@@ -1,5 +1,5 @@
 """
-Data loading: GloVe embeddings + STS-B dataset.
+Data loading: GloVe embeddings + STS-B + AllNLI datasets.
 """
 
 import os
@@ -209,3 +209,138 @@ def get_dataloaders(
         collate_fn=collate_fn, num_workers=0, pin_memory=True,
     )
     return train_loader, val_loader, test_loader
+
+
+# ═══════════════════════════════════════════════════════════
+# AllNLI (SNLI + MultiNLI) for contrastive training
+# ═══════════════════════════════════════════════════════════
+
+ALLNLI_URL = "https://sbert.net/datasets/AllNLI.tsv.gz"
+
+
+def download_allnli(data_dir: str = "data") -> str:
+    """Download AllNLI dataset."""
+    import gzip
+
+    nli_dir = os.path.join(data_dir, "allnli")
+    os.makedirs(nli_dir, exist_ok=True)
+    tsv_path = os.path.join(nli_dir, "AllNLI.tsv")
+
+    if os.path.exists(tsv_path):
+        return tsv_path
+
+    gz_path = os.path.join(nli_dir, "AllNLI.tsv.gz")
+    if not os.path.exists(gz_path):
+        print(f"Downloading AllNLI from {ALLNLI_URL}...")
+        urllib.request.urlretrieve(ALLNLI_URL, gz_path)
+
+    print("Extracting AllNLI...")
+    with gzip.open(gz_path, 'rb') as f_in:
+        with open(tsv_path, 'wb') as f_out:
+            f_out.write(f_in.read())
+
+    return tsv_path
+
+
+class NLITripletDataset(Dataset):
+    """
+    AllNLI dataset yielding (anchor, positive, negative) triplets.
+
+    For each anchor sentence:
+    - positive = an entailment pair
+    - negative = a contradiction pair
+    """
+
+    def __init__(self, word2idx: dict, max_len: int = 50, data_dir: str = "data",
+                 split: str = "train", max_samples: int = 0):
+        self.word2idx = word2idx
+        self.max_len = max_len
+        self.triplets = []
+
+        tsv_path = download_allnli(data_dir)
+
+        # Parse: columns are split, genre, filename, year, old_idx, source1, source2,
+        #        sentence1, sentence2, score, label (entailment/neutral/contradiction)
+        # But AllNLI.tsv from sbert has: split\tsentence1\tsentence2\tlabel
+        entail_pairs = {}  # anchor -> list of entailment sentences
+        contra_pairs = {}  # anchor -> list of contradiction sentences
+
+        print(f"Loading AllNLI ({split})...")
+        with open(tsv_path, 'r', encoding='utf-8') as f:
+            header = f.readline()  # Skip header
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) < 4:
+                    continue
+                row_split, sent1, sent2, label = parts[0], parts[1], parts[2], parts[3]
+                if row_split != split:
+                    continue
+
+                if label == "entailment":
+                    entail_pairs.setdefault(sent1, []).append(sent2)
+                elif label == "contradiction":
+                    contra_pairs.setdefault(sent1, []).append(sent2)
+
+        # Build triplets: anchor + entailment_pos + contradiction_neg
+        for anchor, positives in entail_pairs.items():
+            if anchor not in contra_pairs:
+                continue
+            negatives = contra_pairs[anchor]
+            anchor_ids = tokenize(anchor, word2idx, max_len)
+            for pos in positives:
+                pos_ids = tokenize(pos, word2idx, max_len)
+                neg = negatives[hash(pos) % len(negatives)]  # Deterministic neg selection
+                neg_ids = tokenize(neg, word2idx, max_len)
+                self.triplets.append((anchor_ids, pos_ids, neg_ids))
+
+                if max_samples > 0 and len(self.triplets) >= max_samples:
+                    break
+            if max_samples > 0 and len(self.triplets) >= max_samples:
+                break
+
+        print(f"AllNLI {split}: {len(self.triplets)} triplets")
+
+    def __len__(self):
+        return len(self.triplets)
+
+    def __getitem__(self, idx):
+        return self.triplets[idx]
+
+
+def nli_collate_fn(batch):
+    """Collate NLI triplets into padded tensors."""
+    anchors, positives, negatives = zip(*batch)
+
+    def pad(sequences):
+        max_len = max(len(s) for s in sequences)
+        if max_len == 0:
+            max_len = 1
+        padded = torch.zeros(len(sequences), max_len, dtype=torch.long)
+        mask = torch.zeros(len(sequences), max_len, dtype=torch.float)
+        for i, s in enumerate(sequences):
+            if len(s) > 0:
+                padded[i, :len(s)] = torch.tensor(s, dtype=torch.long)
+                mask[i, :len(s)] = 1.0
+        return padded, mask
+
+    a_ids, a_mask = pad(anchors)
+    p_ids, p_mask = pad(positives)
+    n_ids, n_mask = pad(negatives)
+
+    return a_ids, a_mask, p_ids, p_mask, n_ids, n_mask
+
+
+def get_nli_dataloader(
+    word2idx: dict,
+    batch_size: int = 64,
+    max_len: int = 50,
+    data_dir: str = "data",
+    max_samples: int = 0,
+) -> DataLoader:
+    """Create AllNLI training dataloader."""
+    ds = NLITripletDataset(word2idx, max_len, data_dir, split="train",
+                           max_samples=max_samples)
+    return DataLoader(
+        ds, batch_size=batch_size, shuffle=True,
+        collate_fn=nli_collate_fn, num_workers=0, pin_memory=True,
+    )
