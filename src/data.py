@@ -290,9 +290,8 @@ class NLITripletDataset(Dataset):
 
         tsv_path = download_allnli(data_dir)
 
-        # Parse: columns are split, genre, filename, year, old_idx, source1, source2,
-        #        sentence1, sentence2, score, label (entailment/neutral/contradiction)
-        # But AllNLI.tsv from sbert has: split\tsentence1\tsentence2\tlabel
+        # AllNLI.tsv format: split \t dataset \t filename \t sentence1 \t sentence2 \t label
+        # Columns:            0        1          2          3            4            5
         entail_pairs = {}  # anchor -> list of entailment sentences
         contra_pairs = {}  # anchor -> list of contradiction sentences
 
@@ -301,9 +300,12 @@ class NLITripletDataset(Dataset):
             header = f.readline()  # Skip header
             for line in f:
                 parts = line.strip().split('\t')
-                if len(parts) < 4:
+                if len(parts) < 6:
                     continue
-                row_split, sent1, sent2, label = parts[0], parts[1], parts[2], parts[3]
+                row_split = parts[0]
+                sent1 = parts[3]
+                sent2 = parts[4]
+                label = parts[5]
                 if row_split != split:
                     continue
 
