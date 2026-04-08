@@ -1,0 +1,29 @@
+# SGS Phase 1 Experiment Configuration
+
+model:
+  d_s: 64              # Splatting space dimensionality
+  d_f: 300             # Feature space dimensionality (GloVe dim)
+  vocab_size: 50000    # Top-K GloVe words
+  n_passes: 4          # Number of rendering passes
+  tau_init: 64.0       # Initial temperature (= d_s)
+  covariance: diagonal # diagonal | full (start with diagonal)
+  n_heads: 1           # Number of viewpoint heads (start with 1)
+
+training:
+  batch_size: 64
+  lr: 1e-3
+  weight_decay: 1e-4
+  epochs: 50
+  scheduler: cosine    # cosine | none
+  warmup_epochs: 5
+  grad_clip: 1.0
+  seed: 42
+
+data:
+  glove_path: data/glove.6B.300d.txt
+  max_seq_len: 50      # Max tokens per sentence
+
+logging:
+  use_wandb: false     # Set to true when ready
+  project: sgs-phase1
+  log_every: 10        # Log every N batches
