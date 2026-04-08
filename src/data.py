@@ -215,7 +215,7 @@ def get_dataloaders(
 # AllNLI (SNLI + MultiNLI) for contrastive training
 # ═══════════════════════════════════════════════════════════
 
-ALLNLI_URL = "https://sbert.net/datasets/AllNLI.tsv.gz"
+ALLNLI_URL = "https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/datasets/AllNLI.tsv.gz"
 
 
 def download_allnli(data_dir: str = "data") -> str:
@@ -231,8 +231,19 @@ def download_allnli(data_dir: str = "data") -> str:
 
     gz_path = os.path.join(nli_dir, "AllNLI.tsv.gz")
     if not os.path.exists(gz_path):
-        print(f"Downloading AllNLI from {ALLNLI_URL}...")
-        urllib.request.urlretrieve(ALLNLI_URL, gz_path)
+        print(f"Downloading AllNLI (~96MB)...")
+        req = urllib.request.Request(
+            ALLNLI_URL,
+            headers={"User-Agent": "Mozilla/5.0 (SGS-Experiment)"},
+        )
+        with urllib.request.urlopen(req) as response:
+            with open(gz_path, 'wb') as f:
+                while True:
+                    chunk = response.read(8192)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+        print(f"Downloaded to {gz_path}")
 
     print("Extracting AllNLI...")
     with gzip.open(gz_path, 'rb') as f_in:
