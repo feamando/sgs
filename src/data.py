@@ -232,17 +232,37 @@ def download_allnli(data_dir: str = "data") -> str:
     gz_path = os.path.join(nli_dir, "AllNLI.tsv.gz")
     if not os.path.exists(gz_path):
         print(f"Downloading AllNLI (~96MB)...")
-        req = urllib.request.Request(
-            ALLNLI_URL,
-            headers={"User-Agent": "Mozilla/5.0 (SGS-Experiment)"},
-        )
-        with urllib.request.urlopen(req) as response:
-            with open(gz_path, 'wb') as f:
-                while True:
-                    chunk = response.read(8192)
-                    if not chunk:
-                        break
-                    f.write(chunk)
+        try:
+            import ssl
+            ctx = ssl.create_default_context()
+            req = urllib.request.Request(
+                ALLNLI_URL,
+                headers={"User-Agent": "Mozilla/5.0 (SGS-Experiment)"},
+            )
+            with urllib.request.urlopen(req, context=ctx) as response:
+                with open(gz_path, 'wb') as f:
+                    while True:
+                        chunk = response.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+        except (ssl.SSLError, urllib.error.URLError):
+            # SSL issues (common on Windows) — try without verification
+            print("  SSL error, retrying without certificate verification...")
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(
+                ALLNLI_URL,
+                headers={"User-Agent": "Mozilla/5.0 (SGS-Experiment)"},
+            )
+            with urllib.request.urlopen(req, context=ctx) as response:
+                with open(gz_path, 'wb') as f:
+                    while True:
+                        chunk = response.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
         print(f"Downloaded to {gz_path}")
 
     print("Extracting AllNLI...")
