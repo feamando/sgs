@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-SCAN multi-seed + RPE baseline (fixes C1 and C2 from paper challenge).
+SCAN multi-seed with all ablations.
 
-Runs SGS, vanilla Transformer, and Transformer+RPE on SCAN length split
-across 5 seeds to get mean ± std.
+Fixes from paper challenge:
+  C1: 5 seeds for error bars
+  C2: Transformer+RPE baseline
+  C4: MeanPool+GRU and TransformerEnc+GRU to isolate encoder contribution
+  C8: Token-level accuracy alongside sequence-level
 
 Usage:
     python scripts/run_scan_multiseed.py
@@ -25,13 +28,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from src.scan import get_scan_dataloaders
-from src.seq2seq import SGSSeq2Seq, TransformerSeq2Seq, TransformerRPESeq2Seq
+from src.seq2seq import (
+    SGSSeq2Seq,
+    TransformerSeq2Seq,
+    TransformerRPESeq2Seq,
+    MeanPoolGRUSeq2Seq,
+    TransformerEncoderGRUDecoder,
+)
 
 
 def evaluate_scan(model, test_loader, out_vocab, device):
-    """Compute exact sequence-level accuracy on SCAN."""
+    """Compute sequence-level AND token-level accuracy on SCAN."""
     model.eval()
-    correct, total = 0, 0
+    seq_correct, seq_total = 0, 0
+    tok_correct, tok_total = 0, 0
     eos_id = out_vocab["<EOS>"]
 
     with torch.no_grad():
@@ -48,26 +58,41 @@ def evaluate_scan(model, test_loader, out_vocab, device):
                 pred_list = preds[i].tolist()
                 tgt_list = target_seqs[i].tolist()
 
+                # Trim at EOS
                 if eos_id in pred_list:
                     pred_list = pred_list[:pred_list.index(eos_id)]
                 if eos_id in tgt_list:
                     tgt_list = tgt_list[:tgt_list.index(eos_id)]
                 tgt_list = [t for t in tgt_list if t != 0]
 
+                # Sequence-level: exact match
                 if pred_list == tgt_list:
-                    correct += 1
-                total += 1
+                    seq_correct += 1
+                seq_total += 1
 
-    return correct / max(total, 1), correct, total
+                # Token-level: per-position accuracy (up to min length)
+                max_len = max(len(pred_list), len(tgt_list))
+                if max_len > 0:
+                    # Pad shorter to compare
+                    p = pred_list + [0] * (max_len - len(pred_list))
+                    t = tgt_list + [0] * (max_len - len(tgt_list))
+                    for pi, ti in zip(p, t):
+                        if pi == ti and ti != 0:
+                            tok_correct += 1
+                        tok_total += 1
+
+    seq_acc = seq_correct / max(seq_total, 1)
+    tok_acc = tok_correct / max(tok_total, 1)
+    return seq_acc, tok_acc, seq_correct, seq_total
 
 
 def train_scan(model, train_loader, test_loader, out_vocab, device,
                epochs=20, lr=1e-3, eval_every=5):
-    """Train on SCAN, return best test accuracy."""
+    """Train on SCAN, return best test accuracies."""
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
 
-    best_acc = 0
+    best_seq_acc, best_tok_acc = 0, 0
     for epoch in range(1, epochs + 1):
         model.train()
         total_loss, n = 0, 0
@@ -91,12 +116,14 @@ def train_scan(model, train_loader, test_loader, out_vocab, device,
         scheduler.step()
 
         if epoch % eval_every == 0 or epoch == epochs:
-            acc, c, t = evaluate_scan(model, test_loader, out_vocab, device)
-            best_acc = max(best_acc, acc)
-            print(f"      Epoch {epoch:2d}/{epochs} | loss={total_loss/n:.4f} | "
-                  f"acc={acc:.4f} ({c}/{t}) | best={best_acc:.4f}")
+            seq_acc, tok_acc, c, t = evaluate_scan(model, test_loader, out_vocab, device)
+            best_seq_acc = max(best_seq_acc, seq_acc)
+            best_tok_acc = max(best_tok_acc, tok_acc)
+            print(f"      Ep {epoch:2d}/{epochs} | loss={total_loss/n:.4f} | "
+                  f"seq={seq_acc:.4f} ({c}/{t}) tok={tok_acc:.4f} | "
+                  f"best_seq={best_seq_acc:.4f}")
 
-    return best_acc
+    return best_seq_acc, best_tok_acc
 
 
 def main(args):
@@ -106,18 +133,20 @@ def main(args):
     seeds = [int(s) for s in args.seeds]
     split = args.split
 
-    # Load data once (same across seeds)
     train_loader, test_loader, in_vocab, out_vocab, out_idx2word = get_scan_dataloaders(
         split=split, batch_size=64,
     )
 
     models_config = [
-        ("SGS Seq2Seq", SGSSeq2Seq, {"d_model": 128, "n_passes": 2}),
-        ("Transformer", TransformerSeq2Seq, {"d_model": 128, "nhead": 4}),
-        ("Transformer+RPE", TransformerRPESeq2Seq, {"d_model": 128, "nhead": 4}),
+        ("SGS Seq2Seq",         SGSSeq2Seq,                  {"d_model": 128, "n_passes": 2}),
+        ("MeanPool+GRU",        MeanPoolGRUSeq2Seq,          {"d_model": 128}),
+        ("TransfEnc+GRU",       TransformerEncoderGRUDecoder, {"d_model": 128, "nhead": 4}),
+        ("Transformer",         TransformerSeq2Seq,           {"d_model": 128, "nhead": 4}),
+        ("Transformer+RPE",     TransformerRPESeq2Seq,        {"d_model": 128, "nhead": 4}),
     ]
 
-    all_results = {name: [] for name, _, _ in models_config}
+    all_seq = {name: [] for name, _, _ in models_config}
+    all_tok = {name: [] for name, _, _ in models_config}
 
     for seed in seeds:
         print(f"\n{'#'*60}")
@@ -134,56 +163,74 @@ def main(args):
             print(f"    Params: {n_params:,}")
 
             t0 = time.time()
-            best_acc = train_scan(
+            best_seq, best_tok = train_scan(
                 model, train_loader, test_loader, out_vocab, device,
                 epochs=args.epochs, lr=args.lr, eval_every=args.eval_every,
             )
             dt = time.time() - t0
-            print(f"    Best: {best_acc:.4f} ({dt:.0f}s)")
-            all_results[name].append(best_acc)
+            print(f"    Best: seq={best_seq:.4f} tok={best_tok:.4f} ({dt:.0f}s)")
+            all_seq[name].append(best_seq)
+            all_tok[name].append(best_tok)
 
     # ═══════════════════════════════════════════════════════
     # Summary
     # ═══════════════════════════════════════════════════════
 
-    print(f"\n\n{'='*70}")
+    print(f"\n\n{'='*80}")
     print(f"SCAN {split} — {len(seeds)} seeds")
-    print(f"{'='*70}\n")
-    print(f"{'Model':<25s} {'Mean':>8s} {'± Std':>8s} {'Min':>8s} {'Max':>8s} {'Seeds':>6s}")
-    print("-" * 60)
+    print(f"{'='*80}\n")
+
+    header = f"{'Model':<25s} {'Seq Mean':>9s} {'± Std':>7s} {'Tok Mean':>9s} {'± Std':>7s} {'Seq Min':>8s} {'Seq Max':>8s}"
+    print(header)
+    print("-" * len(header))
 
     for name, _, _ in models_config:
-        accs = all_results[name]
-        mean = np.mean(accs)
-        std = np.std(accs)
-        print(f"{name:<25s} {mean:>8.4f} {std:>8.4f} {min(accs):>8.4f} {max(accs):>8.4f} {len(accs):>6d}")
+        sa = all_seq[name]
+        ta = all_tok[name]
+        print(f"{name:<25s} {np.mean(sa):>9.4f} {np.std(sa):>7.4f} "
+              f"{np.mean(ta):>9.4f} {np.std(ta):>7.4f} "
+              f"{min(sa):>8.4f} {max(sa):>8.4f}")
 
-    # Key comparison
-    sgs_accs = all_results["SGS Seq2Seq"]
-    tfm_accs = all_results["Transformer"]
-    rpe_accs = all_results["Transformer+RPE"]
+    # Key comparisons
+    sgs = np.mean(all_seq["SGS Seq2Seq"])
+    mp_gru = np.mean(all_seq["MeanPool+GRU"])
+    tf_gru = np.mean(all_seq["TransfEnc+GRU"])
+    tf = np.mean(all_seq["Transformer"])
+    rpe = np.mean(all_seq["Transformer+RPE"])
 
-    print(f"\n  SGS vs Transformer:     {np.mean(sgs_accs):.4f} vs {np.mean(tfm_accs):.4f}")
-    print(f"  SGS vs Transformer+RPE: {np.mean(sgs_accs):.4f} vs {np.mean(rpe_accs):.4f}")
+    print(f"\n{'='*80}")
+    print("KEY COMPARISONS (sequence accuracy)")
+    print(f"{'='*80}")
+    print(f"  SGS vs MeanPool+GRU:      {sgs:.4f} vs {mp_gru:.4f} ({sgs - mp_gru:+.4f})")
+    print(f"  SGS vs TransfEnc+GRU:     {sgs:.4f} vs {tf_gru:.4f} ({sgs - tf_gru:+.4f})")
+    print(f"  SGS vs Transformer:       {sgs:.4f} vs {tf:.4f} ({sgs - tf:+.4f})")
+    print(f"  SGS vs Transformer+RPE:   {sgs:.4f} vs {rpe:.4f} ({sgs - rpe:+.4f})")
 
-    if np.mean(sgs_accs) > np.mean(rpe_accs):
-        print(f"  SGS beats Transformer+RPE by {np.mean(sgs_accs) - np.mean(rpe_accs):+.4f}")
+    print(f"\n  C4 VERDICT (is it the encoder or the decoder?):")
+    if sgs > mp_gru + 0.05:
+        print(f"  SGS encoder contributes +{sgs - mp_gru:.4f} over mean-pool (ENCODER MATTERS)")
     else:
-        print(f"  Transformer+RPE beats SGS by {np.mean(rpe_accs) - np.mean(sgs_accs):+.4f}")
+        print(f"  SGS encoder adds only +{sgs - mp_gru:.4f} over mean-pool (GRU may explain most)")
+
+    if tf_gru > tf + 0.05:
+        print(f"  GRU decoder alone helps: TransfEnc+GRU {tf_gru:.4f} vs full Transformer {tf:.4f}")
+    else:
+        print(f"  GRU decoder alone doesn't help much: TransfEnc+GRU {tf_gru:.4f} vs Transformer {tf:.4f}")
 
     # Save
-    results_file = f"scan_{split}_multiseed.json"
+    results_file = f"scan_{split}_full_ablation.json"
     with open(results_file, "w") as f:
         json.dump({
             "split": split,
             "seeds": seeds,
-            "results": {name: accs for name, accs in all_results.items()},
+            "seq_acc": {n: a for n, a in all_seq.items()},
+            "tok_acc": {n: a for n, a in all_tok.items()},
         }, f, indent=2)
     print(f"\nResults saved to {results_file}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SCAN multi-seed + RPE baseline")
+    parser = argparse.ArgumentParser(description="SCAN full ablation with encoder isolation")
     parser.add_argument("--split", type=str, default="length", choices=["length", "addprim_jump"])
     parser.add_argument("--seeds", nargs="+", default=["42", "123", "456", "789", "1337"])
     parser.add_argument("--epochs", type=int, default=20)

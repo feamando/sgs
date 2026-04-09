@@ -153,10 +153,118 @@ class SGSSeq2Seq(nn.Module):
         return torch.zeros(batch_size, 0, dtype=torch.long, device=src_ids.device)
 
 
+# ═══════════════════════════════════════════════════════════
+# C4 Ablation: Isolate encoder vs decoder contribution
+# ═══════════════════════════════════════════════════════════
+
+class MeanPoolGRUSeq2Seq(nn.Module):
+    """Mean-pool encoder + GRU decoder. Tests if GRU alone explains length gen."""
+
+    def __init__(self, in_vocab_size, out_vocab_size, d_model=128):
+        super().__init__()
+        self.d_model = d_model
+        self.enc_embed = nn.Embedding(in_vocab_size, d_model)
+        self.dec_embed = nn.Embedding(out_vocab_size, d_model)
+        self.dec_gru = nn.GRU(d_model, d_model, num_layers=2, batch_first=True, dropout=0.1)
+        self.dec_out = nn.Linear(d_model, out_vocab_size)
+
+    def encode(self, src_ids, src_mask):
+        emb = self.enc_embed(src_ids)  # [batch, seq, d]
+        emb = emb * src_mask.float().unsqueeze(-1)
+        lengths = src_mask.float().sum(dim=1, keepdim=True).clamp(min=1)
+        return emb.sum(dim=1) / lengths  # [batch, d]
+
+    def forward(self, src_ids, src_mask, tgt_ids, tgt_mask):
+        enc_out = self.encode(src_ids, src_mask)
+        tgt_embed = self.dec_embed(tgt_ids[:, :-1])
+        h0 = enc_out.unsqueeze(0).expand(2, -1, -1).contiguous()
+        dec_out, _ = self.dec_gru(tgt_embed, h0)
+        return self.dec_out(dec_out)
+
+    @torch.no_grad()
+    def greedy_decode(self, src_ids, src_mask, max_len=100, bos_id=1, eos_id=2):
+        batch_size = src_ids.shape[0]
+        enc_out = self.encode(src_ids, src_mask)
+        h = enc_out.unsqueeze(0).expand(2, -1, -1).contiguous()
+        input_id = torch.full((batch_size, 1), bos_id, dtype=torch.long, device=src_ids.device)
+        outputs = []
+        finished = torch.zeros(batch_size, dtype=torch.bool, device=src_ids.device)
+        for _ in range(max_len):
+            embed = self.dec_embed(input_id)
+            out, h = self.dec_gru(embed, h)
+            next_id = self.dec_out(out[:, -1, :]).argmax(dim=-1)
+            outputs.append(next_id)
+            input_id = next_id.unsqueeze(1)
+            finished = finished | (next_id == eos_id)
+            if finished.all():
+                break
+        if outputs:
+            return torch.stack(outputs, dim=1)
+        return torch.zeros(batch_size, 0, dtype=torch.long, device=src_ids.device)
+
+
+class TransformerEncoderGRUDecoder(nn.Module):
+    """Transformer encoder + GRU decoder. Tests if transformer encoding + GRU decoding works."""
+
+    def __init__(self, in_vocab_size, out_vocab_size, d_model=128, nhead=4, num_layers=2):
+        super().__init__()
+        self.d_model = d_model
+        self.enc_embed = nn.Embedding(in_vocab_size, d_model)
+        self.enc_pos = nn.Embedding(128, d_model)
+        enc_layer = nn.TransformerEncoderLayer(d_model, nhead, d_model * 4, dropout=0.1, batch_first=True)
+        self.encoder = nn.TransformerEncoder(enc_layer, num_layers)
+
+        self.dec_embed = nn.Embedding(out_vocab_size, d_model)
+        self.dec_gru = nn.GRU(d_model, d_model, num_layers=2, batch_first=True, dropout=0.1)
+        self.dec_out = nn.Linear(d_model, out_vocab_size)
+
+    def encode(self, src_ids, src_mask):
+        seq_len = src_ids.shape[1]
+        pos = torch.arange(seq_len, device=src_ids.device).clamp(max=127)
+        emb = self.enc_embed(src_ids) + self.enc_pos(pos).unsqueeze(0)
+        kpm = ~src_mask.bool()
+        h = self.encoder(emb, src_key_padding_mask=kpm)
+        # Pool: masked mean
+        h = h * src_mask.float().unsqueeze(-1)
+        lengths = src_mask.float().sum(dim=1, keepdim=True).clamp(min=1)
+        return h.sum(dim=1) / lengths  # [batch, d]
+
+    def forward(self, src_ids, src_mask, tgt_ids, tgt_mask):
+        enc_out = self.encode(src_ids, src_mask)
+        tgt_embed = self.dec_embed(tgt_ids[:, :-1])
+        h0 = enc_out.unsqueeze(0).expand(2, -1, -1).contiguous()
+        dec_out, _ = self.dec_gru(tgt_embed, h0)
+        return self.dec_out(dec_out)
+
+    @torch.no_grad()
+    def greedy_decode(self, src_ids, src_mask, max_len=100, bos_id=1, eos_id=2):
+        batch_size = src_ids.shape[0]
+        enc_out = self.encode(src_ids, src_mask)
+        h = enc_out.unsqueeze(0).expand(2, -1, -1).contiguous()
+        input_id = torch.full((batch_size, 1), bos_id, dtype=torch.long, device=src_ids.device)
+        outputs = []
+        finished = torch.zeros(batch_size, dtype=torch.bool, device=src_ids.device)
+        for _ in range(max_len):
+            embed = self.dec_embed(input_id)
+            out, h = self.dec_gru(embed, h)
+            next_id = self.dec_out(out[:, -1, :]).argmax(dim=-1)
+            outputs.append(next_id)
+            input_id = next_id.unsqueeze(1)
+            finished = finished | (next_id == eos_id)
+            if finished.all():
+                break
+        if outputs:
+            return torch.stack(outputs, dim=1)
+        return torch.zeros(batch_size, 0, dtype=torch.long, device=src_ids.device)
+
+
+# ═══════════════════════════════════════════════════════════
+# Original baselines
+# ═══════════════════════════════════════════════════════════
+
 class TransformerSeq2Seq(nn.Module):
     """
     Standard Transformer encoder-decoder baseline for SCAN.
-    Matched parameter count with SGS.
     """
 
     def __init__(self, in_vocab_size, out_vocab_size, d_model=128, nhead=4,
