@@ -326,6 +326,151 @@ class FairSoftmaxModel(nn.Module):
         return cos * 5.0
 
 
+class GaussianKernelSoftmaxModel(nn.Module):
+    """
+    M2 ablation: Gaussian kernel VALUES fed through softmax (not rendering).
+
+    Isolates whether the advantage is from the Gaussian kernel function
+    or from the alpha-compositing mechanism.
+
+    weights = softmax(K(q, μ_i, Σ_i)) instead of rendering equation.
+    Same kernel, same Gaussians, but softmax normalization instead of transmittance.
+    """
+
+    def __init__(self, vocab: SemanticGaussianVocab, d_s: int = 64, tau_init: float = 64.0):
+        super().__init__()
+        self.vocab = vocab
+        self.d_s = d_s
+        self.log_tau = nn.Parameter(torch.tensor(float(tau_init)).log())
+        self.pos_embed_mu = nn.Embedding(512, d_s)
+        nn.init.normal_(self.pos_embed_mu.weight, std=0.01)
+
+    @property
+    def tau(self):
+        return self.log_tau.exp()
+
+    def _encode(self, token_ids, mask):
+        mu, log_var, _, features = self.vocab.get_params(token_ids)
+        seq_len = token_ids.shape[1]
+        positions = torch.arange(seq_len, device=token_ids.device).clamp(max=511)
+        mu = mu + self.pos_embed_mu(positions).unsqueeze(0)
+
+        # Query = centroid (same as SGS)
+        if mask is not None:
+            masked_mu = mu * mask.float().unsqueeze(-1)
+            lengths = mask.float().sum(dim=1, keepdim=True).clamp(min=1)
+            query = masked_mu.sum(dim=1) / lengths
+        else:
+            query = mu.mean(dim=1)
+
+        # Evaluate Gaussian kernel (same as SGS)
+        K = gaussian_kernel_diag(query, mu, log_var, self.tau)
+
+        # SOFTMAX over kernel values instead of alpha-compositing
+        if mask is not None:
+            K = K.masked_fill(~mask.bool(), float('-inf'))
+        weights = torch.softmax(K, dim=-1)  # [batch, n]
+
+        meaning = (weights.unsqueeze(-1) * features).sum(dim=1)
+        return meaning
+
+    def forward(self, ids_a, mask_a, ids_b, mask_b):
+        a = self._encode(ids_a, mask_a)
+        b = self._encode(ids_b, mask_b)
+        cos = nn.functional.cosine_similarity(a, b, dim=-1)
+        return cos * 5.0
+
+
+class HybridSGSSoftmaxModel(nn.Module):
+    """
+    M6: SGS rendering for pass 1, softmax attention for pass 2.
+
+    Combines SGS's inductive bias (structural composition) with
+    softmax's capacity (flexible reweighting).
+    """
+
+    def __init__(self, vocab: SemanticGaussianVocab, d_s: int = 64, d_f: int = 300):
+        super().__init__()
+        self.vocab = vocab
+        self.d_s = d_s
+        self.d_f = d_f
+
+        # Shared
+        self.log_tau = nn.Parameter(torch.tensor(float(d_s)).log())
+        self.pos_embed_mu = nn.Embedding(512, d_s)
+        self.pos_embed_alpha = nn.Embedding(512, 1)
+        nn.init.normal_(self.pos_embed_mu.weight, std=0.01)
+        nn.init.zeros_(self.pos_embed_alpha.weight)
+
+        # Pass 1 → Pass 2 bridge: update features with SGS context
+        self.bridge_ffn = nn.Sequential(
+            nn.LayerNorm(d_f + d_f),
+            nn.Linear(d_f + d_f, d_f * 2),
+            nn.GELU(),
+            nn.Linear(d_f * 2, d_f),
+        )
+
+        # Pass 2: softmax attention layer
+        self.attn_q = nn.Linear(d_f, d_s)
+        self.attn_k = nn.Linear(d_s, d_s)
+        self.attn_ffn = nn.Sequential(
+            nn.LayerNorm(d_f + d_f),
+            nn.Linear(d_f + d_f, d_f * 2),
+            nn.GELU(),
+            nn.Linear(d_f * 2, d_f),
+        )
+
+    @property
+    def tau(self):
+        return self.log_tau.exp()
+
+    def _encode(self, token_ids, mask):
+        mu, log_var, alpha, features = self.vocab.get_params(token_ids)
+        seq_len = token_ids.shape[1]
+        positions = torch.arange(seq_len, device=token_ids.device).clamp(max=511)
+        mu = mu + self.pos_embed_mu(positions).unsqueeze(0)
+        alpha_mod = torch.sigmoid(self.pos_embed_alpha(positions).squeeze(-1)).unsqueeze(0)
+        alpha = alpha * alpha_mod
+        if mask is not None:
+            alpha = alpha * mask.float()
+
+        # === Pass 1: SGS rendering ===
+        centroid = mu.mean(dim=1) if mask is None else (
+            (mu * mask.float().unsqueeze(-1)).sum(dim=1) /
+            mask.float().sum(dim=1, keepdim=True).clamp(min=1)
+        )
+        K = gaussian_kernel_diag(centroid, mu, log_var, self.tau)
+        if mask is not None:
+            K = K * mask.float()
+        sgs_meaning, _ = render(features, alpha, K)
+
+        # Bridge: update features with SGS context
+        context = sgs_meaning.unsqueeze(1).expand_as(features)
+        combined = torch.cat([features, context], dim=-1)
+        features_v2 = features + self.bridge_ffn(combined)
+
+        # === Pass 2: softmax attention ===
+        query = self.attn_q(sgs_meaning)  # [batch, d_s]
+        keys = self.attn_k(mu)  # [batch, n, d_s]
+        scores = torch.bmm(keys, query.unsqueeze(-1)).squeeze(-1) / (self.d_s ** 0.5)
+        if mask is not None:
+            scores = scores.masked_fill(~mask.bool(), float('-inf'))
+        weights = torch.softmax(scores, dim=-1)
+        attn_meaning = (weights.unsqueeze(-1) * features_v2).sum(dim=1)
+
+        # Final: residual combination
+        final = sgs_meaning + self.attn_ffn(
+            torch.cat([sgs_meaning, attn_meaning], dim=-1)
+        )
+        return final
+
+    def forward(self, ids_a, mask_a, ids_b, mask_b):
+        a = self._encode(ids_a, mask_a)
+        b = self._encode(ids_b, mask_b)
+        cos = nn.functional.cosine_similarity(a, b, dim=-1)
+        return cos * 5.0
+
+
 class NoTransmittanceModel(nn.Module):
     """Ablation: rendering without transmittance (T_i = 1 for all)."""
 

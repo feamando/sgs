@@ -25,7 +25,7 @@ Both mechanisms are weighted sums of values. Both are differentiable. But they c
 
 We ask: can the rendering equation from 3DGS serve as a composition mechanism for language? Specifically, if words are represented as Gaussian distributions in a semantic space, can alpha-compositing of these Gaussians produce useful sentence representations?
 
-We find that it can — and that it has properties softmax attention lacks.
+We find that it can — and that it has properties softmax attention lacks. We do not aim to compete with production sentence embedding systems (Reimers & Gurevych, 2019; Gao et al., 2021). Our contribution is a novel composition mechanism with provable properties, a characterization of its inductive bias relative to softmax attention, and 13 formally verified mathematical foundations.
 
 **Contributions:**
 
@@ -343,6 +343,8 @@ Dosovitskiy, A. et al. (2021). An Image is Worth 16x16 Words. ICLR.
 Drozdov, A. et al. (2022). Compositional Semantic Parsing with LLMs. ICLR 2023.
 
 Fel, T. et al. (2025). Into the Rabbit Hull: Minkowski Representation Hypothesis. arXiv.
+
+Gao, T. et al. (2021). SimCSE: Simple Contrastive Learning of Sentence Embeddings. EMNLP.
 
 Gärdenfors, P. (2000). Conceptual Spaces: The Geometry of Thought. MIT Press.
 
