@@ -1,9 +1,11 @@
 """
 Seq2Seq models for SCAN compositional generalization.
 
-SGS encoder + autoregressive decoder vs Transformer encoder-decoder baseline.
+SGS encoder + autoregressive decoder vs Transformer baselines.
+Includes vanilla Transformer and Transformer with Relative Positional Encoding (RPE).
 """
 
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -146,7 +148,9 @@ class SGSSeq2Seq(nn.Module):
             if finished.all():
                 break
 
-        return torch.stack(outputs, dim=1)  # [batch, decode_len]
+        if outputs:
+            return torch.stack(outputs, dim=1)  # [batch, decode_len]
+        return torch.zeros(batch_size, 0, dtype=torch.long, device=src_ids.device)
 
 
 class TransformerSeq2Seq(nn.Module):
@@ -222,4 +226,130 @@ class TransformerSeq2Seq(nn.Module):
             if finished.all():
                 break
 
-        return torch.stack(outputs, dim=1)
+        if outputs:
+            return torch.stack(outputs, dim=1)
+        return torch.zeros(batch_size, 0, dtype=torch.long, device=src_ids.device)
+
+
+# ═══════════════════════════════════════════════════════════
+# Transformer with Relative Positional Encoding (RPE)
+# ═══════════════════════════════════════════════════════════
+
+class RPEMultiHeadAttention(nn.Module):
+    """Multi-head attention with learned relative positional bias per head."""
+
+    def __init__(self, d_model, nhead, dropout=0.1, max_rel=128):
+        super().__init__()
+        self.nhead = nhead
+        self.head_dim = d_model // nhead
+        self.d_model = d_model
+        self.q = nn.Linear(d_model, d_model)
+        self.k = nn.Linear(d_model, d_model)
+        self.v = nn.Linear(d_model, d_model)
+        self.o = nn.Linear(d_model, d_model)
+        self.drop = nn.Dropout(dropout)
+        self.max_rel = max_rel
+        self.rel_bias = nn.Embedding(2 * max_rel + 1, nhead)
+
+    def forward(self, query, key, value, attn_mask=None, key_padding_mask=None):
+        B, T, _ = query.shape
+        S = key.shape[1]
+        q = self.q(query).view(B, T, self.nhead, self.head_dim).transpose(1, 2)
+        k = self.k(key).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
+        v = self.v(value).view(B, S, self.nhead, self.head_dim).transpose(1, 2)
+        scores = (q @ k.transpose(-2, -1)) / math.sqrt(self.head_dim)
+        rel = (torch.arange(T, device=query.device).unsqueeze(1) -
+               torch.arange(S, device=query.device).unsqueeze(0))
+        rel = rel.clamp(-self.max_rel, self.max_rel) + self.max_rel
+        scores = scores + self.rel_bias(rel).permute(2, 0, 1).unsqueeze(0)
+        if attn_mask is not None:
+            scores = scores + attn_mask.unsqueeze(0).unsqueeze(0)
+        if key_padding_mask is not None:
+            scores = scores.masked_fill(key_padding_mask.unsqueeze(1).unsqueeze(2), float('-inf'))
+        w = self.drop(F.softmax(scores, dim=-1))
+        out = (w @ v).transpose(1, 2).contiguous().view(B, T, self.d_model)
+        return self.o(out)
+
+
+class RPEEncLayer(nn.Module):
+    def __init__(self, d, nh, ff, dp=0.1):
+        super().__init__()
+        self.attn = RPEMultiHeadAttention(d, nh, dp)
+        self.ffn = nn.Sequential(nn.Linear(d, ff), nn.GELU(), nn.Dropout(dp), nn.Linear(ff, d))
+        self.n1 = nn.LayerNorm(d)
+        self.n2 = nn.LayerNorm(d)
+        self.dp = nn.Dropout(dp)
+
+    def forward(self, x, kpm=None):
+        x = self.n1(x + self.dp(self.attn(x, x, x, key_padding_mask=kpm)))
+        return self.n2(x + self.dp(self.ffn(x)))
+
+
+class RPEDecLayer(nn.Module):
+    def __init__(self, d, nh, ff, dp=0.1):
+        super().__init__()
+        self.sa = RPEMultiHeadAttention(d, nh, dp)
+        self.ca = RPEMultiHeadAttention(d, nh, dp)
+        self.ffn = nn.Sequential(nn.Linear(d, ff), nn.GELU(), nn.Dropout(dp), nn.Linear(ff, d))
+        self.n1 = nn.LayerNorm(d)
+        self.n2 = nn.LayerNorm(d)
+        self.n3 = nn.LayerNorm(d)
+        self.dp = nn.Dropout(dp)
+
+    def forward(self, tgt, mem, tgt_mask=None, mem_kpm=None):
+        tgt = self.n1(tgt + self.dp(self.sa(tgt, tgt, tgt, attn_mask=tgt_mask)))
+        tgt = self.n2(tgt + self.dp(self.ca(tgt, mem, mem, key_padding_mask=mem_kpm)))
+        return self.n3(tgt + self.dp(self.ffn(tgt)))
+
+
+class TransformerRPESeq2Seq(nn.Module):
+    """Transformer + Relative Positional Encoding for SCAN. No absolute pos embed."""
+
+    def __init__(self, in_vocab_size, out_vocab_size, d_model=128, nhead=4,
+                 num_encoder_layers=2, num_decoder_layers=2):
+        super().__init__()
+        self.d_model = d_model
+        self.enc_emb = nn.Embedding(in_vocab_size, d_model)
+        self.dec_emb = nn.Embedding(out_vocab_size, d_model)
+        self.enc = nn.ModuleList([RPEEncLayer(d_model, nhead, d_model * 4) for _ in range(num_encoder_layers)])
+        self.dec = nn.ModuleList([RPEDecLayer(d_model, nhead, d_model * 4) for _ in range(num_decoder_layers)])
+        self.proj = nn.Linear(d_model, out_vocab_size)
+
+    def _enc(self, src_ids, src_mask):
+        h = self.enc_emb(src_ids)
+        kpm = ~src_mask.bool()
+        for layer in self.enc:
+            h = layer(h, kpm=kpm)
+        return h, kpm
+
+    def forward(self, src_ids, src_mask, tgt_ids, tgt_mask):
+        tl = tgt_ids.shape[1] - 1
+        mem, kpm = self._enc(src_ids, src_mask)
+        h = self.dec_emb(tgt_ids[:, :-1])
+        cm = torch.triu(torch.full((tl, tl), float('-inf'), device=src_ids.device), diagonal=1)
+        for layer in self.dec:
+            h = layer(h, mem, tgt_mask=cm, mem_kpm=kpm)
+        return self.proj(h)
+
+    @torch.no_grad()
+    def greedy_decode(self, src_ids, src_mask, max_len=100, bos_id=1, eos_id=2):
+        B = src_ids.shape[0]
+        mem, kpm = self._enc(src_ids, src_mask)
+        ids = torch.full((B, 1), bos_id, dtype=torch.long, device=src_ids.device)
+        done = torch.zeros(B, dtype=torch.bool, device=src_ids.device)
+        outs = []
+        for _ in range(max_len):
+            tl = ids.shape[1]
+            h = self.dec_emb(ids)
+            cm = torch.triu(torch.full((tl, tl), float('-inf'), device=src_ids.device), diagonal=1)
+            for layer in self.dec:
+                h = layer(h, mem, tgt_mask=cm, mem_kpm=kpm)
+            nxt = self.proj(h[:, -1, :]).argmax(-1)
+            outs.append(nxt)
+            ids = torch.cat([ids, nxt.unsqueeze(1)], dim=1)
+            done = done | (nxt == eos_id)
+            if done.all():
+                break
+        if outs:
+            return torch.stack(outs, dim=1)
+        return torch.zeros(B, 0, dtype=torch.long, device=src_ids.device)
