@@ -144,7 +144,14 @@ def compute_sentence_data(
 
     # Feature color: first 3 PCA of features → RGB
     feat_np = features.squeeze(0).detach().cpu().numpy()
-    feat_pca = PCA(n_components=3).fit_transform(feat_np)
+    n_comp = min(3, feat_np.shape[0], feat_np.shape[1])
+    if n_comp >= 3:
+        feat_pca = PCA(n_components=3).fit_transform(feat_np)
+    else:
+        # Too few tokens for PCA — use fixed warm colors
+        feat_pca = np.zeros((feat_np.shape[0], 3))
+        for j in range(feat_np.shape[0]):
+            feat_pca[j] = [0.9 - j*0.1, 0.5 + j*0.05, 0.3]
     # Normalize to [0, 1]
     feat_min = feat_pca.min(axis=0)
     feat_max = feat_pca.max(axis=0)
