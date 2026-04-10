@@ -149,6 +149,7 @@
     <div class="panel-section">
       <h3>Rendering</h3>
       <div class="controls">
+        <button id="btn-splat" style="background:rgba(244,163,0,0.12);border-color:rgba(244,163,0,0.3);color:#F4A300;">⊕ Splat</button>
         <button id="btn-play">▶ Play</button>
         <button id="btn-step">→ Step</button>
         <button id="btn-reset">↺ Reset</button>
@@ -519,6 +520,49 @@ function resetAnimation() {
   displayExample(currentExample);
 }
 
+function splatAll() {
+  if (!currentExample) return;
+  const ex = currentExample;
+
+  // Reset first
+  if (animInterval) { clearInterval(animInterval); animInterval = null; }
+  clearGaussians();
+
+  const maxWeight = Math.max(...ex.rendering.weights, 0.01);
+
+  // Render ALL gaussians at once
+  for (let i = 0; i < ex.words.length; i++) {
+    const color = ex.gaussians.colors[i] || WARM_COLORS[i % WARM_COLORS.length];
+    const weight = ex.rendering.weights[i];
+
+    addGaussian(
+      ex.gaussians.mu_3d[i],
+      ex.gaussians.scale_3d[i],
+      color,
+      weight / maxWeight,
+      ex.words[i],
+    );
+
+    // Update word list UI
+    const dot = document.getElementById(`dot-${i}`);
+    const wt = document.getElementById(`weight-${i}`);
+    const bar = document.getElementById(`bar-${i}`);
+    if (dot) dot.style.opacity = '1';
+    if (wt) wt.textContent = weight.toFixed(3);
+    if (bar) bar.style.width = `${(weight / maxWeight * 100).toFixed(0)}%`;
+  }
+
+  // Set final transmittance
+  const finalT = ex.stats.residual_transmittance;
+  document.getElementById('transmittance-fill').style.width = `${(finalT * 100).toFixed(0)}%`;
+  document.getElementById('transmittance-label').textContent = `${(finalT * 100).toFixed(0)}%`;
+
+  animStep = ex.words.length;
+  document.getElementById('step-label').textContent = `Splatted! (${ex.words.length} words)`;
+  document.getElementById('btn-play').textContent = '▶ Play';
+  document.getElementById('btn-play').classList.remove('active');
+}
+
 // ─── DATA LOADING ───
 
 async function loadData() {
@@ -579,6 +623,7 @@ function loadMockData() {
 
 // ─── INIT ───
 
+document.getElementById('btn-splat').addEventListener('click', splatAll);
 document.getElementById('btn-play').addEventListener('click', () => {
   if (animInterval) {
     clearInterval(animInterval);
