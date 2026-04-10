@@ -1,10 +1,17 @@
-# B1: Tiny Generative SGS Model — Plan (v3)
+# B1: Generative SGS Model — Plan (v4)
 
 ## Concept
 
-Train a small language model that generates text using SGS rendering, then deploy as a **browser-based app** that runs entirely on the user's device. No server, no API key, no cloud.
+Train a language model that generates text using SGS rendering, then deploy as a **browser-based app** that runs entirely on the user's device. No server, no API key, no cloud.
 
-**The hook:** *"A language model that renders text like 3D scenes — running in your browser. Just 3D rendering math generating words on your laptop."*
+**The hook:** *"A 100M-parameter language model using 3D rendering math instead of transformers. Trained for $10. Runs in your browser."*
+
+## Two Variants
+
+| Variant | Params | Purpose | Deploy |
+|---|---|---|---|
+| **B1** | ~100M | Public demo, browser app | ONNX in browser |
+| **B1-1** | ~1B | Internal benchmark, push the limits | Python/PyTorch, local |
 
 ---
 
@@ -19,27 +26,30 @@ Phase B (Deploy):         Export to ONNX, run in browser via WebGPU/ONNX Runtime
 
 ## Why Edge/Browser Works
 
-| Property | SGS LM | GPT-2 Small | Llama 3 8B |
+| Property | SGS LM (B1) | GPT-2 Small | Llama 3 8B |
 |---|---|---|---|
-| Parameters | ~20M | 117M | 8B |
-| Size on disk | ~80MB | ~500MB | ~16GB |
-| RAM needed | ~200MB | ~1GB | ~32GB |
-| CPU inference | ~50ms/token | ~200ms/token | Impossible |
+| Parameters | ~100M | 117M | 8B |
+| Size on disk (int8) | ~105MB | ~500MB | ~16GB |
+| RAM needed | ~300MB | ~1GB | ~32GB |
+| CPU inference | ~100ms/token | ~200ms/token | Impossible |
 | Runs in browser | **Yes** | Barely | No |
 
-20M params at float16 = ~40MB. With quantization (int8) = ~20MB. A user downloads 20MB once, then generates text locally forever. That's smaller than most website hero images.
+100M params at int8 = ~105MB. Loads in ~5 seconds on broadband. Comparable to GPT-2 Small in size, directly benchmarkable.
 
 ---
 
 ## Architecture
 
+### B1 (100M — browser demo)
+
 ```
 SGSLanguageModel(
-  vocab: 30K BPE tokens as Gaussians
-  d_s: 64 (splatting space)
-  d_f: 256 (feature space)
-  n_passes: 2
-  context: 256 tokens
+  vocab: 32K BPE tokens as Gaussians
+  d_s: 128 (splatting space)
+  d_f: 512 (feature space)
+  n_passes: 3
+  context: 512 tokens
+  n_heads: 4 (multi-head rendering)
 )
 
 Generation step for position t:
@@ -128,16 +138,17 @@ def generate(model, prompt_ids, max_new=200, temperature=0.8, top_k=50):
     return prompt_ids
 ```
 
-### A.5 Train (Day 6 — GPU)
+### A.5 Train (Days 6-7 — GPU)
 
 ```bash
 python scripts/train_lm.py \
   --data data/tinystories \
-  --d_s 64 --d_f 256 --n_passes 2 \
-  --batch_size 32 --lr 3e-4 --epochs 3
+  --d_s 128 --d_f 512 --n_passes 3 --n_heads 4 \
+  --batch_size 32 --lr 3e-4 --epochs 3 \
+  --context_len 512
 ```
 
-12-24 hours on RTX 4090. ~$10 electricity.
+6-12 hours on RTX 4090. ~$10 electricity.
 
 ### A.6 Evaluate + Compare (Day 7)
 
@@ -348,30 +359,137 @@ No backend. No costs beyond the domain name.
 
 ## Cost
 
-| Item | Cost |
-|---|---|
-| TinyStories download | Free |
-| Training (RTX 4090, 24h) | ~$10 |
-| Vercel hosting | Free tier |
-| Domain (optional) | $12/year |
-| Plausible Analytics | Free tier (10K views/mo) |
-| Sentry | Free tier |
-| **Total launch cost** | **~$10-22** |
+| Item | B1 (100M) | B1-1 (1B) |
+|---|---|---|
+| Training data | TinyStories (free) | FineWeb-Edu (~50GB download) |
+| Training time (RTX 4090) | ~12 hours | ~3-5 days |
+| Training cost (electricity) | ~$10 | ~$30-50 |
+| Vercel hosting | Free tier | N/A (internal) |
+| Domain (optional) | $12/year | N/A |
+| Plausible / Sentry | Free tier | N/A |
+| **Total** | **~$10-22** | **~$30-50** |
 
 ---
 
 ## Parameters
 
+### B1 (100M — browser demo)
+
 ```
-Vocabulary:     30,000 × (64 + 64 + 1 + 256) = 11.6M
-Position:       256 × 64 = 16.4K
-Per-pass MLPs:  ~0.6M
-FFN per pass:   ~0.5M
-Output proj:    256 × 30,000 = 7.7M
-─────────────────────────────────────
-Total:          ~20M parameters
-On disk:        ~80MB (float32), ~40MB (float16), ~20MB (int8)
+Vocabulary:     32,000 × (128 + 128 + 1 + 512) = 24.6M
+Position:       512 × 128 = 65.5K
+Query proj:     4 heads × (128 × 128 + 128) = 66K
+Output proj:    4 × 512 → 512 → 32,000 = 16.9M
+Per-pass MLPs:  2 × ~2.5M = 5.0M
+Per-pass FFN:   2 × (512+512)×2048×2 = 8.4M
+LayerNorms:     ~0.1M
+───────────────────────────────────────────────
+Total:          ~105M parameters
+On disk:        ~420MB (float32), ~210MB (float16), ~105MB (int8)
+Browser:        ~105MB download (int8), loads in ~5s on broadband
 ```
+
+Comparable to GPT-2 Small (117M). Direct head-to-head benchmark possible.
+
+### B1-1 (1B — internal benchmark)
+
+```
+Vocabulary:     32,000 × (256 + 256 + 1 + 1024) = 49.2M
+Position:       1024 × 256 = 262K
+Query proj:     8 heads × (256 × 256 + 256) = 526K
+Output proj:    8 × 1024 → 1024 → 32,000 = 41.0M
+Per-pass MLPs:  4 × ~8M = 32M
+Per-pass FFN:   4 × (1024+1024)×4096×2 = 134M
+LayerNorms:     ~0.5M
+───────────────────────────────────────────────
+Total:          ~1.05B parameters
+On disk:        ~4.2GB (float32), ~2.1GB (float16)
+VRAM:           ~12GB (mixed precision) — fits on 4090 (24GB)
+```
+
+Comparable to TinyLlama (1.1B), Phi-1 (1.3B). Meaningful benchmark territory.
+```
+
+---
+
+---
+
+## B1-1: 1B Internal Benchmark
+
+### Why
+
+The 100M model answers "does SGS generate text?" The 1B model answers "can SGS scale?" — a fundamentally different question. At 1B params, we enter the territory of TinyLlama, Phi-1, and OLMo-1B, where meaningful perplexity comparisons are possible.
+
+### Architecture Differences from B1
+
+| Property | B1 (100M) | B1-1 (1B) |
+|---|---|---|
+| d_s (splatting) | 128 | 256 |
+| d_f (features) | 512 | 1024 |
+| n_passes | 3 | 5 |
+| n_heads | 4 | 8 |
+| Context | 512 | 1024 |
+| Vocab | 32K | 32K |
+
+### Training Data
+
+TinyStories (~2.1M stories) is too small for 1B params — will overfit immediately. Options:
+
+| Dataset | Size | Quality |
+|---|---|---|
+| **FineWeb-Edu (sample)** | 10B tokens (subset) | High-quality web text, filtered |
+| **SlimPajama (sample)** | 10B tokens (subset) | Diverse: web, code, books, wiki |
+| **OpenWebText2** | 17B tokens | Reddit-filtered web text |
+
+**Recommendation:** FineWeb-Edu 10B sample. High quality, proven at this scale.
+
+### Training Plan
+
+| Parameter | Value |
+|---|---|
+| Data | FineWeb-Edu, 10B tokens |
+| Batch size | 16 (gradient accumulation to effective 64) |
+| Sequence length | 1024 |
+| Learning rate | 1e-4 (with warmup) |
+| Training tokens | ~10B (1 epoch) |
+| Estimated time | 3-5 days on RTX 4090 |
+| Mixed precision | bf16 (4090 supports) |
+| VRAM | ~12GB peak (fits in 24GB comfortably) |
+
+### What We Measure
+
+| Metric | Compare To |
+|---|---|
+| Perplexity (FineWeb-Edu val) | TinyLlama-1.1B, Pythia-1B, OLMo-1B |
+| HellaSwag (0-shot) | Standard LM benchmark |
+| ARC-Easy (0-shot) | Standard LM benchmark |
+| Generation quality | Manual eval, side-by-side with TinyLlama |
+
+### What We Learn
+
+| If SGS-1B perplexity is... | Interpretation |
+|---|---|
+| Within 10% of TinyLlama-1B | **SGS scales.** The rendering equation doesn't limit model quality at scale. Major finding. |
+| 10-30% worse | **SGS scales partially.** The composition mechanism introduces some overhead but isn't catastrophic. Worth investigating where the gap is. |
+| >30% worse | **SGS has a scaling ceiling.** The rendering equation's constraints (local composition, transmittance depletion) hurt at scale. Would redirect to hybrid architectures. |
+| Better than TinyLlama-1B | **Unlikely but transformative.** Would mean rendering-based composition is strictly superior. Paper upgrades to major conference. |
+
+### Risks
+
+1. **Memory:** 1B params at bf16 = 2GB model + activations. Should fit in 4090's 24GB but needs careful gradient checkpointing.
+2. **Speed:** Multi-pass rendering (5 passes) over 1024 tokens is slower than transformer attention with FlashAttention. Training may be 3-5x slower per step.
+3. **Data download:** FineWeb-Edu sample is ~50GB compressed. Need sufficient disk space.
+4. **Convergence:** No one has trained a 1B SGS model before. Hyperparameters may need tuning. Budget for 2-3 restarts.
+
+### Timeline
+
+| Day | What |
+|---|---|
+| 1 | Download FineWeb-Edu, set up data pipeline |
+| 2-3 | Scale SGS model to 1B, verify forward/backward on 4090 |
+| 4-8 | Train (3-5 days continuous GPU) |
+| 9 | Evaluate: perplexity, benchmarks, generation samples |
+| 10 | Compare to TinyLlama/Pythia, write up findings |
 
 ---
 
