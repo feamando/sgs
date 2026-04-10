@@ -86,6 +86,17 @@
 
   /* Equation display */
   .equation { background: #0a0a12; border: 1px solid #1a1a24; border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-family: 'Inter', monospace; font-size: 13px; color: #F4A300; text-align: center; letter-spacing: 0.5px; }
+
+  /* Comparison bars */
+  .cmp-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; font-size: 11px; }
+  .cmp-word { width: 50px; color: #777; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Source Serif 4', serif; }
+  .cmp-bars { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .cmp-bar-wrap { height: 5px; background: #0f0f18; border-radius: 2px; overflow: hidden; }
+  .cmp-bar-sgs { height: 100%; border-radius: 2px; background: #F4A300; transition: width 0.4s ease; }
+  .cmp-bar-sfm { height: 100%; border-radius: 2px; background: #6B8AFF; transition: width 0.4s ease; }
+  .cmp-legend { display: flex; gap: 12px; font-size: 10px; color: #555; margin-bottom: 8px; }
+  .cmp-legend span { display: flex; align-items: center; gap: 4px; }
+  .cmp-legend-dot { width: 8px; height: 4px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -160,6 +171,12 @@
       <div id="word-list"></div>
     </div>
 
+    <!-- Softmax comparison -->
+    <div class="panel-section">
+      <h3>SGS vs Softmax</h3>
+      <div id="comparison"></div>
+    </div>
+
     <!-- Stats -->
     <div class="panel-section">
       <h3>Stats</h3>
@@ -222,9 +239,12 @@ function initThree() {
   scene.add(dirLight);
 
   // Grid helper (subtle)
-  const grid = new THREE.GridHelper(6, 12, 0x151520, 0x0f0f18);
-  grid.position.y = -1.5;
+  const grid = new THREE.GridHelper(8, 16, 0x121218, 0x0c0c14);
+  grid.position.y = -2;
   scene.add(grid);
+
+  // Load vocab cloud (background dots)
+  loadVocabCloud();
 
   document.getElementById('loading-msg').style.display = 'none';
 
@@ -313,6 +333,49 @@ function addGaussian(pos, scale, color, alpha, word) {
   return mesh;
 }
 
+// ─── VOCAB CLOUD ───
+
+let vocabCloudPoints = null;
+
+async function loadVocabCloud() {
+  try {
+    const resp = await fetch('data/vocab.json');
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data.cloud) return;
+
+    const positions = [];
+    const colors = [];
+    for (const w of data.cloud) {
+      positions.push(w.pos[0], w.pos[1], w.pos[2]);
+      // Warm color with low intensity
+      const t = Math.random();
+      colors.push(
+        0.3 + t * 0.15,  // slight warm tint
+        0.2 + t * 0.1,
+        0.15 + t * 0.05,
+      );
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    const mat = new THREE.PointsMaterial({
+      size: 0.03,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.35,
+      sizeAttenuation: true,
+    });
+
+    vocabCloudPoints = new THREE.Points(geo, mat);
+    scene.add(vocabCloudPoints);
+  } catch (e) {
+    // No vocab cloud — ok
+  }
+}
+
 // ─── LOAD & DISPLAY ───
 
 function displayExample(ex) {
@@ -346,8 +409,37 @@ function displayExample(ex) {
     <div class="stat-row"><span class="stat-label">Tokens</span><span class="stat-value">${ex.stats.n_tokens}</span></div>
     <div class="stat-row"><span class="stat-label">Total weight</span><span class="stat-value">${ex.stats.total_weight.toFixed(3)}</span></div>
     <div class="stat-row"><span class="stat-label">Residual</span><span class="stat-value">${(ex.stats.residual_transmittance * 100).toFixed(1)}%</span></div>
-    <div class="stat-row"><span class="stat-label">Top word</span><span class="stat-value" style="color:#F4A300;">${ex.stats.top_word}</span></div>
+    <div class="stat-row"><span class="stat-label">SGS top</span><span class="stat-value" style="color:#F4A300;">${ex.stats.top_word}</span></div>
+    <div class="stat-row"><span class="stat-label">Softmax top</span><span class="stat-value" style="color:#6B8AFF;">${ex.stats.softmax_top_word || '—'}</span></div>
   `;
+
+  // Comparison: SGS vs Softmax
+  const cmpDiv = document.getElementById('comparison');
+  if (ex.softmax && ex.softmax.weights) {
+    const sgsW = ex.rendering.weights;
+    const sfmW = ex.softmax.weights;
+    const maxSgs = Math.max(...sgsW, 0.01);
+    const maxSfm = Math.max(...sfmW, 0.01);
+    const maxAll = Math.max(maxSgs, maxSfm);
+
+    let cmpHtml = `<div class="cmp-legend">
+      <span><div class="cmp-legend-dot" style="background:#F4A300;"></div>SGS (rendering)</span>
+      <span><div class="cmp-legend-dot" style="background:#6B8AFF;"></div>Softmax (attention)</span>
+    </div>`;
+
+    for (let i = 0; i < ex.words.length; i++) {
+      cmpHtml += `<div class="cmp-row">
+        <div class="cmp-word">${ex.words[i]}</div>
+        <div class="cmp-bars">
+          <div class="cmp-bar-wrap"><div class="cmp-bar-sgs" style="width:${(sgsW[i]/maxAll*100).toFixed(0)}%"></div></div>
+          <div class="cmp-bar-wrap"><div class="cmp-bar-sfm" style="width:${(sfmW[i]/maxAll*100).toFixed(0)}%"></div></div>
+        </div>
+      </div>`;
+    }
+    cmpDiv.innerHTML = cmpHtml;
+  } else {
+    cmpDiv.innerHTML = '<div style="font-size:11px;color:#444;">No softmax data</div>';
+  }
 
   // Reset transmittance
   document.getElementById('transmittance-fill').style.width = '100%';
@@ -476,7 +568,8 @@ function loadMockData() {
       transmittance: [1.0,0.62,0.50,0.35,0.28,0.24,0.21],
       eff_opacity: [0.38,0.19,0.30,0.20,0.14,0.13,0.15],
     },
-    stats: { total_weight: 0.98, residual_transmittance: 0.02, top_word: "the", n_tokens: 7 },
+    softmax: { weights: [0.14,0.15,0.16,0.14,0.13,0.14,0.14] },
+    stats: { total_weight: 0.98, residual_transmittance: 0.02, top_word: "the", softmax_top_word: "coffee", n_tokens: 7 },
   };
 
   const select = document.getElementById('sentence-select');

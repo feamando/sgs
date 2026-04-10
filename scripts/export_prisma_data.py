@@ -159,13 +159,18 @@ def compute_sentence_data(
     feat_range[feat_range == 0] = 1
     colors = (feat_pca - feat_min) / feat_range
 
+    # Compute softmax attention weights for comparison
+    # softmax over dot-product scores (same query, mu as keys)
+    scores = torch.bmm(mu, query.unsqueeze(-1)).squeeze(-1)  # [1, n]
+    softmax_weights = torch.softmax(scores / (mu.shape[-1] ** 0.5), dim=-1)
+
     return {
         "sentence": sentence,
         "words": words,
         "token_ids": tokens,
         "gaussians": {
             "mu_3d": mu_3d.tolist(),
-            "scale_3d": (np.sqrt(var_3d) * 0.3).tolist(),  # Scale for visualization
+            "scale_3d": (np.sqrt(var_3d) * 0.3).tolist(),
             "alpha": alpha.squeeze(0).detach().cpu().tolist(),
             "colors": colors.tolist(),
         },
@@ -178,10 +183,14 @@ def compute_sentence_data(
                 meaning.detach().cpu().numpy().reshape(1, -1)[:, :mu_np.shape[1]]
             ).tolist()[0] if mu_np.shape[1] >= 3 else [0, 0, 0],
         },
+        "softmax": {
+            "weights": softmax_weights.squeeze(0).detach().cpu().tolist(),
+        },
         "stats": {
             "total_weight": float(weights.sum().item()),
             "residual_transmittance": float(transmittance[-1].item() * (1 - eff_opacity[-1].item())),
             "top_word": words[int(weights.squeeze(0).argmax().item())],
+            "softmax_top_word": words[int(softmax_weights.squeeze(0).argmax().item())],
             "n_tokens": len(tokens),
         },
     }
