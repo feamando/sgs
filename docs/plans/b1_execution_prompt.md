@@ -1,12 +1,23 @@
 # B1 Execution Prompt — For a New Terminal Session
 
-Copy the section below into a fresh Claude Code session to start building the generative model.
+Copy the section below into a fresh Claude Code session in the `~/Documents/GitHub/sgs` directory.
 
 ---
 
 ## PROMPT
 
-I'm building Radiance Planck — a 100M-parameter language model that uses Semantic Gaussian Splatting (SGS) rendering instead of transformer attention. The full project is at `~/Documents/GitHub/sgs`.
+I'm building Radiance Planck — a 100M-parameter language model that uses Semantic Gaussian Splatting (SGS) rendering instead of transformer attention.
+
+**Read these files first for full context:**
+- `docs/plans/b1_generative_model_plan.md` — full plan (architecture, training, deployment, risks)
+- `docs/plans/roadmap.md` — project overview and where B1 fits
+- `docs/brand.md` — naming (Planck = 100M micro model)
+- `docs/analysis/phase3_results.md` — latest experiment results
+- `src/model.py` — existing SGS encoder (reference for rendering equation implementation)
+- `src/kernel.py` — Gaussian kernel (reuse this)
+- `src/rendering.py` — alpha-compositing rendering equation (reuse this)
+
+The full project is at `~/Documents/GitHub/sgs`.
 
 ### Context
 
