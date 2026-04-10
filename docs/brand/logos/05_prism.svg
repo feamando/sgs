@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="500" height="400">
+  <defs>
+    <!-- Soft beam gradients (Gaussian-edged beams) -->
+    <linearGradient id="beam-in" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#FFF8E7" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#FFF0CC" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#FFE8A0" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Refracted beam gradients -->
+    <linearGradient id="b-amber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F4A300" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#F4A300" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="b-gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#FFD700" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="b-coral" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#FF6B6B" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="b-rose" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#FF8FA3" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FF8FA3" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="b-peach" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFCBA4" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#FFCBA4" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFCBA4" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Gaussian blur for soft beam edges -->
+    <filter id="soften" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="soften-beam" x="-10%" y="-40%" width="120%" height="180%">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <rect width="500" height="400" fill="white"/>
+
+  <!-- Input beam (white/warm, entering from left) -->
+  <polygon points="40,190 220,195 220,205 40,210" fill="url(#beam-in)" filter="url(#soften)"/>
+
+  <!-- Prism (clean geometric triangle, thin stroke) -->
+  <polygon points="220,100 320,300 120,300" fill="none" stroke="#2A2A3A" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Subtle prism fill -->
+  <polygon points="220,100 320,300 120,300" fill="#2A2A3A" opacity="0.04"/>
+
+  <!-- Refracted beams (fanning out from right face of prism) -->
+  <!-- Each beam is a thin rotated rectangle with gradient + blur -->
+
+  <!-- Beam 1: amber (top) -->
+  <polygon points="290,170 490,110 492,120 292,175" fill="url(#b-amber)" filter="url(#soften-beam)"/>
+
+  <!-- Beam 2: gold -->
+  <polygon points="295,190 492,155 494,165 298,196" fill="url(#b-gold)" filter="url(#soften-beam)"/>
+
+  <!-- Beam 3: peach (center) -->
+  <polygon points="300,210 495,200 496,210 302,216" fill="url(#b-peach)" filter="url(#soften-beam)"/>
+
+  <!-- Beam 4: coral -->
+  <polygon points="298,230 494,250 492,260 296,236" fill="url(#b-coral)" filter="url(#soften-beam)"/>
+
+  <!-- Beam 5: rose (bottom) -->
+  <polygon points="293,248 490,300 488,310 290,254" fill="url(#b-rose)" filter="url(#soften-beam)"/>
+
+</svg>

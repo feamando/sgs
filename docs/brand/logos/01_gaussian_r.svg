@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <!-- Gaussian radial gradients — bright center fading to transparent -->
+    <radialGradient id="g-amber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F4A300" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#F4A300" stop-opacity="0.7"/>
+      <stop offset="70%" stop-color="#F4A300" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g-gold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#FFD700" stop-opacity="0.65"/>
+      <stop offset="70%" stop-color="#FFD700" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g-coral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#FF6B6B" stop-opacity="0.65"/>
+      <stop offset="70%" stop-color="#FF6B6B" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g-rose" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#FF8FA3" stop-opacity="0.6"/>
+      <stop offset="70%" stop-color="#FF8FA3" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FF8FA3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g-peach" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFCBA4" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#FFCBA4" stop-opacity="0.55"/>
+      <stop offset="70%" stop-color="#FFCBA4" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FFCBA4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="500" fill="white"/>
+
+  <!-- R construction from Gaussian ellipses -->
+
+  <!-- Stem of R: tall vertical ellipse (amber) -->
+  <ellipse cx="140" cy="260" rx="65" ry="195" fill="url(#g-amber)" />
+
+  <!-- Bowl of R: large curved ellipse (gold) -->
+  <ellipse cx="220" cy="165" rx="110" ry="95" fill="url(#g-gold)" />
+
+  <!-- Inner bowl cutout area: creates the negative space feel (peach, lighter) -->
+  <ellipse cx="200" cy="175" rx="55" ry="50" fill="url(#g-peach)" opacity="0.5"/>
+
+  <!-- Leg of R: diagonal ellipse going down-right (coral) -->
+  <ellipse cx="260" cy="380" rx="60" ry="130" fill="url(#g-coral)" transform="rotate(-25, 260, 380)" />
+
+  <!-- Joint where bowl meets leg: small bright accent (rose) -->
+  <ellipse cx="195" cy="265" rx="50" ry="45" fill="url(#g-rose)" />
+
+  <!-- Top shoulder accent for definition -->
+  <ellipse cx="155" cy="95" rx="45" ry="40" fill="url(#g-gold)" opacity="0.6"/>
+
+</svg>

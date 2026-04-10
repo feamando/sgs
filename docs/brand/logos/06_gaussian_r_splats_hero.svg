@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500">
+  <defs>
+    <radialGradient id="h-amber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F4A300" stop-opacity="0.92"/>
+      <stop offset="35%" stop-color="#F4A300" stop-opacity="0.68"/>
+      <stop offset="65%" stop-color="#F4A300" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="h-gold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.88"/>
+      <stop offset="35%" stop-color="#FFD700" stop-opacity="0.62"/>
+      <stop offset="65%" stop-color="#FFD700" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="h-coral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.88"/>
+      <stop offset="35%" stop-color="#FF6B6B" stop-opacity="0.6"/>
+      <stop offset="65%" stop-color="#FF6B6B" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="h-rose" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.82"/>
+      <stop offset="35%" stop-color="#FF8FA3" stop-opacity="0.55"/>
+      <stop offset="65%" stop-color="#FF8FA3" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FF8FA3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="h-peach" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFCBA4" stop-opacity="0.78"/>
+      <stop offset="35%" stop-color="#FFCBA4" stop-opacity="0.5"/>
+      <stop offset="65%" stop-color="#FFCBA4" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FFCBA4" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Smaller, more transparent variants for scattered particles -->
+    <radialGradient id="p-amber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F4A300" stop-opacity="0.55"/>
+      <stop offset="50%" stop-color="#F4A300" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="p-gold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#FFD700" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="p-coral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#FF6B6B" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="p-rose" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF8FA3" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#FF8FA3" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FF8FA3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="p-peach" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFCBA4" stop-opacity="0.42"/>
+      <stop offset="50%" stop-color="#FFCBA4" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#FFCBA4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="1200" height="500" fill="#1A1A2E"/>
+
+  <!-- ═══ LEFT SIDE: Gaussian R ═══ -->
+
+  <!-- Stem -->
+  <ellipse cx="200" cy="260" rx="58" ry="175" fill="url(#h-amber)"/>
+  <!-- Bowl -->
+  <ellipse cx="275" cy="165" rx="100" ry="85" fill="url(#h-gold)"/>
+  <!-- Inner bowl accent -->
+  <ellipse cx="260" cy="172" rx="48" ry="42" fill="url(#h-peach)" opacity="0.5"/>
+  <!-- Leg -->
+  <ellipse cx="310" cy="370" rx="52" ry="115" fill="url(#h-coral)" transform="rotate(-25, 310, 370)"/>
+  <!-- Joint -->
+  <ellipse cx="250" cy="260" rx="44" ry="40" fill="url(#h-rose)"/>
+  <!-- Shoulder -->
+  <ellipse cx="210" cy="105" rx="38" ry="35" fill="url(#h-gold)" opacity="0.6"/>
+
+  <!-- ═══ TRANSITION ZONE: Dissolving particles ═══ -->
+
+  <!-- Medium splats breaking away from the R -->
+  <ellipse cx="420" cy="140" rx="40" ry="35" fill="url(#h-gold)" opacity="0.7"/>
+  <ellipse cx="440" cy="280" rx="38" ry="42" fill="url(#h-coral)" opacity="0.6"/>
+  <ellipse cx="480" cy="200" rx="35" ry="30" fill="url(#h-amber)" opacity="0.65"/>
+  <ellipse cx="460" cy="360" rx="32" ry="28" fill="url(#h-rose)" opacity="0.55"/>
+  <ellipse cx="500" cy="110" rx="30" ry="33" fill="url(#h-peach)" opacity="0.5"/>
+
+  <!-- ═══ RIGHT SIDE: Scattered Gaussian particles ═══ -->
+
+  <!-- Larger scattered -->
+  <ellipse cx="580" cy="180" rx="32" ry="28" fill="url(#p-amber)"/>
+  <ellipse cx="650" cy="300" rx="30" ry="34" fill="url(#p-coral)"/>
+  <ellipse cx="620" cy="120" rx="26" ry="24" fill="url(#p-gold)"/>
+  <ellipse cx="700" cy="220" rx="28" ry="25" fill="url(#p-rose)"/>
+  <ellipse cx="680" cy="380" rx="25" ry="28" fill="url(#p-peach)"/>
+
+  <!-- Medium scattered -->
+  <ellipse cx="750" cy="150" rx="22" ry="20" fill="url(#p-gold)"/>
+  <ellipse cx="780" cy="320" rx="20" ry="22" fill="url(#p-amber)"/>
+  <ellipse cx="820" cy="240" rx="21" ry="19" fill="url(#p-coral)"/>
+  <ellipse cx="770" cy="420" rx="18" ry="20" fill="url(#p-rose)"/>
+  <ellipse cx="850" cy="130" rx="19" ry="17" fill="url(#p-peach)"/>
+
+  <!-- Small scattered -->
+  <ellipse cx="900" cy="200" rx="16" ry="14" fill="url(#p-amber)"/>
+  <ellipse cx="920" cy="340" rx="14" ry="16" fill="url(#p-gold)"/>
+  <ellipse cx="960" cy="160" rx="13" ry="12" fill="url(#p-coral)"/>
+  <ellipse cx="940" cy="280" rx="15" ry="13" fill="url(#p-rose)"/>
+  <ellipse cx="980" cy="400" rx="12" ry="14" fill="url(#p-peach)"/>
+
+  <!-- Tiny dust -->
+  <ellipse cx="1020" cy="220" rx="10" ry="9" fill="url(#p-amber)"/>
+  <ellipse cx="1050" cy="310" rx="9" ry="10" fill="url(#p-gold)"/>
+  <ellipse cx="1080" cy="170" rx="8" ry="7" fill="url(#p-coral)"/>
+  <ellipse cx="1060" cy="380" rx="9" ry="8" fill="url(#p-rose)"/>
+  <ellipse cx="1100" cy="250" rx="7" ry="8" fill="url(#p-peach)"/>
+  <ellipse cx="1130" cy="140" rx="6" ry="6" fill="url(#p-gold)"/>
+  <ellipse cx="1140" cy="350" rx="7" ry="6" fill="url(#p-amber)"/>
+  <ellipse cx="1160" cy="200" rx="5" ry="5" fill="url(#p-coral)"/>
+
+</svg>
