@@ -35,6 +35,7 @@ The scale mirrors physics history: Planck discovered the smallest unit of light.
 |---|---|---|---|
 | Visualizer | **Radiance Prisma** | Interactive 3D Gaussian composition demo | German/Latin: a prism decomposes light into components — exactly what the visualizer does for meaning |
 | Chat / Generation app | **Radiance Satz** | Text generation interface powered by Planck or Hertz | German: "Satz" = sentence (what it generates), movement in a symphony (Berlin Philharmonic), theorem in mathematics (our Lean proofs). Three meanings, one word. |
+| Audio / Sound | **Radiance Klang** | Audio synthesis, understanding, and manipulation via Gaussian splatting | German: "Klang" = resonance, tone, sound. Berlin Philharmonic connection. Gaussian splatting applied to time-frequency space. |
 
 ---
 
@@ -46,6 +47,10 @@ Radiance Labs
 ├── Radiance Satz           — Generate text via rendering (chat app)
 │   ├── Powered by Planck   — 100M, runs in your browser
 │   └── Powered by Hertz    — 1B, internal / API
+├── Radiance Klang          — Audio via Gaussian splatting (sound synthesis/editing)
+│   ├── Klang Studio        — Edit audio by manipulating Gaussians
+│   ├── Klang Voice         — Voice cloning via Gaussian transfer
+│   └── Klang Field         — Spatial audio via 3D Gaussian scenes
 └── Radiance [Research]     — Papers, proofs, benchmarks
 ```
 
