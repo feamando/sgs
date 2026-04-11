@@ -1,9 +1,22 @@
+# Core
 torch>=2.0
 numpy>=1.24
 scipy>=1.10
-datasets>=2.14
-pyyaml>=6.0
-tqdm>=4.65
-wandb>=0.15
-matplotlib>=3.7
 scikit-learn>=1.3
+matplotlib>=3.7
+tqdm>=4.65
+pyyaml>=6.0
+
+# Data
+datasets>=2.14
+pandas>=2.0
+pyarrow>=12.0
+
+# Tokenizer (Planck LM)
+sentencepiece>=0.1.99
+
+# Logging
+wandb>=0.15
+
+# Raum PoC-C (optional — falls back to CPU renderer if missing)
+# gsplat>=1.0
