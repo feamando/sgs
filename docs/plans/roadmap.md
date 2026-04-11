@@ -108,6 +108,22 @@
 
 ---
 
+### TEXT-TO-3D (NEW)
+
+#### D1: Radiance Raum — Text-to-3D Gaussian Splatting
+| | |
+|---|---|
+| **Status** | Feasibility analysis + 2 PoC plans ready |
+| **What** | Generate, describe, and edit 3DGS scenes via text — leveraging the SGS/3DGS structural isomorphism |
+| **Core insight** | SGS and 3DGS share the same primitive (Gaussian) and composition (alpha-compositing). Only the spaces differ. |
+| **Approaches** | 5 modeled (A-E). Two approved for PoC: D (compositional) + C (bridge) |
+| **PoC-D** | Compositional Scene Graph — 5 days, CPU, ~50K params (`docs/plans/d1a_raum_poc_compositional.md`) |
+| **PoC-C** | Shared-Equation Bridge — 12 days, GPU, ~335K params (`docs/plans/d1b_raum_poc_bridge.md`) |
+| **Key question** | Does the structural isomorphism between SGS and 3DGS enable better text-to-3D than CLIP-based approaches? |
+| **Viral hook** | "Both your words and your 3D scene are Gaussians. We just connect the spaces." |
+
+---
+
 ### DOMAIN APPLICATIONS
 
 #### A4-Cyber: Cybersecurity Threat Intel
@@ -227,6 +243,9 @@
 | `docs/plans/roadmap.md` | This file |
 | `docs/plans/a3_visualizer_plan.md` | Interactive visualizer plan (v2, with ops) |
 | `docs/plans/b1_generative_model_plan.md` | Generative model plan (v4, 100M + 1B, browser deploy) |
+| `docs/plans/d1_raum_text_to_3d_plan.md` | Radiance Raum: text-to-3D Gaussian Splatting plan + feasibility |
+| `docs/plans/d1a_raum_poc_compositional.md` | PoC-D: compositional scene graph (5 days, CPU) |
+| `docs/plans/d1b_raum_poc_bridge.md` | PoC-C: shared-equation bridge (12 days, GPU) |
 | `docs/plans/a4_domain_research.md` | Domain research: 6 domains ranked |
 | `docs/plans/a4_cybersecurity_ideas.md` | 3 cybersecurity product ideas |
 | `docs/plans/a4_scientific_literature_ideas.md` | 4 scientific literature product ideas |
