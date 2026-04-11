@@ -254,4 +254,50 @@ The proven theorem (Softmax ⊂ Alpha-Compositing) applies to audio composition 
 
 ---
 
+---
+
+## 9. Literature Review: What Exists and What Doesn't
+
+### 9.1 Gaussian Splatting + Audio (Existing)
+
+All existing work uses 3DGS geometry to *inform* audio, not to *represent* audio:
+
+- **DynFOA** (Luo et al., 2026): 3DGS scene geometry conditions a diffusion model for spatial ambisonics. Gaussians encode the room, not the sound.
+- **AV-GS** (Bhosale et al., 2024): Audio-Visual Gaussian Splatting learns material-aware scene representations for sound propagation.
+- **NeRAF** (Brunetto et al., 2025): Joint acoustic + radiance fields for room impulse responses.
+- **Audio-Plane** (Shen et al., 2025): Gaussian planes for talking head synthesis — closest to "Gaussians encoding audio" but for facial motion, not audio signals.
+
+**None of these represent audio signals directly as Gaussian primitives.**
+
+### 9.2 Neural Audio Fields (Closest Conceptual Work)
+
+- **SIREN** (Sitzmann et al., 2020): Proved audio waveforms CAN be represented as continuous neural fields.
+- **"Representing Sounds as Neural Amplitude Fields"** (Li et al., 2026): Benchmark for coordinate-MLPs in audio. Most directly relevant — treats audio as a queryable field.
+- **HyperSound** (Szatkowski et al., 2022): Meta-learned INRs that generalize across audio signals.
+
+These prove audio-as-continuous-field works — but use **implicit** MLPs, not **explicit** Gaussian primitives. Klang replaces the MLP with Gaussians, gaining the same advantages 3DGS gained over NeRF: speed, editability, interpretability.
+
+### 9.3 Audio Tokenization (What We're Competing With)
+
+Current SOTA audio systems (VALL-E, Voicebox, Step-Audio) ALL use discrete tokens via neural codecs:
+
+- **EnCodec** (Defossez et al., 2022): Residual vector quantization, 1.5-24 kbps.
+- **DAC** (Kumar et al., 2023): ~90x compression of 44.1 kHz audio to 8 kbps tokens.
+
+Pipeline: waveform → encoder → continuous latent → VQ discretization → discrete tokens.
+
+**Klang proposes:** waveform → Gaussian fitting → continuous Gaussian set (no discretization). The Gaussians ARE the representation — queryable at any resolution, editable, interpretable.
+
+### 9.4 The Confirmed Gap
+
+**No one has proposed using Gaussian primitives to represent audio signals directly.** Specifically:
+
+1. **Gaussian Audio Fields** — spectrograms as 2D Gaussian mixtures with rendering: unexplored
+2. **Gaussian Audio Tokenization** — replacing VQ codebooks with Gaussian sets: unexplored
+3. **Adaptive audio resolution via split/prune** — from 3DGS: unexplored
+
+The closest work (Neural Amplitude Fields) uses MLPs for the same idea. Klang is to Neural Audio Fields what 3DGS was to NeRF.
+
+---
+
 *This is a research proposal. Phase 0 (spectrogram reconstruction) is the feasibility gate. If Gaussians can reconstruct audio spectrograms with reasonable quality, the direction is validated.*
