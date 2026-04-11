@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Radiance Labs — Logo Concepts v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #fff; font-family: 'Inter', sans-serif; }
+  h1 { text-align: center; padding: 40px 0 10px; font-size: 18px; color: #666; letter-spacing: 4px; text-transform: uppercase; }
+  h2 { text-align: center; padding: 30px 0 10px; font-size: 14px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
+  .section { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; padding: 20px 40px; }
+  .card { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid #222; }
+  .card canvas { display: block; }
+  .card .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+  .card .label { position: absolute; bottom: 10px; left: 14px; font-size: 11px; color: #555; z-index: 10; letter-spacing: 1px; }
+  .sans { font-family: 'Inter', sans-serif; }
+  .wide { width: 100%; max-width: 1100px; }
+  /* Static favicon/white variants */
+  .static-card { width: 120px; height: 120px; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #222; }
+</style>
+</head>
+<body>
+
+<h1>Radiance Labs — Logo v2</h1>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 1. LOGO: Sans R + Sphere Dither Variants -->
+<!-- ═══════════════════════════════════════════ -->
+<h2>1. Logo — Sans R + Sphere (3 variants)</h2>
+<div class="section">
+
+  <!-- Original warm (kept from v1) -->
+  <div class="card" style="width:400px;height:400px;">
+    <canvas id="logo-warm" width="400" height="400"></canvas>
+    <div class="overlay">
+      <span class="sans" style="font-size:200px;font-weight:800;color:white;text-shadow:0 0 80px rgba(244,163,0,0.5);">R</span>
+    </div>
+    <div class="label">WARM AMBER</div>
+  </div>
+
+  <!-- Deep red variant -->
+  <div class="card" style="width:400px;height:400px;">
+    <canvas id="logo-red" width="400" height="400"></canvas>
+    <div class="overlay">
+      <span class="sans" style="font-size:200px;font-weight:800;color:white;text-shadow:0 0 80px rgba(180,40,40,0.5);">R</span>
+    </div>
+    <div class="label">DEEP RED</div>
+  </div>
+
+  <!-- Multi-sphere (overlapping gaussians) -->
+  <div class="card" style="width:400px;height:400px;">
+    <canvas id="logo-multi" width="400" height="400"></canvas>
+    <div class="overlay">
+      <span class="sans" style="font-size:200px;font-weight:800;color:white;text-shadow:0 0 60px rgba(244,163,0,0.4);">R</span>
+    </div>
+    <div class="label">MULTI-GAUSSIAN</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 1a. STATIC / FAVICON — White background -->
+<!-- ═══════════════════════════════════════════ -->
+<h2>1a. Static / Favicon (White Background)</h2>
+<div class="section" style="gap:20px;">
+
+  <!-- Warm static -->
+  <div style="text-align:center;">
+    <div class="static-card" style="background:white;">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="fav-amber" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F4A300" stop-opacity="0.9"/>
+            <stop offset="50%" stop-color="#F4A300" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="40" cy="40" rx="36" ry="36" fill="url(#fav-amber)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="#1a1a2e">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">120×120</div>
+  </div>
+
+  <!-- Red static -->
+  <div style="text-align:center;">
+    <div class="static-card" style="background:white;">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="fav-red" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#B42828" stop-opacity="0.85"/>
+            <stop offset="50%" stop-color="#B42828" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#B42828" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="40" cy="40" rx="36" ry="36" fill="url(#fav-red)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="#1a1a2e">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">120×120</div>
+  </div>
+
+  <!-- Multi static -->
+  <div style="text-align:center;">
+    <div class="static-card" style="background:white;">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <radialGradient id="fav-m1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F4A300" stop-opacity="0.7"/>
+            <stop offset="60%" stop-color="#F4A300" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#F4A300" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="fav-m2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.6"/>
+            <stop offset="60%" stop-color="#FF6B6B" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="fav-m3" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFD700" stop-opacity="0.65"/>
+            <stop offset="60%" stop-color="#FFD700" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="32" cy="35" rx="28" ry="28" fill="url(#fav-m1)"/>
+        <ellipse cx="50" cy="30" rx="24" ry="24" fill="url(#fav-m3)"/>
+        <ellipse cx="42" cy="50" rx="22" ry="22" fill="url(#fav-m2)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="#1a1a2e">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">120×120</div>
+  </div>
+
+  <!-- Dark bg variants -->
+  <div style="text-align:center;">
+    <div class="static-card" style="background:#0f0500;">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <ellipse cx="40" cy="40" rx="36" ry="36" fill="url(#fav-amber)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="white">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">Dark</div>
+  </div>
+
+  <div style="text-align:center;">
+    <div class="static-card" style="background:#0a0a12;">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <ellipse cx="32" cy="35" rx="28" ry="28" fill="url(#fav-m1)"/>
+        <ellipse cx="50" cy="30" rx="24" ry="24" fill="url(#fav-m3)"/>
+        <ellipse cx="42" cy="50" rx="22" ry="22" fill="url(#fav-m2)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="white">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">Dark Multi</div>
+  </div>
+
+  <!-- Tiny 32px favicon -->
+  <div style="text-align:center;">
+    <div style="width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:white;border:1px solid #ddd;">
+      <svg width="32" height="32" viewBox="0 0 80 80">
+        <ellipse cx="40" cy="40" rx="36" ry="36" fill="url(#fav-amber)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="#1a1a2e">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">32px</div>
+  </div>
+  <div style="text-align:center;">
+    <div style="width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#0a0a12;border:1px solid #333;">
+      <svg width="32" height="32" viewBox="0 0 80 80">
+        <ellipse cx="40" cy="40" rx="36" ry="36" fill="url(#fav-amber)"/>
+        <text x="40" y="58" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="56" fill="white">R</text>
+      </svg>
+    </div>
+    <div style="font-size:10px;color:#555;margin-top:6px;">32px dark</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 2. PRISMA — Dotted prism with dot field -->
+<!-- ═══════════════════════════════════════════ -->
+<h2>2. Prisma — Prism + Animated Dot Field</h2>
+<div class="section">
+  <div class="card" style="width:500px;height:350px;">
+    <canvas id="prisma" width="500" height="350"></canvas>
+    <div class="overlay" style="flex-direction:column;gap:4px;">
+      <svg width="120" height="120" viewBox="0 0 120 120" style="filter:drop-shadow(0 0 20px rgba(244,163,0,0.3));">
+        <polygon points="60,10 110,110 10,110" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-dasharray="4,6" stroke-linecap="round"/>
+        <!-- Refraction lines -->
+        <line x1="85" y1="60" x2="115" y2="40" stroke="#F4A300" stroke-width="1" stroke-opacity="0.5"/>
+        <line x1="88" y1="68" x2="118" y2="60" stroke="#FFD700" stroke-width="1" stroke-opacity="0.5"/>
+        <line x1="90" y1="76" x2="120" y2="82" stroke="#FF6B6B" stroke-width="1" stroke-opacity="0.4"/>
+      </svg>
+      <span class="sans" style="font-size:22px;font-weight:600;color:rgba(255,255,255,0.8);letter-spacing:6px;text-transform:uppercase;margin-top:8px;">Prisma</span>
+    </div>
+    <div class="label">PRISM + DOT FIELD</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- 3. HERO — Overlapping dithered splat fields -->
+<!-- ═══════════════════════════════════════════ -->
+<h2>3. Hero — Overlapping Gaussian Splat Fields</h2>
+<div class="section">
+  <div class="card wide" style="height:450px;position:relative;">
+    <!-- Layer multiple canvases for overlapping gaussian splats -->
+    <canvas id="hero-layer1" width="1100" height="450" style="position:absolute;inset:0;"></canvas>
+    <canvas id="hero-layer2" width="1100" height="450" style="position:absolute;inset:0;opacity:0.6;mix-blend-mode:screen;"></canvas>
+    <canvas id="hero-layer3" width="1100" height="450" style="position:absolute;inset:0;opacity:0.4;mix-blend-mode:screen;"></canvas>
+    <div class="overlay" style="flex-direction:column;gap:10px;">
+      <span class="sans" style="font-size:64px;font-weight:800;color:white;text-shadow:0 0 80px rgba(244,163,0,0.3);letter-spacing:-2px;">Radiance Labs</span>
+      <span class="sans" style="font-size:16px;color:rgba(255,255,255,0.45);letter-spacing:5px;text-transform:uppercase;font-weight:400;">Meaning, rendered.</span>
+    </div>
+    <div class="label">HERO — MULTI-SPLAT OVERLAY</div>
+  </div>
+</div>
+
+<div style="height:60px;"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// WebGL2 Dithering Shader
+// ═══════════════════════════════════════════════
+
+const vertSrc = `#version 300 es
+precision mediump float;
+layout(location=0) in vec4 a_position;
+void main(){gl_Position=a_position;}`;
+
+const fragSrc = `#version 300 es
+precision mediump float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec4 u_colorBack;
+uniform vec4 u_colorFront;
+uniform float u_shape;
+uniform float u_type;
+uniform float u_pxSize;
+uniform vec2 u_offset;
+out vec4 fragColor;
+
+#define TWO_PI 6.28318530718
+#define PI 3.14159265358979323846
+
+float hash11(float p){p=fract(p*0.3183099)+0.1;p*=p+19.19;return fract(p*p);}
+float hash21(vec2 p){p=fract(p*vec2(0.3183099,0.3678794))+0.1;p+=dot(p,p+19.19);return fract(p.x*p.y);}
+
+vec3 permute(vec3 x){return mod(((x*34.0)+1.0)*x,289.0);}
+float snoise(vec2 v){
+  const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
+  vec2 i=floor(v+dot(v,C.yy));vec2 x0=v-i+dot(i,C.xx);vec2 i1;
+  i1=(x0.x>x0.y)?vec2(1.,0.):vec2(0.,1.);vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod(i,289.0);
+  vec3 p=permute(permute(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));
+  vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);m=m*m;m=m*m;
+  vec3 x=2.0*fract(p*C.www)-1.0;vec3 h=abs(x)-0.5;vec3 ox=floor(x+0.5);vec3 a0=x-ox;
+  m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);
+  vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;
+  return 130.0*dot(m,g);
+}
+
+const int bayer2x2[4]=int[4](0,2,3,1);
+const int bayer4x4[16]=int[16](0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5);
+const int bayer8x8[64]=int[64](0,32,8,40,2,34,10,42,48,16,56,24,50,18,58,26,12,44,4,36,14,46,6,38,60,28,52,20,62,30,54,22,3,35,11,43,1,33,9,41,51,19,59,27,49,17,57,25,15,47,7,39,13,45,5,37,63,31,55,23,61,29,53,21);
+
+float getBayerValue(vec2 uv,int size){
+  ivec2 pos=ivec2(mod(uv,float(size)));int index=pos.y*size+pos.x;
+  if(size==2)return float(bayer2x2[index])/4.0;
+  if(size==4)return float(bayer4x4[index])/16.0;
+  if(size==8)return float(bayer8x8[index])/64.0;
+  return 0.0;
+}
+
+void main(){
+  float t=.5*u_time;
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;uv-=.5;
+  // Apply offset for multi-splat positioning
+  uv+=u_offset;
+  float pxSize=u_pxSize;
+  vec2 pxSizeUv=gl_FragCoord.xy;pxSizeUv-=.5*u_resolution;pxSizeUv/=pxSize;
+  vec2 pixelizedUv=floor(pxSizeUv)*pxSize/u_resolution.xy;pixelizedUv+=.5;pixelizedUv-=.5;
+  pixelizedUv+=u_offset;
+  vec2 shape_uv=pixelizedUv;vec2 dithering_uv=pxSizeUv;vec2 ditheringNoise_uv=uv*u_resolution;
+
+  float shape=0.;
+  if(u_shape<1.5){shape_uv*=.001;float noise=.5*snoise(shape_uv-vec2(0.,.3*t))+.5*snoise(2.*shape_uv+vec2(0.,.32*t));shape=0.5+0.5*noise;shape=smoothstep(0.3,0.9,shape);}
+  else if(u_shape<2.5){shape_uv*=.003;for(float i=1.;i<6.;i++){shape_uv.x+=0.6/i*cos(i*2.5*shape_uv.y+t);shape_uv.y+=0.6/i*cos(i*1.5*shape_uv.x+t);}shape=.15/abs(sin(t-shape_uv.y-shape_uv.x));shape=smoothstep(0.02,1.,shape);}
+  else if(u_shape<3.5){shape_uv*=.05;float stripeIdx=floor(2.*shape_uv.x/TWO_PI);float rand=hash11(stripeIdx*10.);rand=sign(rand-.5)*pow(.1+abs(rand),.4);shape=sin(shape_uv.x)*cos(shape_uv.y-5.*rand*t);shape=pow(abs(shape),6.);}
+  else if(u_shape<5.5){
+    // Ripple — used for dot field effect
+    float dist=length(shape_uv);float waves=sin(pow(dist,1.7)*7.-3.*t)*.5+.5;shape=waves;
+  }
+  else if(u_shape<6.5){float l=length(shape_uv);float angle=6.*atan(shape_uv.y,shape_uv.x)+4.*t;float twist=1.2;float offset=pow(l,-twist)+angle/TWO_PI;float mid=smoothstep(0.,1.,pow(l,twist));shape=mix(0.,fract(offset),mid);}
+  else{
+    // Sphere
+    shape_uv*=2.;float d=1.-pow(length(shape_uv),2.);vec3 pos=vec3(shape_uv,sqrt(d));vec3 lightPos=normalize(vec3(cos(1.5*t),.8,sin(1.25*t)));shape=.5+.5*dot(lightPos,pos);shape*=step(0.,d);
+  }
+
+  int type=int(floor(u_type));float dithering=0.0;
+  if(type==1){dithering=step(hash21(ditheringNoise_uv),shape);}
+  else if(type==2){dithering=getBayerValue(dithering_uv,2);}
+  else if(type==3){dithering=getBayerValue(dithering_uv,4);}
+  else{dithering=getBayerValue(dithering_uv,8);}
+
+  dithering-=.5;float res=step(.5,shape+dithering);
+  vec3 fgColor=u_colorFront.rgb*u_colorFront.a;float fgOpacity=u_colorFront.a;
+  vec3 bgColor=u_colorBack.rgb*u_colorBack.a;float bgOpacity=u_colorBack.a;
+  vec3 color=fgColor*res;float opacity=fgOpacity*res;
+  color+=bgColor*(1.-opacity);opacity+=bgOpacity*(1.-opacity);
+  fragColor=vec4(color,opacity);
+}`;
+
+function hexToRgba(hex){
+  const r=parseInt(hex.slice(1,3),16)/255;
+  const g=parseInt(hex.slice(3,5),16)/255;
+  const b=parseInt(hex.slice(5,7),16)/255;
+  return[r,g,b,1];
+}
+
+const SHAPES={simplex:1,warp:2,dots:3,ripple:5,swirl:6,sphere:7};
+const TYPES={random:1,'2x2':2,'4x4':3,'8x8':4};
+
+function initShader(canvasId, config){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  const gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:false});
+  if(!gl)return;
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  function compile(type,src){
+    const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null;}
+    return s;
+  }
+  const vs=compile(gl.VERTEX_SHADER,vertSrc);
+  const fs=compile(gl.FRAGMENT_SHADER,fragSrc);
+  const prog=gl.createProgram();gl.attachShader(prog,vs);gl.attachShader(prog,fs);gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(prog));return;}
+
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_position');
+  gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+
+  const u={
+    time:gl.getUniformLocation(prog,'u_time'),
+    res:gl.getUniformLocation(prog,'u_resolution'),
+    cb:gl.getUniformLocation(prog,'u_colorBack'),
+    cf:gl.getUniformLocation(prog,'u_colorFront'),
+    shape:gl.getUniformLocation(prog,'u_shape'),
+    type:gl.getUniformLocation(prog,'u_type'),
+    px:gl.getUniformLocation(prog,'u_pxSize'),
+    offset:gl.getUniformLocation(prog,'u_offset'),
+  };
+
+  const start=Date.now();
+  const bg=hexToRgba(config.colorBack||'#000000');
+  const fg=hexToRgba(config.colorFront||'#ffffff');
+  const speed=config.speed||1;
+  const offset=config.offset||[0,0];
+
+  function render(){
+    const t=(Date.now()-start)*0.001*speed;
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.clearColor(0,0,0,0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(prog);
+    gl.uniform1f(u.time,t);
+    gl.uniform2f(u.res,canvas.width,canvas.height);
+    gl.uniform4fv(u.cb,bg);
+    gl.uniform4fv(u.cf,fg);
+    gl.uniform1f(u.shape,SHAPES[config.shape]||7);
+    gl.uniform1f(u.type,TYPES[config.type]||4);
+    gl.uniform1f(u.px,config.pxSize||4);
+    gl.uniform2f(u.offset,offset[0],offset[1]);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    requestAnimationFrame(render);
+  }
+  render();
+}
+
+// ═══════════════════════════════════════════════
+// 1. Logo variants
+// ═══════════════════════════════════════════════
+
+// Warm amber sphere (original)
+initShader('logo-warm',{shape:'sphere',type:'random',colorBack:'#0f0500',colorFront:'#FF6B6B',pxSize:2,speed:1.0});
+
+// Deep red sphere
+initShader('logo-red',{shape:'sphere',type:'random',colorBack:'#0a0008',colorFront:'#B42828',pxSize:2,speed:0.8});
+
+// Multi-gaussian: uses the "multi-splat" fragment shader approach
+// We'll use a custom canvas with multiple draw calls
+(function(){
+  const canvas=document.getElementById('logo-multi');
+  if(!canvas)return;
+  const gl=canvas.getContext('webgl2',{alpha:true,premultipliedAlpha:false});
+  if(!gl)return;
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE,gl.ONE); // Additive blending for overlapping gaussians
+
+  function compile(type,src){
+    const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null;}
+    return s;
+  }
+  const vs=compile(gl.VERTEX_SHADER,vertSrc);
+  const fs=compile(gl.FRAGMENT_SHADER,fragSrc);
+  const prog=gl.createProgram();gl.attachShader(prog,vs);gl.attachShader(prog,fs);gl.linkProgram(prog);
+
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_position');
+  gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+
+  const u={
+    time:gl.getUniformLocation(prog,'u_time'),
+    res:gl.getUniformLocation(prog,'u_resolution'),
+    cb:gl.getUniformLocation(prog,'u_colorBack'),
+    cf:gl.getUniformLocation(prog,'u_colorFront'),
+    shape:gl.getUniformLocation(prog,'u_shape'),
+    type:gl.getUniformLocation(prog,'u_type'),
+    px:gl.getUniformLocation(prog,'u_pxSize'),
+    offset:gl.getUniformLocation(prog,'u_offset'),
+  };
+
+  const start=Date.now();
+  // Three overlapping gaussian spheres with different colors and offsets
+  const splats=[
+    {color:'#F4A300',offset:[-0.12,-0.05],speed:0.9},
+    {color:'#FF6B6B',offset:[0.1,0.08],speed:1.1},
+    {color:'#FFD700',offset:[0.05,-0.12],speed:0.7},
+  ];
+
+  function render(){
+    const t=(Date.now()-start)*0.001;
+    gl.viewport(0,0,canvas.width,canvas.height);
+    gl.clearColor(0.04,0.02,0.0,1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(prog);
+    gl.uniform1f(u.shape,SHAPES.sphere);
+    gl.uniform1f(u.type,TYPES.random);
+    gl.uniform1f(u.px,2);
+    gl.uniform2f(u.res,canvas.width,canvas.height);
+    gl.uniform4fv(u.cb,[0,0,0,0]); // transparent bg for additive layers
+
+    for(const s of splats){
+      const c=hexToRgba(s.color);
+      c[3]=0.45; // reduce opacity per splat
+      gl.uniform4fv(u.cf,c);
+      gl.uniform1f(u.time,t*s.speed);
+      gl.uniform2f(u.offset,s.offset[0],s.offset[1]);
+      gl.drawArrays(gl.TRIANGLES,0,6);
+    }
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+
+// ═══════════════════════════════════════════════
+// 2. Prisma — dot field background
+// ═══════════════════════════════════════════════
+initShader('prisma',{shape:'dots',type:'random',colorBack:'#06060c',colorFront:'#F4A300',pxSize:2,speed:0.4});
+
+// ═══════════════════════════════════════════════
+// 3. Hero — multiple overlapping splat layers
+// ═══════════════════════════════════════════════
+
+// Layer 1: large amber ripple (base)
+initShader('hero-layer1',{shape:'sphere',type:'random',colorBack:'#08060f',colorFront:'#F4A300',pxSize:2,speed:0.6,offset:[-0.2,0.05]});
+
+// Layer 2: coral sphere offset right (blended on top)
+initShader('hero-layer2',{shape:'sphere',type:'random',colorBack:'#000000',colorFront:'#FF6B6B',pxSize:2,speed:0.8,offset:[0.25,-0.08]});
+
+// Layer 3: gold sphere offset up-left (blended on top)
+initShader('hero-layer3',{shape:'sphere',type:'random',colorBack:'#000000',colorFront:'#FFD700',pxSize:2,speed:0.5,offset:[-0.05,-0.2]});
+
+</script>
+</body>
+</html>
