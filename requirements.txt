@@ -15,6 +15,10 @@ pyarrow>=12.0
 # Tokenizer (Planck LM)
 sentencepiece>=0.1.99
 
+# Audio (Klang)
+librosa>=0.10
+soundfile>=0.12
+
 # Logging
 wandb>=0.15
 
