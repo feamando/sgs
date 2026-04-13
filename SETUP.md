@@ -16,14 +16,30 @@ cd sgs
 
 ## 2. Python Environment
 
-Requires Python 3.10+ (3.11 recommended).
+Requires **Python 3.11 or 3.12** (NOT 3.13 — PyTorch doesn't support 3.13 on Windows yet).
+
+### Install Python 3.12 (if you have 3.13)
+
+1. Download Python 3.12 from https://www.python.org/downloads/release/python-3120/
+   (Windows installer 64-bit)
+2. During install, check **"Add to PATH"** — install alongside 3.13, don't replace it.
+3. Use `py -3.12` to target the right version:
 
 ```powershell
-python -m venv .venv
+# Create venv with Python 3.12 specifically
+py -3.12 -m venv .venv
 .venv\Scripts\activate
+python --version   # should say 3.12.x
+```
 
-# PyTorch with CUDA 12.x (RTX 4090)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+### Install dependencies
+
+```powershell
+# PyTorch with CUDA (match your nvidia-smi CUDA version)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# If cu124 fails, try cu121:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # All other dependencies
 pip install -r requirements.txt
@@ -175,6 +191,28 @@ python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Onc
 # Interactive mode
 python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
 ```
+
+### Track C: Radiance Klang — Audio Gaussian Splatting
+
+```powershell
+# Install audio dependencies
+pip install librosa soundfile
+
+# Variant A: STFT point-blob Gaussians (baseline, slow)
+python klang/run_stft_experiment.py --device cuda --n_gaussians 1500 3000
+
+# Variant B: Layer-based Gaussians (RECOMMENDED — each Gaussian = a sound layer)
+python klang/variant_b_experiment.py --device cuda --n_layers 10 20 40
+
+# Compare output with upper bound:
+#   klang/variant_b_*/audio.wav vs klang/diag_2_griffinlim_stft.wav
+#   Check variant_b_*/trajectories.png for layer frequency paths
+```
+
+Variant B represents each sound source as ONE Gaussian layer with continuous
+frequency trajectory and opacity over time. 10-40 layers, not 1000+ blobs.
+
+Results → `klang/variant_b_*/`
 
 ### Track D1: Radiance Raum — Text-to-3D PoCs
 
