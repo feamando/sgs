@@ -176,6 +176,15 @@ python scripts/run_scan_multiseed.py --glove data/glove.6B.300d.txt
 python scripts/run_paper_fixes.py --glove data/glove.6B.300d.txt
 ```
 
+**Results:** Each script saves a JSON file in the repo root (e.g., `ablation_results.json`, `phase1_5_results.json`, `scan_length_full_ablation.json`, `paper_fixes_results.json`).
+
+```powershell
+# Commit Track A results
+git add *.json
+git commit -m "Track A: experiment results from Windows machine"
+git push
+```
+
 ### Track B1: Radiance Planck (100M language model)
 
 ```powershell
@@ -190,6 +199,19 @@ python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Onc
 
 # Interactive mode
 python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
+```
+
+**Results:** Training logs to wandb (if enabled) and saves checkpoints to `checkpoints/planck/`. Generation samples are printed to stdout.
+
+```powershell
+# Save 50 generated samples to file for review
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 > results/planck_samples.txt
+
+# Commit results (not checkpoints — too large)
+mkdir results 2>nul
+git add results/planck_samples.txt
+git commit -m "Track B1: Planck 100M generation samples"
+git push
 ```
 
 ### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
@@ -214,6 +236,19 @@ python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
 python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of artificial intelligence"
 ```
 
+**Results:** Evaluation script saves benchmark scores to `results/hertz_eval.json`. Checkpoints in `checkpoints/hertz/` (gitignored — too large).
+
+```powershell
+# Save evaluation + samples
+mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The" --n-samples 50 > results/hertz_samples.txt
+
+# Commit results
+git add results/hertz_eval.json results/hertz_samples.txt
+git commit -m "Track B1-1: Hertz 1B evaluation + samples"
+git push
+```
+
 ### Track C: Radiance Klang — Audio Gaussian Splatting
 
 ```powershell
@@ -234,7 +269,14 @@ python klang/variant_b_experiment.py --device cuda --n_layers 10 20 40
 Variant B represents each sound source as ONE Gaussian layer with continuous
 frequency trajectory and opacity over time. 10-40 layers, not 1000+ blobs.
 
-Results → `klang/variant_b_*/`
+**Results:** Audio WAVs + plots saved to `klang/variant_b_*/` (reconstruction.png, trajectories.png, opacity.png, audio.wav).
+
+```powershell
+# Commit Klang results (audio + plots)
+git add klang/variant_b_*/ klang/stft_*.wav
+git commit -m "Track C: Klang audio reconstruction results"
+git push
+```
 
 ### Track D1: Radiance Raum — Text-to-3D PoCs
 
@@ -280,6 +322,30 @@ This prints:
 4. Weight matrix analysis of the space transform
 
 Results → `results/raum_c_analysis/`
+
+**Commit all Raum results:**
+
+```powershell
+git add results/raum_c_analysis/ checkpoints/raum_d/*.json
+git commit -m "Track D: Raum text-to-3D PoC results"
+git push
+```
+
+---
+
+## Committing Results — Summary
+
+After running any track, commit the results so they're available across machines:
+
+| Track | What to commit | Command |
+|---|---|---|
+| A (experiments) | `*.json` in repo root | `git add *.json` |
+| B1 (Planck) | `results/planck_samples.txt` | `git add results/` |
+| B1-1 (Hertz) | `results/hertz_*.json`, `results/hertz_samples.txt` | `git add results/` |
+| C (Klang) | `klang/variant_b_*/` (wav + png) | `git add klang/variant_b_*/` |
+| D (Raum) | `results/raum_c_analysis/`, checkpoint JSONs | `git add results/` |
+
+**Do NOT commit:** model checkpoints (`.pt` files >50MB), GloVe data, TinyStories data, FineWeb data. These are in `.gitignore`.
 
 ---
 
