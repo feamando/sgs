@@ -192,6 +192,28 @@ python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Onc
 python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
 ```
 
+### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
+
+```powershell
+# Step 1: Download FineWeb-Edu sample (~50GB, needs disk space + internet)
+python src/tinystories.py --data-dir data/fineweb --dataset fineweb-edu --max-tokens 10B
+
+# Step 2: Train (~3-5 days on RTX 4090, ~12GB VRAM)
+python scripts/train_lm.py \
+  --data-dir data/fineweb \
+  --d-s 256 --d-f 1024 --n-passes 5 --n-heads 8 \
+  --context-len 1024 \
+  --batch-size 16 \
+  --lr 1e-4 \
+  --checkpoint-dir checkpoints/hertz
+
+# Step 3: Evaluate against TinyLlama/Pythia baselines
+python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
+
+# Step 4: Generate text
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of artificial intelligence"
+```
+
 ### Track C: Radiance Klang — Audio Gaussian Splatting
 
 ```powershell
