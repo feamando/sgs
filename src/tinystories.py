@@ -326,17 +326,16 @@ def prepare_data(
 # FineWeb-Edu download (for Hertz 1B)
 # ────────────────────────────────────────────────────────────
 
-FINEWEB_DATASET = "HuggingFaceFW/fineweb-edu-score-2"
-FINEWEB_HF_API = f"https://huggingface.co/api/datasets/{FINEWEB_DATASET}/tree/main/data"
+FINEWEB_DATASET = "HuggingFaceFW/fineweb-edu"
 FINEWEB_HF_RESOLVE = f"https://huggingface.co/datasets/{FINEWEB_DATASET}/resolve/main"
 
 
 def download_fineweb_edu(data_dir: str, max_tokens: int = 10_000_000_000) -> tuple[list[str], list[str]]:
     """
-    Download FineWeb-Edu sample for Hertz training.
+    Download FineWeb-Edu 10BT sample for Hertz training.
 
-    Downloads parquet shards until we have ~max_tokens worth of text.
-    Uses a rough estimate of 4 chars per token to limit download size.
+    Uses pre-made sample/10BT/ from HuggingFace (~10B tokens in parquet shards).
+    Downloads shards until we have ~max_tokens worth of text.
     """
     import urllib.request
     import ssl
@@ -345,14 +344,17 @@ def download_fineweb_edu(data_dir: str, max_tokens: int = 10_000_000_000) -> tup
     raw_dir = data_dir / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
 
-    # Get file listing
-    print(f"Fetching FineWeb-Edu file list...")
+    # Use the pre-made 10BT sample
+    sample_path = "sample/10BT"
+    api_url = f"https://huggingface.co/api/datasets/{FINEWEB_DATASET}/tree/main/{sample_path}"
+
+    print(f"Fetching FineWeb-Edu file list from {sample_path}...")
     for ctx in [None, ssl.create_default_context()]:
         if ctx is not None:
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
         try:
-            req = urllib.request.Request(FINEWEB_HF_API, headers={"User-Agent": "sgs/1.0"})
+            req = urllib.request.Request(api_url, headers={"User-Agent": "sgs/1.0"})
             resp = urllib.request.urlopen(req, context=ctx)
             files = json.loads(resp.read())
             break
