@@ -25,6 +25,7 @@ def parse_args():
     p.add_argument("--max-new", type=int, default=200, help="Max new tokens to generate")
     p.add_argument("--temperature", type=float, default=0.8)
     p.add_argument("--top-k", type=int, default=50)
+    p.add_argument("--n-samples", type=int, default=1, help="Number of samples to generate")
     p.add_argument("--interactive", action="store_true", help="Interactive mode")
     p.add_argument("--device", default="auto")
 
@@ -155,11 +156,17 @@ def main():
             print(f"\n{text}\n")
     else:
         print(f"\nPrompt: {args.prompt}")
-        print(f"Config: temperature={args.temperature}, top_k={args.top_k}, max_new={args.max_new}\n")
-        text = generate_text(
-            model, sp, args.prompt, args.max_new, args.temperature, args.top_k, device
-        )
-        print(text)
+        print(f"Config: temperature={args.temperature}, top_k={args.top_k}, max_new={args.max_new}, n_samples={args.n_samples}\n")
+
+        for i in range(args.n_samples):
+            text = generate_text(
+                model, sp, args.prompt, args.max_new, args.temperature, args.top_k, device
+            )
+            if args.n_samples > 1:
+                print(f"--- Sample {i+1}/{args.n_samples} ---")
+            print(text)
+            if args.n_samples > 1:
+                print()
 
 
 if __name__ == "__main__":
