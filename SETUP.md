@@ -219,24 +219,19 @@ git push
 ### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
 
 ```powershell
-# Step 1: Download + tokenize FineWeb-Edu (~50GB download, takes a while)
-python src/tinystories.py --dataset fineweb-edu --max-tokens 10B
+# All-in-one: download data + train (kick off and walk away)
+python scripts/train_hertz.py
 
-# Step 2: Train (~3-5 days on RTX 4090, ~10GB VRAM)
-# d_s=256, d_f=3700, 5 passes, 8 heads → 1.03B params
-python scripts/train_lm.py \
-  --data-dir data/fineweb \
-  --d-s 256 --d-f 3700 --n-passes 5 --n-heads 8 \
-  --context-len 1024 \
-  --batch-size 8 \
-  --lr 1e-4 \
-  --checkpoint-dir checkpoints/hertz
+# Or with custom settings:
+python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick test run
+python scripts/train_hertz.py --wandb                        # with logging
+python scripts/train_hertz.py --resume checkpoints/hertz/best.pt  # resume
 
-# Step 3: Evaluate against TinyLlama/Pythia baselines
+# Evaluate against TinyLlama/Pythia baselines
 python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
 
-# Step 4: Generate text
-python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of artificial intelligence"
+# Generate text
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --d-s 256 --d-f 3700 --n-passes 5 --n-heads 8 --context-len 1024 --prompt "The future of artificial intelligence"
 ```
 
 **Results:** Evaluation script saves benchmark scores to `results/hertz_eval.json`. Checkpoints in `checkpoints/hertz/` (gitignored — too large).
