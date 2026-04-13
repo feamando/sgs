@@ -207,10 +207,10 @@ python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
 
 ```powershell
 # Save 50 generated samples to file for review
-python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 > results/planck_samples.txt
-
-# Commit results (not checkpoints — too large)
 mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck_samples.txt
+
+# Commit results (not checkpoints — too large for git)
 git add results/planck_samples.txt
 git commit -m "Track B1: Planck 100M generation samples"
 git push
@@ -219,8 +219,8 @@ git push
 ### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
 
 ```powershell
-# Step 1: Download FineWeb-Edu sample (~50GB, needs disk space + internet)
-python src/tinystories.py --data-dir data/fineweb --dataset fineweb-edu --max-tokens 10B
+# Step 1: Download + tokenize FineWeb-Edu (~50GB download, takes a while)
+python src/tinystories.py --dataset fineweb-edu --max-tokens 10B
 
 # Step 2: Train (~3-5 days on RTX 4090, ~10GB VRAM)
 # d_s=256, d_f=3700, 5 passes, 8 heads → 1.03B params
