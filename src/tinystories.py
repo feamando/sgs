@@ -230,19 +230,27 @@ class TinyStoriesDataset(Dataset):
     """
     Memory-mapped token dataset for causal LM training.
 
-    Returns random (context_length) windows from the tokenized corpus.
+    Uses NON-OVERLAPPING chunks so 1 epoch = 1 pass over all tokens.
     Each sample: (x, y) where y = x shifted right by 1.
+
+    With 450M tokens and context_length=512:
+      n_chunks = 450M / 512 ≈ 879K
+      1 epoch at batch_size=32 ≈ 27.5K steps
+      3 epochs ≈ 82K steps (~2 hours on RTX 4090)
     """
 
     def __init__(self, bin_file: str, context_length: int = 512):
         self.data = np.memmap(bin_file, dtype=np.uint16, mode="r")
         self.context_length = context_length
+        # Non-overlapping chunks
+        self.n_chunks = len(self.data) // (context_length + 1)
 
     def __len__(self):
-        return max(0, len(self.data) - self.context_length)
+        return self.n_chunks
 
     def __getitem__(self, idx):
-        chunk = self.data[idx : idx + self.context_length + 1].astype(np.int64)
+        start = idx * (self.context_length + 1)
+        chunk = self.data[start : start + self.context_length + 1].astype(np.int64)
         x = torch.from_numpy(chunk[:-1].copy())
         y = torch.from_numpy(chunk[1:].copy())
         return x, y
