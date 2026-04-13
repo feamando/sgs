@@ -222,12 +222,13 @@ git push
 # Step 1: Download FineWeb-Edu sample (~50GB, needs disk space + internet)
 python src/tinystories.py --data-dir data/fineweb --dataset fineweb-edu --max-tokens 10B
 
-# Step 2: Train (~3-5 days on RTX 4090, ~12GB VRAM)
+# Step 2: Train (~3-5 days on RTX 4090, ~10GB VRAM)
+# d_s=256, d_f=3700, 5 passes, 8 heads → 1.03B params
 python scripts/train_lm.py \
   --data-dir data/fineweb \
-  --d-s 256 --d-f 1024 --n-passes 5 --n-heads 8 \
+  --d-s 256 --d-f 3700 --n-passes 5 --n-heads 8 \
   --context-len 1024 \
-  --batch-size 16 \
+  --batch-size 8 \
   --lr 1e-4 \
   --checkpoint-dir checkpoints/hertz
 
