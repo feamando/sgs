@@ -322,12 +322,159 @@ def prepare_data(
     return result
 
 
+# ────────────────────────────────────────────────────────────
+# FineWeb-Edu download (for Hertz 1B)
+# ────────────────────────────────────────────────────────────
+
+FINEWEB_DATASET = "HuggingFaceFW/fineweb-edu-score-2"
+FINEWEB_HF_API = f"https://huggingface.co/api/datasets/{FINEWEB_DATASET}/tree/main/data"
+FINEWEB_HF_RESOLVE = f"https://huggingface.co/datasets/{FINEWEB_DATASET}/resolve/main"
+
+
+def download_fineweb_edu(data_dir: str, max_tokens: int = 10_000_000_000) -> tuple[list[str], list[str]]:
+    """
+    Download FineWeb-Edu sample for Hertz training.
+
+    Downloads parquet shards until we have ~max_tokens worth of text.
+    Uses a rough estimate of 4 chars per token to limit download size.
+    """
+    import urllib.request
+    import ssl
+
+    data_dir = Path(data_dir)
+    raw_dir = data_dir / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+
+    # Get file listing
+    print(f"Fetching FineWeb-Edu file list...")
+    for ctx in [None, ssl.create_default_context()]:
+        if ctx is not None:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        try:
+            req = urllib.request.Request(FINEWEB_HF_API, headers={"User-Agent": "sgs/1.0"})
+            resp = urllib.request.urlopen(req, context=ctx)
+            files = json.loads(resp.read())
+            break
+        except (ssl.SSLError, urllib.error.URLError):
+            if ctx is not None:
+                raise
+            continue
+
+    parquet_files = sorted([
+        f["path"] for f in files
+        if isinstance(f, dict) and f.get("path", "").endswith(".parquet")
+    ])
+    print(f"  Found {len(parquet_files)} parquet shards")
+
+    # Download shards until we have enough text
+    # Rough estimate: 4 chars per token, so max_tokens * 4 chars = target char count
+    target_chars = max_tokens * 4
+    total_chars = 0
+    all_texts = []
+
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError("pandas is required: pip install pandas pyarrow")
+
+    for i, pf in enumerate(parquet_files):
+        if total_chars >= target_chars:
+            break
+
+        fname = os.path.basename(pf)
+        local = raw_dir / fname
+
+        if not local.exists():
+            url = f"{FINEWEB_HF_RESOLVE}/{pf}"
+            print(f"  Downloading shard {i+1}: {fname}...")
+            _download_file(url, str(local), desc=fname)
+        else:
+            print(f"  Already have {fname}")
+
+        # Read and count
+        df = pd.read_parquet(local)
+        texts = df["text"].dropna().tolist()
+        shard_chars = sum(len(t) for t in texts)
+        total_chars += shard_chars
+        all_texts.extend(texts)
+
+        est_tokens = total_chars // 4
+        print(f"    {len(texts):,} texts, ~{est_tokens/1e9:.1f}B tokens so far "
+              f"({total_chars/1e9:.1f}B chars)")
+
+    print(f"\n  Total: {len(all_texts):,} texts, ~{total_chars // 4 / 1e9:.1f}B estimated tokens")
+
+    # Split 99/1 train/val
+    split_idx = int(len(all_texts) * 0.99)
+    train_texts = all_texts[:split_idx]
+    val_texts = all_texts[split_idx:]
+    print(f"  Train: {len(train_texts):,}, Val: {len(val_texts):,}")
+
+    return train_texts, val_texts
+
+
+def prepare_fineweb(
+    data_dir: str = "data/fineweb",
+    vocab_size: int = 32000,
+    context_length: int = 1024,
+    max_tokens: int = 10_000_000_000,
+) -> dict:
+    """
+    End-to-end pipeline for FineWeb-Edu: download → tokenize → binary.
+    """
+    data_dir = Path(data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Download
+    train_texts, val_texts = download_fineweb_edu(str(data_dir), max_tokens)
+
+    # 2. Train tokenizer
+    tok_prefix = str(data_dir / "tokenizer")
+    sp = train_tokenizer(train_texts, tok_prefix, vocab_size)
+
+    # 3. Tokenize to binary
+    train_bin = str(data_dir / "train.bin")
+    val_bin = str(data_dir / "val.bin")
+    n_train = tokenize_to_binary(train_texts, sp, train_bin)
+    n_val = tokenize_to_binary(val_texts, sp, val_bin)
+
+    del train_texts, val_texts
+
+    result = {
+        "train_bin": train_bin,
+        "val_bin": val_bin,
+        "tokenizer": tok_prefix + ".model",
+        "n_train_tokens": n_train,
+        "n_val_tokens": n_val,
+        "vocab_size": sp.get_piece_size(),
+    }
+    print(f"\nData ready:")
+    for k, v in result.items():
+        print(f"  {k}: {v}")
+    return result
+
+
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Prepare TinyStories data")
+    parser = argparse.ArgumentParser(description="Prepare training data")
     parser.add_argument("--data-dir", default="data/tinystories")
     parser.add_argument("--vocab-size", type=int, default=32000)
+    parser.add_argument("--dataset", default="tinystories",
+                        choices=["tinystories", "fineweb-edu"],
+                        help="Which dataset to download and prepare")
+    parser.add_argument("--max-tokens", default="10B",
+                        help="Max tokens for FineWeb-Edu (e.g., 1B, 5B, 10B)")
     args = parser.parse_args()
 
-    prepare_data(args.data_dir, args.vocab_size)
+    # Parse max-tokens (supports 1B, 5B, 10B notation)
+    max_tok_str = args.max_tokens.upper().replace("B", "000000000").replace("M", "000000")
+    max_tokens = int(max_tok_str)
+
+    if args.dataset == "tinystories":
+        prepare_data(args.data_dir, args.vocab_size)
+    elif args.dataset == "fineweb-edu":
+        if args.data_dir == "data/tinystories":
+            args.data_dir = "data/fineweb"  # sensible default
+        prepare_fineweb(args.data_dir, args.vocab_size, max_tokens=max_tokens)
