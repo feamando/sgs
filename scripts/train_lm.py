@@ -36,7 +36,7 @@ def parse_args():
 
     # Architecture
     p.add_argument("--d-s", type=int, default=128)
-    p.add_argument("--d-f", type=int, default=512)
+    p.add_argument("--d-f", type=int, default=1000)
     p.add_argument("--n-passes", type=int, default=3)
     p.add_argument("--n-heads", type=int, default=4)
     p.add_argument("--context-len", type=int, default=512)

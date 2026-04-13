@@ -191,7 +191,9 @@ git push
 # Step 1: Download + tokenize TinyStories (~15 min, needs internet)
 python src/tinystories.py --data-dir data/tinystories
 
-# Step 2: Train (~6-12 hours on RTX 4090)
+# Step 2: Train from scratch (~2-3 hours on RTX 4090)
+# Default: d_s=128, d_f=1000, 3 passes, 4 heads → 100.9M params
+# 3 epochs × 27.5K steps = 82K steps total
 python scripts/train_lm.py --data-dir data/tinystories
 
 # Step 3: Generate text

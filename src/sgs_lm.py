@@ -31,7 +31,7 @@ class SGSLanguageModel(nn.Module):
         self,
         vocab_size: int = 32000,
         d_s: int = 128,
-        d_f: int = 512,
+        d_f: int = 1000,      # ~100M params with default settings
         n_passes: int = 3,
         n_heads: int = 4,
         max_len: int = 512,
