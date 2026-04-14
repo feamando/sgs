@@ -201,7 +201,7 @@ def main(args):
     d_s = 64
 
     # Load GloVe
-    word2idx, vectors, freqs, words = load_glove(args.glove, vocab_size=10000)
+    word2idx, vectors, freqs, words = load_glove(args.glove, vocab_size=50000)
 
     # Build vocab (zero-shot — no training)
     vocab = SemanticGaussianVocab(vocab_size=len(words), d_s=d_s, d_f=300)
