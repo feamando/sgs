@@ -108,6 +108,23 @@
 
 ---
 
+### KNOWLEDGE SPLATTING (NEW)
+
+#### B2: Hierarchical SGS — Built-in Knowledge Retrieval
+| | |
+|---|---|
+| **Status** | Whitepaper draft complete (`docs/whitepaper/hierarchical_sgs.md`) |
+| **What** | Multi-scale knowledge rendering: pre-computed "knowledge blobs" as Gaussians in the same splatting space as words. Two-pass rendering: blobs set context, words add specifics. Built-in RAG through the rendering equation. |
+| **Core insight** | In 3DGS, background Gaussians render context, foreground adds detail. Same for language: knowledge blobs are the "background" of meaning. |
+| **B2-Planck 1.1** | 100M + 10K blobs from TinyStories. Validate architecture on story coherence. ~1 week after Planck 1.0 confirmed. |
+| **B2-Hertz 1.1** | 1B + 100K multi-resolution blobs from FineWeb-Edu. Test factual accuracy + dynamic knowledge addition. ~2 weeks after Hertz 1.0 training. |
+| **B2-Code** | Exploratory: code template blobs on The Stack subset. Deferred until B2-Planck validates. |
+| **Key question** | Does unified retrieval+generation (same kernel, same compositing) outperform bolted-on RAG? |
+| **Orthogonal challenged** | 5 challenges documented in whitepaper. Strongest risk: blob dominance. Mitigated by T_max cap. |
+| **Depends on** | Planck 1.0 ✓, Hertz 1.0 (training) |
+
+---
+
 ### TEXT-TO-3D (NEW)
 
 #### D1: Radiance Raum — Text-to-3D Gaussian Splatting
