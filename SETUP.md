@@ -375,6 +375,7 @@ After running any track, commit the results so they're available across machines
 | A (experiments) | `*.json` in repo root | `git add *.json` |
 | B1 (Planck) | `results/planck_samples.txt` | `git add results/` |
 | B1-1 (Hertz) | `results/hertz_*.json`, `results/hertz_samples.txt` | `git add results/` |
+| B2 (Planck 1.1) | `results/planck11_samples.txt` | `git add results/` |
 | C (Klang) | `klang/variant_b_*/` (wav + png) | `git add klang/variant_b_*/` |
 | D (Raum) | `results/raum_c_analysis/`, checkpoint JSONs | `git add results/` |
 
@@ -468,4 +469,109 @@ Templates: ['sphere', 'cube', 'cylinder', 'cone', 'plane', 'torus']
 Generated 10 scenes, first: "a yellow cube behind a green sphere"
 RaumCompositional: 50,033 params
 All OK
+```
+
+---
+
+## 9. Track B2: Planck 1.1 — Knowledge Splatting Experiments
+
+> **Run this AFTER Planck 1.0, Hertz 1.0, Klang, and Raum experiments.**
+> Requires: `checkpoints/planck/best.pt` (Planck 1.0 trained model)
+
+### Background
+
+Planck 1.1 extends the SGS architecture with **knowledge blobs** — pre-computed Gaussian representations of common story patterns from TinyStories. The model renders in two passes:
+1. **Blob pass**: retrieve and render the most relevant knowledge blobs (consuming transmittance)
+2. **Word pass**: render word-level tokens in the remaining transmittance capacity
+
+Mathematical foundation formally verified in Lean 4 (H1, H2, H4). Whitepaper: `docs/whitepaper/hierarchical_sgs.md`
+
+### Step 1: Build Knowledge Blobs
+
+Cluster TinyStories into 50K "story archetype" blobs using Planck 1.0's encoder:
+
+```powershell
+python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 50000
+```
+
+This creates `data/blobs/tinystories/blobs.pt` (~60MB, 50K blobs × (d_s + d_s + 1 + d_f)).
+
+To inspect blob quality:
+```powershell
+python -c "
+import torch, json
+d = torch.load('data/blobs/tinystories/blobs.pt', weights_only=False)
+m = json.load(open('data/blobs/tinystories/meta.json'))
+print(f'Blobs: {d[\"mu\"].shape[0]:,}')
+print(f'Non-empty: {m[\"non_empty_clusters\"]:,}')
+print(f'Chunks processed: {m[\"n_chunks_processed\"]:,}')
+print(f'Mu range: [{d[\"mu\"].min():.3f}, {d[\"mu\"].max():.3f}]')
+print(f'Var range: [{d[\"log_var\"].min():.3f}, {d[\"log_var\"].max():.3f}]')
+"
+```
+
+### Step 2: Train Planck 1.1 (Recommended: Two-Stage)
+
+**Stage A — Blob warmup (base frozen, ~30 min):**
+```powershell
+python scripts/train_planck11.py --freeze-base --epochs 1
+```
+
+**Stage B — Joint training (everything unfrozen, ~2-3 hours):**
+```powershell
+python scripts/train_planck11.py --resume checkpoints/planck11/epoch_1.pt --epochs 3
+```
+
+**Or all-in-one (builds blobs if needed, then trains 3 epochs):**
+```powershell
+python scripts/train_planck11.py
+```
+
+### Step 3: Ablations
+
+Run these to isolate the blob contribution:
+
+```powershell
+# Ablation 1: Blobs disabled (should match Planck 1.0 baseline)
+python scripts/train_planck11.py --t-max 0.0 --save-dir checkpoints/planck11_noablob --epochs 3
+
+# Ablation 2: Fewer blobs
+python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 5000 --output data/blobs/tinystories_5k
+python scripts/train_planck11.py --blob-dir data/blobs/tinystories_5k --n-blobs 5000 --save-dir checkpoints/planck11_5k
+
+# Ablation 3: Higher blob budget
+python scripts/train_planck11.py --t-max 0.5 --save-dir checkpoints/planck11_t50
+
+# Ablation 4: More retrieval
+python scripts/train_planck11.py --blob-k 16 --save-dir checkpoints/planck11_k16
+```
+
+### Step 4: Evaluate
+
+```powershell
+# Generate 50 samples from Planck 1.1
+mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck11_samples.txt
+
+# Compare against Planck 1.0 baseline
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck10_baseline_samples.txt
+```
+
+### Step 5: Hard Gates (Experiment Pass/Fail)
+
+Check these before declaring success:
+
+| Gate | How to check | Pass condition |
+|------|-------------|----------------|
+| Base generation intact | Run with `--t-max 0.0`, compare val loss to Planck 1.0 | Val loss within ±0.05 of Planck 1.0 |
+| Blobs are being used | Check blob utilization in training logs | Blob effective weight > 5% |
+| Perplexity improves | Compare Planck 1.1 val loss vs Planck 1.0 | Val loss lower than Planck 1.0 |
+| Repetition decreases | Count 4-gram repetitions in 50 samples | Fewer repeated 4-grams than Planck 1.0 |
+
+### Step 6: Commit Results
+
+```powershell
+git add results/planck11_samples.txt results/planck10_baseline_samples.txt
+git commit -m "Track B2: Planck 1.1 (H-SGS Knowledge Splatting) results"
+git push
 ```
