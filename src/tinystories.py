@@ -207,16 +207,20 @@ def tokenize_to_binary(
     print(f"Tokenizing {len(texts):,} texts → {output_file}")
     bos, eos = sp.bos_id(), sp.eos_id()
 
-    # Write incrementally to avoid huge list in memory
+    # Batch tokenize for speed (sentencepiece supports batch encoding)
     total = 0
+    batch_size = 10000
     with open(output_file, "wb") as f:
-        for i, text in enumerate(texts):
-            ids = [bos] + sp.encode(text) + [eos]
-            arr = np.array(ids, dtype=np.uint16)
-            f.write(arr.tobytes())
-            total += len(ids)
-            if (i + 1) % 500_000 == 0:
-                print(f"  {i+1:,}/{len(texts):,} ({total:,} tokens)")
+        for start in range(0, len(texts), batch_size):
+            batch = texts[start:start + batch_size]
+            encoded = sp.encode(batch)  # batch encode — much faster
+            for ids in encoded:
+                ids = [bos] + ids + [eos]
+                arr = np.array(ids, dtype=np.uint16)
+                f.write(arr.tobytes())
+                total += len(ids)
+            if (start + batch_size) % 500_000 < batch_size:
+                print(f"  {min(start + batch_size, len(texts)):,}/{len(texts):,} ({total:,} tokens)")
 
     print(f"  Done: {total:,} tokens ({total*2/(1024**2):.0f} MB)")
     return total

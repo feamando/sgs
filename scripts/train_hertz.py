@@ -35,23 +35,28 @@ def parse_args():
     # Data
     p.add_argument("--data-dir", default="data/fineweb")
     p.add_argument("--vocab-size", type=int, default=32000)
-    p.add_argument("--max-tokens", default="10B",
-                   help="Max tokens to download (e.g., 1B, 5B, 10B)")
+    p.add_argument("--max-tokens", default="2B",
+                   help="Max tokens to download (2B default — feasible on single GPU)")
 
     # Architecture — Hertz 1B defaults
     p.add_argument("--d-s", type=int, default=256)
     p.add_argument("--d-f", type=int, default=3700)
-    p.add_argument("--n-passes", type=int, default=5)
+    p.add_argument("--n-passes", type=int, default=3,
+                   help="Rendering passes (3 not 5 — 40%% faster, fits VRAM)")
     p.add_argument("--n-heads", type=int, default=8)
-    p.add_argument("--context-len", type=int, default=1024)
+    p.add_argument("--context-len", type=int, default=512,
+                   help="Context length (512 not 1024 — 4x smaller kernel matrices)")
     p.add_argument("--ffn-mult", type=int, default=4)
     p.add_argument("--dropout", type=float, default=0.0)
+    p.add_argument("--grad-checkpoint", action="store_true", default=True,
+                   help="Gradient checkpointing (saves ~40%% VRAM, trades for compute)")
+    p.add_argument("--no-grad-checkpoint", dest="grad_checkpoint", action="store_false")
 
     # Training
-    p.add_argument("--batch-size", type=int, default=8,
-                   help="Per-GPU batch size (8 fits 24GB with 1B params)")
-    p.add_argument("--grad-accum", type=int, default=8,
-                   help="Gradient accumulation steps (effective batch = batch-size * grad-accum)")
+    p.add_argument("--batch-size", type=int, default=2,
+                   help="Per-GPU micro-batch (2 for 1B on 24GB VRAM)")
+    p.add_argument("--grad-accum", type=int, default=32,
+                   help="Gradient accumulation steps (effective batch = 2 * 32 = 64)")
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--weight-decay", type=float, default=0.1)
     p.add_argument("--epochs", type=int, default=1,
@@ -187,7 +192,10 @@ def main():
         max_len=args.context_len,
         ffn_mult=args.ffn_mult,
         dropout=args.dropout,
+        use_checkpoint=args.grad_checkpoint,
     ).to(device)
+    if args.grad_checkpoint:
+        print("  Gradient checkpointing: ON (saves VRAM, recomputes during backward)")
 
     n_params = model.count_parameters()
     print(f"  Parameters: {n_params:,} ({n_params/1e6:.1f}M / {n_params/1e9:.2f}B)")

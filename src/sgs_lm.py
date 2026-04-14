@@ -16,6 +16,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint as grad_checkpoint
 
 
 class SGSLanguageModel(nn.Module):
@@ -38,6 +39,7 @@ class SGSLanguageModel(nn.Module):
         tau_init: float = 128.0,
         ffn_mult: int = 4,
         dropout: float = 0.0,
+        use_checkpoint: bool = False,
     ):
         super().__init__()
         self.vocab_size = vocab_size
@@ -46,6 +48,7 @@ class SGSLanguageModel(nn.Module):
         self.n_passes = n_passes
         self.n_heads = n_heads
         self.max_len = max_len
+        self.use_checkpoint = use_checkpoint
 
         # ── Gaussian vocabulary (learned from scratch) ──
         self.tok_mu = nn.Embedding(vocab_size, d_s)
@@ -216,6 +219,28 @@ class SGSLanguageModel(nn.Module):
         meaning = torch.bmm(weights, features)                 # [B, L, d_f]
         return meaning
 
+    def _render_pass(
+        self,
+        mu: torch.Tensor,
+        log_var: torch.Tensor,
+        alpha: torch.Tensor,
+        features: torch.Tensor,
+        causal_mask: torch.Tensor,
+    ) -> torch.Tensor:
+        """Single rendering pass: all heads → combine. Checkpointable."""
+        head_meanings = []
+        for h in range(self.n_heads):
+            q_h = self.query_proj[h](mu)                   # [B, L, d_s]
+            K_h = self._pairwise_kernel(q_h, mu, log_var)  # [B, L, L]
+            m_h = self._causal_render(
+                features, alpha, K_h, causal_mask
+            )                                               # [B, L, d_f]
+            head_meanings.append(m_h)
+
+        return self.head_proj(
+            torch.cat(head_meanings, dim=-1)
+        )                                                   # [B, L, d_f]
+
     # ────────────────────────────────────────────────────────────
     # Forward
     # ────────────────────────────────────────────────────────────
@@ -251,20 +276,15 @@ class SGSLanguageModel(nn.Module):
         # ── Multi-pass rendering ──
         meaning = None
         for p in range(self.n_passes):
-            # Heads processed sequentially to limit VRAM
-            head_meanings = []
-            for h in range(self.n_heads):
-                q_h = self.query_proj[h](mu)                   # [B, L, d_s]
-                K_h = self._pairwise_kernel(q_h, mu, log_var)  # [B, L, L]
-                m_h = self._causal_render(
-                    features, alpha, K_h, causal_mask
-                )                                               # [B, L, d_f]
-                head_meanings.append(m_h)
-
-            # Combine heads
-            meaning = self.head_proj(
-                torch.cat(head_meanings, dim=-1)
-            )                                                   # [B, L, d_f]
+            if self.use_checkpoint and self.training:
+                meaning = grad_checkpoint(
+                    self._render_pass, mu, log_var, alpha, features,
+                    causal_mask, use_reentrant=False,
+                )
+            else:
+                meaning = self._render_pass(
+                    mu, log_var, alpha, features, causal_mask,
+                )
             meaning = self.dropout(meaning)
 
             # Update Gaussian params for next pass

@@ -219,13 +219,15 @@ git push
 ### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
 
 ```powershell
-# All-in-one: download data + train (kick off and walk away)
+# All-in-one: download 2B tokens + train (~3-5 days on RTX 4090)
+# Defaults: batch=2, grad_accum=32, context=512, 3 passes, gradient checkpointing ON
 python scripts/train_hertz.py
 
 # Or with custom settings:
-python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick test run
+python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick test (~1 day)
 python scripts/train_hertz.py --wandb                        # with logging
 python scripts/train_hertz.py --resume checkpoints/hertz/best.pt  # resume
+python scripts/train_hertz.py --no-grad-checkpoint --batch-size 1  # if still OOM
 
 # Evaluate against TinyLlama/Pythia baselines
 python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
