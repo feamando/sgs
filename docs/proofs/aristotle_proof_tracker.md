@@ -25,9 +25,9 @@
 
 | # | Claim | Priority | Aristotle ID | Status |
 |---|---|---|---|---|
-| 14 | **H1** Two-pass partition equivalence | P1 (CRITICAL) | `d760d6d8-f53a-435a-95ee-ded40f844d9b` | QUEUED |
-| 15 | **H2** Expressiveness under T_max cap | P2 (CRITICAL) | `d3ba9b30-d03e-45b2-a3a0-d5a3258e9048` | QUEUED |
-| 16 | **H4** Total weight is permutation-invariant | P3 (HIGH) | `6fa7e757-9065-41e7-80a0-dcf746bd6e69` | QUEUED |
+| 14 | **H1** Two-pass partition equivalence | P1 (CRITICAL) | `d760d6d8-f53a-435a-95ee-ded40f844d9b` | COMPLETE |
+| 15 | **H2** Expressiveness under T_max cap | P2 (CRITICAL) | `d3ba9b30-d03e-45b2-a3a0-d5a3258e9048` | IN_PROGRESS |
+| 16 | **H4** Total weight is permutation-invariant | P3 (HIGH) | `6fa7e757-9065-41e7-80a0-dcf746bd6e69` | COMPLETE |
 
 ## Commands
 
