@@ -248,7 +248,143 @@ Without this, an overconfident blob store could consume all transmittance, makin
 
 ---
 
-## 4. Orthogonal Challenge
+## 4. Mathematical Foundations and Proof Obligations
+
+The Hierarchical SGS architecture makes several mathematical claims that require formal verification. Some follow from existing proofs (Claim 3.5: Softmax ⊂ Alpha-Compositing); others are new. We enumerate each claim, its status, and whether Lean 4 proofing is needed.
+
+### 4.1 Claim H1: Two-Pass Equivalence (Partition Rendering)
+
+**Statement:** Partitioning a sequence of Gaussians G = B ∪ W (blobs B, words W) and rendering B first then W produces identical output to rendering the concatenation [B; W] as a single sequence under the standard rendering equation.
+
+```
+Formally: Let G = (g_1, ..., g_k, g_{k+1}, ..., g_{k+n}) where g_1..g_k ∈ B and g_{k+1}..g_{k+n} ∈ W.
+
+Then: M_single(q, G) = M_blob(q, B) + T_residual · M_word(q, W)
+
+where T_residual = Π_{j=1}^{k} (1 - α_j · K_j)
+```
+
+**Status:** Should follow from the associativity of the transmittance product. The transmittance at position k+i in the single sequence decomposes as:
+
+```
+T_{k+i} = Π_{j<k+i} (1 - α_j · K_j)
+         = [Π_{j<k} (1 - α_j · K_j)] · [Π_{k≤j<k+i} (1 - α_j · K_j)]
+         = T_residual · T_i^{word}
+```
+
+This is a standard telescoping product identity.
+
+**Lean 4 proof:** Required. Straightforward — extend `claim_3_1_weights_sum_bounded.lean` and `claim_3_2_monotonic_transmittance.lean` with a partition lemma. Estimated effort: 1 day.
+
+**Risk if false:** Architecture is fundamentally flawed. (Very unlikely — this is basic algebra.)
+
+### 4.2 Claim H2: Expressiveness Preservation Under T_max Cap
+
+**Statement:** With a transmittance budget cap T_max ∈ (0, 1), the word-level rendering pass still satisfies Softmax ⊂ Alpha-Compositing within its available transmittance.
+
+```
+Formally: For any softmax weight vector w over n words with Σ wᵢ = 1, there exist
+alpha-compositing parameters (α₁, ..., αₙ) such that the word-level weights under
+initial transmittance T₀ = (1 - T_max) satisfy:
+
+  w'ᵢ = T₀ · αᵢ · Π_{j<i}(1 - αⱼ) = T₀ · wᵢ
+
+i.e., the relative weights are identical; only the absolute scale changes.
+```
+
+**Status:** The existing proof (Claim 3.5) constructs alpha values aᵢ = wᵢ / Σ_{j≥i} wⱼ to reproduce any softmax vector. This construction doesn't depend on the initial transmittance — the relative weights are preserved regardless of T₀. The proof should extend directly.
+
+**Lean 4 proof:** Required. Extend `claim_3_5_softmax_subset_alpha.lean` with a scaling lemma. Estimated effort: 0.5 days.
+
+**Risk if false:** The T_max cap could inadvertently make the word-level pass less expressive than softmax. (Unlikely — scaling preserves relative weights.)
+
+### 4.3 Claim H3: Gaussian Sufficiency for Cluster Representations
+
+**Statement:** If chunk meanings within a cluster are drawn from a distribution D, then representing the cluster as a single Gaussian N(μ_c, Σ_c) where μ_c = E[D] and Σ_c = Var[D] is the maximum-likelihood estimate under a Gaussian assumption.
+
+**Status:** This is a standard result from statistics (MLE for normal distributions). However, the ASSUMPTION that chunk meanings are approximately Gaussian within each cluster is non-trivial. If a cluster is multi-modal (contains two sub-topics), the Gaussian centroid falls between them, and the kernel K(q, μ_c, Σ_c) will be inaccurate for both sub-topics.
+
+**Lean 4 proof:** NOT required — this is a statistical assumption, not a mathematical theorem. It cannot be proven; it must be validated empirically.
+
+**Empirical validation required:**
+- After clustering, measure the kurtosis and skewness of each cluster.
+- Clusters with high kurtosis (> 5) or bimodality should be split further.
+- Report distribution of cluster quality metrics in the experiment.
+
+**Risk if false:** Blob retrieval accuracy degrades for multi-modal clusters. Mitigation: use more clusters (finer granularity) or Gaussian Mixture Models per "blob" (but this increases complexity).
+
+### 4.4 Claim H4: Blob Ordering by K·α Maximizes Information Contribution
+
+**Statement:** Ordering blobs by descending K·α (effective opacity) before rendering maximizes the total information contributed by the blob pass, measured as the sum of effective weights.
+
+```
+Formally: For blobs (α₁·K₁, ..., αₖ·Kₖ), the sum of effective weights
+  W_total = Σᵢ (αᵢ·Kᵢ) · Π_{j<i}(1 - αⱼ·Kⱼ)
+is maximized when blobs are sorted in descending order of αᵢ·Kᵢ.
+```
+
+**Status:** This is **NOT obviously true** and may in fact be false.
+
+Counter-example sketch: Consider two blobs with effective opacities 0.9 and 0.5.
+- Order [0.9, 0.5]: W = 0.9 + 0.5 × 0.1 = 0.95
+- Order [0.5, 0.9]: W = 0.5 + 0.9 × 0.5 = 0.95
+
+In this case, total weight is identical (both sum to 0.95). For two elements, the total weight W = 1 - Π(1 - aᵢ) is independent of ordering — it's a product, hence commutative.
+
+However, the DISTRIBUTION of weights across blobs changes with ordering:
+- Order [0.9, 0.5]: blob 1 gets weight 0.9, blob 2 gets weight 0.05
+- Order [0.5, 0.9]: blob 1 gets weight 0.5, blob 2 gets weight 0.45
+
+The question is: which distribution is better for generation? Descending order concentrates weight on the most relevant blob (greedy). Ascending order distributes weight more evenly.
+
+**Lean 4 proof:** Required — but to prove what? The total weight claim is false (ordering doesn't affect total weight). What we actually want is: does ordering by K·α produce the best GENERATION quality? This is an empirical question, not a mathematical one.
+
+**Revised claim:** The total rendering weight Σ wᵢ = 1 - Π(1 - αᵢ·Kᵢ) is ORDER-INDEPENDENT. Ordering only affects the distribution of weight across blobs. Descending order by K·α is a heuristic that concentrates weight on the most relevant blob.
+
+**Lean 4 proof required:** Prove that W_total = 1 - Π(1 - aᵢ) is permutation-invariant. Estimated effort: 0.5 days. (This follows from commutativity of multiplication.)
+
+**Experimental validation required:** Compare descending K·α ordering vs. random ordering vs. learned ordering. If ordering doesn't matter (because W_total is invariant), the simpler random ordering suffices.
+
+### 4.5 Claim H5: Dynamic Blob Addition Preserves Rendering Properties
+
+**Statement:** Adding a new blob to an existing blob store at inference time does not violate any rendering equation guarantees (weight boundedness, transmittance monotonicity, etc.).
+
+**Status:** All existing proofs (Claims 3.1, 3.2, 5.1) are parameterized by n (number of elements). Adding a blob increases n by 1. The proofs hold for arbitrary n, so they hold for n+1.
+
+**Lean 4 proof:** NOT required — covered by existing proofs which are universally quantified over n.
+
+**Risk if false:** None — this is a direct consequence of the existing proof structure.
+
+### 4.6 Summary of Proof Obligations
+
+| Claim | Statement | Lean 4? | Effort | Priority |
+|-------|-----------|---------|--------|----------|
+| H1 | Two-pass partition equivalence | Yes | 1 day | Critical |
+| H2 | Expressiveness under T_max cap | Yes | 0.5 day | Critical |
+| H3 | Gaussian sufficiency for clusters | No (empirical) | N/A | Medium |
+| H4 | W_total is order-independent | Yes | 0.5 day | High |
+| H4b | Descending K·α is optimal ordering | No (empirical) | N/A | Medium |
+| H5 | Dynamic addition preserves properties | No (covered) | N/A | Low |
+
+**Total new Lean 4 work: ~2 days, 3 new proof files.**
+
+### 4.7 Assumption: ANN Approximation Error Bound
+
+The architecture uses approximate nearest-neighbor search for blob retrieval. This introduces an error: the true top-k blobs may differ from the retrieved top-k.
+
+**Bound needed:** If ANN retrieval has recall@k ≥ r (i.e., at least r fraction of true top-k are retrieved), then the rendering error is bounded by:
+
+```
+||M_approx - M_exact|| ≤ (1 - r) · T_max · max_j ||f_bⱼ||
+```
+
+This bounds the worst-case impact of approximate retrieval. For r ≥ 0.95 (standard for HNSW) and T_max = 0.3, the error is ≤ 0.015 × max blob feature norm.
+
+**Lean 4 proof:** Desirable but not critical — standard approximation theory. Could be done as a stretch goal.
+
+---
+
+## 5. Orthogonal Challenge (Round 1 — Pre-Experiment)
 
 ### Challenge Round 1: "This is just attention over a key-value memory"
 
@@ -311,7 +447,7 @@ The Gaussian kernel naturally handles multi-resolution retrieval. A specific que
 
 **Counter-argument:** If the blob only "steers" the distribution, its influence may be too weak to produce the structured output needed for code. A dashboard template requires exact import statements, specific function signatures, precise CSS properties. Soft semantic steering may not be enough.
 
-**Resolution:** This is the strongest challenge and may require a modified approach for code. Possible solution: **structured blobs** where f_b is not just a semantic vector but includes explicit token subsequences that get spliced into the generation. This departs from the pure rendering framework but may be necessary for structured domains. **Mark as an open question for the experiment.**
+**Resolution:** This challenge is valid and has led to extracting code generation into a separate track (Track E: Radiance Zuse) with its own architecture where Gaussian variance represents implementation variability rather than semantic breadth. See `docs/whitepaper/sgs_code.md` for the dedicated approach. **H-SGS Knowledge Splatting focuses on natural language only.**
 
 ### Challenge Round 5: "The training data quality ceiling"
 
@@ -329,9 +465,9 @@ The Gaussian kernel naturally handles multi-resolution retrieval. A specific que
 
 ---
 
-## 5. Experiment Plan
+## 6. Experiment Plan
 
-### 5.1 Planck 1.1 — TinyStories with Knowledge Blobs
+### 6.1 Planck 1.1 — TinyStories with Knowledge Blobs
 
 **Objective:** Validate the Hierarchical SGS architecture on a small, controlled task. Does blob conditioning improve story coherence and reduce repetition?
 
@@ -372,7 +508,7 @@ The Gaussian kernel naturally handles multi-resolution retrieval. A specific que
 
 **Timeline:** After Planck 1.0 training is confirmed complete. ~1 week for blob construction + training.
 
-### 5.2 Hertz 1.1 — FineWeb-Edu with Knowledge Blobs
+### 6.2 Hertz 1.1 — FineWeb-Edu with Knowledge Blobs
 
 **Objective:** Test at 1B scale with diverse knowledge. Can blobs improve factual accuracy? Can new knowledge be added at inference time?
 
@@ -415,22 +551,13 @@ If this works, it demonstrates the core advantage over parametric models: **know
 
 **Timeline:** After Hertz 1.0 training completes. ~2 weeks for blob construction + training + evaluation.
 
-### 5.3 Code Experiment (Planck-Code) — Exploratory
+### 6.3 Code: Extracted to Separate Track
 
-**Objective:** Probe whether code template blobs work. This is explicitly exploratory — we expect partial results.
-
-**Setup:**
-1. Train a small SGS-LM (Planck-scale, 100M) on a code dataset (e.g., The Stack Python subset, ~1B tokens).
-2. Create code blobs from common patterns (top 5K most-repeated function templates, class patterns, import patterns).
-3. Evaluate on HumanEval (pass@1, pass@10).
-
-**Key question:** Does blob retrieval of code templates improve pass@k compared to the base model?
-
-**This experiment is deferred until Planck 1.1 results validate the basic architecture.**
+Code generation requires fundamentally different Gaussian semantics (see `docs/whitepaper/sgs_code.md`). Extracted as **Track E: Radiance Zuse** — a dedicated code generation model line with its own architecture and blob semantics.
 
 ---
 
-## 6. Comparison to Existing Work
+## 7. Comparison to Existing Work
 
 | System | Knowledge Store | Retrieval Metric | Composition | Unified? |
 |--------|----------------|-------------------|-------------|----------|
@@ -448,7 +575,7 @@ If this works, it demonstrates the core advantage over parametric models: **know
 
 ---
 
-## 7. Risks and Mitigations
+## 8. Risks and Mitigations
 
 | Risk | Severity | Mitigation | Detection |
 |------|----------|------------|-----------|
@@ -457,11 +584,11 @@ If this works, it demonstrates the core advantage over parametric models: **know
 | Memory scaling (large blob stores) | Medium | Reduced d_b with projection, ANN indexing | Memory profiling |
 | Variance collapse (all Σ → 0 or ∞) | Medium | Σ regularization, init from cluster spread | Monitor Σ distribution during training |
 | Blob staleness (frozen knowledge) | Low | Dynamic blob addition protocol | Compare static vs. dynamic blob eval |
-| Code generation fails (syntax incompatibility) | High | Mark as exploratory, structured blob variant | HumanEval pass@k |
+| Code generation fails (syntax incompatibility) | N/A | Extracted to Track E: Radiance Zuse | See `docs/whitepaper/sgs_code.md` |
 
 ---
 
-## 8. Open Questions
+## 9. Open Questions
 
 1. **Should blob ordering be learned or fixed by K·α?** Fixed ordering is simpler but may be suboptimal. Learned ordering adds parameters but could improve composition.
 
@@ -475,17 +602,18 @@ If this works, it demonstrates the core advantage over parametric models: **know
 
 ---
 
-## 9. Naming
+## 10. Naming
 
 Formal: **Hierarchical Semantic Gaussian Splatting (H-SGS)**
 Colloquial: **Knowledge Splatting**
 3DGS analogy: Multi-scale rendering (LOD)
 Model versions: Planck 1.1, Hertz 1.1 (same base architecture + blob store)
 Track designation: **Track B2** (extension of B1 language models)
+Code generation: Extracted to **Track E: Radiance Zuse** (see `docs/whitepaper/sgs_code.md`)
 
 ---
 
-## 10. References
+## 11. References
 
 - Lewis, P. et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." NeurIPS.
 - Borgeaud, S. et al. (2022). "Improving Language Models by Retrieving from Trillions of Tokens." ICML. (RETRO)

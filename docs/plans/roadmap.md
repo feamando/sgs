@@ -175,6 +175,22 @@
 
 ---
 
+### CODE GENERATION (NEW)
+
+#### E1: Radiance Zuse — SGS for Code Generation
+| | |
+|---|---|
+| **Status** | Stub whitepaper (`docs/whitepaper/sgs_code.md`) |
+| **What** | SGS-based code generation where Gaussian variance represents implementation variability, not semantic breadth |
+| **Core insight** | `import numpy` has near-zero variance (one form); "build a dashboard" has very high variance (many valid implementations). Variance = how many ways to accomplish the intent. |
+| **Named after** | Konrad Zuse (1910-1995) — born Berlin-Wilmersdorf, built the Z3 (first programmable computer), invented Plankalkül (first high-level programming language) |
+| **Models** | Zuse Z3 (100M, Python), Zuse Z4 (1B, multi-language), Zuse Plankalkül (3B+) |
+| **Depends on** | Track B2 (H-SGS validation) — if Knowledge Splatting works for language, adapt blob architecture for code |
+| **Key question** | Does reinterpreting Σ as implementation variability produce meaningful code blobs? |
+| **Deferred until** | Planck 1.1 validates H-SGS blob architecture |
+
+---
+
 ## Execution Timeline
 
 ### Phase I: Foundation (Weeks 1-2)
