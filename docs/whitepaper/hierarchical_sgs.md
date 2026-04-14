@@ -357,16 +357,21 @@ The question is: which distribution is better for generation? Descending order c
 
 ### 4.6 Summary of Proof Obligations
 
-| Claim | Statement | Lean 4? | Effort | Priority |
-|-------|-----------|---------|--------|----------|
-| H1 | Two-pass partition equivalence | Yes | 1 day | Critical |
-| H2 | Expressiveness under T_max cap | Yes | 0.5 day | Critical |
-| H3 | Gaussian sufficiency for clusters | No (empirical) | N/A | Medium |
-| H4 | W_total is order-independent | Yes | 0.5 day | High |
-| H4b | Descending K·α is optimal ordering | No (empirical) | N/A | Medium |
-| H5 | Dynamic addition preserves properties | No (covered) | N/A | Low |
+| Claim | Statement | Lean 4? | Status | File |
+|-------|-----------|---------|--------|------|
+| H1 | Two-pass partition equivalence | Yes | **VERIFIED** | `docs/proofs/lean/claim_H1_two_pass_partition.lean` |
+| H2 | Expressiveness under T_max cap | Yes | **VERIFIED** | `docs/proofs/lean/claim_H2_transmittance_scaling.lean` |
+| H3 | Gaussian sufficiency for clusters | No (empirical) | Pending experiment | N/A |
+| H4 | W_total is order-independent | Yes | **VERIFIED** | `docs/proofs/lean/claim_H4_permutation_invariance.lean` |
+| H4b | Descending K·α is optimal ordering | No (empirical) | Pending experiment | N/A |
+| H5 | Dynamic addition preserves properties | No (covered) | Covered by existing proofs | N/A |
 
-**Total new Lean 4 work: ~2 days, 3 new proof files.**
+**All 3 Lean 4 proofs formally verified (zero sorry). 16 total proofs for SGS.**
+
+Key theorems verified:
+- `two_pass_partition`: Σw(a, 0..k+n) = Σw(a, 0..k) + T(a,k) · Σw(a', 0..n)
+- `transmittance_scaling`: prepending opacity (1-T₀) scales all subsequent weights by T₀, preserving relative proportions w_i/w_j
+- `total_weight_perm_invariant`: Σwᵢ = 1 - Π(1-aᵢ) is permutation-invariant; ordering affects distribution, not total
 
 ### 4.7 Assumption: ANN Approximation Error Bound
 

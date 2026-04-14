@@ -247,6 +247,41 @@ git commit -m "Track B1-1: Hertz 1B evaluation + samples"
 git push
 ```
 
+### Track B2: Radiance Planck 1.1 — Hierarchical SGS (Knowledge Splatting)
+
+```powershell
+# All-in-one: build blobs from Planck 1.0 + train Planck 1.1
+python scripts/train_planck11.py
+
+# Or step by step:
+# Step 1: Build blobs (requires Planck 1.0 checkpoint)
+python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 50000
+
+# Step 2: Train with blob-only warmup (1 epoch, base frozen)
+python scripts/train_planck11.py --freeze-base --epochs 1
+
+# Step 3: Joint training (3 epochs, everything unfrozen)
+python scripts/train_planck11.py --resume checkpoints/planck11/epoch_1.pt --epochs 3
+
+# Ablation: blobs disabled (should match Planck 1.0 baseline)
+python scripts/train_planck11.py --t-max 0.0
+
+# Generate with Planck 1.1
+python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time"
+```
+
+**Results:** Checkpoints in `checkpoints/planck11/`. Compare val loss and generation quality against Planck 1.0.
+
+```powershell
+# Save results
+mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck11_samples.txt
+
+git add results/planck11_samples.txt
+git commit -m "Track B2: Planck 1.1 (H-SGS) samples"
+git push
+```
+
 ### Track C: Radiance Klang — Audio Gaussian Splatting
 
 ```powershell
