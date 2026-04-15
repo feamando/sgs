@@ -199,8 +199,15 @@ def main():
     if args.grad_checkpoint:
         print("  Gradient checkpointing: ON (saves VRAM, recomputes during backward)")
 
-    # torch.compile for kernel fusion (PyTorch 2.0+)
-    if hasattr(torch, "compile") and device.type == "cuda":
+    # torch.compile for kernel fusion (PyTorch 2.0+, requires Triton — Linux only)
+    use_compile = hasattr(torch, "compile") and device.type == "cuda"
+    if use_compile:
+        try:
+            import triton  # noqa: F401
+        except ImportError:
+            use_compile = False
+            print("  torch.compile: OFF (Triton not available, Windows)")
+    if use_compile:
         try:
             model = torch.compile(model, mode="reduce-overhead")
             print("  torch.compile: ON (kernel fusion)")
