@@ -40,7 +40,8 @@ def parse_args():
 
     # Architecture — Hertz 1B defaults
     p.add_argument("--d-s", type=int, default=256)
-    p.add_argument("--d-f", type=int, default=3700)
+    p.add_argument("--d-f", type=int, default=5000,
+                   help="Feature dim (5000 with 4 heads/3 passes → 1.04B params)")
     p.add_argument("--n-passes", type=int, default=3,
                    help="Rendering passes (3 not 5 — 40%% faster, fits VRAM)")
     p.add_argument("--n-heads", type=int, default=4,
