@@ -62,10 +62,8 @@ class SGSLanguageModel(nn.Module):
         # ── Learned temperature ──
         self.log_tau = nn.Parameter(torch.tensor(math.log(tau_init)))
 
-        # ── Multi-head query projections ──
-        self.query_proj = nn.ModuleList(
-            [nn.Linear(d_s, d_s) for _ in range(n_heads)]
-        )
+        # ── Multi-head query projection (single matmul for all heads) ──
+        self.query_proj = nn.Linear(d_s, n_heads * d_s, bias=True)
 
         # ── Head combination → d_f ──
         self.head_proj = nn.Linear(n_heads * d_f, d_f)
@@ -112,10 +110,13 @@ class SGSLanguageModel(nn.Module):
         # Position embeddings — small so they modulate, not dominate
         nn.init.normal_(self.pos_mu.weight, std=0.01)
 
-        # Query projections — start near identity
-        for proj in self.query_proj:
-            nn.init.eye_(proj.weight)
-            nn.init.zeros_(proj.bias)
+        # Query projection — block-diagonal near-identity
+        nn.init.zeros_(self.query_proj.bias)
+        with torch.no_grad():
+            w = torch.zeros(self.n_heads * self.d_s, self.d_s)
+            for h in range(self.n_heads):
+                w[h*self.d_s:(h+1)*self.d_s, :] = torch.eye(self.d_s)
+            self.query_proj.weight.copy_(w)
 
         # Head projection — scaled for residual-like accumulation
         nn.init.normal_(
@@ -227,19 +228,30 @@ class SGSLanguageModel(nn.Module):
         features: torch.Tensor,
         causal_mask: torch.Tensor,
     ) -> torch.Tensor:
-        """Single rendering pass: all heads → combine. Checkpointable."""
-        head_meanings = []
-        for h in range(self.n_heads):
-            q_h = self.query_proj[h](mu)                   # [B, L, d_s]
-            K_h = self._pairwise_kernel(q_h, mu, log_var)  # [B, L, L]
-            m_h = self._causal_render(
-                features, alpha, K_h, causal_mask
-            )                                               # [B, L, d_f]
-            head_meanings.append(m_h)
+        """Single rendering pass: all heads in parallel → combine. Checkpointable."""
+        B, L, d_s = mu.shape
+        H = self.n_heads
 
-        return self.head_proj(
-            torch.cat(head_meanings, dim=-1)
-        )                                                   # [B, L, d_f]
+        # All head queries in one matmul: [B, L, d_s] → [B, L, H*d_s] → [B*H, L, d_s]
+        all_q = self.query_proj(mu)                                # [B, L, H*d_s]
+        all_q = all_q.view(B, L, H, d_s).permute(0, 2, 1, 3)     # [B, H, L, d_s]
+        all_q = all_q.reshape(B * H, L, d_s)                      # [B*H, L, d_s]
+
+        # Expand mu/log_var/alpha/features for all heads
+        mu_h = mu.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
+        lv_h = log_var.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
+        al_h = alpha.unsqueeze(1).expand(B, H, L).reshape(B * H, L)
+        ft_h = features.unsqueeze(1).expand(B, H, L, self.d_f).reshape(B * H, L, self.d_f)
+
+        # One batched kernel + render for all heads simultaneously
+        K_all = self._pairwise_kernel(all_q, mu_h, lv_h)          # [B*H, L, L]
+        m_all = self._causal_render(ft_h, al_h, K_all, causal_mask)  # [B*H, L, d_f]
+
+        # Reshape back: [B*H, L, d_f] → [B, H, L, d_f] → [B, L, H*d_f]
+        m_all = m_all.view(B, H, L, self.d_f).permute(0, 2, 1, 3)   # [B, L, H, d_f]
+        m_cat = m_all.reshape(B, L, H * self.d_f)                     # [B, L, H*d_f]
+
+        return self.head_proj(m_cat)                                   # [B, L, d_f]
 
     # ────────────────────────────────────────────────────────────
     # Forward
@@ -345,9 +357,7 @@ class SGSLanguageModel(nn.Module):
             "tok_features": self.tok_features.weight.numel(),
             "pos_mu": self.pos_mu.weight.numel(),
             "log_tau": 1,
-            "query_proj": sum(
-                p.numel() for proj in self.query_proj for p in proj.parameters()
-            ),
+            "query_proj": sum(p.numel() for p in self.query_proj.parameters()),
             "head_proj": sum(p.numel() for p in self.head_proj.parameters()),
             "mu_update": sum(
                 p.numel() for m in self.mu_update for p in m.parameters()

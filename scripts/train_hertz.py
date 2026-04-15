@@ -30,7 +30,7 @@ from src.tinystories import prepare_fineweb, get_dataloader
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Train Radiance Hertz (1B)")
+    p = argparse.ArgumentParser(description="Train Radiance Hertz (~640M-1B)")
 
     # Data
     p.add_argument("--data-dir", default="data/fineweb")
@@ -43,7 +43,8 @@ def parse_args():
     p.add_argument("--d-f", type=int, default=3700)
     p.add_argument("--n-passes", type=int, default=3,
                    help="Rendering passes (3 not 5 — 40%% faster, fits VRAM)")
-    p.add_argument("--n-heads", type=int, default=8)
+    p.add_argument("--n-heads", type=int, default=4,
+                   help="Attention heads (4 not 8 — halves kernel compute)")
     p.add_argument("--context-len", type=int, default=512,
                    help="Context length (512 not 1024 — 4x smaller kernel matrices)")
     p.add_argument("--ffn-mult", type=int, default=4)
@@ -196,6 +197,14 @@ def main():
     ).to(device)
     if args.grad_checkpoint:
         print("  Gradient checkpointing: ON (saves VRAM, recomputes during backward)")
+
+    # torch.compile for kernel fusion (PyTorch 2.0+)
+    if hasattr(torch, "compile") and device.type == "cuda":
+        try:
+            model = torch.compile(model, mode="reduce-overhead")
+            print("  torch.compile: ON (kernel fusion)")
+        except Exception as e:
+            print(f"  torch.compile: FAILED ({e}), continuing without")
 
     n_params = model.count_parameters()
     print(f"  Parameters: {n_params:,} ({n_params/1e6:.1f}M / {n_params/1e9:.2f}B)")
