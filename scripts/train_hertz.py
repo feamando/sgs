@@ -200,21 +200,6 @@ def main():
     if args.grad_checkpoint:
         print("  Gradient checkpointing: ON (saves VRAM, recomputes during backward)")
 
-    # torch.compile for kernel fusion (PyTorch 2.0+, requires Triton — Linux only)
-    use_compile = hasattr(torch, "compile") and device.type == "cuda"
-    if use_compile:
-        try:
-            import triton  # noqa: F401
-        except ImportError:
-            use_compile = False
-            print("  torch.compile: OFF (Triton not available, Windows)")
-    if use_compile:
-        try:
-            model = torch.compile(model, mode="reduce-overhead")
-            print("  torch.compile: ON (kernel fusion)")
-        except Exception as e:
-            print(f"  torch.compile: FAILED ({e}), continuing without")
-
     n_params = model.count_parameters()
     print(f"  Parameters: {n_params:,} ({n_params/1e6:.1f}M / {n_params/1e9:.2f}B)")
     breakdown = model.param_breakdown()
@@ -272,6 +257,21 @@ def main():
         opt_step = ckpt.get("opt_step", global_step // args.grad_accum)
         if scaler and "scaler" in ckpt:
             scaler.load_state_dict(ckpt["scaler"])
+
+    # ── torch.compile (after resume so state_dict keys match) ──
+    use_compile = hasattr(torch, "compile") and device.type == "cuda"
+    if use_compile:
+        try:
+            import triton  # noqa: F401
+        except ImportError:
+            use_compile = False
+            print("  torch.compile: OFF (Triton not available)")
+    if use_compile:
+        try:
+            model = torch.compile(model, mode="reduce-overhead")
+            print("  torch.compile: ON (kernel fusion)")
+        except Exception as e:
+            print(f"  torch.compile: FAILED ({e}), continuing without")
 
     # ── Wandb ──
     if args.wandb:
@@ -413,8 +413,10 @@ def main():
 
 
 def _save(model, optimizer, scheduler, scaler, epoch, global_step, opt_step, path):
+    # Unwrap torch.compile wrapper so checkpoints are always portable
+    raw_model = getattr(model, "_orig_mod", model)
     ckpt = {
-        "model": model.state_dict(),
+        "model": raw_model.state_dict(),
         "optimizer": optimizer.state_dict(),
         "scheduler": scheduler.state_dict(),
         "epoch": epoch,
