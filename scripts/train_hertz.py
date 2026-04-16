@@ -268,7 +268,7 @@ def main():
             print("  torch.compile: OFF (Triton not available)")
     if use_compile:
         try:
-            model = torch.compile(model, mode="reduce-overhead")
+            model = torch.compile(model, mode="max-autotune")
             print("  torch.compile: ON (kernel fusion)")
         except Exception as e:
             print(f"  torch.compile: FAILED ({e}), continuing without")
