@@ -97,7 +97,7 @@ def evaluate(model, val_loader, eval_steps, device, amp_dtype):
     for i, (x, y) in enumerate(val_loader):
         if i >= eval_steps:
             break
-        x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+        x, y = x.to(device), y.to(device)
         with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=amp_dtype != torch.float32):
             logits = model(x)
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1))
@@ -119,13 +119,6 @@ def main():
         print(f"  GPU: {torch.cuda.get_device_name()}")
         vram_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
         print(f"  VRAM: {vram_gb:.1f} GB")
-
-        # TF32 matmul: ~2x faster on Ampere/Ada for fp32 ops inside autocast
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-        torch.backends.cudnn.benchmark = True
-        torch.set_float32_matmul_precision("high")
-        print("  TF32 matmul: ON | cuDNN benchmark: ON")
 
         # RTX 4090 supports bf16, but check anyway
         if args.mixed_precision == "bf16" and not torch.cuda.is_bf16_supported():
@@ -309,7 +302,7 @@ def main():
         optimizer.zero_grad(set_to_none=True)
 
         for step, (x, y) in enumerate(train_loader):
-            x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+            x, y = x.to(device), y.to(device)
 
             with torch.amp.autocast("cuda", dtype=amp_dtype,
                                     enabled=amp_dtype != torch.float32):
