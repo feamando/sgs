@@ -88,6 +88,18 @@ def parse_args():
     p.add_argument("--num-workers", type=int, default=0,
                    help="DataLoader workers (0 for Windows)")
 
+    # Diagnostics (throughput debugging)
+    p.add_argument("--no-compile", action="store_true",
+                   help="Disable torch.compile. Useful on Windows where "
+                        "triton-windows may add overhead without the Linux "
+                        "Inductor speedups.")
+    p.add_argument("--profile-steps", type=int, default=0,
+                   help="If > 0, run torch.profiler for this many optimizer "
+                        "steps at the start of training and dump a Chrome "
+                        "trace to <save_dir>/trace.json, then exit. Use to "
+                        "identify whether the bottleneck is kernel compute, "
+                        "dataloader starvation, or a CPU/GPU sync.")
+
     return p.parse_args()
 
 
@@ -133,12 +145,18 @@ def main():
         # with d_s=256, L=512, which benefits from this.
         torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = True
         # cuBLASLt often selects better algos for bf16 bmm on Ada than cuBLAS.
-        if hasattr(torch.backends.cuda, "preferred_blas_library"):
+        # Note: on Windows this setter emits a warning and is a no-op
+        # (torch issue: unsupported on Windows), so we only claim it's on
+        # when we're actually on Linux.
+        import sys as _sys
+        if hasattr(torch.backends.cuda, "preferred_blas_library") and _sys.platform != "win32":
             try:
                 torch.backends.cuda.preferred_blas_library(backend="cublaslt")
                 print("  BLAS: cuBLASLt")
             except Exception:
                 pass
+        elif _sys.platform == "win32":
+            print("  BLAS: default (cuBLASLt preference unsupported on Windows)")
 
     # ── Parse max-tokens ──
     max_tok_str = args.max_tokens.upper().replace("B", "000000000").replace("M", "000000")
@@ -285,6 +303,9 @@ def main():
     # state capture). The Apr-15 e2956ff baseline that hit ~10k tok/s used
     # default mode (no CUDA graphs), so this restores that configuration.
     use_compile = hasattr(torch, "compile") and device.type == "cuda"
+    if args.no_compile:
+        use_compile = False
+        print("  torch.compile: OFF (--no-compile)")
     if use_compile:
         try:
             import triton  # noqa: F401
@@ -333,6 +354,31 @@ def main():
     model.train()
     best_val_loss = float("inf")
 
+    # ── Profiler (diagnostic mode, exits after N opt steps) ──
+    # When --profile-steps > 0, wrap the training loop in torch.profiler and
+    # dump a Chrome trace. Purpose: figure out where the ~5x throughput gap
+    # between e2956ff (~10k tok/s, d_f=3700) and today (~2k tok/s, d_f=5000)
+    # is coming from. The d_f bump explains ~1.8x; this surfaces the rest.
+    profiler_ctx = None
+    profile_micro_steps = args.profile_steps * args.grad_accum if args.profile_steps else 0
+    if args.profile_steps > 0:
+        trace_path = str(save_dir / "trace.json")
+        print(f"  Profiler: ON ({args.profile_steps} opt steps "
+              f"= {profile_micro_steps} micro-steps, trace → {trace_path})")
+        profiler_ctx = torch.profiler.profile(
+            activities=[
+                torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.CUDA,
+            ],
+            schedule=torch.profiler.schedule(
+                wait=1, warmup=2, active=max(profile_micro_steps - 3, 1), repeat=1,
+            ),
+            on_trace_ready=lambda p: p.export_chrome_trace(trace_path),
+            record_shapes=False,
+            with_stack=False,
+        )
+        profiler_ctx.__enter__()
+
     for epoch in range(start_epoch, args.epochs):
         epoch_loss_sum = 0.0
         epoch_tokens = 0
@@ -366,6 +412,14 @@ def main():
             loss_accum_tokens += batch_tokens
             epoch_tokens += batch_tokens
             window_tokens += batch_tokens
+
+            if profiler_ctx is not None:
+                profiler_ctx.step()
+                if global_step >= profile_micro_steps:
+                    profiler_ctx.__exit__(None, None, None)
+                    print(f"\n  Profiler: wrote trace to {save_dir / 'trace.json'}")
+                    print(f"  View at chrome://tracing or ui.perfetto.dev")
+                    return
 
             # Optimizer step every grad_accum micro-steps
             if global_step % args.grad_accum == 0:
