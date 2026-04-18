@@ -50,8 +50,11 @@ def parse_args():
                    help="Context length (512 not 1024 — 4x smaller kernel matrices)")
     p.add_argument("--ffn-mult", type=int, default=4)
     p.add_argument("--dropout", type=float, default=0.0)
-    p.add_argument("--grad-checkpoint", action="store_true", default=True,
-                   help="Gradient checkpointing (saves ~40%% VRAM, trades for compute)")
+    p.add_argument("--grad-checkpoint", action="store_true", default=False,
+                   help="Gradient checkpointing. Off by default: at B=2, L=512, H=4, "
+                        "d_f=5000 activations fit in ~12GB of the 24GB 4090. "
+                        "Enabling it blocks CUDA graphs (RNG state capture clash, "
+                        "pytorch#162504) and costs ~30-40%% throughput.")
     p.add_argument("--no-grad-checkpoint", dest="grad_checkpoint", action="store_false")
 
     # Training
@@ -124,6 +127,18 @@ def main():
         if args.mixed_precision == "bf16" and not torch.cuda.is_bf16_supported():
             print("  bf16 not supported, falling back to fp16")
             args.mixed_precision = "fp16"
+
+        # bf16 reduction in cuBLAS picks tensor-core paths for small-K bmms
+        # (pytorch#120750). The rendering kernel does [B*H, L, d_s] x [B*H, d_s, L]
+        # with d_s=256, L=512, which benefits from this.
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = True
+        # cuBLASLt often selects better algos for bf16 bmm on Ada than cuBLAS.
+        if hasattr(torch.backends.cuda, "preferred_blas_library"):
+            try:
+                torch.backends.cuda.preferred_blas_library(backend="cublaslt")
+                print("  BLAS: cuBLASLt")
+            except Exception:
+                pass
 
     # ── Parse max-tokens ──
     max_tok_str = args.max_tokens.upper().replace("B", "000000000").replace("M", "000000")
@@ -225,6 +240,7 @@ def main():
         ],
         lr=args.lr,
         betas=(0.9, 0.95),
+        fused=(device.type == "cuda"),
     )
 
     # ── LR Schedule (based on optimizer steps, not micro-steps) ──
@@ -259,6 +275,11 @@ def main():
             scaler.load_state_dict(ckpt["scaler"])
 
     # ── torch.compile (after resume so state_dict keys match) ──
+    # Mode selection:
+    #   grad_checkpoint=False  → reduce-overhead (CUDA graphs ON, ~5x faster)
+    #   grad_checkpoint=True   → max-autotune-no-cudagraphs
+    # RNG state save/restore in non-reentrant checkpoint is illegal under CUDA
+    # graph capture (pytorch#162504), so the two cannot be combined.
     use_compile = hasattr(torch, "compile") and device.type == "cuda"
     if use_compile:
         try:
@@ -267,21 +288,29 @@ def main():
             use_compile = False
             print("  torch.compile: OFF (Triton not available)")
     if use_compile:
+        compile_mode = (
+            "max-autotune-no-cudagraphs" if args.grad_checkpoint
+            else "reduce-overhead"
+        )
         try:
-            model = torch.compile(model, mode="max-autotune-no-cudagraphs")
-            print("  torch.compile: ON (kernel fusion)")
+            model = torch.compile(model, mode=compile_mode)
+            print(f"  torch.compile: ON (mode={compile_mode})")
         except Exception as e:
             print(f"  torch.compile: FAILED ({e}), continuing without")
 
     # ── Wandb ──
+    # We do NOT call wandb.watch(): it registers per-submodule forward/backward
+    # hooks which both add overhead and break torch.compile fullgraph tracing.
+    # tau and grad_norm are logged manually below (search for wandb.log).
+    # _disable_stats=True kills the system-stats daemon thread.
     if args.wandb:
         try:
             import wandb
             wandb.init(
                 project=args.wandb_project,
                 config=vars(args) | {"n_params": n_params, "actual_vocab": actual_vocab},
+                settings=wandb.Settings(_disable_stats=True),
             )
-            wandb.watch(model, log_freq=1000)
         except ImportError:
             print("  wandb not installed, logging disabled")
             args.wandb = False
@@ -291,18 +320,30 @@ def main():
     save_dir.mkdir(parents=True, exist_ok=True)
 
     # ── Training loop ──
+    # Throughput measurement:
+    #   epoch_loss_sum / epoch_tokens = cumulative loss (for end-of-epoch summary)
+    #   window_tokens / window_elapsed = rolling tok/s over the last log_interval
+    #     optimizer steps (surfaces mid-epoch regressions that a cumulative
+    #     average smears out).
+    # Loss handling:
+    #   We accumulate loss as a GPU tensor (loss_accum) and sync only at
+    #   log_interval, avoiding a per-micro-step loss.item() that forces CPU↔GPU
+    #   syncs and stalls the pipeline.
     print(f"\n  Starting training ({args.epochs} epochs)...")
     model.train()
     best_val_loss = float("inf")
 
     for epoch in range(start_epoch, args.epochs):
-        epoch_loss = 0.0
+        epoch_loss_sum = 0.0
         epoch_tokens = 0
-        t0 = time.time()
+        window_tokens = 0
+        window_t0 = time.time()
+        loss_accum = torch.zeros((), device=device)
+        loss_accum_tokens = 0
         optimizer.zero_grad(set_to_none=True)
 
         for step, (x, y) in enumerate(train_loader):
-            x, y = x.to(device), y.to(device)
+            x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
             with torch.amp.autocast("cuda", dtype=amp_dtype,
                                     enabled=amp_dtype != torch.float32):
@@ -320,8 +361,11 @@ def main():
 
             global_step += 1
             batch_tokens = x.numel()
-            epoch_loss += loss.item() * batch_tokens
+            # Keep the running sum on-device; no .item() here.
+            loss_accum = loss_accum + loss.detach() * batch_tokens
+            loss_accum_tokens += batch_tokens
             epoch_tokens += batch_tokens
+            window_tokens += batch_tokens
 
             # Optimizer step every grad_accum micro-steps
             if global_step % args.grad_accum == 0:
@@ -343,12 +387,22 @@ def main():
                 # ── Log ──
                 if opt_step % args.log_interval == 0:
                     lr = optimizer.param_groups[0]["lr"]
-                    avg = epoch_loss / epoch_tokens
-                    elapsed = time.time() - t0
-                    tok_per_sec = epoch_tokens / elapsed
+                    # Single device sync for the whole log interval.
+                    interval_loss_sum = loss_accum.item()
+                    interval_avg = interval_loss_sum / max(loss_accum_tokens, 1)
+                    epoch_loss_sum += interval_loss_sum
+                    loss_accum = torch.zeros((), device=device)
+                    loss_accum_tokens = 0
+
+                    window_elapsed = time.time() - window_t0
+                    tok_per_sec = window_tokens / max(window_elapsed, 1e-9)
+                    window_tokens = 0
+                    window_t0 = time.time()
+
+                    epoch_avg = epoch_loss_sum / max(epoch_tokens, 1)
                     print(
                         f"  epoch {epoch+1} opt_step {opt_step:>7d} | "
-                        f"loss {loss.item():.4f} avg {avg:.4f} | "
+                        f"loss {interval_avg:.4f} avg {epoch_avg:.4f} | "
                         f"lr {lr:.2e} gnorm {grad_norm:.2f} | "
                         f"tau {model.tau.item():.1f} | "
                         f"{tok_per_sec:.0f} tok/s"
@@ -356,9 +410,9 @@ def main():
                     if args.wandb:
                         import wandb
                         wandb.log({
-                            "train/loss": loss.item(),
-                            "train/avg_loss": avg,
-                            "train/perplexity": math.exp(min(loss.item(), 20)),
+                            "train/loss": interval_avg,
+                            "train/avg_loss": epoch_avg,
+                            "train/perplexity": math.exp(min(interval_avg, 20)),
                             "train/lr": lr,
                             "train/grad_norm": grad_norm,
                             "train/tau": model.tau.item(),
@@ -388,7 +442,12 @@ def main():
                           save_dir / f"step_{opt_step}.pt")
 
         # End of epoch
-        epoch_avg = epoch_loss / max(epoch_tokens, 1)
+        # Fold any remaining (sub-log-interval) loss into the epoch total.
+        if loss_accum_tokens > 0:
+            epoch_loss_sum += loss_accum.item()
+            loss_accum = torch.zeros((), device=device)
+            loss_accum_tokens = 0
+        epoch_avg = epoch_loss_sum / max(epoch_tokens, 1)
         print(f"  Epoch {epoch+1} done | avg loss {epoch_avg:.4f} | "
               f"ppl {math.exp(min(epoch_avg, 20)):.1f}")
         _save(model, optimizer, scheduler, scaler,

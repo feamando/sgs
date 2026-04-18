@@ -22,5 +22,8 @@ soundfile>=0.12
 # Logging
 wandb>=0.15
 
-# Raum PoC-C (optional — falls back to CPU renderer if missing)
+# torch.compile backend on Windows (no-op elsewhere; triton ships with torch on Linux)
+triton-windows>=3.0.0; sys_platform == "win32"
+
+# Raum PoC-C (optional, falls back to CPU renderer if missing)
 # gsplat>=1.0

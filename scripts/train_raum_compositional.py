@@ -49,19 +49,14 @@ def parse_args():
 
 
 def get_features(token_ids, mask, glove_matrix, sgs_encoder=None, feature_mode="glove"):
-    """Extract per-word features. Either raw GloVe or SGS-refined."""
-    # GloVe lookup
-    features = glove_matrix[token_ids]  # [B, L, 300]
-
-    if feature_mode == "sgs" and sgs_encoder is not None:
-        # Run SGS encoder and extract refined features
-        # The encoder modifies features through multi-pass rendering
-        with torch.no_grad():
-            mu, log_var, alpha, feat = sgs_encoder.vocab.get_params(token_ids)
-            # For now, use vocab features (which are GloVe-initialized)
-            # TODO: if encoder checkpoint available, run full forward and capture
-            features = feat
-    return features
+    """Extract per-word features. Currently only raw GloVe is wired up."""
+    if feature_mode == "sgs":
+        raise NotImplementedError(
+            "feature-mode=sgs is not implemented yet. The SGS encoder forward path "
+            "needs to be wired into Raum PoC-D and the encoder checkpoint loaded "
+            "from --sgs-checkpoint. Use feature-mode=glove for now."
+        )
+    return glove_matrix[token_ids]  # [B, L, 300]
 
 
 @torch.no_grad()

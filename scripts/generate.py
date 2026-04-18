@@ -18,7 +18,7 @@ from src.sgs_lm import SGSLanguageModel
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Generate text with Radiance Planck")
+    p = argparse.ArgumentParser(description="Generate text with Radiance Planck/Hertz")
     p.add_argument("--checkpoint", required=True, help="Path to model checkpoint")
     p.add_argument("--tokenizer", default=None, help="Path to .model file (auto-detected if None)")
     p.add_argument("--prompt", default="Once upon a time", help="Text prompt")
@@ -29,37 +29,75 @@ def parse_args():
     p.add_argument("--interactive", action="store_true", help="Interactive mode")
     p.add_argument("--device", default="auto")
 
-    # Architecture (must match checkpoint)
-    p.add_argument("--d-s", type=int, default=128)
-    p.add_argument("--d-f", type=int, default=1000)
-    p.add_argument("--n-passes", type=int, default=3)
-    p.add_argument("--n-heads", type=int, default=4)
-    p.add_argument("--context-len", type=int, default=512)
-    p.add_argument("--ffn-mult", type=int, default=4)
+    # Architecture overrides. If omitted, inferred from checkpoint shapes.
+    p.add_argument("--d-s", type=int, default=None)
+    p.add_argument("--d-f", type=int, default=None)
+    p.add_argument("--n-passes", type=int, default=None)
+    p.add_argument("--n-heads", type=int, default=None)
+    p.add_argument("--context-len", type=int, default=None)
+    p.add_argument("--ffn-mult", type=int, default=None)
     return p.parse_args()
 
 
+def infer_arch(state: dict) -> dict:
+    """Infer SGSLanguageModel architecture from a checkpoint state_dict."""
+    vocab_size, d_s = state["tok_mu.weight"].shape
+    d_f = state["tok_features.weight"].shape[1]
+    max_len = state["pos_mu.weight"].shape[0]
+    # query_proj.weight: [H*d_s, d_s]
+    n_heads = state["query_proj.weight"].shape[0] // d_s
+    # mu_update has (n_passes - 1) entries
+    pass_indices = {
+        int(k.split(".")[1])
+        for k in state.keys()
+        if k.startswith("mu_update.")
+    }
+    n_passes = (max(pass_indices) + 1 + 1) if pass_indices else 1
+    # pass_ffn.0.1.weight: [d_f * ffn_mult, d_f * 2]
+    ffn_mult = 4
+    ffn_key = "pass_ffn.0.1.weight"
+    if ffn_key in state:
+        ffn_mult = state[ffn_key].shape[0] // d_f
+    return {
+        "vocab_size": vocab_size,
+        "d_s": d_s,
+        "d_f": d_f,
+        "n_heads": n_heads,
+        "n_passes": n_passes,
+        "max_len": max_len,
+        "ffn_mult": ffn_mult,
+    }
+
+
 def load_model(args, device):
-    """Load model from checkpoint."""
+    """Load model from checkpoint, auto-inferring architecture."""
     print(f"Loading checkpoint: {args.checkpoint}")
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
 
-    # Infer vocab size from embedding weight
-    vocab_size = state["tok_mu.weight"].shape[0]
+    arch = infer_arch(state)
 
-    model = SGSLanguageModel(
-        vocab_size=vocab_size,
-        d_s=args.d_s,
-        d_f=args.d_f,
-        n_passes=args.n_passes,
-        n_heads=args.n_heads,
-        max_len=args.context_len,
-        ffn_mult=args.ffn_mult,
+    # CLI flags (if provided) override inferred values
+    overrides = {
+        "d_s": args.d_s, "d_f": args.d_f, "n_heads": args.n_heads,
+        "n_passes": args.n_passes, "max_len": args.context_len,
+        "ffn_mult": args.ffn_mult,
+    }
+    for k, v in overrides.items():
+        if v is not None:
+            arch[k] = v
+
+    print(
+        f"  Architecture: vocab={arch['vocab_size']} d_s={arch['d_s']} "
+        f"d_f={arch['d_f']} n_heads={arch['n_heads']} "
+        f"n_passes={arch['n_passes']} context_len={arch['max_len']} "
+        f"ffn_mult={arch['ffn_mult']}"
     )
+
+    model = SGSLanguageModel(**arch)
     model.load_state_dict(state)
     model.to(device).eval()
-    print(f"  Loaded {model.count_parameters()/1e6:.1f}M params, vocab={vocab_size}")
+    print(f"  Loaded {model.count_parameters()/1e6:.1f}M params")
     return model
 
 

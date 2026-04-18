@@ -422,14 +422,28 @@ The 100M model answers "does SGS generate text?" The 1B model answers "can SGS s
 
 ### Architecture Differences from B1
 
-| Property | B1 (100M) | B1-1 (1B) |
-|---|---|---|
-| d_s (splatting) | 128 | 256 |
-| d_f (features) | 512 | 1024 |
-| n_passes | 3 | 5 |
-| n_heads | 4 | 8 |
-| Context | 512 | 1024 |
-| Vocab | 32K | 32K |
+Updated post-implementation (commit 19c93d0) to fit in 24GB VRAM on a single RTX 4090.
+The original plan (d_f=1024, n_passes=5, n_heads=8, context=1024) OOM'd; the current
+configuration trades width for rendering passes and attention heads to keep kernel
+matrices small while preserving the ~1B parameter budget.
+
+| Property | B1 (100M, shipped) | B1-1 (1B, current) | B1-1 (original plan) |
+|---|---|---|---|
+| d_s (splatting) | 128 | 256 | 256 |
+| d_f (features) | 1000 | 5000 | 1024 |
+| n_passes | 3 | 3 | 5 |
+| n_heads | 4 | 4 | 8 |
+| Context | 512 | 512 | 1024 |
+| Vocab | 32K | 32K | 32K |
+| Params | ~100M | ~1.04B | ~1.05B |
+
+Rationale for the changes:
+- Wider `d_f` concentrates params in dense matmuls (fast on tensor cores) rather than
+  in kernel compute.
+- Halving heads + passes quarters the kernel matmul cost; with gradient checkpointing
+  this is what actually fits on 24GB.
+- Shorter context (512) reduces the `[B, L, L]` kernel matrix by 4x. FineWeb-Edu
+  documents are truncated to 512 tokens, which is acceptable for perplexity benchmarks.
 
 ### Training Data
 
@@ -445,16 +459,26 @@ TinyStories (~2.1M stories) is too small for 1B params — will overfit immediat
 
 ### Training Plan
 
-| Parameter | Value |
-|---|---|
-| Data | FineWeb-Edu, 10B tokens |
-| Batch size | 16 (gradient accumulation to effective 64) |
-| Sequence length | 1024 |
-| Learning rate | 1e-4 (with warmup) |
-| Training tokens | ~10B (1 epoch) |
-| Estimated time | 3-5 days on RTX 4090 |
-| Mixed precision | bf16 (4090 supports) |
-| VRAM | ~12GB peak (fits in 24GB comfortably) |
+Current values (actual, post-VRAM tuning); original plan shown for reference.
+
+| Parameter | Current | Original plan |
+|---|---|---|
+| Data | FineWeb-Edu, 10B tokens | FineWeb-Edu, 10B tokens |
+| Micro-batch | 2 | 16 |
+| Grad accumulation | 32 (effective 64) | 4 (effective 64) |
+| Sequence length | 512 | 1024 |
+| Learning rate | 3e-4 (2K warmup) | 1e-4 (with warmup) |
+| Training tokens | 10B (1 epoch) | 10B (1 epoch) |
+| Estimated wall clock | ~30-60 days on RTX 4090 | 3-5 days |
+| Mixed precision | bf16 | bf16 |
+| VRAM | ~22GB peak (grad checkpointing ON) | ~12GB peak |
+
+The wall-clock blowup (3-5d → 30-60d) is the cost of fitting 1B params on a single
+4090 via gradient checkpointing + reduced micro-batch. Observed throughput is
+1.7-2.8k tok/s; 10B tokens / 2.5k tok/s ≈ 46 days. If this is prohibitive,
+scope options are: (a) train on 2B tokens (~10 days, weaker LM but same architecture
+story), (b) rent a bigger GPU for ~$200-400 on vast.ai/Lambda, (c) shrink `d_f` to
+3000 to ~640M params with ~2x throughput.
 
 ### What We Measure
 
@@ -476,8 +500,8 @@ TinyStories (~2.1M stories) is too small for 1B params — will overfit immediat
 
 ### Risks
 
-1. **Memory:** 1B params at bf16 = 2GB model + activations. Should fit in 4090's 24GB but needs careful gradient checkpointing.
-2. **Speed:** Multi-pass rendering (5 passes) over 1024 tokens is slower than transformer attention with FlashAttention. Training may be 3-5x slower per step.
+1. **Memory:** 1B params at bf16 = 2GB model + activations. Fits on a 4090 24GB only with gradient checkpointing + micro-batch 2.
+2. **Speed:** Multi-pass rendering with 3 passes over 512 tokens is ~1.7-2.8k tok/s under torch.compile + bf16. 10B tokens = ~30-60 days wall clock on a single 4090. The main risk is the run straddling a hardware or environment change.
 3. **Data download:** FineWeb-Edu sample is ~50GB compressed. Need sufficient disk space.
 4. **Convergence:** No one has trained a 1B SGS model before. Hyperparameters may need tuning. Budget for 2-3 restarts.
 

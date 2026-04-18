@@ -219,21 +219,27 @@ git push
 ### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
 
 ```powershell
-# All-in-one: download 2B tokens + train (~3-5 days on RTX 4090)
-# Defaults: batch=2, grad_accum=32, context=512, 3 passes, gradient checkpointing ON
-python scripts/train_hertz.py
+# All-in-one: download 10B tokens + train
+# Defaults: batch=2, grad_accum=32, context=512, 3 passes, d_f=5000, gradient checkpointing ON
+# Training time on RTX 4090 at ~2-3k tok/s: approximately 30-60 days for 10B tokens.
+# For a faster sanity check, use --max-tokens 1B --epochs 1 (~3-6 days).
+python scripts/train_hertz.py --max-tokens 10B
 
 # Or with custom settings:
-python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick test (~1 day)
+python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick sanity check
 python scripts/train_hertz.py --wandb                        # with logging
 python scripts/train_hertz.py --resume checkpoints/hertz/best.pt  # resume
 python scripts/train_hertz.py --no-grad-checkpoint --batch-size 1  # if still OOM
 
 # Evaluate against TinyLlama/Pythia baselines
+# Runs: perplexity (FineWeb-Edu val), HellaSwag 0-shot, ARC-Easy 0-shot
 python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
 
-# Generate text
-python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --d-s 256 --d-f 3700 --n-passes 5 --n-heads 8 --context-len 1024 --prompt "The future of artificial intelligence"
+# Smoke test the eval pipeline without waiting (5 examples per task)
+python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt --limit 5
+
+# Generate text (architecture auto-inferred from checkpoint, no flags needed)
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of artificial intelligence"
 ```
 
 **Results:** Evaluation script saves benchmark scores to `results/hertz_eval.json`. Checkpoints in `checkpoints/hertz/` (gitignored — too large).
