@@ -345,6 +345,15 @@ def main():
         for step, (x, y) in enumerate(train_loader):
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
 
+            # Under torch.compile mode="reduce-overhead", CUDA graphs reuse the
+            # same output buffers across forward invocations. With grad
+            # accumulation we queue multiple forwards before the matching
+            # backwards, so forward N+1 would overwrite buffers that backward N
+            # still references. Marking each step tells cudagraph_trees to
+            # allocate fresh outputs. No-op when CUDA graphs are disabled.
+            if use_compile and not args.grad_checkpoint:
+                torch.compiler.cudagraph_mark_step_begin()
+
             with torch.amp.autocast("cuda", dtype=amp_dtype,
                                     enabled=amp_dtype != torch.float32):
                 logits = model(x)
