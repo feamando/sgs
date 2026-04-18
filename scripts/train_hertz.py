@@ -275,11 +275,15 @@ def main():
             scaler.load_state_dict(ckpt["scaler"])
 
     # ── torch.compile (after resume so state_dict keys match) ──
-    # Mode selection:
-    #   grad_checkpoint=False  → reduce-overhead (CUDA graphs ON, ~5x faster)
-    #   grad_checkpoint=True   → max-autotune-no-cudagraphs
-    # RNG state save/restore in non-reentrant checkpoint is illegal under CUDA
-    # graph capture (pytorch#162504), so the two cannot be combined.
+    # We use mode="default" (Inductor kernel fusion, no CUDA graphs). CUDA
+    # graphs (reduce-overhead / max-autotune) are fundamentally incompatible
+    # with gradient accumulation in this script: we queue grad_accum=32
+    # forwards' activations before the matching backwards run, and CUDA graph
+    # buffer reuse overwrites still-live saved tensors. cudagraph_mark_step_begin
+    # does not reliably fix this for multi-forward accumulation patterns, and
+    # additionally clashes with gradient checkpointing (pytorch#162504 RNG
+    # state capture). The Apr-15 e2956ff baseline that hit ~10k tok/s used
+    # default mode (no CUDA graphs), so this restores that configuration.
     use_compile = hasattr(torch, "compile") and device.type == "cuda"
     if use_compile:
         try:
@@ -288,13 +292,9 @@ def main():
             use_compile = False
             print("  torch.compile: OFF (Triton not available)")
     if use_compile:
-        compile_mode = (
-            "max-autotune-no-cudagraphs" if args.grad_checkpoint
-            else "reduce-overhead"
-        )
         try:
-            model = torch.compile(model, mode=compile_mode)
-            print(f"  torch.compile: ON (mode={compile_mode})")
+            model = torch.compile(model, mode="default")
+            print("  torch.compile: ON (mode=default, kernel fusion, no CUDA graphs)")
         except Exception as e:
             print(f"  torch.compile: FAILED ({e}), continuing without")
 
@@ -344,15 +344,6 @@ def main():
 
         for step, (x, y) in enumerate(train_loader):
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
-
-            # Under torch.compile mode="reduce-overhead", CUDA graphs reuse the
-            # same output buffers across forward invocations. With grad
-            # accumulation we queue multiple forwards before the matching
-            # backwards, so forward N+1 would overwrite buffers that backward N
-            # still references. Marking each step tells cudagraph_trees to
-            # allocate fresh outputs. No-op when CUDA graphs are disabled.
-            if use_compile and not args.grad_checkpoint:
-                torch.compiler.cudagraph_mark_step_begin()
 
             with torch.amp.autocast("cuda", dtype=amp_dtype,
                                     enabled=amp_dtype != torch.float32):
