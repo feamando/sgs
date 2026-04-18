@@ -83,6 +83,11 @@ def parse_args():
     # Resume
     p.add_argument("--resume", type=str, default=None,
                    help="Checkpoint path to resume from")
+    p.add_argument("--warm-start", type=str, default=None,
+                   help="Load model weights only (no optimizer, scheduler, "
+                        "or step counters). Use when --resume throughput "
+                        "collapses from Adam state reload. Step counters "
+                        "restart at 0; LR re-warms up.")
 
     # Workers
     p.add_argument("--num-workers", type=int, default=0,
@@ -280,6 +285,8 @@ def main():
     start_epoch = 0
     global_step = 0
     opt_step = 0
+    if args.resume and args.warm_start:
+        raise SystemExit("Pass either --resume or --warm-start, not both.")
     if args.resume:
         print(f"  Resuming from {args.resume}")
         ckpt = torch.load(args.resume, map_location=device, weights_only=False)
@@ -291,6 +298,14 @@ def main():
         opt_step = ckpt.get("opt_step", global_step // args.grad_accum)
         if scaler and "scaler" in ckpt:
             scaler.load_state_dict(ckpt["scaler"])
+    elif args.warm_start:
+        # Weights only. Fresh optimizer state (momentum re-builds in ~200
+        # opt steps, cheap) and fresh LR schedule (re-warms up). Sidesteps
+        # the Adam-state-reload throughput collapse observed on Windows.
+        print(f"  Warm start from {args.warm_start} (weights only)")
+        ckpt = torch.load(args.warm_start, map_location=device, weights_only=False)
+        state = ckpt["model"] if "model" in ckpt else ckpt
+        model.load_state_dict(state)
 
     # ── torch.compile (after resume so state_dict keys match) ──
     # We use mode="default" (Inductor kernel fusion, no CUDA graphs). CUDA
