@@ -373,3 +373,35 @@ class SGSLanguageModel(nn.Module):
         }
         groups["total"] = sum(groups.values())
         return groups
+
+
+def migrate_state_dict(state: dict) -> dict:
+    """Convert a legacy (pre-e2956ff) Planck state_dict to current layout.
+
+    Before e2956ff, query_proj was a ModuleList of n_heads separate Linear(d_s, d_s)
+    projections, producing keys: query_proj.0.weight, query_proj.0.bias, ...
+    Current layout is a single fused Linear(d_s, n_heads * d_s), producing
+    query_proj.weight / query_proj.bias.
+
+    Mathematically the fused layout is a block stack of the per-head layers,
+    so the migration is a lossless concatenation. If the state already uses
+    the fused layout, this is a no-op.
+    """
+    if "query_proj.weight" in state:
+        return state  # already fused
+    per_head_keys = sorted(
+        (k for k in state if k.startswith("query_proj.") and k.endswith(".weight")),
+        key=lambda k: int(k.split(".")[1]),
+    )
+    if not per_head_keys:
+        return state  # unrecognized layout, let load_state_dict raise its own error
+    weights = [state.pop(k) for k in per_head_keys]
+    biases = [
+        state.pop(k.replace(".weight", ".bias"))
+        for k in per_head_keys
+        if k.replace(".weight", ".bias") in state
+    ]
+    state["query_proj.weight"] = torch.cat(weights, dim=0)  # [H*d_s, d_s]
+    if biases:
+        state["query_proj.bias"] = torch.cat(biases, dim=0)  # [H*d_s]
+    return state

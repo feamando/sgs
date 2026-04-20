@@ -16,7 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.sgs_lm import SGSLanguageModel
+from src.sgs_lm import SGSLanguageModel, migrate_state_dict
 from src.blob_store import BlobStore
 
 
@@ -67,6 +67,7 @@ class HSGSLanguageModel(nn.Module):
         """Load base model from checkpoint and wrap with blob store."""
         ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
         state = ckpt["model"] if "model" in ckpt else ckpt
+        state = migrate_state_dict(state)
 
         vocab_size = state["tok_mu.weight"].shape[0]
         base = SGSLanguageModel(vocab_size=vocab_size, **model_kwargs)
@@ -145,16 +146,30 @@ class HSGSLanguageModel(nn.Module):
 
         causal_mask = torch.tril(torch.ones(L, L, device=device))
 
+        # Fused multi-head query projection (matches current base model layout).
+        H = self.base.n_heads
+        d_s = self.base.d_s
+
         meaning = None
         for p in range(self.base.n_passes):
-            head_meanings = []
-            for h in range(self.base.n_heads):
-                q_h = self.base.query_proj[h](mu)
-                K_h = self.base._pairwise_kernel(q_h, mu, log_var)
-                m_h = self.base._causal_render(features, alpha, K_h, causal_mask)
-                head_meanings.append(m_h)
+            # All-heads-in-one matmul: [B, L, d_s] -> [B, L, H*d_s] -> [B*H, L, d_s]
+            all_q = self.base.query_proj(mu)
+            all_q = all_q.view(B, L, H, d_s).permute(0, 2, 1, 3).reshape(B * H, L, d_s)
 
-            meaning = self.base.head_proj(torch.cat(head_meanings, dim=-1))
+            mu_h = mu.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
+            lv_h = log_var.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
+            al_h = alpha.unsqueeze(1).expand(B, H, L).reshape(B * H, L)
+            ft_h = features.unsqueeze(1).expand(B, H, L, self.base.d_f).reshape(
+                B * H, L, self.base.d_f
+            )
+
+            K_all = self.base._pairwise_kernel(all_q, mu_h, lv_h)
+            m_all = self.base._causal_render(ft_h, al_h, K_all, causal_mask)
+
+            m_all = m_all.view(B, H, L, self.base.d_f).permute(0, 2, 1, 3)
+            m_cat = m_all.reshape(B, L, H * self.base.d_f)
+
+            meaning = self.base.head_proj(m_cat)
             meaning = self.base.dropout(meaning)
 
             if p < self.base.n_passes - 1:

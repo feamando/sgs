@@ -173,10 +173,11 @@ def main():
 
     # Load model
     print(f"\nLoading checkpoint: {args.checkpoint}")
-    from src.sgs_lm import SGSLanguageModel
+    from src.sgs_lm import SGSLanguageModel, migrate_state_dict
 
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
+    state = migrate_state_dict(state)
     vocab_size = state["tok_mu.weight"].shape[0]
 
     model = SGSLanguageModel(

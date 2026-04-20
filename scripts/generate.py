@@ -14,7 +14,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.sgs_lm import SGSLanguageModel
+from src.sgs_lm import SGSLanguageModel, migrate_state_dict
 
 
 def parse_args():
@@ -40,7 +40,11 @@ def parse_args():
 
 
 def infer_arch(state: dict) -> dict:
-    """Infer SGSLanguageModel architecture from a checkpoint state_dict."""
+    """Infer SGSLanguageModel architecture from a checkpoint state_dict.
+
+    Expects the fused query_proj layout. Pass the state through
+    migrate_state_dict() first if it may come from a pre-e2956ff checkpoint.
+    """
     vocab_size, d_s = state["tok_mu.weight"].shape
     d_f = state["tok_features.weight"].shape[1]
     max_len = state["pos_mu.weight"].shape[0]
@@ -74,6 +78,7 @@ def load_model(args, device):
     print(f"Loading checkpoint: {args.checkpoint}")
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
+    state = migrate_state_dict(state)
 
     arch = infer_arch(state)
 
