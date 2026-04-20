@@ -79,6 +79,12 @@ def parse_args():
     p.add_argument("--eval-steps", type=int, default=50)
     p.add_argument("--save-interval", type=int, default=5000)
     p.add_argument("--save-dir", default="checkpoints/hertz")
+    p.add_argument("--keep-last", type=int, default=3,
+                   help="Rotate step_*.pt: keep only the N most recent. "
+                        "best.pt, epoch_*.pt, final.pt are never rotated. "
+                        "Default 3. Pass 0 to keep all (uses ~8GB per step "
+                        "checkpoint for a 1B model, tens to hundreds of GB "
+                        "over a full run).")
 
     # Resume
     p.add_argument("--resume", type=str, default=None,
@@ -509,6 +515,7 @@ def main():
                     _save(model, optimizer, scheduler, scaler,
                           epoch, global_step, opt_step,
                           save_dir / f"step_{opt_step}.pt")
+                    _rotate_step_checkpoints(save_dir, args.keep_last)
 
         # End of epoch
         # Fold any remaining (sub-log-interval) loss into the epoch total.
@@ -555,6 +562,31 @@ def _save(model, optimizer, scheduler, scaler, epoch, global_step, opt_step, pat
         ckpt["scaler"] = scaler.state_dict()
     torch.save(ckpt, path)
     print(f"  Saved {path}")
+
+
+def _rotate_step_checkpoints(save_dir: Path, keep_last: int) -> None:
+    """Delete old step_*.pt files, keeping only the N most recent.
+
+    Only touches files matching step_<int>.pt. best.pt, epoch_*.pt, and
+    final.pt are never rotated.
+    """
+    if keep_last <= 0:
+        return
+    steps = []
+    for p in save_dir.glob("step_*.pt"):
+        try:
+            n = int(p.stem.split("_", 1)[1])
+        except (IndexError, ValueError):
+            continue
+        steps.append((n, p))
+    steps.sort()
+    for _, p in steps[:-keep_last]:
+        try:
+            size_mb = p.stat().st_size / 1e6
+            p.unlink()
+            print(f"  Rotated {p.name} ({size_mb:.0f} MB)")
+        except OSError as e:
+            print(f"  Warn: could not rotate {p.name}: {e}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,23 @@
-# SGS — Full Setup Guide (Windows + RTX 4090)
+# SGS, Full Setup Guide (Windows + RTX 4090)
 
-Fresh install from scratch. Covers all tracks: experiments, Planck LM, and Raum text-to-3D.
+Fresh install from scratch. Covers all tracks: experiments, Planck LM, Raum text-to-3D, Klang audio, and Hertz 1B.
+
+> **Run order as of 2026-04-20** (Strategic pivot, see `docs/papers/sgs_training_acceleration.md`):
+>
+> **1. Klang → 2. Planck 1.1 → 3. Raum → 4. Planck 1.2 → 5. Hertz 1.2**
+>
+> Hertz 1.0 is paused. The new large-LM run is Hertz 1.2, with the acceleration recipe from Planck 1.2. This order validates cheaper tracks first, then the accel recipe on Planck 1.2, then commits GPU-weeks to Hertz 1.2.
+
+---
+
+## Table of contents
+
+- §1-5: Install and smoke test (one-time setup)
+- §6: Active tracks in run order (Klang → Planck 1.1 → Raum → Planck 1.2 → Hertz 1.2)
+- §7: Reference tracks (Track A experiments, Planck 1.0, Hertz 1.0)
+- §8: Hertz disk cleanup, before Hertz 1.2 restart
+- §9: Troubleshooting
+- §10: Quick smoke test (2 minutes)
 
 ---
 
@@ -16,17 +33,15 @@ cd sgs
 
 ## 2. Python Environment
 
-Requires **Python 3.11 or 3.12** (NOT 3.13 — PyTorch doesn't support 3.13 on Windows yet).
+Requires **Python 3.11 or 3.12** (NOT 3.13, PyTorch doesn't support 3.13 on Windows yet).
 
 ### Install Python 3.12 (if you have 3.13)
 
-1. Download Python 3.12 from https://www.python.org/downloads/release/python-3120/
-   (Windows installer 64-bit)
-2. During install, check **"Add to PATH"** — install alongside 3.13, don't replace it.
+1. Download Python 3.12 from https://www.python.org/downloads/release/python-3120/ (Windows installer 64-bit)
+2. During install, check **"Add to PATH"**, install alongside 3.13, don't replace it.
 3. Use `py -3.12` to target the right version:
 
 ```powershell
-# Create venv with Python 3.12 specifically
 py -3.12 -m venv .venv
 .venv\Scripts\activate
 python --version   # should say 3.12.x
@@ -51,7 +66,7 @@ pip install -r requirements.txt
 pip install gsplat
 ```
 
-If gsplat fails to install (CUDA build issues on Windows), skip it — the Raum bridge trainer auto-falls back to a CPU-compatible renderer. You can always install it later.
+If gsplat fails to install (CUDA build issues on Windows), skip it, the Raum bridge trainer auto-falls back to a CPU-compatible renderer. You can always install it later.
 
 ---
 
@@ -62,8 +77,7 @@ mkdir data
 cd data
 ```
 
-Download `glove.6B.zip` (~862 MB) from:
-**https://nlp.stanford.edu/data/glove.6B.zip**
+Download `glove.6B.zip` (~862 MB) from https://nlp.stanford.edu/data/glove.6B.zip
 
 Extract `glove.6B.300d.txt` into `data/`. Delete the zip and other files.
 
@@ -112,9 +126,9 @@ sgs/
 │   ├── seq2seq.py              # SCAN seq2seq models
 │   ├── scan.py                 # SCAN dataset
 │   ├── data.py                 # GloVe + STS-B + AllNLI loading
-│   ├── sgs_lm.py               # Radiance Planck — causal SGS language model
+│   ├── sgs_lm.py               # Radiance Planck, causal SGS language model
 │   ├── tinystories.py          # TinyStories data pipeline
-│   └── raum/                   # Radiance Raum — text-to-3D
+│   └── raum/                   # Radiance Raum, text-to-3D
 │       ├── vocab.py            #   scene vocabulary (objects, colors, relations)
 │       ├── templates.py        #   3D shape generators as Gaussian clouds
 │       ├── cameras.py          #   orbit camera utilities
@@ -127,213 +141,161 @@ sgs/
 │       └── analyze.py          #   space transform analysis tools
 │
 ├── scripts/
-│   ├── phase0_feasibility.py   # Numerical feasibility check
-│   ├── train_stsb.py           # STS-B sentence similarity training
-│   ├── run_all_ablations.py    # All ablation experiments
-│   ├── run_phase2.py           # Phase 2: NLI + scaling
-│   ├── run_phase3.py           # Phase 3: SCAN + gap closing
-│   ├── run_scan_multiseed.py   # SCAN multi-seed validation
-│   ├── run_paper_fixes.py      # M2/M6 kernel isolation experiments
-│   ├── train_lm.py             # Radiance Planck training
-│   ├── generate.py             # Planck text generation
-│   ├── export_onnx.py          # Planck → ONNX export
-│   ├── train_raum_compositional.py   # Raum PoC-D training
-│   ├── train_raum_bridge.py          # Raum PoC-C training
-│   └── analyze_raum_bridge.py        # Raum PoC-C analysis
+│   ├── phase0_feasibility.py
+│   ├── train_stsb.py
+│   ├── run_all_ablations.py
+│   ├── run_phase2.py
+│   ├── run_phase3.py
+│   ├── run_scan_multiseed.py
+│   ├── run_paper_fixes.py
+│   ├── train_lm.py                     # Planck 1.0
+│   ├── train_planck11.py               # Planck 1.1 (H-SGS blobs)
+│   ├── build_blobs.py                  # Blob builder for Planck 1.1
+│   ├── train_hertz.py                  # Hertz 1B
+│   ├── evaluate_lm.py                  # Perplexity + HellaSwag + ARC-Easy
+│   ├── generate.py                     # Planck/Hertz text generation
+│   ├── export_onnx.py
+│   ├── train_raum_compositional.py     # Raum PoC-D
+│   ├── train_raum_bridge.py            # Raum PoC-C
+│   └── analyze_raum_bridge.py
 │
+├── klang/                      # Radiance Klang (audio)
 ├── paper/                      # Research papers (markdown)
 ├── docs/                       # Plans, analysis, proofs, whitepaper
+│   ├── papers/
+│   │   └── sgs_training_acceleration.md    # Planck/Hertz 1.2 recipe
 │   ├── plans/
 │   ├── analysis/
-│   ├── proofs/lean/            # 13 Lean 4 formal proofs
-│   └── ...
+│   └── proofs/lean/            # 13 Lean 4 formal proofs
 └── checkpoints/                ← model checkpoints (gitignored)
 ```
 
 ---
 
-## 6. What to Run
+## 6. Active tracks, in run order
 
-### Track A: Prior Experiments (already done, re-run to verify)
+Follow these in order. Each validates the layer below before committing GPU-weeks.
 
-```powershell
-# Phase 0: feasibility check (~10 min)
-python scripts/phase0_feasibility.py --glove data/glove.6B.300d.txt
+### 6.1  Track 1: Klang, Audio Gaussian Splatting
 
-# Phase 1: STS-B all ablations (~8 hours)
-python scripts/run_all_ablations.py --glove data/glove.6B.300d.txt
-
-# Phase 2: NLI + scaling
-python scripts/run_phase2.py --glove data/glove.6B.300d.txt
-
-# Phase 3: SCAN + gap closing
-python scripts/run_phase3.py --glove data/glove.6B.300d.txt
-
-# SCAN multi-seed (5 seeds)
-python scripts/run_scan_multiseed.py --glove data/glove.6B.300d.txt
-
-# Kernel isolation (M2/M6)
-python scripts/run_paper_fixes.py --glove data/glove.6B.300d.txt
-```
-
-**Results:** Each script saves a JSON file in the repo root (e.g., `ablation_results.json`, `phase1_5_results.json`, `scan_length_full_ablation.json`, `paper_fixes_results.json`).
+**Status:** finalize before Planck 1.1.
 
 ```powershell
-# Commit Track A results
-git add *.json
-git commit -m "Track A: experiment results from Windows machine"
-git push
-```
-
-### Track B1: Radiance Planck (100M language model)
-
-```powershell
-# Step 1: Download + tokenize TinyStories (~15 min, needs internet)
-python src/tinystories.py --data-dir data/tinystories
-
-# Step 2: Train from scratch (~2-3 hours on RTX 4090)
-# Default: d_s=128, d_f=1000, 3 passes, 4 heads → 100.9M params
-# 3 epochs × 27.5K steps = 82K steps total
-python scripts/train_lm.py --data-dir data/tinystories
-
-# Step 3: Generate text
-python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time"
-
-# Interactive mode
-python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
-```
-
-**Results:** Training logs to wandb (if enabled) and saves checkpoints to `checkpoints/planck/`. Generation samples are printed to stdout.
-
-```powershell
-# Save 50 generated samples to file for review
-mkdir results 2>nul
-python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck_samples.txt
-
-# Commit results (not checkpoints — too large for git)
-git add results/planck_samples.txt
-git commit -m "Track B1: Planck 100M generation samples"
-git push
-```
-
-### Track B1-1: Radiance Hertz (1B language model — internal benchmark)
-
-```powershell
-# All-in-one: download 10B tokens + train
-# Defaults: batch=2, grad_accum=32, context=512, 3 passes, d_f=5000, gradient checkpointing ON
-# Training time on RTX 4090 at ~2-3k tok/s: approximately 30-60 days for 10B tokens.
-# For a faster sanity check, use --max-tokens 1B --epochs 1 (~3-6 days).
-python scripts/train_hertz.py --max-tokens 10B
-
-# Or with custom settings:
-python scripts/train_hertz.py --max-tokens 1B --epochs 1    # quick sanity check
-python scripts/train_hertz.py --wandb                        # with logging
-python scripts/train_hertz.py --resume checkpoints/hertz/best.pt  # resume
-python scripts/train_hertz.py --no-grad-checkpoint --batch-size 1  # if still OOM
-
-# Evaluate against TinyLlama/Pythia baselines
-# Runs: perplexity (FineWeb-Edu val), HellaSwag 0-shot, ARC-Easy 0-shot
-python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
-
-# Smoke test the eval pipeline without waiting (5 examples per task)
-python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt --limit 5
-
-# Generate text (architecture auto-inferred from checkpoint, no flags needed)
-python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of artificial intelligence"
-```
-
-**Results:** Evaluation script saves benchmark scores to `results/hertz_eval.json`. Checkpoints in `checkpoints/hertz/` (gitignored — too large).
-
-```powershell
-# Save evaluation + samples
-mkdir results 2>nul
-python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The" --n-samples 50 > results/hertz_samples.txt
-
-# Commit results
-git add results/hertz_eval.json results/hertz_samples.txt
-git commit -m "Track B1-1: Hertz 1B evaluation + samples"
-git push
-```
-
-### Track B2: Radiance Planck 1.1 — Hierarchical SGS (Knowledge Splatting)
-
-```powershell
-# All-in-one: build blobs from Planck 1.0 + train Planck 1.1
-python scripts/train_planck11.py
-
-# Or step by step:
-# Step 1: Build blobs (requires Planck 1.0 checkpoint)
-python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 50000
-
-# Step 2: Train with blob-only warmup (1 epoch, base frozen)
-python scripts/train_planck11.py --freeze-base --epochs 1
-
-# Step 3: Joint training (3 epochs, everything unfrozen)
-python scripts/train_planck11.py --resume checkpoints/planck11/epoch_1.pt --epochs 3
-
-# Ablation: blobs disabled (should match Planck 1.0 baseline)
-python scripts/train_planck11.py --t-max 0.0
-
-# Generate with Planck 1.1
-python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time"
-```
-
-**Results:** Checkpoints in `checkpoints/planck11/`. Compare val loss and generation quality against Planck 1.0.
-
-```powershell
-# Save results
-mkdir results 2>nul
-python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck11_samples.txt
-
-git add results/planck11_samples.txt
-git commit -m "Track B2: Planck 1.1 (H-SGS) samples"
-git push
-```
-
-### Track C: Radiance Klang — Audio Gaussian Splatting
-
-```powershell
-# Install audio dependencies
 pip install librosa soundfile
 
 # Variant A: STFT point-blob Gaussians (baseline, slow)
 python klang/run_stft_experiment.py --device cuda --n_gaussians 1500 3000
 
-# Variant B: Layer-based Gaussians (RECOMMENDED — each Gaussian = a sound layer)
+# Variant B: Layer-based Gaussians (RECOMMENDED, each Gaussian = a sound layer)
 python klang/variant_b_experiment.py --device cuda --n_layers 10 20 40
-
-# Compare output with upper bound:
-#   klang/variant_b_*/audio.wav vs klang/diag_2_griffinlim_stft.wav
-#   Check variant_b_*/trajectories.png for layer frequency paths
 ```
 
-Variant B represents each sound source as ONE Gaussian layer with continuous
-frequency trajectory and opacity over time. 10-40 layers, not 1000+ blobs.
+Variant B represents each sound source as ONE Gaussian layer with continuous frequency trajectory and opacity over time. 10-40 layers, not 1000+ blobs.
 
-**Results:** Audio WAVs + plots saved to `klang/variant_b_*/` (reconstruction.png, trajectories.png, opacity.png, audio.wav).
+**Results:** audio WAVs + plots in `klang/variant_b_*/` (reconstruction.png, trajectories.png, opacity.png, audio.wav). Compare `variant_b_*/audio.wav` to the upper bound `klang/diag_2_griffinlim_stft.wav`.
 
 ```powershell
-# Commit Klang results (audio + plots)
 git add klang/variant_b_*/ klang/stft_*.wav
-git commit -m "Track C: Klang audio reconstruction results"
+git commit -m "Track 1 Klang: audio reconstruction results"
 git push
 ```
 
-### Track D1: Radiance Raum — Text-to-3D PoCs
+### 6.2  Track 2: Planck 1.1, Hierarchical SGS (Knowledge Splatting / blobs)
 
-#### PoC-D: Compositional Scene Graph (run first — CPU, ~10 min)
+**Status:** validates whether the blob concept belongs in Hertz 1.2.
+**Prerequisite:** `checkpoints/planck/best.pt` from Planck 1.0 (see §7.2 if missing).
+
+Planck 1.1 extends SGS with pre-computed Gaussian "knowledge blobs" from TinyStories. Two rendering passes: (1) blob pass consumes transmittance with retrieved archetypes, (2) word pass renders token-level in the remaining transmittance. Math formally verified in Lean 4 (H1, H2, H4). Whitepaper: `docs/whitepaper/hierarchical_sgs.md`.
+
+#### Step 1, Build blobs (~15 min)
+
+```powershell
+python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 50000
+```
+
+Output: `data/blobs/tinystories/blobs.pt` (~60 MB).
+
+Inspect:
+```powershell
+python -c "
+import torch, json
+d = torch.load('data/blobs/tinystories/blobs.pt', weights_only=False)
+m = json.load(open('data/blobs/tinystories/meta.json'))
+print(f'Blobs: {d[\"mu\"].shape[0]:,}')
+print(f'Non-empty: {m[\"non_empty_clusters\"]:,}')
+print(f'Mu range: [{d[\"mu\"].min():.3f}, {d[\"mu\"].max():.3f}]')
+"
+```
+
+#### Step 2, Train Planck 1.1 (two-stage, ~3 hours)
+
+```powershell
+# Stage A: blob warmup (base frozen, ~30 min)
+python scripts/train_planck11.py --freeze-base --epochs 1
+
+# Stage B: joint training (~2-3 hours)
+python scripts/train_planck11.py --resume checkpoints/planck11/epoch_1.pt --epochs 3
+```
+
+Or all-in-one:
+```powershell
+python scripts/train_planck11.py
+```
+
+#### Step 3, Ablations (isolate blob contribution)
+
+```powershell
+# Blobs disabled (should match Planck 1.0 baseline)
+python scripts/train_planck11.py --t-max 0.0 --save-dir checkpoints/planck11_noablob --epochs 3
+
+# Fewer blobs (5K)
+python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 5000 --output data/blobs/tinystories_5k
+python scripts/train_planck11.py --blob-dir data/blobs/tinystories_5k --n-blobs 5000 --save-dir checkpoints/planck11_5k
+
+# Higher blob budget
+python scripts/train_planck11.py --t-max 0.5 --save-dir checkpoints/planck11_t50
+
+# More retrieval (top-16 vs default top-8)
+python scripts/train_planck11.py --blob-k 16 --save-dir checkpoints/planck11_k16
+```
+
+#### Step 4, Hard gates (pass/fail before declaring blobs validated)
+
+| Gate | How to check | Pass condition |
+|---|---|---|
+| Base generation intact | Run `--t-max 0.0`, compare val loss to Planck 1.0 | Val loss within ±0.05 of Planck 1.0 |
+| Blobs being used | Blob utilization in training logs | Effective weight > 5% |
+| Perplexity improves | Planck 1.1 val loss vs Planck 1.0 | Strictly lower than Planck 1.0 |
+| Repetition decreases | Count 4-gram repetitions in 50 samples | Fewer repeated 4-grams than Planck 1.0 |
+
+All four must pass. If yes, blobs go into Hertz 1.2. If any fail, drop blobs from the 1.2 scope.
+
+#### Step 5, Commit results
+
+```powershell
+mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck11_samples.txt
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck10_baseline_samples.txt
+git add results/planck11_samples.txt results/planck10_baseline_samples.txt
+git commit -m "Track 2 Planck 1.1: H-SGS blobs validation"
+git push
+```
+
+### 6.3  Track 3: Raum, Text-to-3D PoCs
+
+**Status:** finalize after Planck 1.1.
+
+#### PoC-D: Compositional Scene Graph (CPU, ~10 min)
 
 ```powershell
 python scripts/train_raum_compositional.py --glove data/glove.6B.300d.txt
 ```
 
-This will:
-1. Generate 20K synthetic scenes (sentences + ground truth)
-2. Train the compositional model (role classifier + attribute heads)
-3. Evaluate on held-out compositional generalization test
-4. Print sample scene assemblies
+Generates 20K synthetic scenes, trains the compositional model (role classifier + attribute heads), evaluates on held-out compositional generalization, prints sample scene assemblies.
 
-Results → `checkpoints/raum_d/`
+Results: `checkpoints/raum_d/`.
+
+> **Note:** `--feature-mode sgs` currently raises NotImplementedError. The SGS encoder integration is pending. Use the default `--feature-mode glove`.
 
 #### PoC-C: Shared-Equation Bridge (GPU, ~2-4 hours)
 
@@ -341,14 +303,11 @@ Results → `checkpoints/raum_d/`
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt
 ```
 
-This will:
-1. Generate synthetic scenes + render GT from multiple viewpoints
-2. Train the bridge (semantic Gaussians → spatial Gaussians)
-3. Evaluate render quality (PSNR)
+Generates synthetic scenes + renders GT from multiple viewpoints, trains the semantic-to-spatial Gaussian bridge, evaluates render quality (PSNR).
 
-Results → `checkpoints/raum_c/`
+Results: `checkpoints/raum_c/`.
 
-#### PoC-C Analysis (after training completes)
+#### PoC-C Analysis
 
 ```powershell
 python scripts/analyze_raum_bridge.py ^
@@ -356,78 +315,225 @@ python scripts/analyze_raum_bridge.py ^
   --glove data/glove.6B.300d.txt
 ```
 
-This prints:
-1. Word → xyz mapping (do spatial words map to spatial axes?)
-2. Sentence composition (where do words land in 3D?)
-3. Interpolation paths between word pairs
-4. Weight matrix analysis of the space transform
+Prints: word → xyz mapping, sentence composition in 3D, interpolation paths, weight matrix analysis.
 
-Results → `results/raum_c_analysis/`
+Results: `results/raum_c_analysis/`.
 
-**Commit all Raum results:**
+#### Commit
 
 ```powershell
 git add results/raum_c_analysis/ checkpoints/raum_d/*.json
-git commit -m "Track D: Raum text-to-3D PoC results"
+git commit -m "Track 3 Raum: PoC-C + PoC-D results"
+git push
+```
+
+### 6.4  Track 4: Planck 1.2, Acceleration recipe validation
+
+**Status:** validates the SGS-native training accelerations from `docs/papers/sgs_training_acceleration.md` before Hertz 1.2.
+
+The paper proposes five accelerations, compound expected ~2-3x:
+
+| # | Proposal | Expected | Effort |
+|---|---|---|---|
+| §2.1 | Transmittance-weighted loss | ~1.4x sample efficiency | 1 day |
+| §2.2 | Adaptive pass count (early exit) | ~1.3x | 2 days |
+| §2.3 | Kernel top-k sparsity | ~1.4x forward | 4 days |
+| §2.4 | Shared kernel across passes | ~1.05x | 1 day |
+| §2.5 | Gaussian-native curriculum | ~1.15x (Hertz-2 material) | 2 days |
+
+Recommended validation order on Planck 1.2:
+
+1. **Validate prerequisite:** check correlation between `T[t,t]` and prediction correctness on current Hertz checkpoint. If correlation is strong, §2.1 is well-founded.
+2. **§2.1 first** (cheap, doesn't change compute shape). A/B: `--transmittance-loss` vs plain CE on Planck 1.2, 500M tokens. Pass if perplexity parity at ≥20% fewer tokens.
+3. **§2.3 second** (biggest compute win, orthogonal to §2.1). Measure kernel + render wall-clock delta.
+4. **§2.2 and §2.4** bolt on once the pipeline is stable.
+5. **§2.5** deferred to Hertz 2.x.
+
+Gate before Hertz 1.2: Planck 1.2 must reach Planck 1.0's validation loss on ≤70% of the tokens (1.43x sample efficiency). If not, revisit the paper or drop individual proposals.
+
+### 6.5  Track 5: Hertz 1.2, 1B SGS LM with accel recipe
+
+**Status:** runs only after Planck 1.2 validates §2.1 and §2.3 (minimum).
+**Prerequisite:** Hertz folder cleaned up (see §8).
+
+Command shape (subject to flags added during Planck 1.2 work):
+
+```powershell
+python scripts/train_hertz.py ^
+  --max-tokens 10B ^
+  --no-compile ^
+  --keep-last 3 ^
+  --transmittance-loss ^
+  --kernel-topk 64 ^
+  --wandb
+```
+
+At a Planck-1.2-validated compound ~2x throughput on top of 11.8k tok/s baseline, 10B tokens should complete in ~5 days on the 4090, vs ~10 days without accel.
+
+Evaluation:
+```powershell
+python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt
+python scripts/evaluate_lm.py --checkpoint checkpoints/hertz/best.pt --limit 5   # smoke test
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The future of AI"
+```
+
+Commit:
+```powershell
+mkdir results 2>nul
+python scripts/generate.py --checkpoint checkpoints/hertz/best.pt --prompt "The" --n-samples 50 > results/hertz_samples.txt
+git add results/hertz_eval.json results/hertz_samples.txt
+git commit -m "Track 5 Hertz 1.2: 1B SGS LM evaluation + samples"
 git push
 ```
 
 ---
 
-## Committing Results — Summary
+## 7. Reference tracks (already run / on hold)
 
-After running any track, commit the results so they're available across machines:
+### 7.1  Track A: Prior experiments (Phase 0-3, STS-B, SCAN, NLI)
 
-| Track | What to commit | Command |
-|---|---|---|
-| A (experiments) | `*.json` in repo root | `git add *.json` |
-| B1 (Planck) | `results/planck_samples.txt` | `git add results/` |
-| B1-1 (Hertz) | `results/hertz_*.json`, `results/hertz_samples.txt` | `git add results/` |
-| B2 (Planck 1.1) | `results/planck11_samples.txt` | `git add results/` |
-| C (Klang) | `klang/variant_b_*/` (wav + png) | `git add klang/variant_b_*/` |
-| D (Raum) | `results/raum_c_analysis/`, checkpoint JSONs | `git add results/` |
+Results live in repo root as `*.json`. Re-run for verification:
 
-**Do NOT commit:** model checkpoints (`.pt` files >50MB), GloVe data, TinyStories data, FineWeb data. These are in `.gitignore`.
+```powershell
+python scripts/phase0_feasibility.py --glove data/glove.6B.300d.txt
+python scripts/run_all_ablations.py --glove data/glove.6B.300d.txt
+python scripts/run_phase2.py --glove data/glove.6B.300d.txt
+python scripts/run_phase3.py --glove data/glove.6B.300d.txt
+python scripts/run_scan_multiseed.py --glove data/glove.6B.300d.txt
+python scripts/run_paper_fixes.py --glove data/glove.6B.300d.txt
+```
+
+### 7.2  Planck 1.0, 100M baseline LM
+
+Needed as a prerequisite for Planck 1.1 blobs. Skip if `checkpoints/planck/best.pt` already exists.
+
+```powershell
+python src/tinystories.py --data-dir data/tinystories          # ~15 min
+python scripts/train_lm.py --data-dir data/tinystories          # ~2-3 hours
+
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time"
+python scripts/generate.py --checkpoint checkpoints/planck/best.pt --interactive
+```
+
+### 7.3  Hertz 1.0, **PAUSED**
+
+Hertz 1.0 training was paused 2026-04-20 due to wall-clock infeasibility without the SGS-native accel recipe. Do not restart Hertz 1.0. The next 1B-scale run is Hertz 1.2 (§6.5) which requires Planck 1.2 validation first.
+
+If you want to *reproduce* Hertz 1.0 for comparison purposes only, see the pre-2026-04-20 instructions via `git log` on this file.
 
 ---
 
-## 7. Troubleshooting
+## 8. Hertz disk cleanup, before Hertz 1.2 restart
+
+Before starting Hertz 1.2 you want a clean `checkpoints/hertz/` and enough free disk for the new run. What the old run leaves behind and what to keep:
+
+### 8.1  What's on disk
+
+| Path | Typical size | Safe to delete? |
+|---|---|---|
+| `checkpoints/hertz/best.pt` | ~8 GB | **Yes**, Hertz 1.2 is a fresh architecture |
+| `checkpoints/hertz/step_*.pt` | ~8 GB each, up to hundreds of GB over a full run | **Yes** |
+| `checkpoints/hertz/epoch_*.pt` | ~8 GB each | **Yes** |
+| `checkpoints/hertz/final.pt` | ~8 GB | **Yes** |
+| `checkpoints/hertz/trace.json` | varies | **Yes** (profiler artifact) |
+| `data/fineweb/train.bin` | ~18 GB (9B tokens × 2 bytes) | **No, keep**, reused by Hertz 1.2 |
+| `data/fineweb/val.bin` | ~180 MB | **No, keep** |
+| `data/fineweb/tokenizer.model` | ~2 MB | **No, keep** |
+
+Checkpoints from Hertz 1.0 are not architecturally portable to Hertz 1.2, delete them. The FineWeb-Edu tokenized data is reusable and costly to re-download/tokenize (~hours), keep it.
+
+### 8.2  Cleanup commands (PowerShell)
+
+Show what will be deleted, then delete:
+
+```powershell
+# Inventory first (no deletion)
+Get-ChildItem checkpoints\hertz\*.pt | Select-Object Name, @{N='GB';E={[math]::Round($_.Length/1GB, 2)}}
+Get-ChildItem checkpoints\hertz\trace*.json | Select-Object Name, Length
+
+# Delete all checkpoints (KEEP data/fineweb)
+Remove-Item checkpoints\hertz\*.pt
+Remove-Item checkpoints\hertz\trace*.json -ErrorAction SilentlyContinue
+
+# Verify data is intact
+Get-ChildItem data\fineweb\ | Select-Object Name, @{N='GB';E={[math]::Round($_.Length/1GB, 2)}}
+```
+
+Expected disk savings: ~10-400 GB depending on how many `step_*.pt` accumulated.
+
+### 8.3  Retention during Hertz 1.2
+
+`train_hertz.py` now supports `--keep-last N` which rotates `step_*.pt` files, keeping only the N most recent. `best.pt`, `epoch_*.pt`, `final.pt` are never rotated.
+
+**Default is `--keep-last 3`** (~24 GB of rotating step checkpoints, down from unbounded). Pass `--keep-last 0` to disable rotation (not recommended for long runs).
+
+```powershell
+# Default retention (3 most recent step_*.pt)
+python scripts/train_hertz.py --max-tokens 10B
+
+# Aggressive retention (only 1 step_*.pt, ~8 GB)
+python scripts/train_hertz.py --max-tokens 10B --keep-last 1
+
+# Legacy behavior (keep everything, dangerous)
+python scripts/train_hertz.py --max-tokens 10B --keep-last 0
+```
+
+### 8.4  Also worth clearing
+
+```powershell
+# PyTorch compile cache (regenerates on next run)
+Remove-Item -Recurse "$env:LOCALAPPDATA\torch\inductor" -ErrorAction SilentlyContinue
+Remove-Item -Recurse "$env:USERPROFILE\.cache\torch_inductor" -ErrorAction SilentlyContinue
+
+# Wandb local runs folder
+Remove-Item -Recurse wandb\ -ErrorAction SilentlyContinue
+
+# HuggingFace datasets cache (re-downloads if you need them again)
+# Remove-Item -Recurse "$env:USERPROFILE\.cache\huggingface\datasets"
+```
+
+HuggingFace cache can be several tens of GB. Keep it unless you're desperate for space, redownloading FineWeb-Edu is slow.
+
+---
+
+## 9. Troubleshooting
 
 ### CUDA out of memory
-Reduce batch size:
 ```powershell
-# Planck
 python scripts/train_lm.py --data-dir data/tinystories --batch-size 16
-
-# Raum bridge
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt --batch-size 2 --img-size 32
 ```
 
+### Hertz throughput collapses on resume
+`--resume` can trigger a throughput regression from fused-Adam fallback after loading optimizer state on Windows. Two workarounds:
+
+```powershell
+# Option A: weights-only resume (drops optimizer state, LR re-warms)
+python scripts/train_hertz.py --warm-start checkpoints/hertz/best.pt --no-compile
+
+# Option B: start fresh (best throughput, loses prior tokens)
+python scripts/train_hertz.py --no-compile
+```
+
+### Hertz compile is slow on Windows
+`torch.compile` via `triton-windows` can be *slower* than eager mode on a 4090 under Windows. Use `--no-compile`.
+
 ### gsplat won't install
-Skip it. Raum PoC-C auto-falls back to a simple CPU renderer:
-```
-Rendering backend: simple alpha-composite (CPU)
-```
-Training is slower but works. Install gsplat later if needed.
+Skip it. Raum PoC-C auto-falls back to a simple CPU renderer (output will show `Rendering backend: simple alpha-composite (CPU)`). Training is slower but works.
 
 ### sentencepiece won't install
-Only needed for Planck (B1). Raum doesn't need it:
-```powershell
-pip install sentencepiece
-```
-If it fails, install via conda: `conda install -c conda-forge sentencepiece`
+Only needed for Planck + Hertz. If pip fails: `conda install -c conda-forge sentencepiece`
 
 ### GloVe download issues
-Alternative mirrors:
-- https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip
-- Or via Python:
+Alternative mirror: https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip
+
+Or via Python:
 ```python
 import urllib.request
 urllib.request.urlretrieve("https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip", "data/glove.6B.zip")
 ```
 
 ### SSL errors on Windows
-Some scripts handle this automatically. If you still get SSL errors:
 ```powershell
 pip install certifi
 set SSL_CERT_FILE=%VIRTUAL_ENV%\Lib\site-packages\certifi\cacert.pem
@@ -435,9 +541,9 @@ set SSL_CERT_FILE=%VIRTUAL_ENV%\Lib\site-packages\certifi\cacert.pem
 
 ---
 
-## 8. Quick Smoke Test (2 minutes)
+## 10. Quick smoke test (2 minutes)
 
-After setup, run this to confirm everything works end-to-end:
+After setup, confirm everything works end-to-end:
 
 ```powershell
 python -c "
@@ -481,105 +587,15 @@ All OK
 
 ---
 
-## 9. Track B2: Planck 1.1 — Knowledge Splatting Experiments
+## Appendix: Committing results, summary
 
-> **Run this AFTER Planck 1.0, Hertz 1.0, Klang, and Raum experiments.**
-> Requires: `checkpoints/planck/best.pt` (Planck 1.0 trained model)
+| Track | What to commit | Command |
+|---|---|---|
+| A (experiments) | `*.json` in repo root | `git add *.json` |
+| 1 (Klang) | `klang/variant_b_*/` (wav + png) | `git add klang/variant_b_*/` |
+| 2 (Planck 1.1) | `results/planck11_*.txt`, `results/planck10_baseline*.txt` | `git add results/` |
+| 3 (Raum) | `results/raum_c_analysis/`, checkpoint JSONs | `git add results/` |
+| 4 (Planck 1.2) | `results/planck12_*.txt`, ablation JSONs | `git add results/` |
+| 5 (Hertz 1.2) | `results/hertz_eval.json`, `results/hertz_samples.txt` | `git add results/` |
 
-### Background
-
-Planck 1.1 extends the SGS architecture with **knowledge blobs** — pre-computed Gaussian representations of common story patterns from TinyStories. The model renders in two passes:
-1. **Blob pass**: retrieve and render the most relevant knowledge blobs (consuming transmittance)
-2. **Word pass**: render word-level tokens in the remaining transmittance capacity
-
-Mathematical foundation formally verified in Lean 4 (H1, H2, H4). Whitepaper: `docs/whitepaper/hierarchical_sgs.md`
-
-### Step 1: Build Knowledge Blobs
-
-Cluster TinyStories into 50K "story archetype" blobs using Planck 1.0's encoder:
-
-```powershell
-python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 50000
-```
-
-This creates `data/blobs/tinystories/blobs.pt` (~60MB, 50K blobs × (d_s + d_s + 1 + d_f)).
-
-To inspect blob quality:
-```powershell
-python -c "
-import torch, json
-d = torch.load('data/blobs/tinystories/blobs.pt', weights_only=False)
-m = json.load(open('data/blobs/tinystories/meta.json'))
-print(f'Blobs: {d[\"mu\"].shape[0]:,}')
-print(f'Non-empty: {m[\"non_empty_clusters\"]:,}')
-print(f'Chunks processed: {m[\"n_chunks_processed\"]:,}')
-print(f'Mu range: [{d[\"mu\"].min():.3f}, {d[\"mu\"].max():.3f}]')
-print(f'Var range: [{d[\"log_var\"].min():.3f}, {d[\"log_var\"].max():.3f}]')
-"
-```
-
-### Step 2: Train Planck 1.1 (Recommended: Two-Stage)
-
-**Stage A — Blob warmup (base frozen, ~30 min):**
-```powershell
-python scripts/train_planck11.py --freeze-base --epochs 1
-```
-
-**Stage B — Joint training (everything unfrozen, ~2-3 hours):**
-```powershell
-python scripts/train_planck11.py --resume checkpoints/planck11/epoch_1.pt --epochs 3
-```
-
-**Or all-in-one (builds blobs if needed, then trains 3 epochs):**
-```powershell
-python scripts/train_planck11.py
-```
-
-### Step 3: Ablations
-
-Run these to isolate the blob contribution:
-
-```powershell
-# Ablation 1: Blobs disabled (should match Planck 1.0 baseline)
-python scripts/train_planck11.py --t-max 0.0 --save-dir checkpoints/planck11_noablob --epochs 3
-
-# Ablation 2: Fewer blobs
-python scripts/build_blobs.py --checkpoint checkpoints/planck/best.pt --n-blobs 5000 --output data/blobs/tinystories_5k
-python scripts/train_planck11.py --blob-dir data/blobs/tinystories_5k --n-blobs 5000 --save-dir checkpoints/planck11_5k
-
-# Ablation 3: Higher blob budget
-python scripts/train_planck11.py --t-max 0.5 --save-dir checkpoints/planck11_t50
-
-# Ablation 4: More retrieval
-python scripts/train_planck11.py --blob-k 16 --save-dir checkpoints/planck11_k16
-```
-
-### Step 4: Evaluate
-
-```powershell
-# Generate 50 samples from Planck 1.1
-mkdir results 2>nul
-python scripts/generate.py --checkpoint checkpoints/planck11/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck11_samples.txt
-
-# Compare against Planck 1.0 baseline
-python scripts/generate.py --checkpoint checkpoints/planck/best.pt --prompt "Once upon a time" --n-samples 50 | Out-File results/planck10_baseline_samples.txt
-```
-
-### Step 5: Hard Gates (Experiment Pass/Fail)
-
-Check these before declaring success:
-
-| Gate | How to check | Pass condition |
-|------|-------------|----------------|
-| Base generation intact | Run with `--t-max 0.0`, compare val loss to Planck 1.0 | Val loss within ±0.05 of Planck 1.0 |
-| Blobs are being used | Check blob utilization in training logs | Blob effective weight > 5% |
-| Perplexity improves | Compare Planck 1.1 val loss vs Planck 1.0 | Val loss lower than Planck 1.0 |
-| Repetition decreases | Count 4-gram repetitions in 50 samples | Fewer repeated 4-grams than Planck 1.0 |
-
-### Step 6: Commit Results
-
-```powershell
-git add results/planck11_samples.txt results/planck10_baseline_samples.txt
-git commit -m "Track B2: Planck 1.1 (H-SGS Knowledge Splatting) results"
-git push
-```
+**Do NOT commit:** model checkpoints (`.pt` files >50 MB), GloVe data, TinyStories data, FineWeb data, blob indices (~60 MB). These are in `.gitignore`.
