@@ -254,14 +254,28 @@ python scripts/train_planck11.py --blob-k 16 --save-dir checkpoints/planck11_k16
 
 #### Step 4, Hard gates (pass/fail before declaring blobs validated)
 
-| Gate | How to check | Pass condition |
-|---|---|---|
-| Base generation intact | Run `--t-max 0.0`, compare val loss to Planck 1.0 | Val loss within ±0.05 of Planck 1.0 |
-| Blobs being used | Blob utilization in training logs | Effective weight > 5% |
-| Perplexity improves | Planck 1.1 val loss vs Planck 1.0 | Strictly lower than Planck 1.0 |
-| Repetition decreases | Count 4-gram repetitions in 50 samples | Fewer repeated 4-grams than Planck 1.0 |
+Automated runner: `scripts/validate_planck11.py` evaluates all four gates
+and writes `results/planck11_validation.json`. Exits non-zero if any
+gate fails.
+
+```powershell
+# Full run (requires checkpoints/planck11/best.pt and checkpoints/planck11_noablob/best.pt)
+python scripts/validate_planck11.py
+
+# Skip gate 1 if you haven't trained the --t-max 0.0 ablation yet
+python scripts/validate_planck11.py --skip-gate-1
+```
+
+| # | Gate | How the script checks it | Pass condition |
+|---|---|---|---|
+| 1 | Base generation intact | Eval `checkpoints/planck11_noablob/best.pt` against Planck 1.0 val loss | `|Δ val_loss| ≤ 0.05` |
+| 2 | Blobs being used | Mean of `(1 - t_residual) * gate` over eval batches | `> 0.05` |
+| 3 | Perplexity improves | Planck 1.1 val loss vs Planck 1.0 | Planck 1.1 strictly lower |
+| 4 | Repetition decreases | 4-gram repeats in generated samples | Planck 1.1 fewer than Planck 1.0 |
 
 All four must pass. If yes, blobs go into Hertz 1.2. If any fail, drop blobs from the 1.2 scope.
+
+Thresholds live at the top of `scripts/validate_planck11.py` if you need to tune them.
 
 #### Step 5, Commit results
 
