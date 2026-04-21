@@ -4,7 +4,7 @@ Fresh install from scratch. Covers all tracks: experiments, Planck LM, Raum text
 
 > **Run order as of 2026-04-20** (Strategic pivot, see `docs/papers/sgs_training_acceleration.md`):
 >
-> **1. Klang → 2. Planck 1.1 → 3. Raum → 4. Planck 1.2 → 5. Hertz 1.2**
+> **1. Klang → 2. Planck 1.1 → 3. Raum → 4. Planck 1.2 → 4.5. Klang 1.2 → 5. Hertz 1.2**
 >
 > Hertz 1.0 is paused. The new large-LM run is Hertz 1.2, with the acceleration recipe from Planck 1.2. This order validates cheaper tracks first, then the accel recipe on Planck 1.2, then commits GPU-weeks to Hertz 1.2.
 
@@ -13,7 +13,7 @@ Fresh install from scratch. Covers all tracks: experiments, Planck LM, Raum text
 ## Table of contents
 
 - §1-5: Install and smoke test (one-time setup)
-- §6: Active tracks in run order (Klang → Planck 1.1 → Raum → Planck 1.2 → Hertz 1.2)
+- §6: Active tracks in run order (Klang → Planck 1.1 → Raum → Planck 1.2 → Klang 1.2 → Hertz 1.2)
 - §7: Reference tracks (Track A experiments, Planck 1.0, Hertz 1.0)
 - §8: Hertz disk cleanup, before Hertz 1.2 restart
 - §9: Troubleshooting
@@ -358,6 +358,53 @@ Recommended validation order on Planck 1.2:
 
 Gate before Hertz 1.2: Planck 1.2 must reach Planck 1.0's validation loss on ≤70% of the tokens (1.43x sample efficiency). If not, revisit the paper or drop individual proposals.
 
+### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
+
+**Status:** optional quality pass. Klang 1.1 shipped two decoded variants that are "comprehensible but artefacted" (Variant A: phase warble at 3000g; Variant B: sub-200 Hz dropout + near-Nyquist whine, identical across 10/20/40L). Klang 1.2 addresses both directly and adds quantitative metrics, so we can make a real decision about Klang's status.
+
+Why it runs here and not earlier: the architectural fixes (complex-valued Gaussians, transmittance compositing) benefit from the same SGS theorem work that drives Planck 1.2, and the validator is modeled on `validate_planck11.py`. Running after 1.2 keeps the mental model consistent across tracks.
+
+**Changes in Klang 1.2 (see `docs/papers/sgs_training_acceleration.md` for the underlying theorem and `src/klang/scene.py` for the model):**
+
+| # | Fix | Target artefact |
+|---|---|---|
+| 1 | Complex-valued Gaussians (A·e^(iφ)) | Phase warble (Variant A) |
+| 2 | Mel-scaled init + widened σ/f₀ bounds (~40 Hz to Nyquist + σ cap) | Bass dropout + near-Nyquist whine (Variant B) |
+| 3 | Multi-resolution STFT loss (512/1024/2048) | Single-window over-fit |
+| 4 | Transmittance-budgeted alpha compositing (SGS theorem) | Connects Klang to Planck/Hertz math |
+| 5 | Mel + HiFi-GAN decode bridge | A/B decoder quality vs splat quality |
+| 6 | Optional perceptual loss (VGGish/CLAP stub) | Feature-space quality |
+| 7 | `scripts/validate_klang.py` with spectral MSE / log-MAE / MCD-13 / optional PESQ/STOI | Quantitative gates |
+
+```powershell
+# Train Klang 1.2 on the same test clip used by Variant B
+python klang/klang_1_2_experiment.py --audio klang/test_clip.wav --n-layers 20 --n-steps 3000 --device cuda
+
+# Ablations (optional, each ~10 min on 4090)
+python klang/klang_1_2_experiment.py --no-complex --out-dir klang/klang_1_2_nocomplex
+python klang/klang_1_2_experiment.py --compositing sum --out-dir klang/klang_1_2_sum
+python klang/klang_1_2_experiment.py --no-mrstft --out-dir klang/klang_1_2_nomrstft
+
+# Validate against original + Variant B baseline
+python scripts/validate_klang.py ^
+  --ref klang/original.wav ^
+  --reference-for-gates klang/variant_b_20L/audio.wav
+```
+
+Gates (thresholds at the top of `scripts/validate_klang.py`):
+- **Gate A:** Klang 1.2 spectral MSE vs `original.wav` below the absolute ceiling (`GATE_A_MSE_CEIL`).
+- **Gate B:** Klang 1.2 log-mag MAE strictly lower than Variant B's.
+
+Outputs in `klang/klang_1_2/`: `scene.pt`, `decode_istft.wav`, `decode_griffinlim.wav`, optional `decode_hifigan.wav`, plus `reconstruction.png`, `trajectories.png`, `loss.png`. Validator writes `results/klang_validation.json`.
+
+```powershell
+git add klang/klang_1_2/ results/klang_validation.json
+git commit -m "Track 4.5 Klang 1.2: complex + widened + MRSTFT + metrics"
+git push
+```
+
+If both gates pass, Klang is done and we ship it alongside Hertz 1.2. If not, roll back to Klang 1.1 results and document what 1.2 did vs didn't fix. Either way, cost is ~1-2 hours of GPU time — small enough to be worth running before Hertz burns GPU-weeks.
+
 ### 6.5  Track 5: Hertz 1.2, 1B SGS LM with accel recipe
 
 **Status:** runs only after Planck 1.2 validates §2.1 and §2.3 (minimum).
@@ -603,6 +650,7 @@ All OK
 | 2 (Planck 1.1) | `results/planck11_*.txt`, `results/planck10_baseline*.txt` | `git add results/` |
 | 3 (Raum) | `results/raum_c_analysis/`, checkpoint JSONs | `git add results/` |
 | 4 (Planck 1.2) | `results/planck12_*.txt`, ablation JSONs | `git add results/` |
+| 4.5 (Klang 1.2) | `klang/klang_1_2/`, `results/klang_validation.json` | `git add klang/klang_1_2/ results/` |
 | 5 (Hertz 1.2) | `results/hertz_eval.json`, `results/hertz_samples.txt` | `git add results/` |
 
 **Do NOT commit:** model checkpoints (`.pt` files >50 MB), GloVe data, TinyStories data, FineWeb data, blob indices (~60 MB). These are in `.gitignore`.
