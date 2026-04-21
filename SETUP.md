@@ -217,14 +217,7 @@ Output: `data/blobs/tinystories/blobs.pt` (~60 MB).
 
 Inspect:
 ```powershell
-python -c "
-import torch, json
-d = torch.load('data/blobs/tinystories/blobs.pt', weights_only=False)
-m = json.load(open('data/blobs/tinystories/meta.json'))
-print(f'Blobs: {d[\"mu\"].shape[0]:,}')
-print(f'Non-empty: {m[\"non_empty_clusters\"]:,}')
-print(f'Mu range: [{d[\"mu\"].min():.3f}, {d[\"mu\"].max():.3f}]')
-"
+python scripts/inspect_blobs.py
 ```
 
 #### Step 2, Train Planck 1.1 (two-stage, ~3 hours)

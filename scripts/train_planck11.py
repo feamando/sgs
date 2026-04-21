@@ -279,10 +279,27 @@ def main():
         print(f"  Resuming from {args.resume}")
         ckpt = torch.load(args.resume, map_location=device, weights_only=False)
         model.load_state_dict(ckpt["model"])
-        optimizer.load_state_dict(ckpt["optimizer"])
-        scheduler.load_state_dict(ckpt["scheduler"])
-        start_epoch = ckpt.get("epoch", 0)
-        global_step = ckpt.get("global_step", 0)
+
+        # Optimizer/scheduler state only transfers when the param-group layout
+        # matches. The common mismatch: checkpoint was saved with
+        # --freeze-base (one or two groups) but the resume run trains all
+        # params (three groups), or vice versa. In that case, fall back to
+        # weights-only resume with a fresh optimizer+scheduler.
+        ckpt_groups = len(ckpt["optimizer"]["param_groups"])
+        curr_groups = len(optimizer.param_groups)
+        if ckpt_groups == curr_groups:
+            optimizer.load_state_dict(ckpt["optimizer"])
+            scheduler.load_state_dict(ckpt["scheduler"])
+            start_epoch = ckpt.get("epoch", 0)
+            global_step = ckpt.get("global_step", 0)
+            print(f"  Restored optimizer + scheduler (epoch {start_epoch}, step {global_step})")
+        else:
+            print(
+                f"  WARN: param-group count differs "
+                f"(checkpoint={ckpt_groups}, current={curr_groups}). "
+                f"Falling back to weights-only resume: optimizer and scheduler reset, "
+                f"epoch/global_step reset to 0. Pass matching --freeze-base to preserve."
+            )
 
     # ── Wandb ──
     if args.wandb:
