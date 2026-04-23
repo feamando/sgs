@@ -1,0 +1,39 @@
+{
+  "thresholds": {
+    "gate_1_abs_tol": 0.05,
+    "gate_2_min_blob_weight": 0.05,
+    "gate_3_min_improvement": 0.0,
+    "gate_4_min_delta": 0
+  },
+  "gates": {
+    "gate_3_perplexity": {
+      "planck10_loss": 1.7503921115398406,
+      "planck11_loss": 1.6671747767925262,
+      "delta": 0.08321733474731441,
+      "planck10_ppl": 5.756859564569298,
+      "planck11_ppl": 5.297180918046575,
+      "passed": true
+    },
+    "gate_2_blob_usage": {
+      "mean_blob_weight": 0.05928355485200882,
+      "passed": true
+    },
+    "gate_1_base_intact": {
+      "planck10_loss": 1.7503921115398406,
+      "planck11_noblob_loss": 1.666886991262436,
+      "abs_diff": 0.08350512027740464,
+      "passed": false
+    },
+    "gate_4_repetition": {
+      "planck10_repeats": 258,
+      "planck11_repeats": 417,
+      "delta": -159,
+      "passed": false
+    }
+  },
+  "summary": {
+    "all_passed": false,
+    "gates_run": 4,
+    "gates_passed": 2
+  }
+}
