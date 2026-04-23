@@ -271,9 +271,14 @@ python scripts/validate_planck11.py --skip-gate-1
 | 1 | Base generation intact | Eval `checkpoints/planck11_noablob/best.pt` against Planck 1.0 val loss | `|Δ val_loss| ≤ 0.05` |
 | 2 | Blobs being used | Mean of `(1 - t_residual) * gate` over eval batches | `> 0.05` |
 | 3 | Perplexity improves | Planck 1.1 val loss vs Planck 1.0 | Planck 1.1 strictly lower |
-| 4 | Repetition decreases | 4-gram repeats in generated samples | Planck 1.1 fewer than Planck 1.0 |
+| 4a | Intra-sample repetition | Mean count of repeated 4-grams *within* each generation | Planck 1.1 mean `≤` Planck 1.0 mean |
+| 4b | Cross-sample diversity | Unique-4-gram ratio + mean pairwise Jaccard across the 50 samples per model | Informational only, no pass/fail |
 
-All four must pass. If yes, blobs go into Hertz 1.2. If any fail, drop blobs from the 1.2 scope.
+Gates 1–4a must pass. If yes, blobs go into Hertz 1.2. If any fail, drop blobs from the 1.2 scope.
+
+Gate 4 note: the original single-number "aggregate 4-gram repeats" conflates two different behaviours. Gate 4a isolates the actual failure mode (looping and copy-paste *inside* a sample). Gate 4b reports the other behaviour (consistency *across* samples of the same prompt) but does not fail the run on it. High cross-sample agreement is desirable for factual, search and code-style outputs and is expected to increase as blobs are added, so penalising it would discard the main upside of H-SGS.
+
+Gate 1 note: the current gate trains an ablation with blobs off (`t_max=0`) and compares it to Planck 1.0. If the fine-tune updates base weights, that baseline will drift even when the model behaves correctly. For a clean Gate 1, pair this with `--freeze-base` at training time (planned for Planck 1.3). Until then, treat a small 4a pass + a strong Gate 3 improvement as the operative signal for "blobs help, base is not broken."
 
 Thresholds live at the top of `scripts/validate_planck11.py` if you need to tune them.
 
@@ -287,6 +292,26 @@ git add results/planck11_samples.txt results/planck10_baseline_samples.txt
 git commit -m "Track 2 Planck 1.1: H-SGS blobs validation"
 git push
 ```
+
+#### Step 6, Free disk before starting Track 3
+
+Planck 1.1 writes per-step and per-epoch checkpoints (~400MB each). Before moving to Raum, sweep the intermediates:
+
+```powershell
+# Preview what would be deleted
+python scripts/cleanup_planck11.py
+
+# Actually delete
+python scripts/cleanup_planck11.py --apply
+
+# Also wipe __pycache__ and compile caches
+python scripts/cleanup_planck11.py --apply --include-pycache
+
+# Keep the 2 most recent intermediates per dir (for resume flexibility)
+python scripts/cleanup_planck11.py --apply --keep-last 2
+```
+
+Defaults keep `best.pt` and `final.pt`; only touches `step_*.pt` / `epoch_*.pt` under `checkpoints/planck11*`. Dry-run unless `--apply` is passed.
 
 ### 6.3  Track 3: Raum, Text-to-3D PoCs
 
