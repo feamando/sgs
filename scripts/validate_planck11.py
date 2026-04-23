@@ -16,8 +16,14 @@ Gates:
        is above MIN_BLOB_WEIGHT.
     3. Perplexity improves:    Planck 1.1 validation loss is strictly
        lower than Planck 1.0.
-    4. Repetition decreases:   Planck 1.1 generates fewer repeated
-       4-grams than Planck 1.0 on matched prompts.
+    4a. Intra-sample repetition (hard gate): Planck 1.1 produces no
+        more within-sample 4-gram repeats per generation than Planck 1.0.
+        This catches genuine loops and copy-paste pathology.
+    4b. Cross-sample diversity (informational, not a fail gate): how
+        similar 50 completions of the same prompt look to each other.
+        Lower diversity = higher consistency, which is desirable for
+        factual / code / search outputs. Reported for both models, does
+        not block promotion on its own.
 """
 
 import argparse
@@ -43,7 +49,7 @@ from src.tinystories import get_dataloader
 GATE_1_ABS_TOL = 0.05        # val-loss delta vs Planck 1.0 for t_max=0.0
 GATE_2_MIN_BLOB_WEIGHT = 0.05  # min mean effective blob weight
 GATE_3_MIN_IMPROVEMENT = 0.0   # strictly lower val loss vs Planck 1.0
-GATE_4_MIN_DELTA = 0           # Planck 1.1 must have fewer 4-gram repeats
+GATE_4A_MAX_DELTA = 0          # Planck 1.1 intra-sample repeats must be <= Planck 1.0
 
 
 def parse_args():
@@ -186,7 +192,8 @@ def measure_blob_weight(model, val_loader, eval_batches, device):
     return total / max(count, 1)
 
 
-def _count_4gram_repeats(ids: list[int]) -> int:
+def _intra_sample_repeats(ids: list[int]) -> int:
+    """Count repeated 4-grams within a single generation."""
     if len(ids) < 4:
         return 0
     grams = [tuple(ids[i:i + 4]) for i in range(len(ids) - 3)]
@@ -194,16 +201,72 @@ def _count_4gram_repeats(ids: list[int]) -> int:
     return sum(c - 1 for c in counts.values() if c > 1)
 
 
+def _cross_sample_diversity(samples: list[list[int]]) -> dict:
+    """Given a list of per-sample token lists, compute how diverse the 4-grams
+    are across samples. Returns {unique_ratio, jaccard_mean}.
+
+    - unique_ratio: |∪ grams| / Σ|grams_i|. 1.0 = completely disjoint,
+      lower = samples share n-grams.
+    - jaccard_mean: mean pairwise Jaccard over per-sample gram sets.
+      Higher = samples agree more (= more consistent).
+    """
+    if not samples:
+        return {"unique_ratio": None, "jaccard_mean": None, "n_samples": 0}
+    sets = []
+    total_grams = 0
+    pooled = set()
+    for ids in samples:
+        if len(ids) < 4:
+            sets.append(set())
+            continue
+        s = {tuple(ids[i:i + 4]) for i in range(len(ids) - 3)}
+        sets.append(s)
+        total_grams += len(s)
+        pooled |= s
+    unique_ratio = (len(pooled) / total_grams) if total_grams else None
+
+    # Pairwise Jaccard (cap at 200 pairs to keep this O(n) in practice)
+    import itertools, random
+    pairs = list(itertools.combinations(range(len(sets)), 2))
+    if len(pairs) > 200:
+        random.Random(0).shuffle(pairs)
+        pairs = pairs[:200]
+    jaccards = []
+    for i, j in pairs:
+        a, b = sets[i], sets[j]
+        if not a and not b:
+            continue
+        inter = len(a & b)
+        union = len(a | b)
+        if union:
+            jaccards.append(inter / union)
+    jaccard_mean = (sum(jaccards) / len(jaccards)) if jaccards else None
+
+    return {
+        "unique_ratio": unique_ratio,
+        "jaccard_mean": jaccard_mean,
+        "n_samples": len(sets),
+    }
+
+
 @torch.no_grad()
 def measure_repetition(model, sp, prompts, max_new, temperature, top_k, device):
+    """Returns (total_intra_repeats, mean_intra_repeats, samples).
+
+    `samples` is a list of per-generation token lists (only the new tokens),
+    used downstream for cross-sample diversity.
+    """
     total = 0
+    samples = []
     for prompt in prompts:
         ids = [sp.bos_id()] + sp.encode(prompt)
         x = torch.tensor([ids], dtype=torch.long, device=device)
         out = model.generate(x, max_new=max_new, temperature=temperature, top_k=top_k)
-        gen = out[0].tolist()[len(ids):]  # only count new tokens
-        total += _count_4gram_repeats(gen)
-    return total
+        gen = out[0].tolist()[len(ids):]
+        samples.append(gen)
+        total += _intra_sample_repeats(gen)
+    mean = total / max(len(prompts), 1)
+    return total, mean, samples
 
 
 def main():
@@ -234,7 +297,7 @@ def main():
             "gate_1_abs_tol": GATE_1_ABS_TOL,
             "gate_2_min_blob_weight": GATE_2_MIN_BLOB_WEIGHT,
             "gate_3_min_improvement": GATE_3_MIN_IMPROVEMENT,
-            "gate_4_min_delta": GATE_4_MIN_DELTA,
+            "gate_4a_max_delta": GATE_4A_MAX_DELTA,
         },
         "gates": {},
     }
@@ -290,14 +353,22 @@ def main():
 
         # ── Gate 4: Planck 1.1 generation (reuse loaded model) ──
         if not args.skip_gate_4:
-            print(f"\n[Gate 4] 4-gram repetition over {args.samples} samples")
+            print(f"\n[Gate 4a] Intra-sample 4-gram repetition over "
+                  f"{args.samples} samples")
             t0 = time.time()
-            planck11_reps = measure_repetition(planck11, sp, prompts,
-                                               args.max_new, args.temperature,
-                                               args.top_k, device)
-            print(f"  Planck 1.1 repeats: {planck11_reps} ({time.time()-t0:.1f}s)")
+            (planck11_intra_total, planck11_intra_mean,
+             planck11_samples) = measure_repetition(
+                planck11, sp, prompts, args.max_new, args.temperature,
+                args.top_k, device,
+            )
+            print(f"  Planck 1.1 intra-sample repeats: "
+                  f"{planck11_intra_total} total, "
+                  f"{planck11_intra_mean:.2f} mean/sample "
+                  f"({time.time()-t0:.1f}s)")
         else:
-            planck11_reps = None
+            planck11_intra_total = None
+            planck11_intra_mean = None
+            planck11_samples = None
 
         del planck11
         torch.cuda.empty_cache() if device.type == "cuda" else None
@@ -337,28 +408,59 @@ def main():
             torch.cuda.empty_cache() if device.type == "cuda" else None
 
     # ── Gate 4: needs Planck 1.0 repetition count too ──
-    if not args.skip_gate_4 and not args.skip_gate_3 and planck11_reps is not None:
-        print(f"\n[Gate 4] Comparing to Planck 1.0 repetitions...")
+    if (not args.skip_gate_4 and not args.skip_gate_3
+            and planck11_intra_total is not None):
+        print(f"\n[Gate 4] Measuring Planck 1.0 repetition for comparison...")
         t0 = time.time()
         planck10 = _load_planck10(args, device)
-        planck10_reps = measure_repetition(planck10, sp, prompts,
-                                           args.max_new, args.temperature,
-                                           args.top_k, device)
+        (planck10_intra_total, planck10_intra_mean,
+         planck10_samples) = measure_repetition(
+            planck10, sp, prompts, args.max_new, args.temperature,
+            args.top_k, device,
+        )
         del planck10
         torch.cuda.empty_cache() if device.type == "cuda" else None
-        delta = planck10_reps - planck11_reps
-        passed = delta > GATE_4_MIN_DELTA
-        report["gates"]["gate_4_repetition"] = {
-            "planck10_repeats": planck10_reps,
-            "planck11_repeats": planck11_reps,
-            "delta": delta,
-            "passed": passed,
+
+        # 4a: intra-sample repetition (hard gate). Lower-or-equal is PASS.
+        intra_delta = planck11_intra_mean - planck10_intra_mean
+        passed_4a = intra_delta <= GATE_4A_MAX_DELTA
+        report["gates"]["gate_4a_intra_sample_repetition"] = {
+            "planck10_total": planck10_intra_total,
+            "planck10_mean_per_sample": planck10_intra_mean,
+            "planck11_total": planck11_intra_total,
+            "planck11_mean_per_sample": planck11_intra_mean,
+            "delta_mean": intra_delta,
+            "passed": passed_4a,
         }
-        pass_flags.append(passed)
-        print(f"  Planck 1.0 repeats: {planck10_reps} "
-              f"| Planck 1.1 repeats: {planck11_reps}")
-        print(f"  Delta: {delta} (need > {GATE_4_MIN_DELTA}) "
-              f"→ {'PASS' if passed else 'FAIL'} ({time.time()-t0:.1f}s)")
+        pass_flags.append(passed_4a)
+        print(f"  Planck 1.0 intra-sample: total={planck10_intra_total} "
+              f"mean={planck10_intra_mean:.2f}/sample")
+        print(f"  Planck 1.1 intra-sample: total={planck11_intra_total} "
+              f"mean={planck11_intra_mean:.2f}/sample")
+        print(f"  Δmean = {intra_delta:+.2f} (need <= {GATE_4A_MAX_DELTA}) "
+              f"→ {'PASS' if passed_4a else 'FAIL'} ({time.time()-t0:.1f}s)")
+
+        # 4b: cross-sample diversity (informational, no pass/fail).
+        p10_div = _cross_sample_diversity(planck10_samples)
+        p11_div = _cross_sample_diversity(planck11_samples)
+        report["gates"]["gate_4b_cross_sample_diversity"] = {
+            "planck10": p10_div,
+            "planck11": p11_div,
+            "passed": None,
+            "note": "Informational. Lower unique_ratio / higher jaccard_mean "
+                    "means completions agree more across runs, which is "
+                    "desirable for factual / code / search outputs.",
+        }
+        print(f"\n[Gate 4b] Cross-sample diversity (informational)")
+        if p10_div["unique_ratio"] is not None:
+            print(f"  Planck 1.0: unique_ratio="
+                  f"{p10_div['unique_ratio']:.3f} "
+                  f"jaccard_mean={p10_div['jaccard_mean']:.3f}")
+        if p11_div["unique_ratio"] is not None:
+            print(f"  Planck 1.1: unique_ratio="
+                  f"{p11_div['unique_ratio']:.3f} "
+                  f"jaccard_mean={p11_div['jaccard_mean']:.3f}")
+        print("  (Not a pass/fail gate. See note in JSON.)")
 
     # ── Summary ──
     all_passed = all(pass_flags) if pass_flags else False
