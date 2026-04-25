@@ -3,7 +3,7 @@
     "gate_1_abs_tol": 0.05,
     "gate_2_min_blob_weight": 0.05,
     "gate_3_min_improvement": 0.0,
-    "gate_4_min_delta": 0
+    "gate_4a_max_delta": 0
   },
   "gates": {
     "gate_3_perplexity": {
@@ -24,11 +24,27 @@
       "abs_diff": 0.08350512027740464,
       "passed": false
     },
-    "gate_4_repetition": {
-      "planck10_repeats": 258,
-      "planck11_repeats": 417,
-      "delta": -159,
+    "gate_4a_intra_sample_repetition": {
+      "planck10_total": 258,
+      "planck10_mean_per_sample": 5.16,
+      "planck11_total": 417,
+      "planck11_mean_per_sample": 8.34,
+      "delta_mean": 3.1799999999999997,
       "passed": false
+    },
+    "gate_4b_cross_sample_diversity": {
+      "planck10": {
+        "unique_ratio": 0.8639491242702252,
+        "jaccard_mean": 0.013318217879515122,
+        "n_samples": 50
+      },
+      "planck11": {
+        "unique_ratio": 0.8250821583801548,
+        "jaccard_mean": 0.012150441077885099,
+        "n_samples": 50
+      },
+      "passed": null,
+      "note": "Informational. Lower unique_ratio / higher jaccard_mean means completions agree more across runs, which is desirable for factual / code / search outputs."
     }
   },
   "summary": {
