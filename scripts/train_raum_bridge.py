@@ -62,6 +62,11 @@ def parse_args():
                         "0 disables. Try 1.0 for the real fix.")
     p.add_argument("--pos-margin", type=float, default=0.3,
                    help="Margin for pairwise directional loss (Fix 2).")
+    p.add_argument("--resume", action="store_true",
+                   help="Resume from <save-dir>/last.pt if it exists.")
+    p.add_argument("--ckpt-interval", type=int, default=0,
+                   help="Save last.pt every N steps for resume. "
+                        "0 (default) means save only at eval steps.")
     return p.parse_args()
 
 
@@ -176,8 +181,62 @@ def main():
     save_dir.mkdir(parents=True, exist_ok=True)
     best_val_psnr = 0.0
     global_step = 0
+    start_epoch = 0
 
-    for epoch in range(args.epochs):
+    # ── Resume ──
+    # last.pt carries model + optimizer + scheduler state + counters.
+    # best.pt stays as model-only (same format as before) so the
+    # analysis script does not need to change.
+    last_path = save_dir / "last.pt"
+    if args.resume:
+        if last_path.exists():
+            print(f"Resuming from {last_path}")
+            ckpt = torch.load(last_path, map_location=device, weights_only=False)
+            model.load_state_dict(ckpt["model"])
+            optimizer.load_state_dict(ckpt["optimizer"])
+            scheduler.load_state_dict(ckpt["scheduler"])
+            start_epoch = ckpt.get("epoch", 0)
+            global_step = ckpt.get("global_step", 0)
+            best_val_psnr = ckpt.get("best_val_psnr", 0.0)
+            print(f"  epoch {start_epoch}, step {global_step}, "
+                  f"best_val_psnr {best_val_psnr:.2f}")
+        else:
+            print(f"--resume set but {last_path} not found; starting fresh")
+
+    def save_last(epoch_done: int):
+        """Snapshot everything needed to restart mid-run."""
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "scheduler": scheduler.state_dict(),
+            "epoch": epoch_done,
+            "global_step": global_step,
+            "best_val_psnr": best_val_psnr,
+            "args": vars(args),
+        }, last_path)
+
+    # Install Ctrl-C handler that writes a final snapshot, then re-raises
+    # so the process exits cleanly. First Ctrl-C snapshots and exits,
+    # second one kills immediately (standard double-tap escape hatch).
+    import signal
+    _interrupted = {"count": 0, "epoch": start_epoch}
+
+    def _sigint(signum, frame):
+        _interrupted["count"] += 1
+        if _interrupted["count"] == 1:
+            print("\n[Ctrl-C] snapshotting to last.pt, press again to abort...")
+            try:
+                save_last(_interrupted["epoch"])
+                print(f"[Ctrl-C] saved {last_path}. Resume with --resume.")
+            except Exception as e:
+                print(f"[Ctrl-C] snapshot failed: {e}")
+            raise KeyboardInterrupt
+        else:
+            raise KeyboardInterrupt
+    signal.signal(signal.SIGINT, _sigint)
+
+    for epoch in range(start_epoch, args.epochs):
+        _interrupted["epoch"] = epoch
         t0 = time.time()
         epoch_loss = 0.0
         n_batches = 0
@@ -291,7 +350,16 @@ def main():
                     best_val_psnr = val_psnr
                     torch.save(model.state_dict(), save_dir / "best.pt")
                     print(f"  ** New best → saved")
+                save_last(epoch)
                 model.train()
+
+            # Periodic resume snapshot (off by default).
+            if args.ckpt_interval > 0 and global_step % args.ckpt_interval == 0:
+                save_last(epoch)
+
+        # End-of-epoch snapshot: guarantees we never lose more than one
+        # epoch of progress if the process is killed between evals.
+        save_last(epoch + 1)
 
         elapsed = time.time() - t0
         avg_loss = epoch_loss / max(n_batches, 1)
