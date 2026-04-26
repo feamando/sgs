@@ -351,11 +351,76 @@ Prints: word → xyz mapping, sentence composition in 3D, interpolation paths, w
 
 Results: `results/raum_c_analysis/`.
 
+#### PoC-C bridge-collapse diagnostic and fixes
+
+First analysis of `checkpoints/raum_c/best.pt` (2026-04-26) showed the
+bridge collapsed: every word mapped to within ~3e-3 of the origin, the
+final `mu_proj` layer had norm 0.102 on a `[3, 64]` matrix (~17x below
+default init), and the `left`-`right` x-separation came out with the
+wrong sign. Upstream `mu` is healthy (range `[-4.51, 3.99]`), so the
+bridge itself is the problem: the render loss can be satisfied by
+letting the feature channel carry colour/opacity and leaving position
+at zero.
+
+Two sequential fixes are wired into `train_raum_bridge.py`.
+Run them in order, each to its own `--save-dir` so the original
+collapsed checkpoint and the fix attempts stay side by side for
+comparison.
+
+**Fix 1, spread regulariser (cheap sanity check).** Forces the
+per-axis std of the coarse means toward `--target-spread`.
+
+```powershell
+python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
+  --lambda-spread 0.1 --target-spread 1.0 `
+  --save-dir checkpoints/raum_c_spread
+python scripts/analyze_raum_bridge.py `
+  --checkpoint checkpoints/raum_c_spread/best.pt `
+  --glove data/glove.6B.300d.txt `
+  --save-dir results/raum_c_spread_analysis
+```
+
+Watch the `spread N.NNN` value on the step line climb toward
+`target-spread`. This only proves the architecture *can* spread, it
+does not fix the axis directions.
+
+**Fix 2, supervised position loss (the real fix).** Pulls each
+object-bearing token's coarse mean toward the ground-truth
+`object_positions` already present in the batch, plus a pairwise
+margin term that forces the *direction* of two-object position
+differences ("above" → y increases, "left" → x decreases).
+
+```powershell
+python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
+  --lambda-pos 1.0 --pos-margin 0.3 `
+  --save-dir checkpoints/raum_c_pos
+python scripts/analyze_raum_bridge.py `
+  --checkpoint checkpoints/raum_c_pos/best.pt `
+  --glove data/glove.6B.300d.txt `
+  --save-dir results/raum_c_pos_analysis
+```
+
+Expected after Fix 2: `left`-`right` x-separation flips positive,
+`above`-`below` y-separation becomes clearly positive, colour and
+object words spread beyond ~1e-3, and `mu_proj[2].weight` norm moves
+well above 0.1.
+
+The two flags stack, `--lambda-spread 0.05 --lambda-pos 1.0` is a
+reasonable combined run once Fix 2 works on its own.
+
+**Cleanup between runs.** Each run writes a new `best.pt` under its
+`--save-dir`, so no deletion is required, just use a distinct
+`--save-dir` per experiment. The original
+`checkpoints/raum_c/best.pt` (collapsed) is the reference baseline and
+should be kept. No dataset, vocab, or template regeneration is needed:
+both fixes operate on the existing batch format.
+
 #### Commit
 
 ```powershell
-git add results/raum_c_analysis/ checkpoints/raum_d/*.json
-git commit -m "Track 3 Raum: PoC-C + PoC-D results"
+git add results/raum_c_analysis/ results/raum_c_spread_analysis/ `
+        results/raum_c_pos_analysis/ checkpoints/raum_d/*.json
+git commit -m "Track 3 Raum: PoC-C + PoC-D results, bridge-collapse fixes"
 git push
 ```
 
