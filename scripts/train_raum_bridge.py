@@ -23,7 +23,7 @@ from src.data import load_glove
 from src.gaussian import SemanticGaussianVocab
 from src.raum.vocab import ALL_SCENE_WORDS, OBJECTS, COLORS, RELATIONS
 from src.raum.data import generate_comp_gen_split, RaumDataset, collate_raum
-from src.raum.bridge import RaumBridge, compute_bridge_loss
+from src.raum.bridge import RaumBridge, compute_bridge_loss, compute_position_loss
 from src.raum.templates import build_template_library
 from src.raum.cameras import orbit_cameras
 from src.raum.render_3d import render_gaussians, check_backend
@@ -44,9 +44,24 @@ def parse_args():
     p.add_argument("--d-s", type=int, default=64, help="Splatting space dim")
     p.add_argument("--log-interval", type=int, default=20)
     p.add_argument("--eval-interval", type=int, default=100)
-    p.add_argument("--save-dir", default="checkpoints/raum_c")
+    p.add_argument("--save-dir", default="checkpoints/raum_c",
+                   help="Checkpoint dir. Pass a different one per experiment "
+                        "(e.g. checkpoints/raum_c_spread, checkpoints/raum_c_pos) "
+                        "so runs don't overwrite each other.")
     p.add_argument("--backend", default="auto", choices=["auto", "gsplat", "simple"])
     p.add_argument("--seed", type=int, default=42)
+    # Bridge-collapse fixes (Raum 1.0 debug)
+    p.add_argument("--lambda-spread", type=float, default=0.0,
+                   help="Fix 1: penalty on (coarse-mean std − target-spread). "
+                        "0 disables. Try 0.1 for a sanity run.")
+    p.add_argument("--target-spread", type=float, default=1.0,
+                   help="Desired per-axis std of coarse means.")
+    p.add_argument("--lambda-pos", type=float, default=0.0,
+                   help="Fix 2: supervised position loss weight "
+                        "(MSE(bridge → GT object positions) + pairwise margin). "
+                        "0 disables. Try 1.0 for the real fix.")
+    p.add_argument("--pos-margin", type=float, default=0.3,
+                   help="Margin for pairwise directional loss (Fix 2).")
     return p.parse_args()
 
 
@@ -182,6 +197,7 @@ def main():
             B = token_ids.shape[0]
             total_loss = torch.tensor(0.0, device=device)
             total_psnr = 0.0
+            last_spread = 0.0
 
             for b in range(B):
                 # Get GT objects for this sample
@@ -210,14 +226,37 @@ def main():
                         cam.width, cam.height, backend=backend,
                     )
                     gt_img = gt_images[v].to(device)
-                    loss_v, metrics_v = compute_bridge_loss(rendered, gt_img, {
-                        k: v[b:b+1] for k, v in scene.items()
-                    })
+                    # Only fold spread-reg into the very first render pass
+                    # so it is counted exactly once per batch.
+                    use_spread = (b == 0 and v == 0)
+                    loss_v, metrics_v = compute_bridge_loss(
+                        rendered, gt_img,
+                        {k: vv[b:b+1] for k, vv in scene.items()},
+                        lambda_spread=args.lambda_spread if use_spread else 0.0,
+                        target_spread=args.target_spread,
+                        coarse_means_batch=scene["coarse_means"],
+                        mask_batch=mask,
+                    )
                     total_loss = total_loss + loss_v
                     total_psnr += metrics_v["psnr"]
+                    if use_spread:
+                        last_spread = metrics_v["spread"]
 
             total_loss = total_loss / (B * args.n_views)
             avg_psnr = total_psnr / (B * args.n_views)
+
+            # ── Fix 2: supervised position loss ──
+            if args.lambda_pos > 0.0:
+                pos_loss, pos_metrics = compute_position_loss(
+                    coarse_means=scene["coarse_means"],
+                    obj_labels=batch["obj_labels"].to(device),
+                    object_positions=batch["object_positions"].to(device),
+                    mask=mask,
+                    margin=args.pos_margin,
+                )
+                total_loss = total_loss + args.lambda_pos * pos_loss
+            else:
+                pos_metrics = {"pos_mse": 0.0, "pos_pair_margin": 0.0}
 
             optimizer.zero_grad()
             total_loss.backward()
@@ -230,8 +269,16 @@ def main():
             n_batches += 1
 
             if global_step % args.log_interval == 0:
+                extras = []
+                if args.lambda_spread > 0.0:
+                    extras.append(f"spread {last_spread:.3f}")
+                if args.lambda_pos > 0.0:
+                    extras.append(f"pos_mse {pos_metrics['pos_mse']:.3f} "
+                                  f"pair {pos_metrics['pos_pair_margin']:.3f}")
+                extra_str = f" | {' '.join(extras)}" if extras else ""
                 print(f"  epoch {epoch+1} step {global_step:>5d} | "
-                      f"loss {total_loss.item():.4f} psnr {avg_psnr:.1f} dB")
+                      f"loss {total_loss.item():.4f} psnr {avg_psnr:.1f} dB"
+                      f"{extra_str}")
 
             # ── Eval ──
             if global_step % args.eval_interval == 0:
