@@ -12,6 +12,12 @@ from pathlib import Path
 import torch
 import numpy as np
 
+# Windows consoles default to cp1252 and choke on "→". Force UTF-8
+# on stdout/stderr so the script runs identically on macOS and Windows.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.data import load_glove
@@ -62,7 +68,7 @@ def main():
     print_word_mapping(results)
 
     # Save raw data
-    with open(save_dir / "word_mapping.txt", "w") as f:
+    with open(save_dir / "word_mapping.txt", "w", encoding="utf-8") as f:
         for group, coords in results.items():
             f.write(f"\n{group.upper()}:\n")
             for word, xyz in coords.items():
