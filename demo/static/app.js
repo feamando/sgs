@@ -1,17 +1,47 @@
-import { setCloud } from "/static/viewer.js";
+import { setCloud, setMarkers, setMarkersVisible } from "/static/viewer.js";
 
 const form = document.getElementById("chat");
 const input = document.getElementById("prompt");
 const send = document.getElementById("send");
 const meta = document.getElementById("meta");
+const objectsPanel = document.getElementById("objects");
+const markersToggle = document.getElementById("markers-toggle");
 
 async function checkHealth() {
   try {
     const r = await fetch("/health");
     const j = await r.json();
-    meta.textContent = `ready  |  ${j.device}`;
+    meta.textContent = `ready | ${j.device}`;
   } catch (e) {
     meta.textContent = "offline";
+  }
+}
+
+function renderObjectsPanel(data) {
+  if (!objectsPanel) return;
+  objectsPanel.innerHTML = "";
+  if (!data.objects || data.objects.length === 0) {
+    objectsPanel.innerHTML = '<div class="obj-empty">no objects recognised</div>';
+    return;
+  }
+  for (const o of data.objects) {
+    const row = document.createElement("div");
+    row.className = "obj-row";
+    const sw = document.createElement("span");
+    sw.className = "obj-swatch";
+    const r = Math.round(o.color[0] * 255);
+    const g = Math.round(o.color[1] * 255);
+    const b = Math.round(o.color[2] * 255);
+    sw.style.background = `rgb(${r},${g},${b})`;
+    const label = document.createElement("span");
+    label.className = "obj-label";
+    const pos = o.position.map((x) => x.toFixed(2)).join(", ");
+    label.innerHTML =
+      `<b>${o.template}</b> <span class="obj-word">&ldquo;${o.word}&rdquo;</span>` +
+      `<span class="obj-meta">(${pos}) conf ${Math.round(o.confidence * 100)}%</span>`;
+    row.appendChild(sw);
+    row.appendChild(label);
+    objectsPanel.appendChild(row);
   }
 }
 
@@ -31,7 +61,11 @@ async function submit(prompt) {
     }
     const data = await r.json();
     setCloud(data.splats);
-    meta.textContent = `${data.n_splats} splats  |  ${data.words.join(" ")}`;
+    setMarkers(data.objects);
+    renderObjectsPanel(data);
+    meta.textContent =
+      `${data.n_objects} objects | ${data.n_splats} splats | ` +
+      data.words.join(" ");
   } catch (e) {
     meta.textContent = `error: ${e.message}`;
   } finally {
@@ -46,8 +80,13 @@ form.addEventListener("submit", (e) => {
   submit(p);
 });
 
+if (markersToggle) {
+  markersToggle.addEventListener("change", () => {
+    setMarkersVisible(markersToggle.checked);
+  });
+}
+
 checkHealth();
-// Kick off with a default scene so the viewer isn't empty on load.
 window.addEventListener("load", () => {
   input.value = "a red sphere above a blue cube";
   submit(input.value);
