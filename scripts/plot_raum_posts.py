@@ -181,124 +181,145 @@ def post1_core_idea():
 # ──────────────────────────────────────────────────────────────────
 
 def post2_architecture():
-    fig, ax = plt.subplots(figsize=(11.5, 7.5))
-    ax.set_xlim(0, 11.5)
-    ax.set_ylim(0, 9.0)
+    """
+    Clean left-to-right three-stage diagram. Single spine, vertical
+    middle column for the template library feed into stamp. No
+    diagonal return arrows, no stray connectors. Heads in reading
+    order (template → color → scale → relation).
+    """
+    fig, ax = plt.subplots(figsize=(13.0, 6.8))
+    W, H = 13.0, 6.8
+    ax.set_xlim(0, W)
+    ax.set_ylim(0, H)
     ax.axis("off")
 
-    # Title
+    # ─── Title ───
     ax.text(
-        5.75, 8.5, "Raum 0.0: prompt → scene graph → Gaussian cloud",
-        ha="center", fontsize=14, fontweight="bold", color=C_BASE,
+        W / 2, H - 0.35,
+        "Raum 0.0 architecture",
+        ha="center", fontsize=15, fontweight="bold", color=C_BASE,
     )
     ax.text(
-        5.75, 8.05,
-        "Three stages. Bridge is trained on analytic labels, no pixels in the loss.",
+        W / 2, H - 0.75,
+        "Three stages, left to right. Bridge trained on analytic labels; no pixels in the loss.",
         ha="center", fontsize=10, color=C_TEXT_FAINT,
     )
 
-    # Input prompt
-    _box(ax, 0.3, 4.0, 1.9, 1.0, "prompt\ntokens", C_BASE)
+    # Horizontal centre-line the three stage bodies share.
+    SPINE_Y = 2.8
 
-    # ─── Stage 1: bridge with 4 heads ───
-    bridge_x, bridge_y, bridge_w, bridge_h = 2.8, 2.4, 3.2, 4.2
-    _box(ax, bridge_x, bridge_y, bridge_w, bridge_h, "", "#EAEFF7", text_color=C_BASE)
+    # ─── 0. Prompt (input) ───
+    p_x, p_y, p_w, p_h = 0.4, SPINE_Y - 0.5, 1.7, 1.0
+    _box(ax, p_x, p_y, p_w, p_h, "prompt\ntokens", C_BASE, fontsize=11)
+
+    # ─── Stage 1: bridge ───
+    b_x, b_y, b_w, b_h = 2.6, 1.3, 3.3, 4.1
+    _box(ax, b_x, b_y, b_w, b_h, "", "#EAEFF7", text_color=C_BASE)
     ax.text(
-        bridge_x + bridge_w / 2, bridge_y + bridge_h - 0.35,
-        "Stage 1: Raum bridge  (~2M params)",
-        ha="center", fontsize=10.5, color=C_BASE, fontweight="bold",
+        b_x + b_w / 2, b_y + b_h - 0.35,
+        "Stage 1  ·  Raum bridge",
+        ha="center", fontsize=11, color=C_BASE, fontweight="bold",
     )
     ax.text(
-        bridge_x + bridge_w / 2, bridge_y + bridge_h - 0.7,
-        "per-token heads, analytic labels",
-        ha="center", fontsize=8.8, color=C_TEXT_FAINT, style="italic",
+        b_x + b_w / 2, b_y + b_h - 0.7,
+        "~2M params, 4 per-token heads",
+        ha="center", fontsize=9, color=C_TEXT_FAINT, style="italic",
     )
 
-    head_w, head_h = 2.6, 0.65
-    head_x = bridge_x + (bridge_w - head_w) / 2
+    # Heads in reading order top→bottom.
     heads = [
         ("template head", C_ACCENT),
-        ("color head", C_RED),
-        ("scale head", C_POS),
+        ("color head",    C_RED),
+        ("scale head",    C_POS),
         ("relation head", C_BLUE),
     ]
+    head_w, head_h = 2.7, 0.52
+    head_x = b_x + (b_w - head_w) / 2
+    head_top = b_y + b_h - 1.35
     for i, (label, color) in enumerate(heads):
-        hy = bridge_y + 0.45 + i * (head_h + 0.18)
+        hy = head_top - i * (head_h + 0.15)
         _box(ax, head_x, hy, head_w, head_h, label, color, fontsize=10)
 
-    # ─── Stage 2: template library ───
-    lib_x, lib_y, lib_w, lib_h = 6.6, 4.7, 2.4, 2.2
+    # ─── Stage 2: template library (top) above stamp (bottom) ───
+    lib_x, lib_y, lib_w, lib_h = 6.4, 4.0, 3.3, 2.0
     _box(ax, lib_x, lib_y, lib_w, lib_h, "", "#FDEFD3", text_color=C_BASE)
     ax.text(
         lib_x + lib_w / 2, lib_y + lib_h - 0.3,
-        "Stage 2: template library",
-        ha="center", fontsize=10.5, color=C_BASE, fontweight="bold",
+        "Stage 2  ·  template library",
+        ha="center", fontsize=11, color=C_BASE, fontweight="bold",
     )
     ax.text(
         lib_x + lib_w / 2, lib_y + lib_h - 0.6,
         "6 shapes × ~800 Gaussians",
-        ha="center", fontsize=8.8, color=C_TEXT_FAINT, style="italic",
+        ha="center", fontsize=9, color=C_TEXT_FAINT, style="italic",
     )
     shapes = ["sphere", "cube", "cylinder", "cone", "plane", "torus"]
+    cell_w, cell_h = 0.92, 0.38
+    grid_w = cell_w * 3 + 0.16 * 2
+    gx0 = lib_x + (lib_w - grid_w) / 2
     for i, s in enumerate(shapes):
         col = i % 3
         row = i // 3
-        sx = lib_x + 0.2 + col * 0.72
-        sy = lib_y + 0.3 + (1 - row) * 0.55
-        _box(ax, sx, sy, 0.65, 0.45, s, C_SECOND, fontsize=8)
+        sx = gx0 + col * (cell_w + 0.16)
+        sy = lib_y + 0.2 + (1 - row) * (cell_h + 0.12)
+        _box(ax, sx, sy, cell_w, cell_h, s, C_SECOND, fontsize=9)
 
-    # Stamping box
-    stamp_x, stamp_y, stamp_w, stamp_h = 6.6, 2.6, 2.4, 1.5
+    stamp_x, stamp_y, stamp_w, stamp_h = 6.4, 1.9, 3.3, 1.4
     _box(
         ax, stamp_x, stamp_y, stamp_w, stamp_h,
         "stamp templates\nposition · color · scale",
-        C_SECOND, fontsize=9.5,
+        C_SECOND, fontsize=10,
     )
 
-    # ─── Stage 3: WebGL viewer ───
-    view_x, view_y, view_w, view_h = 9.4, 3.4, 1.9, 2.2
-    _box(ax, view_x, view_y, view_w, view_h, "", "#F9FAFC", text_color=C_BASE)
+    # ─── Stage 3: viewer ───
+    v_x, v_y, v_w, v_h = 10.2, 1.3, 2.5, 4.1
+    _box(ax, v_x, v_y, v_w, v_h, "", "#F9FAFC", text_color=C_BASE)
     ax.text(
-        view_x + view_w / 2, view_y + view_h - 0.35,
-        "Stage 3",
-        ha="center", fontsize=10.5, color=C_BASE, fontweight="bold",
+        v_x + v_w / 2, v_y + v_h - 0.35,
+        "Stage 3  ·  viewer",
+        ha="center", fontsize=11, color=C_BASE, fontweight="bold",
     )
     ax.text(
-        view_x + view_w / 2, view_y + view_h - 0.65,
-        "WebGL2 splat viewer",
-        ha="center", fontsize=9, color=C_TEXT_FAINT, style="italic",
-    )
-    # mini splat icon inside the viewer box
-    rng = np.random.default_rng(7)
-    cx, cy = view_x + view_w / 2, view_y + view_h / 2 - 0.45
-    for _ in range(80):
-        dx = rng.normal(0, 0.22)
-        dy = rng.normal(0, 0.22)
-        ax.scatter(cx + dx, cy + dy - 0.05, s=140, c=C_RED, alpha=0.06, edgecolors="none")
-    for _ in range(60):
-        dx = rng.normal(0, 0.20)
-        dy = rng.normal(0, 0.15)
-        ax.scatter(cx + dx, cy + dy - 0.55, s=140, c=C_BLUE, alpha=0.06, edgecolors="none")
-
-    # Output card
-    _box(ax, 0.3, 0.6, 2.2, 0.9, "FastAPI\nlocal demo", "#555", fontsize=10)
-
-    # Arrows
-    _arrow(ax, 2.2, 4.5, 2.8, 4.5, color=C_BASE, lw=2.0)            # tokens → bridge
-    _arrow(ax, 6.0, 5.7, 6.6, 5.7, color=C_BASE, lw=1.8)            # bridge → library
-    _arrow(ax, 6.0, 3.3, 6.6, 3.3, color=C_BASE, lw=1.8)            # bridge → stamping
-    _arrow(ax, 7.8, 4.7, 7.8, 4.1, color=C_BASE, lw=1.6)            # library → stamping
-    _arrow(ax, 9.0, 3.3, 9.4, 4.0, color=C_BASE, lw=1.8)            # stamping → viewer
-    _arrow(ax, 9.4, 4.5, 9.4, 4.5, color=C_BASE, lw=0.0)            # (no-op placeholder)
-    _arrow(ax, 1.4, 2.4, 1.4, 1.5, color=C_GREY, lw=1.2)            # tokens → demo
-    _arrow(ax, 9.4, 3.4, 2.5, 1.2, color=C_GREY, lw=1.0)            # viewer → demo (browser)
-
-    # Legend-ish caption at bottom
-    ax.text(
-        5.75, 0.3,
-        "Training loss is analytic (positions, colors, relations). No rendered ground truth.",
+        v_x + v_w / 2, v_y + v_h - 0.7,
+        "WebGL2 splat renderer",
         ha="center", fontsize=9.5, color=C_TEXT_FAINT, style="italic",
     )
+
+    # Mini splat preview. Red sphere above blue cube, vertically stacked.
+    rng = np.random.default_rng(7)
+    cx = v_x + v_w / 2
+    cy_red = v_y + v_h / 2 + 0.35
+    cy_blue = v_y + 1.15
+    for _ in range(160):
+        dx = rng.normal(0, 0.26)
+        dy = rng.normal(0, 0.24)
+        ax.scatter(cx + dx, cy_red + dy, s=150, c=C_RED, alpha=0.05, edgecolors="none")
+    for _ in range(140):
+        dx = rng.normal(0, 0.32)
+        dy = rng.normal(0, 0.20)
+        ax.scatter(cx + dx, cy_blue + dy, s=150, c=C_BLUE, alpha=0.05, edgecolors="none")
+
+    # ─── Arrows ───
+    # prompt → bridge
+    _arrow(ax, p_x + p_w, SPINE_Y, b_x, SPINE_Y, color=C_BASE, lw=2.0)
+    # bridge → stamp (single horizontal arrow; heads are internal to the bridge)
+    _arrow(ax, b_x + b_w, stamp_y + stamp_h / 2, stamp_x, stamp_y + stamp_h / 2,
+           color=C_BASE, lw=2.0)
+    # library → stamp
+    _arrow(ax, lib_x + lib_w / 2, lib_y, lib_x + lib_w / 2, stamp_y + stamp_h,
+           color=C_BASE, lw=1.8)
+    # stamp → viewer
+    _arrow(ax, stamp_x + stamp_w, stamp_y + stamp_h / 2,
+           v_x, stamp_y + stamp_h / 2, color=C_BASE, lw=2.0)
+
+    # ─── Footer strip (demo wrapper) ───
+    footer_h = 0.5
+    footer_y = 0.35
+    footer_x = p_x
+    footer_w = v_x + v_w - p_x
+    _box(ax, footer_x, footer_y, footer_w, footer_h,
+         "FastAPI local demo  ·  single-page browser app  ·  runs offline",
+         "#555", fontsize=10)
 
     out = OUT / "post-2-1_architecture.png"
     plt.tight_layout()
