@@ -526,27 +526,80 @@ appendix at the bottom of this file.
 
 ### 6.4  Track 4: Planck 1.2, Acceleration recipe validation
 
-**Status:** validates the SGS-native training accelerations from `docs/papers/sgs_training_acceleration.md` before Hertz 1.2.
+**Status:** implementation landed (commit `ce195c8`). Ablation run pending.
+All four acceleration proposals from `docs/papers/sgs_training_acceleration.md`
+are merged into `src/sgs_lm.py` + `scripts/train_lm.py` behind CLI flags
+(default off). §2.5 curriculum is deferred to Hertz 2.x.
 
-The paper proposes five accelerations, compound expected ~2-3x:
+Full plan trio:
+- Design: `docs/plans/planck_12_plan.md`
+- Ablation matrix + gate: `docs/plans/planck_12_validation.md`
+- Runbook (this section is the short version): `docs/plans/planck_12_runbook.md`
 
-| # | Proposal | Expected | Effort |
-|---|---|---|---|
-| §2.1 | Transmittance-weighted loss | ~1.4x sample efficiency | 1 day |
-| §2.2 | Adaptive pass count (early exit) | ~1.3x | 2 days |
-| §2.3 | Kernel top-k sparsity | ~1.4x forward | 4 days |
-| §2.4 | Shared kernel across passes | ~1.05x | 1 day |
-| §2.5 | Gaussian-native curriculum | ~1.15x (Hertz-2 material) | 2 days |
+Dataset switch: Planck 1.2 runs on FineWeb-Edu (`data/fineweb/{train,val}.bin`)
+instead of TinyStories, so the accel numbers transfer to Hertz 1.2's corpus.
 
-Recommended validation order on Planck 1.2:
+#### Sanity check first
 
-1. **Validate prerequisite:** check correlation between `T[t,t]` and prediction correctness on current Hertz checkpoint. If correlation is strong, §2.1 is well-founded.
-2. **§2.1 first** (cheap, doesn't change compute shape). A/B: `--transmittance-loss` vs plain CE on Planck 1.2, 500M tokens. Pass if perplexity parity at ≥20% fewer tokens.
-3. **§2.3 second** (biggest compute win, orthogonal to §2.1). Measure kernel + render wall-clock delta.
-4. **§2.2 and §2.4** bolt on once the pipeline is stable.
-5. **§2.5** deferred to Hertz 2.x.
+```powershell
+# 1. Default path must still return bare logits (backward compat).
+python -c "import torch; from src.sgs_lm import SGSLanguageModel; m = SGSLanguageModel(vocab_size=256, d_s=16, d_f=32, n_heads=2, n_passes=3, max_len=16); y = m(torch.zeros(1, 8, dtype=torch.long)); print('OK' if isinstance(y, torch.Tensor) else 'FAIL', y.shape)"
 
-Gate before Hertz 1.2: Planck 1.2 must reach Planck 1.0's validation loss on ≤70% of the tokens (1.43x sample efficiency). If not, revisit the paper or drop individual proposals.
+# 2. 500-step baseline on FineWeb-Edu; loss curve should sit close to
+#    Planck 1.1's. Drift >0.02 nats means the default path broke.
+python scripts/train_lm.py --data-dir data/fineweb --epochs 1 --eval-interval 500 --save-dir checkpoints/planck_12/_sanity
+```
+
+#### Full six-run ablation
+
+```powershell
+python scripts/validate_planck12.py --data-dir data/fineweb --wandb
+```
+
+That drives six configurations back-to-back, teeing stdout to
+`results/planck_12/<run_id>/train_log.txt` and accumulating a summary
+in `results/planck_12/ablation.json`. Runs:
+
+| run_id | flags |
+|---|---|
+| `baseline` | *(none)* |
+| `tl` | `--transmittance-loss` |
+| `ap` | `--adaptive-passes` |
+| `sk` | `--sparse-k 64` |
+| `shk` | `--shared-kernel` |
+| `all` | all four |
+
+Per-run hyperparameters and fallback defaults live in
+`planck_12_validation.md`. Iteration on a single config:
+
+```powershell
+# Retry just one run (harness skips already-ok runs unless --force)
+python scripts/validate_planck12.py --data-dir data/fineweb --only sk --force
+
+# One-shot torch.profiler dump at a chosen step
+python scripts/train_lm.py --data-dir data/fineweb --sparse-k 64 --profile-step 3000 --epochs 1
+```
+
+#### Gate
+
+Compound `all` vs. `baseline`:
+- **Sample efficiency ≥ 1.43×** (same val-loss target on ≤70% of the tokens)
+- **Wall-clock ≥ 1.8×**
+
+Both must pass. Either miss → Planck 1.2 stays `in progress`, open a
+1.2.1 row with the remediation; Hertz 1.2 stays blocked.
+
+#### Publishing
+
+After the matrix completes:
+
+```powershell
+git add results/planck_12/ablation.json results/planck_12/README.md
+git commit -m "Planck 1.2: ablation results"
+```
+
+If the gate passed, also flip `Planck 1.2` to `done` in `roadmap.md`
+and unblock `Hertz 1.2`.
 
 ### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
 
