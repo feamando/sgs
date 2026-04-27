@@ -52,6 +52,7 @@ ship. The swimlane visualizer at `pm/index.html` reads this file directly.
 | 5-klang-1-0 | Klang 1.0 | model | done | 2026-04-10 | Initial audio-SGS concept + scene.py scaffold |
 | 5-klang-1-1 | Klang 1.1 | model | done | 2026-04-15 | Variants A & B trained; phase warble + sub-200Hz dropout findings |
 | 5-klang-1-2 | Klang 1.2 | model | open | 2026-04-20 | Complex-valued Gaussians, transmittance compositing, MRSTFT |
-| 6-raum-1-0 | Raum 1.0 | model | in progress | 2026-04-24 | Template-routing bridge; retraining 2026-04-27 after X-rel-Y fix |
+| 6-raum-1-0 | Raum 1.0 | model | done | 2026-04-24 | Template-routing bridge; 6-object hexad, 2-object scenes, analytic-label training. Shipped 2026-04-27 as backbone of Raum 0.0 demo |
+| 6-raum-1-1 | Raum 1.1 | model | open | 2026-04-27 | Executor-side expansion to pair with Raum 0.1: 30-object template library, 3+ objects with anchor pointers, DSL consumer, relation graph head |
 | 10-raum-0-0 | Raum 0.0 | product | done | 2026-04-26 | Local web demo; polish + shader fix shipped 2026-04-27. Known limits (3+ objects, chained relations) deferred to 0.1 |
-| 10-raum-0-1 | Raum 0.1 | product | open | 2026-04-27 | Complex scenes, common-object vocab, OOV policy, planner+executor split (Planck-class planner → DSL → Raum executor; nano-banana-style edit loop) |
+| 10-raum-0-1 | Raum 0.1 | product | open | 2026-04-27 | Complex scenes, common-object vocab, OOV policy, planner+executor split (Planck-class planner → DSL → Raum 1.1 executor; nano-banana-style edit loop) |
