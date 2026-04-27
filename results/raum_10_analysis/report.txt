@@ -1,0 +1,68 @@
+
+  test set (unseen pairs)
+    loss     0.000
+    pos_mse  0.000
+    tpl_acc  100.0%
+    dir_acc  100.0%
+    col_mse  0.000
+    scl_mse  0.000
+    role_ce  0.000
+
+  "a red sphere above a blue cube"
+             a  pos=(-0.02,+0.10,+0.01)  tpl=torus   ( 100%)  col=(1.00,0.01,0.01)  scl=0.72
+           red  pos=(+0.06,+1.04,+0.04)  tpl=torus   (  98%)  col=(0.01,0.00,1.00)  scl=0.69
+        sphere  pos=(-0.00,-0.01,-0.00)  tpl=sphere  ( 100%)  col=(1.00,0.00,0.00)  scl=0.98
+         above  pos=(+0.07,+1.11,-0.05)  tpl=torus   (  99%)  col=(0.02,0.00,1.00)  scl=1.33
+             a  pos=(-0.02,+0.10,+0.01)  tpl=torus   ( 100%)  col=(1.00,0.01,0.01)  scl=0.73
+          blue  pos=(+0.04,+0.89,+0.05)  tpl=torus   ( 100%)  col=(0.03,0.00,1.00)  scl=0.70
+          cube  pos=(+0.00,+1.52,+0.01)  tpl=cube    ( 100%)  col=(0.01,0.00,1.00)  scl=1.00
+
+  "a green cone below a yellow cylinder"
+             a  pos=(+0.09,-0.16,+0.04)  tpl=torus   ( 100%)  col=(0.03,1.00,0.00)  scl=0.64
+         green  pos=(-0.01,-0.80,+0.01)  tpl=torus   (  93%)  col=(0.98,1.00,0.02)  scl=0.74
+          cone  pos=(+0.00,+0.01,-0.00)  tpl=cone    ( 100%)  col=(0.00,1.00,0.00)  scl=0.99
+         below  pos=(-0.03,-1.04,-0.07)  tpl=torus   (  99%)  col=(1.00,1.00,0.01)  scl=1.63
+             a  pos=(+0.10,-0.15,+0.04)  tpl=torus   ( 100%)  col=(0.03,1.00,0.00)  scl=0.64
+        yellow  pos=(+0.03,-0.54,-0.04)  tpl=torus   (  95%)  col=(0.91,1.00,0.03)  scl=0.77
+      cylinder  pos=(-0.01,-1.51,+0.01)  tpl=cylinder( 100%)  col=(1.00,1.00,0.00)  scl=1.01
+
+  "a white torus left a purple sphere"
+             a  pos=(-0.01,+0.00,+0.04)  tpl=torus   (  99%)  col=(1.00,1.00,1.00)  scl=0.90
+         white  pos=(-0.87,+0.05,+0.03)  tpl=torus   (  79%)  col=(0.48,0.01,1.00)  scl=1.03
+         torus  pos=(+0.00,+0.00,-0.00)  tpl=torus   ( 100%)  col=(1.00,1.00,1.00)  scl=0.98
+          left  pos=(-1.02,+0.06,-0.04)  tpl=torus   ( 100%)  col=(0.50,0.01,1.00)  scl=1.78
+             a  pos=(-0.01,+0.01,+0.04)  tpl=torus   (  98%)  col=(1.00,1.00,1.00)  scl=0.90
+        purple  pos=(-0.69,+0.06,+0.00)  tpl=torus   (  70%)  col=(0.56,0.02,1.00)  scl=1.11
+        sphere  pos=(-1.54,+0.01,+0.01)  tpl=sphere  ( 100%)  col=(0.52,0.00,1.00)  scl=0.99
+
+  "a huge red cube on a small blue plane"
+             a  pos=(+0.03,+0.05,-0.01)  tpl=torus   ( 100%)  col=(0.82,0.00,0.58)  scl=1.14
+          huge  pos=(+0.04,+0.55,+0.06)  tpl=torus   ( 100%)  col=(0.10,0.01,0.83)  scl=0.84
+           red  pos=(+0.02,+0.03,-0.02)  tpl=torus   (  91%)  col=(0.28,0.00,0.82)  scl=0.90
+          cube  pos=(-0.01,+0.00,+0.01)  tpl=cube    ( 100%)  col=(0.30,0.00,0.74)  scl=1.43
+            on  pos=(+0.08,+0.71,+0.04)  tpl=torus   ( 100%)  col=(0.17,0.00,0.95)  scl=1.03
+             a  pos=(+0.04,+0.04,-0.01)  tpl=torus   ( 100%)  col=(0.83,0.00,0.69)  scl=1.09
+         small  pos=(+0.06,+0.72,+0.04)  tpl=torus   ( 100%)  col=(0.20,0.00,0.80)  scl=0.95
+          blue  pos=(+0.03,+0.49,+0.04)  tpl=torus   (  99%)  col=(0.22,0.00,0.87)  scl=0.63
+         plane  pos=(+0.01,-0.01,+0.00)  tpl=plane   ( 100%)  col=(0.35,0.00,0.64)  scl=1.43
+
+  "a tiny orange sphere behind a large black cube"
+             a  pos=(+0.08,+0.01,+0.03)  tpl=torus   ( 100%)  col=(0.87,0.58,0.10)  scl=0.37
+          tiny  pos=(-0.01,+0.01,-1.28)  tpl=torus   ( 100%)  col=(0.27,0.40,0.10)  scl=0.89
+        orange  pos=(+0.11,-0.01,-0.03)  tpl=torus   (  87%)  col=(0.19,0.51,0.18)  scl=0.54
+        sphere  pos=(-0.10,+0.04,-0.49)  tpl=sphere  ( 100%)  col=(0.58,0.25,0.06)  scl=0.93
+        behind  pos=(+0.06,+0.00,-1.31)  tpl=torus   ( 100%)  col=(0.40,0.33,0.12)  scl=0.93
+             a  pos=(+0.11,+0.01,+0.03)  tpl=torus   ( 100%)  col=(0.85,0.60,0.12)  scl=0.36
+         large  pos=(+0.06,+0.00,-1.29)  tpl=torus   ( 100%)  col=(0.30,0.32,0.11)  scl=0.98
+         black  pos=(-0.01,+0.04,-0.98)  tpl=torus   (  75%)  col=(0.08,0.68,0.16)  scl=0.62
+          cube  pos=(-0.07,+0.03,-0.40)  tpl=cube    ( 100%)  col=(0.52,0.25,0.07)  scl=1.01
+
+  "a red sphere"
+             a  pos=(-0.02,+0.02,-0.01)  tpl=torus   ( 100%)  col=(1.00,0.01,0.00)  scl=0.70
+           red  pos=(+0.05,+0.09,-0.01)  tpl=cone    (  50%)  col=(1.00,0.00,0.00)  scl=0.94
+        sphere  pos=(-0.00,-0.00,+0.00)  tpl=sphere  ( 100%)  col=(1.00,0.00,0.00)  scl=0.99
+
+  "a blue cube"
+             a  pos=(-0.05,+0.00,+0.02)  tpl=torus   ( 100%)  col=(0.00,0.00,1.00)  scl=0.67
+          blue  pos=(+0.04,+0.11,+0.01)  tpl=torus   (  54%)  col=(0.01,0.00,1.00)  scl=0.58
+          cube  pos=(+0.00,+0.00,+0.00)  tpl=cube    ( 100%)  col=(0.00,0.00,1.00)  scl=0.99
