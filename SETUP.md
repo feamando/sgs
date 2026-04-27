@@ -329,127 +329,117 @@ Results: `checkpoints/raum_d/`.
 
 > **Note:** `--feature-mode sgs` currently raises NotImplementedError. The SGS encoder integration is pending. Use the default `--feature-mode glove`.
 
-#### PoC-C: Shared-Equation Bridge (GPU, ~2-4 hours)
+#### PoC-C: Raum 1.0, template-routing bridge (GPU, ~30-60 min)
+
+Raum 1.0 replaces the PoC-C render-loss bridge with a context-aware
+transformer that routes each object-role token to an object template
+from `src/raum/templates.py` (sphere, cube, cylinder, cone, plane,
+torus) and stamps it at a predicted position, colour, and scale.
+Training is analytic over the labels already produced by
+`src/raum/data.py`, no rendering in the loop.
 
 ```powershell
-python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt
+python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
+  --save-dir checkpoints/raum_10
 ```
 
-Generates synthetic scenes + renders GT from multiple viewpoints, trains the semantic-to-spatial Gaussian bridge, evaluates render quality (PSNR).
+Default architecture: `d_model=128`, 2 transformer layers, 4 heads,
+~478K params. Default loss weights: `--lambda-pos 1.0 --lambda-dir 0.5
+--lambda-tpl 1.0 --lambda-col 1.0 --lambda-scl 0.5 --lambda-rol 0.5
+--pair-margin 0.3`. Default `--batch-size 32`, `--lr 3e-4`,
+`--epochs 30`.
 
-Results: `checkpoints/raum_c/`.
+Watch these metrics on the step / eval lines:
+- `pos` (position MSE) should fall below 0.1
+- `tpl` (template argmax accuracy) should climb above 95%
+- `dir` (pairwise direction accuracy) should climb above 95%
+- `col` (colour MSE) should fall below 0.05
 
-#### PoC-C Analysis
+The val line reports a composite `score = tpl_acc + dir_acc - pos_mse`
+and saves `best.pt` on each new high. `last.pt` carries
+model + optimizer + scheduler + counters for resume.
+
+Results: `checkpoints/raum_10/`.
+
+Background on why this replaces the old bridge: the earlier PoC-C
+used a render loss on images from a CPU alpha-compositing renderer.
+PSNR pegged at 80 dB (the `log10(1e-8) * -10` clamp floor, not a real
+score) because both predicted and GT images came back near-black. On
+top of that, the original bridge was per-token and could not
+distinguish "first sphere" from "second sphere" in a two-object
+scene, so position MSE floored at the variance of the ground-truth
+positions. Raum 1.0 fixes both: drop the dead render loss and make
+the bridge context-aware via a transformer encoder. See commit
+`bff5b75` for the full rewrite.
+
+#### PoC-C analysis
 
 ```powershell
-python scripts/analyze_raum_bridge.py ^
-  --checkpoint checkpoints/raum_c/best.pt ^
+python scripts/analyze_raum_bridge.py `
+  --checkpoint checkpoints/raum_10/best.pt `
   --glove data/glove.6B.300d.txt
 ```
 
-Prints: word → xyz mapping, sentence composition in 3D, interpolation paths, weight matrix analysis.
+Reports:
+- Comp-gen test-set metrics (loss, `pos_mse`, `tpl_acc`, `dir_acc`,
+  `col_mse`, `scl_mse`, `role_ce`) on held-out object pairs
+- Per-sentence probes for a short fixture list of prompts, each
+  showing predicted position, template (with confidence), colour,
+  and scale per token
 
-Results: `results/raum_c_analysis/`.
+Results: `results/raum_10_analysis/report.txt`.
 
-#### PoC-C bridge-collapse diagnostic and fixes
+#### Raum demo (local web app)
 
-First analysis of `checkpoints/raum_c/best.pt` (2026-04-26) showed the
-bridge collapsed: every word mapped to within ~3e-3 of the origin, the
-final `mu_proj` layer had norm 0.102 on a `[3, 64]` matrix (~17x below
-default init), and the `left`-`right` x-separation came out with the
-wrong sign. Upstream `mu` is healthy (range `[-4.51, 3.99]`), so the
-bridge itself is the problem: the render loss can be satisfied by
-letting the feature channel carry colour/opacity and leaving position
-at zero.
-
-Two sequential fixes are wired into `train_raum_bridge.py`.
-Run them in order, each to its own `--save-dir` so the original
-collapsed checkpoint and the fix attempts stay side by side for
-comparison.
-
-**Fix 1, spread regulariser (cheap sanity check).** Forces the
-per-axis std of the coarse means toward `--target-spread`.
+After analysis passes, run the demo to eyeball the model live. The
+backend loads the bridge + template library once; the frontend is
+static HTML + Three.js with no build step.
 
 ```powershell
-python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --lambda-spread 0.1 --target-spread 1.0 `
-  --save-dir checkpoints/raum_c_spread
-python scripts/analyze_raum_bridge.py `
-  --checkpoint checkpoints/raum_c_spread/best.pt `
-  --glove data/glove.6B.300d.txt `
-  --save-dir results/raum_c_spread_analysis
+pip install -r demo/requirements.txt
+python -m demo.app `
+  --checkpoint checkpoints/raum_10/best.pt `
+  --glove data/glove.6B.300d.txt
 ```
 
-Watch the `spread N.NNN` value on the step line climb toward
-`target-spread`. This only proves the architecture *can* spread, it
-does not fix the axis directions.
+Then open <http://localhost:8000>. The default prompt auto-renders;
+type any scene from the training vocabulary (objects / colours / sizes /
+relations in `src/raum/vocab.py`) to regenerate. The side panel lists
+each parsed object with its colour swatch, predicted template, and
+template confidence; amber outline rings mark predicted coarse means
+so misplaced objects are immediately visible.
 
-**Fix 2, supervised position loss (the real fix).** Pulls each
-object-bearing token's coarse mean toward the ground-truth
-`object_positions` already present in the batch, plus a pairwise
-margin term that forces the *direction* of two-object position
-differences ("above" → y increases, "left" → x decreases).
+More in `demo/README.md`. The demo is local-only; nothing is hosted.
 
-```powershell
-python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --lambda-pos 1.0 --pos-margin 0.3 `
-  --save-dir checkpoints/raum_c_pos
-python scripts/analyze_raum_bridge.py `
-  --checkpoint checkpoints/raum_c_pos/best.pt `
-  --glove data/glove.6B.300d.txt `
-  --save-dir results/raum_c_pos_analysis
-```
+#### Pause and resume
 
-Expected after Fix 2: `left`-`right` x-separation flips positive,
-`above`-`below` y-separation becomes clearly positive, colour and
-object words spread beyond ~1e-3, and `mu_proj[2].weight` norm moves
-well above 0.1.
-
-The two flags stack, `--lambda-spread 0.05 --lambda-pos 1.0` is a
-reasonable combined run once Fix 2 works on its own.
-
-**Cleanup between runs.** Each run writes a new `best.pt` under its
-`--save-dir`, so no deletion is required, just use a distinct
-`--save-dir` per experiment. The original
-`checkpoints/raum_c/best.pt` (collapsed) is the reference baseline and
-should be kept. No dataset, vocab, or template regeneration is needed:
-both fixes operate on the existing batch format.
-
-**Pause and resume.** Training runs can take over a day on a 4090 and
-the script now supports pause/resume. Every eval step and end of
+Training runs support pause and resume. Every eval step and end of
 epoch writes `last.pt` (model + optimizer + scheduler + counters).
 `best.pt` stays model-only so `analyze_raum_bridge.py` keeps working
 unchanged.
 
 ```powershell
-# Start a long run
+# Start
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --lambda-spread 0.05 --lambda-pos 1.0 --pos-margin 0.3 `
-  --save-dir checkpoints/raum_c_combined
+  --save-dir checkpoints/raum_10
 
-# Ctrl-C at any time. A final snapshot is written before exit.
-# Resume later from where it stopped:
+# Ctrl-C whenever. A final snapshot is written before exit.
+# Resume:
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --lambda-spread 0.05 --lambda-pos 1.0 --pos-margin 0.3 `
-  --save-dir checkpoints/raum_c_combined --resume
+  --save-dir checkpoints/raum_10 --resume
 ```
 
 Caveats:
-- The resume code is only in runs started *after* commit `6af6842`.
-  Older in-flight runs (e.g. the original collapsed `raum_c` training)
-  did not write `last.pt`, so Ctrl-C on those loses optimizer state and
-  restart would be from scratch. Finish in-flight runs, then use
-  `--resume` going forward.
-- Use `--ckpt-interval N` to snapshot every N steps (default is
-  eval-step + end-of-epoch only, which is enough for most pauses).
+- Use `--ckpt-interval N` for a snapshot every N steps (default is
+  eval-step + end-of-epoch only).
 - Double Ctrl-C skips the snapshot and kills immediately.
+- Resume works only for runs started after commit `6af6842`.
 
 #### Commit
 
 ```powershell
-git add results/raum_c_analysis/ results/raum_c_spread_analysis/ `
-        results/raum_c_pos_analysis/ checkpoints/raum_d/*.json
-git commit -m "Track 3 Raum: PoC-C + PoC-D results, bridge-collapse fixes"
+git add results/raum_10_analysis/ checkpoints/raum_d/*.json
+git commit -m "Track 3 Raum: PoC-C Raum 1.0 + PoC-D results"
 git push
 ```
 
