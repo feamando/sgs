@@ -34,13 +34,18 @@ compat guarantee is broken.
 ## 1. Full six-run matrix
 
 ```
-python scripts/validate_planck12.py --data-dir data/fineweb --wandb
+python scripts/validate_planck12.py --data-dir data/fineweb
 ```
 
 Each run is a subprocess call to `scripts/train_lm.py` with a distinct
 flag combo (see `docs/plans/planck_12_validation.md` for the exact
 matrix). Results accumulate in `results/planck_12/ablation.json`;
-per-run stdout is teed to `results/planck_12/<run_id>/train_log.txt`.
+per-run stdout is teed to `results/planck_12/<run_id>/train_log.txt`,
+which is what the harness parses for the summary table.
+
+Pass `--wandb` only if you want live dashboards for visual monitoring;
+the JSON + per-run log already captures every number the gate uses, so
+`--wandb` is optional (and spends paid-plan quota).
 
 Expected wall clock on an RTX 4090 at the defaults (1 epoch, batch 32,
 L=512, `--max-steps 66750` ≈ 1.09 B tokens to match the adopted

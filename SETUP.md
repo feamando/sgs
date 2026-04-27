@@ -553,12 +553,14 @@ python scripts/train_lm.py --data-dir data/fineweb --epochs 1 --eval-interval 50
 #### Full six-run ablation
 
 ```powershell
-python scripts/validate_planck12.py --data-dir data/fineweb --wandb
+python scripts/validate_planck12.py --data-dir data/fineweb
 ```
 
 That drives six configurations back-to-back, teeing stdout to
 `results/planck_12/<run_id>/train_log.txt` and accumulating a summary
-in `results/planck_12/ablation.json`. Runs:
+in `results/planck_12/ablation.json`. Pass `--wandb` only if you want
+live dashboards; the JSON + per-run logs already carry every number the
+gate needs. Runs:
 
 | run_id | flags |
 |---|---|
