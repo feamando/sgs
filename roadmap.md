@@ -45,11 +45,13 @@ ship. The swimlane visualizer at `pm/index.html` reads this file directly.
 | 1-planck-1-0 | Planck 1.0 | model | done | 2026-04-07 | Foundation 100M LM; baseline |
 | 1-planck-1-1 | Planck 1.1 | model | done | 2026-04-14 | Validated blob concept |
 | 1-planck-1-2 | Planck 1.2 | model | open | 2026-04-20 | Acceleration-recipe validation (gates Hertz 1.2) |
+| 1-planck-1-3 | Planck 1.3 | model | open | 2026-04-27 | Fresh-knowledge blobs: generic grammar base + live RSS blob store (Reuters/AP), beats frontier on 24h-fresh QA |
+| 1-planck-1-4 | Planck 1.4 | model | open | 2026-04-27 | Conversation-memory blobs: per-turn blob writer + hybrid recency/similarity retrieval; flat cost-per-turn vs. growing context |
 | 2-hertz-1-0 | Hertz 1.0 | model | done | 2026-04-07 | Paused 2026-04-20, wall-clock infeasible without accel |
 | 2-hertz-1-2 | Hertz 1.2 | model | open | 2026-04-20 | Large-LM run with SGS accel recipe from Planck 1.2 |
 | 5-klang-1-0 | Klang 1.0 | model | done | 2026-04-10 | Initial audio-SGS concept + scene.py scaffold |
 | 5-klang-1-1 | Klang 1.1 | model | done | 2026-04-15 | Variants A & B trained; phase warble + sub-200Hz dropout findings |
 | 5-klang-1-2 | Klang 1.2 | model | open | 2026-04-20 | Complex-valued Gaussians, transmittance compositing, MRSTFT |
 | 6-raum-1-0 | Raum 1.0 | model | in progress | 2026-04-24 | Template-routing bridge; retraining 2026-04-27 after X-rel-Y fix |
-| 10-raum-0-0 | Raum 0.0 | product | in progress | 2026-04-26 | Local web demo; polish round shipped 2026-04-27 |
+| 10-raum-0-0 | Raum 0.0 | product | done | 2026-04-26 | Local web demo; polish + shader fix shipped 2026-04-27. Known limits (3+ objects, chained relations) deferred to 0.1 |
 | 10-raum-0-1 | Raum 0.1 | product | open | 2026-04-27 | Complex scenes, common-object vocab, OOV policy |
