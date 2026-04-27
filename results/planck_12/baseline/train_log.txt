@@ -1,3 +1,590 @@
+python scripts\train_raum_bridge.py --glove data\glove.6B.300d.txt --save-dir checkpoints\raum_11
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+
+=== Loading GloVe ===
+Loading GloVe from data\glove.6B.300d.txt...
+Loaded 50000 words, embedding dim=300
+Initialized 50000 Gaussians from GloVe
+  PCA explained variance: 0.447
+  μ range: [-4.51, 3.99]
+
+=== Generating data ===
+Comp-gen split:
+  Train pairs: 29, Held-out pairs: 7
+  Held-out: {('cube', 'cone'), ('plane', 'cone'), ('cone', 'cube'), ('cylinder', 'sphere'), ('torus', 'sphere'), ('torus', 'cylinder'), ('sphere', 'torus')}
+  Train: 5000, Val: 500, Test: 500
+
+=== Creating model ===
+C:\Users\feama\sgs\.venv\Lib\site-packages\torch\nn\modules\transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Parameters: 478,290
+
+=== Training (30 epochs) ===
+  ep  1 step     20 | loss 1.534 pos 0.705 dir  30.0% tpl 100.0% col 0.572 scl 0.080 rol 0.080
+  ep  1 step     40 | loss 1.239 pos 0.643 dir  50.0% tpl 100.0% col 0.389 scl 0.092 rol 0.025
+  ep  1 step     60 | loss 0.847 pos 0.420 dir  73.7% tpl 100.0% col 0.271 scl 0.044 rol 0.016
+  ep  1 step     80 | loss 1.234 pos 0.610 dir  55.6% tpl 100.0% col 0.446 scl 0.040 rol 0.012
+  ep  1 step    100 | loss 0.857 pos 0.399 dir  81.8% tpl 100.0% col 0.347 scl 0.052 rol 0.009
+  ep  1 step    120 | loss 0.739 pos 0.332 dir  80.0% tpl 100.0% col 0.294 scl 0.048 rol 0.011
+  ep  1 step    140 | loss 0.820 pos 0.420 dir  66.7% tpl 100.0% col 0.271 scl 0.032 rol 0.007
+  Epoch 1 done (16.8s) | avg_loss=1.191
+  ep  2 step    160 | loss 0.637 pos 0.292 dir  89.5% tpl 100.0% col 0.253 scl 0.029 rol 0.006
+  ep  2 step    180 | loss 0.476 pos 0.177 dir  95.5% tpl 100.0% col 0.266 scl 0.032 rol 0.004
+  ep  2 step    200 | loss 0.507 pos 0.139 dir  95.8% tpl 100.0% col 0.333 scl 0.024 rol 0.004
+  >>> val | loss 0.372 pos 0.078 dir 100.0% tpl 100.0% | score 1.922
+  ** new best, saved best.pt
+  ep  2 step    220 | loss 0.421 pos 0.072 dir  95.0% tpl 100.0% col 0.316 scl 0.032 rol 0.004
+  ep  2 step    240 | loss 0.394 pos 0.058 dir 100.0% tpl 100.0% col 0.319 scl 0.018 rol 0.006
+  ep  2 step    260 | loss 0.353 pos 0.050 dir 100.0% tpl 100.0% col 0.281 scl 0.028 rol 0.004
+  ep  2 step    280 | loss 0.170 pos 0.060 dir 100.0% tpl 100.0% col 0.090 scl 0.027 rol 0.004
+  ep  2 step    300 | loss 0.094 pos 0.032 dir 100.0% tpl 100.0% col 0.043 scl 0.023 rol 0.005
+  Epoch 2 done (18.1s) | avg_loss=0.364
+  ep  3 step    320 | loss 0.097 pos 0.052 dir 100.0% tpl 100.0% col 0.034 scl 0.012 rol 0.003
+  ep  3 step    340 | loss 0.100 pos 0.043 dir 100.0% tpl 100.0% col 0.042 scl 0.017 rol 0.002
+  ep  3 step    360 | loss 0.081 pos 0.048 dir 100.0% tpl 100.0% col 0.022 scl 0.016 rol 0.002
+  ep  3 step    380 | loss 0.050 pos 0.021 dir 100.0% tpl 100.0% col 0.022 scl 0.009 rol 0.001
+  ep  3 step    400 | loss 0.058 pos 0.023 dir 100.0% tpl 100.0% col 0.027 scl 0.011 rol 0.001
+  >>> val | loss 0.023 pos 0.014 dir 100.0% tpl 100.0% | score 1.986
+  ** new best, saved best.pt
+  ep  3 step    420 | loss 0.041 pos 0.016 dir 100.0% tpl 100.0% col 0.017 scl 0.013 rol 0.001
+  ep  3 step    440 | loss 0.045 pos 0.019 dir 100.0% tpl 100.0% col 0.019 scl 0.009 rol 0.001
+  ep  3 step    460 | loss 0.040 pos 0.011 dir 100.0% tpl 100.0% col 0.023 scl 0.009 rol 0.001
+  Epoch 3 done (18.1s) | avg_loss=0.056
+  ep  4 step    480 | loss 0.035 pos 0.021 dir 100.0% tpl 100.0% col 0.010 scl 0.005 rol 0.001
+  ep  4 step    500 | loss 0.028 pos 0.016 dir 100.0% tpl 100.0% col 0.007 scl 0.004 rol 0.001
+  ep  4 step    520 | loss 0.027 pos 0.016 dir 100.0% tpl 100.0% col 0.008 scl 0.004 rol 0.001
+  ep  4 step    540 | loss 0.023 pos 0.009 dir 100.0% tpl 100.0% col 0.010 scl 0.006 rol 0.001
+  ep  4 step    560 | loss 0.033 pos 0.013 dir 100.0% tpl 100.0% col 0.016 scl 0.005 rol 0.000
+  ep  4 step    580 | loss 0.022 pos 0.009 dir 100.0% tpl 100.0% col 0.008 scl 0.006 rol 0.001
+  ep  4 step    600 | loss 0.033 pos 0.024 dir 100.0% tpl 100.0% col 0.005 scl 0.007 rol 0.001
+  >>> val | loss 0.012 pos 0.008 dir 100.0% tpl 100.0% | score 1.992
+  ** new best, saved best.pt
+  ep  4 step    620 | loss 0.023 pos 0.014 dir 100.0% tpl 100.0% col 0.007 scl 0.004 rol 0.000
+  Epoch 4 done (18.5s) | avg_loss=0.030
+  ep  5 step    640 | loss 0.016 pos 0.009 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.000
+  ep  5 step    660 | loss 0.029 pos 0.011 dir 100.0% tpl 100.0% col 0.015 scl 0.004 rol 0.000
+  ep  5 step    680 | loss 0.025 pos 0.012 dir 100.0% tpl 100.0% col 0.010 scl 0.005 rol 0.000
+  ep  5 step    700 | loss 0.023 pos 0.011 dir 100.0% tpl 100.0% col 0.009 scl 0.003 rol 0.001
+  ep  5 step    720 | loss 0.029 pos 0.020 dir 100.0% tpl 100.0% col 0.005 scl 0.005 rol 0.000
+  ep  5 step    740 | loss 0.015 pos 0.008 dir 100.0% tpl 100.0% col 0.004 scl 0.003 rol 0.000
+  ep  5 step    760 | loss 0.023 pos 0.014 dir 100.0% tpl 100.0% col 0.006 scl 0.004 rol 0.000
+  ep  5 step    780 | loss 0.015 pos 0.007 dir 100.0% tpl 100.0% col 0.006 scl 0.002 rol 0.001
+  Epoch 5 done (17.5s) | avg_loss=0.021
+  ep  6 step    800 | loss 0.021 pos 0.008 dir 100.0% tpl 100.0% col 0.009 scl 0.008 rol 0.000
+  >>> val | loss 0.014 pos 0.010 dir 100.0% tpl 100.0% | score 1.990
+  ep  6 step    820 | loss 0.026 pos 0.017 dir 100.0% tpl 100.0% col 0.006 scl 0.005 rol 0.000
+  ep  6 step    840 | loss 0.017 pos 0.009 dir 100.0% tpl 100.0% col 0.006 scl 0.003 rol 0.000
+  ep  6 step    860 | loss 0.024 pos 0.012 dir 100.0% tpl 100.0% col 0.010 scl 0.002 rol 0.000
+  ep  6 step    880 | loss 0.017 pos 0.009 dir 100.0% tpl 100.0% col 0.006 scl 0.003 rol 0.000
+  ep  6 step    900 | loss 0.017 pos 0.010 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.000
+  ep  6 step    920 | loss 0.013 pos 0.006 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.000
+  Epoch 6 done (17.7s) | avg_loss=0.017
+  ep  7 step    940 | loss 0.015 pos 0.008 dir 100.0% tpl 100.0% col 0.006 scl 0.002 rol 0.000
+  ep  7 step    960 | loss 0.015 pos 0.010 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep  7 step    980 | loss 0.011 pos 0.004 dir 100.0% tpl 100.0% col 0.004 scl 0.006 rol 0.000
+  ep  7 step   1000 | loss 0.030 pos 0.024 dir 100.0% tpl 100.0% col 0.004 scl 0.003 rol 0.000
+  >>> val | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% | score 1.997
+  ** new best, saved best.pt
+  ep  7 step   1020 | loss 0.014 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.005 rol 0.000
+  ep  7 step   1040 | loss 0.010 pos 0.004 dir 100.0% tpl 100.0% col 0.004 scl 0.004 rol 0.000
+  ep  7 step   1060 | loss 0.011 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.003 rol 0.001
+  ep  7 step   1080 | loss 0.011 pos 0.005 dir 100.0% tpl 100.0% col 0.004 scl 0.004 rol 0.000
+  Epoch 7 done (18.6s) | avg_loss=0.014
+  ep  8 step   1100 | loss 0.014 pos 0.010 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep  8 step   1120 | loss 0.017 pos 0.007 dir 100.0% tpl 100.0% col 0.008 scl 0.002 rol 0.000
+  ep  8 step   1140 | loss 0.015 pos 0.008 dir 100.0% tpl 100.0% col 0.005 scl 0.001 rol 0.000
+  ep  8 step   1160 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  8 step   1180 | loss 0.013 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.005 rol 0.003
+  ep  8 step   1200 | loss 0.010 pos 0.006 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  >>> val | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% | score 1.998
+  ** new best, saved best.pt
+  ep  8 step   1220 | loss 0.013 pos 0.009 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep  8 step   1240 | loss 0.009 pos 0.007 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  Epoch 8 done (18.3s) | avg_loss=0.011
+  ep  9 step   1260 | loss 0.009 pos 0.003 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  9 step   1280 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep  9 step   1300 | loss 0.009 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep  9 step   1320 | loss 0.013 pos 0.008 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  ep  9 step   1340 | loss 0.012 pos 0.007 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  9 step   1360 | loss 0.009 pos 0.006 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep  9 step   1380 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep  9 step   1400 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.003 rol 0.000
+  >>> val | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% | score 1.996
+  Epoch 9 done (18.2s) | avg_loss=0.010
+  ep 10 step   1420 | loss 0.009 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep 10 step   1440 | loss 0.008 pos 0.003 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep 10 step   1460 | loss 0.012 pos 0.008 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  ep 10 step   1480 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 10 step   1500 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 10 step   1520 | loss 0.008 pos 0.003 dir 100.0% tpl 100.0% col 0.003 scl 0.003 rol 0.000
+  ep 10 step   1540 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 10 step   1560 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  Epoch 10 done (17.7s) | avg_loss=0.009
+  ep 11 step   1580 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 11 step   1600 | loss 0.012 pos 0.009 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  >>> val | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ** new best, saved best.pt
+  ep 11 step   1620 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 11 step   1640 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 11 step   1660 | loss 0.007 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 11 step   1680 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  ep 11 step   1700 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  Epoch 11 done (18.6s) | avg_loss=0.008
+  ep 12 step   1720 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.003 rol 0.000
+  ep 12 step   1740 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.003 rol 0.000
+  ep 12 step   1760 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 12 step   1780 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep 12 step   1800 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  >>> val | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 12 step   1820 | loss 0.019 pos 0.005 dir 100.0% tpl 100.0% col 0.012 scl 0.003 rol 0.000
+  ep 12 step   1840 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 12 step   1860 | loss 0.009 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.004 rol 0.000
+  Epoch 12 done (19.3s) | avg_loss=0.007
+  ep 13 step   1880 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 13 step   1900 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 13 step   1920 | loss 0.007 pos 0.006 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 13 step   1940 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+
+[Ctrl-C] snapshotting to last.pt, press again to abort...
+[Ctrl-C] saved checkpoints\raum_11\last.pt. Resume with --resume.
+Traceback (most recent call last):
+  File "C:\Users\feama\sgs\scripts\train_raum_bridge.py", line 296, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\train_raum_bridge.py", line 234, in main
+    loss.backward()
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\torch\_tensor.py", line 626, in backward
+    torch.autograd.backward(
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\torch\autograd\__init__.py", line 347, in backward
+    _engine_run_backward(
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\torch\autograd\graph.py", line 823, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\scripts\train_raum_bridge.py", line 203, in _sigint
+    raise KeyboardInterrupt
+KeyboardInterrupt
+(.venv) 
+python scripts\train_raum_bridge.py --glove data\glove.6B.300d.txt `
+>>   --save-dir checkpoints\raum_11
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+
+=== Loading GloVe ===
+Loading GloVe from data\glove.6B.300d.txt...
+Loaded 50000 words, embedding dim=300
+Initialized 50000 Gaussians from GloVe
+  PCA explained variance: 0.447
+  μ range: [-4.51, 3.99]
+
+=== Generating data ===
+Comp-gen split:
+  Train pairs: 29, Held-out pairs: 7
+  Held-out: {('torus', 'cylinder'), ('cube', 'cone'), ('cylinder', 'sphere'), ('sphere', 'torus'), ('plane', 'cone'), ('torus', 'sphere'), ('cone', 'cube')}
+  Train: 5000, Val: 500, Test: 500
+
+=== Creating model ===
+C:\Users\feama\sgs\.venv\Lib\site-packages\torch\nn\modules\transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+  Parameters: 478,290
+
+=== Training (30 epochs) ===
+  ep  1 step     20 | loss 1.431 pos 0.648 dir  55.0% tpl 100.0% col 0.582 scl 0.076 rol 0.077
+  ep  1 step     40 | loss 1.257 pos 0.639 dir  50.0% tpl 100.0% col 0.401 scl 0.107 rol 0.027
+  ep  1 step     60 | loss 0.944 pos 0.476 dir  36.8% tpl 100.0% col 0.276 scl 0.051 rol 0.014
+  ep  1 step     80 | loss 1.177 pos 0.552 dir  70.4% tpl 100.0% col 0.480 scl 0.036 rol 0.009
+  ep  1 step    100 | loss 0.905 pos 0.397 dir  77.3% tpl 100.0% col 0.366 scl 0.051 rol 0.011
+  ep  1 step    120 | loss 0.756 pos 0.337 dir  70.0% tpl 100.0% col 0.290 scl 0.054 rol 0.011
+  ep  1 step    140 | loss 0.672 pos 0.310 dir  79.2% tpl 100.0% col 0.279 scl 0.017 rol 0.007
+  Epoch 1 done (15.9s) | avg_loss=1.170
+  ep  2 step    160 | loss 0.585 pos 0.242 dir  94.7% tpl 100.0% col 0.266 scl 0.053 rol 0.008
+  ep  2 step    180 | loss 0.519 pos 0.208 dir  86.4% tpl 100.0% col 0.250 scl 0.022 rol 0.006
+  ep  2 step    200 | loss 0.440 pos 0.137 dir 100.0% tpl 100.0% col 0.273 scl 0.026 rol 0.005
+  >>> val | loss 0.319 pos 0.054 dir 100.0% tpl 100.0% | score 1.946
+  ** new best, saved best.pt
+  ep  2 step    220 | loss 0.351 pos 0.048 dir 100.0% tpl 100.0% col 0.270 scl 0.033 rol 0.007
+  ep  2 step    240 | loss 0.300 pos 0.072 dir 100.0% tpl 100.0% col 0.207 scl 0.025 rol 0.005
+  ep  2 step    260 | loss 0.161 pos 0.035 dir 100.0% tpl 100.0% col 0.094 scl 0.048 rol 0.005
+  ep  2 step    280 | loss 0.101 pos 0.032 dir 100.0% tpl 100.0% col 0.044 scl 0.038 rol 0.005
+  ep  2 step    300 | loss 0.066 pos 0.032 dir 100.0% tpl 100.0% col 0.023 scl 0.015 rol 0.002
+  Epoch 2 done (17.8s) | avg_loss=0.292
+  ep  3 step    320 | loss 0.058 pos 0.028 dir 100.0% tpl 100.0% col 0.023 scl 0.009 rol 0.002
+  ep  3 step    340 | loss 0.081 pos 0.049 dir 100.0% tpl 100.0% col 0.021 scl 0.014 rol 0.005
+  ep  3 step    360 | loss 0.057 pos 0.032 dir 100.0% tpl 100.0% col 0.018 scl 0.009 rol 0.001
+  ep  3 step    380 | loss 0.101 pos 0.051 dir 100.0% tpl 100.0% col 0.043 scl 0.009 rol 0.002
+  ep  3 step    400 | loss 0.049 pos 0.030 dir 100.0% tpl 100.0% col 0.013 scl 0.010 rol 0.001
+  >>> val | loss 0.016 pos 0.007 dir 100.0% tpl 100.0% | score 1.993
+  ** new best, saved best.pt
+  ep  3 step    420 | loss 0.046 pos 0.021 dir 100.0% tpl 100.0% col 0.017 scl 0.013 rol 0.001
+  ep  3 step    440 | loss 0.040 pos 0.024 dir 100.0% tpl 100.0% col 0.011 scl 0.006 rol 0.001
+  ep  3 step    460 | loss 0.033 pos 0.012 dir 100.0% tpl 100.0% col 0.016 scl 0.009 rol 0.001
+  Epoch 3 done (17.7s) | avg_loss=0.050
+  ep  4 step    480 | loss 0.032 pos 0.014 dir 100.0% tpl 100.0% col 0.013 scl 0.004 rol 0.001
+  ep  4 step    500 | loss 0.043 pos 0.022 dir 100.0% tpl 100.0% col 0.009 scl 0.006 rol 0.001
+  ep  4 step    520 | loss 0.023 pos 0.013 dir 100.0% tpl 100.0% col 0.007 scl 0.004 rol 0.001
+  ep  4 step    540 | loss 0.027 pos 0.014 dir 100.0% tpl 100.0% col 0.009 scl 0.005 rol 0.001
+  ep  4 step    560 | loss 0.019 pos 0.012 dir 100.0% tpl 100.0% col 0.004 scl 0.003 rol 0.000
+  ep  4 step    580 | loss 0.022 pos 0.012 dir 100.0% tpl 100.0% col 0.006 scl 0.004 rol 0.001
+  ep  4 step    600 | loss 0.016 pos 0.007 dir 100.0% tpl 100.0% col 0.006 scl 0.006 rol 0.000
+  >>> val | loss 0.009 pos 0.004 dir 100.0% tpl 100.0% | score 1.996
+  ** new best, saved best.pt
+  ep  4 step    620 | loss 0.022 pos 0.011 dir 100.0% tpl 100.0% col 0.008 scl 0.005 rol 0.000
+  Epoch 4 done (18.2s) | avg_loss=0.027
+  ep  5 step    640 | loss 0.025 pos 0.017 dir 100.0% tpl 100.0% col 0.006 scl 0.002 rol 0.000
+  ep  5 step    660 | loss 0.019 pos 0.012 dir 100.0% tpl 100.0% col 0.006 scl 0.003 rol 0.000
+  ep  5 step    680 | loss 0.020 pos 0.010 dir 100.0% tpl 100.0% col 0.007 scl 0.005 rol 0.000
+  ep  5 step    700 | loss 0.022 pos 0.013 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.001
+  ep  5 step    720 | loss 0.020 pos 0.009 dir 100.0% tpl 100.0% col 0.008 scl 0.003 rol 0.000
+  ep  5 step    740 | loss 0.015 pos 0.006 dir 100.0% tpl 100.0% col 0.007 scl 0.003 rol 0.000
+  ep  5 step    760 | loss 0.015 pos 0.007 dir 100.0% tpl 100.0% col 0.007 scl 0.001 rol 0.000
+  ep  5 step    780 | loss 0.016 pos 0.008 dir 100.0% tpl 100.0% col 0.006 scl 0.002 rol 0.000
+  Epoch 5 done (17.3s) | avg_loss=0.020
+  ep  6 step    800 | loss 0.017 pos 0.005 dir 100.0% tpl 100.0% col 0.005 scl 0.012 rol 0.000
+  >>> val | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% | score 1.997
+  ** new best, saved best.pt
+  ep  6 step    820 | loss 0.015 pos 0.008 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.000
+  ep  6 step    840 | loss 0.014 pos 0.009 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  6 step    860 | loss 0.024 pos 0.008 dir 100.0% tpl 100.0% col 0.015 scl 0.001 rol 0.000
+  ep  6 step    880 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.003 rol 0.000
+  ep  6 step    900 | loss 0.013 pos 0.005 dir 100.0% tpl 100.0% col 0.005 scl 0.002 rol 0.000
+  ep  6 step    920 | loss 0.015 pos 0.007 dir 100.0% tpl 100.0% col 0.006 scl 0.002 rol 0.000
+  Epoch 6 done (18.3s) | avg_loss=0.016
+  ep  7 step    940 | loss 0.012 pos 0.006 dir 100.0% tpl 100.0% col 0.005 scl 0.001 rol 0.000
+  ep  7 step    960 | loss 0.012 pos 0.007 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep  7 step    980 | loss 0.011 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.005 rol 0.001
+  ep  7 step   1000 | loss 0.020 pos 0.010 dir 100.0% tpl 100.0% col 0.008 scl 0.003 rol 0.000
+  >>> val | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% | score 1.997
+  ep  7 step   1020 | loss 0.013 pos 0.008 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  7 step   1040 | loss 0.010 pos 0.006 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep  7 step   1060 | loss 0.017 pos 0.010 dir 100.0% tpl 100.0% col 0.005 scl 0.003 rol 0.000
+  ep  7 step   1080 | loss 0.012 pos 0.004 dir 100.0% tpl 100.0% col 0.006 scl 0.003 rol 0.000
+  Epoch 7 done (17.6s) | avg_loss=0.014
+  ep  8 step   1100 | loss 0.013 pos 0.008 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  ep  8 step   1120 | loss 0.014 pos 0.008 dir 100.0% tpl 100.0% col 0.005 scl 0.002 rol 0.000
+  ep  8 step   1140 | loss 0.019 pos 0.009 dir 100.0% tpl 100.0% col 0.008 scl 0.002 rol 0.000
+  ep  8 step   1160 | loss 0.011 pos 0.007 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  ep  8 step   1180 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep  8 step   1200 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  >>> val | loss 0.006 pos 0.004 dir 100.0% tpl 100.0% | score 1.996
+  ep  8 step   1220 | loss 0.016 pos 0.007 dir 100.0% tpl 100.0% col 0.008 scl 0.001 rol 0.000
+  ep  8 step   1240 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  Epoch 8 done (18.2s) | avg_loss=0.012
+  ep  9 step   1260 | loss 0.013 pos 0.008 dir 100.0% tpl 100.0% col 0.003 scl 0.003 rol 0.000
+  ep  9 step   1280 | loss 0.010 pos 0.004 dir 100.0% tpl 100.0% col 0.005 scl 0.001 rol 0.000
+  ep  9 step   1300 | loss 0.010 pos 0.005 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  9 step   1320 | loss 0.009 pos 0.004 dir 100.0% tpl 100.0% col 0.005 scl 0.001 rol 0.000
+  ep  9 step   1340 | loss 0.012 pos 0.005 dir 100.0% tpl 100.0% col 0.005 scl 0.002 rol 0.000
+  ep  9 step   1360 | loss 0.014 pos 0.008 dir 100.0% tpl 100.0% col 0.004 scl 0.002 rol 0.000
+  ep  9 step   1380 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  ep  9 step   1400 | loss 0.009 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.004 rol 0.000
+  >>> val | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% | score 1.997
+  Epoch 9 done (18.7s) | avg_loss=0.010
+  ep 10 step   1420 | loss 0.010 pos 0.007 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 10 step   1440 | loss 0.008 pos 0.003 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep 10 step   1460 | loss 0.011 pos 0.007 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  ep 10 step   1480 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 10 step   1500 | loss 0.010 pos 0.008 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 10 step   1520 | loss 0.011 pos 0.006 dir 100.0% tpl 100.0% col 0.004 scl 0.001 rol 0.000
+  ep 10 step   1540 | loss 0.010 pos 0.006 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep 10 step   1560 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  Epoch 10 done (16.8s) | avg_loss=0.009
+  ep 11 step   1580 | loss 0.020 pos 0.004 dir 100.0% tpl 100.0% col 0.013 scl 0.004 rol 0.000
+  ep 11 step   1600 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  >>> val | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% | score 1.998
+  ** new best, saved best.pt
+  ep 11 step   1620 | loss 0.009 pos 0.005 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 11 step   1640 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 11 step   1660 | loss 0.008 pos 0.006 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 11 step   1680 | loss 0.010 pos 0.006 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  ep 11 step   1700 | loss 0.010 pos 0.004 dir 100.0% tpl 100.0% col 0.005 scl 0.001 rol 0.001
+  Epoch 11 done (19.3s) | avg_loss=0.009
+  ep 12 step   1720 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 12 step   1740 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.003 rol 0.000
+  ep 12 step   1760 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.003 scl 0.002 rol 0.000
+  ep 12 step   1780 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 12 step   1800 | loss 0.008 pos 0.005 dir 100.0% tpl 100.0% col 0.003 scl 0.001 rol 0.000
+  >>> val | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% | score 1.998
+  ep 12 step   1820 | loss 0.008 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.004 rol 0.000
+  ep 12 step   1840 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 12 step   1860 | loss 0.009 pos 0.006 dir 100.0% tpl 100.0% col 0.001 scl 0.003 rol 0.000
+  Epoch 12 done (19.0s) | avg_loss=0.007
+  ep 13 step   1880 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 13 step   1900 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.003 rol 0.000
+  ep 13 step   1920 | loss 0.008 pos 0.006 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 13 step   1940 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 13 step   1960 | loss 0.007 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.003 rol 0.000
+  ep 13 step   1980 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 13 step   2000 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ** new best, saved best.pt
+  ep 13 step   2020 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  Epoch 13 done (18.7s) | avg_loss=0.006
+  ep 14 step   2040 | loss 0.006 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 14 step   2060 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.002 rol 0.000
+  ep 14 step   2080 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 14 step   2100 | loss 0.003 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 14 step   2120 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.003 scl 0.000 rol 0.000
+  ep 14 step   2140 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.003 rol 0.000
+  ep 14 step   2160 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 14 step   2180 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 14 done (17.6s) | avg_loss=0.006
+  ep 15 step   2200 | loss 0.007 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  >>> val | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% | score 1.998
+  ep 15 step   2220 | loss 0.006 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 15 step   2240 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 15 step   2260 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 15 step   2280 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 15 step   2300 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 15 step   2320 | loss 0.005 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 15 step   2340 | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  Epoch 15 done (18.6s) | avg_loss=0.005
+  ep 16 step   2360 | loss 0.007 pos 0.005 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 16 step   2380 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 16 step   2400 | loss 0.006 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  >>> val | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ** new best, saved best.pt
+  ep 16 step   2420 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 16 step   2440 | loss 0.006 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 16 step   2460 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 16 step   2480 | loss 0.004 pos 0.001 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  Epoch 16 done (18.1s) | avg_loss=0.005
+  ep 17 step   2500 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.000 scl 0.001 rol 0.000
+  ep 17 step   2520 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 17 step   2540 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 17 step   2560 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 17 step   2580 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 17 step   2600 | loss 0.006 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 17 step   2620 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 17 step   2640 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  Epoch 17 done (18.5s) | avg_loss=0.005
+  ep 18 step   2660 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 18 step   2680 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 18 step   2700 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 18 step   2720 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 18 step   2740 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 18 step   2760 | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 18 step   2780 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 18 step   2800 | loss 0.006 pos 0.005 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.002 pos 0.002 dir 100.0% tpl 100.0% | score 1.998
+  Epoch 18 done (18.0s) | avg_loss=0.005
+  ep 19 step   2820 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 19 step   2840 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 19 step   2860 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 19 step   2880 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 19 step   2900 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 19 step   2920 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 19 step   2940 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 19 step   2960 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  Epoch 19 done (17.8s) | avg_loss=0.004
+  ep 20 step   2980 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 20 step   3000 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ** new best, saved best.pt
+  ep 20 step   3020 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 20 step   3040 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 20 step   3060 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 20 step   3080 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 20 step   3100 | loss 0.005 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 20 step   3120 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 20 done (19.0s) | avg_loss=0.004
+  ep 21 step   3140 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 21 step   3160 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 21 step   3180 | loss 0.005 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.003 rol 0.000
+  ep 21 step   3200 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 21 step   3220 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 21 step   3240 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 21 step   3260 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 21 done (18.2s) | avg_loss=0.004
+  ep 22 step   3280 | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 22 step   3300 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 22 step   3320 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 22 step   3340 | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 22 step   3360 | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 22 step   3380 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 22 step   3400 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 22 step   3420 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 22 done (18.1s) | avg_loss=0.004
+  ep 23 step   3440 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 23 step   3460 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 23 step   3480 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 23 step   3500 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 23 step   3520 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 23 step   3540 | loss 0.005 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 23 step   3560 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.001 rol 0.000
+  ep 23 step   3580 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  Epoch 23 done (17.3s) | avg_loss=0.004
+  ep 24 step   3600 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.000 pos 0.000 dir 100.0% tpl 100.0% | score 2.000
+  ** new best, saved best.pt
+  ep 24 step   3620 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 24 step   3640 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 24 step   3660 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 24 step   3680 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 24 step   3700 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 24 step   3720 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 24 step   3740 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 24 done (17.9s) | avg_loss=0.004
+  ep 25 step   3760 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 25 step   3780 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 25 step   3800 | loss 0.005 pos 0.004 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 25 step   3820 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 25 step   3840 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.000 scl 0.000 rol 0.000
+  ep 25 step   3860 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 25 step   3880 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 25 step   3900 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  Epoch 25 done (18.4s) | avg_loss=0.004
+  ep 26 step   3920 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 26 step   3940 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  ep 26 step   3960 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 26 step   3980 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 26 step   4000 | loss 0.009 pos 0.007 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  >>> val | loss 0.001 pos 0.001 dir 100.0% tpl 100.0% | score 1.999
+  ep 26 step   4020 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 26 step   4040 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  Epoch 26 done (17.9s) | avg_loss=0.003
+  ep 27 step   4060 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 27 step   4080 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 27 step   4100 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 27 step   4120 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 27 step   4140 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 27 step   4160 | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 27 step   4180 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 27 step   4200 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  >>> val | loss 0.001 pos 0.000 dir 100.0% tpl 100.0% | score 2.000
+  Epoch 27 done (18.9s) | avg_loss=0.003
+  ep 28 step   4220 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4240 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4260 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4280 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4300 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4320 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4340 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 28 step   4360 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.000 scl 0.000 rol 0.000
+  Epoch 28 done (17.0s) | avg_loss=0.003
+  ep 29 step   4380 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 29 step   4400 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  >>> val | loss 0.001 pos 0.000 dir 100.0% tpl 100.0% | score 2.000
+  ep 29 step   4420 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 29 step   4440 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 29 step   4460 | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 29 step   4480 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 29 step   4500 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 29 step   4520 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  Epoch 29 done (17.6s) | avg_loss=0.003
+  ep 30 step   4540 | loss 0.002 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 30 step   4560 | loss 0.004 pos 0.003 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 30 step   4580 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 30 step   4600 | loss 0.002 pos 0.002 dir 100.0% tpl 100.0% col 0.000 scl 0.000 rol 0.000
+  >>> val | loss 0.001 pos 0.000 dir 100.0% tpl 100.0% | score 2.000
+  ep 30 step   4620 | loss 0.003 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.002 rol 0.000
+  ep 30 step   4640 | loss 0.003 pos 0.001 dir 100.0% tpl 100.0% col 0.001 scl 0.001 rol 0.000
+  ep 30 step   4660 | loss 0.004 pos 0.002 dir 100.0% tpl 100.0% col 0.001 scl 0.000 rol 0.000
+  ep 30 step   4680 | loss 0.005 pos 0.003 dir 100.0% tpl 100.0% col 0.002 scl 0.000 rol 0.000
+  Epoch 30 done (18.2s) | avg_loss=0.003
+
+=== Comp-gen test (held-out object pairs) ===
+  test | loss 0.001 pos 0.000 dir 100.0% tpl 100.0% col 0.000
+
+Checkpoint: checkpoints\raum_11\best.pt
+Run analysis: python scripts/analyze_raum_bridge.py --checkpoint checkpoints\raum_11\best.pt --glove data\glove.6B.300d.txt
+(.venv) 
+pip install -r demo\requirements.txt
+Requirement already satisfied: fastapi>=0.110 in c:\users\feama\sgs\.venv\lib\site-packages (from -r demo\requirements.txt (line 1)) (0.136.1)
+Requirement already satisfied: uvicorn[standard]>=0.29 in c:\users\feama\sgs\.venv\lib\site-packages (from -r demo\requirements.txt (line 2)) (0.46.0)
+Requirement already satisfied: pydantic>=2.0 in c:\users\feama\sgs\.venv\lib\site-packages (from -r demo\requirements.txt (line 3)) (2.13.1)
+Requirement already satisfied: starlette>=0.46.0 in c:\users\feama\sgs\.venv\lib\site-packages (from fastapi>=0.110->-r demo\requirements.txt (line 1)) (1.0.0)
+Requirement already satisfied: typing-extensions>=4.8.0 in c:\users\feama\sgs\.venv\lib\site-packages (from fastapi>=0.110->-r demo\requirements.txt (line 1)) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in c:\users\feama\sgs\.venv\lib\site-packages (from fastapi>=0.110->-r demo\requirements.txt (line 1)) (0.4.2)
+Requirement already satisfied: annotated-doc>=0.0.2 in c:\users\feama\sgs\.venv\lib\site-packages (from fastapi>=0.110->-r demo\requirements.txt (line 1)) (0.0.4)
+Requirement already satisfied: click>=7.0 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (8.3.2)
+Requirement already satisfied: h11>=0.8 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (0.16.0)
+Requirement already satisfied: colorama>=0.4 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (0.4.6)
+Requirement already satisfied: httptools>=0.6.3 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (0.7.1)
+Requirement already satisfied: python-dotenv>=0.13 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (1.2.2)
+Requirement already satisfied: pyyaml>=5.1 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (6.0.3)
+Requirement already satisfied: watchfiles>=0.20 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (1.1.1)
+Requirement already satisfied: websockets>=10.4 in c:\users\feama\sgs\.venv\lib\site-packages (from uvicorn[standard]>=0.29->-r demo\requirements.txt (line 2)) (16.0)
+Requirement already satisfied: annotated-types>=0.6.0 in c:\users\feama\sgs\.venv\lib\site-packages (from pydantic>=2.0->-r demo\requirements.txt (line 3)) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.1 in c:\users\feama\sgs\.venv\lib\site-packages (from pydantic>=2.0->-r demo\requirements.txt (line 3)) (2.46.1)
+Requirement already satisfied: anyio<5,>=3.6.2 in c:\users\feama\sgs\.venv\lib\site-packages (from starlette>=0.46.0->fastapi>=0.110->-r demo\requirements.txt (line 1)) (4.13.0)
+Requirement already satisfied: idna>=2.8 in c:\users\feama\sgs\.venv\lib\site-packages (from anyio<5,>=3.6.2->starlette>=0.46.0->fastapi>=0.110->-r demo\requirements.txt (line 1)) (3.11)
+WARNING: There was an error checking the latest version of pip.
+(.venv) 
+python -m demo.app `
+                                               >>   --checkpoint checkpoints\raum_11\best.pt `
+                                                                                              >>   --glove data\glove.6B.300d.txt `
+                                                                                                                                             >>   --template-points 1000 `
+                                                                                                                                                                                            >>   --template-confidence 0.35
+[raum] loading GloVe ...
+Loading GloVe from data\glove.6B.300d.txt...
+Loaded 50000 words, embedding dim=300
+[raum] building SGS vocab ...
+Initialized 50000 Gaussians from GloVe
+  PCA explained variance: 0.447
+  μ range: [-4.51, 3.99]
+[raum] loading bridge checkpoint: checkpoints\raum_11\best.pt
+C:\Users\feama\sgs\.venv\Lib\site-packages\torch\nn\modules\transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[raum] building template library ...
+[raum] ready on cuda
+INFO:     Started server process [115928]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60459 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60459 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49672 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63087 - "GET /static/viewer.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63087 - "GET /static/logo.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63087 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63087 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55828 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49178 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49178 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50556 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49672 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57448 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57448 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57448 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57448 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55062 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51449 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51449 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50098 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50098 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50098 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60938 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63754 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63754 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58147 - "GET /static/viewer.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51250 - "GET /static/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58147 - "GET /static/logo.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58147 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58147 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52619 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52310 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65218 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55873 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54592 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50721 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54883 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54883 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58570 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58570 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52209 - "POST /generate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56377 - "POST /generate HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [115928]
+(.venv) 
+python -c "import torch; from src.sgs_lm import SGSLanguageModel; m = SGSLanguageModel(vocab_size=256, d_s=16, d_f=32, n_heads=2, n_passes=3, max_len=16); y = m(torch.zeros(1, 8, dtype=torch.long)); print('OK' if isinstance(y, torch.Tensor) else 'FAIL', y.shape)"
+OK torch.Size([1, 8, 256])
+(.venv) 
 python scripts/train_lm.py --data-dir data/fineweb --epochs 1 --eval-interval 500 --save-dir checkpoints/planck_12/_sanity
 Device: cuda
   GPU: NVIDIA GeForce RTX 4090
@@ -1636,3 +2223,50 @@ C:\Users\feama\sgs\.venv\Lib\site-packages\torch\optim\lr_scheduler.py:243: User
   >>> val loss 4.1139 ppl 61.2
   Saved checkpoints\planck_12\_sanity\best.pt
   epoch 1 step  65050 | loss 4.1359 avg 4.6486 | lr 2.90e-04 gnorm 1.38 | tau 3.0 | 97089 tok/s
+  epoch 1 step  65100 | loss 4.0276 avg 4.6481 | lr 2.90e-04 gnorm 2.72 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65150 | loss 3.9448 avg 4.6477 | lr 2.90e-04 gnorm 1.37 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65200 | loss 4.0954 avg 4.6473 | lr 2.90e-04 gnorm 1.52 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65250 | loss 3.9492 avg 4.6469 | lr 2.90e-04 gnorm 2.28 | tau 3.0 | 97089 tok/s
+  epoch 1 step  65300 | loss 4.1391 avg 4.6464 | lr 2.90e-04 gnorm 1.63 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65350 | loss 4.0137 avg 4.6460 | lr 2.90e-04 gnorm 1.30 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65400 | loss 4.0026 avg 4.6456 | lr 2.90e-04 gnorm 1.38 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65450 | loss 3.9983 avg 4.6452 | lr 2.90e-04 gnorm 1.62 | tau 3.0 | 97090 tok/s
+  epoch 1 step  65500 | loss 4.0881 avg 4.6448 | lr 2.90e-04 gnorm 2.37 | tau 3.0 | 97090 tok/s
+  >>> val loss 4.1159 ppl 61.3
+  epoch 1 step  65550 | loss 4.1088 avg 4.6443 | lr 2.90e-04 gnorm 1.85 | tau 3.0 | 97068 tok/s
+  epoch 1 step  65600 | loss 3.9054 avg 4.6439 | lr 2.90e-04 gnorm 1.32 | tau 3.0 | 97069 tok/s
+  epoch 1 step  65650 | loss 4.0434 avg 4.6435 | lr 2.90e-04 gnorm 1.35 | tau 3.0 | 97069 tok/s
+  epoch 1 step  65700 | loss 4.1634 avg 4.6431 | lr 2.90e-04 gnorm 1.79 | tau 3.0 | 97069 tok/s
+  epoch 1 step  65750 | loss 4.0078 avg 4.6427 | lr 2.90e-04 gnorm 3.67 | tau 3.0 | 97069 tok/s
+  epoch 1 step  65800 | loss 4.0785 avg 4.6423 | lr 2.90e-04 gnorm 1.41 | tau 3.0 | 97070 tok/s
+  epoch 1 step  65850 | loss 4.1413 avg 4.6418 | lr 2.90e-04 gnorm 1.49 | tau 3.0 | 97070 tok/s
+  epoch 1 step  65900 | loss 4.0620 avg 4.6414 | lr 2.90e-04 gnorm 1.53 | tau 2.9 | 97070 tok/s
+  epoch 1 step  65950 | loss 4.1348 avg 4.6410 | lr 2.90e-04 gnorm 1.40 | tau 2.9 | 97071 tok/s
+  epoch 1 step  66000 | loss 4.0178 avg 4.6406 | lr 2.90e-04 gnorm 1.34 | tau 2.9 | 97071 tok/s
+  >>> val loss 4.1019 ppl 60.5
+  Saved checkpoints\planck_12\_sanity\best.pt
+  Saved checkpoints\planck_12\_sanity\step_66000.pt
+  epoch 1 step  66050 | loss 4.0373 avg 4.6402 | lr 2.90e-04 gnorm 2.42 | tau 2.9 | 97024 tok/s
+  epoch 1 step  66100 | loss 4.0859 avg 4.6398 | lr 2.90e-04 gnorm 1.63 | tau 2.9 | 97024 tok/s
+  epoch 1 step  66150 | loss 4.0956 avg 4.6394 | lr 2.90e-04 gnorm 1.57 | tau 2.9 | 97025 tok/s
+  epoch 1 step  66200 | loss 4.1000 avg 4.6390 | lr 2.90e-04 gnorm 1.62 | tau 2.9 | 97025 tok/s
+  epoch 1 step  66250 | loss 4.0855 avg 4.6386 | lr 2.90e-04 gnorm 2.67 | tau 2.9 | 97025 tok/s
+  epoch 1 step  66300 | loss 4.0930 avg 4.6381 | lr 2.90e-04 gnorm 1.38 | tau 2.9 | 97026 tok/s
+  epoch 1 step  66350 | loss 4.0958 avg 4.6377 | lr 2.90e-04 gnorm 1.91 | tau 2.9 | 97027 tok/s
+  epoch 1 step  66400 | loss 4.0733 avg 4.6373 | lr 2.90e-04 gnorm 1.33 | tau 2.9 | 97027 tok/s
+  epoch 1 step  66450 | loss 4.1494 avg 4.6369 | lr 2.90e-04 gnorm 2.01 | tau 2.9 | 97027 tok/s
+  epoch 1 step  66500 | loss 3.9134 avg 4.6365 | lr 2.90e-04 gnorm 2.15 | tau 2.9 | 97026 tok/s
+  >>> val loss 4.1031 ppl 60.5
+  epoch 1 step  66550 | loss 4.0949 avg 4.6361 | lr 2.90e-04 gnorm 2.12 | tau 2.9 | 97003 tok/s
+  epoch 1 step  66600 | loss 4.0116 avg 4.6357 | lr 2.90e-04 gnorm 1.41 | tau 2.9 | 97003 tok/s
+  epoch 1 step  66650 | loss 4.2105 avg 4.6353 | lr 2.90e-04 gnorm 2.07 | tau 2.9 | 97003 tok/s
+  epoch 1 step  66700 | loss 4.0979 avg 4.6349 | lr 2.90e-04 gnorm 2.65 | tau 2.9 | 97004 tok/s
+  epoch 1 step  66750 | loss 4.0982 avg 4.6345 | lr 2.90e-04 gnorm 1.58 | tau 2.9 | 97005 tok/s
+Traceback (most recent call last):
+  File "C:\Users\feama\sgs\scripts\train_lm.py", line 444, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\train_lm.py", line 350, in main
+    epoch_loss += loss.item() * batch_tokens
+                  ^^^^^^^^^^^
+KeyboardInterrupt
+(.venv) 

@@ -313,9 +313,10 @@ def main() -> int:
     if args.only:
         todo = [r for r in todo if r["id"] == args.only]
 
-    # Adopted runs satisfy their row; don't re-execute unless --force.
+    # Adopted runs were just recorded this invocation; don't re-execute
+    # them even if --force is set (force is for re-queuing prior failures).
     adopted_ids = {s.split("=", 1)[0] for s in args.adopt if "=" in s}
-    if adopted_ids and not args.force:
+    if adopted_ids:
         todo = [r for r in todo if r["id"] not in adopted_ids]
 
     for run in todo:
