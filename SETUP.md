@@ -415,6 +415,35 @@ reasonable combined run once Fix 2 works on its own.
 should be kept. No dataset, vocab, or template regeneration is needed:
 both fixes operate on the existing batch format.
 
+**Pause and resume.** Training runs can take over a day on a 4090 and
+the script now supports pause/resume. Every eval step and end of
+epoch writes `last.pt` (model + optimizer + scheduler + counters).
+`best.pt` stays model-only so `analyze_raum_bridge.py` keeps working
+unchanged.
+
+```powershell
+# Start a long run
+python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
+  --lambda-spread 0.05 --lambda-pos 1.0 --pos-margin 0.3 `
+  --save-dir checkpoints/raum_c_combined
+
+# Ctrl-C at any time. A final snapshot is written before exit.
+# Resume later from where it stopped:
+python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
+  --lambda-spread 0.05 --lambda-pos 1.0 --pos-margin 0.3 `
+  --save-dir checkpoints/raum_c_combined --resume
+```
+
+Caveats:
+- The resume code is only in runs started *after* commit `6af6842`.
+  Older in-flight runs (e.g. the original collapsed `raum_c` training)
+  did not write `last.pt`, so Ctrl-C on those loses optimizer state and
+  restart would be from scratch. Finish in-flight runs, then use
+  `--resume` going forward.
+- Use `--ckpt-interval N` to snapshot every N steps (default is
+  eval-step + end-of-epoch only, which is enough for most pauses).
+- Double Ctrl-C skips the snapshot and kills immediately.
+
 #### Commit
 
 ```powershell

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Raum demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div class="logo-disc">R</div>
+      <div class="logo-text">
+        <div class="brand">Radiance Labs</div>
+        <div class="sub">Raum demo &middot; v0</div>
+      </div>
+    </div>
+    <div class="meta" id="meta">loading...</div>
+  </header>
+
+  <main>
+    <div id="viewer"></div>
+    <aside id="side">
+      <div class="side-title">Parsed objects</div>
+      <div id="objects"></div>
+      <label class="side-toggle">
+        <input id="markers-toggle" type="checkbox" checked />
+        show object markers
+      </label>
+    </aside>
+  </main>
+
+  <footer>
+    <form id="chat">
+      <input id="prompt" type="text" autocomplete="off" spellcheck="false"
+             placeholder="a red sphere above a blue cube" />
+      <button type="submit" id="send">Render</button>
+    </form>
+    <div class="hint" id="hint">
+      Try: &ldquo;a yellow cone left a green cylinder&rdquo; &middot;
+      drag to orbit, scroll to zoom
+    </div>
+  </footer>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="/static/viewer.js"></script>
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
