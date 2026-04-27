@@ -1,0 +1,11 @@
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from C:\Users\feama\_netrc.
+wandb: Currently logged in as: feamando (feamando-radiance-labs) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run cuqzwys2
+wandb: Tracking run with wandb version 0.26.0
+wandb: Run data is saved locally in C:\Users\feama\sgs\wandb\run-20260427_165942-cuqzwys2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vocal-cherry-1
+wandb:  View project at https://wandb.ai/feamando-radiance-labs/planck-12-tl
+wandb:  View run at https://wandb.ai/feamando-radiance-labs/planck-12-tl/runs/cuqzwys2
+C:\Users\feama\sgs\.venv\Lib\site-packages\torch\optim\lr_scheduler.py:243: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
+  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)

@@ -1,5 +1,43 @@
 {
   "runs": {
+    "ap": {
+      "T_mean_final": null,
+      "cmd": [
+        "C:\\Users\\feama\\sgs\\.venv\\Scripts\\python.exe",
+        "scripts/train_lm.py",
+        "--data-dir",
+        "data/fineweb",
+        "--epochs",
+        "1",
+        "--batch-size",
+        "32",
+        "--context-len",
+        "512",
+        "--log-interval",
+        "50",
+        "--eval-interval",
+        "500",
+        "--save-dir",
+        "C:\\Users\\feama\\sgs\\checkpoints\\planck_12\\ap",
+        "--max-steps",
+        "66750",
+        "--wandb",
+        "--wandb-project",
+        "planck-12-ap",
+        "--adaptive-passes"
+      ],
+      "final_val_loss": null,
+      "final_val_ppl": null,
+      "flags": [
+        "--adaptive-passes"
+      ],
+      "label": "\u00a72.2 only",
+      "last_step": 0,
+      "passes_ema_final": null,
+      "status": "exit_1",
+      "tok_per_sec_mean": null,
+      "wall_clock_s": 106.4
+    },
     "baseline": {
       "T_mean_final": null,
       "adopted_from": "/Users/nikita.gorshkov/Downloads/Untitled (3)",
@@ -13,6 +51,44 @@
       "status": "adopted",
       "tok_per_sec_mean": 97394.30838323354,
       "wall_clock_s": 11228.9
+    },
+    "tl": {
+      "T_mean_final": null,
+      "cmd": [
+        "C:\\Users\\feama\\sgs\\.venv\\Scripts\\python.exe",
+        "scripts/train_lm.py",
+        "--data-dir",
+        "data/fineweb",
+        "--epochs",
+        "1",
+        "--batch-size",
+        "32",
+        "--context-len",
+        "512",
+        "--log-interval",
+        "50",
+        "--eval-interval",
+        "500",
+        "--save-dir",
+        "C:\\Users\\feama\\sgs\\checkpoints\\planck_12\\tl",
+        "--max-steps",
+        "66750",
+        "--wandb",
+        "--wandb-project",
+        "planck-12-tl",
+        "--transmittance-loss"
+      ],
+      "final_val_loss": null,
+      "final_val_ppl": null,
+      "flags": [
+        "--transmittance-loss"
+      ],
+      "label": "\u00a72.1 only",
+      "last_step": 0,
+      "passes_ema_final": null,
+      "status": "exit_1",
+      "tok_per_sec_mean": null,
+      "wall_clock_s": 119.5
     }
   }
 }

@@ -1,0 +1,67 @@
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+  VRAM: 25.8 GB
+
+=== Preparing data ===
+Fetching file list from HuggingFace...
+  Already have train-00000-of-00004-2d5a1467fff1081b.parquet
+  Already have train-00001-of-00004-5852b56a2bd28fd9.parquet
+  Already have train-00002-of-00004-a26307300439e943.parquet
+  Already have train-00003-of-00004-d243063613e5a057.parquet
+  Already have validation-00000-of-00001-869c898b519ad725.parquet
+Reading parquet files...
+  Train: 2,119,719 stories
+  Val:   21,990 stories
+Tokenizer already exists: data\fineweb\tokenizer.model
+  Binary already exists: data\fineweb\train.bin (9,034,515,086 tokens)
+  Binary already exists: data\fineweb\val.bin (91,045,731 tokens)
+
+Data ready:
+  train_bin: data\fineweb\train.bin
+  val_bin: data\fineweb\val.bin
+  tokenizer: data\fineweb\tokenizer.model
+  n_train_tokens: 9034515086
+  n_val_tokens: 91045731
+  vocab_size: 32000
+  Steps/epoch: 550,348
+  Total steps: 550,348
+
+=== Creating model ===
+  Accel flags: adaptive-passes
+  Parameters: 100,892,843 (100.9M)
+    tok_mu: 4,096,000 (4.1%)
+    tok_log_var: 4,096,000 (4.1%)
+    tok_raw_alpha: 32,000 (0.0%)
+    tok_features: 32,000,000 (31.7%)
+    pos_mu: 65,536 (0.1%)
+    log_tau: 1 (0.0%)
+    query_proj: 66,048 (0.1%)
+    head_proj: 4,001,000 (4.0%)
+    mu_update: 512,256 (0.5%)
+    alpha_gate: 4,002 (0.0%)
+    pass_ffn: 24,018,000 (23.8%)
+    ln_f: 2,000 (0.0%)
+    lm_head: 32,000,000 (31.7%)
+  Mixed precision: bf16
+Traceback (most recent call last):
+  File "C:\Users\feama\sgs\scripts\train_lm.py", line 453, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\train_lm.py", line 257, in main
+    wandb.init(
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\wandb_init.py", line 1611, in init
+    get_sentry().reraise(e)
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\analytics\sentry.py", line 190, in reraise
+    raise exc.with_traceback(tb)
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\wandb_init.py", line 1532, in init
+    wi.maybe_login(init_settings)
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\wandb_init.py", line 197, in maybe_login
+    wandb_login._login(
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\wandb_login.py", line 190, in _login
+    auth = _find_or_prompt_for_key(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\wandb_login.py", line 266, in _find_or_prompt_for_key
+    auth = wbauth.authenticate_session(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\.venv\Lib\site-packages\wandb\sdk\lib\wbauth\authenticate.py", line 139, in authenticate_session
+    raise UsageError(
+wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
