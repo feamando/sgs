@@ -81,7 +81,62 @@ const splatFS = `
 `;
 
 let cloud = null;
-let markers = null;   // coarse-mean outline markers per predicted object
+
+// ── HTML label overlay ─────────────────────────────────
+// Each predicted object gets a small div anchored to its world-space
+// centre. We project its position on every frame and update transforms.
+// This is cheaper and legible at any zoom, vs. a 3D ring sprite.
+const labelOverlay = document.createElement("div");
+labelOverlay.className = "label-overlay";
+VIEWER.appendChild(labelOverlay);
+
+let labelEntries = [];   // [{el, pos:Vector3}]
+let labelsVisible = true;
+
+function clearLabels() {
+  for (const e of labelEntries) e.el.remove();
+  labelEntries = [];
+}
+
+export function setMarkers(objects) {
+  clearLabels();
+  if (!objects || objects.length === 0) return;
+  for (const o of objects) {
+    const el = document.createElement("div");
+    el.className = "scene-label";
+    el.innerHTML =
+      `<span class="scene-label-name">${o.template}</span>` +
+      `<span class="scene-label-conf">${Math.round(o.confidence * 100)}%</span>`;
+    labelOverlay.appendChild(el);
+    labelEntries.push({
+      el,
+      pos: new THREE.Vector3(o.position[0], o.position[1], o.position[2]),
+    });
+  }
+}
+
+export function setMarkersVisible(v) {
+  labelsVisible = v;
+  labelOverlay.style.display = v ? "" : "none";
+}
+
+function updateLabels() {
+  if (!labelsVisible || labelEntries.length === 0) return;
+  const w = VIEWER.clientWidth;
+  const h = VIEWER.clientHeight;
+  for (const entry of labelEntries) {
+    const p = entry.pos.clone().project(camera);
+    // In front of the camera only.
+    if (p.z < -1 || p.z > 1) {
+      entry.el.style.display = "none";
+      continue;
+    }
+    entry.el.style.display = "";
+    const x = (p.x * 0.5 + 0.5) * w;
+    const y = (-p.y * 0.5 + 0.5) * h;
+    entry.el.style.transform = `translate(-50%, -120%) translate(${x}px, ${y}px)`;
+  }
+}
 
 function disposeCloud() {
   if (!cloud) return;
@@ -89,80 +144,6 @@ function disposeCloud() {
   cloud.geometry.dispose();
   cloud.material.dispose();
   cloud = null;
-}
-
-function disposeMarkers() {
-  if (!markers) return;
-  scene.remove(markers);
-  markers.geometry.dispose();
-  markers.material.dispose();
-  markers = null;
-}
-
-// Ring marker material: a hollow circle. Makes predicted object
-// centres visible without occluding the template splats.
-const markerVS = `
-  attribute float aSize;
-  attribute vec3 aColor;
-  varying vec3 vColor;
-  void main() {
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_Position = projectionMatrix * mv;
-    float dist = -mv.z;
-    gl_PointSize = max(8.0, (aSize * 1200.0) / dist);
-    vColor = aColor;
-  }
-`;
-const markerFS = `
-  precision mediump float;
-  varying vec3 vColor;
-  void main() {
-    vec2 p = gl_PointCoord - 0.5;
-    float r = length(p) * 2.0;     // 0 at centre, 1 at edge
-    // Hollow ring: alpha peaks near r=0.85
-    float ring = smoothstep(0.7, 0.85, r) * (1.0 - smoothstep(0.92, 1.0, r));
-    if (ring < 0.02) discard;
-    gl_FragColor = vec4(vColor, ring);
-  }
-`;
-
-/** Render coarse-mean outline rings for each predicted object. */
-export function setMarkers(objects) {
-  disposeMarkers();
-  if (!objects || objects.length === 0) return;
-  const n = objects.length;
-  const positions = new Float32Array(n * 3);
-  const colors = new Float32Array(n * 3);
-  const sizes = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const o = objects[i];
-    positions[3 * i + 0] = o.position[0];
-    positions[3 * i + 1] = o.position[1];
-    positions[3 * i + 2] = o.position[2];
-    // Subtle accent tint (amber), faded by template confidence.
-    const c = 0.6 + 0.4 * o.confidence;
-    colors[3 * i + 0] = 1.0 * c;
-    colors[3 * i + 1] = 0.7 * c;
-    colors[3 * i + 2] = 0.28 * c;
-    sizes[i] = 0.25 + 0.25 * Math.max(o.scale, 0.1);
-  }
-  const geom = new THREE.BufferGeometry();
-  geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  geom.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
-  geom.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
-  const mat = new THREE.ShaderMaterial({
-    vertexShader: markerVS,
-    fragmentShader: markerFS,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.NormalBlending,
-  });
-  markers = new THREE.Points(geom, mat);
-  scene.add(markers);
-}
-
-export function setMarkersVisible(v) {
-  if (markers) markers.visible = v;
 }
 
 /**
@@ -237,6 +218,7 @@ window.addEventListener("resize", onResize);
 function tick() {
   controls.update();
   renderer.render(scene, camera);
+  updateLabels();
   requestAnimationFrame(tick);
 }
 tick();

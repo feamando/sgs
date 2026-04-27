@@ -85,17 +85,17 @@ def make_cylinder(n: int = 200, radius: float = 0.3, height: float = 1.0) -> Gau
     """Cylinder: points on side + top/bottom caps."""
     n_side = n * 2 // 3
     n_cap = (n - n_side) // 2
-    # Side
+    # Inset the side a hair from the caps and the caps a hair inside the
+    # side so they don't stack into a visible ring at the seam.
+    h_margin = height * 0.03
     theta = 2.0 * math.pi * torch.rand(n_side)
-    h = torch.rand(n_side) * height - height / 2.0
+    h = torch.rand(n_side) * (height - 2 * h_margin) - (height / 2.0 - h_margin)
     side = torch.stack([radius * torch.cos(theta), h, radius * torch.sin(theta)], dim=-1)
-    # Caps
-    top = _uniform_disk(n_cap) * radius
-    top[:, 1] = height / 2.0
-    # Swap y/z for disk (disk generates on z=0, we want y=const)
+    cap_radius = radius * 0.92
+    top = _uniform_disk(n_cap) * cap_radius
     top = top[:, [0, 2, 1]]
     top[:, 1] = height / 2.0
-    bot = _uniform_disk(n_cap) * radius
+    bot = _uniform_disk(n_cap) * cap_radius
     bot = bot[:, [0, 2, 1]]
     bot[:, 1] = -height / 2.0
     means = torch.cat([side, top, bot], dim=0)

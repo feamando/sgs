@@ -4,12 +4,14 @@
 <meta charset="utf-8" />
 <title>Raum demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://rsms.me/" />
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
 <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <header>
     <div class="logo">
-      <div class="logo-disc">R</div>
+      <div id="logo-splat" class="logo-splat"></div>
       <div class="logo-text">
         <div class="brand">Radiance Labs</div>
         <div class="sub">Raum demo &middot; v0</div>
@@ -23,9 +25,10 @@
     <aside id="side">
       <div class="side-title">Parsed objects</div>
       <div id="objects"></div>
+      <div id="warnings" class="warnings"></div>
       <label class="side-toggle">
         <input id="markers-toggle" type="checkbox" checked />
-        show object markers
+        show object labels
       </label>
     </aside>
   </main>
@@ -49,6 +52,10 @@
         "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
       }
     }
+  </script>
+  <script type="module">
+    import { mountLogo } from "/static/logo.js";
+    mountLogo(document.getElementById("logo-splat"));
   </script>
   <script type="module" src="/static/viewer.js"></script>
   <script type="module" src="/static/app.js"></script>

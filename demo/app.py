@@ -43,8 +43,11 @@ def parse_args():
     p.add_argument("--n-layers", type=int, default=2)
     p.add_argument("--n-heads", type=int, default=4)
     p.add_argument("--K", type=int, default=32)
-    p.add_argument("--template-points", type=int, default=200,
+    p.add_argument("--template-points", type=int, default=1000,
                    help="Points per object template.")
+    p.add_argument("--template-confidence", type=float, default=0.35,
+                   help="Min softmax confidence to stamp a template; below this "
+                        "the object is flagged as unresolved.")
     p.add_argument("--vocab-size", type=int, default=50000)
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
@@ -65,10 +68,12 @@ class RaumRuntime:
         n_heads: int,
         K: int,
         template_points: int,
+        template_confidence: float,
         vocab_size: int,
         max_tokens: int,
     ):
         self.max_tokens = max_tokens
+        self.template_confidence = template_confidence
 
         print("[raum] loading GloVe ...")
         word2idx, vectors, freqs, words = load_glove(glove_path, vocab_size=vocab_size)
@@ -123,13 +128,14 @@ class RaumRuntime:
 
         # Gate object selection on the role head so non-object tokens
         # ("a", "above", "red") don't get stamped.
-        splats, objects = assemble_scene(
+        splats, objects, unresolved = assemble_scene(
             out,
             self.template_lib,
             self.template_names,
             mask=mask,
             sample_index=0,
             object_role_id=ROLE_OBJECT,
+            template_confidence_threshold=self.template_confidence,
         )
 
         # Convert log-scale → linear scale for the viewer.
@@ -145,6 +151,15 @@ class RaumRuntime:
             colors = torch.zeros(0, 3)
 
         coarse = out["positions"][0].detach().cpu().tolist()
+
+        warnings = []
+        for u in unresolved:
+            w = words[u.word_index] if u.word_index < len(words) else "?"
+            warnings.append(
+                f"could not resolve \u201c{w}\u201d to a known template "
+                f"(top guess {u.top_template_name}, conf "
+                f"{int(round(u.template_confidence * 100))}%)"
+            )
 
         return {
             "words": words,
@@ -162,6 +177,18 @@ class RaumRuntime:
                 }
                 for o in objects
             ],
+            "unresolved": [
+                {
+                    "word_index": u.word_index,
+                    "word": words[u.word_index] if u.word_index < len(words) else "",
+                    "top_template": u.top_template_name,
+                    "top_template_id": u.top_template_id,
+                    "confidence": u.template_confidence,
+                    "position": u.position,
+                }
+                for u in unresolved
+            ],
+            "warnings": warnings,
             "splats": {
                 "means": means.cpu().tolist(),
                 "scales": scales.cpu().tolist(),
@@ -170,6 +197,7 @@ class RaumRuntime:
             },
             "n_splats": int(means.shape[0]),
             "n_objects": len(objects),
+            "n_unresolved": len(unresolved),
         }
 
 
@@ -220,6 +248,7 @@ def main():
         n_heads=args.n_heads,
         K=args.K,
         template_points=args.template_points,
+        template_confidence=args.template_confidence,
         vocab_size=args.vocab_size,
         max_tokens=args.max_tokens,
     )

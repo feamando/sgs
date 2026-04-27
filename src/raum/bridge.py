@@ -310,6 +310,17 @@ class PredictedObject:
     position: list[float]
     color: list[float]
     scale: float
+    resolved: bool = True
+
+
+@dataclass
+class UnresolvedObject:
+    """Object-role token whose template head did not pass the confidence gate."""
+    word_index: int
+    top_template_name: str
+    top_template_id: int
+    template_confidence: float
+    position: list[float]
 
 
 def assemble_scene(
@@ -323,7 +334,8 @@ def assemble_scene(
     object_role_id: int | None = None,
     soft_mix: bool = False,
     top_k_templates: int = 2,
-) -> tuple[dict, list[PredictedObject]]:
+    template_confidence_threshold: float = 0.35,
+) -> tuple[dict, list[PredictedObject], list[UnresolvedObject]]:
     """
     Materialise the predicted scene for one sample into a flat Gaussian
     cloud that the viewer can render.
@@ -364,17 +376,30 @@ def assemble_scene(
     all_opacities = []
     all_colors = []
     objects: list[PredictedObject] = []
+    unresolved: list[UnresolvedObject] = []
 
     for i in object_tokens:
         probs = torch.softmax(tpl_logits[i], dim=-1)
         top = probs.topk(min(top_k_templates, probs.shape[-1]))
         chosen_idx = int(top.indices[0].item())
         chosen_name = template_names[chosen_idx]
-        tpl = template_lib[chosen_name]
+        confidence = float(top.values[0].item())
 
         pos = positions[i]
         col = colors[i].clamp(0.0, 1.0)
         scl = float(scales[i].item())
+
+        if confidence < template_confidence_threshold:
+            unresolved.append(UnresolvedObject(
+                word_index=i,
+                top_template_name=chosen_name,
+                top_template_id=chosen_idx,
+                template_confidence=confidence,
+                position=pos.tolist(),
+            ))
+            continue
+
+        tpl = template_lib[chosen_name]
 
         # Stamp: transform template means by scale + translation.
         means = tpl.means * scl + pos.unsqueeze(0)
@@ -392,7 +417,7 @@ def assemble_scene(
             word_index=i,
             template_name=chosen_name,
             template_id=chosen_idx,
-            template_confidence=float(top.values[0].item()),
+            template_confidence=confidence,
             position=pos.tolist(),
             color=col.tolist(),
             scale=scl,
@@ -406,7 +431,7 @@ def assemble_scene(
             "opacities": torch.zeros(0),
             "colors": empty,
         }
-        return splats, objects
+        return splats, objects, unresolved
 
     splats = {
         "means": torch.cat(all_means, dim=0),
@@ -414,4 +439,4 @@ def assemble_scene(
         "opacities": torch.cat(all_opacities, dim=0),
         "colors": torch.cat(all_colors, dim=0),
     }
-    return splats, objects
+    return splats, objects, unresolved

@@ -108,14 +108,16 @@ def _gen_two_objects(
         ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
     ]
 
+    # "X rel Y" in English anchors Y and offsets X.
+    # "cone above cylinder" → cylinder at origin, cone at +y.
     offset = RELATIONS[relation]
     obj1_gt = ObjectGT(
         obj_type=OBJECTS[obj1], color=COLORS[color1],
-        scale=1.0, position=[0.0, 0.0, 0.0],
+        scale=1.0, position=list(offset),
     )
     obj2_gt = ObjectGT(
         obj_type=OBJECTS[obj2], color=COLORS[color2],
-        scale=1.0, position=offset,
+        scale=1.0, position=[0.0, 0.0, 0.0],
     )
 
     obj_labels = []

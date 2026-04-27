@@ -340,7 +340,7 @@ Training is analytic over the labels already produced by
 
 ```powershell
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --save-dir checkpoints/raum_10
+  --save-dir checkpoints/raum_11
 ```
 
 Default architecture: `d_model=128`, 2 transformer layers, 4 heads,
@@ -359,7 +359,15 @@ The val line reports a composite `score = tpl_acc + dir_acc - pos_mse`
 and saves `best.pt` on each new high. `last.pt` carries
 model + optimizer + scheduler + counters for resume.
 
-Results: `checkpoints/raum_10/`.
+Results: `checkpoints/raum_11/`.
+
+> **2026-04-27 retrain**: the data generator in `src/raum/data.py` used
+> to anchor object 1 at the origin and offset object 2 by the relation,
+> which inverted English semantics ("cone above cylinder" put the
+> cylinder on top). Fixed to "X rel Y" → Y at origin, X offset.
+> Existing checkpoints under `checkpoints/raum_10/` have the old
+> convention; retrain into `checkpoints/raum_11/` before running the
+> demo.
 
 Background on why this replaces the old bridge: the earlier PoC-C
 used a render loss on images from a CPU alpha-compositing renderer.
@@ -376,7 +384,7 @@ the bridge context-aware via a transformer encoder. See commit
 
 ```powershell
 python scripts/analyze_raum_bridge.py `
-  --checkpoint checkpoints/raum_10/best.pt `
+  --checkpoint checkpoints/raum_11/best.pt `
   --glove data/glove.6B.300d.txt
 ```
 
@@ -387,7 +395,7 @@ Reports:
   showing predicted position, template (with confidence), colour,
   and scale per token
 
-Results: `results/raum_10_analysis/report.txt`.
+Results: `results/raum_11_analysis/report.txt`.
 
 #### Raum demo (local web app)
 
@@ -398,7 +406,7 @@ static HTML + Three.js with no build step.
 ```powershell
 pip install -r demo/requirements.txt
 python -m demo.app `
-  --checkpoint checkpoints/raum_10/best.pt `
+  --checkpoint checkpoints/raum_11/best.pt `
   --glove data/glove.6B.300d.txt
 ```
 
@@ -421,12 +429,12 @@ unchanged.
 ```powershell
 # Start
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --save-dir checkpoints/raum_10
+  --save-dir checkpoints/raum_11
 
 # Ctrl-C whenever. A final snapshot is written before exit.
 # Resume:
 python scripts/train_raum_bridge.py --glove data/glove.6B.300d.txt `
-  --save-dir checkpoints/raum_10 --resume
+  --save-dir checkpoints/raum_11 --resume
 ```
 
 Caveats:
@@ -438,10 +446,61 @@ Caveats:
 #### Commit
 
 ```powershell
-git add results/raum_10_analysis/ checkpoints/raum_d/*.json
+git add results/raum_11_analysis/ checkpoints/raum_d/*.json
 git commit -m "Track 3 Raum: PoC-C Raum 1.0 + PoC-D results"
 git push
 ```
+
+#### Raum 0.0 polish (2026-04-27)
+
+Round of fixes shipped alongside the retrain. Run the demo against a
+fresh `checkpoints/raum_11/best.pt` to see them.
+
+1. **"X rel Y" anchor convention** (`src/raum/data.py`). The data
+   generator used to anchor object 1 at the origin and offset object 2
+   by the relation, which inverts English ("cone above cylinder" put
+   the cylinder on top). Fix: Y is the anchor, X gets the offset.
+   Requires retrain into `checkpoints/raum_11/`.
+2. **Cylinder seam artifact** (`src/raum/templates.py`). Cylinder caps
+   previously sat flush against the side ring, stacking splats into a
+   visible line at y = ±height/2. Fix: inset cap radius to 0.92r and
+   pull the side's y-range in by 3%.
+3. **Unresolved-object path** (`src/raum/bridge.py`, `demo/app.py`,
+   `demo/static/`). `assemble_scene` now returns a third list,
+   `unresolved`. Below a confidence threshold (default 0.35) the
+   argmax template is not stamped; instead the backend emits a
+   `warnings` array and the UI shows a coral-bordered row like
+   "could not resolve 'xylophone' (top guess torus, conf 22%)".
+   Expose via `--template-confidence 0.35` on `demo.app`.
+4. **Floating text labels** (`demo/static/viewer.js`,
+   `demo/static/style.css`). Ring-sprite markers replaced with HTML
+   pills ("cone · 100%") anchored via `Vector3.project(camera)` each
+   frame. Readable at any zoom, no z-fighting with splats.
+5. **Animated Gaussian-splat logo** (`demo/static/logo.js`). Flat
+   amber "R" disc replaced with a 180-point Fibonacci sphere of
+   amber-gradient Gaussian blobs rotating on two axes. 2D canvas,
+   zero-dep, ~36 px square. Inter is now loaded from rsms.me.
+6. **5x template density**. Default `--template-points` raised from
+   200 to 1000. Denser templates make individual objects read as
+   volumetric clouds instead of sparse scatter.
+
+```powershell
+# Retrain with the fixed data generator + polish
+python scripts\train_raum_bridge.py --glove data\glove.6B.300d.txt `
+  --save-dir checkpoints\raum_11
+
+# Run the updated demo
+pip install -r demo\requirements.txt
+python -m demo.app `
+  --checkpoint checkpoints\raum_11\best.pt `
+  --glove data\glove.6B.300d.txt `
+  --template-points 1000 `
+  --template-confidence 0.35
+```
+
+The Raum 0.1 plan (complex scenes, common-object vocabulary, OOV
+handling) is in `docs/plans/d1c_raum_01_plan.md` and condensed in the
+appendix at the bottom of this file.
 
 ### 6.4  Track 4: Planck 1.2, Acceleration recipe validation
 
@@ -763,3 +822,44 @@ All OK
 | 5 (Hertz 1.2) | `results/hertz_eval.json`, `results/hertz_samples.txt` | `git add results/` |
 
 **Do NOT commit:** model checkpoints (`.pt` files >50 MB), GloVe data, TinyStories data, FineWeb data, blob indices (~60 MB). These are in `.gitignore`.
+
+---
+
+## Appendix: Raum 0.1 plan (condensed)
+
+Full plan: `docs/plans/d1c_raum_01_plan.md`.
+
+Raum 0.0 proved text → template-routing works on 2-object scenes with the 6-shape library. Raum 0.1 fixes three limits.
+
+### 1. Complex scenes from prompt context
+- **Goal**: N-object scenes (N in {1,2,3}) with longer sentences and multi-anchor relations.
+- **Changes**:
+  - Data generator: emit 1/2/3-object scenes; anchor pointer per relation so "C right of B" uses B as anchor (not slot-0).
+  - Training: extend pairwise-direction loss to all consecutive object pairs; DETR-style Hungarian matching deferred to 0.2.
+  - Add per-pair relation-graph head to classify relation between any two object tokens; supervise from generator labels.
+- **Success metric**: >90% direction accuracy on 3-object val set.
+
+### 2. Train with common objects
+- **Goal**: expand template library from 6 primitives to ~30 everyday objects (`car`, `tree`, `chair`, `cup`, ...).
+- **Approach** (sharp version): procedural low-poly templates authored from primitive composites. Each new object is a `GaussianTemplate` built from cuboids + cylinders + spheres. ~30 entries in 1-2 days.
+- **Approach** (harder): ShapeNet canonical mesh → Gaussian cloud per category. Better visuals, slower setup.
+- **Bridge change**: just bump `n_templates`. Architecture is agnostic.
+- Tradeoff: procedural looks crude up close; ShapeNet is demo-ready but needs mesh pipeline.
+
+### 3. OOV object handling
+- **Current (0.0)**: low-confidence template → unresolved warning in UI, nothing rendered.
+- **0.1 (ship)**: nearest-neighbour over template embeddings. If GloVe(`xylophone`) is close enough to `GloVe(cube)` by cosine, stamp cube with a "closest guess" label; else keep the warning.
+- **0.2 (research)**: conditional Gaussian-blob decoder driven by the word's feature vector. Unknown objects render as amorphous blobs whose shape is learned — this plays directly into the blob-plugin thesis in the v5 pitch.
+- **Alt**: local LM router for OOV → known template. Fastest to ship, not SGS-native.
+
+### Rollout order
+1. **0.1.0**: 3-object data generator + analytic labels; analyzer verifies 3-object direction accuracy.
+2. **0.1.1**: procedural 30-object library; retrain bridge; demo shows new names.
+3. **0.1.2**: NN-cosine OOV policy with "closest guess" copy.
+4. **0.2**: Hungarian matching, nested relations, conditional-blob OOV decoder (own plan doc).
+
+### Open questions
+- Shared embeddings between Raum and Planck (blob-plugin thesis says yes; Raum-only regime says no).
+- Global vs per-template confidence threshold (plane/torus were 0.0 argmax attractors).
+- "template" vs "blob class" naming once library > 30.
+

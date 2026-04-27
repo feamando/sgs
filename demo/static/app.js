@@ -5,6 +5,7 @@ const input = document.getElementById("prompt");
 const send = document.getElementById("send");
 const meta = document.getElementById("meta");
 const objectsPanel = document.getElementById("objects");
+const warningsPanel = document.getElementById("warnings");
 const markersToggle = document.getElementById("markers-toggle");
 
 async function checkHealth() {
@@ -45,6 +46,18 @@ function renderObjectsPanel(data) {
   }
 }
 
+function renderWarnings(data) {
+  if (!warningsPanel) return;
+  warningsPanel.innerHTML = "";
+  if (!data.warnings || data.warnings.length === 0) return;
+  for (const w of data.warnings) {
+    const row = document.createElement("div");
+    row.className = "warning-row";
+    row.textContent = w;
+    warningsPanel.appendChild(row);
+  }
+}
+
 async function submit(prompt) {
   send.disabled = true;
   meta.textContent = "rendering...";
@@ -63,8 +76,10 @@ async function submit(prompt) {
     setCloud(data.splats);
     setMarkers(data.objects);
     renderObjectsPanel(data);
+    renderWarnings(data);
+    const unresolved = data.n_unresolved ? ` | ${data.n_unresolved} unresolved` : "";
     meta.textContent =
-      `${data.n_objects} objects | ${data.n_splats} splats | ` +
+      `${data.n_objects} objects | ${data.n_splats} splats${unresolved} | ` +
       data.words.join(" ");
   } catch (e) {
     meta.textContent = `error: ${e.message}`;
