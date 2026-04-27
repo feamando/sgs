@@ -42,20 +42,20 @@ flag combo (see `docs/plans/planck_12_validation.md` for the exact
 matrix). Results accumulate in `results/planck_12/ablation.json`;
 per-run stdout is teed to `results/planck_12/<run_id>/train_log.txt`.
 
-Expected wall clock on an RTX 4090 at the defaults (1 epoch over
-500M FineWeb-Edu tokens, batch 32, L=512):
+Expected wall clock on an RTX 4090 at the defaults (1 epoch, batch 32,
+L=512, `--max-steps 66750` ≈ 1.09 B tokens to match the adopted
+baseline):
 
 | run | est. wall |
 |---|---|
-| baseline | 6.5 h |
-| tl / ap / shk | 6.0–6.5 h |
-| sk | 4.8 h |
-| all | 3.6 h |
+| baseline | ~3.05 h (already recorded, adopted from manual run) |
+| tl / ap / shk | ~3.0 h |
+| sk | ~2.3 h |
+| all | ~1.7 h |
 
-If the budget is too big, drop the FineWeb-Edu subset to 250M tokens
-(edit the first N records of `train.bin` through a smaller `--epochs`,
-or pre-slice the bin). All conclusions scale since we compare ratios,
-not absolute numbers.
+`--max-steps` is how the harness keeps the accel runs token-matched to
+the adopted baseline. Pass `--max-steps 0` to remove the cap (full
+epoch = ~550k steps); ratios still hold but absolute wall clock balloons.
 
 ---
 

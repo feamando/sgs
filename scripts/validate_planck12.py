@@ -75,6 +75,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--context-len", type=int, default=512)
     p.add_argument("--log-interval", type=int, default=50)
     p.add_argument("--eval-interval", type=int, default=500)
+    p.add_argument("--max-steps", type=int, default=66750,
+                   help="Stop each run at this many global steps for parity "
+                        "with the adopted baseline (0 = no cap, full epoch)")
     p.add_argument("--only", choices=[r["id"] for r in RUNS],
                    help="Run only this config (for iteration)")
     p.add_argument("--skip", nargs="*", default=[],
@@ -123,6 +126,8 @@ def build_command(run: dict, args: argparse.Namespace) -> list[str]:
         "--eval-interval", str(args.eval_interval),
         "--save-dir", str(save_dir),
     ]
+    if args.max_steps:
+        cmd += ["--max-steps", str(args.max_steps)]
     if args.wandb:
         cmd += ["--wandb", "--wandb-project", f"planck-12-{run['id']}"]
     cmd += run["flags"]

@@ -48,6 +48,8 @@ def parse_args():
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--weight-decay", type=float, default=0.1)
     p.add_argument("--epochs", type=int, default=3)
+    p.add_argument("--max-steps", type=int, default=0,
+                   help="Stop training after this many global steps (0 = no cap)")
     p.add_argument("--grad-clip", type=float, default=1.0)
     p.add_argument("--warmup-steps", type=int, default=1000)
     p.add_argument("--mixed-precision", default="bf16", choices=["bf16", "fp16", "fp32"])
@@ -407,11 +409,18 @@ def main():
                 _save(model, optimizer, scheduler, scaler, epoch, global_step,
                       save_dir / f"step_{global_step}.pt")
 
+            if args.max_steps and global_step >= args.max_steps:
+                print(f"  Reached --max-steps {args.max_steps}; stopping.")
+                break
+
         # End of epoch
         epoch_avg = epoch_loss / max(epoch_tokens, 1)
         print(f"  Epoch {epoch+1} done | avg loss {epoch_avg:.4f} | ppl {math.exp(min(epoch_avg, 20)):.1f}")
         _save(model, optimizer, scheduler, scaler, epoch + 1, global_step,
               save_dir / f"epoch_{epoch+1}.pt")
+
+        if args.max_steps and global_step >= args.max_steps:
+            break
 
     # ── Final eval ──
     print("\n=== Final evaluation ===")
