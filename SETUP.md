@@ -176,6 +176,28 @@ sgs/
 
 Follow these in order. Each validates the layer below before committing GPU-weeks.
 
+> **Roadmap + swimlane visualizer**
+>
+> Every track below is a **swimlane**. Each version bump (e.g. Planck
+> 1.2, Raum 0.1, Klang 1.2) is an **entry** in the root `roadmap.md`
+> file. The local dashboard at `pm/index.html` renders those entries as
+> Model and Product swimlanes with status cards (open / in progress /
+> done).
+>
+> **Sync rule** — any version work in this file MUST be mirrored as a
+> row in `roadmap.md`, and any row added to `roadmap.md` MUST have its
+> run instructions here. When in doubt, open `roadmap.md` first — it is
+> the authoritative status board.
+>
+> Run the visualizer (no build step):
+>
+> ```powershell
+> # from the repo root
+> python -m http.server 8000
+> ```
+>
+> then open <http://localhost:8000/pm/>.
+
 ### 6.1  Track 1: Klang, Audio Gaussian Splatting
 
 **Status:** finalize before Planck 1.1.

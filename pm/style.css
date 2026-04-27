@@ -1,0 +1,243 @@
+/* Radiance Labs v5 palette — same as Raum demo. */
+:root {
+  --bg: #0a0a0f;
+  --panel: #12121a;
+  --panel-2: #0d0d14;
+  --ink: #f5f1e8;
+  --ink-dim: #8a8598;
+  --accent: #ffb347;
+  --accent-coral: #ff6b6b;
+  --accent-green: #6be38b;
+  --border: #1f1f2a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.005em;
+}
+
+/* ── Header ────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-splat {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.sub {
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.meta {
+  font-size: 12px;
+  color: var(--ink-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ── Body ──────────────────────────────────────────────── */
+main {
+  padding: 28px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.stream {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stream-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-left: 4px;
+}
+.stream-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.stream-hint {
+  font-size: 12px;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+}
+
+.lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Swimlane ──────────────────────────────────────────── */
+.lane {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: stretch;
+  gap: 14px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.lane-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.lane-id {
+  font-size: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+}
+.lane-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.lane-count {
+  font-size: 11px;
+  color: var(--ink-dim);
+  margin-top: 2px;
+}
+
+.lane-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* ── Card ──────────────────────────────────────────────── */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 190px;
+  max-width: 260px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.card:hover {
+  border-color: rgba(255, 179, 71, 0.4);
+  transform: translateY(-1px);
+}
+.card.status-done { border-left: 3px solid var(--accent-green); }
+.card.status-in-progress { border-left: 3px solid var(--accent); }
+.card.status-open { border-left: 3px solid var(--ink-dim); }
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.card-name { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.card-version {
+  font-size: 10px;
+  color: var(--ink-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--ink-dim);
+  width: fit-content;
+}
+.card-pill.status-open      { color: var(--ink-dim); }
+.card-pill.status-in-progress {
+  color: var(--accent);
+  border-color: rgba(255, 179, 71, 0.35);
+  background: rgba(255, 179, 71, 0.08);
+}
+.card-pill.status-done      {
+  color: var(--accent-green);
+  border-color: rgba(107, 227, 139, 0.3);
+  background: rgba(107, 227, 139, 0.06);
+}
+
+.card-date {
+  font-size: 10px;
+  color: var(--ink-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.card-notes {
+  font-size: 12px;
+  color: var(--ink-dim);
+  line-height: 1.4;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: var(--ink-dim);
+  font-style: italic;
+  padding: 4px 2px;
+}
+
+.error {
+  padding: 16px;
+  border: 1px solid var(--accent-coral);
+  background: rgba(255, 107, 107, 0.08);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.error code { color: var(--accent-coral); }
+
+footer {
+  padding: 16px 24px 24px;
+  color: var(--ink-dim);
+  font-size: 11px;
+  text-align: center;
+}
+footer code {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}

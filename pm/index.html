@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Radiance Labs · Roadmap Visualizer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://rsms.me/" />
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <div id="logo-splat" class="logo-splat"></div>
+      <div class="logo-text">
+        <div class="brand">Radiance Labs</div>
+        <div class="sub">Roadmap Visualizer &middot; v0</div>
+      </div>
+    </div>
+    <div class="meta" id="meta">loading...</div>
+  </header>
+
+  <main>
+    <section class="stream" id="models-stream">
+      <div class="stream-head">
+        <div class="stream-title">Models</div>
+        <div class="stream-hint">trained artefacts &middot; model-side iterations</div>
+      </div>
+      <div class="lanes" id="models-lanes"></div>
+    </section>
+
+    <section class="stream" id="products-stream">
+      <div class="stream-head">
+        <div class="stream-title">Products</div>
+        <div class="stream-hint">user-facing demos and apps</div>
+      </div>
+      <div class="lanes" id="products-lanes"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Reads <code>../roadmap.md</code>. Update that file and refresh.</span>
+  </footer>
+
+  <script type="module">
+    import { mountLogo } from "./logo.js";
+    mountLogo(document.getElementById("logo-splat"));
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

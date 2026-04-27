@@ -1,4 +1,9 @@
-# SGS Master Plan
+# SGS Master Plan (historical)
+
+> **Note (2026-04-27):** authoritative status lives in `roadmap.md` at
+> the repo root, rendered by the `pm/` dashboard. This file is kept as
+> a prose master plan of the original project framing and is no longer
+> the place to track version status.
 
 **Project:** Semantic Gaussian Splatting
 **Started:** 2026-04-07

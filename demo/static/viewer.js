@@ -66,6 +66,13 @@ const splatVS = `
   }
 `;
 
+/* Hard-core / soft-rim profile: the inner ~55% of the radius is fully
+ * opaque, the outer rim ramps alpha to zero, and anything too faint is
+ * discarded. This matters because we run dozens to hundreds of coloured
+ * splats per object; with a pure Gaussian falloff + transparent blending,
+ * overlapping splats of different colours pixel-mix into a tinted smear
+ * (the "colours combining" bug). Hard cores let the GPU depth-test properly
+ * so the nearer colour wins and only the thin rim feathers. */
 const splatFS = `
   precision mediump float;
   varying vec3 vColor;
@@ -75,7 +82,8 @@ const splatFS = `
     vec2 p = gl_PointCoord - 0.5;
     float r2 = dot(p, p) * 4.0;       // 0 at centre, 1 at edge
     if (r2 > 1.0) discard;
-    float a = vOpacity * exp(-3.0 * r2);
+    float a = vOpacity * (1.0 - smoothstep(0.55, 1.0, r2));
+    if (a < 0.15) discard;
     gl_FragColor = vec4(vColor, a);
   }
 `;
@@ -181,11 +189,16 @@ export function setCloud(splats) {
   geom.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
   geom.setAttribute("aOpacity", new THREE.BufferAttribute(opacities, 1));
 
+  /* depthWrite MUST be true here. The hard-core shader discards sub-0.15
+   * alpha fragments so the remaining core is effectively opaque; writing
+   * depth lets nearer splats occlude further ones, which is what keeps
+   * coloured objects from bleeding through each other. */
   const mat = new THREE.ShaderMaterial({
     vertexShader: splatVS,
     fragmentShader: splatFS,
     transparent: true,
-    depthWrite: false,
+    depthWrite: true,
+    depthTest: true,
     blending: THREE.NormalBlending,
   });
 
