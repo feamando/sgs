@@ -40,6 +40,17 @@ class SGSLanguageModel(nn.Module):
         ffn_mult: int = 4,
         dropout: float = 0.0,
         use_checkpoint: bool = False,
+        # ── Planck 1.2 accel flags (§2.1-§2.4, all default off) ──
+        # See docs/plans/planck_12_plan.md. When any of these are set,
+        # forward returns (logits, T_diag, passes_run) instead of logits.
+        return_accel_state: bool = False,   # enables the tuple return
+        adaptive_passes: bool = False,      # §2.2
+        ap_eps: float = 0.02,
+        ap_min_step: int = 2000,
+        sparse_k: int = 0,                  # §2.3; 0 = disabled
+        sparse_warmup_steps: int = 5000,
+        sparse_tau_gate: float = 30.0,
+        shared_kernel: bool = False,        # §2.4
     ):
         super().__init__()
         self.vocab_size = vocab_size
@@ -49,6 +60,20 @@ class SGSLanguageModel(nn.Module):
         self.n_heads = n_heads
         self.max_len = max_len
         self.use_checkpoint = use_checkpoint
+
+        # Accel flags — plain attributes, not buffers. They are fixed per
+        # training run so we don't need them in state_dict. `opt_step`
+        # must be set externally by the training loop (default 0 means
+        # warmup-based gates block sparsity until it's bumped).
+        self.return_accel_state = return_accel_state
+        self.adaptive_passes = adaptive_passes
+        self.ap_eps = ap_eps
+        self.ap_min_step = ap_min_step
+        self.sparse_k = int(sparse_k)
+        self.sparse_warmup_steps = sparse_warmup_steps
+        self.sparse_tau_gate = sparse_tau_gate
+        self.shared_kernel = shared_kernel
+        self.opt_step = 0
 
         # ── Gaussian vocabulary (learned from scratch) ──
         self.tok_mu = nn.Embedding(vocab_size, d_s)
@@ -182,7 +207,7 @@ class SGSLanguageModel(nn.Module):
         alpha: torch.Tensor,
         K: torch.Tensor,
         causal_mask: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Causal alpha-compositing rendering.
 
@@ -198,6 +223,8 @@ class SGSLanguageModel(nn.Module):
             causal_mask: [L, L]
         Returns:
             meaning: [B, L, d_f]
+            T_diag:  [B, L] — transmittance at the predicted position
+                     (i.e. T[t,t]). Used by §2.1/§2.2.
         """
         # Effective opacity per (query_pos, key_pos)
         eff_a = alpha.unsqueeze(1) * K                         # [B, L, L]
@@ -218,7 +245,117 @@ class SGSLanguageModel(nn.Module):
         # Blending weights and render
         weights = eff_a * T                                    # [B, L, L]
         meaning = torch.bmm(weights, features)                 # [B, L, d_f]
-        return meaning
+
+        # Diagonal T[t,t] — confidence signal for §2.1 loss weighting
+        # and §2.2 early-exit. Gathered here so callers don't have to
+        # re-derive it from the [B, L, L] tensor.
+        T_diag = T.diagonal(dim1=-2, dim2=-1)                  # [B, L]
+        return meaning, T_diag
+
+    def _causal_render_sparse(
+        self,
+        features: torch.Tensor,
+        alpha: torch.Tensor,
+        mahal: torch.Tensor,
+        causal_mask: torch.Tensor,
+        k: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Top-k sparse causal alpha-compositing render (§2.3, Tier B).
+
+        For each query position t, keep only the k keys with smallest
+        Mahalanobis distance (highest kernel weight) among causally
+        visible keys (j <= t), then run log-cumsum + bmm over those
+        k entries only. Cost: O(B·L·k) instead of O(B·L·L) for
+        cumsum + render.
+
+        Args:
+            features:    [B, L, d_f]
+            alpha:       [B, L]
+            mahal:       [B, L, L] — Mahalanobis distance (pre-exp)
+            causal_mask: [L, L]
+            k:           max keys per query (clamped to L).
+        Returns:
+            meaning: [B, L, d_f]
+            T_diag:  [B, L]
+        """
+        B, L, d_f = features.shape
+        k = min(k, L)
+
+        # Mask future keys by making their distance huge → never in top-k.
+        huge = mahal.new_full((), 1e9)
+        mahal_causal = torch.where(
+            causal_mask.bool().unsqueeze(0),                  # [1, L, L]
+            mahal,
+            huge.expand_as(mahal),
+        )
+
+        # Smallest distance = highest kernel weight.
+        # top_idx[:, t, :] are the k key positions selected for query t.
+        _, top_idx = torch.topk(mahal_causal, k=k, dim=-1, largest=False)  # [B, L, k]
+
+        # Transmittance must accumulate in causal order (ascending key
+        # position), so sort the selected keys by index. This preserves
+        # the left-to-right alpha-composite semantics.
+        top_idx, _ = torch.sort(top_idx, dim=-1)              # [B, L, k]
+
+        # Gather the corresponding kernel values and alpha.
+        top_mahal = torch.gather(mahal_causal, -1, top_idx)   # [B, L, k]
+        K_top = torch.exp(-0.5 * top_mahal / self.tau)         # [B, L, k]
+
+        alpha_exp = alpha.unsqueeze(1).expand(B, L, L)        # [B, L, L]
+        alpha_top = torch.gather(alpha_exp, -1, top_idx)      # [B, L, k]
+
+        eff_a = (alpha_top * K_top).clamp(min=0.0, max=1.0 - 1e-6)
+
+        # Log-cumsum over the k keys — cheaper than full-L cumsum.
+        log_1ma = torch.log1p(-eff_a)                         # [B, L, k]
+        log_cum = log_1ma.cumsum(dim=-1)
+        log_T = torch.cat(
+            [torch.zeros_like(log_cum[:, :, :1]), log_cum[:, :, :-1]],
+            dim=-1,
+        )
+        T = log_T.exp()                                       # [B, L, k]
+        weights = eff_a * T                                   # [B, L, k]
+
+        # Gather feature rows for the selected keys and reduce.
+        # idx_exp: [B, L, k, d_f] used by gather on the L axis of features.
+        idx_exp = top_idx.unsqueeze(-1).expand(B, L, k, d_f)
+        feat_exp = features.unsqueeze(1).expand(B, L, L, d_f)
+        top_feats = torch.gather(feat_exp, 2, idx_exp)        # [B, L, k, d_f]
+        meaning = (weights.unsqueeze(-1) * top_feats).sum(dim=2)  # [B, L, d_f]
+
+        # Diagonal T[t,t] proxy for §2.1/§2.2. In dense render T[t,t] is
+        # the transmittance accumulated over keys with position < t. In
+        # the sparse selection, we approximate that as the fully-absorbed
+        # transmittance across all selected keys (i.e. how much context
+        # the query absorbed from its top-k neighbours). For queries where
+        # t itself is in the top-k, use the accurate T at that slot.
+        arange_L = torch.arange(L, device=mahal.device).view(1, L, 1)
+        match = (top_idx == arange_L)                         # [B, L, k]
+        has_self = match.any(dim=-1)                          # [B, L]
+        self_pos = match.float().argmax(dim=-1)               # [B, L]
+        T_self = torch.gather(T, -1, self_pos.unsqueeze(-1)).squeeze(-1)
+        T_fallback = log_cum[..., -1].exp()                   # [B, L]
+        T_diag = torch.where(has_self, T_self, T_fallback)
+        return meaning, T_diag
+
+    def _pairwise_mahal(
+        self,
+        queries: torch.Tensor,
+        mu: torch.Tensor,
+        log_var: torch.Tensor,
+    ) -> torch.Tensor:
+        """Pairwise Mahalanobis distance (pre-exp). Same factored form as
+        `_pairwise_kernel` but returns the raw distance so sparse rendering
+        can run top-k in distance space."""
+        iv = torch.exp(-log_var)
+        mu_iv = mu * iv
+        mu2_iv_sum = (mu * mu_iv).sum(-1)
+        q_sq = queries * queries
+        term1 = torch.bmm(q_sq, iv.transpose(1, 2))
+        term2 = torch.bmm(queries, mu_iv.transpose(1, 2))
+        return term1 - 2.0 * term2 + mu2_iv_sum.unsqueeze(1)
 
     def _render_pass(
         self,
@@ -227,10 +364,20 @@ class SGSLanguageModel(nn.Module):
         alpha: torch.Tensor,
         features: torch.Tensor,
         causal_mask: torch.Tensor,
-    ) -> torch.Tensor:
-        """Single rendering pass: all heads in parallel → combine. Checkpointable."""
+        K_cached: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Single rendering pass: all heads in parallel → combine. Checkpointable.
+
+        Returns (meaning, T_diag, K_all). K_all is returned so §2.4
+        (shared kernel) can reuse it across passes; it is the kernel
+        (not the raw distance) and is always dense at the [B*H, L, L]
+        shape. When `K_cached` is provided it takes the sparse-path
+        decision out of our hands: we render densely with the cached
+        kernel. T_diag has shape [B*H, L].
+        """
         B, L, d_s = mu.shape
         H = self.n_heads
+        d_f = self.d_f
 
         # All head queries in one matmul: [B, L, d_s] → [B, L, H*d_s] → [B*H, L, d_s]
         all_q = self.query_proj(mu)                                # [B, L, H*d_s]
@@ -241,31 +388,63 @@ class SGSLanguageModel(nn.Module):
         mu_h = mu.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
         lv_h = log_var.unsqueeze(1).expand(B, H, L, d_s).reshape(B * H, L, d_s)
         al_h = alpha.unsqueeze(1).expand(B, H, L).reshape(B * H, L)
-        ft_h = features.unsqueeze(1).expand(B, H, L, self.d_f).reshape(B * H, L, self.d_f)
+        ft_h = features.unsqueeze(1).expand(B, H, L, d_f).reshape(B * H, L, d_f)
 
-        # One batched kernel + render for all heads simultaneously
-        K_all = self._pairwise_kernel(all_q, mu_h, lv_h)          # [B*H, L, L]
-        m_all = self._causal_render(ft_h, al_h, K_all, causal_mask)  # [B*H, L, d_f]
+        # §2.3 top-k sparsity gate: only active past warmup AND when the
+        # kernel is sharp enough (small τ) for top-k to be meaningful.
+        # Disabled when shared_kernel is driving this call with a cached K.
+        sparse_active = (
+            self.sparse_k > 0
+            and K_cached is None
+            and self.opt_step >= self.sparse_warmup_steps
+            and float(self.tau.detach()) <= self.sparse_tau_gate
+        )
+
+        if sparse_active:
+            mahal = self._pairwise_mahal(all_q, mu_h, lv_h)       # [B*H, L, L]
+            m_all, T_all = self._causal_render_sparse(
+                ft_h, al_h, mahal, causal_mask, self.sparse_k,
+            )
+            # Reconstitute K_all from mahal only if downstream needs it
+            # (§2.4 shared-kernel path never combines with sparse in one
+            # run; return None-equivalent sentinel). Use the dense kernel
+            # exp for passes that might cache it; cheap vs. the render.
+            K_all = torch.exp(-0.5 * mahal / self.tau)
+        else:
+            if K_cached is not None:
+                K_all = K_cached
+            else:
+                K_all = self._pairwise_kernel(all_q, mu_h, lv_h)  # [B*H, L, L]
+            m_all, T_all = self._causal_render(ft_h, al_h, K_all, causal_mask)
 
         # Reshape back: [B*H, L, d_f] → [B, H, L, d_f] → [B, L, H*d_f]
-        m_all = m_all.view(B, H, L, self.d_f).permute(0, 2, 1, 3)   # [B, L, H, d_f]
-        m_cat = m_all.reshape(B, L, H * self.d_f)                     # [B, L, H*d_f]
+        m_all_r = m_all.view(B, H, L, d_f).permute(0, 2, 1, 3)    # [B, L, H, d_f]
+        m_cat = m_all_r.reshape(B, L, H * d_f)                    # [B, L, H*d_f]
+        meaning = self.head_proj(m_cat)                           # [B, L, d_f]
 
-        return self.head_proj(m_cat)                                   # [B, L, d_f]
+        # Aggregate T across heads for the outer loop (mean over heads
+        # gives a per-query confidence signal).
+        T_diag = T_all.view(B, H, L).mean(dim=1)                  # [B, L]
+        return meaning, T_diag, K_all
 
     # ────────────────────────────────────────────────────────────
     # Forward
     # ────────────────────────────────────────────────────────────
 
-    def forward(self, token_ids: torch.Tensor) -> torch.Tensor:
+    def forward(self, token_ids: torch.Tensor):
         """
         Causal language model forward pass.
 
         Args:
             token_ids: [B, L] token indices
         Returns:
-            logits: [B, L, vocab_size]
-                    logits[:, t, :] predicts token at position t+1
+            Default (no accel flags set):
+                logits: [B, L, vocab_size]
+                        logits[:, t, :] predicts token at position t+1
+            When `return_accel_state=True` (set by accel flags):
+                (logits, T_diag, passes_run)
+                  T_diag:     [B, L] — final-pass transmittance at t=t
+                  passes_run: int — number of passes actually executed
         """
         B, L = token_ids.shape
         device = token_ids.device
@@ -287,17 +466,47 @@ class SGSLanguageModel(nn.Module):
 
         # ── Multi-pass rendering ──
         meaning = None
+        T_diag = None
+        K_cache = None                  # §2.4 shared kernel
+        T_prev_pass = None              # §2.2 adaptive exit
+        passes_run = 0
+
         for p in range(self.n_passes):
+            # §2.4: once we've computed the kernel in pass 0, reuse it.
+            # The first pass always recomputes K; subsequent passes
+            # consume the cache.
+            k_in = K_cache if (self.shared_kernel and p > 0) else None
+
             if self.use_checkpoint and self.training:
-                meaning = grad_checkpoint(
+                meaning, T_diag, K_all = grad_checkpoint(
                     self._render_pass, mu, log_var, alpha, features,
-                    causal_mask, use_reentrant=False,
+                    causal_mask, k_in, use_reentrant=False,
                 )
             else:
-                meaning = self._render_pass(
-                    mu, log_var, alpha, features, causal_mask,
+                meaning, T_diag, K_all = self._render_pass(
+                    mu, log_var, alpha, features, causal_mask, K_cached=k_in,
                 )
+            if self.shared_kernel and p == 0:
+                K_cache = K_all.detach() if not self.training else K_all
+
             meaning = self.dropout(meaning)
+            passes_run = p + 1
+
+            # §2.2 adaptive early exit — only in training past min-step.
+            # Measure on T_diag rather than full T to keep the comparison
+            # cheap and batch-level (we skip the remaining passes for the
+            # whole batch when the signal stabilises).
+            if (
+                self.adaptive_passes
+                and self.training
+                and self.opt_step >= self.ap_min_step
+                and p < self.n_passes - 1
+                and T_prev_pass is not None
+            ):
+                delta = (T_diag - T_prev_pass).abs().max().item()
+                if delta < self.ap_eps:
+                    break
+            T_prev_pass = T_diag.detach()
 
             # Update Gaussian params for next pass
             if p < self.n_passes - 1:
@@ -308,6 +517,9 @@ class SGSLanguageModel(nn.Module):
 
         # ── Output ──
         logits = self.lm_head(self.ln_f(meaning))              # [B, L, V]
+
+        if self.return_accel_state:
+            return logits, T_diag, passes_run
         return logits
 
     # ────────────────────────────────────────────────────────────
@@ -326,6 +538,10 @@ class SGSLanguageModel(nn.Module):
         self.eval()
         ids = prompt_ids.clone()
 
+        # Generation never wants the accel-state tuple — always take
+        # the plain-logits path even when flags are set.
+        was_returning = self.return_accel_state
+        self.return_accel_state = False
         for _ in range(max_new):
             ctx = ids[:, -self.max_len :]
             logits = self.forward(ctx)[:, -1, :]
@@ -339,6 +555,7 @@ class SGSLanguageModel(nn.Module):
             next_id = torch.multinomial(probs, 1)
             ids = torch.cat([ids, next_id], dim=1)
 
+        self.return_accel_state = was_returning
         return ids
 
     # ────────────────────────────────────────────────────────────
