@@ -22,6 +22,13 @@ Usage:
 
     # Dry-run: print the train commands without executing them
     python scripts/validate_planck12.py --data-dir data/fineweb --dry-run
+
+    # Adopt an already-trained run from an existing train log without
+    # re-executing (useful if the baseline was started manually):
+    python scripts/validate_planck12.py --adopt baseline=path/to/log.txt
+    # Provide an explicit wall clock (seconds) when adopting; otherwise
+    # the harness estimates it from last_step * batch * ctx / tok/s.
+    python scripts/validate_planck12.py --adopt baseline=log.txt --adopt-wall-s 10980
 """
 
 from __future__ import annotations
@@ -78,6 +85,14 @@ def parse_args() -> argparse.Namespace:
                    help="Print commands without executing")
     p.add_argument("--wandb", action="store_true",
                    help="Enable wandb for each run (adds --wandb)")
+    p.add_argument("--adopt", action="append", default=[],
+                   metavar="RUN_ID=LOG_PATH",
+                   help="Adopt an already-finished run by parsing its log "
+                        "and writing the summary row without re-executing. "
+                        "May be passed multiple times.")
+    p.add_argument("--adopt-wall-s", type=float, default=None,
+                   help="Explicit wall-clock seconds for --adopt. If omitted, "
+                        "estimated from last_step * batch * ctx / mean tok_per_sec.")
     return p.parse_args()
 
 
@@ -213,6 +228,48 @@ def run_one(run: dict, args: argparse.Namespace, results: dict) -> None:
           f"tok/s={parsed['tok_per_sec_mean']}")
 
 
+def adopt_run(spec: str, args: argparse.Namespace, results: dict) -> None:
+    """Parse a completed train log and record it as a run, no subprocess."""
+    if "=" not in spec:
+        raise SystemExit(f"--adopt expects RUN_ID=PATH, got {spec!r}")
+    run_id, log_path_str = spec.split("=", 1)
+    run = next((r for r in RUNS if r["id"] == run_id), None)
+    if run is None:
+        raise SystemExit(f"--adopt: unknown run id {run_id!r}")
+
+    src = Path(log_path_str).expanduser().resolve()
+    if not src.exists():
+        raise SystemExit(f"--adopt: log not found: {src}")
+
+    # Copy the log into the canonical location so downstream re-parsing works.
+    dst_dir = RESULTS_DIR / run_id
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / "train_log.txt"
+    dst.write_text(src.read_text(), encoding="utf-8", errors="replace")
+
+    parsed = parse_log(dst.read_text())
+
+    wall = args.adopt_wall_s
+    if wall is None and parsed["last_step"] and parsed["tok_per_sec_mean"]:
+        tokens = parsed["last_step"] * args.batch_size * args.context_len
+        wall = tokens / parsed["tok_per_sec_mean"]
+
+    results["runs"][run_id] = {
+        "label": run["label"],
+        "flags": run["flags"],
+        "status": "adopted",
+        "wall_clock_s": round(wall, 1) if wall else None,
+        "cmd": None,
+        "adopted_from": str(src),
+        **parsed,
+    }
+    save_results(results)
+    print(f"adopted {run_id} from {src}: "
+          f"val_loss={parsed['final_val_loss']} "
+          f"last_step={parsed['last_step']} "
+          f"wall≈{wall:.0f}s" if wall else f"adopted {run_id} (wall unknown)")
+
+
 def summarise(results: dict) -> None:
     runs = results.get("runs", {})
     if not runs:
@@ -244,15 +301,24 @@ def main() -> int:
     os.chdir(PROJECT_ROOT)
     results = load_results()
 
+    for spec in args.adopt:
+        adopt_run(spec, args, results)
+
     todo = [r for r in RUNS if r["id"] not in args.skip]
     if args.only:
         todo = [r for r in todo if r["id"] == args.only]
 
+    # Adopted runs satisfy their row; don't re-execute unless --force.
+    adopted_ids = {s.split("=", 1)[0] for s in args.adopt if "=" in s}
+    if adopted_ids and not args.force:
+        todo = [r for r in todo if r["id"] not in adopted_ids]
+
     for run in todo:
         rid = run["id"]
-        if not args.force and rid in results["runs"] \
-           and results["runs"][rid].get("status") == "ok":
-            print(f"skip {rid} (already ok in results/planck_12/ablation.json)")
+        prior_status = results["runs"].get(rid, {}).get("status")
+        if not args.force and prior_status in ("ok", "adopted"):
+            print(f"skip {rid} (status={prior_status} "
+                  f"in results/planck_12/ablation.json)")
             continue
         run_one(run, args, results)
 

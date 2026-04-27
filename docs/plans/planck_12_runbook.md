@@ -59,6 +59,28 @@ not absolute numbers.
 
 ---
 
+## 1a. Adopting a run that was trained manually
+
+If a configuration (typically `baseline`) was trained outside the harness
+and you want to record it as the reference row without re-executing,
+point `--adopt` at the saved stdout:
+
+```
+python scripts/validate_planck12.py \
+    --adopt baseline=/path/to/saved_train_log.txt
+```
+
+The log file is copied into `results/planck_12/baseline/train_log.txt`,
+parsed for final val loss / tok/s / last step, and a row with
+`status: adopted` is written to `ablation.json`. Wall clock is estimated
+from `last_step * batch * ctx / tok_per_sec_mean`; override it with
+`--adopt-wall-s <seconds>` if you have a timestamp. Adopted runs are
+treated the same as `ok` runs by the skip logic, so a subsequent
+`python scripts/validate_planck12.py --data-dir data/fineweb` picks up
+from the remaining five configs.
+
+---
+
 ## 2. Individual runs (for iteration / re-runs)
 
 ```
