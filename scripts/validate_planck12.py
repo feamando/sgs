@@ -1,34 +1,46 @@
 #!/usr/bin/env python3
 """
-Planck 1.2 acceleration-recipe ablation harness.
+Planck 1.2 / 1.2.1 acceleration-recipe ablation harness.
 
-Drives the six-run matrix from docs/plans/planck_12_validation.md:
-  baseline, tl (§2.1), ap (§2.2), sk (§2.3), shk (§2.4), all (compound).
+Drives the ablation matrix from:
+  docs/plans/planck_12_validation.md   (the original six runs), and
+  docs/plans/planck_12_1_validation.md (the 1.2.1 ten-run matrix).
+
+The RUNS table now reflects the 1.2.1 flag set (tl with warmup+floor,
+sk with the gather rewrite, shk with `mix` schedule; `all` drops ap and
+uses shk-schedule mix), plus four new hedged runs (muon, liger,
+muon_liger, all_plus).
 
 Each run is launched as a subprocess call to scripts/train_lm.py so
-GPU state, VRAM, and wandb runs stay isolated. Outputs accumulate in
-results/planck_12/ablation.json so partial progress is preserved
-across runs and crashes.
+GPU state and VRAM stay isolated. Outputs accumulate in
+<results_dir>/ablation.json so partial progress is preserved across
+runs and crashes.
 
 Usage:
-    # Full matrix
-    python scripts/validate_planck12.py --data-dir data/fineweb
+    # Full 1.2.1 matrix (writes to results/planck_12_1/)
+    python scripts/validate_planck12.py --data-dir data/fineweb \
+        --results-dir results/planck_12_1
 
-    # Single run (for iteration / debugging)
-    python scripts/validate_planck12.py --data-dir data/fineweb --only tl
+    # Single run
+    python scripts/validate_planck12.py --data-dir data/fineweb --only muon \
+        --results-dir results/planck_12_1
 
-    # Re-run a specific config after it failed
-    python scripts/validate_planck12.py --data-dir data/fineweb --only all --force
+    # Adopt the 1.2 baseline into the 1.2.1 results without re-training
+    python scripts/validate_planck12.py \
+        --results-dir results/planck_12_1 \
+        --adopt baseline=results/planck_12/baseline/train_log.txt \
+        --adopt-wall-s 11229
 
-    # Dry-run: print the train commands without executing them
+    # Dry-run
     python scripts/validate_planck12.py --data-dir data/fineweb --dry-run
 
-    # Adopt an already-trained run from an existing train log without
-    # re-executing (useful if the baseline was started manually):
-    python scripts/validate_planck12.py --adopt baseline=path/to/log.txt
-    # Provide an explicit wall clock (seconds) when adopting; otherwise
-    # the harness estimates it from last_step * batch * ctx / tok/s.
-    python scripts/validate_planck12.py --adopt baseline=log.txt --adopt-wall-s 10980
+    # Re-run a specific config after it failed
+    python scripts/validate_planck12.py --data-dir data/fineweb --only all \
+        --results-dir results/planck_12_1 --force
+
+The 1.2 results directory (results/planck_12/) is historical and should
+not be written to with 1.2.1-flag runs. The --results-dir flag defaults
+to the 1.2 dir for backward compat; pass results/planck_12_1 for 1.2.1.
 """
 
 from __future__ import annotations
@@ -44,22 +56,32 @@ import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RESULTS_DIR = PROJECT_ROOT / "results" / "planck_12"
-CKPT_ROOT = PROJECT_ROOT / "checkpoints" / "planck_12"
 
-# Six runs. Order matters: baseline first, compound last.
+# The 1.2.1 RUNS table. `all` drops --adaptive-passes (inert in 1.2)
+# and adopts --shk-schedule mix + the tl warmup/floor. Four new rows
+# (muon, liger, muon_liger, all_plus) implement the industry-standard
+# hedge per docs/plans/planck_12_1_plan.md. Row order is preserved in
+# the summary table; keep baseline first and the compounds last.
+_TL_FLAGS = [
+    "--transmittance-loss",
+    "--tl-warmup-steps", "5000",
+    "--tl-floor-eps", "0.05",
+]
+_SK_FLAGS = ["--sparse-k", "64"]
+_SHK_FLAGS = ["--shared-kernel", "--shk-schedule", "mix"]
+
 RUNS: list[dict] = [
-    {"id": "baseline", "label": "Plain CE, 3 passes", "flags": []},
-    {"id": "tl",       "label": "§2.1 only", "flags": ["--transmittance-loss"]},
-    {"id": "ap",       "label": "§2.2 only", "flags": ["--adaptive-passes"]},
-    {"id": "sk",       "label": "§2.3 only", "flags": ["--sparse-k", "64"]},
-    {"id": "shk",      "label": "§2.4 only", "flags": ["--shared-kernel"]},
-    {"id": "all",      "label": "all four composed", "flags": [
-        "--transmittance-loss",
-        "--adaptive-passes",
-        "--sparse-k", "64",
-        "--shared-kernel",
-    ]},
+    {"id": "baseline",    "label": "Plain CE, 3 passes",              "flags": []},
+    {"id": "tl",          "label": "§2.1 (warmup+floor)",             "flags": list(_TL_FLAGS)},
+    {"id": "ap",          "label": "§2.2 only (diagnostic)",          "flags": ["--adaptive-passes"]},
+    {"id": "sk",          "label": "§2.3 (gather rewrite)",           "flags": list(_SK_FLAGS)},
+    {"id": "shk",         "label": "§2.4 (schedule=mix)",             "flags": list(_SHK_FLAGS)},
+    {"id": "all",         "label": "SGS-native compound (no ap)",     "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS)},
+    {"id": "muon",        "label": "Muon optimizer",                  "flags": ["--optimizer", "muon"]},
+    {"id": "liger",       "label": "Liger fused linear+CE",           "flags": ["--liger"]},
+    {"id": "muon_liger",  "label": "Muon + Liger",                    "flags": ["--optimizer", "muon", "--liger"]},
+    # all_plus drops tl (mutually exclusive with Liger); see plan §4.
+    {"id": "all_plus",    "label": "SGS-native + Muon + Liger",       "flags": list(_SK_FLAGS) + list(_SHK_FLAGS) + ["--optimizer", "muon", "--liger"]},
 ]
 
 
@@ -75,9 +97,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--context-len", type=int, default=512)
     p.add_argument("--log-interval", type=int, default=50)
     p.add_argument("--eval-interval", type=int, default=500)
+    p.add_argument("--save-interval", type=int, default=10000,
+                   help="Checkpoint interval. 10k by default for 1.2.1 "
+                        "because 10 runs × frequent ckpts overflows disk.")
     p.add_argument("--max-steps", type=int, default=66750,
                    help="Stop each run at this many global steps for parity "
                         "with the adopted baseline (0 = no cap, full epoch)")
+    p.add_argument("--results-dir", default="results/planck_12",
+                   help="Where ablation.json and per-run train_log.txt "
+                        "land. Use results/planck_12_1 for the 1.2.1 matrix.")
+    p.add_argument("--ckpt-dir", default=None,
+                   help="Where per-run checkpoint subdirs are created. "
+                        "Defaults to checkpoints/<basename(results-dir)>.")
     p.add_argument("--only", choices=[r["id"] for r in RUNS],
                    help="Run only this config (for iteration)")
     p.add_argument("--skip", nargs="*", default=[],
@@ -96,26 +127,36 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--adopt-wall-s", type=float, default=None,
                    help="Explicit wall-clock seconds for --adopt. If omitted, "
                         "estimated from last_step * batch * ctx / mean tok_per_sec.")
-    return p.parse_args()
+    args = p.parse_args()
+
+    # Resolve results + ckpt dirs relative to PROJECT_ROOT and expose as
+    # attributes. Defaulting ckpt-dir from results-dir's basename keeps
+    # them paired (results/planck_12_1 → checkpoints/planck_12_1).
+    args.results_path = (PROJECT_ROOT / args.results_dir).resolve()
+    if args.ckpt_dir is None:
+        args.ckpt_path = PROJECT_ROOT / "checkpoints" / Path(args.results_dir).name
+    else:
+        args.ckpt_path = (PROJECT_ROOT / args.ckpt_dir).resolve()
+    return args
 
 
-def load_results() -> dict:
-    path = RESULTS_DIR / "ablation.json"
+def load_results(results_path: Path) -> dict:
+    path = results_path / "ablation.json"
     if not path.exists():
         return {"runs": {}}
     with open(path) as f:
         return json.load(f)
 
 
-def save_results(data: dict) -> None:
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = RESULTS_DIR / "ablation.json"
+def save_results(data: dict, results_path: Path) -> None:
+    results_path.mkdir(parents=True, exist_ok=True)
+    path = results_path / "ablation.json"
     with open(path, "w") as f:
         json.dump(data, f, indent=2, sort_keys=True)
 
 
 def build_command(run: dict, args: argparse.Namespace) -> list[str]:
-    save_dir = CKPT_ROOT / run["id"]
+    save_dir = args.ckpt_path / run["id"]
     cmd = [
         sys.executable, "scripts/train_lm.py",
         "--data-dir", args.data_dir,
@@ -124,12 +165,17 @@ def build_command(run: dict, args: argparse.Namespace) -> list[str]:
         "--context-len", str(args.context_len),
         "--log-interval", str(args.log_interval),
         "--eval-interval", str(args.eval_interval),
+        "--save-interval", str(args.save_interval),
         "--save-dir", str(save_dir),
     ]
     if args.max_steps:
         cmd += ["--max-steps", str(args.max_steps)]
     if args.wandb:
-        cmd += ["--wandb", "--wandb-project", f"planck-12-{run['id']}"]
+        cmd += [
+            "--wandb",
+            "--wandb-project",
+            f"planck-{Path(args.results_dir).name.replace('planck_', '')}-{run['id']}",
+        ]
     cmd += run["flags"]
     return cmd
 
@@ -191,8 +237,8 @@ def parse_log(text: str) -> dict:
 def run_one(run: dict, args: argparse.Namespace, results: dict) -> None:
     run_id = run["id"]
     cmd = build_command(run, args)
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    log_path = RESULTS_DIR / run_id / "train_log.txt"
+    args.results_path.mkdir(parents=True, exist_ok=True)
+    log_path = args.results_path / run_id / "train_log.txt"
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"\n=== run {run_id} ({run['label']}) ===")
@@ -227,7 +273,7 @@ def run_one(run: dict, args: argparse.Namespace, results: dict) -> None:
         "cmd": cmd,
         **parsed,
     }
-    save_results(results)
+    save_results(results, args.results_path)
     print(f"  done: status={status} wall={wall:.0f}s "
           f"val_loss={parsed['final_val_loss']} "
           f"tok/s={parsed['tok_per_sec_mean']}")
@@ -247,7 +293,7 @@ def adopt_run(spec: str, args: argparse.Namespace, results: dict) -> None:
         raise SystemExit(f"--adopt: log not found: {src}")
 
     # Copy the log into the canonical location so downstream re-parsing works.
-    dst_dir = RESULTS_DIR / run_id
+    dst_dir = args.results_path / run_id
     dst_dir.mkdir(parents=True, exist_ok=True)
     dst = dst_dir / "train_log.txt"
     dst.write_text(src.read_text(), encoding="utf-8", errors="replace")
@@ -268,7 +314,7 @@ def adopt_run(spec: str, args: argparse.Namespace, results: dict) -> None:
         "adopted_from": str(src),
         **parsed,
     }
-    save_results(results)
+    save_results(results, args.results_path)
     print(f"adopted {run_id} from {src}: "
           f"val_loss={parsed['final_val_loss']} "
           f"last_step={parsed['last_step']} "
@@ -304,7 +350,7 @@ def summarise(results: dict) -> None:
 def main() -> int:
     args = parse_args()
     os.chdir(PROJECT_ROOT)
-    results = load_results()
+    results = load_results(args.results_path)
 
     for spec in args.adopt:
         adopt_run(spec, args, results)
@@ -319,12 +365,13 @@ def main() -> int:
     if adopted_ids:
         todo = [r for r in todo if r["id"] not in adopted_ids]
 
+    rel_results = args.results_path.relative_to(PROJECT_ROOT)
     for run in todo:
         rid = run["id"]
         prior_status = results["runs"].get(rid, {}).get("status")
         if not args.force and prior_status in ("ok", "adopted"):
-            print(f"skip {rid} (status={prior_status} "
-                  f"in results/planck_12/ablation.json)")
+            print(f"skip {rid} (status={prior_status} in "
+                  f"{rel_results}/ablation.json)")
             continue
         run_one(run, args, results)
 
