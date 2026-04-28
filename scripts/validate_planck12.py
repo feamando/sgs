@@ -8,8 +8,13 @@ Drives the ablation matrix from:
 
 The RUNS table now reflects the 1.2.1 flag set (tl with warmup+floor,
 sk with the gather rewrite, shk with `mix` schedule; `all` drops ap and
-uses shk-schedule mix), plus four new hedged runs (muon, liger,
-muon_liger, all_plus).
+uses shk-schedule mix), plus two new hedged runs (muon, all_plus).
+
+Liger was dropped from the validated matrix: `triton>=2.3.0` is
+unsatisfiable on Windows even with `triton-windows`, and the RTX 4090
+training box is Windows-only. The `--liger` flag on train_lm.py still
+works if a Linux/CUDA box installs the dep, but it is not part of the
+1.2.1 gate.
 
 Each run is launched as a subprocess call to scripts/train_lm.py so
 GPU state and VRAM stay isolated. Outputs accumulate in
@@ -58,10 +63,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # The 1.2.1 RUNS table. `all` drops --adaptive-passes (inert in 1.2)
-# and adopts --shk-schedule mix + the tl warmup/floor. Four new rows
-# (muon, liger, muon_liger, all_plus) implement the industry-standard
-# hedge per docs/plans/planck_12_1_plan.md. Row order is preserved in
-# the summary table; keep baseline first and the compounds last.
+# and adopts --shk-schedule mix + the tl warmup/floor. Two new rows
+# (muon, all_plus) implement the industry-standard hedge per
+# docs/plans/planck_12_1_plan.md. Liger was dropped (Windows Triton
+# incompatibility), so all_plus stacks the full SGS-native compound
+# with Muon (tl IS enabled since there's no Liger mutual exclusion).
+# Row order is preserved in the summary table; keep baseline first
+# and the compounds last.
 _TL_FLAGS = [
     "--transmittance-loss",
     "--tl-warmup-steps", "5000",
@@ -78,10 +86,7 @@ RUNS: list[dict] = [
     {"id": "shk",         "label": "§2.4 (schedule=mix)",             "flags": list(_SHK_FLAGS)},
     {"id": "all",         "label": "SGS-native compound (no ap)",     "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS)},
     {"id": "muon",        "label": "Muon optimizer",                  "flags": ["--optimizer", "muon"]},
-    {"id": "liger",       "label": "Liger fused linear+CE",           "flags": ["--liger"]},
-    {"id": "muon_liger",  "label": "Muon + Liger",                    "flags": ["--optimizer", "muon", "--liger"]},
-    # all_plus drops tl (mutually exclusive with Liger); see plan §4.
-    {"id": "all_plus",    "label": "SGS-native + Muon + Liger",       "flags": list(_SK_FLAGS) + list(_SHK_FLAGS) + ["--optimizer", "muon", "--liger"]},
+    {"id": "all_plus",    "label": "SGS-native + Muon",               "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS) + ["--optimizer", "muon"]},
 ]
 
 

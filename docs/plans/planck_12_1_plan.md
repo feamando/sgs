@@ -14,9 +14,12 @@ tracks in parallel:
 - **(A) SGS-native remediation** — targeted fixes to the three
   proposals that landed but underperformed (tl, sk, shk); drop the one
   that never fired (ap).
-- **(B) Industry-standard accel** — Muon optimizer + Liger Kernel, both
-  drop-in and known to compound cleanly, as an independent path to the
-  Hertz 1.2 unblock gate.
+- **(B) Industry-standard accel** — Muon optimizer as an independent
+  path to the Hertz 1.2 unblock gate. Liger Kernel was also evaluated
+  but is dropped: `triton>=2.3.0` is unsatisfiable on Windows (even
+  with `triton-windows`) and the 4090 training box is Windows-only.
+  The `--liger` flag is kept in `scripts/train_lm.py` for a future
+  Linux/CUDA box but is not on the validated path.
 
 The six-step flow for this track mirrors 1.2:
 
@@ -37,7 +40,7 @@ The six-step flow for this track mirrors 1.2:
 ## Design decisions
 
 - **Two parallel tracks.** Either-path gate on the compound. If both
-  pass, `all_plus` (SGS-native + Muon + Liger) becomes the Hertz 1.2
+  pass, `all_plus` (SGS-native + Muon) becomes the Hertz 1.2
   recipe; if only one passes, that one carries.
 - **Baseline stays adopted.** The 66,750-step Planck 1.2 baseline
   (`results/planck_12/ablation.json:baseline`) is the reference point.
@@ -53,9 +56,11 @@ The six-step flow for this track mirrors 1.2:
 - **Vendor Muon.** Pure-PyTorch reference (~120 LoC), zero external
   deps. The official implementations all assume multi-GPU DDP layouts
   we don't need.
-- **Liger as an external dep.** `pip install liger-kernel`, pinned.
-  Smoke-test the import + `FusedLinearCrossEntropy` forward-parity
-  against bare `F.cross_entropy` as part of the implementation commit.
+- **Liger dropped.** `triton>=2.3.0` is unsatisfiable on Windows, the
+  training box is Windows-only, and `triton-windows` does not expose
+  the symbols Liger needs. The `--liger` flag in `scripts/train_lm.py`
+  remains wired up but is not part of the 1.2.1 validated matrix and
+  is not required at import time.
 - **One big commit.** Same cadence as 1.2; easier to revert if the
   matrix reveals a regression in shared infrastructure.
 
@@ -205,52 +210,35 @@ In `scripts/train_lm.py`:
 - No divergence; if it NaNs, fall back to `lr = 0.01` once before
   flagging a bug.
 
-### Liger Kernel (FusedLinearCrossEntropy)
+### Liger Kernel (dropped from 1.2.1)
 
-**What it is.** Triton-backed fused kernel that computes `logits =
-x @ W.T; loss = F.cross_entropy(logits, y)` in one pass without
-materialising the intermediate `[B * L, vocab]` logits tensor. At
-vocab=32k, d_f=1000, B*L = 16,384, the logits tensor alone is ~2 GiB
-bf16 per step; Liger saves that plus the backward-pass equivalent.
-Public claims: ~20% step-time reduction, ~60% memory reduction at our
-shape class.
+**Status.** Evaluated, coded end-to-end (`--liger` flag,
+`LigerFusedLinearCrossEntropyLoss` attach point in
+`scripts/train_lm.py`), then dropped. `pip install liger-kernel`
+resolves to `triton>=2.3.0`; on Windows the official `triton` wheel is
+Linux-only and `triton-windows` does not satisfy the dependency
+resolver even when installed. The 4090 training box is Windows, so
+Liger cannot run in the 1.2.1 matrix.
 
-**Implementation.**
+**What stays.** The `--liger` flag and the fused-CE code path remain
+in `scripts/train_lm.py` for a future Linux/CUDA box. They are not
+imported unless `--liger` is set, so the matrix does not depend on
+`liger-kernel` being installed.
 
-- Dependency: `pip install liger-kernel` (pin to a known-working
-  version in `requirements.txt`).
-- In `src/sgs_lm.py`, expose the tied `lm_head.weight` as an attribute
-  so `train_lm.py` can hand it to Liger directly.
-- In `scripts/train_lm.py`, gate on `--liger`:
-  - When off: existing `logits = lm_head(x); ce = F.cross_entropy(...)`.
-  - When on: replace with
-    `loss = FusedLinearCrossEntropy()(x, lm_head.weight, y)`. Liger
-    returns the loss directly; the `--transmittance-loss` reweighting
-    path needs a logits tensor for `F.cross_entropy(reduction='none')`
-    so it is incompatible with Liger. When both are set,
-    `--liger` wins and we log a one-line warning (Liger + `tl` cannot
-    co-exist without writing a custom Triton kernel, which is out of
-    scope for 1.2.1).
-
-**Per-proposal sanity.**
-- Forward-parity smoke: same input, same weights — `Liger` loss must
-  match `F.cross_entropy` within 1e-3 absolute. If not, bail on
-  `--liger` and open an issue.
-- Throughput ≥1.15× baseline (conservative; public claims are 1.20×).
+**What changes downstream.** `all_plus` is now `all` + Muon (no
+Liger), and the gate thresholds move accordingly (see §6).
 
 ---
 
 ## 3. Harness additions
 
-Four new entries appended to `scripts/validate_planck12.py`'s `RUNS`
-list, plus the existing six untouched for comparability:
+Two new entries appended to `scripts/validate_planck12.py`'s `RUNS`
+list, plus the existing six modified for 1.2.1 flag sets:
 
 | run_id | label | new flags |
 |---|---|---|
 | `muon` | Muon only | `--optimizer muon` |
-| `liger` | Liger only | `--liger` |
-| `muon_liger` | Muon + Liger | `--optimizer muon --liger` |
-| `all_plus` | SGS-native `all` (no `ap`) + Muon + Liger | `--transmittance-loss --sparse-k 64 --shared-kernel --shk-schedule mix --optimizer muon --liger` |
+| `all_plus` | SGS-native `all` (no `ap`) + Muon | `--transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 --sparse-k 64 --shared-kernel --shk-schedule mix --optimizer muon` |
 
 Also modify the existing `all` entry to drop `--adaptive-passes` (ap is
 no longer in the compound) and use `--shk-schedule mix` by default.
@@ -266,22 +254,16 @@ accepts `--results-dir` so the 1.2 JSON stays read-only.
 - **Muon stability.** Higher effective LR. If it diverges, we fall
   back to `lr=0.01` once; a second divergence means bail and file a
   bug.
-- **Liger + tl incompatibility.** Code-enforced mutual exclusion with a
-  clear error message. `all_plus` uses both, so we either (a) drop tl
-  from `all_plus` if a Liger+tl merger is not written, or (b) write a
-  tiny wrapper that computes the fused CE then re-weights — TBD at
-  implementation time. Default for now: **drop tl from `all_plus`**
-  unless the Liger+tl merger is trivial. This is acceptable because
-  tl's remediation is orthogonal to Liger's throughput gain.
 - **sk gather rewrite changes numerics.** Advanced indexing vs.
   `gather(expand)` should be bitwise identical for the forward pass;
   verify with a 500-step parity run before the full matrix.
-- **Disk.** Nine runs × default checkpoints = non-trivial disk use on
+- **Disk.** Eight runs × default checkpoints = non-trivial disk use on
   the Windows box. Set `--save-interval 10000` (instead of the default
-  2000) in all 1.2.1 runs. Seven runs × 3 checkpoints at ~400 MB each
-  is ~8 GB.
-- **Wall-clock budget.** 7 new 66,750-step runs at ~3h each = ~21h.
-  Budget is tight but acceptable.
+  2000) in all 1.2.1 runs. Eight runs × 3 checkpoints at ~400 MB each
+  is ~10 GB (baseline and optionally `ap` are adopted, not re-run).
+- **Wall-clock budget.** With baseline adopted and optionally `ap`
+  adopted: 6 fresh 66,750-step runs at ~2-3h each = ~15-18h. If `ap`
+  is re-run, add ~3h. Budget acceptable.
 
 ---
 
@@ -309,12 +291,13 @@ Any of the following compounds passes:
 | compound | sample eff. | wall-clock | notes |
 |---|---:|---:|---|
 | `all` (SGS-native, no ap) | ≥1.43× | ≥1.8× | original thesis |
-| `muon_liger` | ≥1.30× | ≥1.7× | industry-standard hedge (Muon ~1.5× sample-eff; Liger ~1.2× wall-clock) |
-| `all_plus` | ≥1.50× | ≥1.9× | stacked path (only if both above pass) |
+| `muon` | ≥1.35× | ≥1.0× (no regression) | industry-standard hedge (Muon reports 1.3-1.5× sample-eff; wall-clock neutral) |
+| `all_plus` = SGS-native + Muon | ≥1.55× | ≥1.8× | stacked path, combines both tracks |
 
-The `muon_liger` thresholds are slightly lower than `all`'s because
-the known-good estimates are narrower and we don't need to hit the
-full original 1.43×/1.8× to justify Hertz 1.2.
+The `muon` wall-clock floor is "no regression" because Muon is a
+sample-efficiency win, not a throughput win — Newton-Schulz adds ~1%
+overhead per step. If sample-eff lands, Muon clears the gate even at
+parity wall-clock.
 
 If at least one passes, flip Planck 1.2.1 to `done`, use the winning
 recipe for Hertz 1.2, and flip Hertz 1.2 from `blocked` to `open`.

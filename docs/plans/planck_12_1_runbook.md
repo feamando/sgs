@@ -4,10 +4,15 @@
 `planck_12_1_plan.md` (design) and `planck_12_1_validation.md`
 (ablation matrix). Implementation commit: `48f89d4`.*
 
-Concrete commands for running the 10-run 1.2.1 ablation. All paths
+Concrete commands for running the 8-run 1.2.1 ablation. All paths
 relative to the repo root. This supersedes the 1.2 runbook for the
 remediation work; the 1.2 runbook is preserved for historical
 reproducibility.
+
+Liger was dropped from the validated matrix (Windows Triton
+incompatibility). The `--liger` flag still works on Linux/CUDA if
+someone installs `liger-kernel`, but the 1.2.1 gate does not
+require it.
 
 ---
 
@@ -27,13 +32,9 @@ y = m(torch.zeros(1, 8, dtype=torch.long))
 print('OK' if isinstance(y, torch.Tensor) else 'FAIL', y.shape)
 "
 
-# Install Liger (1.2.1 new dep; only needed for --liger runs)
-pip install liger-kernel
-
-# Verify Muon + Liger imports
+# Verify Muon import (Liger is not on the 1.2.1 path)
 python -c "
 from src.optim.muon import Muon, MuonWithAuxAdam
-from liger_kernel.transformers.fused_linear_cross_entropy import LigerFusedLinearCrossEntropyLoss
 print('deps OK')
 "
 ```
@@ -62,7 +63,7 @@ runs will see baseline as already-done and skip it.
 
 ---
 
-## 2. Full 10-run matrix
+## 2. Full 8-run matrix
 
 ```
 python scripts/validate_planck12.py \
@@ -70,7 +71,7 @@ python scripts/validate_planck12.py \
     --results-dir results/planck_12_1
 ```
 
-Each of the remaining 9 runs is a subprocess call to
+Each of the remaining 7 runs is a subprocess call to
 `scripts/train_lm.py` with a distinct flag combo (see
 `docs/plans/planck_12_1_validation.md`). Results accumulate in
 `results/planck_12_1/ablation.json`; per-run stdout is teed to
@@ -88,12 +89,10 @@ Expected wall clock on an RTX 4090 at the defaults
 | `shk` | ~2.8 h | `mix` schedule has one fewer reuse than `always` |
 | `all` | ~1.7 h | SGS-native compound |
 | `muon` | ~3.0 h | Newton-Schulz overhead is ~1%/step |
-| `liger` | ~2.5 h | fused kernel wins on 32k-vocab lm_head |
-| `muon_liger` | ~2.5 h | |
-| `all_plus` | ~1.5 h | stacked |
+| `all_plus` | ~1.7 h | SGS-native + Muon stacked |
 
-Total: ~22h on RTX 4090 if baseline and ap are adopted;
-~25h if everything runs fresh.
+Total: ~15-18h on RTX 4090 if baseline and ap are adopted;
+~18-21h if everything runs fresh.
 
 ### 2a. Option: adopt `ap` too
 
@@ -134,28 +133,7 @@ Loss curves must agree within 0.01 nats at matched log steps. If they
 diverge, the gather rewrite has broken the sparse path — inspect
 `src/sgs_lm.py:_causal_render_sparse`.
 
-### 3b. Liger forward-parity
-
-```
-python -c "
-import torch, torch.nn.functional as F
-from liger_kernel.transformers.fused_linear_cross_entropy import LigerFusedLinearCrossEntropyLoss
-
-torch.manual_seed(0)
-B, L, D, V = 4, 16, 128, 1024
-hidden = torch.randn(B*L, D, device='cuda', dtype=torch.bfloat16)
-weight = torch.randn(V, D, device='cuda', dtype=torch.bfloat16)
-targets = torch.randint(0, V, (B*L,), device='cuda')
-
-ref = F.cross_entropy(hidden @ weight.T, targets)
-liger = LigerFusedLinearCrossEntropyLoss()(weight, hidden, targets)
-print(f'ref={ref.item():.6f} liger={liger.item():.6f} diff={abs(ref-liger).item():.2e}')
-assert abs(ref - liger).item() < 1e-3, 'Liger parity check failed'
-print('OK')
-"
-```
-
-### 3c. Muon stability (500 steps)
+### 3b. Muon stability (500 steps)
 
 ```
 python scripts/train_lm.py \
@@ -240,7 +218,7 @@ python scripts/validate_planck12.py \
 ## 7. Publishing results
 
 1. Write `results/planck_12_1/README.md` covering: gate pass/fail
-   (`all`, `muon_liger`, `all_plus`), per-run val loss + tok/s deltas,
+   (`all`, `muon`, `all_plus`), per-run val loss + tok/s deltas,
    any anomalies.
 2. `git add results/planck_12_1/ablation.json results/planck_12_1/README.md`
 3. Commit.
@@ -255,10 +233,12 @@ python scripts/validate_planck12.py \
 ## 8. Gotchas
 
 - **Disk budget.** `--save-interval 10000` is the default for 1.2.1;
-  do not lower it. 10 runs × 6 checkpoints × ~400 MB ≈ 24 GB.
-- **Liger + tl.** `--liger` overrides `--transmittance-loss` with a
-  one-line warning; don't panic. The tl signal comes from the `all`
-  run, not `all_plus`.
+  do not lower it. 8 runs × 6 checkpoints × ~400 MB ≈ 19 GB (less
+  with adopted rows).
+- **Liger is off the 1.2.1 path.** `pip install liger-kernel` fails
+  on Windows (`triton>=2.3.0` unsatisfiable). The `--liger` flag
+  remains on `scripts/train_lm.py` for a future Linux/CUDA box, but
+  the 1.2.1 matrix does not queue any Liger runs.
 - **Muon on 1D params.** Muon itself raises if given a non-2D tensor.
   The `MuonWithAuxAdam` wrapper routes automatically; if you
   hand-build an optimizer, respect the partition (see

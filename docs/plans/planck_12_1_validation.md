@@ -64,9 +64,9 @@ A second failure is logged in the JSON and skipped.
 
 ## Runs
 
-Ten runs total. Six are re-runs / carry-overs of the 1.2 matrix at the
-same labels so we can read regression vs. progress side-by-side. Four
-are new.
+Eight runs total. Six are re-runs / carry-overs of the 1.2 matrix at
+the same labels so we can read regression vs. progress side-by-side.
+Two are new.
 
 | run_id | Label | Extra flags | Origin |
 |---|---|---|---|
@@ -77,14 +77,19 @@ are new.
 | `shk` | §2.4 remediated | `--shared-kernel --shk-schedule mix` | re-run (1.2 underperformed) |
 | `all` | SGS-native compound (no ap) | `--transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 --sparse-k 64 --shared-kernel --shk-schedule mix` | new compound |
 | `muon` | Muon only | `--optimizer muon` | new |
-| `liger` | Liger only | `--liger` | new |
-| `muon_liger` | Muon + Liger | `--optimizer muon --liger` | new |
-| `all_plus` | SGS-native `all` + Muon + Liger | `--sparse-k 64 --shared-kernel --shk-schedule mix --optimizer muon --liger` | new (tl dropped, see note) |
+| `all_plus` | SGS-native `all` + Muon | `--transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 --sparse-k 64 --shared-kernel --shk-schedule mix --optimizer muon` | new (stacks both tracks) |
 
-**`all_plus` tl exclusion.** Liger + tl are mutually exclusive (tl
-needs per-token CE on materialised logits; Liger fuses the logits
-away). `all_plus` therefore drops `--transmittance-loss`. If tl carries
-the SGS-native track, that signal shows up in the `all` run, not here.
+**Liger dropped.** The 1.2.1 plan originally included `liger`,
+`muon_liger`, and a Liger-inclusive `all_plus`. `pip install
+liger-kernel` requires `triton>=2.3.0`, which is unsatisfiable on
+Windows (the 4090 training box is Windows-only; `triton-windows` does
+not satisfy the resolver). The `--liger` flag remains in
+`scripts/train_lm.py` for a future Linux/CUDA box but is not on the
+1.2.1 validated path.
+
+**`all_plus` now includes tl.** With Liger out, the Liger/tl mutual
+exclusion no longer applies, so `all_plus` is the full SGS-native
+compound plus Muon — a clean superset of `all`.
 
 **`all` changes vs. 1.2.** Drops `--adaptive-passes` (inert in 1.2);
 adds `--shk-schedule mix` to avoid the always-shared quality regression;
@@ -148,27 +153,15 @@ matrix. Columns "sanity OK?" populate the results README.*
 - No NaN divergence. If it NaNs, fall back to `--muon-lr 0.01` once
   then flag.
 
-**`liger` — forward-parity on smoke test, then throughput.**
-- Startup smoke test: Liger loss matches `F.cross_entropy` within 1e-3
-  on a random `[32, 512, 1000] @ [32000, 1000]` tensor pair. (Smoke
-  test lives in `scripts/validate_planck12.py`, runs before the
-  matrix; failure aborts the run.)
-- Throughput ≥ 1.15× baseline.
-- Val loss within 0.05 nats of baseline (numerical parity).
-
-**`muon_liger` — composition is additive, not interacting.**
-- Sample efficiency within 0.1× of `muon` (Liger should not disturb
-  convergence).
-- Wall-clock speedup ≥ `liger`'s (Muon adds a small Newton-Schulz
-  cost per step, but the AdamW→Muon swap on embeddings isn't a
-  throughput regression).
-
 **`all` and `all_plus` — no hidden interaction.**
 - If the compound `all` speedup is substantially below the product of
   individual speedups, flag it and inspect the sk+shk pair (both
   touch the kernel).
-- `all_plus` should land between `all` and `muon_liger` on both axes
-  (sample eff from the SGS-native track, wall-clock from the hedge).
+- `all_plus` should clear `all` on sample-eff (Muon adds convergence)
+  and match `all` on wall-clock (Newton-Schulz is ~1%/step overhead).
+  If `all_plus` regresses wall-clock vs. `all` by more than 5%, the
+  Muon param partition is probably routing too much through
+  Newton-Schulz (inspect `MuonWithAuxAdam` group sizes).
 
 ---
 
@@ -180,8 +173,8 @@ the three compounds below must clear its thresholds on both axes.
 | compound | sample eff. | wall-clock | notes |
 |---|---:|---:|---|
 | `all` | ≥ 1.43× | ≥ 1.8× | SGS-native thesis, original 1.2 target |
-| `muon_liger` | ≥ 1.30× | ≥ 1.7× | industry-standard hedge (Muon's claimed 1.5× is our only prior) |
-| `all_plus` | ≥ 1.50× | ≥ 1.9× | stacked (eligible only if both above pass) |
+| `muon` | ≥ 1.35× | ≥ 1.0× (no regression) | industry-standard hedge; Muon is a sample-eff win, not a throughput win (Newton-Schulz adds ~1%/step) |
+| `all_plus` = SGS-native + Muon | ≥ 1.55× | ≥ 1.8× | stacked path, combines both tracks |
 
 If `all_plus` passes, it becomes the Hertz 1.2 recipe. Otherwise the
 winning compound carries.
@@ -205,8 +198,7 @@ Before queuing the full matrix on the Windows box:
    non-sparse branch and numerically identical on the sparse branch
    (since the gather-vs-indexing rewrite is a pure algebraic
    simplification).
-2. **Liger forward parity.** See `liger` sanity above.
-3. **Muon stability.** Run `muon` for 500 steps; confirm no NaN and
+2. **Muon stability.** Run `muon` for 500 steps; confirm no NaN and
    loss is monotonically decreasing on the moving average.
 
 A failure at any of these aborts the full-matrix run and files a bug.
@@ -216,13 +208,14 @@ A failure at any of these aborts the full-matrix run and files a bug.
 ## Budget
 
 - Baseline: **adopted**, 0h.
-- 9 new 66,750-step runs × ~3h each on RTX 4090 bf16 = ~21h GPU time.
-- `liger` and `muon_liger` may run slightly faster (~2.5h) if the
-  +15% wall-clock claim holds; `all_plus` slightly faster still.
+- `ap`: optionally adopted (inert in 1.2), 0h.
+- 6 or 7 new 66,750-step runs × ~2.5-3h each on RTX 4090 bf16.
+  - With `ap` adopted: 6 fresh runs ≈ 15-18h GPU time.
+  - With `ap` re-run: 7 fresh runs ≈ 18-21h.
 - Allow 2h slack for smoke tests + one NaN-retry budget.
 
-**Total budget: ~25h wall-clock** on the Windows box. User has
-confirmed ±21h is acceptable; the slack absorbs one retry.
+**Total budget: ~18-23h wall-clock** on the Windows box. User has
+confirmed ±21h is acceptable.
 
 ---
 
@@ -240,7 +233,7 @@ confirmed ±21h is acceptable; the slack absorbs one retry.
 
 On completion, `results/planck_12_1/` contains:
 
-- `ablation.json` (10 rows).
+- `ablation.json` (8 rows).
 - `README.md` summarising gate pass/fail, one table comparing all
   runs, any unexpected per-run behaviour, and the Hertz 1.2
   recommendation.
