@@ -52,7 +52,8 @@ ship. The swimlane visualizer at `pm/index.html` reads this file directly.
 | 2-hertz-1-2 | Hertz 1.2 | model | open | 2026-04-20 | Large-LM run with an accel recipe. Blocked on Planck 1.2.1 compound clearing 1.43× sample-eff / 1.8× wall-clock gate, via either SGS-native (§2.1+§2.3+§2.4) or industry-standard (Muon+Liger) track — whichever passes first |
 | 5-klang-1-0 | Klang 1.0 | model | done | 2026-04-10 | Initial audio-SGS concept + scene.py scaffold |
 | 5-klang-1-1 | Klang 1.1 | model | done | 2026-04-15 | Variants A & B trained; phase warble + sub-200Hz dropout findings |
-| 5-klang-1-2 | Klang 1.2 | model | open | 2026-04-20 | Complex-valued Gaussians, transmittance compositing, MRSTFT |
+| 5-klang-1-2 | Klang 1.2 | model | done | 2026-04-20 | Complex-valued Gaussians, transmittance compositing, MRSTFT. Shipped 2026-04-28: Gate A (MSE 0.00156) + Gate B (log-MAE 1.378 vs Variant B 2.057) both pass. Bass dropout + Nyquist whine fixed. Still behind Klang 1.1 Variant A (stft_3000g) on absolute quality → 1.3 |
+| 5-klang-1-3 | Klang 1.3 | model | open | 2026-04-28 | Scale Klang 1.2 architecture (complex Gaussians + transmittance + MRSTFT) to 1000-3000 gaussians to beat Klang 1.1 Variant A (stft_3000g, log-MAE 1.255, MCD 308.9). Absolute-quality pass; if it clears Variant A the Klang track ships |
 | 6-raum-1-0 | Raum 1.0 | model | done | 2026-04-24 | Template-routing bridge; 6-object hexad, 2-object scenes, analytic-label training. Shipped 2026-04-27 as backbone of Raum 0.0 demo |
 | 6-raum-1-1 | Raum 1.1 | model | open | 2026-04-27 | Executor-side expansion to pair with Raum 0.1: 30-object template library, 3+ objects with anchor pointers, DSL consumer, relation graph head |
 | 10-raum-0-0 | Raum 0.0 | product | done | 2026-04-26 | Local web demo; polish + shader fix shipped 2026-04-27. Known limits (3+ objects, chained relations) deferred to 0.1 |
