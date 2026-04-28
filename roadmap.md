@@ -45,11 +45,11 @@ ship. The swimlane visualizer at `pm/index.html` reads this file directly.
 | 1-planck-1-0 | Planck 1.0 | model | done | 2026-04-07 | Foundation 100M LM; baseline |
 | 1-planck-1-1 | Planck 1.1 | model | done | 2026-04-14 | Validated blob concept |
 | 1-planck-1-2 | Planck 1.2 | model | done | 2026-04-20 | Six-run ablation matrix shipped 2026-04-28; gate FAIL (val loss 2× worse, speedup 1.07×). Diagnoses at results/planck_12/README.md. Remediation tracked as Planck 1.2.1 |
-| 1-planck-1-2-1 | Planck 1.2.1 | model | open | 2026-04-28 | Targeted fixes for failed accel proposals: §2.1 tl reweight floor + plain-CE warmup, §2.3 sk gather rewrite (OOM), §2.4 shk sharing-weight tune. Drop §2.2 ap from compound until the exit gate fires. Re-run ablation; if compound passes, unblocks Hertz 1.2 |
+| 1-planck-1-2-1 | Planck 1.2.1 | model | open | 2026-04-28 | Two-track accel remediation. (A) SGS-native fixes: §2.1 tl reweight floor + plain-CE warmup, §2.3 sk gather rewrite (OOM), §2.4 shk sharing-weight tune; drop §2.2 ap from compound. (B) Industry-standard hedge: Muon optimizer (~1.5× convergence) + Liger FusedLinearCrossEntropy (~1.2× throughput). Gate passes if EITHER compound clears 1.43× sample-eff / 1.8× wall-clock; unblocks Hertz 1.2 |
 | 1-planck-1-3 | Planck 1.3 | model | open | 2026-04-27 | Fresh-knowledge blobs: generic grammar base + live RSS blob store (Reuters/AP), beats frontier on 24h-fresh QA |
 | 1-planck-1-4 | Planck 1.4 | model | open | 2026-04-27 | Conversation-memory blobs: per-turn blob writer + hybrid recency/similarity retrieval; flat cost-per-turn vs. growing context |
 | 2-hertz-1-0 | Hertz 1.0 | model | done | 2026-04-07 | Paused 2026-04-20, wall-clock infeasible without accel |
-| 2-hertz-1-2 | Hertz 1.2 | model | open | 2026-04-20 | Large-LM run with SGS accel recipe. Blocked on Planck 1.2.1 (gate predicate §2.1 + §2.3 not yet met, see results/planck_12/README.md) |
+| 2-hertz-1-2 | Hertz 1.2 | model | open | 2026-04-20 | Large-LM run with an accel recipe. Blocked on Planck 1.2.1 compound clearing 1.43× sample-eff / 1.8× wall-clock gate, via either SGS-native (§2.1+§2.3+§2.4) or industry-standard (Muon+Liger) track — whichever passes first |
 | 5-klang-1-0 | Klang 1.0 | model | done | 2026-04-10 | Initial audio-SGS concept + scene.py scaffold |
 | 5-klang-1-1 | Klang 1.1 | model | done | 2026-04-15 | Variants A & B trained; phase warble + sub-200Hz dropout findings |
 | 5-klang-1-2 | Klang 1.2 | model | open | 2026-04-20 | Complex-valued Gaussians, transmittance compositing, MRSTFT |

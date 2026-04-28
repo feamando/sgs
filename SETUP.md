@@ -610,11 +610,20 @@ and unblock `Hertz 1.2`.
 
 ### 6.4b  Track 4b: Planck 1.2.1, accel-recipe remediation
 
-**Status:** open (2026-04-28). Remediation for the three proposals that
-failed their per-proposal sanity checks in §6.4. Full post-mortem at
-`results/planck_12/README.md`.
+**Status:** open (2026-04-28). Two parallel sub-tracks:
 
-Scope, in priority order:
+- **(A) SGS-native remediation** — fix the three proposals from
+  §6.4 that failed their per-proposal sanity checks.
+- **(B) Industry-standard accel** — add Muon + Liger as a second
+  independent path to the wall-clock gate. The SGS-native thesis is
+  orthogonal to the Hertz 1.2 decision under this hedge: if (B) alone
+  compounds to ≥1.8× wall-clock with matched val loss, Hertz 1.2
+  unblocks regardless of how (A) lands, and the SGS-native work
+  reframes as a pure quality ablation.
+
+Full post-mortem for sub-track (A) at `results/planck_12/README.md`.
+
+#### (A) SGS-native remediation, in priority order
 
 1. **§2.1 tl — fix the degenerate weighting.** `T_mean` stayed at 1.0,
    zeroing `(1-T)^γ` and collapsing the loss onto the T-penalty
@@ -629,7 +638,10 @@ Scope, in priority order:
    `src/sgs_lm.py:325`. Expected output is `[B, L, k, d_f] ≈ 4 GiB` bf16;
    the current path appears to expand `feat` to `[B, L, L, d_f]` before
    indexing. Rewrite as an indexed lookup into `[B, L, d_f]`, then
-   re-run the full 66,750-step ablation.
+   re-run the full 66,750-step ablation. FlashAttention-2's tiled
+   softmax is a useful design reference (avoid materialising the
+   full `[B, L, L]` matrix), though the kernel itself does not apply
+   to SGS's Gaussian-compositing primitive.
 3. **§2.4 shk — tune the sharing-weight schedule.** Throughput +9.9%
    (target ≥20%), val loss +0.23 nats vs baseline (target ≤0.05).
    Likely the shared-kernel assumption is too aggressive at d_s=128.
@@ -640,23 +652,78 @@ Drop **§2.2 ap** from the compound re-run until its exit gate actually
 fires. On the 66k-step matrix `passes_ema` never left 3.0 and val loss
 was seed noise, so it's not pulling weight.
 
-Once all three land, re-run:
+#### (B) Industry-standard accel
+
+Two drop-ins that don't depend on SGS-native internals; both are known
+to compound cleanly. Treat as independent flags on `scripts/train_lm.py`:
+
+1. **Muon optimizer** (`--optimizer muon`, default `adamw`). Replaces
+   AdamW on the 2D matmul parameters (attention/FFN weights); keeps
+   AdamW on embeddings, norms, and 1D scalars (log_tau, alpha gates,
+   etc.) as Moonshot's reference recipe recommends. Reported ≥1.5×
+   convergence vs AdamW across LMs in 2025. Implementation: vendor
+   the small Muon reference at `src/optim/muon.py` (~120 LoC,
+   Newton-Schulz orthogonalisation, pure PyTorch; no CUDA extension).
+   Per-proposal sanity: match or beat baseline val loss at equal
+   tokens, and show ≥1.3× sample efficiency on the same step budget.
+2. **Liger Kernel** (`--liger`, default off). Specifically
+   `liger_kernel.transformers.FusedLinearCrossEntropy` replacing the
+   final `lm_head + F.cross_entropy` pair. 32k vocab × d_f=1000 is
+   the single biggest compute line; Liger's fused path skips the
+   intermediate logits tensor and reports ~20% step-time reduction
+   with ~60% less memory at these shapes. Pure throughput win, no
+   quality delta expected. `pip install liger-kernel` (vendor if
+   distribution is a concern). Ignore the RMSNorm/SwiGLU kernels
+   for now — SGS's ops are not the standard Transformer ones.
+
+Deferred to **Planck 1.3+ / Hertz 1.2** iteration, not this remediation:
+
+- **FP8 training** (`transformer_engine`, SM 8.9 on the 4090).
+  ~1.2× throughput + ~40% VRAM; attractive, but the transmittance
+  pathway has known numeric sensitivity and we do not want to stack
+  FP8 on an unstable loss. Revisit once tl is fixed.
+- **Speculative rollout** applies to RL/post-training only, so not
+  relevant at the pretraining stage.
+
+#### Re-run sequence
 
 ```powershell
-# Force-rerun only the fixed configs (baseline stays adopted)
+# --- (A) SGS-native remediation ---
 python scripts/validate_planck12.py --data-dir data/fineweb --only tl --force
 python scripts/validate_planck12.py --data-dir data/fineweb --only sk --force
 python scripts/validate_planck12.py --data-dir data/fineweb --only shk --force
 
-# Then the compound without ap
+# --- (B) Industry-standard accel (independent of A) ---
+python scripts/validate_planck12.py --data-dir data/fineweb --only muon --force
+python scripts/validate_planck12.py --data-dir data/fineweb --only liger --force
+python scripts/validate_planck12.py --data-dir data/fineweb --only muon_liger --force
+
+# --- Compound re-runs ---
+# SGS-native compound (without ap)
 python scripts/validate_planck12.py --data-dir data/fineweb --only all --force
+# Everything compound: SGS-native + Muon + Liger
+python scripts/validate_planck12.py --data-dir data/fineweb --only all_plus --force
 ```
 
-Gate for Planck 1.2.1 → Hertz 1.2 unblock: same as 1.2 (sample
-efficiency ≥1.43×, wall-clock ≥1.8×). If compound still fails, demote
-the worst remaining proposal and retry; repeat until one of the
-compounds passes or the remaining proposals no longer clear the §2.1 +
-§2.3 gate predicate (see §6.5).
+This adds four new `RUNS` entries to `scripts/validate_planck12.py`:
+`muon`, `liger`, `muon_liger`, `all_plus`. Update the harness at the
+same time as the `train_lm.py` flags land; keep the existing six rows
+untouched so the original ablation stays comparable.
+
+#### Gate for Planck 1.2.1 → Hertz 1.2 unblock
+
+**Either** of the following passes:
+
+1. **SGS-native compound (`all` without ap)**: sample efficiency ≥1.43×,
+   wall-clock ≥1.8×. Retains the original thesis.
+2. **Muon + Liger compound (`muon_liger`)**: sample efficiency ≥1.30×
+   (Muon's contribution), wall-clock ≥1.7× (Muon ~1.4× + Liger ~1.2×,
+   discounted for interaction). Val loss must match or beat baseline
+   at equal tokens.
+
+If both pass, use `all_plus` for Hertz 1.2. If neither passes, demote
+the worst proposal in each track and retry; do not take Hertz 1.2 off
+block until at least one compound clears.
 
 ### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
 
