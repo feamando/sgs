@@ -51,6 +51,22 @@ class SGSLanguageModel(nn.Module):
         sparse_warmup_steps: int = 5000,
         sparse_tau_gate: float = 30.0,
         shared_kernel: bool = False,        # §2.4
+        # ── Planck 1.2.1 additions (§2.4 sharing schedule) ──
+        # "always"  — cache K from pass 0, reuse in every subsequent pass
+        #             (matches the 1.2 `shared_kernel=True` behaviour).
+        # "mix"     — cache K from pass 0, recompute in middle passes,
+        #             reuse only in the last pass. Softens the quality
+        #             regression seen in 1.2's shk run.
+        # "late"    — recompute in all passes until `shk_switch_step`,
+        #             then switch to `mix` for the remainder of training.
+        shk_schedule: str = "always",
+        shk_switch_step: int = 20000,
+        # Planck 1.2.1 Liger hook: when True, forward returns the pre-head
+        # hidden state (post-LN) instead of logits, so the caller can run
+        # a fused linear+CE kernel (liger_kernel.FusedLinearCrossEntropy).
+        # Combined with return_accel_state it yields (hidden, T_diag,
+        # passes_run). Eval always disables this for comparability.
+        return_hidden: bool = False,
     ):
         super().__init__()
         self.vocab_size = vocab_size
@@ -73,6 +89,9 @@ class SGSLanguageModel(nn.Module):
         self.sparse_warmup_steps = sparse_warmup_steps
         self.sparse_tau_gate = sparse_tau_gate
         self.shared_kernel = shared_kernel
+        self.shk_schedule = shk_schedule
+        self.shk_switch_step = int(shk_switch_step)
+        self.return_hidden = return_hidden
         self.opt_step = 0
 
         # ── Gaussian vocabulary (learned from scratch) ──
@@ -318,11 +337,11 @@ class SGSLanguageModel(nn.Module):
         T = log_T.exp()                                       # [B, L, k]
         weights = eff_a * T                                   # [B, L, k]
 
-        # Gather feature rows for the selected keys and reduce.
-        # idx_exp: [B, L, k, d_f] used by gather on the L axis of features.
-        idx_exp = top_idx.unsqueeze(-1).expand(B, L, k, d_f)
-        feat_exp = features.unsqueeze(1).expand(B, L, L, d_f)
-        top_feats = torch.gather(feat_exp, 2, idx_exp)        # [B, L, k, d_f]
+        # Gather feature rows for the selected keys and reduce. Advanced
+        # indexing: features[b, top_idx[b, l, :], :] → [B, L, k, d_f] with
+        # no [B, L, L, d_f] intermediate (the 1.2 `sk` OOM root cause).
+        batch_idx = torch.arange(B, device=features.device).view(B, 1, 1)
+        top_feats = features[batch_idx, top_idx]              # [B, L, k, d_f]
         meaning = (weights.unsqueeze(-1) * top_feats).sum(dim=2)  # [B, L, d_f]
 
         # Diagonal T[t,t] proxy for §2.1/§2.2. In dense render T[t,t] is
@@ -471,11 +490,27 @@ class SGSLanguageModel(nn.Module):
         T_prev_pass = None              # §2.2 adaptive exit
         passes_run = 0
 
+        # §2.4 schedule: resolve the effective mode for this step.
+        # `late` is just `mix` with a warmup that disables kernel reuse.
+        if self.shk_schedule == "late" and self.opt_step < self.shk_switch_step:
+            active_schedule = "off"
+        elif self.shk_schedule == "late":
+            active_schedule = "mix"
+        else:
+            active_schedule = self.shk_schedule  # "always" or "mix" or "off"
+
         for p in range(self.n_passes):
             # §2.4: once we've computed the kernel in pass 0, reuse it.
-            # The first pass always recomputes K; subsequent passes
-            # consume the cache.
-            k_in = K_cache if (self.shared_kernel and p > 0) else None
+            # - "always": reuse cache on every p > 0.
+            # - "mix"   : reuse cache only on the final pass.
+            # - "off"   : never reuse (regular per-pass kernels).
+            if not self.shared_kernel or active_schedule == "off":
+                reuse = False
+            elif active_schedule == "mix":
+                reuse = (p == self.n_passes - 1) and p > 0
+            else:  # "always"
+                reuse = p > 0
+            k_in = K_cache if reuse else None
 
             if self.use_checkpoint and self.training:
                 meaning, T_diag, K_all = grad_checkpoint(
@@ -486,7 +521,8 @@ class SGSLanguageModel(nn.Module):
                 meaning, T_diag, K_all = self._render_pass(
                     mu, log_var, alpha, features, causal_mask, K_cached=k_in,
                 )
-            if self.shared_kernel and p == 0:
+            # Cache from pass 0 if any downstream pass will reuse it.
+            if self.shared_kernel and p == 0 and active_schedule != "off":
                 K_cache = K_all.detach() if not self.training else K_all
 
             meaning = self.dropout(meaning)
@@ -516,6 +552,14 @@ class SGSLanguageModel(nn.Module):
                 features = features + self.pass_ffn[p](ctx)
 
         # ── Output ──
+        # Liger path: caller fuses `hidden @ lm_head.weight.T` + CE in a
+        # single Triton kernel. Skip the materialised logits tensor.
+        if self.return_hidden:
+            hidden = self.ln_f(meaning)                        # [B, L, d_f]
+            if self.return_accel_state:
+                return hidden, T_diag, passes_run
+            return hidden
+
         logits = self.lm_head(self.ln_f(meaning))              # [B, L, V]
 
         if self.return_accel_state:

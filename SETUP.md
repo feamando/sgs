@@ -526,7 +526,12 @@ appendix at the bottom of this file.
 
 ### 6.4  Track 4: Planck 1.2, Acceleration recipe validation
 
-**Status:** implementation landed (commit `ce195c8`). Ablation run pending.
+**Status:** ablation complete (2026-04-28). **Gate FAIL.** Compound `all`
+vs. baseline landed at val loss 8.55 (baseline 4.10) and 1.07×
+wall-clock (target ≥1.8×). Per-proposal diagnoses and the full summary
+table live at `results/planck_12/README.md`. Remediation tracked in
+§6.4b (Planck 1.2.1). Hertz 1.2 stays blocked on that rerun.
+
 All four acceleration proposals from `docs/papers/sgs_training_acceleration.md`
 are merged into `src/sgs_lm.py` + `scripts/train_lm.py` behind CLI flags
 (default off). §2.5 curriculum is deferred to Hertz 2.x.
@@ -603,6 +608,122 @@ git commit -m "Planck 1.2: ablation results"
 If the gate passed, also flip `Planck 1.2` to `done` in `roadmap.md`
 and unblock `Hertz 1.2`.
 
+### 6.4b  Track 4b: Planck 1.2.1, accel-recipe remediation
+
+**Status:** open (2026-04-28). Implementation landed in commit `48f89d4`.
+Results land in `results/planck_12_1/` (sibling to `results/planck_12/`
+so the original ablation stays read-only).
+
+Full design and per-proposal diagnoses live in three docs:
+
+- `docs/plans/planck_12_1_plan.md` — design + two-track hedge rationale
+- `docs/plans/planck_12_1_validation.md` — 10-run matrix + either-path gate
+- `docs/plans/planck_12_1_runbook.md` — exact commands
+
+The 1.2 post-mortem (`results/planck_12/README.md`) is the root cause
+analysis that this remediation track addresses.
+
+#### What's in 1.2.1
+
+Two parallel tracks, both feeding the same Hertz 1.2 unblock gate:
+
+- **(A) SGS-native remediation.** Three targeted fixes behind new
+  CLI flags on `scripts/train_lm.py` (see commit `48f89d4`):
+  - `tl`: `--tl-warmup-steps 5000` delays the reweight until T has
+    settled; `--tl-floor-eps 0.05` turns `(1-T)^γ` into
+    `((1-T)·(1-eps)+eps)^γ` so the CE gradient never zeroes out.
+  - `sk`: `src/sgs_lm.py:_causal_render_sparse` now uses advanced
+    indexing `features[batch_idx, top_idx]` instead of
+    `gather(expand(...))`, cutting the gather buffer from ~16 GiB to
+    ~4 GiB. No CLI change needed.
+  - `shk`: `--shk-schedule {always,mix,late}` replaces the binary
+    switch. Default for the re-run is `mix` (only the last pass
+    reuses the cached kernel).
+
+  **§2.2 ap is dropped** from the compound (`passes_ema` never left
+  3.0 in 1.2; no signal to optimise). Optional standalone probe in
+  Planck 1.2.2.
+
+- **(B) Industry-standard hedge.** Two drop-ins, each behind a flag:
+  - `--optimizer muon` routes 2D matrix params to a vendored Muon
+    (`src/optim/muon.py`, ~180 LoC, Newton-Schulz orthogonalisation,
+    no external CUDA dep). 1D / embedding params stay on AdamW.
+    Canonical hyperparams: `--muon-lr 0.02`, `--muon-momentum 0.95`.
+  - `--liger` uses `liger_kernel.FusedLinearCrossEntropy` to skip
+    the intermediate `[B·L, vocab]` logits tensor. 32k vocab × d_f
+    1000 is the single biggest compute line; expected ~20% step-time
+    and ~60% memory reduction at our shape.
+  - Liger and `--transmittance-loss` are mutually exclusive (tl
+    needs per-token CE on materialised logits, which Liger elides).
+    The code enforces this at startup with a one-line warning.
+
+Deferred to later iterations, **not** in 1.2.1:
+
+- **FP8 training** (`transformer_engine`, SM 8.9 on the 4090).
+  ~1.2× throughput + ~40% VRAM. Stacking FP8 on a still-shaky tl
+  path is a bad sequencing decision; revisit at Planck 1.3+.
+- **FlashAttention-2** is a design reference for the sk rewrite
+  (avoid materialising `[B, L, L, d_f]`), not a drop-in; SGS uses
+  Gaussian compositing, not QKV attention.
+- **Speculative rollout** — RL/post-training only.
+
+#### Run sequence
+
+```powershell
+# Step 1: adopt the 1.2 baseline so we don't re-train it
+python scripts/validate_planck12.py ^
+  --results-dir results\planck_12_1 ^
+  --adopt baseline=results\planck_12\baseline\train_log.txt ^
+  --adopt-wall-s 11229
+
+# Step 2 (optional): carry over the 1.2 ap run (diagnostic, inert)
+python scripts/validate_planck12.py ^
+  --results-dir results\planck_12_1 ^
+  --adopt ap=results\planck_12\ap\train_log.txt
+
+# Step 3: run the remaining 8 configs (tl, sk, shk, all, muon, liger,
+# muon_liger, all_plus) — ~22h on RTX 4090 at --max-steps 66750.
+python scripts/validate_planck12.py ^
+  --data-dir data\fineweb ^
+  --results-dir results\planck_12_1
+
+# Single-run iteration after a crash
+python scripts/validate_planck12.py --data-dir data\fineweb ^
+  --results-dir results\planck_12_1 --only muon --force
+```
+
+Muon NaN fallback (one retry) and Liger/sk/Muon smoke tests are in
+`docs/plans/planck_12_1_runbook.md`. Run the smoke tests first.
+
+#### Gate for Planck 1.2.1 → Hertz 1.2 unblock
+
+**Any** of the following passes:
+
+| compound | sample eff. | wall-clock | notes |
+|---|---:|---:|---|
+| `all` (SGS-native, no ap) | ≥1.43× | ≥1.8× | original thesis |
+| `muon_liger` | ≥1.30× | ≥1.7× | industry-standard hedge |
+| `all_plus` (SGS-native + Muon + Liger, tl dropped) | ≥1.50× | ≥1.9× | stacked path, only if both above pass |
+
+If at least one passes, flip `Planck 1.2.1` to `done` in `roadmap.md`
+and unblock `Hertz 1.2` with the winning recipe recorded in §6.5.
+
+If none pass, demote the worst per-run regression in each compound
+(e.g. drop `shk` from `all` if its quality cost exceeds 0.10 nats) and
+open `Planck 1.2.2` for the targeted follow-up. Hertz 1.2 stays
+blocked until a compound clears.
+
+#### Publishing
+
+```powershell
+git add results/planck_12_1/ablation.json results/planck_12_1/README.md
+git commit -m "Planck 1.2.1: ablation results + gate verdict"
+git push
+```
+
+If the gate passed, also update `roadmap.md` (Planck 1.2.1 → done,
+Hertz 1.2 → open) and §6.5 below with the winning recipe.
+
 ### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
 
 **Status:** optional quality pass. Klang 1.1 shipped two decoded variants that are "comprehensible but artefacted" (Variant A: phase warble at 3000g; Variant B: sub-200 Hz dropout + near-Nyquist whine, identical across 10/20/40L). Klang 1.2 addresses both directly and adds quantitative metrics, so we can make a real decision about Klang's status.
@@ -652,18 +773,47 @@ If both gates pass, Klang is done and we ship it alongside Hertz 1.2. If not, ro
 
 ### 6.5  Track 5: Hertz 1.2, 1B SGS LM with accel recipe
 
-**Status:** runs only after Planck 1.2 validates §2.1 and §2.3 (minimum).
+**Status:** blocked. Planck 1.2's compound gate failed (2026-04-28).
+Runs only after **Planck 1.2.1** (§6.4b) validates a compound — **any
+one of** `all` (SGS-native), `muon_liger` (industry-standard hedge), or
+`all_plus` (stacked) — against the gate thresholds in §6.4b. The
+winning recipe's flag set flows directly into the Hertz 1.2 launch
+command.
+
 **Prerequisite:** Hertz folder cleaned up (see §8).
 
-Command shape (subject to flags added during Planck 1.2 work):
+Command shape (final flag set pending 1.2.1 outcome). Pick one of
+these three templates to match the winning compound:
 
 ```powershell
+# Template A: SGS-native compound wins (no Muon/Liger)
 python scripts/train_hertz.py ^
   --max-tokens 10B ^
   --no-compile ^
   --keep-last 3 ^
-  --transmittance-loss ^
-  --kernel-topk 64 ^
+  --transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 ^
+  --sparse-k 64 ^
+  --shared-kernel --shk-schedule mix ^
+  --wandb
+
+# Template B: muon_liger wins (industry-standard hedge only)
+python scripts/train_hertz.py ^
+  --max-tokens 10B ^
+  --no-compile ^
+  --keep-last 3 ^
+  --optimizer muon ^
+  --liger ^
+  --wandb
+
+# Template C: all_plus wins (stacked — tl dropped due to Liger)
+python scripts/train_hertz.py ^
+  --max-tokens 10B ^
+  --no-compile ^
+  --keep-last 3 ^
+  --sparse-k 64 ^
+  --shared-kernel --shk-schedule mix ^
+  --optimizer muon ^
+  --liger ^
   --wandb
 ```
 
