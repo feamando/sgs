@@ -76,6 +76,15 @@ def parse_args():
     p.add_argument("--tl-gamma", type=float, default=1.5)
     p.add_argument("--tl-lambda", type=float, default=0.01)
     p.add_argument("--tl-tmax", type=float, default=0.3)
+    # 1.2.1 §2.1 remediation: warmup on plain CE while T stabilises,
+    # and floor the reweight so it never zeroes out the CE gradient.
+    p.add_argument("--tl-warmup-steps", type=int, default=0,
+                   help="§2.1 (1.2.1): use plain CE until this step, then "
+                        "engage transmittance reweighting")
+    p.add_argument("--tl-floor-eps", type=float, default=0.0,
+                   help="§2.1 (1.2.1): replace (1-T)^gamma with "
+                        "((1-T)*(1-eps)+eps)^gamma to keep a CE gradient "
+                        "floor when T saturates at 1")
 
     # §2.2 Adaptive pass count
     p.add_argument("--adaptive-passes", action="store_true",
@@ -92,6 +101,26 @@ def parse_args():
     # §2.4 Shared kernel across passes
     p.add_argument("--shared-kernel", action="store_true",
                    help="§2.4: reuse pass-1 kernel in subsequent passes")
+    # 1.2.1 §2.4 remediation: choose a sharing schedule rather than
+    # always-on. `always` = current 1.2 behaviour, `mix` = only the last
+    # pass reuses, `late` = `mix` after --shk-switch-step.
+    p.add_argument("--shk-schedule", default="always",
+                   choices=["always", "mix", "late"],
+                   help="§2.4 (1.2.1): kernel sharing schedule")
+    p.add_argument("--shk-switch-step", type=int, default=20000,
+                   help="§2.4 (1.2.1): step at which `late` switches to `mix`")
+
+    # ── Planck 1.2.1 industry-standard hedge ──
+    p.add_argument("--optimizer", default="adamw",
+                   choices=["adamw", "muon"],
+                   help="1.2.1: optimizer. `muon` routes 2D params to Muon "
+                        "and 1D/embedding params to AdamW")
+    p.add_argument("--muon-lr", type=float, default=0.02,
+                   help="1.2.1: Muon LR on 2D params (AdamW LR remains --lr)")
+    p.add_argument("--muon-momentum", type=float, default=0.95)
+    p.add_argument("--liger", action="store_true",
+                   help="1.2.1: use liger_kernel.FusedLinearCrossEntropy "
+                        "to skip the intermediate logits tensor")
 
     # Profiling (bakes into stdout per plan; see planck_12_plan.md §resolved)
     p.add_argument("--log-profile", action="store_true",
@@ -111,10 +140,14 @@ def evaluate(model, val_loader, eval_steps, device, amp_dtype):
     compare across ablations. Keeps val numbers directly comparable.
     """
     was_returning = getattr(model, "return_accel_state", False)
-    # Swap off accel-tuple return for the duration of eval so the CE call
-    # sees plain logits without branching.
+    was_hidden = getattr(model, "return_hidden", False)
+    # Swap off both tuple-return and hidden-return for eval so we always
+    # evaluate on plain materialised logits. Keeps val loss comparable
+    # across runs regardless of which training-time accel flags fired.
     if was_returning:
         model.return_accel_state = False
+    if was_hidden:
+        model.return_hidden = False
     model.eval()
     total_loss = 0.0
     n = 0
@@ -130,6 +163,8 @@ def evaluate(model, val_loader, eval_steps, device, amp_dtype):
     model.train()
     if was_returning:
         model.return_accel_state = True
+    if was_hidden:
+        model.return_hidden = True
     avg_loss = total_loss / max(n, 1)
     return avg_loss, math.exp(min(avg_loss, 20))  # cap perplexity to avoid overflow
 
@@ -169,6 +204,17 @@ def main():
         or args.sparse_k > 0
         or args.shared_kernel
     )
+    # Liger + transmittance-loss is mutually exclusive: tl needs a
+    # per-token CE (reduction='none') on materialised logits, which is
+    # exactly what Liger elides. Policy from the 1.2.1 plan: Liger wins.
+    if args.liger and args.transmittance_loss:
+        print("  WARN: --liger overrides --transmittance-loss "
+              "(tl needs the logits tensor; Liger elides it)")
+        args.transmittance_loss = False
+        accel_active = (
+            args.adaptive_passes or args.sparse_k > 0 or args.shared_kernel
+        )
+
     model = SGSLanguageModel(
         vocab_size=actual_vocab,
         d_s=args.d_s,
@@ -186,16 +232,22 @@ def main():
         sparse_warmup_steps=args.sparse_warmup_steps,
         sparse_tau_gate=args.sparse_tau_gate,
         shared_kernel=args.shared_kernel,
+        shk_schedule=args.shk_schedule,
+        shk_switch_step=args.shk_switch_step,
+        return_hidden=args.liger,
     ).to(device)
-    if accel_active:
-        flags_on = ", ".join([
-            n for n, v in [
-                ("transmittance-loss", args.transmittance_loss),
-                ("adaptive-passes", args.adaptive_passes),
-                (f"sparse-k={args.sparse_k}", args.sparse_k > 0),
-                ("shared-kernel", args.shared_kernel),
-            ] if v
-        ])
+    flag_bits = [
+        ("transmittance-loss", args.transmittance_loss),
+        ("adaptive-passes", args.adaptive_passes),
+        (f"sparse-k={args.sparse_k}", args.sparse_k > 0),
+        ("shared-kernel", args.shared_kernel),
+        (f"shk-schedule={args.shk_schedule}",
+         args.shared_kernel and args.shk_schedule != "always"),
+        (f"optimizer={args.optimizer}", args.optimizer != "adamw"),
+        ("liger", args.liger),
+    ]
+    flags_on = ", ".join([n for n, v in flag_bits if v])
+    if flags_on:
         print(f"  Accel flags: {flags_on}")
 
     n_params = model.count_parameters()
@@ -206,25 +258,77 @@ def main():
             print(f"    {k}: {v:,} ({v/n_params*100:.1f}%)")
 
     # ── Optimizer ──
-    # Separate weight decay for embeddings vs other params
-    decay_params = []
-    no_decay_params = []
-    for name, param in model.named_parameters():
-        if not param.requires_grad:
-            continue
-        if "ln_f" in name or "bias" in name or "log_tau" in name:
-            no_decay_params.append(param)
-        else:
-            decay_params.append(param)
+    if args.optimizer == "muon":
+        # Route 2D matrix params to Muon; everything else (embeddings,
+        # norms, biases, 1D scalars, and lm_head.weight which behaves
+        # like an embedding) goes to AdamW. This split follows the
+        # canonical Muon deployment; see src/optim/muon.py.
+        from src.optim.muon import MuonWithAuxAdam
 
-    optimizer = torch.optim.AdamW(
-        [
-            {"params": decay_params, "weight_decay": args.weight_decay},
-            {"params": no_decay_params, "weight_decay": 0.0},
-        ],
-        lr=args.lr,
-        betas=(0.9, 0.95),
-    )
+        muon_params: list = []
+        other_params: list = []
+        no_decay_params: list = []
+        for name, param in model.named_parameters():
+            if not param.requires_grad:
+                continue
+            # Treat lm_head.weight as an embedding-class param (tied or
+            # untied, its gradient structure matches tok_features).
+            is_embedding = (
+                name.startswith("tok_")
+                or name.startswith("pos_")
+                or name == "lm_head.weight"
+            )
+            is_scalar_or_norm = (
+                "ln_f" in name or "bias" in name or "log_tau" in name
+            )
+            if is_scalar_or_norm:
+                other_params.append(param)
+                no_decay_params.append(param)
+            elif is_embedding:
+                other_params.append(param)
+            elif param.dim() == 2:
+                muon_params.append(param)
+            else:
+                # 1D weights (e.g. LayerNorm gains that aren't ln_f)
+                other_params.append(param)
+                no_decay_params.append(param)
+
+        optimizer = MuonWithAuxAdam(
+            params_2d=muon_params,
+            params_other=other_params,
+            muon_lr=args.muon_lr,
+            muon_momentum=args.muon_momentum,
+            muon_wd=0.0,
+            adam_lr=args.lr,
+            adam_betas=(0.9, 0.95),
+            adam_wd=args.weight_decay,
+            adam_no_decay_params=no_decay_params,
+        )
+        print(
+            f"  Optimizer: Muon ({len(muon_params)} 2D params, "
+            f"lr={args.muon_lr}) + AdamW "
+            f"({len(other_params)} other params, lr={args.lr})"
+        )
+    else:
+        # Separate weight decay for embeddings vs other params.
+        decay_params = []
+        no_decay_params = []
+        for name, param in model.named_parameters():
+            if not param.requires_grad:
+                continue
+            if "ln_f" in name or "bias" in name or "log_tau" in name:
+                no_decay_params.append(param)
+            else:
+                decay_params.append(param)
+
+        optimizer = torch.optim.AdamW(
+            [
+                {"params": decay_params, "weight_decay": args.weight_decay},
+                {"params": no_decay_params, "weight_decay": 0.0},
+            ],
+            lr=args.lr,
+            betas=(0.9, 0.95),
+        )
 
     # ── LR Schedule ──
     warmup = LinearLR(optimizer, start_factor=0.01, end_factor=1.0, total_iters=args.warmup_steps)
@@ -273,24 +377,57 @@ def main():
     best_val_loss = float("inf")
     passes_run_ema = float(args.n_passes)
 
+    # ── Liger fused linear+CE ──
+    # Instantiated once; applied per step when --liger is set.
+    liger_fn = None
+    if args.liger:
+        from liger_kernel.transformers.fused_linear_cross_entropy import (
+            LigerFusedLinearCrossEntropyLoss,
+        )
+        liger_fn = LigerFusedLinearCrossEntropyLoss()
+        print("  Liger fused linear+CE: enabled")
+
     def _compute_loss(x_batch, y_batch):
         """Forward + loss. Returns (loss, T_diag_mean_or_None, passes_run)."""
         model.opt_step = global_step
         out = model(x_batch)
         if accel_active:
-            logits_, T_diag_, passes_ = out
+            out_tensor, T_diag_, passes_ = out
         else:
-            logits_, T_diag_, passes_ = out, None, args.n_passes
+            out_tensor, T_diag_, passes_ = out, None, args.n_passes
 
-        flat_logits = logits_.view(-1, logits_.size(-1))
         flat_y = y_batch.view(-1)
 
-        if args.transmittance_loss and T_diag_ is not None:
-            # Per-token CE, reshape to [B, L], apply §2.1 weighting.
+        if args.liger:
+            # out_tensor is [B, L, d_f] (post-LN hidden). Liger expects
+            # [N, d_f] with lm_head.weight at [V, d_f].
+            hidden_flat = out_tensor.view(-1, out_tensor.size(-1))
+            l = liger_fn(model.lm_head.weight, hidden_flat, flat_y)
+            mean_T = T_diag_.mean().item() if T_diag_ is not None else None
+            return l, mean_T, passes_
+
+        flat_logits = out_tensor.view(-1, out_tensor.size(-1))
+
+        tl_active = (
+            args.transmittance_loss
+            and T_diag_ is not None
+            and global_step >= args.tl_warmup_steps
+        )
+        if tl_active:
+            # Per-token CE, reshape to [B, L], apply §2.1 weighting with
+            # the 1.2.1 gradient-floor fix.
             ce_flat = F.cross_entropy(flat_logits, flat_y, reduction="none")
             ce = ce_flat.view_as(T_diag_)                      # [B, L]
             T_clamped = T_diag_.clamp(0.0, 1.0)
-            weight = (1.0 - T_clamped).pow(args.tl_gamma)
+            # 1.2.1 floor: replace (1-T)^gamma with ((1-T)*(1-eps)+eps)^gamma
+            # so T=1 still yields a non-zero weight (eps^gamma) instead
+            # of killing the CE gradient entirely. Root cause of 1.2's
+            # tl collapse.
+            if args.tl_floor_eps > 0.0:
+                base = (1.0 - T_clamped) * (1.0 - args.tl_floor_eps) + args.tl_floor_eps
+            else:
+                base = 1.0 - T_clamped
+            weight = base.pow(args.tl_gamma)
             ce_w = (weight * ce).mean()
             reg = F.relu(T_clamped - args.tl_tmax).pow(2).mean() * args.tl_lambda
             l = ce_w + reg
