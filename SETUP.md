@@ -526,7 +526,12 @@ appendix at the bottom of this file.
 
 ### 6.4  Track 4: Planck 1.2, Acceleration recipe validation
 
-**Status:** implementation landed (commit `ce195c8`). Ablation run pending.
+**Status:** ablation complete (2026-04-28). **Gate FAIL.** Compound `all`
+vs. baseline landed at val loss 8.55 (baseline 4.10) and 1.07×
+wall-clock (target ≥1.8×). Per-proposal diagnoses and the full summary
+table live at `results/planck_12/README.md`. Remediation tracked in
+§6.4b (Planck 1.2.1). Hertz 1.2 stays blocked on that rerun.
+
 All four acceleration proposals from `docs/papers/sgs_training_acceleration.md`
 are merged into `src/sgs_lm.py` + `scripts/train_lm.py` behind CLI flags
 (default off). §2.5 curriculum is deferred to Hertz 2.x.
@@ -603,6 +608,56 @@ git commit -m "Planck 1.2: ablation results"
 If the gate passed, also flip `Planck 1.2` to `done` in `roadmap.md`
 and unblock `Hertz 1.2`.
 
+### 6.4b  Track 4b: Planck 1.2.1, accel-recipe remediation
+
+**Status:** open (2026-04-28). Remediation for the three proposals that
+failed their per-proposal sanity checks in §6.4. Full post-mortem at
+`results/planck_12/README.md`.
+
+Scope, in priority order:
+
+1. **§2.1 tl — fix the degenerate weighting.** `T_mean` stayed at 1.0,
+   zeroing `(1-T)^γ` and collapsing the loss onto the T-penalty
+   alone. Two candidate fixes, pick one after a 2k-step probe:
+   - Warmup on plain CE for the first `--tl-warmup-steps` (e.g. 5000)
+     before the reweighting engages, so T has time to settle below
+     `T_max` under honest gradients.
+   - Add a floor: `weight = (1 - T * 0.99).clamp(min=eps).pow(γ)`,
+     so the CE signal never fully vanishes.
+2. **§2.3 sk — fix the OOM in the gather.** Died at step 10,100 with a
+   15.62 GiB alloc inside `torch.gather(feat_exp, 2, idx_exp)` at
+   `src/sgs_lm.py:325`. Expected output is `[B, L, k, d_f] ≈ 4 GiB` bf16;
+   the current path appears to expand `feat` to `[B, L, L, d_f]` before
+   indexing. Rewrite as an indexed lookup into `[B, L, d_f]`, then
+   re-run the full 66,750-step ablation.
+3. **§2.4 shk — tune the sharing-weight schedule.** Throughput +9.9%
+   (target ≥20%), val loss +0.23 nats vs baseline (target ≤0.05).
+   Likely the shared-kernel assumption is too aggressive at d_s=128.
+   Try a mix: per-pass kernels for the first K passes, shared for the
+   rest, swept by a single flag.
+
+Drop **§2.2 ap** from the compound re-run until its exit gate actually
+fires. On the 66k-step matrix `passes_ema` never left 3.0 and val loss
+was seed noise, so it's not pulling weight.
+
+Once all three land, re-run:
+
+```powershell
+# Force-rerun only the fixed configs (baseline stays adopted)
+python scripts/validate_planck12.py --data-dir data/fineweb --only tl --force
+python scripts/validate_planck12.py --data-dir data/fineweb --only sk --force
+python scripts/validate_planck12.py --data-dir data/fineweb --only shk --force
+
+# Then the compound without ap
+python scripts/validate_planck12.py --data-dir data/fineweb --only all --force
+```
+
+Gate for Planck 1.2.1 → Hertz 1.2 unblock: same as 1.2 (sample
+efficiency ≥1.43×, wall-clock ≥1.8×). If compound still fails, demote
+the worst remaining proposal and retry; repeat until one of the
+compounds passes or the remaining proposals no longer clear the §2.1 +
+§2.3 gate predicate (see §6.5).
+
 ### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
 
 **Status:** optional quality pass. Klang 1.1 shipped two decoded variants that are "comprehensible but artefacted" (Variant A: phase warble at 3000g; Variant B: sub-200 Hz dropout + near-Nyquist whine, identical across 10/20/40L). Klang 1.2 addresses both directly and adds quantitative metrics, so we can make a real decision about Klang's status.
@@ -652,7 +707,10 @@ If both gates pass, Klang is done and we ship it alongside Hertz 1.2. If not, ro
 
 ### 6.5  Track 5: Hertz 1.2, 1B SGS LM with accel recipe
 
-**Status:** runs only after Planck 1.2 validates §2.1 and §2.3 (minimum).
+**Status:** blocked. Planck 1.2's compound gate failed (2026-04-28) and
+the §2.1 + §2.3 proposals both need remediation before they can carry
+Hertz. Runs only after **Planck 1.2.1** (§6.4b) validates at least §2.1
+and §2.3 against the 1.43× sample-efficiency / 1.8× wall-clock gates.
 **Prerequisite:** Hertz folder cleaned up (see §8).
 
 Command shape (subject to flags added during Planck 1.2 work):
