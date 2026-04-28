@@ -672,24 +672,24 @@ Deferred to later iterations, **not** in 1.2.1:
 
 ```powershell
 # Step 1: adopt the 1.2 baseline so we don't re-train it
-python scripts/validate_planck12.py ^
-  --results-dir results\planck_12_1 ^
-  --adopt baseline=results\planck_12\baseline\train_log.txt ^
+python scripts/validate_planck12.py `
+  --results-dir results\planck_12_1 `
+  --adopt baseline=results\planck_12\baseline\train_log.txt `
   --adopt-wall-s 11229
 
 # Step 2 (optional): carry over the 1.2 ap run (diagnostic, inert)
-python scripts/validate_planck12.py ^
-  --results-dir results\planck_12_1 ^
+python scripts/validate_planck12.py `
+  --results-dir results\planck_12_1 `
   --adopt ap=results\planck_12\ap\train_log.txt
 
 # Step 3: run the remaining 6 configs (tl, sk, shk, all, muon, all_plus)
 # — ~15-18h on RTX 4090 at --max-steps 66750 with baseline + ap adopted.
-python scripts/validate_planck12.py ^
-  --data-dir data\fineweb ^
+python scripts/validate_planck12.py `
+  --data-dir data\fineweb `
   --results-dir results\planck_12_1
 
 # Single-run iteration after a crash
-python scripts/validate_planck12.py --data-dir data\fineweb ^
+python scripts/validate_planck12.py --data-dir data\fineweb `
   --results-dir results\planck_12_1 --only muon --force
 ```
 
@@ -753,8 +753,8 @@ python klang/klang_1_2_experiment.py --compositing sum --out-dir klang/klang_1_2
 python klang/klang_1_2_experiment.py --no-mrstft --out-dir klang/klang_1_2_nomrstft
 
 # Validate against original + Variant B baseline
-python scripts/validate_klang.py ^
-  --ref klang/original.wav ^
+python scripts/validate_klang.py `
+  --ref klang/original.wav `
   --reference-for-gates klang/variant_b_20L/audio.wav
 ```
 
@@ -790,29 +790,29 @@ stdout and the per-run `train_log.txt`.
 
 ```powershell
 # Template A: SGS-native compound wins (no Muon)
-python scripts/train_hertz.py ^
-  --max-tokens 10B ^
-  --no-compile ^
-  --keep-last 3 ^
-  --transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 ^
-  --sparse-k 64 ^
+python scripts/train_hertz.py `
+  --max-tokens 10B `
+  --no-compile `
+  --keep-last 3 `
+  --transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 `
+  --sparse-k 64 `
   --shared-kernel --shk-schedule mix
 
 # Template B: muon alone wins (industry-standard hedge only)
-python scripts/train_hertz.py ^
-  --max-tokens 10B ^
-  --no-compile ^
-  --keep-last 3 ^
+python scripts/train_hertz.py `
+  --max-tokens 10B `
+  --no-compile `
+  --keep-last 3 `
   --optimizer muon
 
 # Template C: all_plus wins (SGS-native + Muon stacked)
-python scripts/train_hertz.py ^
-  --max-tokens 10B ^
-  --no-compile ^
-  --keep-last 3 ^
-  --transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 ^
-  --sparse-k 64 ^
-  --shared-kernel --shk-schedule mix ^
+python scripts/train_hertz.py `
+  --max-tokens 10B `
+  --no-compile `
+  --keep-last 3 `
+  --transmittance-loss --tl-warmup-steps 5000 --tl-floor-eps 0.05 `
+  --sparse-k 64 `
+  --shared-kernel --shk-schedule mix `
   --optimizer muon
 ```
 
