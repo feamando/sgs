@@ -725,6 +725,142 @@ git push
 If the gate passed, also update `roadmap.md` (Planck 1.2.1 → done,
 Hertz 1.2 → open) and §6.5 below with the winning recipe.
 
+### 6.4c  Track 4c: Planck 1.2.2, three-bug fix pass on 1.2.1
+
+**Status:** open (2026-04-29). The 1.2.1 eight-run matrix crashed four
+of eight runs and left the either-path gate unreachable. 1.2.2 is a
+targeted three-bug fix pass plus a minimum-viable five-fresh-run
+re-matrix. Results land in `results/planck_12_2/` (sibling to
+`results/planck_12_1/`).
+
+Full design and per-bug diagnoses live in three docs:
+
+- `docs/plans/planck_12_2_plan.md` — three-bug design + minimum-viable scope
+- `docs/plans/planck_12_2_validation.md` — 6-row matrix + smoke tests + gate
+- `docs/plans/planck_12_2_runbook.md` — exact commands
+
+The 1.2.1 ablation JSON (`results/planck_12_1/ablation.json`) is the
+evidence base: two honest regressions (`tl`, `shk`: +0.16 nats vs
+baseline), one OOM (`sk` at step 9,900), one compound collapse (`all`:
+train 0.066 / val 5.49, then OOM at step 29,900), and two scheduler
+crashes at step 0 (`muon`, `all_plus`).
+
+#### The three bugs (and fixes)
+
+1. **`MuonWithAuxAdam` is not a `torch.optim.Optimizer`.**
+   `LRScheduler.__init__` type-checks `isinstance(optimizer,
+   Optimizer)`; the 1.2.1 wrapper was duck-typed and crashed at
+   model-init on both `muon` and `all_plus`.
+   Fix in `src/optim/muon.py`: subclass `Optimizer`, call
+   `super().__init__([{"params": []}], defaults={})`, then re-link
+   `self.param_groups` to the inner Muon + AdamW groups. Re-link
+   after `load_state_dict` too.
+
+2. **`sk` OOM on `[B, L, L, d_f]` in backward.**
+   1.2.1's advanced-indexing rewrite `features[batch_idx, top_idx]`
+   matches the right shape on forward (~4 GiB) but the backward path
+   broadcasts the indices and materialises the full pairwise tensor
+   (~16 GiB). 1.2.1's OOM traceback is inside `loss.backward()`, not
+   `forward()`.
+   Fix in `src/sgs_lm.py:_causal_render_sparse`: flat `index_select`
+   with precomputed global indices. `index_select`'s backward is a
+   sparse `index_add` — touches only selected rows, no `[B, L, L,
+   d_f]` intermediate in either direction.
+
+3. **`tl` keeps `T_mean` pinned at 1.0.**
+   1.2.1's multiplicative floor
+   `((1-T)(1-eps)+eps)^gamma` at `T=1` yields `eps^gamma ≈ 0.011`,
+   i.e. near-free CE. The model minimises by driving all tokens to
+   fully-absorbed; the `max(0, T-T_max)²` penalty gets gamed (train
+   loss 0.066, val 5.49).
+   Fix in `scripts/train_lm.py` (`_compute_loss` tl branch): additive
+   floor `(1-T)^gamma + floor` — preserves monotonicity, keeps CE
+   gradient alive at T=1, upweights T=0. Plus batch-mean
+   renormalisation so `gamma` / `floor` don't silently rescale the
+   effective LR.
+
+Also fixed in this pass: the harness summary table now masks the
+`speedup` column to `—` for rows that crashed or finished under 90%
+of the baseline's token budget, so a died-at-step-0 run no longer
+advertises a bogus multi-× wall-clock win.
+
+#### Run sequence
+
+```powershell
+# Step 1: adopt the 1.2 baseline (identical to 1.2.1, unchanged here)
+python scripts\validate_planck12.py `
+    --results-dir results\planck_12_2 `
+    --adopt baseline=results\planck_12\baseline\train_log.txt `
+    --adopt-wall-s 11229
+
+# Step 2: MANDATORY smoke tests (abort matrix on failure)
+# 2a - Muon scheduler-compat (500 steps, ~2 min)
+python scripts\train_lm.py --data-dir data\fineweb `
+    --optimizer muon --max-steps 500 `
+    --save-dir checkpoints\smoke\muon_1_2_2
+
+# 2b - sk forward+backward parity (500 steps each)
+python scripts\train_lm.py --data-dir data\fineweb `
+    --max-steps 500 `
+    --save-dir checkpoints\smoke\baseline_1_2_2
+python scripts\train_lm.py --data-dir data\fineweb `
+    --sparse-k 64 --sparse-warmup-steps 0 --max-steps 500 `
+    --save-dir checkpoints\smoke\sk_1_2_2
+
+# 2c - tl T-drift diagnostic (2,000 steps, T_mean must drop below 0.95)
+python scripts\train_lm.py --data-dir data\fineweb `
+    --transmittance-loss --tl-warmup-steps 500 --tl-floor-eps 0.05 `
+    --max-steps 2000 --log-interval 50 `
+    --save-dir checkpoints\smoke\tl_1_2_2
+
+# Step 3: run the 5 fresh configs (sk_fix, muon_fix, tl_fix, all_fix,
+# all_plus_fix). ~12h on RTX 4090 with baseline adopted; +~3h NaN slack.
+python scripts\validate_planck12.py `
+    --data-dir data\fineweb `
+    --results-dir results\planck_12_2
+
+# Single-run iteration after a crash
+python scripts\validate_planck12.py --data-dir data\fineweb `
+    --results-dir results\planck_12_2 --only tl_fix --force
+```
+
+NaN fallback: Muon runs → `--muon-lr 0.01`; non-Muon runs →
+`--batch-size 16`. One retry each. See
+`docs/plans/planck_12_2_runbook.md` for the exact retry commands and
+re-adoption flow.
+
+#### Gate for Planck 1.2.2 → Hertz 1.2 unblock
+
+Unchanged from 1.2.1, only the run IDs rename with the `_fix`
+suffix. **Any** of the following passes:
+
+| compound | sample eff. | wall-clock | notes |
+|---|---:|---:|---|
+| `all_fix` (SGS-native) | ≥1.43× | ≥1.8× | original thesis, now with the three fixes |
+| `muon_fix` | ≥1.35× | ≥1.0× (no regression) | industry-standard hedge; sample-eff win, not throughput |
+| `all_plus_fix` (SGS-native + Muon) | ≥1.55× | ≥1.8× | stacked path, combines both tracks |
+
+If at least one passes, flip **both** `Planck 1.2.1` and
+`Planck 1.2.2` to `done` in `roadmap.md` and unblock `Hertz 1.2`
+with the winning recipe recorded in §6.5.
+
+If none pass, the SGS-native track is declared not-an-accelerator at
+the 100M scale. If `muon_fix` clears its own bar in isolation,
+consider Hertz 1.2 on plain Muon (template B in §6.5). Otherwise
+keep Hertz 1.2 blocked; Planck 1.2.3 scope is not pre-committed.
+
+#### Publishing
+
+```powershell
+git add results\planck_12_2\ablation.json results\planck_12_2\README.md
+git commit -m "Planck 1.2.2: ablation results + gate verdict"
+git push
+```
+
+If the gate passed, also update `roadmap.md` (Planck 1.2.1 and
+Planck 1.2.2 → done, Hertz 1.2 → open) and §6.5 below with the
+winning recipe template.
+
 ### 6.4.5  Track 4.5: Klang 1.2 revisit (after Planck 1.2, before Hertz 1.2)
 
 **Status:** optional quality pass. Klang 1.1 shipped two decoded variants that are "comprehensible but artefacted" (Variant A: phase warble at 3000g; Variant B: sub-200 Hz dropout + near-Nyquist whine, identical across 10/20/40L). Klang 1.2 addresses both directly and adds quantitative metrics, so we can make a real decision about Klang's status.

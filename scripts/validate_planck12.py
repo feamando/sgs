@@ -87,6 +87,16 @@ RUNS: list[dict] = [
     {"id": "all",         "label": "SGS-native compound (no ap)",     "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS)},
     {"id": "muon",        "label": "Muon optimizer",                  "flags": ["--optimizer", "muon"]},
     {"id": "all_plus",    "label": "SGS-native + Muon",               "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS) + ["--optimizer", "muon"]},
+    # ── 1.2.2 re-matrix ──────────────────────────────────────────────
+    # Same flag sets as their 1.2.1 counterparts; distinct IDs so the
+    # 1.2.2 JSON doesn't collide with the 1.2.1 status rows when both
+    # dirs are inspected side-by-side. Run with --results-dir
+    # results/planck_12_2.
+    {"id": "sk_fix",       "label": "1.2.2 sk (index_select)",        "flags": list(_SK_FLAGS)},
+    {"id": "muon_fix",     "label": "1.2.2 Muon (Optimizer subclass)","flags": ["--optimizer", "muon"]},
+    {"id": "tl_fix",       "label": "1.2.2 tl (additive floor+norm)", "flags": list(_TL_FLAGS)},
+    {"id": "all_fix",      "label": "1.2.2 SGS-native compound",      "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS)},
+    {"id": "all_plus_fix", "label": "1.2.2 SGS-native + Muon",        "flags": list(_TL_FLAGS) + list(_SK_FLAGS) + list(_SHK_FLAGS) + ["--optimizer", "muon"]},
 ]
 
 
@@ -332,20 +342,30 @@ def summarise(results: dict) -> None:
         return
     baseline = runs.get("baseline")
     print("\n=== summary ===")
-    header = f"{'id':<10} {'status':<10} {'val_loss':>10} {'tok/s':>10} {'wall_s':>8} {'speedup':>8}"
+    header = f"{'id':<14} {'status':<10} {'val_loss':>10} {'tok/s':>10} {'wall_s':>8} {'speedup':>8}"
     print(header)
     print("-" * len(header))
+    # Speedup is only meaningful when a run actually completed the same
+    # work as the baseline. Require status in {ok, adopted} AND at least
+    # 90% of baseline's last_step. Crashed short runs get "—" so the
+    # table doesn't advertise bogus 94x wins on step-0 failures.
+    base_last_step = baseline.get("last_step") if baseline else 0
+    step_floor = 0.9 * (base_last_step or 0)
     for run in RUNS:
         r = runs.get(run["id"])
         if not r:
             continue
-        speedup = ""
-        if baseline and r.get("wall_clock_s") and baseline.get("wall_clock_s"):
+        status = r.get("status", "?")
+        last_step = r.get("last_step") or 0
+        completed = status in ("ok", "adopted") and last_step >= step_floor
+        if completed and baseline and r.get("wall_clock_s") and baseline.get("wall_clock_s"):
             speedup = f"{baseline['wall_clock_s'] / r['wall_clock_s']:.2f}x"
+        else:
+            speedup = "—"
         val_loss = r.get("final_val_loss")
         tok = r.get("tok_per_sec_mean")
         print(
-            f"{run['id']:<10} {r.get('status','?'):<10} "
+            f"{run['id']:<14} {status:<10} "
             f"{val_loss if val_loss is not None else '-':>10} "
             f"{(f'{tok:.0f}' if tok else '-'):>10} "
             f"{r.get('wall_clock_s','-'):>8} {speedup:>8}"

@@ -124,13 +124,19 @@ class Muon(Optimizer):
         return loss
 
 
-class MuonWithAuxAdam:
-    """Wrapper that holds a Muon for 2D params and an AdamW for the rest.
+class MuonWithAuxAdam(Optimizer):
+    """Holds a Muon for 2D params and an AdamW for the rest.
 
-    Presents the subset of the Optimizer interface that training code
-    touches: `step`, `zero_grad`, `state_dict`, `load_state_dict`, and
-    `param_groups` (for the LR scheduler — the scheduler mutates LR in
-    place on each inner optimizer's param groups).
+    Subclasses `torch.optim.Optimizer` so PyTorch's LR schedulers
+    (`LinearLR`, `CosineAnnealingLR`, `SequentialLR`) accept it —
+    they type-check `isinstance(optimizer, Optimizer)` in
+    `LRScheduler.__init__`. 1.2.1's duck-typed wrapper failed that
+    check and crashed at model-init.
+
+    The LR scheduler sees one flat `param_groups` list:
+    Muon's groups first, then AdamW's. Scaling all groups by the same
+    factor (the warmup + cosine shape) is what we want — Muon's
+    absolute LR is higher but the schedule shape is shared.
     """
 
     def __init__(
@@ -145,7 +151,7 @@ class MuonWithAuxAdam:
         adam_wd: float = 0.1,
         adam_no_decay_params: list | None = None,
     ):
-        # Muon branch.
+        # Inner optimizers hold all real state and param groups.
         self.muon = Muon(
             params_2d,
             lr=muon_lr,
@@ -153,11 +159,6 @@ class MuonWithAuxAdam:
             weight_decay=muon_wd,
         )
 
-        # AdamW branch. `params_other` is everything not handled by Muon
-        # (embeddings, norms, biases, 1D scalars, and lm_head.weight which
-        # behaves like an embedding). `adam_no_decay_params` is a subset
-        # of `params_other` for which wd should be 0 (norms, biases,
-        # log_tau).
         no_decay_set = (
             {id(p) for p in adam_no_decay_params} if adam_no_decay_params else set()
         )
@@ -171,18 +172,12 @@ class MuonWithAuxAdam:
             lr=adam_lr,
             betas=adam_betas,
         )
-        # PyTorch LR schedulers read `_step_count` to warn when
-        # optimizer.step() was skipped. Mirror the inner counters.
-        self._step_count = 0
 
-    @property
-    def param_groups(self):
-        # The LR scheduler treats this as one flat list of param groups.
-        # Muon's group is listed first; the AdamW groups follow. Scaling
-        # all groups by the same factor (LinearLR / CosineAnnealingLR)
-        # is what we want — Muon's absolute LR is higher but the
-        # warmup/decay shape is shared.
-        return self.muon.param_groups + self.adam.param_groups
+        # Optimizer base-class init with no params of its own. We then
+        # overwrite param_groups to expose both inner optimizers' groups
+        # as one flat list. This is what LRScheduler iterates.
+        super().__init__([{"params": []}], defaults={})
+        self.param_groups = self.muon.param_groups + self.adam.param_groups
 
     def zero_grad(self, set_to_none: bool = True):
         self.muon.zero_grad(set_to_none=set_to_none)
@@ -198,3 +193,5 @@ class MuonWithAuxAdam:
     def load_state_dict(self, state):
         self.muon.load_state_dict(state["muon"])
         self.adam.load_state_dict(state["adam"])
+        # Re-link param_groups to the loaded inner groups.
+        self.param_groups = self.muon.param_groups + self.adam.param_groups

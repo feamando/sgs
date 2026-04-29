@@ -414,20 +414,24 @@ def main():
             and global_step >= args.tl_warmup_steps
         )
         if tl_active:
-            # Per-token CE, reshape to [B, L], apply §2.1 weighting with
-            # the 1.2.1 gradient-floor fix.
+            # Per-token CE, reshape to [B, L], apply §2.1 weighting.
+            # 1.2.2 fix: additive floor + renormalisation.
+            # - 1.2.1's multiplicative floor `((1-T)(1-eps)+eps)^gamma`
+            #   kept weight > 0 at T=1 but scaled ALL weights down, so
+            #   raising gamma/eps silently reduced effective LR and the
+            #   model collapsed to the penalty gradient (T pinned at 1.0,
+            #   train loss → 0.07 while val → 5.49).
+            # - 1.2.2 uses additive floor: weight at T=0 is (1+floor),
+            #   weight at T=1 is exactly floor. Upweighting
+            #   under-absorbed tokens is preserved and the CE gradient
+            #   survives at T=1.
+            # - Renormalise by batch-mean so changing gamma/floor
+            #   doesn't rescale CE magnitude (and indirectly the LR).
             ce_flat = F.cross_entropy(flat_logits, flat_y, reduction="none")
             ce = ce_flat.view_as(T_diag_)                      # [B, L]
             T_clamped = T_diag_.clamp(0.0, 1.0)
-            # 1.2.1 floor: replace (1-T)^gamma with ((1-T)*(1-eps)+eps)^gamma
-            # so T=1 still yields a non-zero weight (eps^gamma) instead
-            # of killing the CE gradient entirely. Root cause of 1.2's
-            # tl collapse.
-            if args.tl_floor_eps > 0.0:
-                base = (1.0 - T_clamped) * (1.0 - args.tl_floor_eps) + args.tl_floor_eps
-            else:
-                base = 1.0 - T_clamped
-            weight = base.pow(args.tl_gamma)
+            weight = (1.0 - T_clamped).pow(args.tl_gamma) + args.tl_floor_eps
+            weight = weight / weight.mean().detach().clamp_min(1e-6)
             ce_w = (weight * ce).mean()
             reg = F.relu(T_clamped - args.tl_tmax).pow(2).mean() * args.tl_lambda
             l = ce_w + reg

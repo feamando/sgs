@@ -337,11 +337,16 @@ class SGSLanguageModel(nn.Module):
         T = log_T.exp()                                       # [B, L, k]
         weights = eff_a * T                                   # [B, L, k]
 
-        # Gather feature rows for the selected keys and reduce. Advanced
-        # indexing: features[b, top_idx[b, l, :], :] → [B, L, k, d_f] with
-        # no [B, L, L, d_f] intermediate (the 1.2 `sk` OOM root cause).
-        batch_idx = torch.arange(B, device=features.device).view(B, 1, 1)
-        top_feats = features[batch_idx, top_idx]              # [B, L, k, d_f]
+        # Gather feature rows for the selected keys and reduce. 1.2.2:
+        # the advanced-indexing form `features[batch_idx, top_idx]` had
+        # the right forward shape but its autograd path builds a
+        # [B, L, L, d_f] intermediate on backward (1.2.1 OOM at step
+        # 9.9k / 29.9k for sk / all). Flat `index_select` has
+        # index_add backward that touches only selected rows.
+        flat = features.reshape(B * L, d_f)
+        offsets = (torch.arange(B, device=features.device) * L).view(B, 1, 1)
+        global_idx = (top_idx + offsets).reshape(-1)          # [B*L*k]
+        top_feats = flat.index_select(0, global_idx).view(B, L, k, d_f)
         meaning = (weights.unsqueeze(-1) * top_feats).sum(dim=2)  # [B, L, d_f]
 
         # Diagonal T[t,t] proxy for §2.1/§2.2. In dense render T[t,t] is
