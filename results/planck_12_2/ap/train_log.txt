@@ -1,0 +1,1661 @@
+C:\Users\feama\sgs\.venv\Lib\site-packages\torch\optim\lr_scheduler.py:243: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
+  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+  VRAM: 25.8 GB
+
+=== Preparing data ===
+Fetching file list from HuggingFace...
+  Already have train-00000-of-00004-2d5a1467fff1081b.parquet
+  Already have train-00001-of-00004-5852b56a2bd28fd9.parquet
+  Already have train-00002-of-00004-a26307300439e943.parquet
+  Already have train-00003-of-00004-d243063613e5a057.parquet
+  Already have validation-00000-of-00001-869c898b519ad725.parquet
+Reading parquet files...
+  Train: 2,119,719 stories
+  Val:   21,990 stories
+Tokenizer already exists: data\fineweb\tokenizer.model
+  Binary already exists: data\fineweb\train.bin (9,034,515,086 tokens)
+  Binary already exists: data\fineweb\val.bin (91,045,731 tokens)
+
+Data ready:
+  train_bin: data\fineweb\train.bin
+  val_bin: data\fineweb\val.bin
+  tokenizer: data\fineweb\tokenizer.model
+  n_train_tokens: 9034515086
+  n_val_tokens: 91045731
+  vocab_size: 32000
+  Steps/epoch: 550,348
+  Total steps: 550,348
+
+=== Creating model ===
+  Accel flags: adaptive-passes
+  Parameters: 100,892,843 (100.9M)
+    tok_mu: 4,096,000 (4.1%)
+    tok_log_var: 4,096,000 (4.1%)
+    tok_raw_alpha: 32,000 (0.0%)
+    tok_features: 32,000,000 (31.7%)
+    pos_mu: 65,536 (0.1%)
+    log_tau: 1 (0.0%)
+    query_proj: 66,048 (0.1%)
+    head_proj: 4,001,000 (4.0%)
+    mu_update: 512,256 (0.5%)
+    alpha_gate: 4,002 (0.0%)
+    pass_ffn: 24,018,000 (23.8%)
+    ln_f: 2,000 (0.0%)
+    lm_head: 32,000,000 (31.7%)
+  Mixed precision: bf16
+
+=== Training (1 epochs) ===
+  epoch 1 step     50 | loss 8.8223 avg 9.4403 | lr 1.78e-05 gnorm 1.63 | tau 127.9 | 80384 tok/s | passes 3.00 T 0.078
+  epoch 1 step    100 | loss 8.0873 avg 8.9221 | lr 3.27e-05 gnorm 0.86 | tau 127.8 | 88188 tok/s | passes 3.00 T 0.402
+  epoch 1 step    150 | loss 7.5957 avg 8.5377 | lr 4.75e-05 gnorm 1.29 | tau 127.5 | 91484 tok/s | passes 3.00 T 0.412
+  epoch 1 step    200 | loss 7.5204 avg 8.2986 | lr 6.24e-05 gnorm 0.95 | tau 127.2 | 93235 tok/s | passes 3.00 T 0.211
+  epoch 1 step    250 | loss 7.3129 avg 8.1225 | lr 7.72e-05 gnorm 2.59 | tau 126.8 | 94279 tok/s | passes 3.00 T 0.539
+  epoch 1 step    300 | loss 7.3580 avg 7.9849 | lr 9.21e-05 gnorm 3.32 | tau 126.3 | 94651 tok/s | passes 3.00 T 0.768
+  epoch 1 step    350 | loss 7.2601 avg 7.8735 | lr 1.07e-04 gnorm 1.31 | tau 125.8 | 94969 tok/s | passes 3.00 T 0.844
+  epoch 1 step    400 | loss 7.0284 avg 7.7798 | lr 1.22e-04 gnorm 0.79 | tau 125.2 | 95246 tok/s | passes 3.00 T 0.905
+  epoch 1 step    450 | loss 6.9329 avg 7.6970 | lr 1.37e-04 gnorm 1.77 | tau 124.5 | 95366 tok/s | passes 3.00 T 0.856
+  epoch 1 step    500 | loss 6.9703 avg 7.6229 | lr 1.51e-04 gnorm 1.01 | tau 123.8 | 95402 tok/s | passes 3.00 T 0.886
+  >>> val loss 6.8977 ppl 990.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step    550 | loss 6.8433 avg 7.5557 | lr 1.66e-04 gnorm 2.01 | tau 123.1 | 91287 tok/s | passes 3.00 T 0.895
+  epoch 1 step    600 | loss 6.7990 avg 7.4947 | lr 1.81e-04 gnorm 3.07 | tau 122.2 | 91532 tok/s | passes 3.00 T 0.925
+  epoch 1 step    650 | loss 6.7875 avg 7.4382 | lr 1.96e-04 gnorm 0.92 | tau 121.3 | 91715 tok/s | passes 3.00 T 0.912
+  epoch 1 step    700 | loss 6.7160 avg 7.3860 | lr 2.11e-04 gnorm 0.93 | tau 120.4 | 92151 tok/s | passes 3.00 T 0.953
+  epoch 1 step    750 | loss 6.6373 avg 7.3368 | lr 2.26e-04 gnorm 1.82 | tau 119.6 | 92381 tok/s | passes 3.00 T 0.922
+  epoch 1 step    800 | loss 6.6575 avg 7.2916 | lr 2.41e-04 gnorm 1.68 | tau 118.6 | 92492 tok/s | passes 3.00 T 0.896
+  epoch 1 step    850 | loss 6.5461 avg 7.2506 | lr 2.55e-04 gnorm 1.06 | tau 117.6 | 92648 tok/s | passes 3.00 T 0.898
+  epoch 1 step    900 | loss 6.6171 avg 7.2105 | lr 2.70e-04 gnorm 1.25 | tau 116.6 | 92816 tok/s | passes 3.00 T 0.917
+  epoch 1 step    950 | loss 6.5325 avg 7.1730 | lr 2.85e-04 gnorm 3.42 | tau 115.4 | 93032 tok/s | passes 3.00 T 0.935
+  epoch 1 step   1000 | loss 6.5413 avg 7.1384 | lr 3.00e-04 gnorm 1.65 | tau 114.3 | 93243 tok/s | passes 3.00 T 0.890
+  >>> val loss 6.4558 ppl 636.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   1050 | loss 6.4727 avg 7.1060 | lr 3.00e-04 gnorm 1.09 | tau 113.1 | 91401 tok/s | passes 3.00 T 0.895
+  epoch 1 step   1100 | loss 6.4357 avg 7.0744 | lr 3.00e-04 gnorm 1.60 | tau 111.9 | 91645 tok/s | passes 3.00 T 0.911
+  epoch 1 step   1150 | loss 6.3877 avg 7.0453 | lr 3.00e-04 gnorm 1.66 | tau 110.7 | 91862 tok/s | passes 3.00 T 0.896
+  epoch 1 step   1200 | loss 6.3341 avg 7.0168 | lr 3.00e-04 gnorm 1.19 | tau 109.6 | 92063 tok/s | passes 3.00 T 0.901
+  epoch 1 step   1250 | loss 6.3649 avg 6.9897 | lr 3.00e-04 gnorm 0.84 | tau 108.5 | 92215 tok/s | passes 3.00 T 0.924
+  epoch 1 step   1300 | loss 6.3686 avg 6.9640 | lr 3.00e-04 gnorm 1.13 | tau 107.4 | 92401 tok/s | passes 3.00 T 0.908
+  epoch 1 step   1350 | loss 6.2840 avg 6.9384 | lr 3.00e-04 gnorm 0.93 | tau 106.3 | 92533 tok/s | passes 3.00 T 0.913
+  epoch 1 step   1400 | loss 6.2609 avg 6.9144 | lr 3.00e-04 gnorm 1.48 | tau 105.2 | 92699 tok/s | passes 3.00 T 0.911
+  epoch 1 step   1450 | loss 6.2692 avg 6.8908 | lr 3.00e-04 gnorm 1.25 | tau 104.1 | 92842 tok/s | passes 3.00 T 0.916
+  epoch 1 step   1500 | loss 6.2150 avg 6.8679 | lr 3.00e-04 gnorm 0.98 | tau 103.0 | 92989 tok/s | passes 3.00 T 0.908
+  >>> val loss 6.2091 ppl 497.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   1550 | loss 6.1928 avg 6.8462 | lr 3.00e-04 gnorm 1.01 | tau 101.9 | 91798 tok/s | passes 3.00 T 0.918
+  epoch 1 step   1600 | loss 6.1864 avg 6.8253 | lr 3.00e-04 gnorm 1.00 | tau 100.7 | 91967 tok/s | passes 3.00 T 0.895
+  epoch 1 step   1650 | loss 6.1053 avg 6.8053 | lr 3.00e-04 gnorm 1.05 | tau 99.7 | 92094 tok/s | passes 3.00 T 0.894
+  epoch 1 step   1700 | loss 6.1525 avg 6.7857 | lr 3.00e-04 gnorm 0.81 | tau 98.7 | 92269 tok/s | passes 3.00 T 0.912
+  epoch 1 step   1750 | loss 6.1126 avg 6.7668 | lr 3.00e-04 gnorm 0.92 | tau 97.7 | 92419 tok/s | passes 3.00 T 0.906
+  epoch 1 step   1800 | loss 6.0344 avg 6.7480 | lr 3.00e-04 gnorm 0.90 | tau 96.7 | 92538 tok/s | passes 3.00 T 0.915
+  epoch 1 step   1850 | loss 6.0909 avg 6.7300 | lr 3.00e-04 gnorm 0.82 | tau 95.8 | 92642 tok/s | passes 3.00 T 0.916
+  epoch 1 step   1900 | loss 6.0989 avg 6.7124 | lr 3.00e-04 gnorm 1.02 | tau 94.9 | 92735 tok/s | passes 3.00 T 0.915
+  epoch 1 step   1950 | loss 6.1258 avg 6.6953 | lr 3.00e-04 gnorm 0.77 | tau 94.1 | 92836 tok/s | passes 3.00 T 0.933
+  epoch 1 step   2000 | loss 6.0659 avg 6.6787 | lr 3.00e-04 gnorm 0.94 | tau 93.1 | 92914 tok/s | passes 3.00 T 0.929
+  >>> val loss 6.0231 ppl 412.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   2050 | loss 6.0656 avg 6.6624 | lr 3.00e-04 gnorm 0.71 | tau 92.1 | 91979 tok/s | passes 3.00 T 0.913
+  epoch 1 step   2100 | loss 6.0437 avg 6.6466 | lr 3.00e-04 gnorm 0.81 | tau 91.1 | 92089 tok/s | passes 3.00 T 0.945
+  epoch 1 step   2150 | loss 5.9560 avg 6.6316 | lr 3.00e-04 gnorm 1.01 | tau 90.2 | 92200 tok/s | passes 3.00 T 0.937
+  epoch 1 step   2200 | loss 5.9984 avg 6.6165 | lr 3.00e-04 gnorm 1.03 | tau 89.2 | 92300 tok/s | passes 3.00 T 0.936
+  epoch 1 step   2250 | loss 5.9859 avg 6.6022 | lr 3.00e-04 gnorm 0.69 | tau 88.3 | 92374 tok/s | passes 3.00 T 0.945
+  epoch 1 step   2300 | loss 6.0123 avg 6.5882 | lr 3.00e-04 gnorm 0.86 | tau 87.3 | 92388 tok/s | passes 3.00 T 0.942
+  epoch 1 step   2350 | loss 6.1121 avg 6.5743 | lr 3.00e-04 gnorm 0.86 | tau 86.4 | 92405 tok/s | passes 3.00 T 0.949
+  epoch 1 step   2400 | loss 5.9637 avg 6.5610 | lr 3.00e-04 gnorm 0.60 | tau 85.4 | 92453 tok/s | passes 3.00 T 0.950
+  epoch 1 step   2450 | loss 5.9069 avg 6.5480 | lr 3.00e-04 gnorm 0.76 | tau 84.5 | 92554 tok/s | passes 3.00 T 0.952
+  epoch 1 step   2500 | loss 5.8940 avg 6.5349 | lr 3.00e-04 gnorm 0.74 | tau 83.5 | 92626 tok/s | passes 3.00 T 0.947
+  >>> val loss 5.8820 ppl 358.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   2550 | loss 5.8889 avg 6.5225 | lr 3.00e-04 gnorm 0.73 | tau 82.5 | 91903 tok/s | passes 3.00 T 0.952
+  epoch 1 step   2600 | loss 5.9349 avg 6.5098 | lr 3.00e-04 gnorm 0.74 | tau 81.6 | 91998 tok/s | passes 3.00 T 0.959
+  epoch 1 step   2650 | loss 5.9137 avg 6.4977 | lr 3.00e-04 gnorm 0.78 | tau 80.7 | 92089 tok/s | passes 3.00 T 0.963
+  epoch 1 step   2700 | loss 5.9006 avg 6.4859 | lr 3.00e-04 gnorm 0.71 | tau 79.7 | 92172 tok/s | passes 3.00 T 0.958
+  epoch 1 step   2750 | loss 5.8424 avg 6.4739 | lr 3.00e-04 gnorm 0.76 | tau 78.8 | 92268 tok/s | passes 3.00 T 0.963
+  epoch 1 step   2800 | loss 5.7706 avg 6.4622 | lr 3.00e-04 gnorm 0.68 | tau 77.8 | 92363 tok/s | passes 3.00 T 0.967
+  epoch 1 step   2850 | loss 5.8292 avg 6.4507 | lr 3.00e-04 gnorm 0.94 | tau 77.0 | 92458 tok/s | passes 3.00 T 0.966
+  epoch 1 step   2900 | loss 5.7420 avg 6.4395 | lr 3.00e-04 gnorm 1.00 | tau 76.1 | 92521 tok/s | passes 3.00 T 0.967
+  epoch 1 step   2950 | loss 5.9275 avg 6.4285 | lr 3.00e-04 gnorm 0.82 | tau 75.2 | 92600 tok/s | passes 3.00 T 0.969
+  epoch 1 step   3000 | loss 5.7153 avg 6.4175 | lr 3.00e-04 gnorm 0.68 | tau 74.3 | 92676 tok/s | passes 3.00 T 0.974
+  >>> val loss 5.7626 ppl 318.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   3050 | loss 5.9406 avg 6.4070 | lr 3.00e-04 gnorm 0.73 | tau 73.4 | 92085 tok/s | passes 3.00 T 0.974
+  epoch 1 step   3100 | loss 5.7485 avg 6.3966 | lr 3.00e-04 gnorm 0.74 | tau 72.6 | 92153 tok/s | passes 3.00 T 0.980
+  epoch 1 step   3150 | loss 5.7081 avg 6.3864 | lr 3.00e-04 gnorm 0.67 | tau 71.7 | 92225 tok/s | passes 3.00 T 0.979
+  epoch 1 step   3200 | loss 5.6597 avg 6.3762 | lr 3.00e-04 gnorm 0.84 | tau 70.9 | 92301 tok/s | passes 3.00 T 0.978
+  epoch 1 step   3250 | loss 5.7208 avg 6.3660 | lr 3.00e-04 gnorm 0.84 | tau 70.1 | 92361 tok/s | passes 3.00 T 0.979
+  epoch 1 step   3300 | loss 5.7176 avg 6.3561 | lr 3.00e-04 gnorm 0.71 | tau 69.3 | 92428 tok/s | passes 3.00 T 0.983
+  epoch 1 step   3350 | loss 5.8094 avg 6.3465 | lr 3.00e-04 gnorm 1.01 | tau 68.4 | 92477 tok/s | passes 3.00 T 0.983
+  epoch 1 step   3400 | loss 5.7123 avg 6.3370 | lr 3.00e-04 gnorm 0.74 | tau 67.6 | 92521 tok/s | passes 3.00 T 0.984
+  epoch 1 step   3450 | loss 5.7161 avg 6.3275 | lr 3.00e-04 gnorm 0.69 | tau 66.8 | 92554 tok/s | passes 3.00 T 0.986
+  epoch 1 step   3500 | loss 5.6069 avg 6.3182 | lr 3.00e-04 gnorm 0.72 | tau 66.0 | 92583 tok/s | passes 3.00 T 0.988
+  >>> val loss 5.6594 ppl 287.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   3550 | loss 5.6783 avg 6.3091 | lr 3.00e-04 gnorm 0.96 | tau 65.3 | 92014 tok/s | passes 3.00 T 0.986
+  epoch 1 step   3600 | loss 5.5818 avg 6.2998 | lr 3.00e-04 gnorm 1.12 | tau 64.5 | 92059 tok/s | passes 3.00 T 0.988
+  epoch 1 step   3650 | loss 5.6238 avg 6.2910 | lr 3.00e-04 gnorm 0.67 | tau 63.8 | 92115 tok/s | passes 3.00 T 0.988
+  epoch 1 step   3700 | loss 5.5092 avg 6.2820 | lr 3.00e-04 gnorm 0.81 | tau 63.0 | 92177 tok/s | passes 3.00 T 0.990
+  epoch 1 step   3750 | loss 5.6456 avg 6.2733 | lr 3.00e-04 gnorm 0.67 | tau 62.3 | 92251 tok/s | passes 3.00 T 0.990
+  epoch 1 step   3800 | loss 5.5990 avg 6.2645 | lr 3.00e-04 gnorm 0.88 | tau 61.6 | 92310 tok/s | passes 3.00 T 0.990
+  epoch 1 step   3850 | loss 5.5600 avg 6.2560 | lr 3.00e-04 gnorm 0.68 | tau 61.0 | 92365 tok/s | passes 3.00 T 0.989
+  epoch 1 step   3900 | loss 5.5431 avg 6.2476 | lr 3.00e-04 gnorm 0.91 | tau 60.4 | 92422 tok/s | passes 3.00 T 0.990
+  epoch 1 step   3950 | loss 5.5640 avg 6.2393 | lr 3.00e-04 gnorm 0.75 | tau 59.7 | 92476 tok/s | passes 3.00 T 0.990
+  epoch 1 step   4000 | loss 5.5205 avg 6.2311 | lr 3.00e-04 gnorm 1.35 | tau 59.0 | 92531 tok/s | passes 3.00 T 0.991
+  >>> val loss 5.5738 ppl 263.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   4050 | loss 5.5664 avg 6.2228 | lr 3.00e-04 gnorm 0.89 | tau 58.4 | 92065 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4100 | loss 5.5397 avg 6.2147 | lr 3.00e-04 gnorm 0.89 | tau 57.7 | 92126 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4150 | loss 5.5945 avg 6.2069 | lr 3.00e-04 gnorm 1.23 | tau 57.1 | 92182 tok/s | passes 3.00 T 0.991
+  epoch 1 step   4200 | loss 5.5199 avg 6.1990 | lr 3.00e-04 gnorm 0.81 | tau 56.5 | 92237 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4250 | loss 5.5575 avg 6.1913 | lr 3.00e-04 gnorm 0.75 | tau 56.0 | 92316 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4300 | loss 5.5222 avg 6.1835 | lr 3.00e-04 gnorm 0.77 | tau 55.4 | 92423 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4350 | loss 5.5086 avg 6.1759 | lr 3.00e-04 gnorm 0.82 | tau 54.8 | 92510 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4400 | loss 5.5141 avg 6.1684 | lr 3.00e-04 gnorm 1.08 | tau 54.3 | 92611 tok/s | passes 3.00 T 0.992
+  epoch 1 step   4450 | loss 5.5025 avg 6.1610 | lr 3.00e-04 gnorm 1.79 | tau 53.8 | 92694 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4500 | loss 5.4907 avg 6.1535 | lr 3.00e-04 gnorm 0.80 | tau 53.3 | 92786 tok/s | passes 3.00 T 0.993
+  >>> val loss 5.4867 ppl 241.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   4550 | loss 5.4681 avg 6.1465 | lr 3.00e-04 gnorm 1.45 | tau 52.8 | 92469 tok/s | passes 3.00 T 0.994
+  epoch 1 step   4600 | loss 5.4896 avg 6.1393 | lr 3.00e-04 gnorm 0.82 | tau 52.4 | 92575 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4650 | loss 5.4981 avg 6.1322 | lr 3.00e-04 gnorm 0.89 | tau 52.0 | 92678 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4700 | loss 5.3767 avg 6.1252 | lr 3.00e-04 gnorm 1.15 | tau 51.5 | 92781 tok/s | passes 3.00 T 0.985
+  epoch 1 step   4750 | loss 5.5195 avg 6.1184 | lr 3.00e-04 gnorm 2.59 | tau 51.1 | 92883 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4800 | loss 5.5112 avg 6.1115 | lr 3.00e-04 gnorm 1.10 | tau 50.7 | 92982 tok/s | passes 3.00 T 0.994
+  epoch 1 step   4850 | loss 5.4642 avg 6.1048 | lr 3.00e-04 gnorm 1.59 | tau 50.3 | 93076 tok/s | passes 3.00 T 0.994
+  epoch 1 step   4900 | loss 5.4329 avg 6.0979 | lr 3.00e-04 gnorm 1.02 | tau 49.9 | 93171 tok/s | passes 3.00 T 0.993
+  epoch 1 step   4950 | loss 5.4743 avg 6.0913 | lr 3.00e-04 gnorm 1.36 | tau 49.6 | 93266 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5000 | loss 5.4781 avg 6.0847 | lr 3.00e-04 gnorm 2.10 | tau 49.2 | 93359 tok/s | passes 3.00 T 0.993
+  >>> val loss 5.4365 ppl 229.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   5050 | loss 5.4481 avg 6.0783 | lr 3.00e-04 gnorm 0.81 | tau 48.8 | 93057 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5100 | loss 5.4859 avg 6.0720 | lr 3.00e-04 gnorm 1.16 | tau 48.5 | 93151 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5150 | loss 5.2936 avg 6.0656 | lr 3.00e-04 gnorm 1.00 | tau 48.1 | 93242 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5200 | loss 5.3877 avg 6.0592 | lr 3.00e-04 gnorm 1.14 | tau 47.8 | 93324 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5250 | loss 5.3712 avg 6.0529 | lr 3.00e-04 gnorm 1.06 | tau 47.4 | 93410 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5300 | loss 5.3364 avg 6.0467 | lr 3.00e-04 gnorm 1.49 | tau 47.1 | 93495 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5350 | loss 5.2633 avg 6.0406 | lr 3.00e-04 gnorm 1.15 | tau 46.8 | 93568 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5400 | loss 5.4094 avg 6.0346 | lr 3.00e-04 gnorm 1.53 | tau 46.5 | 93633 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5450 | loss 5.4101 avg 6.0287 | lr 3.00e-04 gnorm 1.05 | tau 46.2 | 93665 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5500 | loss 5.3748 avg 6.0227 | lr 3.00e-04 gnorm 1.07 | tau 45.9 | 93715 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.3656 ppl 213.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   5550 | loss 5.3945 avg 6.0169 | lr 3.00e-04 gnorm 0.86 | tau 45.6 | 93392 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5600 | loss 5.3303 avg 6.0111 | lr 3.00e-04 gnorm 1.00 | tau 45.3 | 93462 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5650 | loss 5.3405 avg 6.0053 | lr 3.00e-04 gnorm 1.16 | tau 45.1 | 93533 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5700 | loss 5.2870 avg 5.9996 | lr 3.00e-04 gnorm 1.01 | tau 44.8 | 93588 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5750 | loss 5.3300 avg 5.9939 | lr 3.00e-04 gnorm 0.84 | tau 44.5 | 93659 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5800 | loss 5.3675 avg 5.9884 | lr 3.00e-04 gnorm 1.56 | tau 44.3 | 93727 tok/s | passes 3.00 T 0.993
+  epoch 1 step   5850 | loss 5.3677 avg 5.9830 | lr 3.00e-04 gnorm 1.97 | tau 44.0 | 93796 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5900 | loss 5.3731 avg 5.9775 | lr 3.00e-04 gnorm 1.39 | tau 43.8 | 93852 tok/s | passes 3.00 T 0.994
+  epoch 1 step   5950 | loss 5.3761 avg 5.9721 | lr 3.00e-04 gnorm 0.96 | tau 43.6 | 93915 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6000 | loss 5.3312 avg 5.9667 | lr 3.00e-04 gnorm 1.83 | tau 43.4 | 93983 tok/s | passes 3.00 T 0.993
+  >>> val loss 5.3237 ppl 205.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   6050 | loss 5.2847 avg 5.9614 | lr 3.00e-04 gnorm 1.41 | tau 43.2 | 93715 tok/s | passes 3.00 T 0.993
+  epoch 1 step   6100 | loss 5.3899 avg 5.9561 | lr 3.00e-04 gnorm 1.29 | tau 43.0 | 93785 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6150 | loss 5.2702 avg 5.9508 | lr 3.00e-04 gnorm 1.08 | tau 42.7 | 93859 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6200 | loss 5.3591 avg 5.9457 | lr 3.00e-04 gnorm 1.61 | tau 42.4 | 93932 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6250 | loss 5.4517 avg 5.9406 | lr 3.00e-04 gnorm 1.28 | tau 42.2 | 94002 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6300 | loss 5.2585 avg 5.9355 | lr 3.00e-04 gnorm 1.25 | tau 41.9 | 94072 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6350 | loss 5.3340 avg 5.9305 | lr 3.00e-04 gnorm 2.22 | tau 41.7 | 94143 tok/s | passes 3.00 T 0.993
+  epoch 1 step   6400 | loss 5.3325 avg 5.9256 | lr 3.00e-04 gnorm 2.05 | tau 41.5 | 94211 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6450 | loss 5.3362 avg 5.9208 | lr 3.00e-04 gnorm 0.90 | tau 41.4 | 94278 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6500 | loss 5.2894 avg 5.9158 | lr 3.00e-04 gnorm 1.81 | tau 41.1 | 94346 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.2860 ppl 197.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   6550 | loss 5.3528 avg 5.9110 | lr 3.00e-04 gnorm 1.21 | tau 40.9 | 94103 tok/s | passes 3.00 T 0.993
+  epoch 1 step   6600 | loss 5.2378 avg 5.9062 | lr 3.00e-04 gnorm 1.49 | tau 40.7 | 94169 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6650 | loss 5.2943 avg 5.9014 | lr 3.00e-04 gnorm 1.37 | tau 40.5 | 94236 tok/s | passes 3.00 T 0.993
+  epoch 1 step   6700 | loss 5.2346 avg 5.8967 | lr 3.00e-04 gnorm 1.03 | tau 40.2 | 94302 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6750 | loss 5.3075 avg 5.8921 | lr 3.00e-04 gnorm 3.16 | tau 40.0 | 94365 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6800 | loss 5.2890 avg 5.8875 | lr 3.00e-04 gnorm 1.33 | tau 39.8 | 94428 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6850 | loss 5.3704 avg 5.8830 | lr 3.00e-04 gnorm 1.05 | tau 39.7 | 94492 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6900 | loss 5.2825 avg 5.8786 | lr 3.00e-04 gnorm 1.35 | tau 39.5 | 94555 tok/s | passes 3.00 T 0.994
+  epoch 1 step   6950 | loss 5.2543 avg 5.8742 | lr 3.00e-04 gnorm 1.51 | tau 39.3 | 94615 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7000 | loss 5.1609 avg 5.8698 | lr 3.00e-04 gnorm 1.39 | tau 39.1 | 94675 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.2450 ppl 189.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   7050 | loss 5.3184 avg 5.8655 | lr 3.00e-04 gnorm 1.04 | tau 38.8 | 94443 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7100 | loss 5.2100 avg 5.8612 | lr 3.00e-04 gnorm 1.00 | tau 38.7 | 94503 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7150 | loss 5.2909 avg 5.8569 | lr 3.00e-04 gnorm 0.92 | tau 38.5 | 94563 tok/s | passes 3.00 T 0.995
+  epoch 1 step   7200 | loss 5.2760 avg 5.8526 | lr 3.00e-04 gnorm 1.51 | tau 38.3 | 94623 tok/s | passes 3.00 T 0.995
+  epoch 1 step   7250 | loss 5.1768 avg 5.8484 | lr 3.00e-04 gnorm 1.88 | tau 38.1 | 94682 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7300 | loss 5.2483 avg 5.8441 | lr 3.00e-04 gnorm 2.72 | tau 37.9 | 94740 tok/s | passes 3.00 T 0.995
+  epoch 1 step   7350 | loss 5.3005 avg 5.8401 | lr 3.00e-04 gnorm 3.05 | tau 37.7 | 94797 tok/s | passes 3.00 T 0.993
+  epoch 1 step   7400 | loss 5.2396 avg 5.8361 | lr 3.00e-04 gnorm 1.28 | tau 37.5 | 94854 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7450 | loss 5.2511 avg 5.8321 | lr 3.00e-04 gnorm 1.03 | tau 37.3 | 94910 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7500 | loss 5.2148 avg 5.8279 | lr 3.00e-04 gnorm 0.98 | tau 37.1 | 94964 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.2169 ppl 184.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   7550 | loss 5.2627 avg 5.8239 | lr 3.00e-04 gnorm 0.99 | tau 36.9 | 94752 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7600 | loss 5.1988 avg 5.8199 | lr 3.00e-04 gnorm 1.25 | tau 36.7 | 94801 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7650 | loss 5.2797 avg 5.8159 | lr 3.00e-04 gnorm 1.35 | tau 36.5 | 94850 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7700 | loss 5.1966 avg 5.8120 | lr 3.00e-04 gnorm 1.88 | tau 36.3 | 94902 tok/s | passes 3.00 T 0.995
+  epoch 1 step   7750 | loss 5.3318 avg 5.8081 | lr 3.00e-04 gnorm 2.28 | tau 36.2 | 94953 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7800 | loss 5.2347 avg 5.8043 | lr 3.00e-04 gnorm 1.61 | tau 36.0 | 95005 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7850 | loss 5.1572 avg 5.8005 | lr 3.00e-04 gnorm 1.54 | tau 35.8 | 95045 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7900 | loss 5.2105 avg 5.7967 | lr 3.00e-04 gnorm 1.29 | tau 35.6 | 95095 tok/s | passes 3.00 T 0.994
+  epoch 1 step   7950 | loss 5.0997 avg 5.7929 | lr 3.00e-04 gnorm 1.07 | tau 35.5 | 95146 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8000 | loss 5.2019 avg 5.7891 | lr 3.00e-04 gnorm 1.12 | tau 35.3 | 95197 tok/s | passes 3.00 T 0.995
+  >>> val loss 5.1913 ppl 179.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   8050 | loss 5.1699 avg 5.7854 | lr 3.00e-04 gnorm 1.02 | tau 35.2 | 94994 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8100 | loss 5.2116 avg 5.7817 | lr 3.00e-04 gnorm 2.16 | tau 35.0 | 95045 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8150 | loss 5.0566 avg 5.7780 | lr 3.00e-04 gnorm 2.03 | tau 34.8 | 95096 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8200 | loss 5.2033 avg 5.7743 | lr 3.00e-04 gnorm 1.22 | tau 34.6 | 95146 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8250 | loss 5.0616 avg 5.7707 | lr 3.00e-04 gnorm 3.60 | tau 34.4 | 95197 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8300 | loss 5.1023 avg 5.7671 | lr 3.00e-04 gnorm 2.14 | tau 34.2 | 95246 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8350 | loss 5.1720 avg 5.7634 | lr 3.00e-04 gnorm 1.24 | tau 34.1 | 95295 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8400 | loss 5.1058 avg 5.7599 | lr 3.00e-04 gnorm 1.39 | tau 34.0 | 95342 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8450 | loss 5.0890 avg 5.7564 | lr 3.00e-04 gnorm 2.04 | tau 33.8 | 95389 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8500 | loss 5.1421 avg 5.7527 | lr 3.00e-04 gnorm 1.66 | tau 33.6 | 95436 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.1583 ppl 173.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   8550 | loss 5.1354 avg 5.7493 | lr 3.00e-04 gnorm 2.71 | tau 33.4 | 95235 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8600 | loss 5.2081 avg 5.7459 | lr 3.00e-04 gnorm 2.47 | tau 33.3 | 95282 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8650 | loss 5.0941 avg 5.7424 | lr 3.00e-04 gnorm 1.40 | tau 33.1 | 95329 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8700 | loss 5.1602 avg 5.7390 | lr 3.00e-04 gnorm 1.98 | tau 32.9 | 95376 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8750 | loss 5.1130 avg 5.7356 | lr 3.00e-04 gnorm 1.78 | tau 32.8 | 95421 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8800 | loss 5.2385 avg 5.7323 | lr 3.00e-04 gnorm 1.31 | tau 32.6 | 95466 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8850 | loss 5.1751 avg 5.7289 | lr 3.00e-04 gnorm 1.80 | tau 32.5 | 95511 tok/s | passes 3.00 T 0.994
+  epoch 1 step   8900 | loss 5.1507 avg 5.7256 | lr 3.00e-04 gnorm 3.22 | tau 32.3 | 95556 tok/s | passes 3.00 T 0.995
+  epoch 1 step   8950 | loss 5.1976 avg 5.7224 | lr 3.00e-04 gnorm 2.30 | tau 32.2 | 95598 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9000 | loss 5.0605 avg 5.7191 | lr 3.00e-04 gnorm 1.26 | tau 32.0 | 95642 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.1330 ppl 169.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   9050 | loss 5.1218 avg 5.7159 | lr 3.00e-04 gnorm 1.42 | tau 31.9 | 95457 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9100 | loss 5.0946 avg 5.7128 | lr 3.00e-04 gnorm 1.05 | tau 31.7 | 95499 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9150 | loss 5.1500 avg 5.7097 | lr 3.00e-04 gnorm 1.75 | tau 31.6 | 95541 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9200 | loss 5.1250 avg 5.7064 | lr 3.00e-04 gnorm 1.53 | tau 31.5 | 95585 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9250 | loss 5.1452 avg 5.7032 | lr 3.00e-04 gnorm 2.13 | tau 31.3 | 95627 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9300 | loss 5.0578 avg 5.7001 | lr 3.00e-04 gnorm 1.76 | tau 31.1 | 95668 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9350 | loss 5.1858 avg 5.6970 | lr 3.00e-04 gnorm 3.01 | tau 31.0 | 95710 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9400 | loss 5.0444 avg 5.6939 | lr 3.00e-04 gnorm 0.96 | tau 30.9 | 95752 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9450 | loss 5.0967 avg 5.6908 | lr 3.00e-04 gnorm 0.95 | tau 30.7 | 95793 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9500 | loss 5.0833 avg 5.6878 | lr 3.00e-04 gnorm 1.12 | tau 30.6 | 95834 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.1034 ppl 164.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step   9550 | loss 5.1290 avg 5.6848 | lr 3.00e-04 gnorm 1.00 | tau 30.4 | 95645 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9600 | loss 5.1001 avg 5.6819 | lr 3.00e-04 gnorm 1.57 | tau 30.3 | 95687 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9650 | loss 5.0852 avg 5.6789 | lr 3.00e-04 gnorm 1.65 | tau 30.2 | 95727 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9700 | loss 5.1417 avg 5.6759 | lr 3.00e-04 gnorm 1.32 | tau 30.0 | 95768 tok/s | passes 3.00 T 0.994
+  epoch 1 step   9750 | loss 5.0259 avg 5.6730 | lr 3.00e-04 gnorm 1.84 | tau 29.9 | 95807 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9800 | loss 5.1457 avg 5.6701 | lr 3.00e-04 gnorm 1.32 | tau 29.7 | 95844 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9850 | loss 5.1179 avg 5.6673 | lr 3.00e-04 gnorm 1.20 | tau 29.6 | 95882 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9900 | loss 5.1192 avg 5.6644 | lr 3.00e-04 gnorm 0.93 | tau 29.4 | 95919 tok/s | passes 3.00 T 0.995
+  epoch 1 step   9950 | loss 5.0578 avg 5.6615 | lr 3.00e-04 gnorm 1.16 | tau 29.3 | 95957 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10000 | loss 5.0519 avg 5.6587 | lr 3.00e-04 gnorm 1.48 | tau 29.1 | 95996 tok/s | passes 3.00 T 0.994
+  >>> val loss 5.0826 ppl 161.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_10000.pt
+  epoch 1 step  10050 | loss 5.1148 avg 5.6558 | lr 3.00e-04 gnorm 1.22 | tau 28.9 | 95752 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10100 | loss 5.1884 avg 5.6531 | lr 3.00e-04 gnorm 1.22 | tau 28.8 | 95791 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10150 | loss 5.0216 avg 5.6503 | lr 3.00e-04 gnorm 2.47 | tau 28.7 | 95829 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10200 | loss 5.1402 avg 5.6475 | lr 3.00e-04 gnorm 0.96 | tau 28.5 | 95867 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10250 | loss 5.0396 avg 5.6446 | lr 3.00e-04 gnorm 1.45 | tau 28.4 | 95905 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10300 | loss 5.0881 avg 5.6419 | lr 3.00e-04 gnorm 2.76 | tau 28.2 | 95942 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10350 | loss 5.0324 avg 5.6391 | lr 3.00e-04 gnorm 1.88 | tau 28.1 | 95980 tok/s | passes 3.00 T 0.994
+  epoch 1 step  10400 | loss 5.1468 avg 5.6364 | lr 3.00e-04 gnorm 1.76 | tau 28.0 | 96017 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10450 | loss 5.0182 avg 5.6337 | lr 3.00e-04 gnorm 1.78 | tau 27.8 | 96053 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10500 | loss 5.0914 avg 5.6310 | lr 3.00e-04 gnorm 1.11 | tau 27.7 | 96089 tok/s | passes 3.00 T 0.995
+  >>> val loss 5.0574 ppl 157.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  10550 | loss 5.0853 avg 5.6284 | lr 3.00e-04 gnorm 1.09 | tau 27.5 | 95925 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10600 | loss 4.9985 avg 5.6257 | lr 3.00e-04 gnorm 1.17 | tau 27.4 | 95961 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10650 | loss 4.9766 avg 5.6230 | lr 3.00e-04 gnorm 1.78 | tau 27.2 | 95997 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10700 | loss 5.0901 avg 5.6204 | lr 3.00e-04 gnorm 0.97 | tau 27.1 | 96033 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10750 | loss 5.0895 avg 5.6178 | lr 3.00e-04 gnorm 1.71 | tau 27.0 | 96068 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10800 | loss 5.1006 avg 5.6151 | lr 3.00e-04 gnorm 1.09 | tau 26.8 | 96104 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10850 | loss 4.9842 avg 5.6125 | lr 3.00e-04 gnorm 1.44 | tau 26.7 | 96139 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10900 | loss 5.0926 avg 5.6099 | lr 3.00e-04 gnorm 1.54 | tau 26.5 | 96173 tok/s | passes 3.00 T 0.995
+  epoch 1 step  10950 | loss 4.9810 avg 5.6073 | lr 3.00e-04 gnorm 1.13 | tau 26.4 | 96207 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11000 | loss 4.8798 avg 5.6047 | lr 3.00e-04 gnorm 3.08 | tau 26.3 | 96241 tok/s | passes 3.00 T 0.995
+  >>> val loss 5.0464 ppl 155.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  11050 | loss 4.9734 avg 5.6021 | lr 3.00e-04 gnorm 1.13 | tau 26.2 | 96078 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11100 | loss 5.1251 avg 5.5996 | lr 3.00e-04 gnorm 1.13 | tau 26.0 | 96113 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11150 | loss 5.0772 avg 5.5970 | lr 3.00e-04 gnorm 4.61 | tau 25.9 | 96147 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11200 | loss 5.0544 avg 5.5946 | lr 3.00e-04 gnorm 1.53 | tau 25.8 | 96181 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11250 | loss 4.9975 avg 5.5921 | lr 3.00e-04 gnorm 1.58 | tau 25.7 | 96214 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11300 | loss 5.1214 avg 5.5896 | lr 3.00e-04 gnorm 1.53 | tau 25.5 | 96248 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11350 | loss 5.0720 avg 5.5872 | lr 3.00e-04 gnorm 1.47 | tau 25.4 | 96281 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11400 | loss 5.0596 avg 5.5846 | lr 3.00e-04 gnorm 2.95 | tau 25.3 | 96314 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11450 | loss 4.9707 avg 5.5822 | lr 3.00e-04 gnorm 3.46 | tau 25.2 | 96346 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11500 | loss 4.9263 avg 5.5798 | lr 3.00e-04 gnorm 3.49 | tau 25.0 | 96379 tok/s | passes 3.00 T 0.995
+  >>> val loss 5.0272 ppl 152.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  11550 | loss 4.9409 avg 5.5774 | lr 3.00e-04 gnorm 1.91 | tau 24.9 | 96224 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11600 | loss 5.0208 avg 5.5749 | lr 3.00e-04 gnorm 1.46 | tau 24.8 | 96256 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11650 | loss 5.0138 avg 5.5726 | lr 3.00e-04 gnorm 2.09 | tau 24.7 | 96288 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11700 | loss 5.0230 avg 5.5702 | lr 3.00e-04 gnorm 2.07 | tau 24.5 | 96321 tok/s | passes 3.00 T 0.996
+  epoch 1 step  11750 | loss 4.9283 avg 5.5679 | lr 3.00e-04 gnorm 1.30 | tau 24.4 | 96352 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11800 | loss 4.8811 avg 5.5656 | lr 3.00e-04 gnorm 1.16 | tau 24.3 | 96384 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11850 | loss 5.0856 avg 5.5633 | lr 3.00e-04 gnorm 1.35 | tau 24.2 | 96416 tok/s | passes 3.00 T 0.995
+  epoch 1 step  11900 | loss 5.0587 avg 5.5610 | lr 3.00e-04 gnorm 1.06 | tau 24.0 | 96435 tok/s | passes 3.00 T 0.996
+  epoch 1 step  11950 | loss 5.0178 avg 5.5587 | lr 3.00e-04 gnorm 1.58 | tau 23.9 | 96468 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12000 | loss 4.9491 avg 5.5563 | lr 3.00e-04 gnorm 1.10 | tau 23.8 | 96501 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.9974 ppl 148.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  12050 | loss 4.9908 avg 5.5541 | lr 3.00e-04 gnorm 3.40 | tau 23.7 | 96358 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12100 | loss 5.0282 avg 5.5519 | lr 3.00e-04 gnorm 1.92 | tau 23.5 | 96390 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12150 | loss 4.9610 avg 5.5496 | lr 3.00e-04 gnorm 1.14 | tau 23.4 | 96422 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12200 | loss 5.1190 avg 5.5474 | lr 3.00e-04 gnorm 0.97 | tau 23.3 | 96454 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12250 | loss 5.0002 avg 5.5451 | lr 3.00e-04 gnorm 1.75 | tau 23.1 | 96487 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12300 | loss 4.9391 avg 5.5429 | lr 3.00e-04 gnorm 1.38 | tau 23.0 | 96519 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12350 | loss 4.8833 avg 5.5407 | lr 3.00e-04 gnorm 1.12 | tau 22.9 | 96550 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12400 | loss 4.9796 avg 5.5385 | lr 3.00e-04 gnorm 1.64 | tau 22.8 | 96581 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12450 | loss 4.9477 avg 5.5362 | lr 3.00e-04 gnorm 1.47 | tau 22.7 | 96613 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12500 | loss 4.8961 avg 5.5341 | lr 3.00e-04 gnorm 0.94 | tau 22.6 | 96644 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.9835 ppl 146.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  12550 | loss 4.9754 avg 5.5319 | lr 3.00e-04 gnorm 1.87 | tau 22.4 | 96502 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12600 | loss 4.9133 avg 5.5297 | lr 3.00e-04 gnorm 3.09 | tau 22.3 | 96533 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12650 | loss 4.9723 avg 5.5275 | lr 3.00e-04 gnorm 1.40 | tau 22.2 | 96564 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12700 | loss 5.0024 avg 5.5254 | lr 3.00e-04 gnorm 1.13 | tau 22.1 | 96595 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12750 | loss 5.0225 avg 5.5232 | lr 3.00e-04 gnorm 1.05 | tau 22.0 | 96625 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12800 | loss 4.9449 avg 5.5211 | lr 3.00e-04 gnorm 1.07 | tau 21.8 | 96655 tok/s | passes 3.00 T 0.995
+  epoch 1 step  12850 | loss 4.9329 avg 5.5190 | lr 3.00e-04 gnorm 1.07 | tau 21.7 | 96685 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12900 | loss 4.9440 avg 5.5168 | lr 3.00e-04 gnorm 2.04 | tau 21.6 | 96716 tok/s | passes 3.00 T 0.996
+  epoch 1 step  12950 | loss 4.9253 avg 5.5147 | lr 3.00e-04 gnorm 2.95 | tau 21.5 | 96744 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13000 | loss 4.9567 avg 5.5126 | lr 3.00e-04 gnorm 3.60 | tau 21.4 | 96774 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.9817 ppl 145.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  13050 | loss 4.9931 avg 5.5105 | lr 3.00e-04 gnorm 0.96 | tau 21.3 | 96640 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13100 | loss 4.9833 avg 5.5084 | lr 3.00e-04 gnorm 1.41 | tau 21.2 | 96669 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13150 | loss 5.0505 avg 5.5064 | lr 3.00e-04 gnorm 1.76 | tau 21.1 | 96698 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13200 | loss 4.9496 avg 5.5043 | lr 3.00e-04 gnorm 4.79 | tau 21.0 | 96727 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13250 | loss 4.9005 avg 5.5022 | lr 3.00e-04 gnorm 1.66 | tau 20.9 | 96756 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13300 | loss 4.9365 avg 5.5002 | lr 3.00e-04 gnorm 3.30 | tau 20.8 | 96785 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13350 | loss 4.8806 avg 5.4982 | lr 3.00e-04 gnorm 1.75 | tau 20.7 | 96814 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13400 | loss 4.9406 avg 5.4962 | lr 3.00e-04 gnorm 1.21 | tau 20.6 | 96843 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13450 | loss 4.9822 avg 5.4942 | lr 3.00e-04 gnorm 1.68 | tau 20.5 | 96871 tok/s | passes 3.00 T 0.995
+  epoch 1 step  13500 | loss 4.8925 avg 5.4922 | lr 3.00e-04 gnorm 1.28 | tau 20.3 | 96899 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.9537 ppl 141.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  13550 | loss 4.9277 avg 5.4901 | lr 3.00e-04 gnorm 2.55 | tau 20.2 | 96767 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13600 | loss 4.9594 avg 5.4882 | lr 3.00e-04 gnorm 2.30 | tau 20.1 | 96795 tok/s | passes 3.00 T 0.995
+  epoch 1 step  13650 | loss 5.0352 avg 5.4862 | lr 3.00e-04 gnorm 1.26 | tau 20.0 | 96822 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13700 | loss 4.9354 avg 5.4842 | lr 3.00e-04 gnorm 1.11 | tau 19.9 | 96849 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13750 | loss 5.0133 avg 5.4822 | lr 3.00e-04 gnorm 2.90 | tau 19.8 | 96876 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13800 | loss 4.9390 avg 5.4803 | lr 3.00e-04 gnorm 1.08 | tau 19.7 | 96903 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13850 | loss 5.0368 avg 5.4783 | lr 3.00e-04 gnorm 1.32 | tau 19.6 | 96929 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13900 | loss 4.9599 avg 5.4764 | lr 3.00e-04 gnorm 1.11 | tau 19.5 | 96956 tok/s | passes 3.00 T 0.996
+  epoch 1 step  13950 | loss 4.9716 avg 5.4745 | lr 3.00e-04 gnorm 3.57 | tau 19.4 | 96982 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14000 | loss 4.8753 avg 5.4725 | lr 3.00e-04 gnorm 2.19 | tau 19.3 | 97008 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.9388 ppl 139.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  14050 | loss 4.9790 avg 5.4706 | lr 3.00e-04 gnorm 1.44 | tau 19.2 | 96882 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14100 | loss 4.9589 avg 5.4687 | lr 3.00e-04 gnorm 2.33 | tau 19.1 | 96909 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14150 | loss 4.9362 avg 5.4668 | lr 3.00e-04 gnorm 1.20 | tau 19.0 | 96934 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14200 | loss 4.8979 avg 5.4649 | lr 3.00e-04 gnorm 1.20 | tau 18.9 | 96960 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14250 | loss 4.9747 avg 5.4630 | lr 3.00e-04 gnorm 1.11 | tau 18.8 | 96986 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14300 | loss 4.8800 avg 5.4611 | lr 3.00e-04 gnorm 1.29 | tau 18.7 | 97011 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14350 | loss 5.0631 avg 5.4593 | lr 3.00e-04 gnorm 3.02 | tau 18.6 | 97036 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14400 | loss 4.9206 avg 5.4574 | lr 3.00e-04 gnorm 2.05 | tau 18.5 | 97061 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14450 | loss 4.9704 avg 5.4556 | lr 3.00e-04 gnorm 1.45 | tau 18.4 | 97086 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14500 | loss 4.9770 avg 5.4538 | lr 3.00e-04 gnorm 1.10 | tau 18.3 | 97111 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.9220 ppl 137.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  14550 | loss 4.9164 avg 5.4520 | lr 3.00e-04 gnorm 2.06 | tau 18.2 | 96983 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14600 | loss 4.9051 avg 5.4501 | lr 3.00e-04 gnorm 1.14 | tau 18.2 | 97008 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14650 | loss 4.9699 avg 5.4484 | lr 3.00e-04 gnorm 1.95 | tau 18.1 | 97033 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14700 | loss 4.8981 avg 5.4466 | lr 3.00e-04 gnorm 4.06 | tau 18.0 | 97057 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14750 | loss 4.9246 avg 5.4448 | lr 3.00e-04 gnorm 3.27 | tau 17.9 | 97082 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14800 | loss 4.9216 avg 5.4430 | lr 3.00e-04 gnorm 2.06 | tau 17.8 | 97107 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14850 | loss 4.8877 avg 5.4412 | lr 3.00e-04 gnorm 1.51 | tau 17.7 | 97132 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14900 | loss 4.8836 avg 5.4395 | lr 3.00e-04 gnorm 1.21 | tau 17.6 | 97156 tok/s | passes 3.00 T 0.996
+  epoch 1 step  14950 | loss 4.9456 avg 5.4377 | lr 3.00e-04 gnorm 2.22 | tau 17.6 | 97180 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15000 | loss 4.9379 avg 5.4359 | lr 3.00e-04 gnorm 1.21 | tau 17.5 | 97204 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8992 ppl 134.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  15050 | loss 4.9636 avg 5.4342 | lr 3.00e-04 gnorm 3.91 | tau 17.4 | 97089 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15100 | loss 4.8828 avg 5.4324 | lr 3.00e-04 gnorm 1.62 | tau 17.3 | 97112 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15150 | loss 4.9996 avg 5.4307 | lr 3.00e-04 gnorm 2.35 | tau 17.2 | 97136 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15200 | loss 4.9572 avg 5.4290 | lr 3.00e-04 gnorm 1.12 | tau 17.1 | 97159 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15250 | loss 4.8366 avg 5.4272 | lr 3.00e-04 gnorm 2.32 | tau 17.0 | 97183 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15300 | loss 4.9042 avg 5.4256 | lr 2.99e-04 gnorm 1.67 | tau 16.9 | 97207 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15350 | loss 4.8691 avg 5.4239 | lr 2.99e-04 gnorm 5.64 | tau 16.8 | 97230 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15400 | loss 4.9082 avg 5.4222 | lr 2.99e-04 gnorm 1.13 | tau 16.8 | 97253 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15450 | loss 4.8418 avg 5.4205 | lr 2.99e-04 gnorm 1.73 | tau 16.6 | 97275 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15500 | loss 4.8747 avg 5.4188 | lr 2.99e-04 gnorm 1.61 | tau 16.6 | 97298 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8822 ppl 131.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  15550 | loss 4.8402 avg 5.4171 | lr 2.99e-04 gnorm 2.26 | tau 16.5 | 97174 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15600 | loss 4.9340 avg 5.4154 | lr 2.99e-04 gnorm 1.14 | tau 16.4 | 97197 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15650 | loss 4.9139 avg 5.4137 | lr 2.99e-04 gnorm 1.91 | tau 16.3 | 97219 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15700 | loss 4.8761 avg 5.4120 | lr 2.99e-04 gnorm 3.25 | tau 16.2 | 97242 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15750 | loss 4.8106 avg 5.4104 | lr 2.99e-04 gnorm 1.04 | tau 16.1 | 97264 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15800 | loss 4.9147 avg 5.4087 | lr 2.99e-04 gnorm 1.63 | tau 16.0 | 97287 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15850 | loss 4.8537 avg 5.4070 | lr 2.99e-04 gnorm 1.65 | tau 16.0 | 97309 tok/s | passes 3.00 T 0.997
+  epoch 1 step  15900 | loss 4.9648 avg 5.4053 | lr 2.99e-04 gnorm 1.92 | tau 15.9 | 97331 tok/s | passes 3.00 T 0.996
+  epoch 1 step  15950 | loss 4.8582 avg 5.4037 | lr 2.99e-04 gnorm 1.32 | tau 15.8 | 97353 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16000 | loss 4.7677 avg 5.4020 | lr 2.99e-04 gnorm 1.17 | tau 15.8 | 97375 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8826 ppl 132.0
+  epoch 1 step  16050 | loss 4.8468 avg 5.4004 | lr 2.99e-04 gnorm 2.02 | tau 15.7 | 97311 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16100 | loss 4.8424 avg 5.3988 | lr 2.99e-04 gnorm 2.90 | tau 15.6 | 97332 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16150 | loss 4.7648 avg 5.3972 | lr 2.99e-04 gnorm 1.63 | tau 15.5 | 97354 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16200 | loss 4.8652 avg 5.3955 | lr 2.99e-04 gnorm 1.11 | tau 15.4 | 97375 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16250 | loss 4.8470 avg 5.3939 | lr 2.99e-04 gnorm 1.67 | tau 15.3 | 97396 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16300 | loss 4.8212 avg 5.3923 | lr 2.99e-04 gnorm 1.37 | tau 15.3 | 97417 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16350 | loss 4.8261 avg 5.3907 | lr 2.99e-04 gnorm 2.90 | tau 15.2 | 97439 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16400 | loss 4.8032 avg 5.3890 | lr 2.99e-04 gnorm 2.38 | tau 15.1 | 97460 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16450 | loss 4.8446 avg 5.3874 | lr 2.99e-04 gnorm 1.71 | tau 15.0 | 97480 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16500 | loss 4.9110 avg 5.3859 | lr 2.99e-04 gnorm 3.83 | tau 15.0 | 97501 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8659 ppl 129.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  16550 | loss 4.7990 avg 5.3843 | lr 2.99e-04 gnorm 1.31 | tau 14.9 | 97388 tok/s | passes 3.00 T 0.997
+  epoch 1 step  16600 | loss 4.9058 avg 5.3827 | lr 2.99e-04 gnorm 1.54 | tau 14.8 | 97408 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16650 | loss 4.8815 avg 5.3811 | lr 2.99e-04 gnorm 4.63 | tau 14.8 | 97428 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16700 | loss 4.8057 avg 5.3795 | lr 2.99e-04 gnorm 1.11 | tau 14.7 | 97449 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16750 | loss 4.8953 avg 5.3779 | lr 2.99e-04 gnorm 1.53 | tau 14.6 | 97469 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16800 | loss 4.8654 avg 5.3764 | lr 2.99e-04 gnorm 1.46 | tau 14.5 | 97489 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16850 | loss 4.8980 avg 5.3749 | lr 2.99e-04 gnorm 1.18 | tau 14.5 | 97509 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16900 | loss 4.9337 avg 5.3733 | lr 2.99e-04 gnorm 1.41 | tau 14.4 | 97529 tok/s | passes 3.00 T 0.996
+  epoch 1 step  16950 | loss 4.8177 avg 5.3718 | lr 2.99e-04 gnorm 2.51 | tau 14.4 | 97548 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17000 | loss 4.7968 avg 5.3703 | lr 2.99e-04 gnorm 1.64 | tau 14.3 | 97568 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8497 ppl 127.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  17050 | loss 4.8317 avg 5.3688 | lr 2.99e-04 gnorm 1.56 | tau 14.2 | 97461 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17100 | loss 4.8191 avg 5.3672 | lr 2.99e-04 gnorm 1.45 | tau 14.2 | 97479 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17150 | loss 4.8179 avg 5.3657 | lr 2.99e-04 gnorm 4.17 | tau 14.1 | 97499 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17200 | loss 4.9431 avg 5.3642 | lr 2.99e-04 gnorm 1.77 | tau 14.0 | 97518 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17250 | loss 4.8165 avg 5.3627 | lr 2.99e-04 gnorm 1.10 | tau 14.0 | 97538 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17300 | loss 4.7513 avg 5.3612 | lr 2.99e-04 gnorm 2.69 | tau 13.9 | 97557 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17350 | loss 4.8803 avg 5.3597 | lr 2.99e-04 gnorm 2.07 | tau 13.8 | 97576 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17400 | loss 4.7729 avg 5.3583 | lr 2.99e-04 gnorm 1.75 | tau 13.8 | 97595 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17450 | loss 4.8920 avg 5.3569 | lr 2.99e-04 gnorm 1.33 | tau 13.7 | 97614 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17500 | loss 4.7898 avg 5.3553 | lr 2.99e-04 gnorm 1.91 | tau 13.6 | 97633 tok/s | passes 3.00 T 0.997
+  >>> val loss 4.8334 ppl 125.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  17550 | loss 4.8006 avg 5.3539 | lr 2.99e-04 gnorm 2.20 | tau 13.5 | 97523 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17600 | loss 4.8821 avg 5.3524 | lr 2.99e-04 gnorm 1.48 | tau 13.5 | 97542 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17650 | loss 4.9174 avg 5.3510 | lr 2.99e-04 gnorm 1.19 | tau 13.4 | 97561 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17700 | loss 4.9488 avg 5.3495 | lr 2.99e-04 gnorm 1.85 | tau 13.3 | 97579 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17750 | loss 4.9274 avg 5.3481 | lr 2.99e-04 gnorm 1.17 | tau 13.3 | 97598 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17800 | loss 4.8060 avg 5.3466 | lr 2.99e-04 gnorm 1.15 | tau 13.2 | 97617 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17850 | loss 4.8709 avg 5.3452 | lr 2.99e-04 gnorm 2.04 | tau 13.1 | 97635 tok/s | passes 3.00 T 0.996
+  epoch 1 step  17900 | loss 4.7512 avg 5.3437 | lr 2.99e-04 gnorm 5.20 | tau 13.1 | 97654 tok/s | passes 3.00 T 0.997
+  epoch 1 step  17950 | loss 4.7553 avg 5.3423 | lr 2.99e-04 gnorm 1.46 | tau 13.0 | 97672 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18000 | loss 4.8545 avg 5.3409 | lr 2.99e-04 gnorm 1.10 | tau 12.9 | 97690 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8229 ppl 124.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  18050 | loss 4.8010 avg 5.3395 | lr 2.99e-04 gnorm 2.34 | tau 12.9 | 97581 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18100 | loss 4.7609 avg 5.3381 | lr 2.99e-04 gnorm 1.49 | tau 12.8 | 97600 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18150 | loss 4.7784 avg 5.3367 | lr 2.99e-04 gnorm 1.18 | tau 12.8 | 97618 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18200 | loss 4.8776 avg 5.3352 | lr 2.99e-04 gnorm 1.12 | tau 12.7 | 97636 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18250 | loss 4.8822 avg 5.3339 | lr 2.99e-04 gnorm 1.30 | tau 12.6 | 97654 tok/s | passes 3.00 T 0.995
+  epoch 1 step  18300 | loss 4.8223 avg 5.3325 | lr 2.99e-04 gnorm 2.50 | tau 12.6 | 97672 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18350 | loss 4.7695 avg 5.3311 | lr 2.99e-04 gnorm 1.15 | tau 12.5 | 97690 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18400 | loss 4.7665 avg 5.3297 | lr 2.99e-04 gnorm 1.49 | tau 12.4 | 97707 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18450 | loss 4.7368 avg 5.3282 | lr 2.99e-04 gnorm 1.10 | tau 12.4 | 97725 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18500 | loss 4.7437 avg 5.3269 | lr 2.99e-04 gnorm 2.15 | tau 12.3 | 97742 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.8121 ppl 123.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  18550 | loss 4.7683 avg 5.3255 | lr 2.99e-04 gnorm 2.09 | tau 12.2 | 97642 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18600 | loss 4.8940 avg 5.3241 | lr 2.99e-04 gnorm 1.12 | tau 12.2 | 97660 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18650 | loss 4.8822 avg 5.3228 | lr 2.99e-04 gnorm 1.25 | tau 12.1 | 97678 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18700 | loss 4.7480 avg 5.3214 | lr 2.99e-04 gnorm 1.85 | tau 12.1 | 97695 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18750 | loss 4.7897 avg 5.3200 | lr 2.99e-04 gnorm 3.16 | tau 12.0 | 97712 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18800 | loss 4.8138 avg 5.3186 | lr 2.99e-04 gnorm 1.57 | tau 11.9 | 97729 tok/s | passes 3.00 T 0.997
+  epoch 1 step  18850 | loss 4.8063 avg 5.3173 | lr 2.99e-04 gnorm 1.46 | tau 11.9 | 97746 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18900 | loss 4.8179 avg 5.3159 | lr 2.99e-04 gnorm 1.55 | tau 11.8 | 97763 tok/s | passes 3.00 T 0.996
+  epoch 1 step  18950 | loss 4.9162 avg 5.3146 | lr 2.99e-04 gnorm 1.60 | tau 11.8 | 97780 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19000 | loss 4.7154 avg 5.3132 | lr 2.99e-04 gnorm 1.79 | tau 11.7 | 97797 tok/s | passes 3.00 T 0.997
+  >>> val loss 4.7945 ppl 120.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  19050 | loss 4.7955 avg 5.3118 | lr 2.99e-04 gnorm 1.36 | tau 11.7 | 97696 tok/s | passes 3.00 T 0.997
+  epoch 1 step  19100 | loss 4.8641 avg 5.3105 | lr 2.99e-04 gnorm 2.28 | tau 11.6 | 97713 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19150 | loss 4.8762 avg 5.3091 | lr 2.99e-04 gnorm 1.98 | tau 11.6 | 97729 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19200 | loss 4.8046 avg 5.3078 | lr 2.99e-04 gnorm 2.34 | tau 11.5 | 97746 tok/s | passes 3.00 T 0.997
+  epoch 1 step  19250 | loss 4.6916 avg 5.3065 | lr 2.99e-04 gnorm 1.93 | tau 11.5 | 97763 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19300 | loss 4.7324 avg 5.3051 | lr 2.99e-04 gnorm 4.43 | tau 11.4 | 97779 tok/s | passes 3.00 T 0.997
+  epoch 1 step  19350 | loss 4.8831 avg 5.3038 | lr 2.99e-04 gnorm 1.50 | tau 11.4 | 97796 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19400 | loss 4.6914 avg 5.3025 | lr 2.99e-04 gnorm 1.92 | tau 11.3 | 97812 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19450 | loss 4.7416 avg 5.3012 | lr 2.99e-04 gnorm 1.32 | tau 11.2 | 97829 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19500 | loss 4.7585 avg 5.2998 | lr 2.99e-04 gnorm 1.57 | tau 11.2 | 97845 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7784 ppl 118.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  19550 | loss 4.9392 avg 5.2985 | lr 2.99e-04 gnorm 1.21 | tau 11.1 | 97751 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19600 | loss 4.7980 avg 5.2973 | lr 2.99e-04 gnorm 1.22 | tau 11.1 | 97767 tok/s | passes 3.00 T 0.997
+  epoch 1 step  19650 | loss 4.7720 avg 5.2959 | lr 2.99e-04 gnorm 2.52 | tau 11.0 | 97784 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19700 | loss 4.8419 avg 5.2946 | lr 2.99e-04 gnorm 1.58 | tau 11.0 | 97800 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19750 | loss 4.8127 avg 5.2933 | lr 2.99e-04 gnorm 1.13 | tau 10.9 | 97816 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19800 | loss 4.7499 avg 5.2920 | lr 2.99e-04 gnorm 1.20 | tau 10.9 | 97832 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19850 | loss 4.7528 avg 5.2906 | lr 2.99e-04 gnorm 1.61 | tau 10.8 | 97848 tok/s | passes 3.00 T 0.996
+  epoch 1 step  19900 | loss 4.7935 avg 5.2893 | lr 2.99e-04 gnorm 1.19 | tau 10.8 | 97863 tok/s | passes 3.00 T 0.997
+  epoch 1 step  19950 | loss 4.7540 avg 5.2881 | lr 2.99e-04 gnorm 1.73 | tau 10.7 | 97879 tok/s | passes 3.00 T 0.997
+  epoch 1 step  20000 | loss 4.6971 avg 5.2868 | lr 2.99e-04 gnorm 2.60 | tau 10.7 | 97895 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7638 ppl 117.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_20000.pt
+  epoch 1 step  20050 | loss 4.7954 avg 5.2855 | lr 2.99e-04 gnorm 2.28 | tau 10.6 | 97757 tok/s | passes 3.00 T 0.997
+  epoch 1 step  20100 | loss 4.7439 avg 5.2842 | lr 2.99e-04 gnorm 1.79 | tau 10.6 | 97772 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20150 | loss 4.7073 avg 5.2829 | lr 2.99e-04 gnorm 2.54 | tau 10.5 | 97786 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20200 | loss 4.7472 avg 5.2816 | lr 2.99e-04 gnorm 1.26 | tau 10.5 | 97800 tok/s | passes 3.00 T 0.997
+  epoch 1 step  20250 | loss 4.7065 avg 5.2804 | lr 2.99e-04 gnorm 1.38 | tau 10.4 | 97814 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20300 | loss 4.6419 avg 5.2790 | lr 2.99e-04 gnorm 1.90 | tau 10.4 | 97828 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20350 | loss 4.7476 avg 5.2777 | lr 2.99e-04 gnorm 1.09 | tau 10.3 | 97842 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20400 | loss 4.8318 avg 5.2765 | lr 2.99e-04 gnorm 1.82 | tau 10.3 | 97856 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20450 | loss 4.6951 avg 5.2752 | lr 2.99e-04 gnorm 3.01 | tau 10.2 | 97870 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20500 | loss 4.7301 avg 5.2740 | lr 2.99e-04 gnorm 1.17 | tau 10.2 | 97884 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7528 ppl 115.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  20550 | loss 4.7136 avg 5.2727 | lr 2.99e-04 gnorm 2.00 | tau 10.1 | 97787 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20600 | loss 4.8208 avg 5.2714 | lr 2.99e-04 gnorm 1.39 | tau 10.1 | 97801 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20650 | loss 4.6907 avg 5.2701 | lr 2.99e-04 gnorm 1.40 | tau 10.0 | 97814 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20700 | loss 4.7686 avg 5.2689 | lr 2.99e-04 gnorm 1.83 | tau 10.0 | 97827 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20750 | loss 4.7071 avg 5.2676 | lr 2.99e-04 gnorm 1.35 | tau 9.9 | 97840 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20800 | loss 4.7533 avg 5.2664 | lr 2.99e-04 gnorm 1.64 | tau 9.9 | 97854 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20850 | loss 4.7685 avg 5.2652 | lr 2.99e-04 gnorm 1.75 | tau 9.8 | 97867 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20900 | loss 4.6560 avg 5.2639 | lr 2.99e-04 gnorm 2.40 | tau 9.8 | 97881 tok/s | passes 3.00 T 0.996
+  epoch 1 step  20950 | loss 4.6639 avg 5.2627 | lr 2.99e-04 gnorm 1.89 | tau 9.7 | 97894 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21000 | loss 4.7925 avg 5.2615 | lr 2.99e-04 gnorm 3.06 | tau 9.7 | 97907 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7413 ppl 114.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  21050 | loss 4.7148 avg 5.2602 | lr 2.99e-04 gnorm 1.35 | tau 9.6 | 97818 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21100 | loss 4.8496 avg 5.2589 | lr 2.99e-04 gnorm 1.70 | tau 9.6 | 97831 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21150 | loss 4.7114 avg 5.2576 | lr 2.99e-04 gnorm 1.81 | tau 9.5 | 97844 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21200 | loss 4.7661 avg 5.2564 | lr 2.99e-04 gnorm 1.30 | tau 9.5 | 97857 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21250 | loss 4.7752 avg 5.2552 | lr 2.99e-04 gnorm 1.75 | tau 9.5 | 97870 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21300 | loss 4.6208 avg 5.2539 | lr 2.99e-04 gnorm 1.20 | tau 9.4 | 97884 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21350 | loss 4.6605 avg 5.2527 | lr 2.99e-04 gnorm 1.66 | tau 9.4 | 97897 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21400 | loss 4.7005 avg 5.2514 | lr 2.99e-04 gnorm 1.17 | tau 9.3 | 97909 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21450 | loss 4.7507 avg 5.2502 | lr 2.99e-04 gnorm 1.12 | tau 9.3 | 97923 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21500 | loss 4.7191 avg 5.2489 | lr 2.99e-04 gnorm 1.57 | tau 9.3 | 97936 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7153 ppl 111.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  21550 | loss 4.6659 avg 5.2477 | lr 2.99e-04 gnorm 1.10 | tau 9.2 | 97848 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21600 | loss 4.7259 avg 5.2464 | lr 2.99e-04 gnorm 1.34 | tau 9.2 | 97861 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21650 | loss 4.7148 avg 5.2452 | lr 2.99e-04 gnorm 1.80 | tau 9.1 | 97874 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21700 | loss 4.7029 avg 5.2440 | lr 2.99e-04 gnorm 1.35 | tau 9.1 | 97887 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21750 | loss 4.6739 avg 5.2427 | lr 2.99e-04 gnorm 1.24 | tau 9.1 | 97900 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21800 | loss 4.7291 avg 5.2415 | lr 2.99e-04 gnorm 1.18 | tau 9.0 | 97913 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21850 | loss 4.6982 avg 5.2403 | lr 2.99e-04 gnorm 1.47 | tau 9.0 | 97926 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21900 | loss 4.7265 avg 5.2391 | lr 2.99e-04 gnorm 2.26 | tau 8.9 | 97938 tok/s | passes 3.00 T 0.996
+  epoch 1 step  21950 | loss 4.7129 avg 5.2379 | lr 2.99e-04 gnorm 1.20 | tau 8.9 | 97951 tok/s | passes 3.00 T 0.995
+  epoch 1 step  22000 | loss 4.6390 avg 5.2366 | lr 2.99e-04 gnorm 2.35 | tau 8.9 | 97964 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.7010 ppl 110.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  22050 | loss 4.7860 avg 5.2354 | lr 2.99e-04 gnorm 1.05 | tau 8.8 | 97877 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22100 | loss 4.6720 avg 5.2342 | lr 2.99e-04 gnorm 1.76 | tau 8.8 | 97890 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22150 | loss 4.7178 avg 5.2329 | lr 2.99e-04 gnorm 1.61 | tau 8.7 | 97904 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22200 | loss 4.8078 avg 5.2318 | lr 2.99e-04 gnorm 1.39 | tau 8.7 | 97916 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22250 | loss 4.7746 avg 5.2306 | lr 2.99e-04 gnorm 1.25 | tau 8.7 | 97929 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22300 | loss 4.7518 avg 5.2293 | lr 2.99e-04 gnorm 2.77 | tau 8.7 | 97941 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22350 | loss 4.7189 avg 5.2281 | lr 2.99e-04 gnorm 1.02 | tau 8.6 | 97954 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22400 | loss 4.7227 avg 5.2270 | lr 2.99e-04 gnorm 1.11 | tau 8.6 | 97967 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22450 | loss 4.8239 avg 5.2257 | lr 2.99e-04 gnorm 1.36 | tau 8.6 | 97978 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22500 | loss 4.5937 avg 5.2245 | lr 2.99e-04 gnorm 1.41 | tau 8.5 | 97991 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.6819 ppl 108.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  22550 | loss 4.8014 avg 5.2234 | lr 2.99e-04 gnorm 1.01 | tau 8.5 | 97904 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22600 | loss 4.6830 avg 5.2221 | lr 2.99e-04 gnorm 1.37 | tau 8.4 | 97916 tok/s | passes 3.00 T 0.995
+  epoch 1 step  22650 | loss 4.6536 avg 5.2209 | lr 2.99e-04 gnorm 1.06 | tau 8.4 | 97928 tok/s | passes 3.00 T 0.995
+  epoch 1 step  22700 | loss 4.6770 avg 5.2198 | lr 2.99e-04 gnorm 1.11 | tau 8.4 | 97941 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22750 | loss 4.7861 avg 5.2186 | lr 2.99e-04 gnorm 2.59 | tau 8.3 | 97954 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22800 | loss 4.6563 avg 5.2174 | lr 2.99e-04 gnorm 2.10 | tau 8.3 | 97966 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22850 | loss 4.5881 avg 5.2162 | lr 2.99e-04 gnorm 1.08 | tau 8.3 | 97978 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22900 | loss 4.7241 avg 5.2151 | lr 2.99e-04 gnorm 2.05 | tau 8.2 | 97991 tok/s | passes 3.00 T 0.996
+  epoch 1 step  22950 | loss 4.6350 avg 5.2139 | lr 2.99e-04 gnorm 1.51 | tau 8.2 | 98003 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23000 | loss 4.6785 avg 5.2127 | lr 2.99e-04 gnorm 2.63 | tau 8.2 | 98015 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.6758 ppl 107.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  23050 | loss 4.6987 avg 5.2115 | lr 2.99e-04 gnorm 1.23 | tau 8.1 | 97929 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23100 | loss 4.7434 avg 5.2103 | lr 2.99e-04 gnorm 1.32 | tau 8.1 | 97942 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23150 | loss 4.7027 avg 5.2092 | lr 2.99e-04 gnorm 1.07 | tau 8.1 | 97954 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23200 | loss 4.6286 avg 5.2080 | lr 2.99e-04 gnorm 1.19 | tau 8.0 | 97966 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23250 | loss 4.5949 avg 5.2069 | lr 2.99e-04 gnorm 1.78 | tau 8.0 | 97978 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23300 | loss 4.7301 avg 5.2057 | lr 2.99e-04 gnorm 1.03 | tau 8.0 | 97990 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23350 | loss 4.5842 avg 5.2045 | lr 2.99e-04 gnorm 1.07 | tau 7.9 | 98002 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23400 | loss 4.7710 avg 5.2034 | lr 2.99e-04 gnorm 0.94 | tau 7.9 | 98014 tok/s | passes 3.00 T 0.995
+  epoch 1 step  23450 | loss 4.5825 avg 5.2022 | lr 2.99e-04 gnorm 1.08 | tau 7.9 | 98026 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23500 | loss 4.6101 avg 5.2010 | lr 2.99e-04 gnorm 1.08 | tau 7.8 | 98038 tok/s | passes 3.00 T 0.996
+  >>> val loss 4.6594 ppl 105.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  23550 | loss 4.7060 avg 5.1999 | lr 2.99e-04 gnorm 1.59 | tau 7.8 | 97959 tok/s | passes 3.00 T 0.995
+  epoch 1 step  23600 | loss 4.6832 avg 5.1987 | lr 2.99e-04 gnorm 2.01 | tau 7.8 | 97971 tok/s | passes 3.00 T 0.995
+  epoch 1 step  23650 | loss 4.7196 avg 5.1976 | lr 2.99e-04 gnorm 1.94 | tau 7.7 | 97983 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23700 | loss 4.6558 avg 5.1964 | lr 2.99e-04 gnorm 1.05 | tau 7.7 | 97994 tok/s | passes 3.00 T 0.995
+  epoch 1 step  23750 | loss 4.6059 avg 5.1953 | lr 2.99e-04 gnorm 1.05 | tau 7.7 | 98006 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23800 | loss 4.5822 avg 5.1941 | lr 2.99e-04 gnorm 2.08 | tau 7.7 | 98018 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23850 | loss 4.6746 avg 5.1930 | lr 2.99e-04 gnorm 1.07 | tau 7.6 | 98030 tok/s | passes 3.00 T 0.996
+  epoch 1 step  23900 | loss 4.6468 avg 5.1919 | lr 2.99e-04 gnorm 1.46 | tau 7.6 | 98041 tok/s | passes 3.00 T 0.995
+  epoch 1 step  23950 | loss 4.7015 avg 5.1908 | lr 2.99e-04 gnorm 1.65 | tau 7.6 | 98053 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24000 | loss 4.7410 avg 5.1896 | lr 2.99e-04 gnorm 1.07 | tau 7.5 | 98065 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.6445 ppl 104.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  24050 | loss 4.6645 avg 5.1885 | lr 2.99e-04 gnorm 2.06 | tau 7.5 | 97987 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24100 | loss 4.7732 avg 5.1873 | lr 2.99e-04 gnorm 1.03 | tau 7.5 | 97999 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24150 | loss 4.7908 avg 5.1862 | lr 2.99e-04 gnorm 1.41 | tau 7.4 | 98010 tok/s | passes 3.00 T 0.996
+  epoch 1 step  24200 | loss 4.7054 avg 5.1851 | lr 2.99e-04 gnorm 1.06 | tau 7.4 | 98022 tok/s | passes 3.00 T 0.996
+  epoch 1 step  24250 | loss 4.6391 avg 5.1840 | lr 2.99e-04 gnorm 1.18 | tau 7.4 | 98034 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24300 | loss 4.5078 avg 5.1829 | lr 2.99e-04 gnorm 1.26 | tau 7.4 | 98045 tok/s | passes 3.00 T 0.996
+  epoch 1 step  24350 | loss 4.6963 avg 5.1818 | lr 2.99e-04 gnorm 1.45 | tau 7.3 | 98057 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24400 | loss 4.5967 avg 5.1807 | lr 2.99e-04 gnorm 1.15 | tau 7.3 | 98068 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24450 | loss 4.6907 avg 5.1795 | lr 2.99e-04 gnorm 0.96 | tau 7.3 | 98079 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24500 | loss 4.6401 avg 5.1784 | lr 2.99e-04 gnorm 1.09 | tau 7.2 | 98091 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.6301 ppl 102.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  24550 | loss 4.6544 avg 5.1773 | lr 2.99e-04 gnorm 1.25 | tau 7.2 | 98012 tok/s | passes 3.00 T 0.996
+  epoch 1 step  24600 | loss 4.5964 avg 5.1762 | lr 2.99e-04 gnorm 1.41 | tau 7.2 | 98020 tok/s | passes 3.00 T 0.996
+  epoch 1 step  24650 | loss 4.6689 avg 5.1751 | lr 2.99e-04 gnorm 1.72 | tau 7.2 | 98031 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24700 | loss 4.5154 avg 5.1740 | lr 2.99e-04 gnorm 1.06 | tau 7.1 | 98043 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24750 | loss 4.6299 avg 5.1729 | lr 2.99e-04 gnorm 1.49 | tau 7.1 | 98054 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24800 | loss 4.6556 avg 5.1718 | lr 2.99e-04 gnorm 1.07 | tau 7.1 | 98065 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24850 | loss 4.6005 avg 5.1707 | lr 2.99e-04 gnorm 1.03 | tau 7.1 | 98076 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24900 | loss 4.6770 avg 5.1695 | lr 2.99e-04 gnorm 1.10 | tau 7.0 | 98088 tok/s | passes 3.00 T 0.995
+  epoch 1 step  24950 | loss 4.6781 avg 5.1685 | lr 2.99e-04 gnorm 1.15 | tau 7.0 | 98099 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25000 | loss 4.7033 avg 5.1673 | lr 2.99e-04 gnorm 1.23 | tau 7.0 | 98109 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.6186 ppl 101.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  25050 | loss 4.6342 avg 5.1662 | lr 2.99e-04 gnorm 1.09 | tau 6.9 | 98035 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25100 | loss 4.6585 avg 5.1651 | lr 2.99e-04 gnorm 1.04 | tau 6.9 | 98046 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25150 | loss 4.4838 avg 5.1640 | lr 2.99e-04 gnorm 1.01 | tau 6.9 | 98057 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25200 | loss 4.6710 avg 5.1630 | lr 2.99e-04 gnorm 1.16 | tau 6.9 | 98067 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25250 | loss 4.4280 avg 5.1619 | lr 2.99e-04 gnorm 1.78 | tau 6.8 | 98078 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25300 | loss 4.6239 avg 5.1608 | lr 2.99e-04 gnorm 1.62 | tau 6.8 | 98089 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25350 | loss 4.5562 avg 5.1597 | lr 2.99e-04 gnorm 0.97 | tau 6.8 | 98100 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25400 | loss 4.6174 avg 5.1586 | lr 2.99e-04 gnorm 1.12 | tau 6.8 | 98111 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25450 | loss 4.5641 avg 5.1575 | lr 2.99e-04 gnorm 1.07 | tau 6.7 | 98122 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25500 | loss 4.5831 avg 5.1564 | lr 2.99e-04 gnorm 1.04 | tau 6.7 | 98133 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.5998 ppl 99.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  25550 | loss 4.6087 avg 5.1553 | lr 2.99e-04 gnorm 1.05 | tau 6.7 | 98053 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25600 | loss 4.6605 avg 5.1542 | lr 2.99e-04 gnorm 1.03 | tau 6.6 | 98063 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25650 | loss 4.6027 avg 5.1532 | lr 2.99e-04 gnorm 1.12 | tau 6.6 | 98074 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25700 | loss 4.6154 avg 5.1522 | lr 2.99e-04 gnorm 1.51 | tau 6.6 | 98085 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25750 | loss 4.5594 avg 5.1511 | lr 2.99e-04 gnorm 1.04 | tau 6.6 | 98095 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25800 | loss 4.6654 avg 5.1500 | lr 2.98e-04 gnorm 1.50 | tau 6.5 | 98106 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25850 | loss 4.6726 avg 5.1489 | lr 2.98e-04 gnorm 1.13 | tau 6.5 | 98117 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25900 | loss 4.5035 avg 5.1478 | lr 2.98e-04 gnorm 1.69 | tau 6.5 | 98127 tok/s | passes 3.00 T 0.995
+  epoch 1 step  25950 | loss 4.6761 avg 5.1468 | lr 2.98e-04 gnorm 1.07 | tau 6.5 | 98137 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26000 | loss 4.5102 avg 5.1457 | lr 2.98e-04 gnorm 1.88 | tau 6.4 | 98147 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.5966 ppl 99.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  26050 | loss 4.5783 avg 5.1447 | lr 2.98e-04 gnorm 1.46 | tau 6.4 | 98072 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26100 | loss 4.5348 avg 5.1436 | lr 2.98e-04 gnorm 1.06 | tau 6.4 | 98082 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26150 | loss 4.5963 avg 5.1426 | lr 2.98e-04 gnorm 1.08 | tau 6.4 | 98093 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26200 | loss 4.6409 avg 5.1416 | lr 2.98e-04 gnorm 1.66 | tau 6.4 | 98104 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26250 | loss 4.6002 avg 5.1405 | lr 2.98e-04 gnorm 1.02 | tau 6.3 | 98114 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26300 | loss 4.5040 avg 5.1395 | lr 2.98e-04 gnorm 1.06 | tau 6.3 | 98124 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26350 | loss 4.5472 avg 5.1385 | lr 2.98e-04 gnorm 1.02 | tau 6.3 | 98135 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26400 | loss 4.6588 avg 5.1374 | lr 2.98e-04 gnorm 1.02 | tau 6.3 | 98145 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26450 | loss 4.6138 avg 5.1364 | lr 2.98e-04 gnorm 1.35 | tau 6.2 | 98155 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26500 | loss 4.6272 avg 5.1353 | lr 2.98e-04 gnorm 1.40 | tau 6.2 | 98165 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.5782 ppl 97.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  26550 | loss 4.4240 avg 5.1343 | lr 2.98e-04 gnorm 1.03 | tau 6.2 | 98094 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26600 | loss 4.5914 avg 5.1332 | lr 2.98e-04 gnorm 1.15 | tau 6.2 | 98102 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26650 | loss 4.5650 avg 5.1322 | lr 2.98e-04 gnorm 0.99 | tau 6.2 | 98113 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26700 | loss 4.5648 avg 5.1311 | lr 2.98e-04 gnorm 1.25 | tau 6.1 | 98123 tok/s | passes 3.00 T 0.994
+  epoch 1 step  26750 | loss 4.4964 avg 5.1301 | lr 2.98e-04 gnorm 1.47 | tau 6.1 | 98133 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26800 | loss 4.5789 avg 5.1291 | lr 2.98e-04 gnorm 1.05 | tau 6.1 | 98143 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26850 | loss 4.6478 avg 5.1280 | lr 2.98e-04 gnorm 1.25 | tau 6.1 | 98153 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26900 | loss 4.5313 avg 5.1270 | lr 2.98e-04 gnorm 1.31 | tau 6.0 | 98163 tok/s | passes 3.00 T 0.995
+  epoch 1 step  26950 | loss 4.6340 avg 5.1260 | lr 2.98e-04 gnorm 1.07 | tau 6.0 | 98174 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27000 | loss 4.6421 avg 5.1250 | lr 2.98e-04 gnorm 1.02 | tau 6.0 | 98183 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.5643 ppl 96.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  27050 | loss 4.5445 avg 5.1240 | lr 2.98e-04 gnorm 1.16 | tau 6.0 | 98114 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27100 | loss 4.5697 avg 5.1229 | lr 2.98e-04 gnorm 1.22 | tau 6.0 | 98124 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27150 | loss 4.6279 avg 5.1219 | lr 2.98e-04 gnorm 1.52 | tau 5.9 | 98133 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27200 | loss 4.5423 avg 5.1209 | lr 2.98e-04 gnorm 1.30 | tau 5.9 | 98143 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27250 | loss 4.5822 avg 5.1199 | lr 2.98e-04 gnorm 1.05 | tau 5.9 | 98153 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27300 | loss 4.5807 avg 5.1189 | lr 2.98e-04 gnorm 1.20 | tau 5.9 | 98163 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27350 | loss 4.5920 avg 5.1179 | lr 2.98e-04 gnorm 1.06 | tau 5.9 | 98172 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27400 | loss 4.6735 avg 5.1169 | lr 2.98e-04 gnorm 1.12 | tau 5.9 | 98182 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27450 | loss 4.6144 avg 5.1159 | lr 2.98e-04 gnorm 1.13 | tau 5.8 | 98192 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27500 | loss 4.5178 avg 5.1149 | lr 2.98e-04 gnorm 1.83 | tau 5.8 | 98201 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.5585 ppl 95.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  27550 | loss 4.5043 avg 5.1138 | lr 2.98e-04 gnorm 0.95 | tau 5.8 | 98130 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27600 | loss 4.4790 avg 5.1128 | lr 2.98e-04 gnorm 1.06 | tau 5.8 | 98139 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27650 | loss 4.4851 avg 5.1118 | lr 2.98e-04 gnorm 1.00 | tau 5.8 | 98149 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27700 | loss 4.6903 avg 5.1108 | lr 2.98e-04 gnorm 0.99 | tau 5.7 | 98159 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27750 | loss 4.5781 avg 5.1098 | lr 2.98e-04 gnorm 1.76 | tau 5.7 | 98168 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27800 | loss 4.5986 avg 5.1088 | lr 2.98e-04 gnorm 1.04 | tau 5.7 | 98178 tok/s | passes 3.00 T 0.995
+  epoch 1 step  27850 | loss 4.6448 avg 5.1077 | lr 2.98e-04 gnorm 1.39 | tau 5.7 | 98188 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27900 | loss 4.4960 avg 5.1067 | lr 2.98e-04 gnorm 1.56 | tau 5.7 | 98197 tok/s | passes 3.00 T 0.994
+  epoch 1 step  27950 | loss 4.5966 avg 5.1057 | lr 2.98e-04 gnorm 1.24 | tau 5.7 | 98206 tok/s | passes 3.00 T 0.995
+  epoch 1 step  28000 | loss 4.5450 avg 5.1047 | lr 2.98e-04 gnorm 0.98 | tau 5.6 | 98216 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.5437 ppl 94.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  28050 | loss 4.4497 avg 5.1038 | lr 2.98e-04 gnorm 0.99 | tau 5.6 | 98143 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28100 | loss 4.4806 avg 5.1027 | lr 2.98e-04 gnorm 1.41 | tau 5.6 | 98151 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28150 | loss 4.5209 avg 5.1017 | lr 2.98e-04 gnorm 1.24 | tau 5.6 | 98161 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28200 | loss 4.5866 avg 5.1007 | lr 2.98e-04 gnorm 1.08 | tau 5.6 | 98170 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28250 | loss 4.5121 avg 5.0998 | lr 2.98e-04 gnorm 1.11 | tau 5.6 | 98179 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28300 | loss 4.5224 avg 5.0988 | lr 2.98e-04 gnorm 1.04 | tau 5.6 | 98188 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28350 | loss 4.4633 avg 5.0978 | lr 2.98e-04 gnorm 1.00 | tau 5.5 | 98197 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28400 | loss 4.4937 avg 5.0968 | lr 2.98e-04 gnorm 1.06 | tau 5.5 | 98206 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28450 | loss 4.4708 avg 5.0959 | lr 2.98e-04 gnorm 1.06 | tau 5.5 | 98215 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28500 | loss 4.5751 avg 5.0949 | lr 2.98e-04 gnorm 1.11 | tau 5.5 | 98224 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.5272 ppl 92.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  28550 | loss 4.6176 avg 5.0939 | lr 2.98e-04 gnorm 1.07 | tau 5.5 | 98151 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28600 | loss 4.5312 avg 5.0929 | lr 2.98e-04 gnorm 1.06 | tau 5.5 | 98160 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28650 | loss 4.6055 avg 5.0920 | lr 2.98e-04 gnorm 1.00 | tau 5.5 | 98170 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28700 | loss 4.5736 avg 5.0910 | lr 2.98e-04 gnorm 0.98 | tau 5.4 | 98179 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28750 | loss 4.4703 avg 5.0900 | lr 2.98e-04 gnorm 1.05 | tau 5.4 | 98189 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28800 | loss 4.4243 avg 5.0890 | lr 2.98e-04 gnorm 1.00 | tau 5.4 | 98198 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28850 | loss 4.5540 avg 5.0881 | lr 2.98e-04 gnorm 1.28 | tau 5.4 | 98207 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28900 | loss 4.6807 avg 5.0871 | lr 2.98e-04 gnorm 1.02 | tau 5.4 | 98217 tok/s | passes 3.00 T 0.994
+  epoch 1 step  28950 | loss 4.4162 avg 5.0862 | lr 2.98e-04 gnorm 1.04 | tau 5.4 | 98226 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29000 | loss 4.5360 avg 5.0852 | lr 2.98e-04 gnorm 1.00 | tau 5.4 | 98235 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.5263 ppl 92.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  29050 | loss 4.4784 avg 5.0843 | lr 2.98e-04 gnorm 1.16 | tau 5.3 | 98170 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29100 | loss 4.5052 avg 5.0833 | lr 2.98e-04 gnorm 0.95 | tau 5.3 | 98179 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29150 | loss 4.4589 avg 5.0824 | lr 2.98e-04 gnorm 0.99 | tau 5.3 | 98188 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29200 | loss 4.4513 avg 5.0814 | lr 2.98e-04 gnorm 1.01 | tau 5.3 | 98197 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29250 | loss 4.6296 avg 5.0805 | lr 2.98e-04 gnorm 0.99 | tau 5.3 | 98206 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29300 | loss 4.4711 avg 5.0795 | lr 2.98e-04 gnorm 1.27 | tau 5.3 | 98215 tok/s | passes 3.00 T 0.993
+  epoch 1 step  29350 | loss 4.5382 avg 5.0785 | lr 2.98e-04 gnorm 1.38 | tau 5.3 | 98224 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29400 | loss 4.5363 avg 5.0776 | lr 2.98e-04 gnorm 1.06 | tau 5.2 | 98233 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29450 | loss 4.4419 avg 5.0766 | lr 2.98e-04 gnorm 1.02 | tau 5.2 | 98242 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29500 | loss 4.4899 avg 5.0757 | lr 2.98e-04 gnorm 1.09 | tau 5.2 | 98250 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.5119 ppl 91.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  29550 | loss 4.4575 avg 5.0747 | lr 2.98e-04 gnorm 1.03 | tau 5.2 | 98183 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29600 | loss 4.5811 avg 5.0738 | lr 2.98e-04 gnorm 1.42 | tau 5.2 | 98192 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29650 | loss 4.4296 avg 5.0728 | lr 2.98e-04 gnorm 1.07 | tau 5.2 | 98201 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29700 | loss 4.5656 avg 5.0719 | lr 2.98e-04 gnorm 1.01 | tau 5.2 | 98210 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29750 | loss 4.5219 avg 5.0709 | lr 2.98e-04 gnorm 1.09 | tau 5.2 | 98219 tok/s | passes 3.00 T 0.993
+  epoch 1 step  29800 | loss 4.6234 avg 5.0700 | lr 2.98e-04 gnorm 1.09 | tau 5.1 | 98228 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29850 | loss 4.4519 avg 5.0691 | lr 2.98e-04 gnorm 1.06 | tau 5.1 | 98237 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29900 | loss 4.4412 avg 5.0682 | lr 2.98e-04 gnorm 1.33 | tau 5.1 | 98245 tok/s | passes 3.00 T 0.994
+  epoch 1 step  29950 | loss 4.5330 avg 5.0672 | lr 2.98e-04 gnorm 1.15 | tau 5.1 | 98254 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30000 | loss 4.6060 avg 5.0663 | lr 2.98e-04 gnorm 1.11 | tau 5.1 | 98263 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.5076 ppl 90.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_30000.pt
+  epoch 1 step  30050 | loss 4.5637 avg 5.0654 | lr 2.98e-04 gnorm 1.38 | tau 5.1 | 98174 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30100 | loss 4.4906 avg 5.0645 | lr 2.98e-04 gnorm 0.97 | tau 5.1 | 98182 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30150 | loss 4.5682 avg 5.0636 | lr 2.98e-04 gnorm 0.99 | tau 5.1 | 98190 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30200 | loss 4.6108 avg 5.0626 | lr 2.98e-04 gnorm 1.03 | tau 5.0 | 98198 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30250 | loss 4.4965 avg 5.0617 | lr 2.98e-04 gnorm 1.36 | tau 5.0 | 98207 tok/s | passes 3.00 T 0.994
+  epoch 1 step  30300 | loss 4.5350 avg 5.0608 | lr 2.98e-04 gnorm 1.11 | tau 5.0 | 98215 tok/s | passes 3.00 T 0.994
+  epoch 1 step  30350 | loss 4.4949 avg 5.0599 | lr 2.98e-04 gnorm 1.14 | tau 5.0 | 98223 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30400 | loss 4.4983 avg 5.0589 | lr 2.98e-04 gnorm 1.08 | tau 5.0 | 98231 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30450 | loss 4.5098 avg 5.0580 | lr 2.98e-04 gnorm 0.98 | tau 5.0 | 98239 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30500 | loss 4.4811 avg 5.0571 | lr 2.98e-04 gnorm 0.98 | tau 5.0 | 98248 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.5016 ppl 90.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  30550 | loss 4.5623 avg 5.0562 | lr 2.98e-04 gnorm 1.03 | tau 4.9 | 98186 tok/s | passes 3.00 T 0.994
+  epoch 1 step  30600 | loss 4.3842 avg 5.0553 | lr 2.98e-04 gnorm 1.03 | tau 4.9 | 98194 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30650 | loss 4.4475 avg 5.0544 | lr 2.98e-04 gnorm 1.04 | tau 4.9 | 98202 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30700 | loss 4.5315 avg 5.0535 | lr 2.98e-04 gnorm 1.40 | tau 4.9 | 98210 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30750 | loss 4.4543 avg 5.0526 | lr 2.98e-04 gnorm 1.05 | tau 4.9 | 98218 tok/s | passes 3.00 T 0.994
+  epoch 1 step  30800 | loss 4.4118 avg 5.0516 | lr 2.98e-04 gnorm 1.03 | tau 4.9 | 98226 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30850 | loss 4.4903 avg 5.0507 | lr 2.98e-04 gnorm 1.10 | tau 4.9 | 98234 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30900 | loss 4.6118 avg 5.0498 | lr 2.98e-04 gnorm 1.03 | tau 4.9 | 98242 tok/s | passes 3.00 T 0.993
+  epoch 1 step  30950 | loss 4.5059 avg 5.0489 | lr 2.98e-04 gnorm 1.07 | tau 4.9 | 98250 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31000 | loss 4.4616 avg 5.0480 | lr 2.98e-04 gnorm 1.07 | tau 4.8 | 98258 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4895 ppl 89.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  31050 | loss 4.5335 avg 5.0471 | lr 2.98e-04 gnorm 1.08 | tau 4.8 | 98194 tok/s | passes 3.00 T 0.994
+  epoch 1 step  31100 | loss 4.4657 avg 5.0462 | lr 2.98e-04 gnorm 1.07 | tau 4.8 | 98202 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31150 | loss 4.5115 avg 5.0453 | lr 2.98e-04 gnorm 1.23 | tau 4.8 | 98210 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31200 | loss 4.5097 avg 5.0444 | lr 2.98e-04 gnorm 1.12 | tau 4.8 | 98218 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31250 | loss 4.4929 avg 5.0436 | lr 2.98e-04 gnorm 1.12 | tau 4.8 | 98226 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31300 | loss 4.4676 avg 5.0427 | lr 2.98e-04 gnorm 1.70 | tau 4.8 | 98234 tok/s | passes 3.00 T 0.994
+  epoch 1 step  31350 | loss 4.3986 avg 5.0418 | lr 2.98e-04 gnorm 1.07 | tau 4.8 | 98242 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31400 | loss 4.5136 avg 5.0409 | lr 2.98e-04 gnorm 1.05 | tau 4.8 | 98250 tok/s | passes 3.00 T 0.994
+  epoch 1 step  31450 | loss 4.4026 avg 5.0400 | lr 2.98e-04 gnorm 1.11 | tau 4.7 | 98259 tok/s | passes 3.00 T 0.994
+  epoch 1 step  31500 | loss 4.4201 avg 5.0391 | lr 2.98e-04 gnorm 1.06 | tau 4.7 | 98267 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4785 ppl 88.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  31550 | loss 4.5141 avg 5.0383 | lr 2.98e-04 gnorm 1.25 | tau 4.7 | 98206 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31600 | loss 4.4616 avg 5.0374 | lr 2.98e-04 gnorm 1.01 | tau 4.7 | 98214 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31650 | loss 4.4349 avg 5.0365 | lr 2.98e-04 gnorm 0.97 | tau 4.7 | 98222 tok/s | passes 3.00 T 0.992
+  epoch 1 step  31700 | loss 4.5360 avg 5.0356 | lr 2.98e-04 gnorm 1.09 | tau 4.7 | 98229 tok/s | passes 3.00 T 0.994
+  epoch 1 step  31750 | loss 4.5439 avg 5.0348 | lr 2.98e-04 gnorm 1.28 | tau 4.7 | 98237 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31800 | loss 4.4468 avg 5.0339 | lr 2.98e-04 gnorm 1.42 | tau 4.7 | 98245 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31850 | loss 4.5895 avg 5.0330 | lr 2.98e-04 gnorm 1.12 | tau 4.7 | 98253 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31900 | loss 4.3729 avg 5.0321 | lr 2.98e-04 gnorm 1.14 | tau 4.6 | 98260 tok/s | passes 3.00 T 0.993
+  epoch 1 step  31950 | loss 4.3942 avg 5.0312 | lr 2.98e-04 gnorm 1.09 | tau 4.6 | 98269 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32000 | loss 4.5152 avg 5.0304 | lr 2.98e-04 gnorm 1.84 | tau 4.6 | 98277 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4746 ppl 87.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  32050 | loss 4.4954 avg 5.0295 | lr 2.98e-04 gnorm 1.40 | tau 4.6 | 98211 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32100 | loss 4.3826 avg 5.0286 | lr 2.98e-04 gnorm 0.99 | tau 4.6 | 98219 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32150 | loss 4.4824 avg 5.0278 | lr 2.98e-04 gnorm 1.02 | tau 4.6 | 98227 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32200 | loss 4.4230 avg 5.0269 | lr 2.98e-04 gnorm 1.04 | tau 4.6 | 98235 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32250 | loss 4.5114 avg 5.0260 | lr 2.98e-04 gnorm 1.09 | tau 4.6 | 98242 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32300 | loss 4.4963 avg 5.0252 | lr 2.98e-04 gnorm 1.10 | tau 4.6 | 98250 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32350 | loss 4.5278 avg 5.0243 | lr 2.98e-04 gnorm 1.11 | tau 4.5 | 98258 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32400 | loss 4.4007 avg 5.0234 | lr 2.98e-04 gnorm 1.06 | tau 4.5 | 98266 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32450 | loss 4.4461 avg 5.0226 | lr 2.98e-04 gnorm 1.13 | tau 4.5 | 98274 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32500 | loss 4.4287 avg 5.0217 | lr 2.98e-04 gnorm 1.13 | tau 4.5 | 98281 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.4634 ppl 86.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  32550 | loss 4.4457 avg 5.0209 | lr 2.98e-04 gnorm 1.27 | tau 4.5 | 98222 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32600 | loss 4.4680 avg 5.0200 | lr 2.98e-04 gnorm 1.01 | tau 4.5 | 98229 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32650 | loss 4.4618 avg 5.0192 | lr 2.98e-04 gnorm 1.15 | tau 4.5 | 98236 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32700 | loss 4.4112 avg 5.0183 | lr 2.98e-04 gnorm 1.31 | tau 4.5 | 98244 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32750 | loss 4.4570 avg 5.0175 | lr 2.98e-04 gnorm 1.43 | tau 4.5 | 98252 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32800 | loss 4.4083 avg 5.0166 | lr 2.98e-04 gnorm 1.13 | tau 4.5 | 98260 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32850 | loss 4.4492 avg 5.0157 | lr 2.98e-04 gnorm 1.07 | tau 4.5 | 98267 tok/s | passes 3.00 T 0.994
+  epoch 1 step  32900 | loss 4.4920 avg 5.0149 | lr 2.98e-04 gnorm 1.10 | tau 4.5 | 98275 tok/s | passes 3.00 T 0.993
+  epoch 1 step  32950 | loss 4.5216 avg 5.0140 | lr 2.98e-04 gnorm 1.24 | tau 4.4 | 98282 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33000 | loss 4.4111 avg 5.0132 | lr 2.97e-04 gnorm 1.27 | tau 4.4 | 98289 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4553 ppl 86.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  33050 | loss 4.5431 avg 5.0123 | lr 2.97e-04 gnorm 1.09 | tau 4.4 | 98231 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33100 | loss 4.4205 avg 5.0115 | lr 2.97e-04 gnorm 1.24 | tau 4.4 | 98238 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33150 | loss 4.5292 avg 5.0106 | lr 2.97e-04 gnorm 1.08 | tau 4.4 | 98246 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33200 | loss 4.5064 avg 5.0098 | lr 2.97e-04 gnorm 1.11 | tau 4.4 | 98253 tok/s | passes 3.00 T 0.992
+  epoch 1 step  33250 | loss 4.5310 avg 5.0090 | lr 2.97e-04 gnorm 1.09 | tau 4.4 | 98261 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33300 | loss 4.4976 avg 5.0082 | lr 2.97e-04 gnorm 1.08 | tau 4.4 | 98268 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33350 | loss 4.5060 avg 5.0073 | lr 2.97e-04 gnorm 1.26 | tau 4.4 | 98275 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33400 | loss 4.3652 avg 5.0065 | lr 2.97e-04 gnorm 1.09 | tau 4.4 | 98283 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33450 | loss 4.4916 avg 5.0057 | lr 2.97e-04 gnorm 1.06 | tau 4.4 | 98290 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33500 | loss 4.3955 avg 5.0048 | lr 2.97e-04 gnorm 1.11 | tau 4.4 | 98298 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.4438 ppl 85.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  33550 | loss 4.4206 avg 5.0040 | lr 2.97e-04 gnorm 1.19 | tau 4.4 | 98237 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33600 | loss 4.4273 avg 5.0032 | lr 2.97e-04 gnorm 1.12 | tau 4.3 | 98244 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33650 | loss 4.4022 avg 5.0024 | lr 2.97e-04 gnorm 1.05 | tau 4.3 | 98251 tok/s | passes 3.00 T 0.994
+  epoch 1 step  33700 | loss 4.3486 avg 5.0016 | lr 2.97e-04 gnorm 1.11 | tau 4.3 | 98258 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33750 | loss 4.4175 avg 5.0007 | lr 2.97e-04 gnorm 1.33 | tau 4.3 | 98265 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33800 | loss 4.4775 avg 4.9999 | lr 2.97e-04 gnorm 1.03 | tau 4.3 | 98273 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33850 | loss 4.4411 avg 4.9991 | lr 2.97e-04 gnorm 1.05 | tau 4.3 | 98280 tok/s | passes 3.00 T 0.993
+  epoch 1 step  33900 | loss 4.3578 avg 4.9982 | lr 2.97e-04 gnorm 1.12 | tau 4.3 | 98288 tok/s | passes 3.00 T 0.994
+  epoch 1 step  33950 | loss 4.4062 avg 4.9974 | lr 2.97e-04 gnorm 1.16 | tau 4.3 | 98295 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34000 | loss 4.4921 avg 4.9966 | lr 2.97e-04 gnorm 1.19 | tau 4.3 | 98302 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4349 ppl 84.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  34050 | loss 4.3930 avg 4.9958 | lr 2.97e-04 gnorm 1.13 | tau 4.3 | 98246 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34100 | loss 4.3477 avg 4.9950 | lr 2.97e-04 gnorm 1.16 | tau 4.3 | 98253 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34150 | loss 4.4929 avg 4.9942 | lr 2.97e-04 gnorm 1.08 | tau 4.3 | 98260 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34200 | loss 4.5046 avg 4.9934 | lr 2.97e-04 gnorm 1.24 | tau 4.3 | 98267 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34250 | loss 4.3360 avg 4.9926 | lr 2.97e-04 gnorm 1.06 | tau 4.3 | 98274 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34300 | loss 4.3663 avg 4.9917 | lr 2.97e-04 gnorm 1.13 | tau 4.3 | 98282 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34350 | loss 4.4040 avg 4.9909 | lr 2.97e-04 gnorm 1.24 | tau 4.3 | 98289 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34400 | loss 4.4548 avg 4.9901 | lr 2.97e-04 gnorm 1.29 | tau 4.2 | 98296 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34450 | loss 4.4445 avg 4.9893 | lr 2.97e-04 gnorm 1.08 | tau 4.2 | 98304 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34500 | loss 4.3650 avg 4.9885 | lr 2.97e-04 gnorm 1.07 | tau 4.2 | 98311 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.4305 ppl 84.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  34550 | loss 4.4206 avg 4.9877 | lr 2.97e-04 gnorm 1.05 | tau 4.2 | 98255 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34600 | loss 4.3476 avg 4.9869 | lr 2.97e-04 gnorm 1.00 | tau 4.2 | 98261 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34650 | loss 4.4389 avg 4.9861 | lr 2.97e-04 gnorm 1.08 | tau 4.2 | 98268 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34700 | loss 4.2636 avg 4.9853 | lr 2.97e-04 gnorm 1.11 | tau 4.2 | 98276 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34750 | loss 4.4009 avg 4.9845 | lr 2.97e-04 gnorm 1.33 | tau 4.2 | 98282 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34800 | loss 4.4083 avg 4.9837 | lr 2.97e-04 gnorm 1.14 | tau 4.2 | 98289 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34850 | loss 4.3392 avg 4.9829 | lr 2.97e-04 gnorm 1.08 | tau 4.2 | 98297 tok/s | passes 3.00 T 0.993
+  epoch 1 step  34900 | loss 4.4509 avg 4.9821 | lr 2.97e-04 gnorm 1.08 | tau 4.2 | 98304 tok/s | passes 3.00 T 0.992
+  epoch 1 step  34950 | loss 4.4835 avg 4.9813 | lr 2.97e-04 gnorm 1.26 | tau 4.2 | 98311 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35000 | loss 4.4190 avg 4.9805 | lr 2.97e-04 gnorm 1.04 | tau 4.2 | 98318 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4209 ppl 83.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  35050 | loss 4.4048 avg 4.9797 | lr 2.97e-04 gnorm 1.01 | tau 4.2 | 98263 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35100 | loss 4.3723 avg 4.9789 | lr 2.97e-04 gnorm 1.25 | tau 4.2 | 98269 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35150 | loss 4.4717 avg 4.9781 | lr 2.97e-04 gnorm 1.05 | tau 4.2 | 98276 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35200 | loss 4.4147 avg 4.9773 | lr 2.97e-04 gnorm 1.29 | tau 4.2 | 98283 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35250 | loss 4.4575 avg 4.9765 | lr 2.97e-04 gnorm 1.08 | tau 4.2 | 98291 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35300 | loss 4.4172 avg 4.9758 | lr 2.97e-04 gnorm 1.19 | tau 4.2 | 98298 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35350 | loss 4.4294 avg 4.9750 | lr 2.97e-04 gnorm 1.10 | tau 4.1 | 98304 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35400 | loss 4.5115 avg 4.9742 | lr 2.97e-04 gnorm 1.31 | tau 4.1 | 98311 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35450 | loss 4.3497 avg 4.9734 | lr 2.97e-04 gnorm 1.33 | tau 4.1 | 98318 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35500 | loss 4.3093 avg 4.9726 | lr 2.97e-04 gnorm 1.04 | tau 4.1 | 98325 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.4141 ppl 82.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  35550 | loss 4.3852 avg 4.9718 | lr 2.97e-04 gnorm 1.37 | tau 4.1 | 98269 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35600 | loss 4.3350 avg 4.9711 | lr 2.97e-04 gnorm 1.12 | tau 4.1 | 98276 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35650 | loss 4.4635 avg 4.9703 | lr 2.97e-04 gnorm 1.38 | tau 4.1 | 98282 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35700 | loss 4.4257 avg 4.9695 | lr 2.97e-04 gnorm 1.11 | tau 4.1 | 98289 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35750 | loss 4.4273 avg 4.9687 | lr 2.97e-04 gnorm 1.12 | tau 4.1 | 98296 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35800 | loss 4.3096 avg 4.9680 | lr 2.97e-04 gnorm 1.12 | tau 4.1 | 98303 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35850 | loss 4.3998 avg 4.9672 | lr 2.97e-04 gnorm 1.26 | tau 4.1 | 98309 tok/s | passes 3.00 T 0.992
+  epoch 1 step  35900 | loss 4.4042 avg 4.9664 | lr 2.97e-04 gnorm 1.10 | tau 4.1 | 98316 tok/s | passes 3.00 T 0.993
+  epoch 1 step  35950 | loss 4.4769 avg 4.9657 | lr 2.97e-04 gnorm 1.17 | tau 4.1 | 98323 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36000 | loss 4.3939 avg 4.9649 | lr 2.97e-04 gnorm 1.07 | tau 4.1 | 98330 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.4090 ppl 82.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  36050 | loss 4.3850 avg 4.9641 | lr 2.97e-04 gnorm 1.22 | tau 4.1 | 98273 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36100 | loss 4.4516 avg 4.9633 | lr 2.97e-04 gnorm 1.07 | tau 4.1 | 98279 tok/s | passes 3.00 T 0.993
+  epoch 1 step  36150 | loss 4.3422 avg 4.9626 | lr 2.97e-04 gnorm 1.12 | tau 4.1 | 98286 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36200 | loss 4.3701 avg 4.9618 | lr 2.97e-04 gnorm 1.18 | tau 4.1 | 98293 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36250 | loss 4.3980 avg 4.9611 | lr 2.97e-04 gnorm 1.21 | tau 4.1 | 98299 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36300 | loss 4.5144 avg 4.9603 | lr 2.97e-04 gnorm 1.16 | tau 4.1 | 98306 tok/s | passes 3.00 T 0.993
+  epoch 1 step  36350 | loss 4.4230 avg 4.9595 | lr 2.97e-04 gnorm 1.25 | tau 4.1 | 98313 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36400 | loss 4.4388 avg 4.9588 | lr 2.97e-04 gnorm 1.06 | tau 4.0 | 98320 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36450 | loss 4.3730 avg 4.9580 | lr 2.97e-04 gnorm 1.18 | tau 4.0 | 98327 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36500 | loss 4.3613 avg 4.9573 | lr 2.97e-04 gnorm 1.35 | tau 4.0 | 98334 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3956 ppl 81.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  36550 | loss 4.3921 avg 4.9565 | lr 2.97e-04 gnorm 1.07 | tau 4.0 | 98280 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36600 | loss 4.3950 avg 4.9557 | lr 2.97e-04 gnorm 1.11 | tau 4.0 | 98287 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36650 | loss 4.4204 avg 4.9550 | lr 2.97e-04 gnorm 1.11 | tau 4.0 | 98294 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36700 | loss 4.4866 avg 4.9542 | lr 2.97e-04 gnorm 1.45 | tau 4.0 | 98300 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36750 | loss 4.4385 avg 4.9535 | lr 2.97e-04 gnorm 1.36 | tau 4.0 | 98307 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36800 | loss 4.3977 avg 4.9528 | lr 2.97e-04 gnorm 1.03 | tau 4.0 | 98314 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36850 | loss 4.3673 avg 4.9520 | lr 2.97e-04 gnorm 1.03 | tau 4.0 | 98320 tok/s | passes 3.00 T 0.992
+  epoch 1 step  36900 | loss 4.3701 avg 4.9512 | lr 2.97e-04 gnorm 1.00 | tau 4.0 | 98326 tok/s | passes 3.00 T 0.993
+  epoch 1 step  36950 | loss 4.3715 avg 4.9505 | lr 2.97e-04 gnorm 1.25 | tau 4.0 | 98333 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37000 | loss 4.3905 avg 4.9497 | lr 2.97e-04 gnorm 1.28 | tau 4.0 | 98339 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.3969 ppl 81.2
+  epoch 1 step  37050 | loss 4.3795 avg 4.9490 | lr 2.97e-04 gnorm 1.32 | tau 4.0 | 98308 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37100 | loss 4.3890 avg 4.9482 | lr 2.97e-04 gnorm 1.08 | tau 4.0 | 98314 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37150 | loss 4.3630 avg 4.9475 | lr 2.97e-04 gnorm 1.12 | tau 4.0 | 98320 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37200 | loss 4.3758 avg 4.9468 | lr 2.97e-04 gnorm 1.17 | tau 4.0 | 98327 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37250 | loss 4.4062 avg 4.9460 | lr 2.97e-04 gnorm 1.06 | tau 4.0 | 98333 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37300 | loss 4.3320 avg 4.9453 | lr 2.97e-04 gnorm 1.16 | tau 4.0 | 98339 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37350 | loss 4.4363 avg 4.9445 | lr 2.97e-04 gnorm 1.09 | tau 4.0 | 98346 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37400 | loss 4.3645 avg 4.9438 | lr 2.97e-04 gnorm 1.09 | tau 4.0 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37450 | loss 4.3895 avg 4.9431 | lr 2.97e-04 gnorm 1.09 | tau 4.0 | 98359 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37500 | loss 4.4339 avg 4.9423 | lr 2.97e-04 gnorm 1.13 | tau 4.0 | 98365 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3891 ppl 80.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  37550 | loss 4.3847 avg 4.9416 | lr 2.97e-04 gnorm 1.20 | tau 4.0 | 98311 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37600 | loss 4.4572 avg 4.9409 | lr 2.97e-04 gnorm 1.08 | tau 3.9 | 98318 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37650 | loss 4.3495 avg 4.9401 | lr 2.97e-04 gnorm 1.13 | tau 3.9 | 98324 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37700 | loss 4.2820 avg 4.9394 | lr 2.97e-04 gnorm 1.22 | tau 3.9 | 98331 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37750 | loss 4.4392 avg 4.9387 | lr 2.97e-04 gnorm 1.17 | tau 3.9 | 98338 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37800 | loss 4.5009 avg 4.9380 | lr 2.97e-04 gnorm 1.16 | tau 3.9 | 98344 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37850 | loss 4.2965 avg 4.9372 | lr 2.97e-04 gnorm 1.20 | tau 3.9 | 98350 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37900 | loss 4.3925 avg 4.9365 | lr 2.97e-04 gnorm 1.22 | tau 3.9 | 98357 tok/s | passes 3.00 T 0.992
+  epoch 1 step  37950 | loss 4.4028 avg 4.9358 | lr 2.97e-04 gnorm 1.08 | tau 3.9 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38000 | loss 4.3813 avg 4.9351 | lr 2.97e-04 gnorm 1.32 | tau 3.9 | 98369 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3846 ppl 80.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  38050 | loss 4.3782 avg 4.9344 | lr 2.97e-04 gnorm 1.17 | tau 3.9 | 98317 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38100 | loss 4.3404 avg 4.9336 | lr 2.97e-04 gnorm 1.20 | tau 3.9 | 98324 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38150 | loss 4.3274 avg 4.9329 | lr 2.97e-04 gnorm 1.05 | tau 3.9 | 98330 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38200 | loss 4.3819 avg 4.9322 | lr 2.97e-04 gnorm 1.05 | tau 3.9 | 98337 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38250 | loss 4.3932 avg 4.9315 | lr 2.97e-04 gnorm 1.13 | tau 3.9 | 98343 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38300 | loss 4.3100 avg 4.9308 | lr 2.97e-04 gnorm 1.07 | tau 3.9 | 98349 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38350 | loss 4.2771 avg 4.9300 | lr 2.97e-04 gnorm 1.02 | tau 3.9 | 98356 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38400 | loss 4.4774 avg 4.9293 | lr 2.97e-04 gnorm 1.13 | tau 3.9 | 98362 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38450 | loss 4.3881 avg 4.9286 | lr 2.97e-04 gnorm 1.14 | tau 3.9 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38500 | loss 4.3968 avg 4.9279 | lr 2.97e-04 gnorm 1.09 | tau 3.9 | 98375 tok/s | passes 3.00 T 0.991
+  >>> val loss 4.3800 ppl 79.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  38550 | loss 4.4427 avg 4.9272 | lr 2.97e-04 gnorm 1.03 | tau 3.9 | 98323 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38600 | loss 4.3246 avg 4.9265 | lr 2.97e-04 gnorm 1.12 | tau 3.9 | 98329 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38650 | loss 4.3739 avg 4.9258 | lr 2.97e-04 gnorm 1.09 | tau 3.9 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38700 | loss 4.3650 avg 4.9250 | lr 2.97e-04 gnorm 1.17 | tau 3.9 | 98343 tok/s | passes 3.00 T 0.993
+  epoch 1 step  38750 | loss 4.4428 avg 4.9243 | lr 2.97e-04 gnorm 1.11 | tau 3.9 | 98349 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38800 | loss 4.3529 avg 4.9236 | lr 2.97e-04 gnorm 1.05 | tau 3.9 | 98355 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38850 | loss 4.4789 avg 4.9229 | lr 2.96e-04 gnorm 1.14 | tau 3.9 | 98361 tok/s | passes 3.00 T 0.993
+  epoch 1 step  38900 | loss 4.4020 avg 4.9222 | lr 2.96e-04 gnorm 1.11 | tau 3.9 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  38950 | loss 4.4684 avg 4.9215 | lr 2.96e-04 gnorm 1.65 | tau 3.9 | 98374 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39000 | loss 4.2636 avg 4.9208 | lr 2.96e-04 gnorm 1.31 | tau 3.9 | 98380 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3753 ppl 79.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  39050 | loss 4.2871 avg 4.9201 | lr 2.96e-04 gnorm 1.12 | tau 3.9 | 98327 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39100 | loss 4.3962 avg 4.9194 | lr 2.96e-04 gnorm 1.27 | tau 3.9 | 98333 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39150 | loss 4.2323 avg 4.9187 | lr 2.96e-04 gnorm 1.15 | tau 3.9 | 98339 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39200 | loss 4.3804 avg 4.9180 | lr 2.96e-04 gnorm 1.19 | tau 3.9 | 98346 tok/s | passes 3.00 T 0.993
+  epoch 1 step  39250 | loss 4.4449 avg 4.9173 | lr 2.96e-04 gnorm 1.17 | tau 3.9 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39300 | loss 4.2840 avg 4.9166 | lr 2.96e-04 gnorm 1.41 | tau 3.8 | 98357 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39350 | loss 4.4277 avg 4.9159 | lr 2.96e-04 gnorm 1.16 | tau 3.8 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39400 | loss 4.3547 avg 4.9152 | lr 2.96e-04 gnorm 1.14 | tau 3.8 | 98369 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39450 | loss 4.3103 avg 4.9145 | lr 2.96e-04 gnorm 1.30 | tau 3.8 | 98375 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39500 | loss 4.3599 avg 4.9139 | lr 2.96e-04 gnorm 1.29 | tau 3.8 | 98381 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3683 ppl 78.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  39550 | loss 4.4046 avg 4.9132 | lr 2.96e-04 gnorm 1.37 | tau 3.8 | 98331 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39600 | loss 4.4015 avg 4.9125 | lr 2.96e-04 gnorm 1.23 | tau 3.8 | 98337 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39650 | loss 4.3758 avg 4.9118 | lr 2.96e-04 gnorm 1.39 | tau 3.8 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39700 | loss 4.4675 avg 4.9111 | lr 2.96e-04 gnorm 1.25 | tau 3.8 | 98348 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39750 | loss 4.4613 avg 4.9105 | lr 2.96e-04 gnorm 1.34 | tau 3.8 | 98354 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39800 | loss 4.3703 avg 4.9098 | lr 2.96e-04 gnorm 1.17 | tau 3.8 | 98360 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39850 | loss 4.2822 avg 4.9091 | lr 2.96e-04 gnorm 1.21 | tau 3.8 | 98365 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39900 | loss 4.3637 avg 4.9084 | lr 2.96e-04 gnorm 1.29 | tau 3.8 | 98372 tok/s | passes 3.00 T 0.992
+  epoch 1 step  39950 | loss 4.3713 avg 4.9077 | lr 2.96e-04 gnorm 1.14 | tau 3.8 | 98378 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40000 | loss 4.2834 avg 4.9070 | lr 2.96e-04 gnorm 1.10 | tau 3.8 | 98384 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3598 ppl 78.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_40000.pt
+  epoch 1 step  40050 | loss 4.3837 avg 4.9064 | lr 2.96e-04 gnorm 1.44 | tau 3.8 | 98312 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40100 | loss 4.3038 avg 4.9057 | lr 2.96e-04 gnorm 1.08 | tau 3.8 | 98318 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40150 | loss 4.3468 avg 4.9050 | lr 2.96e-04 gnorm 1.16 | tau 3.8 | 98323 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40200 | loss 4.3435 avg 4.9043 | lr 2.96e-04 gnorm 1.18 | tau 3.8 | 98329 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40250 | loss 4.3021 avg 4.9037 | lr 2.96e-04 gnorm 1.25 | tau 3.8 | 98334 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40300 | loss 4.2435 avg 4.9030 | lr 2.96e-04 gnorm 1.10 | tau 3.8 | 98339 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40350 | loss 4.4046 avg 4.9023 | lr 2.96e-04 gnorm 1.10 | tau 3.8 | 98345 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40400 | loss 4.3229 avg 4.9016 | lr 2.96e-04 gnorm 1.08 | tau 3.8 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40450 | loss 4.4261 avg 4.9009 | lr 2.96e-04 gnorm 1.17 | tau 3.8 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  40500 | loss 4.4460 avg 4.9003 | lr 2.96e-04 gnorm 1.16 | tau 3.8 | 98362 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3562 ppl 78.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  40550 | loss 4.4127 avg 4.8996 | lr 2.96e-04 gnorm 1.14 | tau 3.8 | 98313 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40600 | loss 4.3749 avg 4.8989 | lr 2.96e-04 gnorm 1.11 | tau 3.8 | 98319 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40650 | loss 4.3052 avg 4.8983 | lr 2.96e-04 gnorm 1.11 | tau 3.8 | 98325 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40700 | loss 4.3786 avg 4.8976 | lr 2.96e-04 gnorm 1.46 | tau 3.8 | 98330 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40750 | loss 4.4556 avg 4.8970 | lr 2.96e-04 gnorm 1.19 | tau 3.8 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40800 | loss 4.2112 avg 4.8963 | lr 2.96e-04 gnorm 1.26 | tau 3.8 | 98341 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40850 | loss 4.3054 avg 4.8956 | lr 2.96e-04 gnorm 1.15 | tau 3.8 | 98347 tok/s | passes 3.00 T 0.991
+  epoch 1 step  40900 | loss 4.3037 avg 4.8950 | lr 2.96e-04 gnorm 1.11 | tau 3.8 | 98353 tok/s | passes 3.00 T 0.992
+  epoch 1 step  40950 | loss 4.3372 avg 4.8943 | lr 2.96e-04 gnorm 1.22 | tau 3.8 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41000 | loss 4.3858 avg 4.8937 | lr 2.96e-04 gnorm 1.24 | tau 3.8 | 98364 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3506 ppl 77.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  41050 | loss 4.3307 avg 4.8930 | lr 2.96e-04 gnorm 1.06 | tau 3.8 | 98318 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41100 | loss 4.3230 avg 4.8924 | lr 2.96e-04 gnorm 1.16 | tau 3.8 | 98323 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41150 | loss 4.3072 avg 4.8917 | lr 2.96e-04 gnorm 1.18 | tau 3.8 | 98329 tok/s | passes 3.00 T 0.993
+  epoch 1 step  41200 | loss 4.4158 avg 4.8910 | lr 2.96e-04 gnorm 1.15 | tau 3.8 | 98335 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41250 | loss 4.4901 avg 4.8904 | lr 2.96e-04 gnorm 1.37 | tau 3.7 | 98340 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41300 | loss 4.4615 avg 4.8897 | lr 2.96e-04 gnorm 1.38 | tau 3.7 | 98345 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41350 | loss 4.3105 avg 4.8891 | lr 2.96e-04 gnorm 1.13 | tau 3.7 | 98351 tok/s | passes 3.00 T 0.991
+  epoch 1 step  41400 | loss 4.2425 avg 4.8884 | lr 2.96e-04 gnorm 1.13 | tau 3.7 | 98357 tok/s | passes 3.00 T 0.991
+  epoch 1 step  41450 | loss 4.3363 avg 4.8878 | lr 2.96e-04 gnorm 1.14 | tau 3.7 | 98362 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41500 | loss 4.3517 avg 4.8871 | lr 2.96e-04 gnorm 1.26 | tau 3.7 | 98368 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3467 ppl 77.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  41550 | loss 4.3689 avg 4.8865 | lr 2.96e-04 gnorm 1.23 | tau 3.7 | 98320 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41600 | loss 4.3293 avg 4.8858 | lr 2.96e-04 gnorm 1.31 | tau 3.7 | 98326 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41650 | loss 4.2867 avg 4.8852 | lr 2.96e-04 gnorm 1.21 | tau 3.7 | 98331 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41700 | loss 4.4474 avg 4.8846 | lr 2.96e-04 gnorm 1.15 | tau 3.7 | 98337 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41750 | loss 4.4538 avg 4.8839 | lr 2.96e-04 gnorm 1.17 | tau 3.7 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41800 | loss 4.2868 avg 4.8833 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98347 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41850 | loss 4.2337 avg 4.8826 | lr 2.96e-04 gnorm 1.18 | tau 3.7 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41900 | loss 4.2803 avg 4.8820 | lr 2.96e-04 gnorm 1.08 | tau 3.7 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  41950 | loss 4.2892 avg 4.8813 | lr 2.96e-04 gnorm 1.21 | tau 3.7 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42000 | loss 4.4256 avg 4.8807 | lr 2.96e-04 gnorm 1.22 | tau 3.7 | 98368 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3416 ppl 76.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  42050 | loss 4.3531 avg 4.8801 | lr 2.96e-04 gnorm 1.10 | tau 3.7 | 98320 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42100 | loss 4.3724 avg 4.8794 | lr 2.96e-04 gnorm 1.27 | tau 3.7 | 98326 tok/s | passes 3.00 T 0.991
+  epoch 1 step  42150 | loss 4.4775 avg 4.8788 | lr 2.96e-04 gnorm 1.29 | tau 3.7 | 98331 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42200 | loss 4.3116 avg 4.8782 | lr 2.96e-04 gnorm 1.19 | tau 3.7 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42250 | loss 4.2165 avg 4.8775 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42300 | loss 4.4497 avg 4.8769 | lr 2.96e-04 gnorm 1.08 | tau 3.7 | 98347 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42350 | loss 4.2852 avg 4.8763 | lr 2.96e-04 gnorm 1.28 | tau 3.7 | 98353 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42400 | loss 4.2368 avg 4.8756 | lr 2.96e-04 gnorm 1.09 | tau 3.7 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42450 | loss 4.3263 avg 4.8750 | lr 2.96e-04 gnorm 1.12 | tau 3.7 | 98364 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42500 | loss 4.2611 avg 4.8744 | lr 2.96e-04 gnorm 1.27 | tau 3.7 | 98369 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3348 ppl 76.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  42550 | loss 4.5463 avg 4.8737 | lr 2.96e-04 gnorm 1.30 | tau 3.7 | 98323 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42600 | loss 4.4978 avg 4.8731 | lr 2.96e-04 gnorm 1.22 | tau 3.7 | 98329 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42650 | loss 4.4043 avg 4.8725 | lr 2.96e-04 gnorm 1.18 | tau 3.7 | 98334 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42700 | loss 4.4118 avg 4.8719 | lr 2.96e-04 gnorm 1.14 | tau 3.7 | 98339 tok/s | passes 3.00 T 0.991
+  epoch 1 step  42750 | loss 4.2988 avg 4.8712 | lr 2.96e-04 gnorm 1.12 | tau 3.7 | 98345 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42800 | loss 4.4324 avg 4.8706 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98350 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42850 | loss 4.2580 avg 4.8700 | lr 2.96e-04 gnorm 1.23 | tau 3.7 | 98355 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42900 | loss 4.3266 avg 4.8694 | lr 2.96e-04 gnorm 1.18 | tau 3.7 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  42950 | loss 4.3771 avg 4.8688 | lr 2.96e-04 gnorm 1.17 | tau 3.7 | 98366 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43000 | loss 4.3100 avg 4.8681 | lr 2.96e-04 gnorm 1.20 | tau 3.7 | 98371 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3333 ppl 76.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  43050 | loss 4.2965 avg 4.8675 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98321 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43100 | loss 4.3983 avg 4.8669 | lr 2.96e-04 gnorm 1.32 | tau 3.7 | 98326 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43150 | loss 4.3609 avg 4.8663 | lr 2.96e-04 gnorm 1.28 | tau 3.7 | 98332 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43200 | loss 4.3323 avg 4.8656 | lr 2.96e-04 gnorm 1.18 | tau 3.7 | 98337 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43250 | loss 4.1865 avg 4.8650 | lr 2.96e-04 gnorm 1.31 | tau 3.7 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43300 | loss 4.2764 avg 4.8644 | lr 2.96e-04 gnorm 1.33 | tau 3.7 | 98348 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43350 | loss 4.2847 avg 4.8638 | lr 2.96e-04 gnorm 1.12 | tau 3.7 | 98353 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43400 | loss 4.2949 avg 4.8631 | lr 2.96e-04 gnorm 1.26 | tau 3.7 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43450 | loss 4.3389 avg 4.8625 | lr 2.96e-04 gnorm 1.29 | tau 3.7 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43500 | loss 4.2702 avg 4.8619 | lr 2.96e-04 gnorm 1.11 | tau 3.7 | 98369 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3284 ppl 75.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  43550 | loss 4.2768 avg 4.8613 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98325 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43600 | loss 4.3864 avg 4.8607 | lr 2.96e-04 gnorm 1.28 | tau 3.7 | 98330 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43650 | loss 4.4435 avg 4.8601 | lr 2.96e-04 gnorm 1.22 | tau 3.7 | 98335 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43700 | loss 4.3224 avg 4.8595 | lr 2.96e-04 gnorm 1.50 | tau 3.7 | 98341 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43750 | loss 4.3992 avg 4.8589 | lr 2.96e-04 gnorm 1.18 | tau 3.7 | 98346 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43800 | loss 4.3745 avg 4.8583 | lr 2.96e-04 gnorm 1.16 | tau 3.7 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43850 | loss 4.3074 avg 4.8577 | lr 2.96e-04 gnorm 1.08 | tau 3.7 | 98356 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43900 | loss 4.3875 avg 4.8571 | lr 2.96e-04 gnorm 1.28 | tau 3.7 | 98362 tok/s | passes 3.00 T 0.992
+  epoch 1 step  43950 | loss 4.2924 avg 4.8565 | lr 2.95e-04 gnorm 1.18 | tau 3.7 | 98367 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44000 | loss 4.2902 avg 4.8559 | lr 2.95e-04 gnorm 1.14 | tau 3.6 | 98372 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3192 ppl 75.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  44050 | loss 4.2662 avg 4.8553 | lr 2.95e-04 gnorm 1.30 | tau 3.6 | 98326 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44100 | loss 4.3115 avg 4.8547 | lr 2.95e-04 gnorm 1.31 | tau 3.6 | 98331 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44150 | loss 4.2537 avg 4.8541 | lr 2.95e-04 gnorm 1.21 | tau 3.6 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44200 | loss 4.4293 avg 4.8535 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44250 | loss 4.3609 avg 4.8529 | lr 2.95e-04 gnorm 1.23 | tau 3.6 | 98347 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44300 | loss 4.2644 avg 4.8523 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44350 | loss 4.3220 avg 4.8517 | lr 2.95e-04 gnorm 1.23 | tau 3.6 | 98357 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44400 | loss 4.3842 avg 4.8511 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44450 | loss 4.4284 avg 4.8505 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44500 | loss 4.3250 avg 4.8499 | lr 2.95e-04 gnorm 1.23 | tau 3.6 | 98373 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3177 ppl 75.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  44550 | loss 4.3919 avg 4.8493 | lr 2.95e-04 gnorm 1.31 | tau 3.6 | 98328 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44600 | loss 4.3257 avg 4.8487 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98332 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44650 | loss 4.3381 avg 4.8481 | lr 2.95e-04 gnorm 1.29 | tau 3.6 | 98338 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44700 | loss 4.2890 avg 4.8475 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98343 tok/s | passes 3.00 T 0.993
+  epoch 1 step  44750 | loss 4.2923 avg 4.8469 | lr 2.95e-04 gnorm 1.44 | tau 3.6 | 98348 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44800 | loss 4.3365 avg 4.8463 | lr 2.95e-04 gnorm 1.30 | tau 3.6 | 98353 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44850 | loss 4.3383 avg 4.8457 | lr 2.95e-04 gnorm 1.24 | tau 3.6 | 98358 tok/s | passes 3.00 T 0.991
+  epoch 1 step  44900 | loss 4.3179 avg 4.8451 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  44950 | loss 4.3315 avg 4.8446 | lr 2.95e-04 gnorm 1.14 | tau 3.6 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45000 | loss 4.1807 avg 4.8440 | lr 2.95e-04 gnorm 1.13 | tau 3.6 | 98373 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3144 ppl 74.8
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  45050 | loss 4.4520 avg 4.8434 | lr 2.95e-04 gnorm 1.11 | tau 3.6 | 98325 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45100 | loss 4.3004 avg 4.8428 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98330 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45150 | loss 4.4887 avg 4.8422 | lr 2.95e-04 gnorm 1.28 | tau 3.6 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45200 | loss 4.3622 avg 4.8417 | lr 2.95e-04 gnorm 1.69 | tau 3.6 | 98341 tok/s | passes 3.00 T 0.991
+  epoch 1 step  45250 | loss 4.2252 avg 4.8411 | lr 2.95e-04 gnorm 1.28 | tau 3.6 | 98346 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45300 | loss 4.3631 avg 4.8405 | lr 2.95e-04 gnorm 1.52 | tau 3.6 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45350 | loss 4.3569 avg 4.8399 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98356 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45400 | loss 4.2883 avg 4.8393 | lr 2.95e-04 gnorm 1.09 | tau 3.6 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45450 | loss 4.2786 avg 4.8388 | lr 2.95e-04 gnorm 1.40 | tau 3.6 | 98366 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45500 | loss 4.3281 avg 4.8382 | lr 2.95e-04 gnorm 1.41 | tau 3.6 | 98372 tok/s | passes 3.00 T 0.991
+  >>> val loss 4.3110 ppl 74.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  45550 | loss 4.3816 avg 4.8376 | lr 2.95e-04 gnorm 1.11 | tau 3.6 | 98330 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45600 | loss 4.4262 avg 4.8370 | lr 2.95e-04 gnorm 1.25 | tau 3.6 | 98335 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45650 | loss 4.2663 avg 4.8365 | lr 2.95e-04 gnorm 1.14 | tau 3.6 | 98340 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45700 | loss 4.3272 avg 4.8359 | lr 2.95e-04 gnorm 1.08 | tau 3.6 | 98345 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45750 | loss 4.3742 avg 4.8353 | lr 2.95e-04 gnorm 1.11 | tau 3.6 | 98350 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45800 | loss 4.2580 avg 4.8348 | lr 2.95e-04 gnorm 1.33 | tau 3.6 | 98355 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45850 | loss 4.2751 avg 4.8342 | lr 2.95e-04 gnorm 1.23 | tau 3.6 | 98360 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45900 | loss 4.2931 avg 4.8336 | lr 2.95e-04 gnorm 1.16 | tau 3.6 | 98365 tok/s | passes 3.00 T 0.992
+  epoch 1 step  45950 | loss 4.2670 avg 4.8331 | lr 2.95e-04 gnorm 1.14 | tau 3.6 | 98370 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46000 | loss 4.2646 avg 4.8325 | lr 2.95e-04 gnorm 1.23 | tau 3.6 | 98375 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3089 ppl 74.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  46050 | loss 4.2762 avg 4.8319 | lr 2.95e-04 gnorm 1.59 | tau 3.6 | 98332 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46100 | loss 4.2136 avg 4.8314 | lr 2.95e-04 gnorm 1.28 | tau 3.6 | 98337 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46150 | loss 4.4170 avg 4.8308 | lr 2.95e-04 gnorm 1.49 | tau 3.6 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46200 | loss 4.2186 avg 4.8302 | lr 2.95e-04 gnorm 1.53 | tau 3.6 | 98347 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46250 | loss 4.2999 avg 4.8297 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46300 | loss 4.2976 avg 4.8291 | lr 2.95e-04 gnorm 1.12 | tau 3.6 | 98357 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46350 | loss 4.3594 avg 4.8285 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98362 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46400 | loss 4.3555 avg 4.8280 | lr 2.95e-04 gnorm 1.32 | tau 3.6 | 98367 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46450 | loss 4.2328 avg 4.8274 | lr 2.95e-04 gnorm 1.48 | tau 3.6 | 98372 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46500 | loss 4.3260 avg 4.8268 | lr 2.95e-04 gnorm 1.17 | tau 3.6 | 98377 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3044 ppl 74.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  46550 | loss 4.2434 avg 4.8263 | lr 2.95e-04 gnorm 1.14 | tau 3.6 | 98333 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46600 | loss 4.3550 avg 4.8257 | lr 2.95e-04 gnorm 1.20 | tau 3.6 | 98338 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46650 | loss 4.4272 avg 4.8252 | lr 2.95e-04 gnorm 1.46 | tau 3.6 | 98343 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46700 | loss 4.2879 avg 4.8246 | lr 2.95e-04 gnorm 1.28 | tau 3.6 | 98348 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46750 | loss 4.2171 avg 4.8240 | lr 2.95e-04 gnorm 1.19 | tau 3.6 | 98353 tok/s | passes 3.00 T 0.991
+  epoch 1 step  46800 | loss 4.3112 avg 4.8235 | lr 2.95e-04 gnorm 1.28 | tau 3.6 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46850 | loss 4.2820 avg 4.8229 | lr 2.95e-04 gnorm 1.29 | tau 3.6 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46900 | loss 4.5247 avg 4.8224 | lr 2.95e-04 gnorm 1.54 | tau 3.5 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  46950 | loss 4.3080 avg 4.8218 | lr 2.95e-04 gnorm 1.18 | tau 3.5 | 98373 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47000 | loss 4.3889 avg 4.8213 | lr 2.95e-04 gnorm 1.19 | tau 3.5 | 98378 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.3002 ppl 73.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  47050 | loss 4.3379 avg 4.8207 | lr 2.95e-04 gnorm 1.21 | tau 3.5 | 98334 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47100 | loss 4.3410 avg 4.8201 | lr 2.95e-04 gnorm 1.26 | tau 3.5 | 98339 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47150 | loss 4.2980 avg 4.8196 | lr 2.95e-04 gnorm 1.27 | tau 3.5 | 98344 tok/s | passes 3.00 T 0.991
+  epoch 1 step  47200 | loss 4.2645 avg 4.8190 | lr 2.95e-04 gnorm 1.32 | tau 3.5 | 98348 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47250 | loss 4.3008 avg 4.8185 | lr 2.95e-04 gnorm 1.15 | tau 3.5 | 98353 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47300 | loss 4.2198 avg 4.8179 | lr 2.95e-04 gnorm 1.30 | tau 3.5 | 98358 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47350 | loss 4.2665 avg 4.8174 | lr 2.95e-04 gnorm 1.11 | tau 3.5 | 98364 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47400 | loss 4.3165 avg 4.8168 | lr 2.95e-04 gnorm 1.14 | tau 3.5 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47450 | loss 4.3565 avg 4.8163 | lr 2.95e-04 gnorm 1.30 | tau 3.5 | 98373 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47500 | loss 4.3044 avg 4.8157 | lr 2.95e-04 gnorm 1.55 | tau 3.5 | 98378 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2937 ppl 73.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  47550 | loss 4.3250 avg 4.8152 | lr 2.95e-04 gnorm 1.23 | tau 3.5 | 98338 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47600 | loss 4.2748 avg 4.8146 | lr 2.95e-04 gnorm 1.30 | tau 3.5 | 98343 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47650 | loss 4.3288 avg 4.8141 | lr 2.95e-04 gnorm 1.30 | tau 3.5 | 98348 tok/s | passes 3.00 T 0.993
+  epoch 1 step  47700 | loss 4.1920 avg 4.8136 | lr 2.95e-04 gnorm 1.21 | tau 3.5 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47750 | loss 4.1689 avg 4.8130 | lr 2.95e-04 gnorm 1.36 | tau 3.5 | 98357 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47800 | loss 4.3155 avg 4.8125 | lr 2.95e-04 gnorm 1.21 | tau 3.5 | 98362 tok/s | passes 3.00 T 0.993
+  epoch 1 step  47850 | loss 4.3581 avg 4.8119 | lr 2.95e-04 gnorm 1.28 | tau 3.5 | 98367 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47900 | loss 4.1438 avg 4.8114 | lr 2.95e-04 gnorm 1.39 | tau 3.5 | 98372 tok/s | passes 3.00 T 0.992
+  epoch 1 step  47950 | loss 4.1548 avg 4.8109 | lr 2.95e-04 gnorm 1.23 | tau 3.5 | 98376 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48000 | loss 4.1782 avg 4.8103 | lr 2.95e-04 gnorm 1.16 | tau 3.5 | 98381 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2921 ppl 73.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  48050 | loss 4.2782 avg 4.8098 | lr 2.95e-04 gnorm 1.23 | tau 3.5 | 98340 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48100 | loss 4.2987 avg 4.8092 | lr 2.95e-04 gnorm 1.23 | tau 3.5 | 98345 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48150 | loss 4.3112 avg 4.8087 | lr 2.95e-04 gnorm 1.14 | tau 3.5 | 98350 tok/s | passes 3.00 T 0.993
+  epoch 1 step  48200 | loss 4.1765 avg 4.8082 | lr 2.95e-04 gnorm 1.11 | tau 3.5 | 98354 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48250 | loss 4.3775 avg 4.8076 | lr 2.95e-04 gnorm 1.43 | tau 3.5 | 98359 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48300 | loss 4.3181 avg 4.8071 | lr 2.95e-04 gnorm 1.40 | tau 3.5 | 98364 tok/s | passes 3.00 T 0.993
+  epoch 1 step  48350 | loss 4.3281 avg 4.8066 | lr 2.95e-04 gnorm 1.24 | tau 3.5 | 98369 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48400 | loss 4.3177 avg 4.8061 | lr 2.95e-04 gnorm 1.20 | tau 3.5 | 98374 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48450 | loss 4.2606 avg 4.8056 | lr 2.95e-04 gnorm 1.44 | tau 3.5 | 98378 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48500 | loss 4.2885 avg 4.8050 | lr 2.94e-04 gnorm 1.66 | tau 3.5 | 98383 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2866 ppl 72.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  48550 | loss 4.2942 avg 4.8045 | lr 2.94e-04 gnorm 1.24 | tau 3.5 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48600 | loss 4.2690 avg 4.8040 | lr 2.94e-04 gnorm 1.27 | tau 3.5 | 98347 tok/s | passes 3.00 T 0.993
+  epoch 1 step  48650 | loss 4.2840 avg 4.8034 | lr 2.94e-04 gnorm 1.29 | tau 3.5 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48700 | loss 4.2109 avg 4.8029 | lr 2.94e-04 gnorm 1.45 | tau 3.5 | 98356 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48750 | loss 4.3239 avg 4.8024 | lr 2.94e-04 gnorm 1.61 | tau 3.5 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48800 | loss 4.3750 avg 4.8019 | lr 2.94e-04 gnorm 1.28 | tau 3.5 | 98366 tok/s | passes 3.00 T 0.993
+  epoch 1 step  48850 | loss 4.3770 avg 4.8013 | lr 2.94e-04 gnorm 1.49 | tau 3.5 | 98370 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48900 | loss 4.2915 avg 4.8008 | lr 2.94e-04 gnorm 1.19 | tau 3.5 | 98375 tok/s | passes 3.00 T 0.992
+  epoch 1 step  48950 | loss 4.3410 avg 4.8003 | lr 2.94e-04 gnorm 1.47 | tau 3.5 | 98380 tok/s | passes 3.00 T 0.993
+  epoch 1 step  49000 | loss 4.2881 avg 4.7998 | lr 2.94e-04 gnorm 1.26 | tau 3.5 | 98385 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2817 ppl 72.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  49050 | loss 4.3252 avg 4.7993 | lr 2.94e-04 gnorm 1.30 | tau 3.5 | 98340 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49100 | loss 4.3424 avg 4.7987 | lr 2.94e-04 gnorm 1.18 | tau 3.5 | 98344 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49150 | loss 4.2719 avg 4.7982 | lr 2.94e-04 gnorm 1.40 | tau 3.5 | 98349 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49200 | loss 4.5057 avg 4.7977 | lr 2.94e-04 gnorm 1.60 | tau 3.5 | 98354 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49250 | loss 4.2791 avg 4.7972 | lr 2.94e-04 gnorm 1.20 | tau 3.5 | 98359 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49300 | loss 4.2984 avg 4.7966 | lr 2.94e-04 gnorm 1.33 | tau 3.5 | 98363 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49350 | loss 4.2969 avg 4.7961 | lr 2.94e-04 gnorm 1.21 | tau 3.5 | 98368 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49400 | loss 4.3307 avg 4.7956 | lr 2.94e-04 gnorm 1.64 | tau 3.5 | 98373 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49450 | loss 4.2544 avg 4.7951 | lr 2.94e-04 gnorm 1.39 | tau 3.5 | 98378 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49500 | loss 4.2638 avg 4.7946 | lr 2.94e-04 gnorm 1.19 | tau 3.5 | 98382 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2796 ppl 72.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  49550 | loss 4.2793 avg 4.7941 | lr 2.94e-04 gnorm 1.39 | tau 3.5 | 98342 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49600 | loss 4.2015 avg 4.7935 | lr 2.94e-04 gnorm 1.30 | tau 3.5 | 98347 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49650 | loss 4.2786 avg 4.7930 | lr 2.94e-04 gnorm 1.85 | tau 3.5 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49700 | loss 4.0898 avg 4.7925 | lr 2.94e-04 gnorm 1.29 | tau 3.4 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  49750 | loss 4.2285 avg 4.7920 | lr 2.94e-04 gnorm 1.22 | tau 3.5 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49800 | loss 4.4250 avg 4.7915 | lr 2.94e-04 gnorm 1.69 | tau 3.4 | 98366 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49850 | loss 4.2784 avg 4.7909 | lr 2.94e-04 gnorm 1.27 | tau 3.4 | 98370 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49900 | loss 4.3925 avg 4.7904 | lr 2.94e-04 gnorm 1.23 | tau 3.4 | 98375 tok/s | passes 3.00 T 0.992
+  epoch 1 step  49950 | loss 4.2015 avg 4.7899 | lr 2.94e-04 gnorm 1.87 | tau 3.4 | 98380 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50000 | loss 4.2917 avg 4.7894 | lr 2.94e-04 gnorm 1.36 | tau 3.4 | 98384 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2778 ppl 72.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_50000.pt
+  epoch 1 step  50050 | loss 4.1953 avg 4.7889 | lr 2.94e-04 gnorm 1.34 | tau 3.4 | 98329 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50100 | loss 4.1968 avg 4.7884 | lr 2.94e-04 gnorm 1.28 | tau 3.4 | 98333 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50150 | loss 4.2740 avg 4.7878 | lr 2.94e-04 gnorm 1.17 | tau 3.4 | 98338 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50200 | loss 4.2149 avg 4.7873 | lr 2.94e-04 gnorm 1.30 | tau 3.4 | 98342 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50250 | loss 4.3705 avg 4.7868 | lr 2.94e-04 gnorm 1.41 | tau 3.4 | 98347 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50300 | loss 4.3182 avg 4.7863 | lr 2.94e-04 gnorm 1.58 | tau 3.4 | 98351 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50350 | loss 4.2162 avg 4.7858 | lr 2.94e-04 gnorm 1.19 | tau 3.4 | 98356 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50400 | loss 4.1526 avg 4.7853 | lr 2.94e-04 gnorm 1.29 | tau 3.4 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50450 | loss 4.1749 avg 4.7848 | lr 2.94e-04 gnorm 1.18 | tau 3.4 | 98365 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50500 | loss 4.2352 avg 4.7843 | lr 2.94e-04 gnorm 1.31 | tau 3.4 | 98369 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2720 ppl 71.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  50550 | loss 4.3004 avg 4.7838 | lr 2.94e-04 gnorm 1.24 | tau 3.4 | 98328 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50600 | loss 4.1296 avg 4.7833 | lr 2.94e-04 gnorm 1.22 | tau 3.4 | 98332 tok/s | passes 3.00 T 0.992
+  epoch 1 step  50650 | loss 4.3300 avg 4.7828 | lr 2.94e-04 gnorm 1.40 | tau 3.4 | 98337 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50700 | loss 4.2075 avg 4.7823 | lr 2.94e-04 gnorm 1.47 | tau 3.4 | 98341 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50750 | loss 4.3124 avg 4.7818 | lr 2.94e-04 gnorm 1.31 | tau 3.4 | 98346 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50800 | loss 4.3088 avg 4.7813 | lr 2.94e-04 gnorm 1.26 | tau 3.4 | 98350 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50850 | loss 4.2340 avg 4.7808 | lr 2.94e-04 gnorm 1.20 | tau 3.4 | 98355 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50900 | loss 4.1307 avg 4.7803 | lr 2.94e-04 gnorm 1.28 | tau 3.4 | 98359 tok/s | passes 3.00 T 0.993
+  epoch 1 step  50950 | loss 4.2457 avg 4.7798 | lr 2.94e-04 gnorm 2.07 | tau 3.4 | 98364 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51000 | loss 4.2690 avg 4.7793 | lr 2.94e-04 gnorm 1.27 | tau 3.4 | 98368 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2704 ppl 71.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  51050 | loss 4.3329 avg 4.7788 | lr 2.94e-04 gnorm 1.23 | tau 3.4 | 98329 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51100 | loss 4.2674 avg 4.7783 | lr 2.94e-04 gnorm 1.71 | tau 3.4 | 98334 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51150 | loss 4.1665 avg 4.7778 | lr 2.94e-04 gnorm 1.55 | tau 3.4 | 98338 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51200 | loss 4.1742 avg 4.7773 | lr 2.94e-04 gnorm 1.63 | tau 3.4 | 98343 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51250 | loss 4.4382 avg 4.7768 | lr 2.94e-04 gnorm 1.50 | tau 3.4 | 98347 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51300 | loss 4.3226 avg 4.7763 | lr 2.94e-04 gnorm 1.68 | tau 3.4 | 98352 tok/s | passes 3.00 T 0.992
+  epoch 1 step  51350 | loss 4.2055 avg 4.7758 | lr 2.94e-04 gnorm 1.21 | tau 3.4 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51400 | loss 4.2268 avg 4.7753 | lr 2.94e-04 gnorm 1.32 | tau 3.4 | 98361 tok/s | passes 3.00 T 0.992
+  epoch 1 step  51450 | loss 4.2291 avg 4.7748 | lr 2.94e-04 gnorm 1.39 | tau 3.4 | 98366 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51500 | loss 4.3538 avg 4.7743 | lr 2.94e-04 gnorm 1.63 | tau 3.4 | 98370 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2643 ppl 71.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  51550 | loss 4.2511 avg 4.7738 | lr 2.94e-04 gnorm 1.34 | tau 3.4 | 98331 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51600 | loss 4.2794 avg 4.7733 | lr 2.94e-04 gnorm 1.46 | tau 3.4 | 98336 tok/s | passes 3.00 T 0.992
+  epoch 1 step  51650 | loss 4.1827 avg 4.7728 | lr 2.94e-04 gnorm 1.17 | tau 3.4 | 98340 tok/s | passes 3.00 T 0.992
+  epoch 1 step  51700 | loss 4.3433 avg 4.7723 | lr 2.94e-04 gnorm 1.38 | tau 3.4 | 98345 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51750 | loss 4.2343 avg 4.7718 | lr 2.94e-04 gnorm 1.31 | tau 3.4 | 98349 tok/s | passes 3.00 T 0.992
+  epoch 1 step  51800 | loss 4.2701 avg 4.7713 | lr 2.94e-04 gnorm 1.25 | tau 3.4 | 98354 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51850 | loss 4.3054 avg 4.7709 | lr 2.94e-04 gnorm 1.27 | tau 3.4 | 98359 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51900 | loss 4.1442 avg 4.7704 | lr 2.94e-04 gnorm 1.60 | tau 3.4 | 98363 tok/s | passes 3.00 T 0.993
+  epoch 1 step  51950 | loss 4.2060 avg 4.7699 | lr 2.94e-04 gnorm 1.24 | tau 3.4 | 98368 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52000 | loss 4.3439 avg 4.7694 | lr 2.94e-04 gnorm 1.27 | tau 3.4 | 98373 tok/s | passes 3.00 T 0.992
+  >>> val loss 4.2638 ppl 71.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  52050 | loss 4.2904 avg 4.7689 | lr 2.94e-04 gnorm 1.63 | tau 3.4 | 98334 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52100 | loss 4.3523 avg 4.7684 | lr 2.94e-04 gnorm 1.59 | tau 3.4 | 98338 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52150 | loss 4.3198 avg 4.7680 | lr 2.94e-04 gnorm 1.26 | tau 3.4 | 98343 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52200 | loss 4.2897 avg 4.7675 | lr 2.94e-04 gnorm 1.72 | tau 3.4 | 98347 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52250 | loss 4.1597 avg 4.7670 | lr 2.94e-04 gnorm 1.26 | tau 3.4 | 98352 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52300 | loss 4.3482 avg 4.7665 | lr 2.94e-04 gnorm 1.68 | tau 3.4 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52350 | loss 4.2315 avg 4.7660 | lr 2.94e-04 gnorm 1.50 | tau 3.4 | 98361 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52400 | loss 4.3186 avg 4.7655 | lr 2.94e-04 gnorm 1.38 | tau 3.4 | 98365 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52450 | loss 4.1157 avg 4.7650 | lr 2.94e-04 gnorm 1.33 | tau 3.4 | 98370 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52500 | loss 4.2476 avg 4.7645 | lr 2.94e-04 gnorm 1.79 | tau 3.4 | 98374 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2574 ppl 70.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  52550 | loss 4.1008 avg 4.7641 | lr 2.94e-04 gnorm 1.27 | tau 3.4 | 98337 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52600 | loss 4.2241 avg 4.7636 | lr 2.94e-04 gnorm 1.20 | tau 3.4 | 98342 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52650 | loss 4.3524 avg 4.7631 | lr 2.94e-04 gnorm 1.35 | tau 3.4 | 98346 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52700 | loss 4.2531 avg 4.7626 | lr 2.93e-04 gnorm 1.41 | tau 3.3 | 98351 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52750 | loss 4.2980 avg 4.7621 | lr 2.93e-04 gnorm 1.22 | tau 3.3 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52800 | loss 4.2601 avg 4.7617 | lr 2.93e-04 gnorm 1.32 | tau 3.3 | 98360 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52850 | loss 4.2153 avg 4.7612 | lr 2.93e-04 gnorm 1.27 | tau 3.3 | 98364 tok/s | passes 3.00 T 0.993
+  epoch 1 step  52900 | loss 4.2938 avg 4.7607 | lr 2.93e-04 gnorm 1.28 | tau 3.3 | 98369 tok/s | passes 3.00 T 0.992
+  epoch 1 step  52950 | loss 4.2637 avg 4.7602 | lr 2.93e-04 gnorm 1.34 | tau 3.3 | 98373 tok/s | passes 3.00 T 0.994
+  epoch 1 step  53000 | loss 4.3157 avg 4.7598 | lr 2.93e-04 gnorm 1.60 | tau 3.3 | 98378 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2537 ppl 70.4
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  53050 | loss 4.0829 avg 4.7593 | lr 2.93e-04 gnorm 1.34 | tau 3.3 | 98340 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53100 | loss 4.2291 avg 4.7588 | lr 2.93e-04 gnorm 1.21 | tau 3.3 | 98345 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53150 | loss 4.2749 avg 4.7583 | lr 2.93e-04 gnorm 1.32 | tau 3.3 | 98349 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53200 | loss 4.1723 avg 4.7578 | lr 2.93e-04 gnorm 1.38 | tau 3.3 | 98354 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53250 | loss 4.2186 avg 4.7574 | lr 2.93e-04 gnorm 1.22 | tau 3.3 | 98358 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53300 | loss 4.1705 avg 4.7569 | lr 2.93e-04 gnorm 1.22 | tau 3.3 | 98363 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53350 | loss 4.1953 avg 4.7564 | lr 2.93e-04 gnorm 1.79 | tau 3.3 | 98367 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53400 | loss 4.3042 avg 4.7559 | lr 2.93e-04 gnorm 1.51 | tau 3.3 | 98372 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53450 | loss 4.2390 avg 4.7555 | lr 2.93e-04 gnorm 1.55 | tau 3.3 | 98376 tok/s | passes 3.00 T 0.994
+  epoch 1 step  53500 | loss 4.2458 avg 4.7550 | lr 2.93e-04 gnorm 1.63 | tau 3.3 | 98380 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2504 ppl 70.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  53550 | loss 4.2331 avg 4.7545 | lr 2.93e-04 gnorm 2.03 | tau 3.3 | 98342 tok/s | passes 3.00 T 0.994
+  epoch 1 step  53600 | loss 4.2627 avg 4.7540 | lr 2.93e-04 gnorm 1.83 | tau 3.3 | 98346 tok/s | passes 3.00 T 0.994
+  epoch 1 step  53650 | loss 4.2117 avg 4.7535 | lr 2.93e-04 gnorm 2.19 | tau 3.3 | 98351 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53700 | loss 4.2389 avg 4.7531 | lr 2.93e-04 gnorm 1.33 | tau 3.3 | 98355 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53750 | loss 4.2381 avg 4.7526 | lr 2.93e-04 gnorm 1.63 | tau 3.3 | 98360 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53800 | loss 4.2338 avg 4.7521 | lr 2.93e-04 gnorm 1.41 | tau 3.3 | 98364 tok/s | passes 3.00 T 0.994
+  epoch 1 step  53850 | loss 4.2686 avg 4.7517 | lr 2.93e-04 gnorm 1.22 | tau 3.3 | 98369 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53900 | loss 4.0774 avg 4.7512 | lr 2.93e-04 gnorm 1.56 | tau 3.3 | 98373 tok/s | passes 3.00 T 0.993
+  epoch 1 step  53950 | loss 4.2237 avg 4.7507 | lr 2.93e-04 gnorm 1.36 | tau 3.3 | 98378 tok/s | passes 3.00 T 0.993
+  epoch 1 step  54000 | loss 4.2919 avg 4.7503 | lr 2.93e-04 gnorm 1.34 | tau 3.3 | 98382 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.2418 ppl 69.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  54050 | loss 4.0783 avg 4.7498 | lr 2.93e-04 gnorm 1.31 | tau 3.3 | 98345 tok/s | passes 3.00 T 0.993
+  epoch 1 step  54100 | loss 4.2352 avg 4.7493 | lr 2.93e-04 gnorm 1.51 | tau 3.3 | 98350 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54150 | loss 4.3050 avg 4.7489 | lr 2.93e-04 gnorm 1.42 | tau 3.3 | 98354 tok/s | passes 3.00 T 0.993
+  epoch 1 step  54200 | loss 4.1631 avg 4.7484 | lr 2.93e-04 gnorm 1.22 | tau 3.3 | 98359 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54250 | loss 4.1797 avg 4.7479 | lr 2.93e-04 gnorm 1.39 | tau 3.3 | 98363 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54300 | loss 4.1185 avg 4.7474 | lr 2.93e-04 gnorm 1.26 | tau 3.3 | 98367 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54350 | loss 4.1321 avg 4.7470 | lr 2.93e-04 gnorm 1.63 | tau 3.3 | 98372 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54400 | loss 4.1720 avg 4.7465 | lr 2.93e-04 gnorm 1.93 | tau 3.3 | 98376 tok/s | passes 3.00 T 0.993
+  epoch 1 step  54450 | loss 4.2264 avg 4.7460 | lr 2.93e-04 gnorm 2.17 | tau 3.3 | 98380 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54500 | loss 4.2019 avg 4.7456 | lr 2.93e-04 gnorm 1.71 | tau 3.3 | 98385 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.2323 ppl 68.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  54550 | loss 4.2732 avg 4.7451 | lr 2.93e-04 gnorm 1.36 | tau 3.3 | 98349 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54600 | loss 4.2356 avg 4.7446 | lr 2.93e-04 gnorm 1.42 | tau 3.3 | 98353 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54650 | loss 4.2045 avg 4.7442 | lr 2.93e-04 gnorm 1.30 | tau 3.3 | 98357 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54700 | loss 4.2521 avg 4.7437 | lr 2.93e-04 gnorm 1.56 | tau 3.3 | 98362 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54750 | loss 4.1937 avg 4.7432 | lr 2.93e-04 gnorm 1.58 | tau 3.3 | 98366 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54800 | loss 4.2924 avg 4.7427 | lr 2.93e-04 gnorm 1.66 | tau 3.3 | 98370 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54850 | loss 4.2208 avg 4.7423 | lr 2.93e-04 gnorm 1.32 | tau 3.3 | 98374 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54900 | loss 4.2262 avg 4.7418 | lr 2.93e-04 gnorm 1.21 | tau 3.3 | 98379 tok/s | passes 3.00 T 0.994
+  epoch 1 step  54950 | loss 4.2110 avg 4.7413 | lr 2.93e-04 gnorm 1.67 | tau 3.3 | 98383 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55000 | loss 4.2437 avg 4.7408 | lr 2.93e-04 gnorm 1.99 | tau 3.3 | 98387 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.2235 ppl 68.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  55050 | loss 4.2631 avg 4.7404 | lr 2.93e-04 gnorm 1.48 | tau 3.3 | 98353 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55100 | loss 4.1960 avg 4.7399 | lr 2.93e-04 gnorm 3.14 | tau 3.3 | 98357 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55150 | loss 4.2194 avg 4.7394 | lr 2.93e-04 gnorm 1.86 | tau 3.3 | 98361 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55200 | loss 4.0904 avg 4.7389 | lr 2.93e-04 gnorm 1.37 | tau 3.3 | 98365 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55250 | loss 4.2355 avg 4.7385 | lr 2.93e-04 gnorm 1.36 | tau 3.3 | 98370 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55300 | loss 4.2627 avg 4.7380 | lr 2.93e-04 gnorm 2.22 | tau 3.3 | 98374 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55350 | loss 4.1982 avg 4.7375 | lr 2.93e-04 gnorm 1.53 | tau 3.3 | 98378 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55400 | loss 4.2298 avg 4.7370 | lr 2.93e-04 gnorm 1.33 | tau 3.3 | 98382 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55450 | loss 4.1074 avg 4.7366 | lr 2.93e-04 gnorm 1.64 | tau 3.3 | 98387 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55500 | loss 4.2027 avg 4.7361 | lr 2.93e-04 gnorm 1.71 | tau 3.3 | 98391 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.2136 ppl 67.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  55550 | loss 4.0922 avg 4.7356 | lr 2.93e-04 gnorm 1.61 | tau 3.3 | 98356 tok/s | passes 3.00 T 0.993
+  epoch 1 step  55600 | loss 4.1827 avg 4.7352 | lr 2.93e-04 gnorm 2.43 | tau 3.3 | 98359 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55650 | loss 4.2789 avg 4.7347 | lr 2.93e-04 gnorm 1.41 | tau 3.3 | 98364 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55700 | loss 4.2614 avg 4.7342 | lr 2.93e-04 gnorm 1.61 | tau 3.3 | 98368 tok/s | passes 3.00 T 0.995
+  epoch 1 step  55750 | loss 4.0724 avg 4.7337 | lr 2.93e-04 gnorm 1.33 | tau 3.3 | 98372 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55800 | loss 4.2553 avg 4.7333 | lr 2.93e-04 gnorm 1.33 | tau 3.2 | 98377 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55850 | loss 4.2676 avg 4.7328 | lr 2.93e-04 gnorm 1.32 | tau 3.2 | 98381 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55900 | loss 4.1368 avg 4.7323 | lr 2.93e-04 gnorm 1.48 | tau 3.2 | 98385 tok/s | passes 3.00 T 0.994
+  epoch 1 step  55950 | loss 4.2505 avg 4.7318 | lr 2.93e-04 gnorm 1.42 | tau 3.2 | 98389 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56000 | loss 4.1093 avg 4.7314 | lr 2.93e-04 gnorm 1.35 | tau 3.2 | 98394 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.2053 ppl 67.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  56050 | loss 4.2289 avg 4.7309 | lr 2.93e-04 gnorm 2.20 | tau 3.2 | 98358 tok/s | passes 3.00 T 0.995
+  epoch 1 step  56100 | loss 4.2178 avg 4.7304 | lr 2.93e-04 gnorm 1.73 | tau 3.2 | 98362 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56150 | loss 4.1021 avg 4.7299 | lr 2.93e-04 gnorm 1.35 | tau 3.2 | 98367 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56200 | loss 4.1286 avg 4.7294 | lr 2.93e-04 gnorm 1.48 | tau 3.2 | 98371 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56250 | loss 4.2439 avg 4.7290 | lr 2.93e-04 gnorm 1.93 | tau 3.2 | 98375 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56300 | loss 4.2246 avg 4.7285 | lr 2.93e-04 gnorm 1.33 | tau 3.2 | 98380 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56350 | loss 4.1575 avg 4.7280 | lr 2.93e-04 gnorm 1.72 | tau 3.2 | 98384 tok/s | passes 3.00 T 0.995
+  epoch 1 step  56400 | loss 4.0900 avg 4.7275 | lr 2.93e-04 gnorm 1.99 | tau 3.2 | 98388 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56450 | loss 4.1666 avg 4.7271 | lr 2.93e-04 gnorm 1.30 | tau 3.2 | 98392 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56500 | loss 4.2600 avg 4.7266 | lr 2.93e-04 gnorm 1.77 | tau 3.2 | 98396 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1968 ppl 66.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  56550 | loss 4.1362 avg 4.7261 | lr 2.92e-04 gnorm 1.47 | tau 3.2 | 98362 tok/s | passes 3.00 T 0.995
+  epoch 1 step  56600 | loss 4.1539 avg 4.7256 | lr 2.92e-04 gnorm 1.35 | tau 3.2 | 98366 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56650 | loss 4.2762 avg 4.7252 | lr 2.92e-04 gnorm 1.63 | tau 3.2 | 98370 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56700 | loss 4.2440 avg 4.7247 | lr 2.92e-04 gnorm 1.40 | tau 3.2 | 98374 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56750 | loss 4.1875 avg 4.7243 | lr 2.92e-04 gnorm 1.53 | tau 3.2 | 98379 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56800 | loss 4.1757 avg 4.7238 | lr 2.92e-04 gnorm 1.34 | tau 3.2 | 98383 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56850 | loss 4.2412 avg 4.7233 | lr 2.92e-04 gnorm 1.41 | tau 3.2 | 98387 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56900 | loss 4.0632 avg 4.7228 | lr 2.92e-04 gnorm 1.54 | tau 3.2 | 98391 tok/s | passes 3.00 T 0.994
+  epoch 1 step  56950 | loss 4.3159 avg 4.7224 | lr 2.92e-04 gnorm 1.86 | tau 3.2 | 98395 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57000 | loss 4.1062 avg 4.7219 | lr 2.92e-04 gnorm 2.08 | tau 3.2 | 98399 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1856 ppl 65.7
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  57050 | loss 4.2335 avg 4.7214 | lr 2.92e-04 gnorm 3.26 | tau 3.2 | 98365 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57100 | loss 4.1735 avg 4.7210 | lr 2.92e-04 gnorm 1.72 | tau 3.2 | 98369 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57150 | loss 4.2440 avg 4.7205 | lr 2.92e-04 gnorm 1.71 | tau 3.2 | 98373 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57200 | loss 4.1606 avg 4.7200 | lr 2.92e-04 gnorm 1.87 | tau 3.2 | 98378 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57250 | loss 4.1811 avg 4.7195 | lr 2.92e-04 gnorm 1.98 | tau 3.2 | 98382 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57300 | loss 4.2276 avg 4.7191 | lr 2.92e-04 gnorm 1.76 | tau 3.2 | 98386 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57350 | loss 4.0811 avg 4.7186 | lr 2.92e-04 gnorm 1.62 | tau 3.2 | 98390 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57400 | loss 4.2704 avg 4.7181 | lr 2.92e-04 gnorm 2.07 | tau 3.2 | 98394 tok/s | passes 3.00 T 0.995
+  epoch 1 step  57450 | loss 4.2323 avg 4.7177 | lr 2.92e-04 gnorm 1.40 | tau 3.2 | 98398 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57500 | loss 4.1498 avg 4.7172 | lr 2.92e-04 gnorm 1.30 | tau 3.2 | 98402 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1775 ppl 65.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  57550 | loss 4.1412 avg 4.7167 | lr 2.92e-04 gnorm 1.30 | tau 3.2 | 98367 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57600 | loss 4.0919 avg 4.7162 | lr 2.92e-04 gnorm 1.41 | tau 3.2 | 98371 tok/s | passes 3.00 T 0.995
+  epoch 1 step  57650 | loss 4.2778 avg 4.7158 | lr 2.92e-04 gnorm 1.74 | tau 3.2 | 98375 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57700 | loss 4.0391 avg 4.7153 | lr 2.92e-04 gnorm 1.42 | tau 3.2 | 98379 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57750 | loss 4.1484 avg 4.7148 | lr 2.92e-04 gnorm 1.82 | tau 3.2 | 98383 tok/s | passes 3.00 T 0.995
+  epoch 1 step  57800 | loss 4.1312 avg 4.7144 | lr 2.92e-04 gnorm 1.58 | tau 3.2 | 98388 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57850 | loss 4.2348 avg 4.7139 | lr 2.92e-04 gnorm 2.43 | tau 3.2 | 98392 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57900 | loss 4.1779 avg 4.7134 | lr 2.92e-04 gnorm 1.98 | tau 3.2 | 98396 tok/s | passes 3.00 T 0.994
+  epoch 1 step  57950 | loss 4.2364 avg 4.7129 | lr 2.92e-04 gnorm 1.45 | tau 3.2 | 98400 tok/s | passes 3.00 T 0.995
+  epoch 1 step  58000 | loss 4.1637 avg 4.7125 | lr 2.92e-04 gnorm 4.65 | tau 3.2 | 98404 tok/s | passes 3.00 T 0.995
+  >>> val loss 4.1796 ppl 65.3
+  epoch 1 step  58050 | loss 4.1730 avg 4.7120 | lr 2.92e-04 gnorm 1.70 | tau 3.2 | 98385 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58100 | loss 4.2299 avg 4.7115 | lr 2.92e-04 gnorm 1.48 | tau 3.2 | 98389 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58150 | loss 4.1092 avg 4.7111 | lr 2.92e-04 gnorm 1.53 | tau 3.1 | 98393 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58200 | loss 4.2719 avg 4.7106 | lr 2.92e-04 gnorm 1.45 | tau 3.1 | 98397 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58250 | loss 4.1529 avg 4.7102 | lr 2.92e-04 gnorm 1.91 | tau 3.1 | 98401 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58300 | loss 4.2427 avg 4.7097 | lr 2.92e-04 gnorm 2.29 | tau 3.1 | 98405 tok/s | passes 3.00 T 0.995
+  epoch 1 step  58350 | loss 4.1649 avg 4.7092 | lr 2.92e-04 gnorm 1.50 | tau 3.1 | 98409 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58400 | loss 4.1365 avg 4.7088 | lr 2.92e-04 gnorm 3.00 | tau 3.1 | 98413 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58450 | loss 4.2267 avg 4.7083 | lr 2.92e-04 gnorm 2.99 | tau 3.1 | 98417 tok/s | passes 3.00 T 0.995
+  epoch 1 step  58500 | loss 4.1030 avg 4.7078 | lr 2.92e-04 gnorm 1.46 | tau 3.1 | 98421 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1687 ppl 64.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  58550 | loss 4.1395 avg 4.7074 | lr 2.92e-04 gnorm 2.72 | tau 3.1 | 98385 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58600 | loss 4.1313 avg 4.7069 | lr 2.92e-04 gnorm 1.49 | tau 3.1 | 98389 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58650 | loss 4.1277 avg 4.7064 | lr 2.92e-04 gnorm 1.61 | tau 3.1 | 98393 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58700 | loss 4.0515 avg 4.7060 | lr 2.92e-04 gnorm 2.44 | tau 3.1 | 98397 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58750 | loss 4.1247 avg 4.7055 | lr 2.92e-04 gnorm 1.34 | tau 3.1 | 98401 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58800 | loss 4.1839 avg 4.7050 | lr 2.92e-04 gnorm 2.21 | tau 3.1 | 98405 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58850 | loss 4.2224 avg 4.7046 | lr 2.92e-04 gnorm 1.31 | tau 3.1 | 98409 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58900 | loss 4.0873 avg 4.7041 | lr 2.92e-04 gnorm 1.48 | tau 3.1 | 98413 tok/s | passes 3.00 T 0.994
+  epoch 1 step  58950 | loss 4.1421 avg 4.7036 | lr 2.92e-04 gnorm 1.42 | tau 3.1 | 98417 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59000 | loss 4.0903 avg 4.7032 | lr 2.92e-04 gnorm 1.70 | tau 3.1 | 98421 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1586 ppl 64.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  59050 | loss 4.1677 avg 4.7027 | lr 2.92e-04 gnorm 1.42 | tau 3.1 | 98387 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59100 | loss 4.1896 avg 4.7022 | lr 2.92e-04 gnorm 2.25 | tau 3.1 | 98391 tok/s | passes 3.00 T 0.995
+  epoch 1 step  59150 | loss 4.1518 avg 4.7018 | lr 2.92e-04 gnorm 2.42 | tau 3.1 | 98395 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59200 | loss 4.1461 avg 4.7013 | lr 2.92e-04 gnorm 2.17 | tau 3.1 | 98400 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59250 | loss 4.1759 avg 4.7008 | lr 2.92e-04 gnorm 1.40 | tau 3.1 | 98404 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59300 | loss 4.1494 avg 4.7004 | lr 2.92e-04 gnorm 1.61 | tau 3.1 | 98408 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59350 | loss 4.0603 avg 4.6999 | lr 2.92e-04 gnorm 2.54 | tau 3.1 | 98412 tok/s | passes 3.00 T 0.995
+  epoch 1 step  59400 | loss 4.0750 avg 4.6994 | lr 2.92e-04 gnorm 1.93 | tau 3.1 | 98416 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59450 | loss 4.2019 avg 4.6990 | lr 2.92e-04 gnorm 1.38 | tau 3.1 | 98420 tok/s | passes 3.00 T 0.995
+  epoch 1 step  59500 | loss 4.2385 avg 4.6985 | lr 2.92e-04 gnorm 1.51 | tau 3.1 | 98424 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1467 ppl 63.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  59550 | loss 4.1715 avg 4.6980 | lr 2.92e-04 gnorm 1.82 | tau 3.1 | 98391 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59600 | loss 4.0287 avg 4.6976 | lr 2.92e-04 gnorm 1.81 | tau 3.1 | 98395 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59650 | loss 4.2435 avg 4.6971 | lr 2.92e-04 gnorm 1.40 | tau 3.1 | 98399 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59700 | loss 4.2500 avg 4.6967 | lr 2.92e-04 gnorm 2.59 | tau 3.1 | 98403 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59750 | loss 4.0740 avg 4.6962 | lr 2.92e-04 gnorm 1.53 | tau 3.1 | 98407 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59800 | loss 4.0717 avg 4.6958 | lr 2.92e-04 gnorm 1.85 | tau 3.1 | 98411 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59850 | loss 4.1076 avg 4.6953 | lr 2.92e-04 gnorm 2.56 | tau 3.1 | 98415 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59900 | loss 4.1708 avg 4.6948 | lr 2.92e-04 gnorm 2.07 | tau 3.1 | 98419 tok/s | passes 3.00 T 0.994
+  epoch 1 step  59950 | loss 4.1828 avg 4.6944 | lr 2.92e-04 gnorm 2.05 | tau 3.1 | 98423 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60000 | loss 4.1341 avg 4.6939 | lr 2.92e-04 gnorm 1.47 | tau 3.1 | 98427 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1446 ppl 63.1
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\step_60000.pt
+  epoch 1 step  60050 | loss 4.2722 avg 4.6934 | lr 2.92e-04 gnorm 1.95 | tau 3.1 | 98380 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60100 | loss 4.0966 avg 4.6930 | lr 2.92e-04 gnorm 1.68 | tau 3.1 | 98383 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60150 | loss 4.1765 avg 4.6925 | lr 2.91e-04 gnorm 1.42 | tau 3.1 | 98387 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60200 | loss 4.1057 avg 4.6920 | lr 2.91e-04 gnorm 1.54 | tau 3.1 | 98391 tok/s | passes 3.00 T 0.995
+  epoch 1 step  60250 | loss 4.0090 avg 4.6916 | lr 2.91e-04 gnorm 1.46 | tau 3.1 | 98395 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60300 | loss 4.1308 avg 4.6911 | lr 2.91e-04 gnorm 2.77 | tau 3.0 | 98399 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60350 | loss 4.1272 avg 4.6906 | lr 2.91e-04 gnorm 2.06 | tau 3.0 | 98403 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60400 | loss 4.2102 avg 4.6902 | lr 2.91e-04 gnorm 1.54 | tau 3.0 | 98407 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60450 | loss 4.1644 avg 4.6897 | lr 2.91e-04 gnorm 1.98 | tau 3.0 | 98411 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60500 | loss 4.1945 avg 4.6893 | lr 2.91e-04 gnorm 1.57 | tau 3.0 | 98415 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1428 ppl 63.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  60550 | loss 4.2045 avg 4.6888 | lr 2.91e-04 gnorm 1.67 | tau 3.0 | 98382 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60600 | loss 4.2330 avg 4.6883 | lr 2.91e-04 gnorm 2.28 | tau 3.0 | 98386 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60650 | loss 4.2972 avg 4.6879 | lr 2.91e-04 gnorm 1.55 | tau 3.0 | 98390 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60700 | loss 4.2034 avg 4.6874 | lr 2.91e-04 gnorm 1.66 | tau 3.0 | 98394 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60750 | loss 4.1076 avg 4.6870 | lr 2.91e-04 gnorm 1.67 | tau 3.0 | 98398 tok/s | passes 3.00 T 0.993
+  epoch 1 step  60800 | loss 4.2352 avg 4.6865 | lr 2.91e-04 gnorm 1.70 | tau 3.0 | 98402 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60850 | loss 4.1720 avg 4.6861 | lr 2.91e-04 gnorm 2.39 | tau 3.0 | 98406 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60900 | loss 4.0843 avg 4.6856 | lr 2.91e-04 gnorm 1.59 | tau 3.0 | 98410 tok/s | passes 3.00 T 0.994
+  epoch 1 step  60950 | loss 4.2737 avg 4.6852 | lr 2.91e-04 gnorm 1.53 | tau 3.0 | 98414 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61000 | loss 4.2109 avg 4.6847 | lr 2.91e-04 gnorm 1.55 | tau 3.0 | 98418 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1347 ppl 62.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  61050 | loss 4.1185 avg 4.6843 | lr 2.91e-04 gnorm 1.44 | tau 3.0 | 98385 tok/s | passes 3.00 T 0.993
+  epoch 1 step  61100 | loss 4.0626 avg 4.6838 | lr 2.91e-04 gnorm 1.47 | tau 3.0 | 98388 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61150 | loss 4.1969 avg 4.6833 | lr 2.91e-04 gnorm 1.94 | tau 3.0 | 98392 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61200 | loss 4.1217 avg 4.6829 | lr 2.91e-04 gnorm 1.40 | tau 3.0 | 98397 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61250 | loss 4.0703 avg 4.6824 | lr 2.91e-04 gnorm 1.37 | tau 3.0 | 98401 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61300 | loss 4.1100 avg 4.6820 | lr 2.91e-04 gnorm 1.69 | tau 3.0 | 98404 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61350 | loss 4.0627 avg 4.6815 | lr 2.91e-04 gnorm 1.37 | tau 3.0 | 98408 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61400 | loss 4.1094 avg 4.6810 | lr 2.91e-04 gnorm 1.93 | tau 3.0 | 98412 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61450 | loss 4.0747 avg 4.6806 | lr 2.91e-04 gnorm 1.83 | tau 3.0 | 98416 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61500 | loss 4.1077 avg 4.6801 | lr 2.91e-04 gnorm 1.47 | tau 3.0 | 98420 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1260 ppl 61.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  61550 | loss 4.0809 avg 4.6797 | lr 2.91e-04 gnorm 1.41 | tau 3.0 | 98388 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61600 | loss 4.0496 avg 4.6792 | lr 2.91e-04 gnorm 2.17 | tau 3.0 | 98392 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61650 | loss 4.1776 avg 4.6788 | lr 2.91e-04 gnorm 1.64 | tau 3.0 | 98396 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61700 | loss 4.1775 avg 4.6783 | lr 2.91e-04 gnorm 1.43 | tau 3.0 | 98400 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61750 | loss 4.0751 avg 4.6779 | lr 2.91e-04 gnorm 2.84 | tau 3.0 | 98403 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61800 | loss 4.1561 avg 4.6774 | lr 2.91e-04 gnorm 1.78 | tau 3.0 | 98407 tok/s | passes 3.00 T 0.993
+  epoch 1 step  61850 | loss 4.1872 avg 4.6770 | lr 2.91e-04 gnorm 2.11 | tau 3.0 | 98411 tok/s | passes 3.00 T 0.993
+  epoch 1 step  61900 | loss 4.1559 avg 4.6765 | lr 2.91e-04 gnorm 1.90 | tau 3.0 | 98415 tok/s | passes 3.00 T 0.994
+  epoch 1 step  61950 | loss 4.0194 avg 4.6761 | lr 2.91e-04 gnorm 1.54 | tau 3.0 | 98418 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62000 | loss 4.1656 avg 4.6756 | lr 2.91e-04 gnorm 1.87 | tau 3.0 | 98422 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1206 ppl 61.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  62050 | loss 3.9163 avg 4.6751 | lr 2.91e-04 gnorm 1.33 | tau 3.0 | 98389 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62100 | loss 4.1219 avg 4.6747 | lr 2.91e-04 gnorm 1.86 | tau 3.0 | 98393 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62150 | loss 4.2102 avg 4.6742 | lr 2.91e-04 gnorm 1.54 | tau 2.9 | 98397 tok/s | passes 3.00 T 0.993
+  epoch 1 step  62200 | loss 4.1987 avg 4.6738 | lr 2.91e-04 gnorm 1.53 | tau 2.9 | 98401 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62250 | loss 4.0959 avg 4.6733 | lr 2.91e-04 gnorm 1.68 | tau 2.9 | 98405 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62300 | loss 4.1019 avg 4.6728 | lr 2.91e-04 gnorm 1.70 | tau 2.9 | 98408 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62350 | loss 4.1120 avg 4.6724 | lr 2.91e-04 gnorm 1.40 | tau 2.9 | 98412 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62400 | loss 4.2409 avg 4.6720 | lr 2.91e-04 gnorm 1.74 | tau 2.9 | 98416 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62450 | loss 4.0793 avg 4.6715 | lr 2.91e-04 gnorm 1.77 | tau 2.9 | 98420 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62500 | loss 4.1464 avg 4.6711 | lr 2.91e-04 gnorm 1.65 | tau 2.9 | 98424 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1185 ppl 61.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  62550 | loss 4.0562 avg 4.6706 | lr 2.91e-04 gnorm 1.43 | tau 2.9 | 98392 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62600 | loss 4.2890 avg 4.6702 | lr 2.91e-04 gnorm 1.84 | tau 2.9 | 98396 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62650 | loss 4.1351 avg 4.6697 | lr 2.91e-04 gnorm 1.41 | tau 2.9 | 98400 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62700 | loss 4.1152 avg 4.6693 | lr 2.91e-04 gnorm 1.53 | tau 2.9 | 98404 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62750 | loss 4.1530 avg 4.6688 | lr 2.91e-04 gnorm 1.34 | tau 2.9 | 98408 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62800 | loss 4.1573 avg 4.6684 | lr 2.91e-04 gnorm 1.39 | tau 2.9 | 98411 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62850 | loss 4.0217 avg 4.6679 | lr 2.91e-04 gnorm 1.49 | tau 2.9 | 98415 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62900 | loss 4.1130 avg 4.6675 | lr 2.91e-04 gnorm 1.47 | tau 2.9 | 98419 tok/s | passes 3.00 T 0.994
+  epoch 1 step  62950 | loss 4.0196 avg 4.6670 | lr 2.91e-04 gnorm 1.67 | tau 2.9 | 98423 tok/s | passes 3.00 T 0.993
+  epoch 1 step  63000 | loss 4.0716 avg 4.6666 | lr 2.91e-04 gnorm 1.47 | tau 2.9 | 98427 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1142 ppl 61.2
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  63050 | loss 4.0705 avg 4.6661 | lr 2.91e-04 gnorm 1.56 | tau 2.9 | 98396 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63100 | loss 3.9421 avg 4.6657 | lr 2.91e-04 gnorm 1.48 | tau 2.9 | 98400 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63150 | loss 4.0455 avg 4.6652 | lr 2.91e-04 gnorm 1.40 | tau 2.9 | 98404 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63200 | loss 4.0262 avg 4.6648 | lr 2.91e-04 gnorm 1.70 | tau 2.9 | 98408 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63250 | loss 4.0492 avg 4.6643 | lr 2.91e-04 gnorm 1.64 | tau 2.9 | 98412 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63300 | loss 4.0868 avg 4.6639 | lr 2.91e-04 gnorm 2.57 | tau 2.9 | 98416 tok/s | passes 3.00 T 0.993
+  epoch 1 step  63350 | loss 4.0419 avg 4.6634 | lr 2.91e-04 gnorm 1.79 | tau 2.9 | 98419 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63400 | loss 4.1956 avg 4.6630 | lr 2.91e-04 gnorm 3.02 | tau 2.9 | 98423 tok/s | passes 3.00 T 0.993
+  epoch 1 step  63450 | loss 4.1075 avg 4.6625 | lr 2.91e-04 gnorm 1.33 | tau 2.9 | 98427 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63500 | loss 4.0861 avg 4.6621 | lr 2.91e-04 gnorm 1.74 | tau 2.9 | 98431 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1105 ppl 61.0
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  63550 | loss 4.0614 avg 4.6617 | lr 2.91e-04 gnorm 2.45 | tau 2.9 | 98400 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63600 | loss 4.1551 avg 4.6612 | lr 2.90e-04 gnorm 2.63 | tau 2.9 | 98404 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63650 | loss 4.1489 avg 4.6608 | lr 2.90e-04 gnorm 1.91 | tau 2.9 | 98408 tok/s | passes 3.00 T 0.993
+  epoch 1 step  63700 | loss 4.2309 avg 4.6604 | lr 2.90e-04 gnorm 1.48 | tau 2.9 | 98412 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63750 | loss 3.9444 avg 4.6599 | lr 2.90e-04 gnorm 1.61 | tau 2.9 | 98416 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63800 | loss 4.0603 avg 4.6595 | lr 2.90e-04 gnorm 1.48 | tau 2.8 | 98420 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63850 | loss 4.1249 avg 4.6590 | lr 2.90e-04 gnorm 1.47 | tau 2.8 | 98423 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63900 | loss 4.0880 avg 4.6586 | lr 2.90e-04 gnorm 1.41 | tau 2.8 | 98427 tok/s | passes 3.00 T 0.994
+  epoch 1 step  63950 | loss 4.0902 avg 4.6582 | lr 2.90e-04 gnorm 2.59 | tau 2.8 | 98431 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64000 | loss 4.0453 avg 4.6577 | lr 2.90e-04 gnorm 1.47 | tau 2.8 | 98435 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.1024 ppl 60.5
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  64050 | loss 4.1119 avg 4.6573 | lr 2.90e-04 gnorm 1.43 | tau 2.8 | 98403 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64100 | loss 4.0494 avg 4.6569 | lr 2.90e-04 gnorm 1.54 | tau 2.8 | 98407 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64150 | loss 4.1150 avg 4.6564 | lr 2.90e-04 gnorm 1.33 | tau 2.8 | 98411 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64200 | loss 3.9798 avg 4.6560 | lr 2.90e-04 gnorm 1.45 | tau 2.8 | 98414 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64250 | loss 4.0272 avg 4.6556 | lr 2.90e-04 gnorm 1.44 | tau 2.8 | 98418 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64300 | loss 4.0956 avg 4.6551 | lr 2.90e-04 gnorm 1.54 | tau 2.8 | 98422 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64350 | loss 4.0658 avg 4.6547 | lr 2.90e-04 gnorm 1.99 | tau 2.8 | 98426 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64400 | loss 4.1171 avg 4.6542 | lr 2.90e-04 gnorm 1.47 | tau 2.8 | 98429 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64450 | loss 4.2663 avg 4.6538 | lr 2.90e-04 gnorm 1.45 | tau 2.8 | 98433 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64500 | loss 4.1275 avg 4.6534 | lr 2.90e-04 gnorm 1.40 | tau 2.8 | 98437 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.0995 ppl 60.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  64550 | loss 4.0327 avg 4.6529 | lr 2.90e-04 gnorm 1.74 | tau 2.8 | 98405 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64600 | loss 3.9365 avg 4.6525 | lr 2.90e-04 gnorm 1.42 | tau 2.8 | 98409 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64650 | loss 3.9844 avg 4.6521 | lr 2.90e-04 gnorm 2.20 | tau 2.8 | 98413 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64700 | loss 4.1627 avg 4.6516 | lr 2.90e-04 gnorm 1.97 | tau 2.8 | 98417 tok/s | passes 3.00 T 0.992
+  epoch 1 step  64750 | loss 4.0785 avg 4.6512 | lr 2.90e-04 gnorm 1.39 | tau 2.8 | 98420 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64800 | loss 4.0975 avg 4.6508 | lr 2.90e-04 gnorm 1.63 | tau 2.8 | 98424 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64850 | loss 3.9171 avg 4.6503 | lr 2.90e-04 gnorm 1.55 | tau 2.8 | 98428 tok/s | passes 3.00 T 0.994
+  epoch 1 step  64900 | loss 4.0975 avg 4.6499 | lr 2.90e-04 gnorm 1.43 | tau 2.8 | 98432 tok/s | passes 3.00 T 0.993
+  epoch 1 step  64950 | loss 4.2054 avg 4.6495 | lr 2.90e-04 gnorm 1.57 | tau 2.8 | 98435 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65000 | loss 4.0505 avg 4.6490 | lr 2.90e-04 gnorm 1.55 | tau 2.8 | 98439 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.0884 ppl 59.6
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  65050 | loss 4.1323 avg 4.6486 | lr 2.90e-04 gnorm 1.47 | tau 2.8 | 98409 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65100 | loss 4.1514 avg 4.6482 | lr 2.90e-04 gnorm 1.78 | tau 2.8 | 98413 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65150 | loss 4.1190 avg 4.6477 | lr 2.90e-04 gnorm 1.75 | tau 2.8 | 98417 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65200 | loss 4.1992 avg 4.6473 | lr 2.90e-04 gnorm 1.44 | tau 2.8 | 98421 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65250 | loss 4.0513 avg 4.6469 | lr 2.90e-04 gnorm 1.45 | tau 2.8 | 98424 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65300 | loss 4.0505 avg 4.6464 | lr 2.90e-04 gnorm 2.37 | tau 2.8 | 98428 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65350 | loss 3.9284 avg 4.6460 | lr 2.90e-04 gnorm 1.56 | tau 2.8 | 98432 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65400 | loss 3.9249 avg 4.6456 | lr 2.90e-04 gnorm 1.41 | tau 2.7 | 98436 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65450 | loss 4.1380 avg 4.6451 | lr 2.90e-04 gnorm 1.76 | tau 2.7 | 98439 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65500 | loss 4.0785 avg 4.6447 | lr 2.90e-04 gnorm 1.39 | tau 2.7 | 98443 tok/s | passes 3.00 T 0.994
+  >>> val loss 4.0888 ppl 59.7
+  epoch 1 step  65550 | loss 4.0002 avg 4.6443 | lr 2.90e-04 gnorm 1.88 | tau 2.7 | 98425 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65600 | loss 4.0454 avg 4.6439 | lr 2.90e-04 gnorm 1.47 | tau 2.7 | 98429 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65650 | loss 3.9917 avg 4.6434 | lr 2.90e-04 gnorm 1.58 | tau 2.7 | 98432 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65700 | loss 4.0006 avg 4.6430 | lr 2.90e-04 gnorm 1.54 | tau 2.7 | 98436 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65750 | loss 4.0121 avg 4.6426 | lr 2.90e-04 gnorm 1.75 | tau 2.7 | 98440 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65800 | loss 4.0176 avg 4.6421 | lr 2.90e-04 gnorm 1.41 | tau 2.7 | 98444 tok/s | passes 3.00 T 0.993
+  epoch 1 step  65850 | loss 4.0386 avg 4.6417 | lr 2.90e-04 gnorm 1.34 | tau 2.7 | 98447 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65900 | loss 4.0480 avg 4.6413 | lr 2.90e-04 gnorm 1.71 | tau 2.7 | 98451 tok/s | passes 3.00 T 0.994
+  epoch 1 step  65950 | loss 4.1620 avg 4.6408 | lr 2.90e-04 gnorm 2.28 | tau 2.7 | 98455 tok/s | passes 3.00 T 0.994
+  epoch 1 step  66000 | loss 4.0584 avg 4.6404 | lr 2.90e-04 gnorm 1.56 | tau 2.7 | 98458 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.0823 ppl 59.3
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\best.pt
+  epoch 1 step  66050 | loss 3.9868 avg 4.6400 | lr 2.90e-04 gnorm 1.37 | tau 2.7 | 98429 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66100 | loss 4.0217 avg 4.6396 | lr 2.90e-04 gnorm 1.76 | tau 2.7 | 98432 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66150 | loss 4.0060 avg 4.6391 | lr 2.90e-04 gnorm 1.48 | tau 2.7 | 98436 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66200 | loss 4.1044 avg 4.6387 | lr 2.90e-04 gnorm 1.69 | tau 2.7 | 98439 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66250 | loss 4.0882 avg 4.6383 | lr 2.90e-04 gnorm 1.38 | tau 2.7 | 98443 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66300 | loss 4.1930 avg 4.6378 | lr 2.90e-04 gnorm 1.39 | tau 2.7 | 98447 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66350 | loss 4.1429 avg 4.6374 | lr 2.90e-04 gnorm 1.45 | tau 2.7 | 98450 tok/s | passes 3.00 T 0.994
+  epoch 1 step  66400 | loss 3.9672 avg 4.6370 | lr 2.90e-04 gnorm 1.58 | tau 2.7 | 98454 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66450 | loss 4.1265 avg 4.6366 | lr 2.90e-04 gnorm 1.70 | tau 2.7 | 98458 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66500 | loss 4.2229 avg 4.6361 | lr 2.90e-04 gnorm 2.04 | tau 2.7 | 98462 tok/s | passes 3.00 T 0.993
+  >>> val loss 4.0833 ppl 59.3
+  epoch 1 step  66550 | loss 4.0715 avg 4.6357 | lr 2.90e-04 gnorm 1.90 | tau 2.7 | 98444 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66600 | loss 4.0319 avg 4.6353 | lr 2.90e-04 gnorm 1.90 | tau 2.7 | 98447 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66650 | loss 4.0473 avg 4.6349 | lr 2.90e-04 gnorm 1.93 | tau 2.7 | 98451 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66700 | loss 4.0892 avg 4.6345 | lr 2.90e-04 gnorm 2.46 | tau 2.7 | 98455 tok/s | passes 3.00 T 0.993
+  epoch 1 step  66750 | loss 3.9917 avg 4.6340 | lr 2.90e-04 gnorm 1.39 | tau 2.7 | 98458 tok/s | passes 3.00 T 0.993
+  Reached --max-steps 66750; stopping.
+  Epoch 1 done | avg loss 4.6340 | ppl 102.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\epoch_1.pt
+
+=== Final evaluation ===
+  Final val loss: 4.0594
+  Final val ppl:  57.9
+  Saved C:\Users\feama\sgs\checkpoints\planck_12_2\ap\final.pt
+
+Done. Checkpoints in C:\Users\feama\sgs\checkpoints\planck_12_2\ap
