@@ -6,6 +6,11 @@ the Raum template library, scene generator, and compositional bridge
 param count. Exits non-zero on any import or shape failure.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import torch
 
 from src.gaussian import SemanticGaussianVocab
