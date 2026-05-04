@@ -44,14 +44,20 @@ usually defined", and the blob store hands it "which specific concept is
 involved in this prompt".
 
 ### Corpus: English Wikipedia
-- **Source**: Wikimedia snapshot dumps (`enwiki-YYYYMMDD-pages-articles-multistream.xml.bz2`).
-  Pick a specific snapshot and check it into `data/wikipedia/snapshot_id.txt`
-  so the base-training run is reproducible.
-- **Cleaning**: strip markup with `wikiextractor` (templates, references,
-  tables that confuse the tokenizer); keep lead sections + body prose,
-  drop disambiguation pages, lists, and redirects.
-- **Size**: cleaned English Wikipedia is ~4B tokens at our tokenizer,
-  comparable to Planck 1.1's token budget. No subsampling needed.
+- **Source**: HuggingFace `wikimedia/wikipedia` dataset, pinned to a
+  specific `{date}.{lang}` revision (e.g. `20231101.en`). Revision id
+  checked into `data/wikipedia/snapshot_id.txt` so the base-training
+  run is reproducible.
+- **Cleaning**: none — the HF dataset ships pre-cleaned (no markup,
+  references, tables), deduplicated, with disambiguation pages and
+  redirects dropped.
+- **Why not the raw XML + `wikiextractor` pipeline**: `wikiextractor`
+  is broken on Python 3.11+ (regex uses mid-pattern `(?i)` flag,
+  which became an error). The fix is merged upstream but unreleased.
+  The HF path sidesteps the issue, is deterministic by revision,
+  and removes ~100 GB of bz2 + XML handling.
+- **Size**: ~4B tokens at our tokenizer, comparable to Planck 1.1's
+  token budget. No subsampling needed.
 - **Why not mix in C4 / BabyLM**: keeping the base corpus to one source
   means the blob-retrieval distribution shift is zero. If we mix corpora,
   the base model has a mixed prior over phrasings and we lose the
