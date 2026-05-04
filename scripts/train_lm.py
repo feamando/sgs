@@ -179,7 +179,26 @@ def main():
 
     # ── Data ──
     print("\n=== Preparing data ===")
-    data = prepare_data(args.data_dir, args.vocab_size, args.context_len)
+    data_dir = Path(args.data_dir)
+    train_bin = data_dir / "train.bin"
+    val_bin = data_dir / "val.bin"
+    tok_model = data_dir / "tokenizer.model"
+    if train_bin.exists() and val_bin.exists() and tok_model.exists():
+        import sentencepiece as spm
+        sp = spm.SentencePieceProcessor(model_file=str(tok_model))
+        data = {
+            "train_bin": str(train_bin),
+            "val_bin": str(val_bin),
+            "tokenizer": str(tok_model),
+            "n_train_tokens": train_bin.stat().st_size // 2,
+            "n_val_tokens": val_bin.stat().st_size // 2,
+            "vocab_size": sp.get_piece_size(),
+        }
+        print(f"  Reusing existing {args.data_dir}:")
+        for k, v in data.items():
+            print(f"    {k}: {v}")
+    else:
+        data = prepare_data(args.data_dir, args.vocab_size, args.context_len)
     actual_vocab = data["vocab_size"]
 
     train_loader = get_dataloader(

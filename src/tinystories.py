@@ -1,7 +1,11 @@
 """
-TinyStories data pipeline — download, BPE tokenizer, binary dataset.
+Data pipelines — download, BPE tokenizer, binary dataset.
 
-Downloads from HuggingFace without the `datasets` library (Windows SSL compat).
+Misnamed for legacy reasons: this file started as the TinyStories
+loader, but now also contains FineWeb-Edu (Hertz) and Wikipedia
+(Planck 1.3) pipelines. Rename is deferred; every new corpus lands
+here until there's a reason to split.
+
 Trains a 32K BPE tokenizer via sentencepiece.
 Stores tokenized data as memory-mapped uint16 arrays for fast loading.
 """
@@ -461,6 +465,82 @@ def prepare_fineweb(
     return result
 
 
+# ────────────────────────────────────────────────────────────
+# Wikipedia (for Planck 1.3) — consumes HuggingFace datasets cache
+# ────────────────────────────────────────────────────────────
+
+WIKIPEDIA_DATASET = "wikimedia/wikipedia"
+WIKIPEDIA_DEFAULT_REVISION = "20231101.en"
+
+
+def load_wikipedia_texts(
+    hf_cache_dir: str,
+    revision: str = WIKIPEDIA_DEFAULT_REVISION,
+    val_fraction: float = 0.005,
+) -> tuple[list[str], list[str]]:
+    """Load cleaned Wikipedia articles from a HuggingFace datasets cache.
+
+    Returns (train_texts, val_texts). Uses `datasets.load_dataset` with
+    a local cache so the Parquet files downloaded by SETUP §2.1 are
+    reused verbatim.
+    """
+    try:
+        from datasets import load_dataset
+    except ImportError:
+        raise ImportError("datasets is required: pip install datasets")
+
+    print(f"Loading {WIKIPEDIA_DATASET} ({revision}) from cache {hf_cache_dir}...")
+    ds = load_dataset(
+        WIKIPEDIA_DATASET,
+        revision,
+        cache_dir=hf_cache_dir,
+        split="train",
+    )
+    texts = ds["text"]
+    n = len(texts)
+    split_idx = int(n * (1.0 - val_fraction))
+    train_texts = list(texts[:split_idx])
+    val_texts = list(texts[split_idx:])
+    print(f"  {n:,} articles → train {len(train_texts):,}, val {len(val_texts):,}")
+    return train_texts, val_texts
+
+
+def prepare_wikipedia(
+    data_dir: str = "data/wikipedia",
+    hf_cache_dir: str = "data/wikipedia/hf",
+    revision: str = WIKIPEDIA_DEFAULT_REVISION,
+    vocab_size: int = 32000,
+) -> dict:
+    """End-to-end Wikipedia prep: HF cache → tokenizer → train.bin/val.bin."""
+    data_dir = Path(data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    train_texts, val_texts = load_wikipedia_texts(hf_cache_dir, revision)
+
+    tok_prefix = str(data_dir / "tokenizer")
+    sp = train_tokenizer(train_texts, tok_prefix, vocab_size)
+
+    train_bin = str(data_dir / "train.bin")
+    val_bin = str(data_dir / "val.bin")
+    n_train = tokenize_to_binary(train_texts, sp, train_bin)
+    n_val = tokenize_to_binary(val_texts, sp, val_bin)
+
+    del train_texts, val_texts
+
+    result = {
+        "train_bin": train_bin,
+        "val_bin": val_bin,
+        "tokenizer": tok_prefix + ".model",
+        "n_train_tokens": n_train,
+        "n_val_tokens": n_val,
+        "vocab_size": sp.get_piece_size(),
+    }
+    print(f"\nData ready:")
+    for k, v in result.items():
+        print(f"  {k}: {v}")
+    return result
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -468,13 +548,16 @@ if __name__ == "__main__":
     parser.add_argument("--data-dir", default="data/tinystories")
     parser.add_argument("--vocab-size", type=int, default=32000)
     parser.add_argument("--dataset", default="tinystories",
-                        choices=["tinystories", "fineweb-edu"],
+                        choices=["tinystories", "fineweb-edu", "wikipedia"],
                         help="Which dataset to download and prepare")
     parser.add_argument("--max-tokens", default="10B",
                         help="Max tokens for FineWeb-Edu (e.g., 1B, 5B, 10B)")
+    parser.add_argument("--hf-cache-dir", default="data/wikipedia/hf",
+                        help="HuggingFace datasets cache dir (Wikipedia only)")
+    parser.add_argument("--revision", default=WIKIPEDIA_DEFAULT_REVISION,
+                        help="HF dataset revision (Wikipedia only)")
     args = parser.parse_args()
 
-    # Parse max-tokens (supports 1B, 5B, 10B notation)
     max_tok_str = args.max_tokens.upper().replace("B", "000000000").replace("M", "000000")
     max_tokens = int(max_tok_str)
 
@@ -482,5 +565,14 @@ if __name__ == "__main__":
         prepare_data(args.data_dir, args.vocab_size)
     elif args.dataset == "fineweb-edu":
         if args.data_dir == "data/tinystories":
-            args.data_dir = "data/fineweb"  # sensible default
+            args.data_dir = "data/fineweb"
         prepare_fineweb(args.data_dir, args.vocab_size, max_tokens=max_tokens)
+    elif args.dataset == "wikipedia":
+        if args.data_dir == "data/tinystories":
+            args.data_dir = "data/wikipedia"
+        prepare_wikipedia(
+            args.data_dir,
+            hf_cache_dir=args.hf_cache_dir,
+            revision=args.revision,
+            vocab_size=args.vocab_size,
+        )
