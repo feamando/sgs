@@ -77,14 +77,23 @@ A Planck-1.3 checkpoint with:
   score *without blobs* strictly above Planck 1.1's. This is the check
   that the base itself got smarter; blobs only add to it.
 
+### Wall-clock
+Planck 1.1 trained in ~3 hours on ~1-2B TinyStories train-tokens
+(two-stage, 3 epochs; see `SETUP_202604.md` §6.2). Wikipedia is ~4B
+tokens, roughly 2-4× more, so plain-AdamW base training is
+**~3-7 days** end-to-end on the 4090. Much cheaper than Hertz
+because Planck is 10× smaller; the "10 days for 10B tokens at
+~11.8k tok/s" figure is Hertz-1B throughput, not Planck's.
+
 ### Tradeoff
-Wikipedia is ~4B tokens vs. TinyStories' ~1B, so base training is ~4×
-longer wall-clock at matched throughput. We absorb this because:
-(a) Planck 1.2.x accel is shelved — we are not waiting for a magic
-    speedup, so "long training" is now the honest baseline,
-(b) a stronger base is the single biggest quality lever for a 100M model,
-(c) the same corpus powers the 1.3.1b blob index, so preprocessing
-    amortises.
+~3-7 days instead of ~3 hours, driven by the corpus size, not by
+anything architectural. We absorb this because:
+(a) a stronger base is the single biggest quality lever for a 100M
+    model,
+(b) the same corpus powers the 1.3.1a blob index, so preprocessing
+    amortises,
+(c) every downstream demo (Satz 0.1, Raum 1.1's frozen encoder) gets
+    strictly better by running on Planck 1.3 rather than 1.1.
 
 If base MMLU-lite score drops below Planck 1.1's despite the larger
 corpus, abort the 1.3 track — something is wrong with the tokenizer or
@@ -201,8 +210,10 @@ human spot checks (50 questions/week) so we know the judge isn't lying.
 
 ## Rollout
 
-1. **1.3.0** base retrain on Wikipedia — ~2-3 weeks on plain AdamW (no
-   accel recipe; ~4B tokens at 4090 baseline throughput)
+1. **1.3.0** base retrain on Wikipedia — ~3-7 days on plain AdamW
+   (~4B tokens, 4090 baseline Planck throughput; Planck 1.1 was ~3
+   hours at ~1-2B TinyStories tokens, so this is a corpus-size
+   scale-up, not a new bottleneck)
 2. **1.3.1a** static Wikipedia blob index — 3-5 days of infra, reuses the
    1.3.0 preprocessing pipeline
 3. **1.3.1b** RSS ingest + dynamic blob builder — ~1 week of plumbing

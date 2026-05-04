@@ -1,11 +1,17 @@
 # Raum 1.1 — 1-model text→3D with a blob library
 
-*Status: draft plan. Written 2026-05-01. Replaces the older
-"30-template library + relation head" scope that appeared in
-`SETUP_202605.md` §4 before the 1-model pivot. Paired with
-Raum 0.1 product stages (`docs/plans/d1c_raum_01_plan.md`). Prereq:
-Satz 0.1 (`docs/plans/satz_01_plan.md`) confirms Planck 1.1 is the
-right frozen encoder.*
+*Status: draft plan. Written 2026-05-01, re-sequenced 2026-05-04.
+Paired with Raum 0.1 product stages
+(`docs/plans/d1c_raum_01_plan.md`).*
+
+*Run order change 2026-05-04: Raum 1.1 is now the FOREGROUND track.
+Stages 1.1.A and 1.1.B start against the frozen Planck 1.1 encoder
+on disk. Planck 1.3 trains in the background (~3-7 days, plain
+AdamW, see `docs/plans/planck_13_plan.md`); once 1.3 is ready we
+re-train the bridge against it. The bridge is ~5-10M params and
+re-trains in hours, so the encoder swap is cheap. Satz 0.1
+(`docs/plans/satz_01_plan.md`) runs after Planck 1.3 ships and
+independently validates the encoder choice.*
 
 Raum 1.0 proved the `text → template-routing bridge` concept on a
 six-shape library. Raum 1.1 is the model half of Raum 0.1 and the
@@ -47,12 +53,14 @@ prompt
 
 Three moving parts:
 
-- **Frozen encoder.** Planck 1.1, loaded weights-only, no gradient
-  flow. Only the token + feature embeddings are used — we do not
-  run its autoregressive generation at all. Rationale: Planck 1.1
-  is already trained on TinyStories with a blob-attention
-  mechanism, so its token features already live in a space where
-  "object-ness" is separable. Satz 0.1 validates that this is true.
+- **Frozen encoder.** Planck 1.1 to start (it is already on disk
+  with a blob-attention mechanism, so token features already live
+  in a space where "object-ness" is separable). Swap to Planck 1.3
+  once that ships — 1.3's Wikipedia base adds encyclopedic priors
+  that strictly help the bridge's blob-id head over 30-60 classes.
+  Bridge re-training under the new encoder is hours, not days.
+  Loaded weights-only, no gradient flow; we do not run autoregressive
+  generation. Satz 0.1 independently validates the encoder choice.
 - **Raum bridge.** A small transformer (target ~5-10M params, see
   §3) that maps token features to DSL-shaped outputs. This is the
   *only* thing we train.

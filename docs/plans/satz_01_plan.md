@@ -1,20 +1,30 @@
-# Satz 0.1 — product demo for Planck 1.1 (LM + blob retrieval)
+# Satz 0.1 — product demo for Planck LM + blob retrieval
 
-*Status: draft plan. Written 2026-05-01. Prereq for using Planck 1.1 as
-the Raum planner/encoder (`docs/plans/d1c_raum_01_plan.md`). No new
-training — Satz 0.1 is a thin web layer over artefacts that already
-exist in the tree.*
+*Status: draft plan. Written 2026-05-01, updated 2026-05-04 to make
+Planck 1.3 + Wikipedia blobs the primary path; the Planck 1.1 +
+TinyStories configuration is now the fallback, used only if 1.3 is
+materially delayed. Prereq for using Planck as the Raum frozen encoder
+(`docs/plans/d1c_raum_01_plan.md`). No new training — Satz 0.1 is a
+thin web layer over artefacts produced elsewhere in the tree.*
 
 Satz is the product track for **text**. Where Raum is the text → 3D
 bridge and Klang is text → audio, Satz's job is to demo "Planck LM +
 blob retrieval" as a standalone story: a small (~100M) model that can
 be conditioned on external blobs at inference time without retraining.
 
-Raum 0.1 (the 1-model rewrite) re-uses Planck 1.1 as a frozen encoder.
-Before we commit to that, we want a working demo that proves Planck
-1.1 + blobs is already a believable standalone product. Satz 0.1 is
-that demo. If Planck 1.1 embeds prompts sensibly in this stripped-down
-setting, it is also the correct encoder for Raum.
+Raum 0.1 (the 1-model rewrite) re-uses Planck as a frozen encoder.
+Before we commit to that, we want a working demo that proves Planck +
+blobs is already a believable standalone product. Satz 0.1 is that
+demo. If Planck embeds prompts sensibly in this stripped-down setting,
+it is also the correct encoder for Raum.
+
+**Primary path: Planck 1.3 + Wikipedia blobs.** TinyStories-trained
+Planck 1.1 was the right proof that blobs work; it is the wrong
+substrate for a "reasoner + knowledge via blobs" demo. Wait for
+Planck 1.3's Wikipedia base and the 1.3.1a blob index
+(`docs/plans/planck_13_plan.md`). If 1.3 is materially delayed, the
+Planck 1.1 + TinyStories configuration is the fallback and must be
+flagged as a placeholder in the UI.
 
 Everything below is a plan, not a commitment.
 
@@ -37,11 +47,9 @@ Local web app that:
 ### Non-goals for 0.1
 - No fine-tuning, no new training run, no new datasets.
 - No 3D viewer (that's Raum's job).
-- No editable blobs / blob authoring UI (that's a 0.2 feature; for
-  now blobs are the existing TinyStories bundle on disk).
-- No Wikipedia blob index yet — Planck 1.3 §1.3.1 adds that as its
-  own deliverable; Satz 0.1 just re-uses whatever blob bundle
-  `scripts/build_blobs.py` already produced for Planck 1.1.
+- No editable blobs / blob authoring UI (that's a 0.2 feature).
+- No live RSS blobs (Planck 1.3.1b ships that later). Satz 0.1
+  consumes the static Wikipedia blob index built by Planck 1.3.1a.
 
 ### Why now
 - Validates Planck 1.1 works as a standalone LM before it becomes
@@ -232,10 +240,9 @@ Key interactions:
   If only at encode time, display those instead of per-step weights
   and note the limitation in the UI caption. Don't invent a new
   attention path just for the demo.
-- **Blob bundle provenance.** Which blob bundle do we ship the demo
-  with? The one from Planck 1.1 eval (TinyStories fairy-tale blobs)
-  is the honest choice. When Planck 1.3 §1.3.1 lands a Wikipedia
-  blob index, Satz 0.1.3 (follow-up) swaps the default bundle.
+- **Blob bundle provenance.** Primary bundle is Planck 1.3.1a's
+  Wikipedia lead-section index. Fallback is the Planck 1.1
+  TinyStories bundle, flagged in the UI as placeholder-only.
 - **Prompt length limits.** Planck 1.1's `max_len` is 512 tokens;
   textarea must enforce that (or truncate with a visible warning).
 - **Safety / content.** No filtering at 0.1. TinyStories is benign

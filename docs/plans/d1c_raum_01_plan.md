@@ -1,10 +1,13 @@
 # Raum 0.1 — product: compositional scenes, common-object vocab, OOV, editable DSL
 
 *Status: rewritten 2026-05-01 for the 1-model architecture. Supersedes
-the earlier Planner+Executor draft. Depends on Satz 0.1
-(`docs/plans/satz_01_plan.md`) validating Planck 1.1 as a frozen
-encoder, and on Raum 1.1 (`docs/plans/raum_11_plan.md`) delivering the
-bridge + blob library.*
+the earlier Planner+Executor draft. Re-sequenced 2026-05-04 — Raum is
+now the FOREGROUND track and runs in parallel with Planck 1.3
+background training. Stages 0.1.0/0.1.1 start against Planck 1.1;
+Planck 1.3 swap happens mid-rollout once that training finishes (hours
+of bridge re-training). Satz 0.1
+(`docs/plans/satz_01_plan.md`) and the full QA eval land after 0.1
+ships.*
 
 Raum 0.0 handled "A [rel] B" on six primitives. Raum 0.1 is the
 **product** rollout of Raum 1.1: it exposes the bridge + blob library
