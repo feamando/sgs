@@ -1,22 +1,188 @@
 # Disk Cleanup Guide
 
-When the SGS working tree (or the Windows user profile) runs low on
-space, work top-to-bottom through this doc. Every section is in the
-form: **(a) how to measure, (b) what it is, (c) whether it's safe to
-delete, (d) the exact command**.
+Run this top-to-bottom when the SGS checkpoints dir has ballooned.
+Every step is: **dry-run first**, review, **then delete**.
 
-PowerShell-first. All paths assume the repo root is `C:\Users\feama\sgs`
-and the Windows user is `feama`. Adjust if different.
+PowerShell-first. Repo root assumed to be `C:\Users\feama\sgs`.
 
 Last updated: 2026-05-06.
 
 ---
 
-## 1. Diagnose — find the culprits first
+## TL;DR — 2026-05-06 reclaim plan (~380 GB)
 
-### 1.1 Top-level repo dirs by size
+As of 2026-05-06, `checkpoints\` is 860 GB. 468 GB is active
+Planck 1.3 training — **do not touch it**. The rest is safe to clean.
 
-From the repo root:
+| # | target | reclaim | risk |
+|---|---|---|---|
+| 1 | Planck 1.2 / 1.2.1 / 1.2.2 ablations (FAIL, shelved) | ~320 GB | none — all closed FAIL |
+| 2 | Planck 1.0 old checkpoints | ~50 GB | none — superseded by 1.1 and 1.3 |
+| 3 | Planck 1.1 ablation variants (`*_5k`, `*_k16`, `*_noablob`, `*_t50`) | ~12 GB | none — canonical `planck11\` kept |
+| 4 | Hertz 1.0 artefacts | negligible on this box | none — shelved 2026-04-20 |
+
+**Total: ~380 GB.** Planck 1.3 (active, 468 GB) and canonical
+`planck11\best.pt` (frozen-encoder bootstrap, 3-4 GB) stay intact.
+
+Run the four steps below in any order; each is independent.
+
+---
+
+## Step 1 — Planck 1.2.x ablation runs (~320 GB)
+
+All three 1.2.x tracks closed FAIL 2026-05-01. They are not reopened.
+
+**Dry run** (lists what would be deleted):
+
+```powershell
+foreach ($dir in "planck_12","planck_12_1","planck_12_2") {
+  Get-ChildItem "checkpoints\$dir" -File -Recurse |
+    Where-Object { $_.Name -ne 'best.pt' } | Remove-Item -WhatIf
+}
+```
+
+Review the output. Then **execute** by removing `-WhatIf`:
+
+```powershell
+foreach ($dir in "planck_12","planck_12_1","planck_12_2") {
+  Get-ChildItem "checkpoints\$dir" -File -Recurse |
+    Where-Object { $_.Name -ne 'best.pt' } | Remove-Item
+}
+```
+
+Keeps `best.pt` in each dir as a historical reference (a few GB
+total). If you want to purge those too:
+
+```powershell
+Remove-Item checkpoints\planck_12, checkpoints\planck_12_1, checkpoints\planck_12_2 -Recurse -Force
+```
+
+---
+
+## Step 2 — Planck 1.0 checkpoints (~50 GB)
+
+Planck 1.0 is the foundation 100M LM. It's superseded by Planck 1.1
+(blob-concept validator) and, once it ships, Planck 1.3 (Wikipedia
+base). The `best.pt` in `checkpoints\planck\` is the historical
+artefact — keep that, drop the rest.
+
+**Dry run**:
+
+```powershell
+Get-ChildItem checkpoints\planck -File -Recurse |
+  Where-Object { $_.Name -ne 'best.pt' } | Remove-Item -WhatIf
+```
+
+**Execute**:
+
+```powershell
+Get-ChildItem checkpoints\planck -File -Recurse |
+  Where-Object { $_.Name -ne 'best.pt' } | Remove-Item
+```
+
+---
+
+## Step 3 — Planck 1.1 ablation variants (~12 GB)
+
+`checkpoints\planck11\` is the canonical Planck 1.1 checkpoint (the
+bootstrap encoder for Raum when Planck 1.3 isn't ready — see
+`SETUP_202605.md` §3). The four `planck11_*` variants are ablations
+from the blob-concept experiments and aren't referenced anywhere.
+
+**Dry run**:
+
+```powershell
+Remove-Item checkpoints\planck11_5k, checkpoints\planck11_k16, `
+            checkpoints\planck11_noablob, checkpoints\planck11_t50 `
+            -Recurse -Force -WhatIf
+```
+
+**Execute**:
+
+```powershell
+Remove-Item checkpoints\planck11_5k, checkpoints\planck11_k16, `
+            checkpoints\planck11_noablob, checkpoints\planck11_t50 `
+            -Recurse -Force
+```
+
+**Do NOT touch `checkpoints\planck11\`** — that's the canonical
+bootstrap encoder.
+
+---
+
+## Step 4 — Hertz 1.0 artefacts
+
+Hertz 1.0 was paused 2026-04-20 as infeasible. Any checkpoints from
+the aborted run are not used by Hertz 1.2 (which starts from scratch
+on plain AdamW).
+
+**Dry run**:
+
+```powershell
+Get-ChildItem checkpoints\hertz, checkpoints\hertz_nocompile, checkpoints\hertz_profile `
+  -Recurse -File -ErrorAction SilentlyContinue |
+  Measure-Object Length -Sum | ForEach-Object { "Hertz footprint: {0:N2} GB" -f ($_.Sum/1GB) }
+
+Remove-Item checkpoints\hertz, checkpoints\hertz_nocompile, checkpoints\hertz_profile `
+  -Recurse -Force -WhatIf
+```
+
+**Execute**:
+
+```powershell
+Remove-Item checkpoints\hertz, checkpoints\hertz_nocompile, checkpoints\hertz_profile `
+  -Recurse -Force
+```
+
+On the current box these are ~0 GB each per the inventory, but clear
+the directories so the next Hertz 1.2 launch starts from a clean
+slate.
+
+---
+
+## Do NOT touch
+
+| path | reason |
+|---|---|
+| `checkpoints\planck13\` | **Active Planck 1.3 training** (468 GB; do not interrupt) |
+| `checkpoints\planck11\best.pt` | Bootstrap encoder for Raum when 1.3 isn't ready (see `SETUP_202605.md` §3) |
+| `checkpoints\raum_10\`, `raum_11\`, `raum_c*\`, `raum_d\` | Live Raum track, small anyway |
+| `data\wikipedia\train.bin`, `val.bin`, `tokenizer.model` | Planck 1.3 training data, ~8 GB |
+| `klang\references\variant_a_3000g\*` | The benchmark Klang 1.3 chases |
+| `.venv\` | Python environment; recreating costs time + bandwidth |
+| `.git\` | Repo history |
+
+---
+
+## Verify after cleanup
+
+Re-run the top-level inventory:
+
+```powershell
+Get-ChildItem checkpoints -Directory | ForEach-Object {
+  $s=(Get-ChildItem $_.FullName -Recurse -File -ErrorAction SilentlyContinue |
+      Measure-Object Length -Sum).Sum/1GB
+  "{0,-50} {1,8:N2} GB" -f $_.Name,$s
+}
+```
+
+Expected after all four steps, with Planck 1.3 still running:
+
+```
+planck                                                 <5 GB
+planck11                                               ~3 GB
+planck13                                              <in flux, ~470 GB>
+planck_12 / planck_12_1 / planck_12_2                  <1 GB each (or gone)
+planck11_5k / k16 / noablob / t50                      (gone)
+hertz / hertz_nocompile / hertz_profile                (empty)
+raum_*                                                 <1 GB each
+```
+
+---
+
+## Appendix — diagnostics (if numbers drift again)
+
+### Top-level repo dirs by size
 
 ```powershell
 Get-ChildItem -Directory | ForEach-Object {
@@ -26,234 +192,26 @@ Get-ChildItem -Directory | ForEach-Object {
 } | Sort-Object SizeGB -Descending
 ```
 
-Usual heavy hitters (biggest first): `data\`, `checkpoints\`, `results\`,
-`klang\`, `.venv\`.
-
-### 1.2 Wikipedia staging dir breakdown
-
-```powershell
-Get-ChildItem data\wikipedia -Directory -ErrorAction SilentlyContinue |
-  ForEach-Object {
-    $s=(Get-ChildItem $_.FullName -Recurse -File | Measure-Object Length -Sum).Sum/1GB
-    "{0,-50} {1,8:N2} GB" -f $_.Name,$s
-  }
-```
-
-### 1.3 Checkpoints breakdown
-
-```powershell
-Get-ChildItem checkpoints -Directory -ErrorAction SilentlyContinue |
-  ForEach-Object {
-    $s=(Get-ChildItem $_.FullName -Recurse -File | Measure-Object Length -Sum).Sum/1GB
-    "{0,-50} {1,8:N2} GB" -f $_.Name,$s
-  }
-```
-
-### 1.4 User-profile caches (outside the repo)
+### User-profile caches (outside the repo)
 
 ```powershell
 "{0,8:N2} GB  HF hub cache"      -f ((Get-ChildItem $env:USERPROFILE\.cache\huggingface          -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1GB)
-"{0,8:N2} GB  HF datasets cache" -f ((Get-ChildItem $env:USERPROFILE\.cache\huggingface\datasets -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1GB)
 "{0,8:N2} GB  pip cache"         -f ((Get-ChildItem $env:LOCALAPPDATA\pip\cache                  -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1GB)
 "{0,8:N2} GB  torch hub cache"   -f ((Get-ChildItem $env:USERPROFILE\.cache\torch                -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1GB)
 ```
 
----
-
-## 2. Safe-to-delete catalogue
-
-Ordered by typical size won back per action, biggest first.
-
-### 2.1 Old raw Wikipedia dump (~24 GB) — SAFE
-
-The bz2 XML dump you downloaded before the `wikiextractor` pivot. Not
-used by Planck 1.3 anymore; HF Parquet superseded it.
-
-```powershell
-# Check what's there first
-Get-ChildItem data\wikipedia\*.bz2, data\wikipedia\*.xml, data\wikipedia\*.xml.bz2 -ErrorAction SilentlyContinue
-
-# Delete
-Remove-Item data\wikipedia\*.bz2, data\wikipedia\*.xml.bz2 -ErrorAction SilentlyContinue
-```
-
-### 2.2 Old ablation checkpoints (~50-200 GB) — usually SAFE
-
-Planck 1.2 / 1.2.1 / 1.2.2 were large ablation sweeps; each track kept
-periodic checkpoints. They're all marked `done` as FAIL on the roadmap
-and are not reopened.
-
-```powershell
-# List candidates
-Get-ChildItem checkpoints\planck_12*, checkpoints\planck_1_2* -Recurse -File -ErrorAction SilentlyContinue |
-  Measure-Object Length -Sum | ForEach-Object { "{0:N2} GB" -f ($_.Sum/1GB) }
-
-# Keep best.pt, drop the rest
-Get-ChildItem checkpoints\planck_12*, checkpoints\planck_1_2* -Recurse -File -ErrorAction SilentlyContinue |
-  Where-Object { $_.Name -notmatch 'best\.pt$' } | Remove-Item -WhatIf
-# Remove `-WhatIf` once you've reviewed the list
-```
-
-**Keep**: `checkpoints\planck\best.pt` (Planck 1.0), `checkpoints\planck11\best.pt`
-(Planck 1.1 — frozen encoder for Raum), and `checkpoints\planck13\best.pt`
-once 1.3 finishes.
-
-### 2.3 Hertz 1.0 remnants (can be 50+ GB) — SAFE
-
-Hertz 1.0 was paused 2026-04-20 as infeasible. Any checkpoints from the
-aborted run are not needed.
-
-```powershell
-Get-ChildItem checkpoints\hertz*, results\hertz* -Recurse -File -ErrorAction SilentlyContinue |
-  Measure-Object Length -Sum | ForEach-Object { "Hertz footprint: {0:N2} GB" -f ($_.Sum/1GB) }
-
-Remove-Item checkpoints\hertz*, results\hertz* -Recurse -Force -WhatIf
-```
-
-### 2.4 HF Parquet download for the Wikipedia Arrow build (~20 GB) — DELETE AFTER §2.2 ships
-
-Once `python -m src.tinystories --dataset wikipedia ...` has packed
-`train.bin` + `val.bin`, the Parquet files in
-`data\wikipedia\hf\wikimedia___wikipedia\<revision>\downloads\` are no
-longer needed. The Arrow shards a few dirs up stay in use only during
-dataset iteration — after packing, even those are optional.
-
-```powershell
-# Space the HF cache currently uses
-Get-ChildItem data\wikipedia\hf -Recurse -File -ErrorAction SilentlyContinue |
-  Measure-Object Length -Sum | ForEach-Object { "HF cache: {0:N2} GB" -f ($_.Sum/1GB) }
-
-# Only AFTER train.bin / val.bin are packed and you've confirmed with:
-#   python scripts/train_lm.py --data-dir data\wikipedia --epochs 1 --max-steps 10
-# then:
-Remove-Item data\wikipedia\hf -Recurse -Force -WhatIf
-```
-
-**Warning**: if you later re-run §2.2 or need the raw dataset, you'll
-re-download ~20 GB. Only delete if disk pressure is real.
-
-### 2.5 Klang intermediate artefacts (~10-30 GB) — usually SAFE
-
-Klang 1.0 / 1.1 / 1.2 sweeps wrote many per-run `.pt` + `.wav` bundles.
-Variant A and Variant B reference files are keepers; the rest can go
-once the gate comparison is finished.
-
-```powershell
-Get-ChildItem klang\runs, results\klang* -Recurse -File -ErrorAction SilentlyContinue |
-  Measure-Object Length -Sum | ForEach-Object { "Klang artefacts: {0:N2} GB" -f ($_.Sum/1GB) }
-
-# Review before removing — Variant A's 3000g reference is the Klang 1.1
-# benchmark we still measure 1.3 against
-```
-
-**Keep**: `klang\references\variant_a_3000g\*`, `klang\references\variant_b_*\*`,
-anything cited in `docs/klang/*.md`.
-
-### 2.6 pip wheel cache (~5-15 GB) — SAFE
-
-Pure convenience cache. Deleting costs a re-download on the next
-`pip install`.
-
-```powershell
-pip cache purge
-```
-
-### 2.7 HF hub cache (~5-50 GB) — CONTEXT-DEPENDENT
-
-`$env:USERPROFILE\.cache\huggingface\hub` holds downloaded models and
-datasets *outside* the repo. On a fresh box it's small; if you ever ran
-frontier-model experiments it can be huge.
-
-```powershell
-Get-ChildItem $env:USERPROFILE\.cache\huggingface\hub -Directory -ErrorAction SilentlyContinue |
-  ForEach-Object {
-    $s=(Get-ChildItem $_.FullName -Recurse -File | Measure-Object Length -Sum).Sum/1GB
-    "{0,-60} {1,8:N2} GB" -f $_.Name,$s
-  } | Sort-Object -Property {[double]($_ -replace '.*?(\d[\d\.]*)\s*GB','$1')} -Descending
-```
-
-Safe to delete entries for models you're not actively using.
-
-### 2.8 torch hub cache — SAFE
-
-```powershell
-Remove-Item $env:USERPROFILE\.cache\torch -Recurse -Force -WhatIf
-```
-
-### 2.9 `wandb\` local run dirs — usually SAFE
-
-Only relevant if wandb was ever enabled (it's off by default per the
-`feedback_sgs_wandb_default` memory).
-
-```powershell
-Get-ChildItem wandb -Directory -ErrorAction SilentlyContinue |
-  Measure-Object | Select-Object -ExpandProperty Count
-# If non-zero, and you don't need local run history:
-Remove-Item wandb -Recurse -Force -WhatIf
-```
-
-### 2.10 Results dir (`results\` / `paper\`) — PRUNE, DON'T WIPE
-
-Training logs, JSON eval outputs, figures. Individual files are small
-but they accumulate. Keep anything referenced by a `docs/plans/**.md`
-or `docs/analysis/**.md`.
-
-```powershell
-# List largest files under results\
-Get-ChildItem results -Recurse -File -ErrorAction SilentlyContinue |
-  Sort-Object Length -Descending | Select-Object -First 30 Name, @{N='MB';E={[math]::Round($_.Length/1MB,1)}}, FullName
-```
+Free actions: `pip cache purge`; delete unused models in
+`$env:USERPROFILE\.cache\huggingface\hub`.
 
 ---
 
-## 3. Do NOT delete
+## Prevent future bloat
 
-These look big and deletable but are load-bearing right now:
-
-| path | why keep |
-|---|---|
-| `data\wikipedia\train.bin`, `val.bin` | Planck 1.3 training data, ~8 GB |
-| `data\wikipedia\tokenizer.model`, `tokenizer.vocab` | SentencePiece trained on Wikipedia; re-training is 1-3 hours |
-| `data\wikipedia\snapshot_id.txt` | Revision pin for reproducibility |
-| `checkpoints\planck11\best.pt` | Frozen encoder for Raum 1.1, Satz 0.1 fallback |
-| `checkpoints\planck13\best.pt` | (once it exists) primary Planck base |
-| `checkpoints\klang\*\best.pt` | Klang 1.2 Gate A/B reference checkpoints |
-| `.venv\` | the Python environment; recreating costs 10-30 min + bandwidth |
-| `.git\` | repo history (should be small; don't touch regardless) |
-| `klang\references\variant_a_3000g\*` | the benchmark Klang 1.3 chases |
-| `data\blobs\wikipedia\*` | (once built) Planck 1.3.1a blob index |
-
----
-
-## 4. Fast recipe for "I just need 100 GB back, right now"
-
-In priority order, stop after each step if you're under the bar:
-
-1. **`Remove-Item data\wikipedia\*.bz2`** → ~24 GB
-2. **Prune ablation checkpoints** (§2.2) → 50-200 GB (biggest single win)
-3. **`Remove-Item checkpoints\hertz*`** (§2.3) → 10-50 GB
-4. **`pip cache purge`** (§2.6) → 5-15 GB
-5. **Prune old HF hub models** (§2.7) → 5-50 GB
-6. **Delete `data\wikipedia\hf` after §2.2 packs the bins** (§2.4) → ~20 GB
-7. **Clean `klang\runs`** (§2.5) → 10-30 GB
-
-If all of that still doesn't clear it, the problem is outside the SGS
-tree — run WinDirStat or TreeSize against `C:\Users\feama` and
-`C:\Users` to find it.
-
----
-
-## 5. Prevent future bloat
-
-- Don't enable `--wandb` by default; it writes a local run dir per
-  invocation (see `feedback_sgs_wandb_default` memory).
-- Don't keep every intermediate checkpoint — configure `train_lm.py`
-  and `train_hertz.py` with `--keep-last N` where available.
-- Don't pin HF datasets in the repo tree (`data\wikipedia\hf`) if a
-  shared location like `%USERPROFILE%\.cache\huggingface\datasets` is
-  acceptable. The current setup puts Wikipedia inside the repo on
-  purpose so the snapshot is co-located with the training binaries,
-  but this costs ~20-40 GB extra during clustering.
-- Run `CLEANUP.md §1` diagnostics monthly. Catching a 50 GB ablation
-  artefact before it becomes five is easier than finding 500 GB of
-  surprises.
+- `--wandb` off by default (it writes a local run dir per
+  invocation; see `feedback_sgs_wandb_default` memory).
+- `train_hertz.py --keep-last 3` rotates `step_*.pt` checkpoints.
+  `train_lm.py` should too — if Planck 1.3's checkpoint dir keeps
+  growing past 500 GB, add the same flag to that script.
+- Run the `TL;DR` block at least once per major version (Planck 1.4,
+  Hertz 1.2, Raum 0.1) to keep the FAIL-track detritus from
+  accumulating again.
