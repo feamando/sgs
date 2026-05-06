@@ -60,8 +60,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  max-width: 1600px;
-  margin: 0 auto;
 }
 
 .stream {
@@ -103,6 +101,7 @@ main {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 10px;
+  min-width: 0;
 }
 
 .lane-label {
@@ -133,10 +132,19 @@ main {
 
 .lane-cards {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
   align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
+.lane-cards::-webkit-scrollbar { height: 8px; }
+.lane-cards::-webkit-scrollbar-track { background: transparent; }
+.lane-cards::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.lane-cards::-webkit-scrollbar-thumb:hover { background: var(--ink-dim); }
 
 /* ── Card ──────────────────────────────────────────────── */
 .card {
@@ -144,8 +152,8 @@ main {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 190px;
-  max-width: 260px;
+  flex: 0 0 240px;
+  width: 240px;
   padding: 12px 14px;
   background: var(--panel-2);
   border: 1px solid var(--border);
