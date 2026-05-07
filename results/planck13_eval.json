@@ -1,0 +1,18 @@
+{
+  "checkpoint": "checkpoints\\planck13\\best.pt",
+  "params": 100892843,
+  "limit": null,
+  "perplexity": {
+    "perplexity": 24.95610414488285,
+    "nll": 3.217118447379873,
+    "n_tokens": 32677888
+  },
+  "hellaswag": {
+    "accuracy": 0.26249751045608444,
+    "n": 10042
+  },
+  "arc_easy": {
+    "accuracy": 0.3114478114478115,
+    "n": 2376
+  }
+}
