@@ -1,22 +1,27 @@
 """
-Raum 1.0: template-routing bridge.
+Raum bridge: template-routing (1.0) and blob-library (1.1) modes.
 
 Maps a token sequence to a 3D scene by routing each object-role token
-to an object template from `templates.build_template_library(...)` and
-stamping it at a predicted position with a predicted colour and scale.
+to a blob/template from a library and stamping it at a predicted
+position with a predicted colour and scale.
 
 Architecture:
 
     tokens (mu_s [B,N,d_s] + features [B,N,d_f])
       + learned positional embedding
       → Linear fusion to d_model
-      → TransformerEncoder (2 layers, 4 heads, d_model)
+      → TransformerEncoder (n_layers, n_heads, d_model)
       → per-token heads:
           position_head  → xyz                (every token)
-          template_head  → 6-way logits       (object tokens)
+          blob_head      → N_BLOBS logits     (object tokens)
           color_head     → RGB                (object tokens, sigmoid)
           scale_head     → scalar size        (object tokens)
           role_head      → N_ROLES logits     (every token)
+
+Raum 1.1 adds:
+  - blob_head (replaces template_head, larger output dim)
+  - Accepts encoder features from FrozenPlanckEncoder (d_s=128, d_f=1000)
+  - n_templates parameter generalised to n_blobs
 
 Assembly is a separate step (`assemble_scene`) so training can use
 just the head outputs (fast, analytic supervision) while inference
@@ -30,6 +35,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .vocab import N_OBJECTS, N_ROLES
+
+# Default blob count for 1.1 (overridden at init for blob-library mode)
+DEFAULT_N_BLOBS = N_OBJECTS  # backward compat: 6 for 1.0
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -48,10 +56,8 @@ class RaumBridge(nn.Module):
         n_heads: int = 4,
         max_len: int = 32,
         n_templates: int = N_OBJECTS,
+        n_blobs: int | None = None,
         n_roles: int = N_ROLES,
-        # Kept for CLI compatibility with the old bridge; unused at this
-        # layer since we no longer upsample per-word Gaussians. The demo
-        # stamps full templates instead.
         K: int = 32,
     ):
         super().__init__()
@@ -59,15 +65,13 @@ class RaumBridge(nn.Module):
         self.d_f = d_f
         self.d_model = d_model
         self.max_len = max_len
-        self.n_templates = n_templates
-        self.K = K  # retained for checkpoint metadata only
+        # n_blobs supersedes n_templates when provided
+        self.n_blobs = n_blobs if n_blobs is not None else n_templates
+        self.n_templates = self.n_blobs  # alias for backward compat
+        self.K = K
 
-        # Fuse semantic position + feature into d_model. Position
-        # channel carries SGS "where", feature channel carries "what".
         self.input_proj = nn.Linear(d_s + d_f, d_model)
 
-        # Learned absolute positional embedding. Token order encodes role
-        # binding ("first sphere" vs "second sphere") in our templates.
         self.pos_emb = nn.Parameter(torch.zeros(max_len, d_model))
 
         enc_layer = nn.TransformerEncoderLayer(
@@ -86,7 +90,7 @@ class RaumBridge(nn.Module):
             nn.Linear(d_model, d_model), nn.GELU(),
             nn.Linear(d_model, 3),
         )
-        self.template_head = nn.Linear(d_model, n_templates)
+        self.template_head = nn.Linear(d_model, self.n_blobs)
         self.role_head = nn.Linear(d_model, n_roles)
         self.color_head = nn.Sequential(
             nn.Linear(d_model, d_model // 2), nn.GELU(),

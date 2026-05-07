@@ -151,9 +151,87 @@ def _gen_two_objects(
     )
 
 
+def _gen_three_objects(
+    obj1: str | None = None, obj2: str | None = None, obj3: str | None = None,
+) -> SceneGT:
+    """Template: 'a {c1} {o1} {rel1} a {c2} {o2} and a {c3} {o3} {rel2} the {o2}'"""
+    obj1 = obj1 or random.choice(list(OBJECTS.keys()))
+    obj2 = obj2 or random.choice(list(OBJECTS.keys()))
+    obj3 = obj3 or random.choice(list(OBJECTS.keys()))
+    c1 = random.choice(list(COLORS.keys()))
+    c2 = random.choice(list(COLORS.keys()))
+    c3 = random.choice(list(COLORS.keys()))
+    rel1 = random.choice(list(RELATIONS.keys()))
+    rel2 = random.choice(list(RELATIONS.keys()))
+
+    words = ["a", c1, obj1, rel1, "a", c2, obj2, "and", "a", c3, obj3, rel2, "the", obj2]
+    roles = [
+        ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
+        ROLE_RELATION,
+        ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
+        ROLE_OTHER,
+        ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
+        ROLE_RELATION,
+        ROLE_OTHER, ROLE_OTHER,
+    ]
+
+    offset1 = RELATIONS[rel1]
+    offset2 = RELATIONS[rel2]
+    # obj2 at origin, obj1 offset by rel1, obj3 offset by rel2
+    obj1_gt = ObjectGT(
+        obj_type=OBJECTS[obj1], color=COLORS[c1],
+        scale=1.0, position=list(offset1),
+    )
+    obj2_gt = ObjectGT(
+        obj_type=OBJECTS[obj2], color=COLORS[c2],
+        scale=1.0, position=[0.0, 0.0, 0.0],
+    )
+    obj3_gt = ObjectGT(
+        obj_type=OBJECTS[obj3], color=COLORS[c3],
+        scale=1.0, position=list(offset2),
+    )
+
+    obj_labels = []
+    color_labels = []
+    size_labels = []
+    obj_idx = 0
+    obj_list = [obj1, obj2, obj3]
+    color_list = [c1, c2, c3]
+    for i, r in enumerate(roles):
+        if r == ROLE_OBJECT and obj_idx < 3:
+            obj_labels.append(OBJECTS[obj_list[obj_idx]])
+            obj_idx += 1
+        else:
+            obj_labels.append(-1)
+
+        if r == ROLE_COLOR:
+            ci = min(len(color_labels), 2)
+            obj_color_idx = sum(1 for rr in roles[:i] if rr == ROLE_COLOR)
+            if obj_color_idx < 3:
+                color_labels.append(COLORS[color_list[obj_color_idx]])
+            else:
+                color_labels.append([-1, -1, -1])
+        else:
+            color_labels.append([-1, -1, -1])
+
+        size_labels.append(-1.0)
+
+    return SceneGT(
+        sentence=" ".join(words),
+        words=words,
+        objects=[obj1_gt, obj2_gt, obj3_gt],
+        role_labels=roles,
+        obj_labels=obj_labels,
+        color_labels=color_labels,
+        size_labels=size_labels,
+        relation_label=offset1,
+    )
+
+
 def generate_dataset(
     n_samples: int,
     two_object_ratio: float = 0.7,
+    n_objects_max: int = 2,
     seed: int = 42,
 ) -> list[SceneGT]:
     """Generate a dataset of random scenes."""
@@ -163,7 +241,10 @@ def generate_dataset(
 
     scenes = []
     for _ in range(n_samples):
-        if random.random() < two_object_ratio:
+        r = random.random()
+        if n_objects_max >= 3 and r < 0.3:
+            scenes.append(_gen_three_objects())
+        elif r < (0.3 + 0.5 if n_objects_max >= 3 else two_object_ratio):
             scenes.append(_gen_two_objects())
         else:
             scenes.append(_gen_single_object())
@@ -176,6 +257,7 @@ def generate_comp_gen_split(
     n_train: int = 15000,
     n_val: int = 2500,
     n_test: int = 2500,
+    n_objects_max: int = 2,
     seed: int = 42,
 ) -> tuple[list[SceneGT], list[SceneGT], list[SceneGT]]:
     """
@@ -183,6 +265,7 @@ def generate_comp_gen_split(
 
     Test set contains object PAIRS never seen together in training.
     Individual objects all appear in training (just not in these combinations).
+    When n_objects_max >= 3, training includes 3-object scenes.
     """
     obj_names = list(OBJECTS.keys())
     n_obj = len(obj_names)
@@ -199,7 +282,6 @@ def generate_comp_gen_split(
     for pair in all_pairs:
         if len(held_out) >= n_held:
             break
-        # Check: if we add this pair, does every object still appear in some training pair?
         candidate = held_out | {pair}
         remaining = [p for p in all_pairs if p not in candidate]
         objs_in_train = {o for p in remaining for o in p}
@@ -211,34 +293,36 @@ def generate_comp_gen_split(
     old_state = random.getstate()
     random.seed(seed)
 
-    # Generate training data (only from train_pairs for 2-object scenes)
-    train = []
-    for _ in range(n_train):
-        if random.random() < 0.7:
-            obj1, obj2 = random.choice(train_pairs)
-            train.append(_gen_two_objects(obj1=obj1, obj2=obj2))
+    def _gen_scene(pairs):
+        r = random.random()
+        if n_objects_max >= 3 and r < 0.3:
+            obj1, obj2 = random.choice(pairs)
+            obj3 = random.choice(obj_names)
+            return _gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3)
+        elif r < (0.8 if n_objects_max >= 3 else 0.7):
+            obj1, obj2 = random.choice(pairs)
+            return _gen_two_objects(obj1=obj1, obj2=obj2)
         else:
-            train.append(_gen_single_object())
+            return _gen_single_object()
 
-    # Validation: same distribution as train
-    val = []
-    for _ in range(n_val):
-        if random.random() < 0.7:
-            obj1, obj2 = random.choice(train_pairs)
-            val.append(_gen_two_objects(obj1=obj1, obj2=obj2))
-        else:
-            val.append(_gen_single_object())
+    train = [_gen_scene(train_pairs) for _ in range(n_train)]
+    val = [_gen_scene(train_pairs) for _ in range(n_val)]
 
-    # Test: ONLY held-out pairs (2-object scenes)
+    # Test: ONLY held-out pairs (2- and 3-object scenes)
     test = []
     held_list = list(held_out)
     for _ in range(n_test):
-        obj1, obj2 = random.choice(held_list)
-        test.append(_gen_two_objects(obj1=obj1, obj2=obj2))
+        if n_objects_max >= 3 and random.random() < 0.4:
+            obj1, obj2 = random.choice(held_list)
+            obj3 = random.choice(obj_names)
+            test.append(_gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3))
+        else:
+            obj1, obj2 = random.choice(held_list)
+            test.append(_gen_two_objects(obj1=obj1, obj2=obj2))
 
     random.setstate(old_state)
 
-    print(f"Comp-gen split:")
+    print(f"Comp-gen split (n_objects_max={n_objects_max}):")
     print(f"  Train pairs: {len(train_pairs)}, Held-out pairs: {len(held_out)}")
     print(f"  Held-out: {held_out}")
     print(f"  Train: {len(train)}, Val: {len(val)}, Test: {len(test)}")
@@ -247,7 +331,7 @@ def generate_comp_gen_split(
 
 # ── Tokenization ──
 
-def tokenize_scene(scene: SceneGT, word2idx: dict[str, int]) -> dict:
+def tokenize_scene(scene: SceneGT, word2idx: dict[str, int], max_objects: int = 3) -> dict:
     """
     Convert a SceneGT to tensors for model input.
 
@@ -269,7 +353,7 @@ def tokenize_scene(scene: SceneGT, word2idx: dict[str, int]) -> dict:
 
     ids = [word2idx.get(w.lower(), unk_idx) for w in scene.words]
 
-    max_obj = 2
+    max_obj = max_objects
     positions = torch.zeros(max_obj, 3)
     types = torch.full((max_obj,), -1, dtype=torch.long)
     colors = torch.zeros(max_obj, 3)
@@ -302,15 +386,16 @@ def tokenize_scene(scene: SceneGT, word2idx: dict[str, int]) -> dict:
 class RaumDataset(Dataset):
     """PyTorch dataset wrapping a list of SceneGT + word2idx."""
 
-    def __init__(self, scenes: list[SceneGT], word2idx: dict[str, int]):
+    def __init__(self, scenes: list[SceneGT], word2idx: dict[str, int], max_objects: int = 3):
         self.scenes = scenes
         self.word2idx = word2idx
+        self.max_objects = max_objects
 
     def __len__(self):
         return len(self.scenes)
 
     def __getitem__(self, idx):
-        return tokenize_scene(self.scenes[idx], self.word2idx)
+        return tokenize_scene(self.scenes[idx], self.word2idx, max_objects=self.max_objects)
 
 
 def collate_raum(batch: list[dict]) -> dict:

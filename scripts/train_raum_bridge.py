@@ -1,25 +1,25 @@
 """
-Training script for Raum 1.0: template-routing bridge.
+Training script for Raum bridge (1.0 and 1.1).
 
-The bridge is supervised analytically on the labels already produced
-by `src.raum.data.tokenize_scene` (position, template, colour, scale,
-role). No rendering happens in the training loop, so an epoch on a
-4090 is minutes rather than tens of minutes.
-
-Typical use:
-
+Raum 1.0 (GloVe path):
     python scripts/train_raum_bridge.py ^
       --glove data/glove.6B.300d.txt ^
       --save-dir checkpoints/raum_10
 
-Resume after a Ctrl-C:
-
+Raum 1.1 (frozen Planck encoder):
     python scripts/train_raum_bridge.py ^
       --glove data/glove.6B.300d.txt ^
-      --save-dir checkpoints/raum_10 --resume
+      --encoder-checkpoint checkpoints/planck13/best.pt --freeze-encoder ^
+      --n-objects-max 3 ^
+      --d-model 256 --n-layers 6 --n-heads 8 ^
+      --save-dir checkpoints/raum_11_n3
+
+Resume after a Ctrl-C:
+    python scripts/train_raum_bridge.py ... --resume
 """
 
 import argparse
+import json
 import signal
 import sys
 import time
@@ -36,8 +36,26 @@ from src.raum.bridge import RaumBridge, compute_routing_loss
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Train Raum 1.0 routing bridge")
+    p = argparse.ArgumentParser(description="Train Raum bridge (1.0 / 1.1)")
     p.add_argument("--glove", required=True, help="Path to glove.6B.300d.txt")
+
+    # Raum 1.1: frozen encoder
+    p.add_argument("--encoder-checkpoint", type=str, default=None,
+                   help="Path to Planck checkpoint (enables 1.1 mode)")
+    p.add_argument("--freeze-encoder", action="store_true",
+                   help="Freeze encoder weights (default for 1.1)")
+    p.add_argument("--tokenizer", type=str, default=None,
+                   help="SentencePiece model for encoder mode (auto-detected from data dir)")
+
+    # Raum 1.1: blob library
+    p.add_argument("--blobs-dir", type=str, default=None,
+                   help="Path to blob library dir (data/blobs/)")
+    p.add_argument("--n-blobs-max", type=int, default=None,
+                   help="Cap on blob library size for ablations")
+
+    # Data
+    p.add_argument("--n-objects-max", type=int, default=2,
+                   help="Max objects per scene (2 for 1.0, 3 for 1.1)")
     p.add_argument("--n-train", type=int, default=5000)
     p.add_argument("--n-val", type=int, default=500)
     p.add_argument("--n-test", type=int, default=500)
@@ -74,8 +92,25 @@ def parse_args():
     return p.parse_args()
 
 
+def _load_blob_library(blobs_dir: str, n_blobs_max: int | None) -> tuple[int, list[str]]:
+    """Load blob index and return (n_blobs, blob_names)."""
+    index_path = Path(blobs_dir) / "index.json"
+    if not index_path.exists():
+        raise FileNotFoundError(
+            f"Blob index not found at {index_path}. "
+            f"Run scripts/build_blobs_shapenet.py first."
+        )
+    with open(index_path) as f:
+        index = json.load(f)
+
+    blob_names = index if isinstance(index, list) else list(index.keys())
+    if n_blobs_max is not None:
+        blob_names = blob_names[:n_blobs_max]
+    return len(blob_names), blob_names
+
+
 @torch.no_grad()
-def evaluate(model, vocab, loader, device, args, max_batches=None) -> dict:
+def evaluate(model, get_features_fn, loader, device, args, max_batches=None) -> dict:
     """Run the validation loader and return averaged metrics."""
     model.eval()
     totals: dict[str, float] = {}
@@ -85,7 +120,7 @@ def evaluate(model, vocab, loader, device, args, max_batches=None) -> dict:
             break
         token_ids = batch["token_ids"].to(device)
         mask = batch["mask"].to(device)
-        mu_s, _, _, features = vocab.get_params(token_ids)
+        mu_s, features = get_features_fn(token_ids)
         out = model(mu_s, features, mask)
         _, metrics = compute_routing_loss(
             out, batch,
@@ -109,24 +144,83 @@ def main():
     if device.type == "cuda":
         print(f"  GPU: {torch.cuda.get_device_name()}")
 
-    # ── GloVe + SGS vocab ──
+    use_encoder = args.encoder_checkpoint is not None
+    if use_encoder:
+        print(f"\n=== Raum 1.1 mode (frozen Planck encoder) ===")
+        print(f"  Encoder: {args.encoder_checkpoint}")
+    else:
+        print(f"\n=== Raum 1.0 mode (GloVe + SemanticGaussianVocab) ===")
+
+    # ── GloVe (always loaded for 1.0; also for 1.1 as fallback word2idx) ──
     print("\n=== Loading GloVe ===")
     word2idx, vectors, freqs, words = load_glove(args.glove, vocab_size=50000)
-    d_f = vectors.shape[1]
 
-    vocab = SemanticGaussianVocab(len(words), d_s=args.d_s, d_f=d_f)
-    vocab.init_from_glove(vectors, freqs)
-    vocab.to(device)
-    vocab.eval()
+    # ── Feature extraction function ──
+    if use_encoder:
+        from src.raum.encoder import FrozenPlanckEncoder, build_sp_word2idx
+        encoder = FrozenPlanckEncoder(args.encoder_checkpoint, device=device)
+        encoder.to(device)
+        encoder.eval()
+        d_s = encoder.d_s
+        d_f = encoder.d_f
+        print(f"  Encoder dims: d_s={d_s}, d_f={d_f}, vocab={encoder.vocab_size}")
+
+        # Build word2idx from SentencePiece so token_ids match the encoder
+        tokenizer_path = args.tokenizer
+        if tokenizer_path is None:
+            # Auto-detect from checkpoint dir sibling data dir
+            ckpt_dir = Path(args.encoder_checkpoint).parent
+            candidates = [
+                ckpt_dir.parent / "data" / "wikipedia" / "tokenizer.model",
+                ckpt_dir / "tokenizer.model",
+                Path("data/wikipedia/tokenizer.model"),
+                Path("data/tinystories/tokenizer.model"),
+            ]
+            for c in candidates:
+                if c.exists():
+                    tokenizer_path = str(c)
+                    break
+        if tokenizer_path and Path(tokenizer_path).exists():
+            print(f"  Tokenizer: {tokenizer_path}")
+            word2idx = build_sp_word2idx(tokenizer_path)
+            print(f"  SP word2idx: {len(word2idx)} scene words mapped")
+        else:
+            print(f"  WARN: No SP tokenizer found, using GloVe word2idx.")
+            print(f"  Token IDs may not match encoder embeddings!")
+
+        def get_features(token_ids):
+            return encoder.encode(token_ids)
+    else:
+        d_f = vectors.shape[1]
+        d_s = args.d_s
+        vocab = SemanticGaussianVocab(len(words), d_s=d_s, d_f=d_f)
+        vocab.init_from_glove(vectors, freqs)
+        vocab.to(device)
+        vocab.eval()
+
+        def get_features(token_ids):
+            mu_s, _, _, features = vocab.get_params(token_ids)
+            return mu_s, features
+
+    # ── Determine n_blobs ──
+    from src.raum.vocab import N_OBJECTS
+    if args.blobs_dir:
+        n_blobs, blob_names = _load_blob_library(args.blobs_dir, args.n_blobs_max)
+        print(f"  Blob library: {n_blobs} classes from {args.blobs_dir}")
+    else:
+        n_blobs = N_OBJECTS
+        blob_names = None
 
     # ── Data ──
     print("\n=== Generating data ===")
     train_scenes, val_scenes, test_scenes = generate_comp_gen_split(
-        args.n_train, args.n_val, args.n_test, seed=args.seed,
+        args.n_train, args.n_val, args.n_test,
+        n_objects_max=args.n_objects_max, seed=args.seed,
     )
-    train_ds = RaumDataset(train_scenes, word2idx)
-    val_ds = RaumDataset(val_scenes, word2idx)
-    test_ds = RaumDataset(test_scenes, word2idx)
+    max_objects = args.n_objects_max
+    train_ds = RaumDataset(train_scenes, word2idx, max_objects=max_objects)
+    val_ds = RaumDataset(val_scenes, word2idx, max_objects=max_objects)
+    test_ds = RaumDataset(test_scenes, word2idx, max_objects=max_objects)
 
     train_loader = torch.utils.data.DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=True,
@@ -144,11 +238,14 @@ def main():
     # ── Model ──
     print("\n=== Creating model ===")
     model = RaumBridge(
-        d_s=args.d_s, d_f=d_f,
+        d_s=d_s, d_f=d_f,
         d_model=args.d_model, n_layers=args.n_layers, n_heads=args.n_heads,
+        n_blobs=n_blobs,
         K=args.K,
     ).to(device)
     print(f"  Parameters: {model.count_parameters():,}")
+    print(f"  d_s={d_s}, d_f={d_f}, d_model={args.d_model}, "
+          f"n_layers={args.n_layers}, n_heads={args.n_heads}, n_blobs={n_blobs}")
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -159,7 +256,7 @@ def main():
     save_dir.mkdir(parents=True, exist_ok=True)
     last_path = save_dir / "last.pt"
     best_path = save_dir / "best.pt"
-    best_score = float("-inf")   # composite: tpl_acc + dir_acc - pos_mse
+    best_score = float("-inf")
     global_step = 0
     start_epoch = 0
 
@@ -188,7 +285,7 @@ def main():
             "args": vars(args),
         }, last_path)
 
-    # Ctrl-C handler: one tap = snapshot and exit; two = kill.
+    # Ctrl-C handler
     _state = {"count": 0, "epoch": start_epoch}
 
     def _sigint(signum, frame):
@@ -219,7 +316,7 @@ def main():
             mask = batch["mask"].to(device)
 
             with torch.no_grad():
-                mu_s, _, _, features = vocab.get_params(token_ids)
+                mu_s, features = get_features(token_ids)
 
             out = model(mu_s, features, mask)
             loss, metrics = compute_routing_loss(
@@ -252,7 +349,7 @@ def main():
                 )
 
             if global_step % args.eval_interval == 0:
-                val = evaluate(model, vocab, val_loader, device, args, max_batches=None)
+                val = evaluate(model, get_features, val_loader, device, args, max_batches=None)
                 score = val["tpl_acc"] + val["dir_acc"] - val["pos_mse"]
                 print(
                     f"  >>> val | loss {val['loss']:.3f} "
@@ -276,7 +373,7 @@ def main():
 
     # Final comp-gen test report.
     print("\n=== Comp-gen test (held-out object pairs) ===")
-    test = evaluate(model, vocab, test_loader, device, args)
+    test = evaluate(model, get_features, test_loader, device, args)
     print(
         f"  test | loss {test['loss']:.3f} "
         f"pos {test['pos_mse']:.3f} "
