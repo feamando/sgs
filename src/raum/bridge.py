@@ -35,6 +35,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .vocab import N_OBJECTS, N_ROLES
+from .data import N_RELATIONS
 
 # Default blob count for 1.1 (overridden at init for blob-library mode)
 DEFAULT_N_BLOBS = N_OBJECTS  # backward compat: 6 for 1.0
@@ -58,6 +59,8 @@ class RaumBridge(nn.Module):
         n_templates: int = N_OBJECTS,
         n_blobs: int | None = None,
         n_roles: int = N_ROLES,
+        n_relations: int = N_RELATIONS,
+        with_relation_head: bool = False,
         K: int = 32,
     ):
         super().__init__()
@@ -65,9 +68,9 @@ class RaumBridge(nn.Module):
         self.d_f = d_f
         self.d_model = d_model
         self.max_len = max_len
-        # n_blobs supersedes n_templates when provided
         self.n_blobs = n_blobs if n_blobs is not None else n_templates
-        self.n_templates = self.n_blobs  # alias for backward compat
+        self.n_templates = self.n_blobs
+        self.with_relation_head = with_relation_head
         self.K = K
 
         self.input_proj = nn.Linear(d_s + d_f, d_model)
@@ -100,6 +103,15 @@ class RaumBridge(nn.Module):
             nn.Linear(d_model, d_model // 4), nn.GELU(),
             nn.Linear(d_model // 4, 1),
         )
+
+        # ── Pairwise relation head (optional, Stage 1.1.C) ────────
+        if with_relation_head:
+            self.relation_head = nn.Sequential(
+                nn.Linear(d_model * 2, d_model), nn.GELU(),
+                nn.Linear(d_model, n_relations),
+            )
+        else:
+            self.relation_head = None
 
         self._init_weights()
 
@@ -138,18 +150,24 @@ class RaumBridge(nn.Module):
         template_logits = self.template_head(h)           # [B, N, T]
         role_logits = self.role_head(h)                   # [B, N, R]
         colors = torch.sigmoid(self.color_head(h))        # [B, N, 3] in [0,1]
-        # Scale is a multiplier on the template's intrinsic size.
-        # Softplus keeps it strictly positive; bias toward ~1.0 at init.
         scales = F.softplus(self.scale_head(h)).squeeze(-1) + 0.1  # [B, N]
 
-        return {
+        out = {
             "positions": positions,
             "template_logits": template_logits,
             "role_logits": role_logits,
             "colors": colors,
             "scales": scales,
-            "coarse_means": positions,  # alias kept for analyzer compat
+            "coarse_means": positions,
         }
+
+        if self.relation_head is not None:
+            out["relation_logits"] = self.relation_head(
+                torch.cat([h.unsqueeze(2).expand(-1, -1, N, -1),
+                           h.unsqueeze(1).expand(-1, N, -1, -1)], dim=-1)
+            )  # [B, N, N, N_REL]
+
+        return out
 
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters())
@@ -169,6 +187,7 @@ def compute_routing_loss(
     lambda_col: float = 1.0,
     lambda_scl: float = 0.5,
     lambda_rol: float = 0.5,
+    lambda_rel: float = 0.5,
     pair_margin: float = 0.3,
 ) -> tuple[torch.Tensor, dict]:
     """
@@ -277,6 +296,41 @@ def compute_routing_loss(
     scl_mse = scl_mse / max(n_pos, 1)
     pair_loss = pair_loss / max(n_pair, 1)
 
+    # ── Relation head loss (when present) ──
+    rel_loss = positions.new_zeros(())
+    rel_correct = 0
+    rel_total = 0
+    if "relation_logits" in out and "relation_ids" in batch:
+        rel_logits = out["relation_logits"]  # [B, N, N, N_REL]
+        relation_ids = batch["relation_ids"].to(device)  # [B, max_obj-1]
+
+        for b in range(B):
+            is_obj = (obj_labels[b] >= 0) & (mask[b] > 0.5)
+            tok_idxs = torch.nonzero(is_obj, as_tuple=False).flatten().tolist()
+            if len(tok_idxs) < 2:
+                continue
+            # relation_ids[b, i] is the relation from obj[i+1] to obj[1] (anchor)
+            anchor_tok = tok_idxs[1] if len(tok_idxs) > 1 else tok_idxs[0]
+            for rel_i in range(min(len(tok_idxs) - 1, relation_ids.shape[1])):
+                gt_rel = relation_ids[b, rel_i]
+                if gt_rel < 0:
+                    continue
+                # For first pair: relation is from obj[0] to obj[1]
+                # For subsequent: relation is from obj[i+1] to anchor (obj[1])
+                if rel_i == 0:
+                    src_tok = tok_idxs[0]
+                    dst_tok = tok_idxs[1]
+                else:
+                    src_tok = tok_idxs[rel_i + 1] if rel_i + 1 < len(tok_idxs) else tok_idxs[-1]
+                    dst_tok = anchor_tok
+                logits_pair = rel_logits[b, src_tok, dst_tok].unsqueeze(0)
+                rel_loss = rel_loss + F.cross_entropy(logits_pair, gt_rel.unsqueeze(0))
+                rel_total += 1
+                if logits_pair.argmax().item() == gt_rel.item():
+                    rel_correct += 1
+
+    rel_loss = rel_loss / max(rel_total, 1)
+
     total = (
         lambda_pos * pos_mse
         + lambda_dir * pair_loss
@@ -284,6 +338,7 @@ def compute_routing_loss(
         + lambda_col * col_mse
         + lambda_scl * scl_mse
         + lambda_rol * role_loss
+        + lambda_rel * rel_loss
     )
 
     metrics = {
@@ -294,8 +349,10 @@ def compute_routing_loss(
         "col_mse": float(col_mse.item()),
         "scl_mse": float(scl_mse.item()),
         "role_ce": float(role_loss.item()),
+        "rel_ce": float(rel_loss.item()),
         "tpl_acc": tpl_correct / max(n_pos, 1),
         "dir_acc": dir_correct / max(dir_total, 1),
+        "rel_acc": rel_correct / max(rel_total, 1),
     }
     return total, metrics
 

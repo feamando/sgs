@@ -46,6 +46,11 @@ class ObjectGT:
     position: list[float]      # [x, y, z]
 
 
+RELATION_NAMES = list(RELATIONS.keys())
+N_RELATIONS = len(RELATION_NAMES)
+RELATION_TO_ID = {name: i for i, name in enumerate(RELATION_NAMES)}
+
+
 @dataclass
 class SceneGT:
     """Ground truth for a complete scene."""
@@ -58,6 +63,8 @@ class SceneGT:
     color_labels: list[list[float]]  # RGB (-1 if not a color word)
     size_labels: list[float]   # scale (-1 if not a size word)
     relation_label: list[float] | None  # xyz offset (None if no relation)
+    # Per-pair relation IDs: relation_ids[i] is the relation from obj[i] to anchor
+    relation_ids: list[int] = field(default_factory=list)
 
 
 # ── Sentence generators ──
@@ -171,6 +178,7 @@ def _gen_two_objects(
         color_labels=color_labels,
         size_labels=size_labels,
         relation_label=offset,
+        relation_ids=[RELATION_TO_ID[relation]],
     )
 
 
@@ -266,6 +274,7 @@ def _gen_n_objects(
         color_labels=color_labels,
         size_labels=size_labels,
         relation_label=positions[0] if len(positions) > 0 else None,
+        relation_ids=[RELATION_TO_ID[r] for r in rels],
     )
 
 
@@ -368,8 +377,10 @@ def generate_comp_gen_split(
                 n = 2
             elif r < 0.80:
                 n = 3
-            else:
+            elif n_objects_max >= 4:
                 n = random.randint(4, n_objects_max)
+            else:
+                n = 3
 
         if n == 1:
             return _gen_single_object(objects=objects)
@@ -441,6 +452,12 @@ def tokenize_scene(scene: SceneGT, word2idx: dict[str, int], max_objects: int = 
         colors[i] = torch.tensor(obj.color)
         scales[i] = obj.scale
 
+    # Pairwise relation IDs: [max_obj-1] padded with -1
+    max_rels = max_obj - 1
+    rel_ids = torch.full((max_rels,), -1, dtype=torch.long)
+    for i, rid in enumerate(scene.relation_ids[:max_rels]):
+        rel_ids[i] = rid
+
     return {
         "token_ids": torch.tensor(ids, dtype=torch.long),
         "mask": torch.ones(len(ids), dtype=torch.float32),
@@ -449,6 +466,7 @@ def tokenize_scene(scene: SceneGT, word2idx: dict[str, int], max_objects: int = 
         "color_labels": torch.tensor(scene.color_labels, dtype=torch.float32),
         "size_labels": torch.tensor(scene.size_labels, dtype=torch.float32),
         "relation_label": torch.tensor(scene.relation_label or [0, 0, 0], dtype=torch.float32),
+        "relation_ids": rel_ids,
         "n_objects": len(scene.objects),
         "object_positions": positions,
         "object_types": types,
@@ -507,8 +525,8 @@ def collate_raum(batch: list[dict]) -> dict:
     out["color_labels"] = torch.stack(colors)
 
     # Fixed-size tensors: just stack
-    for key in ["relation_label", "object_positions", "object_types",
-                "object_colors", "object_scales"]:
+    for key in ["relation_label", "relation_ids", "object_positions",
+                "object_types", "object_colors", "object_scales"]:
         out[key] = torch.stack([d[key] for d in batch])
 
     out["n_objects"] = torch.tensor([d["n_objects"] for d in batch])

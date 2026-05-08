@@ -53,6 +53,10 @@ def parse_args():
     p.add_argument("--n-blobs-max", type=int, default=None,
                    help="Cap on blob library size for ablations")
 
+    # Relation head (Stage 1.1.C)
+    p.add_argument("--with-relation-head", action="store_true",
+                   help="Enable pairwise relation classification head")
+
     # Data
     p.add_argument("--n-objects-max", type=int, default=2,
                    help="Max objects per scene (2 for 1.0, 3 for 1.1)")
@@ -246,6 +250,7 @@ def main():
         d_s=d_s, d_f=d_f,
         d_model=args.d_model, n_layers=args.n_layers, n_heads=args.n_heads,
         n_blobs=n_blobs,
+        with_relation_head=args.with_relation_head,
         K=args.K,
     ).to(device)
     print(f"  Parameters: {model.count_parameters():,}")
