@@ -202,20 +202,25 @@ def main():
             mu_s, _, _, features = vocab.get_params(token_ids)
             return mu_s, features
 
-    # ── Determine n_blobs ──
+    # ── Determine n_blobs + scene object vocabulary ──
     from src.raum.vocab import N_OBJECTS
+    from src.raum.data import load_blob_object_names
     if args.blobs_dir:
         n_blobs, blob_names = _load_blob_library(args.blobs_dir, args.n_blobs_max)
+        scene_objects = load_blob_object_names(args.blobs_dir)
+        if args.n_blobs_max:
+            scene_objects = {k: v for k, v in scene_objects.items() if v < args.n_blobs_max}
         print(f"  Blob library: {n_blobs} classes from {args.blobs_dir}")
     else:
         n_blobs = N_OBJECTS
         blob_names = None
+        scene_objects = None  # falls back to OBJECTS (6 primitives)
 
     # ── Data ──
     print("\n=== Generating data ===")
     train_scenes, val_scenes, test_scenes = generate_comp_gen_split(
         args.n_train, args.n_val, args.n_test,
-        n_objects_max=args.n_objects_max, seed=args.seed,
+        n_objects_max=args.n_objects_max, objects=scene_objects, seed=args.seed,
     )
     max_objects = args.n_objects_max
     train_ds = RaumDataset(train_scenes, word2idx, max_objects=max_objects)

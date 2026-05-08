@@ -1,14 +1,20 @@
 """
-Synthetic scene data generation for Raum PoC.
+Synthetic scene data generation for Raum.
 
 Generates (sentence, scene_ground_truth) pairs from templates.
-Handles tokenization via GloVe word2idx.
+Handles tokenization via GloVe word2idx or SentencePiece.
+
+When a blob library is provided (via `object_names` parameter), the
+scene generator samples from the full blob vocabulary rather than the
+6 procedural primitives.
 """
 
+import json
 import random
 import torch
 import numpy as np
 from dataclasses import dataclass, field
+from pathlib import Path
 from torch.utils.data import Dataset
 
 from .vocab import (
@@ -16,6 +22,19 @@ from .vocab import (
     ROLE_OBJECT, ROLE_COLOR, ROLE_SIZE, ROLE_RELATION, ROLE_OTHER,
     N_OBJECTS, N_ROLES,
 )
+
+
+def load_blob_object_names(blobs_dir: str | Path) -> dict[str, int]:
+    """Load object names from blob library index.json.
+
+    Returns dict mapping object_name -> blob_id (same format as OBJECTS).
+    """
+    index_path = Path(blobs_dir) / "index.json"
+    with open(index_path) as f:
+        names = json.load(f)
+    if isinstance(names, list):
+        return {name: i for i, name in enumerate(names)}
+    return {name: i for i, name in enumerate(names.keys())}
 
 
 @dataclass
@@ -47,10 +66,12 @@ def _gen_single_object(
     color: str | None = None,
     size: str | None = None,
     obj: str | None = None,
+    objects: dict[str, int] | None = None,
 ) -> SceneGT:
     """Template: 'a [size] {color} {object}'"""
+    objects = objects or OBJECTS
     color = color or random.choice(list(COLORS.keys()))
-    obj = obj or random.choice(list(OBJECTS.keys()))
+    obj = obj or random.choice(list(objects.keys()))
     use_size = size is not None or random.random() < 0.5
     size = size or random.choice(list(SIZES.keys()))
 
@@ -64,13 +85,13 @@ def _gen_single_object(
         scale = 1.0
 
     obj_gt = ObjectGT(
-        obj_type=OBJECTS[obj],
+        obj_type=objects[obj],
         color=COLORS[color],
         scale=scale,
         position=[0.0, 0.0, 0.0],
     )
 
-    obj_labels = [OBJECTS[obj] if r == ROLE_OBJECT else -1 for r in roles]
+    obj_labels = [objects[obj] if r == ROLE_OBJECT else -1 for r in roles]
     color_labels = [COLORS[color] if r == ROLE_COLOR else [-1, -1, -1] for r in roles]
     size_labels = [scale if r == ROLE_SIZE else -1.0 for r in roles]
 
@@ -90,13 +111,15 @@ def _gen_two_objects(
     color1: str | None = None, obj1: str | None = None,
     relation: str | None = None,
     color2: str | None = None, obj2: str | None = None,
+    objects: dict[str, int] | None = None,
 ) -> SceneGT:
     """Template: 'a {color1} {object1} {relation} a {color2} {object2}'"""
+    objects = objects or OBJECTS
     color1 = color1 or random.choice(list(COLORS.keys()))
-    obj1 = obj1 or random.choice(list(OBJECTS.keys()))
+    obj1 = obj1 or random.choice(list(objects.keys()))
     relation = relation or random.choice(list(RELATIONS.keys()))
     color2 = color2 or random.choice(list(COLORS.keys()))
-    obj2 = obj2 or random.choice(list(OBJECTS.keys()))
+    obj2 = obj2 or random.choice(list(objects.keys()))
 
     # Some relations are multi-word in natural English but we use single-word keys
     # "left" means "left of", etc.
@@ -112,11 +135,11 @@ def _gen_two_objects(
     # "cone above cylinder" → cylinder at origin, cone at +y.
     offset = RELATIONS[relation]
     obj1_gt = ObjectGT(
-        obj_type=OBJECTS[obj1], color=COLORS[color1],
+        obj_type=objects[obj1], color=COLORS[color1],
         scale=1.0, position=list(offset),
     )
     obj2_gt = ObjectGT(
-        obj_type=OBJECTS[obj2], color=COLORS[color2],
+        obj_type=objects[obj2], color=COLORS[color2],
         scale=1.0, position=[0.0, 0.0, 0.0],
     )
 
@@ -126,7 +149,7 @@ def _gen_two_objects(
     obj_idx = 0
     for i, r in enumerate(roles):
         if r == ROLE_OBJECT:
-            obj_labels.append(OBJECTS[obj1] if obj_idx == 0 else OBJECTS[obj2])
+            obj_labels.append(objects[obj1] if obj_idx == 0 else objects[obj2])
             obj_idx += 1
         else:
             obj_labels.append(-1)
@@ -153,11 +176,13 @@ def _gen_two_objects(
 
 def _gen_three_objects(
     obj1: str | None = None, obj2: str | None = None, obj3: str | None = None,
+    objects: dict[str, int] | None = None,
 ) -> SceneGT:
     """Template: 'a {c1} {o1} {rel1} a {c2} {o2} and a {c3} {o3} {rel2} the {o2}'"""
-    obj1 = obj1 or random.choice(list(OBJECTS.keys()))
-    obj2 = obj2 or random.choice(list(OBJECTS.keys()))
-    obj3 = obj3 or random.choice(list(OBJECTS.keys()))
+    objects = objects or OBJECTS
+    obj1 = obj1 or random.choice(list(objects.keys()))
+    obj2 = obj2 or random.choice(list(objects.keys()))
+    obj3 = obj3 or random.choice(list(objects.keys()))
     c1 = random.choice(list(COLORS.keys()))
     c2 = random.choice(list(COLORS.keys()))
     c3 = random.choice(list(COLORS.keys()))
@@ -179,15 +204,15 @@ def _gen_three_objects(
     offset2 = RELATIONS[rel2]
     # obj2 at origin, obj1 offset by rel1, obj3 offset by rel2
     obj1_gt = ObjectGT(
-        obj_type=OBJECTS[obj1], color=COLORS[c1],
+        obj_type=objects[obj1], color=COLORS[c1],
         scale=1.0, position=list(offset1),
     )
     obj2_gt = ObjectGT(
-        obj_type=OBJECTS[obj2], color=COLORS[c2],
+        obj_type=objects[obj2], color=COLORS[c2],
         scale=1.0, position=[0.0, 0.0, 0.0],
     )
     obj3_gt = ObjectGT(
-        obj_type=OBJECTS[obj3], color=COLORS[c3],
+        obj_type=objects[obj3], color=COLORS[c3],
         scale=1.0, position=list(offset2),
     )
 
@@ -199,7 +224,7 @@ def _gen_three_objects(
     color_list = [c1, c2, c3]
     for i, r in enumerate(roles):
         if r == ROLE_OBJECT and obj_idx < 3:
-            obj_labels.append(OBJECTS[obj_list[obj_idx]])
+            obj_labels.append(objects[obj_list[obj_idx]])
             obj_idx += 1
         else:
             obj_labels.append(-1)
@@ -258,6 +283,7 @@ def generate_comp_gen_split(
     n_val: int = 2500,
     n_test: int = 2500,
     n_objects_max: int = 2,
+    objects: dict[str, int] | None = None,
     seed: int = 42,
 ) -> tuple[list[SceneGT], list[SceneGT], list[SceneGT]]:
     """
@@ -266,8 +292,12 @@ def generate_comp_gen_split(
     Test set contains object PAIRS never seen together in training.
     Individual objects all appear in training (just not in these combinations).
     When n_objects_max >= 3, training includes 3-object scenes.
+
+    If `objects` is provided, use that vocabulary instead of the default
+    6 procedural primitives. Pass the output of load_blob_object_names().
     """
-    obj_names = list(OBJECTS.keys())
+    objects = objects or OBJECTS
+    obj_names = list(objects.keys())
     n_obj = len(obj_names)
 
     # All possible ordered pairs
@@ -298,12 +328,12 @@ def generate_comp_gen_split(
         if n_objects_max >= 3 and r < 0.3:
             obj1, obj2 = random.choice(pairs)
             obj3 = random.choice(obj_names)
-            return _gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3)
+            return _gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3, objects=objects)
         elif r < (0.8 if n_objects_max >= 3 else 0.7):
             obj1, obj2 = random.choice(pairs)
-            return _gen_two_objects(obj1=obj1, obj2=obj2)
+            return _gen_two_objects(obj1=obj1, obj2=obj2, objects=objects)
         else:
-            return _gen_single_object()
+            return _gen_single_object(objects=objects)
 
     train = [_gen_scene(train_pairs) for _ in range(n_train)]
     val = [_gen_scene(train_pairs) for _ in range(n_val)]
@@ -315,10 +345,10 @@ def generate_comp_gen_split(
         if n_objects_max >= 3 and random.random() < 0.4:
             obj1, obj2 = random.choice(held_list)
             obj3 = random.choice(obj_names)
-            test.append(_gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3))
+            test.append(_gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3, objects=objects))
         else:
             obj1, obj2 = random.choice(held_list)
-            test.append(_gen_two_objects(obj1=obj1, obj2=obj2))
+            test.append(_gen_two_objects(obj1=obj1, obj2=obj2, objects=objects))
 
     random.setstate(old_state)
 
