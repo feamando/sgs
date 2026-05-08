@@ -92,14 +92,12 @@ SYNSET_TO_NAME = {
     "04554684": "washer",
 }
 
-# Default 30 categories for Stage A (drop thin/problematic ones)
-DEFAULT_CATEGORIES = [
-    "airplane", "bag", "bathtub", "bed", "bench", "bookshelf", "bottle",
-    "bowl", "bus", "cabinet", "camera", "can", "car", "chair", "clock",
-    "guitar", "helmet", "jar", "knife", "lamp", "laptop", "mug",
-    "piano", "pot", "skateboard", "sofa", "stove", "table", "telephone",
-    "tower",
-]
+# Drop categories that are too thin for good Gaussian fit or have
+# ambiguous names that collide with common English words.
+_SKIP = {"rifle", "file"}
+
+# Default: all ShapeNet categories minus skipped ones
+DEFAULT_CATEGORIES = sorted(set(SYNSET_TO_NAME.values()) - _SKIP)
 
 
 def parse_args():
