@@ -174,68 +174,84 @@ def _gen_two_objects(
     )
 
 
-def _gen_three_objects(
-    obj1: str | None = None, obj2: str | None = None, obj3: str | None = None,
+def _gen_n_objects(
+    n: int,
+    obj_names_override: list[str] | None = None,
     objects: dict[str, int] | None = None,
 ) -> SceneGT:
-    """Template: 'a {c1} {o1} {rel1} a {c2} {o2} and a {c3} {o3} {rel2} the {o2}'"""
-    objects = objects or OBJECTS
-    obj1 = obj1 or random.choice(list(objects.keys()))
-    obj2 = obj2 or random.choice(list(objects.keys()))
-    obj3 = obj3 or random.choice(list(objects.keys()))
-    c1 = random.choice(list(COLORS.keys()))
-    c2 = random.choice(list(COLORS.keys()))
-    c3 = random.choice(list(COLORS.keys()))
-    rel1 = random.choice(list(RELATIONS.keys()))
-    rel2 = random.choice(list(RELATIONS.keys()))
+    """
+    Generate an N-object scene.
 
-    words = ["a", c1, obj1, rel1, "a", c2, obj2, "and", "a", c3, obj3, rel2, "the", obj2]
+    Template: 'a {c1} {o1} {rel1} a {c2} {o2} [and a {c3} {o3} {rel2} the {o2} ...]'
+
+    First object pair uses standard "X rel Y" (obj1 offset, obj2 at origin).
+    Additional objects each get "and a {c} {o} {rel} the {o2}" appended,
+    with positions offset from origin.
+    """
+    objects = objects or OBJECTS
+    obj_keys = list(objects.keys())
+
+    # Pick object names
+    if obj_names_override and len(obj_names_override) >= n:
+        chosen_objs = obj_names_override[:n]
+    else:
+        chosen_objs = [random.choice(obj_keys) for _ in range(n)]
+
+    colors = [random.choice(list(COLORS.keys())) for _ in range(n)]
+    rels = [random.choice(list(RELATIONS.keys())) for _ in range(n - 1)]
+
+    # Build sentence: "a c1 o1 rel1 a c2 o2 and a c3 o3 rel2 the o2 and ..."
+    # First pair
+    words = ["a", colors[0], chosen_objs[0], rels[0], "a", colors[1], chosen_objs[1]]
     roles = [
         ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
         ROLE_RELATION,
         ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
-        ROLE_OTHER,
-        ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
-        ROLE_RELATION,
-        ROLE_OTHER, ROLE_OTHER,
     ]
 
-    offset1 = RELATIONS[rel1]
-    offset2 = RELATIONS[rel2]
-    # obj2 at origin, obj1 offset by rel1, obj3 offset by rel2
-    obj1_gt = ObjectGT(
-        obj_type=objects[obj1], color=COLORS[c1],
-        scale=1.0, position=list(offset1),
-    )
-    obj2_gt = ObjectGT(
-        obj_type=objects[obj2], color=COLORS[c2],
-        scale=1.0, position=[0.0, 0.0, 0.0],
-    )
-    obj3_gt = ObjectGT(
-        obj_type=objects[obj3], color=COLORS[c3],
-        scale=1.0, position=list(offset2),
-    )
+    # Additional objects
+    for i in range(2, n):
+        words += ["and", "a", colors[i], chosen_objs[i], rels[i - 1], "the", chosen_objs[1]]
+        roles += [
+            ROLE_OTHER,
+            ROLE_OTHER, ROLE_COLOR, ROLE_OBJECT,
+            ROLE_RELATION,
+            ROLE_OTHER, ROLE_OTHER,
+        ]
 
+    # Positions: obj2 (index 1) at origin, all others offset by their relation
+    positions = []
+    positions.append(list(RELATIONS[rels[0]]))  # obj1
+    positions.append([0.0, 0.0, 0.0])           # obj2 (anchor)
+    for i in range(2, n):
+        positions.append(list(RELATIONS[rels[i - 1]]))
+
+    # Build ground truth
+    obj_gts = []
+    for i in range(n):
+        obj_gts.append(ObjectGT(
+            obj_type=objects[chosen_objs[i]],
+            color=COLORS[colors[i]],
+            scale=1.0,
+            position=positions[i],
+        ))
+
+    # Per-word labels
     obj_labels = []
     color_labels = []
     size_labels = []
     obj_idx = 0
-    obj_list = [obj1, obj2, obj3]
-    color_list = [c1, c2, c3]
+    color_idx = 0
     for i, r in enumerate(roles):
-        if r == ROLE_OBJECT and obj_idx < 3:
-            obj_labels.append(objects[obj_list[obj_idx]])
+        if r == ROLE_OBJECT and obj_idx < n:
+            obj_labels.append(objects[chosen_objs[obj_idx]])
             obj_idx += 1
         else:
             obj_labels.append(-1)
 
-        if r == ROLE_COLOR:
-            ci = min(len(color_labels), 2)
-            obj_color_idx = sum(1 for rr in roles[:i] if rr == ROLE_COLOR)
-            if obj_color_idx < 3:
-                color_labels.append(COLORS[color_list[obj_color_idx]])
-            else:
-                color_labels.append([-1, -1, -1])
+        if r == ROLE_COLOR and color_idx < n:
+            color_labels.append(COLORS[colors[color_idx]])
+            color_idx += 1
         else:
             color_labels.append([-1, -1, -1])
 
@@ -244,13 +260,30 @@ def _gen_three_objects(
     return SceneGT(
         sentence=" ".join(words),
         words=words,
-        objects=[obj1_gt, obj2_gt, obj3_gt],
+        objects=obj_gts,
         role_labels=roles,
         obj_labels=obj_labels,
         color_labels=color_labels,
         size_labels=size_labels,
-        relation_label=offset1,
+        relation_label=positions[0] if len(positions) > 0 else None,
     )
+
+
+def _gen_three_objects(
+    obj1: str | None = None, obj2: str | None = None, obj3: str | None = None,
+    objects: dict[str, int] | None = None,
+) -> SceneGT:
+    """Backward-compat wrapper for 3-object generation."""
+    override = None
+    if obj1 or obj2 or obj3:
+        objects = objects or OBJECTS
+        obj_keys = list(objects.keys())
+        override = [
+            obj1 or random.choice(obj_keys),
+            obj2 or random.choice(obj_keys),
+            obj3 or random.choice(obj_keys),
+        ]
+    return _gen_n_objects(3, obj_names_override=override, objects=objects)
 
 
 def generate_dataset(
@@ -324,30 +357,43 @@ def generate_comp_gen_split(
     random.seed(seed)
 
     def _gen_scene(pairs):
-        r = random.random()
-        if n_objects_max >= 3 and r < 0.3:
-            obj1, obj2 = random.choice(pairs)
-            obj3 = random.choice(obj_names)
-            return _gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3, objects=objects)
-        elif r < (0.8 if n_objects_max >= 3 else 0.7):
+        # Pick a random object count weighted toward 2-3
+        if n_objects_max <= 2:
+            n = 2 if random.random() < 0.7 else 1
+        else:
+            r = random.random()
+            if r < 0.15:
+                n = 1
+            elif r < 0.50:
+                n = 2
+            elif r < 0.80:
+                n = 3
+            else:
+                n = random.randint(4, n_objects_max)
+
+        if n == 1:
+            return _gen_single_object(objects=objects)
+        elif n == 2:
             obj1, obj2 = random.choice(pairs)
             return _gen_two_objects(obj1=obj1, obj2=obj2, objects=objects)
         else:
-            return _gen_single_object(objects=objects)
+            obj1, obj2 = random.choice(pairs)
+            extra = [random.choice(obj_names) for _ in range(n - 2)]
+            return _gen_n_objects(n, obj_names_override=[obj1, obj2] + extra, objects=objects)
 
     train = [_gen_scene(train_pairs) for _ in range(n_train)]
     val = [_gen_scene(train_pairs) for _ in range(n_val)]
 
-    # Test: ONLY held-out pairs (2- and 3-object scenes)
+    # Test: ONLY held-out pairs (multi-object scenes)
     test = []
     held_list = list(held_out)
     for _ in range(n_test):
-        if n_objects_max >= 3 and random.random() < 0.4:
-            obj1, obj2 = random.choice(held_list)
-            obj3 = random.choice(obj_names)
-            test.append(_gen_three_objects(obj1=obj1, obj2=obj2, obj3=obj3, objects=objects))
+        obj1, obj2 = random.choice(held_list)
+        if n_objects_max >= 3:
+            n = random.randint(2, min(n_objects_max, 5))
+            extra = [random.choice(obj_names) for _ in range(n - 2)]
+            test.append(_gen_n_objects(n, obj_names_override=[obj1, obj2] + extra, objects=objects))
         else:
-            obj1, obj2 = random.choice(held_list)
             test.append(_gen_two_objects(obj1=obj1, obj2=obj2, objects=objects))
 
     random.setstate(old_state)
