@@ -65,7 +65,7 @@ def _lvis_name_to_blob_name(lvis_name: str) -> str | None:
 
 def parse_args():
     p = argparse.ArgumentParser(description="Build blob library from Objaverse")
-    p.add_argument("--max-classes", type=int, default=200,
+    p.add_argument("--max-classes", type=int, default=300,
                    help="Max categories to include (ranked by annotation count)")
     p.add_argument("--categories", type=str, default=None,
                    help="Comma-separated blob names (overrides --max-classes)")
