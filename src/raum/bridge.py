@@ -460,6 +460,15 @@ def assemble_scene(
             ))
             continue
 
+        if chosen_name not in template_lib:
+            unresolved.append(UnresolvedObject(
+                word_index=i,
+                top_template_name=chosen_name,
+                top_template_id=chosen_idx,
+                template_confidence=confidence,
+                position=pos.tolist(),
+            ))
+            continue
         tpl = template_lib[chosen_name]
 
         # Stamp: transform template means by scale + translation.

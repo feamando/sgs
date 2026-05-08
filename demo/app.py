@@ -133,14 +133,24 @@ class RaumRuntime:
         self.model.to(self.device).eval()
 
         print("[raum] building template library ...")
-        self.template_lib = build_template_library(n_gaussians=args.template_points)
-
         if args.blobs_dir and Path(args.blobs_dir).exists():
             import json
+            from src.raum.templates import GaussianTemplate
             with open(Path(args.blobs_dir) / "index.json") as f:
                 self.template_names = json.load(f)
-            print(f"[raum] blob library: {len(self.template_names)} classes")
+            self.template_lib = {}
+            for name in self.template_names:
+                pt_path = Path(args.blobs_dir) / f"{name}.pt"
+                if pt_path.exists():
+                    blob = torch.load(pt_path, map_location="cpu", weights_only=True)
+                    self.template_lib[name] = GaussianTemplate(
+                        means=blob["means"],
+                        scales=blob["scales_log"],
+                        opacities=blob["opacities"],
+                    )
+            print(f"[raum] blob library: {len(self.template_lib)}/{len(self.template_names)} loaded")
         else:
+            self.template_lib = build_template_library(n_gaussians=args.template_points)
             self.template_names = list(OBJECTS.keys())
 
         print(f"[raum] ready on {self.device} | {self.model.count_parameters():,} params")
