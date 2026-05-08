@@ -32,6 +32,7 @@ from src.gaussian import SemanticGaussianVocab
 from src.raum.bridge import RaumBridge, assemble_scene
 from src.raum.templates import build_template_library
 from src.raum.vocab import OBJECTS, ROLE_OBJECT
+from src.raum.dsl import bridge_output_to_dsl, dsl_to_json, json_to_dsl, validate
 
 
 def parse_args():
@@ -161,6 +162,14 @@ class RaumRuntime:
                 f"{int(round(u.template_confidence * 100))}%)"
             )
 
+        # Build DSL from bridge output
+        dsl = bridge_output_to_dsl(
+            out, mask,
+            blob_names=self.template_names,
+            sample_index=0,
+            object_role_id=ROLE_OBJECT,
+        )
+
         return {
             "words": words,
             "coarse_means": coarse,
@@ -189,6 +198,7 @@ class RaumRuntime:
                 for u in unresolved
             ],
             "warnings": warnings,
+            "dsl": dsl,
             "splats": {
                 "means": means.cpu().tolist(),
                 "scales": scales.cpu().tolist(),
@@ -210,6 +220,10 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 class GenerateRequest(BaseModel):
     prompt: str
+
+
+class RenderDSLRequest(BaseModel):
+    dsl: dict
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -234,6 +248,70 @@ def generate(req: GenerateRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return JSONResponse(result)
+
+
+@app.post("/render-dsl")
+def render_dsl(req: RenderDSLRequest):
+    """Re-render from an edited DSL without re-running the bridge."""
+    if runtime is None:
+        raise HTTPException(status_code=503, detail="runtime not initialised")
+
+    valid, errors = validate(req.dsl)
+    if not valid:
+        raise HTTPException(status_code=400, detail={"errors": errors})
+
+    # Build splats from DSL objects using the template library
+    import torch
+    all_means = []
+    all_scales_log = []
+    all_opacities = []
+    all_colors = []
+
+    for obj in req.dsl.get("objects", []):
+        blob_name = obj.get("blob", "")
+        if blob_name not in runtime.template_lib:
+            continue
+        tpl = runtime.template_lib[blob_name]
+        pos = torch.tensor(obj.get("position", [0, 0, 0]), dtype=torch.float32)
+        col = torch.tensor(obj.get("color", [0.7, 0.7, 0.7]), dtype=torch.float32).clamp(0, 1)
+        scl = float(obj.get("scale", 1.0))
+
+        means = tpl.means * scl + pos.unsqueeze(0)
+        sc_log = tpl.scales.clone() + torch.log(torch.tensor(max(scl, 1e-3)))
+        all_means.append(means)
+        all_scales_log.append(sc_log)
+        all_opacities.append(tpl.opacities.clone())
+        all_colors.append(col.unsqueeze(0).expand(means.shape[0], 3).clone())
+
+    if all_means:
+        means = torch.cat(all_means, dim=0)
+        scales = torch.cat(all_scales_log, dim=0).exp()
+        opacities = torch.sigmoid(torch.cat(all_opacities, dim=0))
+        colors = torch.cat(all_colors, dim=0)
+    else:
+        means = torch.zeros(0, 3)
+        scales = torch.zeros(0, 3)
+        opacities = torch.zeros(0)
+        colors = torch.zeros(0, 3)
+
+    return JSONResponse({
+        "dsl": req.dsl,
+        "splats": {
+            "means": means.tolist(),
+            "scales": scales.tolist(),
+            "opacities": opacities.tolist(),
+            "colors": colors.tolist(),
+        },
+        "n_splats": int(means.shape[0]),
+        "n_objects": len(req.dsl.get("objects", [])),
+    })
+
+
+@app.post("/validate-dsl")
+def validate_dsl_endpoint(req: RenderDSLRequest):
+    """Validate DSL without rendering."""
+    valid, errors = validate(req.dsl)
+    return JSONResponse({"valid": valid, "errors": errors})
 
 
 def main():
