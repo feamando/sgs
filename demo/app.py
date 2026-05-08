@@ -39,6 +39,12 @@ def parse_args():
     p = argparse.ArgumentParser(description="Raum demo server")
     p.add_argument("--checkpoint", required=True, help="Path to routing-bridge best.pt")
     p.add_argument("--glove", required=True, help="Path to glove.6B.300d.txt")
+    p.add_argument("--encoder-checkpoint", type=str, default=None,
+                   help="Path to Planck checkpoint (enables 1.1 mode)")
+    p.add_argument("--tokenizer", type=str, default=None,
+                   help="SentencePiece tokenizer model (auto-detected)")
+    p.add_argument("--blobs-dir", type=str, default=None,
+                   help="Path to blob library for template names")
     p.add_argument("--d-s", type=int, default=64)
     p.add_argument("--d-model", type=int, default=128)
     p.add_argument("--n-layers", type=int, default=2)
@@ -59,52 +65,85 @@ def parse_args():
 class RaumRuntime:
     """Loads vocab + bridge + template library once, generates scenes."""
 
-    def __init__(
-        self,
-        checkpoint: str,
-        glove_path: str,
-        d_s: int,
-        d_model: int,
-        n_layers: int,
-        n_heads: int,
-        K: int,
-        template_points: int,
-        template_confidence: float,
-        vocab_size: int,
-        max_tokens: int,
-    ):
-        self.max_tokens = max_tokens
-        self.template_confidence = template_confidence
+    def __init__(self, args):
+        self.max_tokens = args.max_tokens
+        self.template_confidence = args.template_confidence
+        self.use_encoder = args.encoder_checkpoint is not None
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         print("[raum] loading GloVe ...")
-        word2idx, vectors, freqs, words = load_glove(glove_path, vocab_size=vocab_size)
+        word2idx, vectors, freqs, words = load_glove(args.glove, vocab_size=args.vocab_size)
         self.word2idx = word2idx
-        d_f = vectors.shape[1]
 
-        print("[raum] building SGS vocab ...")
-        self.vocab = SemanticGaussianVocab(len(words), d_s=d_s, d_f=d_f)
-        self.vocab.init_from_glove(vectors, freqs)
-        self.vocab.eval()
+        # Load bridge checkpoint and infer architecture
+        print(f"[raum] loading bridge checkpoint: {args.checkpoint}")
+        state = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+        d_model = state["pos_emb"].shape[1]
+        n_blobs = state["template_head.weight"].shape[0]
+        d_in = state["input_proj.weight"].shape[1]
+        n_layers = 0
+        while f"encoder.layers.{n_layers}.self_attn.in_proj_weight" in state:
+            n_layers += 1
+        for nh in [8, 6, 4, 2, 1]:
+            if d_model % nh == 0:
+                n_heads = nh
+                break
+        has_relation = "relation_head.0.weight" in state
+        print(f"[raum] inferred: d_model={d_model}, n_layers={n_layers}, "
+              f"n_heads={n_heads}, n_blobs={n_blobs}, relation_head={has_relation}")
 
-        print(f"[raum] loading bridge checkpoint: {checkpoint}")
+        if self.use_encoder:
+            from src.raum.encoder import FrozenPlanckEncoder, build_sp_word2idx
+            print(f"[raum] loading encoder: {args.encoder_checkpoint}")
+            self.encoder = FrozenPlanckEncoder(args.encoder_checkpoint, device=self.device)
+            self.encoder.to(self.device).eval()
+            d_s = self.encoder.d_s
+            d_f = self.encoder.d_f
+
+            tokenizer_path = args.tokenizer
+            if tokenizer_path is None:
+                for c in [Path("data/wikipedia/tokenizer.model"),
+                          Path("data/tinystories/tokenizer.model")]:
+                    if c.exists():
+                        tokenizer_path = str(c)
+                        break
+            if tokenizer_path and Path(tokenizer_path).exists():
+                self.word2idx = build_sp_word2idx(tokenizer_path)
+                print(f"[raum] SP tokenizer: {tokenizer_path}")
+
+            self.vocab = None
+        else:
+            d_f = vectors.shape[1]
+            d_s = args.d_s
+            print("[raum] building SGS vocab ...")
+            self.vocab = SemanticGaussianVocab(len(words), d_s=d_s, d_f=d_f)
+            self.vocab.init_from_glove(vectors, freqs)
+            self.vocab.to(self.device).eval()
+            self.encoder = None
+
         self.model = RaumBridge(
             d_s=d_s, d_f=d_f,
             d_model=d_model, n_layers=n_layers, n_heads=n_heads,
-            K=K,
+            n_blobs=n_blobs,
+            with_relation_head=has_relation,
+            K=args.K,
         )
-        state = torch.load(checkpoint, map_location="cpu", weights_only=True)
         self.model.load_state_dict(state)
-        self.model.eval()
-
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.vocab.to(self.device)
-        self.model.to(self.device)
+        self.model.to(self.device).eval()
 
         print("[raum] building template library ...")
-        self.template_lib = build_template_library(n_gaussians=template_points)
-        self.template_names = list(OBJECTS.keys())  # sphere, cube, cylinder, ...
+        self.template_lib = build_template_library(n_gaussians=args.template_points)
 
-        print(f"[raum] ready on {self.device}")
+        if args.blobs_dir and Path(args.blobs_dir).exists():
+            import json
+            with open(Path(args.blobs_dir) / "index.json") as f:
+                self.template_names = json.load(f)
+            print(f"[raum] blob library: {len(self.template_names)} classes")
+        else:
+            self.template_names = list(OBJECTS.keys())
+
+        print(f"[raum] ready on {self.device} | {self.model.count_parameters():,} params")
 
     def tokenize(self, prompt: str) -> tuple[list[str], torch.Tensor, torch.Tensor]:
         words = [w.strip(".,!?;:").lower() for w in prompt.split()]
@@ -124,7 +163,10 @@ class RaumRuntime:
     def generate(self, prompt: str) -> dict:
         words, token_ids, mask = self.tokenize(prompt)
 
-        mu_s, _, _, features = self.vocab.get_params(token_ids)
+        if self.use_encoder:
+            mu_s, features = self.encoder.encode(token_ids)
+        else:
+            mu_s, _, _, features = self.vocab.get_params(token_ids)
         out = self.model(mu_s, features, mask)
 
         # Gate object selection on the role head so non-object tokens
@@ -317,19 +359,7 @@ def validate_dsl_endpoint(req: RenderDSLRequest):
 def main():
     global runtime
     args = parse_args()
-    runtime = RaumRuntime(
-        checkpoint=args.checkpoint,
-        glove_path=args.glove,
-        d_s=args.d_s,
-        d_model=args.d_model,
-        n_layers=args.n_layers,
-        n_heads=args.n_heads,
-        K=args.K,
-        template_points=args.template_points,
-        template_confidence=args.template_confidence,
-        vocab_size=args.vocab_size,
-        max_tokens=args.max_tokens,
-    )
+    runtime = RaumRuntime(args)
     import uvicorn
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
