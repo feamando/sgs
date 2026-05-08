@@ -41,16 +41,20 @@ def _run(model, vocab, words: list[str]) -> dict:
 @torch.no_grad()
 def probe_sentence(
     model,
-    vocab,
+    vocab_or_fn,
     word2idx: dict[str, int],
     sentence: str,
+    use_encoder: bool = False,
 ) -> dict:
     """Run one sentence and return per-token head outputs + argmax info."""
     device = next(model.parameters()).device
     words = sentence.lower().split()
     token_ids, mask = _tokenize(words, word2idx, device)
 
-    mu_s, _, _, features = vocab.get_params(token_ids)
+    if use_encoder:
+        mu_s, features = vocab_or_fn(token_ids)
+    else:
+        mu_s, _, _, features = vocab_or_fn.get_params(token_ids)
     out = model(mu_s, features, mask)
 
     positions = out["positions"][0].cpu().numpy()
@@ -119,9 +123,10 @@ def probe_interpolation(
 @torch.no_grad()
 def evaluate_routing(
     model,
-    vocab,
+    vocab_or_fn,
     loader,
     device,
+    use_encoder: bool = False,
 ) -> dict:
     """Comp-gen metrics on a labelled loader.
 
@@ -140,7 +145,10 @@ def evaluate_routing(
     for batch in loader:
         token_ids = batch["token_ids"].to(device)
         mask = batch["mask"].to(device)
-        mu_s, _, _, features = vocab.get_params(token_ids)
+        if use_encoder:
+            mu_s, features = vocab_or_fn(token_ids)
+        else:
+            mu_s, _, _, features = vocab_or_fn.get_params(token_ids)
         out = model(mu_s, features, mask)
         _, metrics = compute_routing_loss(out, batch)
         for k, v in metrics.items():
