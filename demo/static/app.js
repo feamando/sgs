@@ -7,6 +7,19 @@ const meta = document.getElementById("meta");
 const objectsPanel = document.getElementById("objects");
 const warningsPanel = document.getElementById("warnings");
 const markersToggle = document.getElementById("markers-toggle");
+const dslEditor = document.getElementById("dsl-editor");
+const dslErrors = document.getElementById("dsl-errors");
+const dslRenderBtn = document.getElementById("dsl-render");
+
+// Tab switching
+document.querySelectorAll(".side-tabs .tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".side-tabs .tab").forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById(tab.dataset.tab).classList.add("active");
+  });
+});
 
 async function checkHealth() {
   try {
@@ -77,6 +90,10 @@ async function submit(prompt) {
     setMarkers(data.objects);
     renderObjectsPanel(data);
     renderWarnings(data);
+    if (data.dsl && dslEditor) {
+      dslEditor.value = JSON.stringify(data.dsl, null, 2);
+      dslErrors.textContent = "";
+    }
     const unresolved = data.n_unresolved ? ` | ${data.n_unresolved} unresolved` : "";
     meta.textContent =
       `${data.n_objects} objects | ${data.n_splats} splats${unresolved} | ` +
@@ -98,6 +115,49 @@ form.addEventListener("submit", (e) => {
 if (markersToggle) {
   markersToggle.addEventListener("change", () => {
     setMarkersVisible(markersToggle.checked);
+  });
+}
+
+// DSL edit + re-render
+if (dslRenderBtn) {
+  dslRenderBtn.addEventListener("click", async () => {
+    if (!dslEditor) return;
+    let dsl;
+    try {
+      dsl = JSON.parse(dslEditor.value);
+    } catch (e) {
+      dslErrors.textContent = `JSON error: ${e.message}`;
+      return;
+    }
+    dslErrors.textContent = "";
+    dslRenderBtn.disabled = true;
+    meta.textContent = "re-rendering from DSL...";
+    try {
+      const r = await fetch("/render-dsl", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ dsl }),
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({ detail: r.statusText }));
+        const detail = err.detail;
+        if (typeof detail === "object" && detail.errors) {
+          dslErrors.textContent = detail.errors.join("; ");
+        } else {
+          dslErrors.textContent = detail || r.statusText;
+        }
+        meta.textContent = "DSL validation failed";
+        return;
+      }
+      const data = await r.json();
+      setCloud(data.splats);
+      meta.textContent = `${data.n_objects} objects | ${data.n_splats} splats (from DSL edit)`;
+    } catch (e) {
+      dslErrors.textContent = e.message;
+      meta.textContent = "error";
+    } finally {
+      dslRenderBtn.disabled = false;
+    }
   });
 }
 

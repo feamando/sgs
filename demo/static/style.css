@@ -147,6 +147,33 @@ main {
   font-size: 12px;
   color: var(--ink);
 }
+/* ── Side panel tabs ───────────────────────────────── */
+.side-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.side-tabs .tab {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.side-tabs .tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 .side-title {
   font-size: 11px;
   color: var(--ink-dim);
@@ -281,6 +308,44 @@ footer {
   color: var(--ink-dim);
   cursor: wait;
 }
+
+/* ── DSL editor ───────────────────────────────────── */
+#dsl-editor {
+  width: 100%;
+  height: 260px;
+  padding: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: #0d0d14;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  resize: vertical;
+  outline: none;
+}
+#dsl-editor:focus { border-color: var(--accent); }
+.dsl-errors {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--accent-coral);
+  min-height: 16px;
+}
+.dsl-btn {
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a0a0f;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+.dsl-btn:hover { filter: brightness(1.1); }
+.dsl-btn:disabled { background: #3a3a48; color: var(--ink-dim); cursor: wait; }
 
 .hint {
   max-width: 860px;

@@ -35,13 +35,23 @@
     </aside>
     <div id="viewer"></div>
     <aside id="side">
-      <div class="side-title">Parsed objects</div>
-      <div id="objects"></div>
-      <div id="warnings" class="warnings"></div>
-      <label class="side-toggle">
-        <input id="markers-toggle" type="checkbox" checked />
-        show object labels
-      </label>
+      <div class="side-tabs">
+        <button class="tab active" data-tab="objects-tab">Objects</button>
+        <button class="tab" data-tab="dsl-tab">Scene Graph</button>
+      </div>
+      <div id="objects-tab" class="tab-content active">
+        <div id="objects"></div>
+        <div id="warnings" class="warnings"></div>
+        <label class="side-toggle">
+          <input id="markers-toggle" type="checkbox" checked />
+          show object labels
+        </label>
+      </div>
+      <div id="dsl-tab" class="tab-content">
+        <textarea id="dsl-editor" spellcheck="false" placeholder="DSL will appear here after rendering..."></textarea>
+        <div id="dsl-errors" class="dsl-errors"></div>
+        <button id="dsl-render" class="dsl-btn">Re-render</button>
+      </div>
     </aside>
   </main>
 
