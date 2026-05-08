@@ -1,11 +1,13 @@
 """
 Objaverse → Gaussian blob library for Raum 1.1.
 
-No registration required. Downloads only the specific objects needed
-(~50-250 MB for 49 classes, not the full 8.9 TB dataset).
+No registration required. Downloads only the specific objects needed.
+By default selects up to 200 categories from Objaverse's LVIS labels,
+ranked by annotation count (more annotations = higher quality meshes).
 
 Usage:
     python scripts/build_blobs_objaverse.py --n-points 1000 --out-dir data/blobs
+    python scripts/build_blobs_objaverse.py --max-classes 100 --out-dir data/blobs
 
 Outputs:
     data/blobs/<class_name>.pt   — {means, scales_log, opacities, colors}
@@ -14,6 +16,7 @@ Outputs:
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -23,70 +26,49 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
-# LVIS category name → clean GloVe-compatible name for the blob library.
-# LVIS uses compound names like "car_(automobile)"; we map to single words.
-LVIS_TO_BLOB_NAME = {
-    "airplane": "airplane",
-    "backpack": "backpack",
-    "banana": "banana",
-    "basket": "basket",
-    "bathtub": "bathtub",
-    "bed": "bed",
-    "bench": "bench",
-    "bicycle": "bicycle",
-    "boat": "boat",
-    "book": "book",
-    "bookshelf": "bookshelf",
-    "bottle": "bottle",
-    "bowl": "bowl",
-    "bus_(vehicle)": "bus",
-    "cabinet": "cabinet",
-    "cake": "cake",
-    "camera": "camera",
-    "candle": "candle",
-    "car_(automobile)": "car",
-    "chair": "chair",
-    "clock": "clock",
-    "cup": "cup",
-    "desk": "desk",
-    "drum_(musical_instrument)": "drum",
-    "guitar": "guitar",
-    "hamburger": "hamburger",
-    "hat": "hat",
-    "helmet": "helmet",
-    "jar": "jar",
-    "keyboard_(computer)": "keyboard",
-    "knife": "knife",
-    "lamp": "lamp",
-    "laptop_computer": "laptop",
-    "microphone": "microphone",
-    "microwave_oven": "microwave",
-    "motorcycle": "motorcycle",
-    "mug": "mug",
-    "piano": "piano",
-    "pillow": "pillow",
-    "plate": "plate",
-    "pot": "pot",
-    "refrigerator": "refrigerator",
-    "skateboard": "skateboard",
-    "sofa": "sofa",
-    "speaker_(stero_equipment)": "speaker",
-    "stove": "stove",
-    "table": "table",
-    "telephone": "telephone",
-    "television_set": "monitor",
-    "toilet": "toilet",
-    "tower": "tower",
-    "train_(railroad_vehicle)": "train",
-    "truck": "truck",
-    "vase": "vase",
+# Categories to skip: too thin for Gaussian fit, ambiguous words, or
+# non-objects (materials, abstract concepts).
+_SKIP_PATTERNS = {
+    "rifle", "pistol", "sword", "gun", "arrow",  # too thin
+    "person", "man", "woman", "boy", "girl", "baby",  # people
+    "hand", "face", "head", "leg", "foot",  # body parts
+    "water", "sky", "grass", "snow", "sand",  # materials/scenes
 }
+
+
+def _lvis_name_to_blob_name(lvis_name: str) -> str | None:
+    """Convert LVIS category name to a clean single-word blob name."""
+    # Strip parenthetical qualifiers: "car_(automobile)" → "car"
+    clean = re.sub(r"_?\(.*?\)", "", lvis_name).strip("_")
+    # Replace underscores with nothing for single-word check
+    parts = clean.split("_")
+
+    # Use first word if compound (e.g. "laptop_computer" → "laptop")
+    # Unless first word is too generic
+    if len(parts) == 1:
+        name = parts[0]
+    elif parts[0] in ("electric", "musical", "computer", "baby"):
+        name = parts[1] if len(parts) > 1 else parts[0]
+    else:
+        name = parts[0]
+
+    # Skip if in blocklist
+    if name in _SKIP_PATTERNS:
+        return None
+
+    # Must be at least 3 chars and look like a noun
+    if len(name) < 3:
+        return None
+
+    return name
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Build blob library from Objaverse")
+    p.add_argument("--max-classes", type=int, default=200,
+                   help="Max categories to include (ranked by annotation count)")
     p.add_argument("--categories", type=str, default=None,
-                   help="Comma-separated blob names to build (default: all)")
+                   help="Comma-separated blob names (overrides --max-classes)")
     p.add_argument("--n-points", type=int, default=1000,
                    help="Gaussians per blob (surface samples)")
     p.add_argument("--out-dir", type=str, default="data/blobs")
@@ -170,14 +152,7 @@ def main():
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Filter categories
-    if args.categories:
-        target_names = [c.strip() for c in args.categories.split(",")]
-        lvis_to_use = {k: v for k, v in LVIS_TO_BLOB_NAME.items() if v in target_names}
-    else:
-        lvis_to_use = LVIS_TO_BLOB_NAME
-
-    print(f"Target: {len(lvis_to_use)} categories")
+    print(f"Max classes: {args.max_classes}")
     print(f"Points per blob: {args.n_points}")
     print(f"Output: {out_dir}")
 
@@ -185,6 +160,39 @@ def main():
     print("\n=== Loading LVIS annotations ===")
     lvis_annotations = objaverse.load_lvis_annotations()
     print(f"  LVIS categories available: {len(lvis_annotations)}")
+
+    # Build category selection: rank by annotation count, deduplicate names
+    if args.categories:
+        # Explicit list: find matching LVIS keys
+        target_names = set(c.strip() for c in args.categories.split(","))
+        lvis_to_use = {}
+        for lvis_name in lvis_annotations:
+            blob_name = _lvis_name_to_blob_name(lvis_name)
+            if blob_name and blob_name in target_names:
+                lvis_to_use[lvis_name] = blob_name
+    else:
+        # Auto-select top N by annotation count
+        ranked = sorted(
+            lvis_annotations.items(),
+            key=lambda kv: len(kv[1]),
+            reverse=True,
+        )
+        lvis_to_use = {}
+        seen_names = set()
+        for lvis_name, uids in ranked:
+            if len(lvis_to_use) >= args.max_classes:
+                break
+            blob_name = _lvis_name_to_blob_name(lvis_name)
+            if blob_name is None:
+                continue
+            if blob_name in seen_names:
+                continue
+            if len(uids) < 3:
+                continue  # too few examples to pick a good canonical
+            seen_names.add(blob_name)
+            lvis_to_use[lvis_name] = blob_name
+
+    print(f"  Selected: {len(lvis_to_use)} categories")
 
     # Load full annotations for canonical selection
     print("\n=== Loading object annotations ===")
@@ -195,7 +203,7 @@ def main():
     uid_to_category: dict[str, str] = {}
     missing = []
 
-    for lvis_name, blob_name in sorted(lvis_to_use.items()):
+    for lvis_name, blob_name in sorted(lvis_to_use.items(), key=lambda kv: kv[1]):
         if lvis_name not in lvis_annotations or len(lvis_annotations[lvis_name]) == 0:
             print(f"  SKIP {blob_name}: no LVIS annotations for '{lvis_name}'")
             missing.append(blob_name)
