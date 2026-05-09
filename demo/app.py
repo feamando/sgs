@@ -32,6 +32,7 @@ from src.gaussian import SemanticGaussianVocab
 from src.raum.bridge import RaumBridge, assemble_scene
 from src.raum.templates import build_template_library
 from src.raum.vocab import OBJECTS, ROLE_OBJECT
+from src.raum.oov import OOVPolicy
 from src.raum.dsl import bridge_output_to_dsl, dsl_to_json, json_to_dsl, validate
 
 
@@ -153,6 +154,16 @@ class RaumRuntime:
             self.template_lib = build_template_library(n_gaussians=args.template_points)
             self.template_names = list(OBJECTS.keys())
 
+        # OOV policy: cosine-NN fallback for words not in blob library
+        if args.blobs_dir and Path(args.blobs_dir).exists():
+            self.oov_policy = OOVPolicy(
+                self.template_names, vectors, word2idx,
+                threshold=args.template_confidence,
+            )
+            print(f"[raum] OOV policy: cosine threshold={args.template_confidence}")
+        else:
+            self.oov_policy = None
+
         print(f"[raum] ready on {self.device} | {self.model.count_parameters():,} params")
 
     def tokenize(self, prompt: str) -> tuple[list[str], torch.Tensor, torch.Tensor]:
@@ -190,6 +201,39 @@ class RaumRuntime:
             object_role_id=ROLE_OBJECT,
             template_confidence_threshold=self.template_confidence,
         )
+
+        # OOV resolution: try NN fallback for unresolved objects
+        if self.oov_policy and unresolved:
+            still_unresolved = []
+            for u in unresolved:
+                word = words[u.word_index] if u.word_index < len(words) else ""
+                nn_id, cos = self.oov_policy.find_nearest(word)
+                if nn_id is not None and cos >= self.oov_policy.threshold:
+                    nn_name = self.template_names[nn_id]
+                    if nn_name in self.template_lib:
+                        from src.raum.bridge import PredictedObject
+                        tpl = self.template_lib[nn_name]
+                        pos = torch.tensor(u.position, dtype=torch.float32)
+                        scl = 1.0
+                        col = torch.tensor([0.7, 0.7, 0.7], dtype=torch.float32)
+                        obj_means = tpl.means * scl + pos.unsqueeze(0)
+                        sc_log = tpl.scales.clone()
+                        splats["means"] = torch.cat([splats["means"], obj_means])
+                        splats["scales_log"] = torch.cat([splats["scales_log"], sc_log])
+                        splats["opacities"] = torch.cat([splats["opacities"], tpl.opacities.clone()])
+                        splats["colors"] = torch.cat([splats["colors"], col.unsqueeze(0).expand(obj_means.shape[0], 3).clone()])
+                        objects.append(PredictedObject(
+                            word_index=u.word_index,
+                            template_name=f"{nn_name} (via '{word}')",
+                            template_id=nn_id,
+                            template_confidence=cos,
+                            position=u.position,
+                            color=[0.7, 0.7, 0.7],
+                            scale=scl,
+                        ))
+                        continue
+                still_unresolved.append(u)
+            unresolved = still_unresolved
 
         # Convert log-scale → linear scale for the viewer.
         if splats["means"].numel() > 0:
