@@ -55,12 +55,15 @@ class FrozenPlanckEncoder(nn.Module):
         return self.forward(token_ids)
 
 
-def build_sp_word2idx(tokenizer_path: str | Path) -> dict[str, int]:
+def build_sp_word2idx(
+    tokenizer_path: str | Path,
+    extra_words: list[str] | None = None,
+) -> dict[str, int]:
     """
     Build a word2idx from a SentencePiece model for Raum scene words.
 
-    Each scene word (sphere, red, above, etc.) encodes to a single SP
-    token. Returns {word: sp_token_id} for use in RaumDataset.
+    Includes ALL_SCENE_WORDS (colors, relations, shapes) plus any
+    extra words (e.g. blob library names). Returns {word: sp_token_id}.
     """
     import sentencepiece as spm
     from .vocab import ALL_SCENE_WORDS
@@ -68,14 +71,17 @@ def build_sp_word2idx(tokenizer_path: str | Path) -> dict[str, int]:
     sp = spm.SentencePieceProcessor(model_file=str(tokenizer_path))
     word2idx: dict[str, int] = {}
 
-    for word in ALL_SCENE_WORDS:
+    all_words = set(ALL_SCENE_WORDS)
+    if extra_words:
+        for w in extra_words:
+            all_words.update(w.split())
+
+    for word in all_words:
         ids = sp.encode(word, out_type=int)
         if len(ids) == 1:
             word2idx[word] = ids[0]
         else:
-            # Multi-token: use first subtoken (rare for common words)
             word2idx[word] = ids[0]
 
-    # Fallback for unk
     word2idx["<unk>"] = sp.unk_id()
     return word2idx

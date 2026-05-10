@@ -109,10 +109,7 @@ class RaumRuntime:
                     if c.exists():
                         tokenizer_path = str(c)
                         break
-            if tokenizer_path and Path(tokenizer_path).exists():
-                self.word2idx = build_sp_word2idx(tokenizer_path)
-                print(f"[raum] SP tokenizer: {tokenizer_path}")
-
+            self._sp_tokenizer_path = tokenizer_path
             self.vocab = None
         else:
             d_f = vectors.shape[1]
@@ -153,6 +150,14 @@ class RaumRuntime:
         else:
             self.template_lib = build_template_library(n_gaussians=args.template_points)
             self.template_names = list(OBJECTS.keys())
+
+        # Build SP word2idx now that we know the blob names
+        if self.use_encoder and hasattr(self, '_sp_tokenizer_path') and self._sp_tokenizer_path:
+            self.word2idx = build_sp_word2idx(
+                self._sp_tokenizer_path,
+                extra_words=self.template_names,
+            )
+            print(f"[raum] SP tokenizer: {self._sp_tokenizer_path} ({len(self.word2idx)} words)")
 
         # OOV policy: cosine-NN fallback for words not in blob library
         if args.blobs_dir and Path(args.blobs_dir).exists():

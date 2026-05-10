@@ -186,9 +186,10 @@ def main():
                     break
         if tokenizer_path and Path(tokenizer_path).exists():
             print(f"  Tokenizer: {tokenizer_path}")
-            word2idx = build_sp_word2idx(tokenizer_path)
-            print(f"  SP word2idx: {len(word2idx)} scene words mapped")
+            # Defer full word2idx build until after blob library is loaded
+            _sp_tokenizer_path = tokenizer_path
         else:
+            _sp_tokenizer_path = None
             print(f"  WARN: No SP tokenizer found, using GloVe word2idx.")
             print(f"  Token IDs may not match encoder embeddings!")
 
@@ -218,7 +219,14 @@ def main():
     else:
         n_blobs = N_OBJECTS
         blob_names = None
-        scene_objects = None  # falls back to OBJECTS (6 primitives)
+        scene_objects = None
+
+    # Build SP word2idx now that we know the blob names
+    if use_encoder and '_sp_tokenizer_path' in dir() and _sp_tokenizer_path:
+        from src.raum.encoder import build_sp_word2idx
+        extra = list(scene_objects.keys()) if scene_objects else None
+        word2idx = build_sp_word2idx(_sp_tokenizer_path, extra_words=extra)
+        print(f"  SP word2idx: {len(word2idx)} words mapped (incl. blob names)")
 
     # ── Data ──
     print("\n=== Generating data ===")

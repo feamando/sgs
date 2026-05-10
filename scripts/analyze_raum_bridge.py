@@ -82,6 +82,8 @@ def parse_args():
                    help="Planck checkpoint (1.1 mode)")
     p.add_argument("--tokenizer", type=str, default=None,
                    help="SP tokenizer model (auto-detected)")
+    p.add_argument("--blobs-dir", type=str, default=None,
+                   help="Path to blob library (for word2idx + scene objects)")
     p.add_argument("--n-objects-max", type=int, default=2)
     p.add_argument("--d-s", type=int, default=64)
     p.add_argument("--K", type=int, default=32)
@@ -145,7 +147,14 @@ def main():
                     tokenizer_path = str(c)
                     break
         if tokenizer_path and Path(tokenizer_path).exists():
-            word2idx = build_sp_word2idx(tokenizer_path)
+            extra = None
+            if args.blobs_dir:
+                import json as _json
+                _idx_path = Path(args.blobs_dir) / "index.json"
+                if _idx_path.exists():
+                    with open(_idx_path) as _f:
+                        extra = _json.load(_f)
+            word2idx = build_sp_word2idx(tokenizer_path, extra_words=extra)
             print(f"Using SP tokenizer: {tokenizer_path} ({len(word2idx)} words)")
 
         vocab = None
