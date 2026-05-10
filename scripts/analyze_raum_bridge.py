@@ -173,12 +173,14 @@ def main():
             return mu_s, features
 
     # ── Create model matching checkpoint ──
+    has_relation = "relation_head.0.weight" in state
     model = RaumBridge(
         d_s=d_s, d_f=d_f,
         d_model=config["d_model"],
         n_layers=config["n_layers"],
         n_heads=config["n_heads"],
         n_blobs=config["n_blobs"],
+        with_relation_head=has_relation,
         K=args.K,
     ).to(device)
     model.load_state_dict(state)
