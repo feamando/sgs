@@ -2,16 +2,27 @@
 
 **A Formally Verified Theorem Connecting Transformer Attention to Volume Rendering**
 
-Nikita Gorshkov — April 2026
-Proof: Machine-verified in Lean 4 / Mathlib by Aristotle (harmonic.fun)
+Nikita Gorshkov
+
+Radiance Labs, 2026
+
+Machine-verified in Lean 4 / Mathlib (zero `sorry`, standard axioms only)
 
 ---
 
-## The Two Schemes
+## Abstract
+
+We establish a strict inclusion between two fundamental weighted aggregation schemes used in modern AI and computer graphics. Specifically, we prove that (1) the set of weight vectors achievable by softmax attention is a proper subset of those achievable by alpha-compositing, and (2) provide a constructive mapping from any softmax weight vector to equivalent alpha-compositing parameters via a telescoping tail-sum formula. The converse fails because alpha-compositing can produce exact-zero weights (hard sparsity) and sub-unity weight sums (residual transmittance), both structurally impossible under softmax. Both theorems are machine-verified in Lean 4 with Mathlib, requiring zero unproven assertions and depending only on standard axioms. This result formally grounds the use of volume-rendering equations as drop-in replacements for attention in neural architectures, confirming that no expressiveness is lost and strict additional capability is gained.
+
+---
+
+## 1. Introduction
+
+### 1.1 The Two Schemes
 
 Modern AI and computer graphics each use a weighted aggregation scheme to combine information from multiple sources into a single output. Despite being developed independently for completely different purposes, these two schemes turn out to be mathematically related — in a way that, to our knowledge, has not been formally established before.
 
-### Scheme A: Softmax Attention (Transformers)
+#### Scheme A: Softmax Attention (Transformers)
 
 Every large language model (GPT, Claude, Llama, etc.) uses the **transformer architecture** (Vaswani et al., 2017). At its core, a transformer computes outputs as weighted sums:
 
@@ -30,7 +41,7 @@ wᵢ = exp(sᵢ) / Σⱼ exp(sⱼ)
 - Always sum to exactly 1: Σᵢ wᵢ = 1
 - Every element contributes at least something (no element can be completely ignored)
 
-### Scheme B: Alpha-Compositing (Volume Rendering)
+#### Scheme B: Alpha-Compositing (Volume Rendering)
 
 3D Gaussian Splatting (Kerbl et al., 2023) and earlier volume rendering techniques (Porter & Duff, 1984; Max, 1995) compute outputs as:
 
@@ -54,7 +65,7 @@ Each aᵢ ∈ [0, 1] is the opacity of element i. The transmittance Tᵢ represe
 
 ---
 
-## The Question
+### 1.2 The Question
 
 Both schemes produce a weighted sum of values. Both are differentiable and used in gradient-based optimization. But what is their mathematical relationship?
 
@@ -65,7 +76,13 @@ Specifically:
 
 ---
 
-## The Result
+### 1.3 Related Work
+
+Linear attention approximations (Katharopoulos et al., 2020) have explored connections between attention and kernel methods. Ramsauer et al. (2021) related attention to Hopfield networks. To our knowledge, no prior work has formally proven the strict set-theoretic inclusion between softmax weight vectors and alpha-compositing weight vectors, nor provided the constructive telescoping mapping.
+
+---
+
+## 2. Main Results
 
 ### Theorem 1: Alpha-compositing is NOT a special case of softmax
 
@@ -81,7 +98,7 @@ But softmax weights are always strictly positive: wᵢ = exp(sᵢ)/Σⱼexp(sⱼ
 
 Therefore, the weight vector (0, 1) is achievable by alpha-compositing but not by softmax. ∎
 
-### Theorem 2: Softmax IS a special case of alpha-compositing
+### Theorem 2: Softmax IS a special case of alpha-compositing (constructive)
 
 **Statement:** For any softmax weight vector w (from any scores s), there exist alpha-compositing parameters a such that the alpha-compositing weights exactly equal w.
 
@@ -119,7 +136,7 @@ wᵢ^{alpha} = aᵢ · Tᵢ = (wᵢ/Rᵢ) · Rᵢ = wᵢ ✓
 
 The construction exactly recovers the original softmax weights. ∎
 
-### Corollary: Strict Inclusion
+### Corollary (Strict Inclusion)
 
 ```
 {softmax weight vectors} ⊂ {alpha-compositing weight vectors}    (strict)
@@ -131,19 +148,21 @@ The set of weight vectors achievable by alpha-compositing strictly contains thos
 
 ---
 
-## Why This Matters
+---
 
-### For AI Architecture Design
+## 3. Discussion
+
+### 3.1 Implications for AI Architecture Design
 
 This theorem establishes that the rendering equation from computer graphics is **provably at least as expressive** as the attention mechanism in transformers for computing weighted aggregations. Any computation a transformer performs through attention weights can be exactly replicated by alpha-compositing — plus alpha-compositing offers additional capabilities (exact sparsity, sub-unity sums) that softmax structurally cannot provide.
 
 This is relevant to the **Semantic Gaussian Splatting (SGS)** proposal, which replaces transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting. The theorem proves this replacement does not lose expressiveness.
 
-### For Computer Graphics
+### 3.2 Implications for Computer Graphics
 
 The reverse direction is also interesting: the standard alpha-compositing pipeline used in rendering is *strictly more powerful* than softmax attention as a weighted aggregation scheme. This provides theoretical backing for the empirical success of volume rendering and splatting-based methods over attention-based alternatives in 3D reconstruction tasks.
 
-### The Extra Expressiveness
+### 3.3 The Extra Expressiveness
 
 The additional capabilities of alpha-compositing have concrete interpretations:
 
@@ -153,11 +172,25 @@ The additional capabilities of alpha-compositing have concrete interpretations:
 
 ---
 
-## The Formal Proof (Lean 4)
+---
 
-The following is the complete, machine-verified proof in Lean 4 with Mathlib. It compiles with zero `sorry` (unproven assertions) and depends only on standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
+## 4. Conclusion
 
-Verified by Aristotle (harmonic.fun) — Lean 4 v4.28.0, Mathlib v4.28.0.
+We have proven that the set of weight vectors achievable by softmax attention is a strict subset of those achievable by alpha-compositing. The proof is constructive: given any softmax weights, the telescoping tail-sum formula $a_i = w_i / \sum_{j \geq i} w_j$ produces alpha-compositing parameters that exactly recover those weights. The result is machine-verified in Lean 4 with zero unproven assertions. This formally grounds architectures that replace attention with volume-rendering equations, confirming no expressiveness is lost.
+
+---
+
+## References
+
+1. Vaswani, A., Shazeer, N., Parmar, N., et al. (2017). "Attention Is All You Need." NeurIPS 2017.
+2. Kerbl, B., Kopanas, G., Leimkuhler, T., Drettakis, G. (2023). "3D Gaussian Splatting for Real-Time Radiance Field Rendering." ACM TOG (SIGGRAPH) 42(4).
+3. Porter, T. and Duff, T. (1984). "Compositing Digital Images." ACM SIGGRAPH Computer Graphics 18(3), 253-259.
+4. Max, N. (1995). "Optical Models for Direct Volume Rendering." IEEE TVCG 1(2), 99-108.
+5. Mildenhall, B., Srinivasan, P.P., Tancik, M., et al. (2020). "NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis." ECCV 2020.
+6. Katharopoulos, A., Vyas, A., Pappas, N., Fleuret, F. (2020). "Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention." ICML 2020.
+7. Ramsauer, H., Schafl, B., Lehner, J., et al. (2021). "Hopfield Networks is All You Need." ICLR 2021.
+8. de Moura, L. and Ullrich, S. (2021). "The Lean 4 Theorem Prover and Programming Language." CADE 2021.
+9. Gorshkov, N. (2025). "Semantic Gaussian Splatting." Radiance Labs. github.com/feamando/sgs
 
 ```lean
 import Mathlib
@@ -172,6 +205,12 @@ noncomputable section
 We investigate the relationship between two weighted aggregation schemes:
 - **Scheme A (Softmax)**: weights `w_i = exp(s_i) / Σ_j exp(s_j)`
 - **Scheme B (Alpha Compositing)**: weights `w_i = a_i * Π_{j<i} (1 - a_j)`
+
+---
+
+## Appendix A: Machine-Verified Lean 4 Source
+
+The following is the complete proof. It compiles with zero `sorry` (unproven assertions) and depends only on standard axioms (`propext`, `Classical.choice`, `Quot.sound`). Verified by Aristotle (harmonic.fun), Lean 4 v4.28.0, Mathlib v4.28.0.
 
 ## Main results
 
@@ -313,47 +352,29 @@ end
 
 ---
 
-## Notation and Definitions Reference
+---
+
+## Appendix B: Notation Reference
 
 | Symbol | Definition | Domain |
 |---|---|---|
-| sᵢ | Relevance score for element i | ℝ (any real number) |
-| wᵢ (softmax) | exp(sᵢ) / Σⱼ exp(sⱼ) | (0, 1) — strictly positive |
-| aᵢ | Opacity of element i | [0, 1] — can be zero |
-| Tᵢ | Transmittance: ∏ⱼ<ᵢ (1 - aⱼ) | [0, 1] — non-increasing |
-| wᵢ (compositing) | aᵢ · Tᵢ | [0, 1] — can be zero |
-| Rᵢ (tail sum) | Σⱼ≥ᵢ wⱼ | (0, 1] |
+| $s_i$ | Relevance score for element i | $\mathbb{R}$ |
+| $w_i$ (softmax) | $\exp(s_i) / \sum_j \exp(s_j)$ | $(0, 1)$, strictly positive |
+| $a_i$ | Opacity of element i | $[0, 1]$, can be zero |
+| $T_i$ | Transmittance: $\prod_{j<i} (1 - a_j)$ | $[0, 1]$, non-increasing |
+| $w_i$ (compositing) | $a_i \cdot T_i$ | $[0, 1]$, can be zero |
+| $R_i$ (tail sum) | $\sum_{j \geq i} w_j$ | $(0, 1]$ |
 
 ---
 
-## References
-
-1. **Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, L., Polosukhin, I.** (2017). Attention Is All You Need. *Advances in Neural Information Processing Systems (NeurIPS)*.
-
-2. **Kerbl, B., Kopanas, G., Leimkühler, T., Drettakis, G.** (2023). 3D Gaussian Splatting for Real-Time Radiance Field Rendering. *ACM Transactions on Graphics (SIGGRAPH), 42(4)*.
-
-3. **Porter, T. & Duff, T.** (1984). Compositing Digital Images. *ACM SIGGRAPH Computer Graphics, 18(3), 253-259*.
-
-4. **Max, N.** (1995). Optical Models for Direct Volume Rendering. *IEEE Transactions on Visualization and Computer Graphics, 1(2), 99-108*.
-
-5. **Mildenhall, B., Srinivasan, P.P., Tancik, M., Barron, J.T., Ramamoorthi, R., Ng, R.** (2020). NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis. *European Conference on Computer Vision (ECCV)*.
-
-6. **Ramsauer, H., Schafl, B., Lehner, J., Seidl, P., Widrich, M., et al.** (2021). Hopfield Networks is All You Need. *International Conference on Learning Representations (ICLR)*.
-
-7. **Katharopoulos, A., Vyas, A., Pappas, N., Fleuret, F.** (2020). Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention. *International Conference on Machine Learning (ICML)*.
-
-8. **de Moura, L., Ullrich, S.** (2021). The Lean 4 Theorem Prover and Programming Language. *International Conference on Automated Deduction (CADE)*.
-
----
-
-## Verification Details
+## Appendix C: Verification Details
 
 | Property | Value |
 |---|---|
-| **Prover** | Aristotle (harmonic.fun) |
-| **Language** | Lean 4 v4.28.0 |
-| **Library** | Mathlib v4.28.0 |
-| **`sorry` count** | 0 |
-| **Axioms** | propext, Classical.choice, Quot.sound (standard) |
-| **Aristotle Project ID** | efb72d79-54a2-49ed-a263-d7b9ce34dc33 |
-| **Date** | 2026-04-07 |
+| Prover | Aristotle (harmonic.fun) |
+| Language | Lean 4 v4.28.0 |
+| Library | Mathlib v4.28.0 |
+| `sorry` count | 0 |
+| Axioms | propext, Classical.choice, Quot.sound (standard) |
+| Aristotle Project ID | efb72d79-54a2-49ed-a263-d7b9ce34dc33 |
+| Date verified | 2026-04-07 |
