@@ -96,20 +96,29 @@ def encode_chunks(model, data_path, chunk_size, max_chunks, device):
 
 
 def cluster_chunks(mu, features, n_blobs):
-    """Cluster chunk embeddings into n_blobs clusters using mini-batch k-means."""
-    from sklearn.cluster import MiniBatchKMeans
-
+    """Cluster chunk embeddings into n_blobs clusters using Faiss (GPU if available)."""
     print(f"\nClustering {mu.shape[0]:,} chunks into {n_blobs:,} blobs...")
-    mu_np = mu.numpy()
+    mu_np = mu.numpy().astype(np.float32)
 
-    kmeans = MiniBatchKMeans(
-        n_clusters=n_blobs,
-        batch_size=min(10000, mu.shape[0]),
-        n_init=3,
-        max_iter=100,
-        verbose=1,
-    )
-    labels = kmeans.fit_predict(mu_np)
+    try:
+        import faiss
+        d = mu_np.shape[1]
+        kmeans = faiss.Kmeans(d, n_blobs, niter=20, verbose=True, gpu=True)
+        kmeans.train(mu_np)
+        _, labels = kmeans.index.search(mu_np, 1)
+        labels = labels.ravel()
+        print(f"  Faiss GPU k-means done.")
+    except (ImportError, RuntimeError):
+        print("  Faiss not available or GPU failed, falling back to sklearn...")
+        from sklearn.cluster import MiniBatchKMeans
+        kmeans = MiniBatchKMeans(
+            n_clusters=n_blobs,
+            batch_size=min(10000, mu.shape[0]),
+            n_init=1,
+            max_iter=100,
+            verbose=1,
+        )
+        labels = kmeans.fit_predict(mu_np)
 
     print("Computing blob parameters...")
     blob_mu = torch.zeros(n_blobs, mu.shape[1])
