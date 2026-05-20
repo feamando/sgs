@@ -31,75 +31,34 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 # ── Needle generation ──────────────────────────────────────────────────
 
-NEEDLE_TEMPLATES = [
-    ("The capital of {country} is {city}.", "{city}"),
-    ("My favorite number is {number}.", "{number}"),
-    ("The password to my vault is {code}.", "{code}"),
-    ("I was born in the year {year}.", "{year}"),
-    ("My pet's name is {name}.", "{name}"),
-    ("The secret ingredient is {ingredient}.", "{ingredient}"),
-    ("I keep my spare key under the {object}.", "{object}"),
-    ("My childhood address was {address}.", "{address}"),
-]
-
-FAKE_COUNTRIES = [
-    "Zarbia", "Floondia", "Krelvatia", "Moondor", "Plixtar",
-    "Quendalia", "Yorthwick", "Blimfar", "Snarlovia", "Wumpus",
-]
-
-FAKE_CITIES = [
-    "Floonville", "Blarghton", "Mizzleplex", "Quorvath", "Zinkledorf",
-    "Primbleton", "Snazzleburg", "Glorpwick", "Twiddleham", "Frazzleton",
-]
-
-FAKE_NAMES = [
-    "Glorpnax", "Mizzleworth", "Frazzlebottom", "Snickerdoodle",
-    "Wumpleton", "Blinkmire", "Quazzleflip", "Primbly", "Zorkington",
-]
-
-FAKE_INGREDIENTS = [
-    "powdered starfruit", "liquid moonbeam", "crushed rainbow",
-    "fermented cloud", "distilled thunder", "pickled lightning",
-]
-
-FAKE_OBJECTS = [
-    "purple flowerpot", "third stepping stone", "ceramic frog",
-    "leftmost gnome", "hollow rock", "fake cactus",
+# Real-world needle facts (answers the Wikipedia-trained LM has seen)
+NEEDLE_FACTS = [
+    ("The capital of Australia is Canberra.", "Canberra"),
+    ("The chemical symbol for gold is Au.", "Au"),
+    ("The speed of light is approximately 300000 kilometers per second.", "300000"),
+    ("The largest planet in our solar system is Jupiter.", "Jupiter"),
+    ("The Great Wall of China was built during the Ming dynasty.", "Ming"),
+    ("Water boils at 100 degrees Celsius at sea level.", "100"),
+    ("The human body has 206 bones.", "206"),
+    ("Shakespeare was born in Stratford-upon-Avon.", "Stratford"),
+    ("The Amazon River flows through Brazil.", "Brazil"),
+    ("Photosynthesis converts carbon dioxide into oxygen.", "oxygen"),
+    ("The Eiffel Tower is located in Paris.", "Paris"),
+    ("DNA stands for deoxyribonucleic acid.", "deoxyribonucleic"),
+    ("The Pacific Ocean is the largest ocean on Earth.", "Pacific"),
+    ("Albert Einstein developed the theory of relativity.", "relativity"),
+    ("The Mona Lisa was painted by Leonardo da Vinci.", "Leonardo"),
+    ("Mount Everest is 8849 meters tall.", "8849"),
+    ("The first moon landing was in 1969.", "1969"),
+    ("Gravity on Earth is approximately 9.8 meters per second squared.", "9.8"),
+    ("The largest desert in the world is the Sahara.", "Sahara"),
+    ("The human heart has four chambers.", "four"),
 ]
 
 
 def generate_needle():
-    """Generate a random needle fact and its expected answer substring."""
-    template_text, answer_template = random.choice(NEEDLE_TEMPLATES)
-
-    country = random.choice(FAKE_COUNTRIES)
-    city = random.choice(FAKE_CITIES)
-    number = str(random.randint(1000, 99999))
-    code = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=8))
-    year = str(random.randint(1850, 2010))
-    name = random.choice(FAKE_NAMES)
-    ingredient = random.choice(FAKE_INGREDIENTS)
-    obj = random.choice(FAKE_OBJECTS)
-    address = f"{random.randint(1, 999)} {random.choice(FAKE_CITIES)} Street"
-
-    replacements = {
-        "{country}": country,
-        "{city}": city,
-        "{number}": number,
-        "{code}": code,
-        "{year}": year,
-        "{name}": name,
-        "{ingredient}": ingredient,
-        "{object}": obj,
-        "{address}": address,
-    }
-
-    fact = template_text
-    answer = answer_template
-    for k, v in replacements.items():
-        fact = fact.replace(k, v)
-        answer = answer.replace(k, v)
-
+    """Pick a random real-world needle fact."""
+    fact, answer = random.choice(NEEDLE_FACTS)
     return fact, answer
 
 
@@ -348,11 +307,12 @@ def run_single_trial(
     retrieval_recalled = False
     needle_blob_rank = -1
     if args.mode != "no-retrieval":
-        final_query = turn_encoder.encode_query(session.turns[-1].user_msg)
+        query_mu, query_feat = turn_encoder.encode_query(session.turns[-1].user_msg)
         indices, scores, _ = blob_store.retrieve(
-            final_query,
+            query_mu,
             current_time=float(args.n_turns),
             decay=args.decay if args.mode == "hybrid" else 0.0,
+            query_features=query_feat,
         )
         # The needle was written at turn=needle_turn, so its blob timestamp = needle_turn
         needle_timestamps = blob_store.timestamps[indices].tolist() if indices.numel() > 0 else []

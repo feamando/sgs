@@ -99,16 +99,21 @@ class DynamicBlobStore(nn.Module):
         query: torch.Tensor,
         current_time: float = 0.0,
         decay: float = 0.1,
+        query_features: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Retrieve top-k blobs by similarity with recency decay.
 
-        Score = cos_sim(query, blob_mu) * exp(-decay * age)
+        Score = cos_sim(query_features, blob_features) * exp(-decay * age)
+
+        Uses feature-space similarity (d_f=1000) for semantic matching.
+        Falls back to mu-space (d_s=128) if query_features not provided.
 
         Args:
-            query: [d_s] query vector
+            query: [d_s] query in splatting space (fallback)
             current_time: current turn index (for age computation)
             decay: exponential decay rate on age
+            query_features: [d_f] query in feature space (preferred)
 
         Returns:
             indices: [k] blob indices
@@ -120,15 +125,22 @@ class DynamicBlobStore(nn.Module):
             return empty, torch.zeros(0, device=query.device), torch.zeros(0, self.d_f, device=query.device)
 
         valid_mask = self.valid
-        valid_mu = self.mu[valid_mask]
         valid_ts = self.timestamps[valid_mask]
         valid_idx = torch.nonzero(valid_mask, as_tuple=False).squeeze(-1)
 
-        # Cosine similarity
-        query_norm = query / query.norm().clamp(min=1e-8)
-        mu_norms = valid_mu.norm(dim=-1, keepdim=True).clamp(min=1e-8)
-        mu_normed = valid_mu / mu_norms
-        cos_sim = (query_norm.unsqueeze(0) @ mu_normed.T).squeeze(0)
+        # Use feature space for similarity (much better for semantic matching)
+        if query_features is not None:
+            valid_feat = self.features[valid_mask]
+            q_norm = query_features / query_features.norm().clamp(min=1e-8)
+            f_norms = valid_feat.norm(dim=-1, keepdim=True).clamp(min=1e-8)
+            f_normed = valid_feat / f_norms
+            cos_sim = (q_norm.unsqueeze(0) @ f_normed.T).squeeze(0)
+        else:
+            valid_mu = self.mu[valid_mask]
+            query_norm = query / query.norm().clamp(min=1e-8)
+            mu_norms = valid_mu.norm(dim=-1, keepdim=True).clamp(min=1e-8)
+            mu_normed = valid_mu / mu_norms
+            cos_sim = (query_norm.unsqueeze(0) @ mu_normed.T).squeeze(0)
 
         # Recency weighting
         age = current_time - valid_ts
@@ -212,14 +224,19 @@ class TurnEncoder:
         return mu_mean, feat_mean
 
     @torch.no_grad()
-    def encode_query(self, text: str) -> torch.Tensor:
-        """Encode a query string into splatting space for retrieval."""
+    def encode_query(self, text: str) -> tuple[torch.Tensor, torch.Tensor]:
+        """Encode a query string into splatting space + feature space.
+
+        Returns:
+            (mu_s [d_s], features [d_f])
+        """
         token_ids = self.tokenizer.encode(text, out_type=int)[:512]
         ids_t = torch.tensor([token_ids], dtype=torch.long, device=self.device)
         mu = self.tok_mu(ids_t)
+        features = self.tok_features(ids_t)
         pos = torch.arange(len(token_ids), device=self.device)
         mu = mu + self.pos_mu(pos).unsqueeze(0)
-        return mu.mean(dim=1).squeeze(0)  # [d_s]
+        return mu.mean(dim=1).squeeze(0), features.mean(dim=1).squeeze(0)
 
 
 class HybridRetriever:
@@ -267,11 +284,12 @@ class HybridRetriever:
 
         # Retrieve older turns (skip the last N which go verbatim)
         if n_turns > self.n_recent and self.blob_store.n_valid > 0:
-            query = self.turn_encoder.encode_query(current_user_msg)
+            query_mu, query_feat = self.turn_encoder.encode_query(current_user_msg)
             _, scores, _ = self.blob_store.retrieve(
-                query,
+                query_mu,
                 current_time=float(n_turns),
                 decay=self.decay,
+                query_features=query_feat,
             )
             # Get the actual turn texts for retrieved blobs
             # (blob index maps to turn index for per-session stores)
