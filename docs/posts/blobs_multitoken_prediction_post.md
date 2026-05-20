@@ -2,33 +2,23 @@
 
 ---
 
-Something clicked recently while reading Meta's multi-token prediction paper (Gloeckle et al., 2024).
+Meta's multi-token prediction (Gloeckle et al., 2024): predict the next N tokens simultaneously. Forces the model to encode "what happens over the next N steps" in one hidden state.
 
-Their core insight: instead of predicting one token at a time, train the model to predict the next N tokens simultaneously. The auxiliary prediction heads force the shared trunk to build richer representations, representations that encode not just "what comes next" but "what comes next at multiple scales."
+Our SGS blobs do the same thing, but for retrieval instead of generation.
 
-We have been building something structurally analogous in our Semantic Gaussian Splatting work, but in a completely different domain.
+A blob is a single Gaussian primitive that encodes what an entire paragraph means. One query retrieves it. One alpha-compositing pass integrates it. The model doesn't re-read the paragraph token by token; it gets the chunk-level meaning in one shot.
 
-**SGS blobs are multi-token predictions over meaning.**
+The parallel:
+- Multi-token prediction amortizes autoregressive steps at the output.
+- Blob retrieval amortizes context processing at the input.
 
-In a standard language model, each token contributes a tiny slice of meaning to the output. Context accumulates one position at a time. The model's hidden state is a compressed summary of everything so far.
+Both force more compositional representations. Both operate at a coarser grain than the atomic unit (token).
 
-In SGS, a "blob" is a pre-computed chunk of meaning, a Gaussian distribution in semantic space that summarizes an entire passage, paragraph, or concept. When the model encounters a query, it retrieves the top-k most relevant blobs and renders them via transmittance-weighted compositing (the same alpha-compositing equation used in volume rendering and, as we recently proved formally, a strict superset of softmax attention).
+The deeper connection: we recently proved that alpha-compositing (how blobs are rendered) is a strict superset of softmax attention (how transformers aggregate). Same mathematical operation, different scale. Multi-token prediction and multi-chunk retrieval are two faces of the same coin.
 
-The parallel to multi-token prediction:
-
-- Multi-token prediction: one forward pass produces N future tokens simultaneously, forcing the model to represent "what happens over the next N steps" in its hidden state.
-- Blob retrieval: one query retrieves a blob that encodes "what an entire paragraph means" in a single Gaussian primitive, forcing the retrieval mechanism to match at a semantic chunk level rather than token-by-token.
-
-Both are forms of "predict/retrieve at a coarser grain than the atomic unit." Both force the underlying representations to be more compositional. Both amortize computation: multi-token prediction amortizes autoregressive steps, blob retrieval amortizes context processing.
-
-The difference: multi-token prediction is trained end-to-end with a shared trunk. Blob retrieval separates the "chunking" step (offline, at index time) from the "retrieval + integration" step (online, at inference time). This separation is what lets a 100M parameter model access knowledge that would otherwise require a much larger context window.
-
-We are currently evaluating this on Planck 1.4 (conversation-memory blobs, where each dialogue turn becomes a retrievable blob). Early architecture is live; eval results incoming.
-
-The deeper question: if multi-token prediction at the output forces better internal representations, does multi-chunk retrieval at the input do the same? We think yes, and the formal connection between alpha-compositing and attention (our JMLR submission) provides the theoretical grounding for why these two seemingly different ideas are actually the same mathematical operation applied at different scales.
+Currently evaluating on Planck 1.4, where each conversation turn becomes a retrievable blob. Flat cost per turn regardless of conversation length.
 
 ---
 
 Nikita Gorshkov
 Radiance Labs
-github.com/feamando/sgs
