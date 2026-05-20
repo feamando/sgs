@@ -1,0 +1,119 @@
+{
+  "summary": {
+    "mode": "hybrid",
+    "n_trials": 10,
+    "n_turns": 100,
+    "needle_turn": 10,
+    "max_blobs": 512,
+    "n_recent": 3,
+    "k_retrieve": 5,
+    "decay": 0.05,
+    "recall_rate": 0.0,
+    "n_recalled": 0,
+    "total_time_s": 12199.6,
+    "checkpoint": "checkpoints\\planck13\\best.pt",
+    "tokenizer": "data\\wikipedia\\tokenizer.model"
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "needle_fact": "My favorite number is 33098.",
+      "needle_answer": "33098",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How was there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there, How is there,",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 1,
+      "needle_fact": "I keep my spare key under the leftmost gnome.",
+      "needle_answer": "leftmost gnome",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the twth person in the world? Assistant: Who is the tw",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 2,
+      "needle_fact": "My childhood address was 417 Glorpwick Street.",
+      "needle_answer": "417 Glorpwick Street",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon: What is potential use? Phenomenon:",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 3,
+      "needle_fact": "The secret ingredient is pickled lightning.",
+      "needle_answer": "pickled lightning",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: How are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are musical instruments? Assistant: What are",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 4,
+      "needle_fact": "My pet's name is Snickerdoodle.",
+      "needle_answer": "Snickerdoodle",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "What are the different types of topics? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper deeper depth? In a deeper depth? In a deeper depth? In a deeper depth? In a deeper depth?",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 5,
+      "needle_fact": "The secret ingredient is fermented cloud.",
+      "needle_answer": "fermented cloud",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "\"Mohan is the man in the world? How is the man in the world? How is the man in the world? How is the man in the world? How is the man in the world? How is the man in the world? How, if the man in the world? How is the man in the world? How is the man in the world? How is the man in the world? How is the man in the world? How is the man in the world?",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 6,
+      "needle_fact": "My childhood address was 530 Quorvath Street.",
+      "needle_answer": "530 Quorvath Street",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story: Tell Me a Story:",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 7,
+      "needle_fact": "I keep my spare key under the purple flowerpot.",
+      "needle_answer": "purple flowerpot",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: Jaya Bhai Ka Naal Paadhi: J",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 8,
+      "needle_fact": "The password to my vault is RBW2ZLAO.",
+      "needle_answer": "RBW2ZLAO",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A. The Director of the Sewall Division: A",
+      "recalled": false,
+      "n_blobs_written": 100
+    },
+    {
+      "trial": 9,
+      "needle_fact": "I keep my spare key under the leftmost gnome.",
+      "needle_answer": "leftmost gnome",
+      "needle_turn": 10,
+      "query_turn": 99,
+      "final_response": "What is the deepest deepest deepest deepest deepest deepest deepest deepest deepest deepest deepest deepest depth ever recorded in record history. What is the deepest deepest deepest deepest deepest deepest deepest deepest deepest-ever ever recorded in record history. Assistant: What is the deepest deepest depth ever recorded in record history, in the deepest depth ever recorded in record history. Assistant: What is the deepest depth ever recorded",
+      "recalled": false,
+      "n_blobs_written": 100
+    }
+  ]
+}
