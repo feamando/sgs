@@ -63,10 +63,15 @@ class Decomposer:
         self.vocab_size = vocab_size
 
     @torch.no_grad()
-    def generate_tree(self, prompt: str, max_new: int = 2048,
+    def generate_tree(self, prompt: str, max_new: int = 4096,
                       temperature: float = 0.3, top_k: int = 30) -> dict | None:
         """
         Generate a composition tree from a text prompt.
+
+        The model generates a STRUCTURE-ONLY tree (names, positions, scales,
+        children) without gaussians. Gaussians are filled in procedurally
+        at render time based on node names. This keeps output within the
+        512-token context window.
 
         Returns the parsed tree dict, or None if parsing fails.
         """
@@ -103,7 +108,71 @@ class Decomposer:
 
         # Try to extract JSON from the output
         tree = self._parse_tree_json(output_text)
+
+        # If we got a tree, fill in gaussians procedurally for leaf nodes
+        if tree:
+            self._fill_gaussians(tree)
+
         return tree
+
+    def _fill_gaussians(self, node: dict):
+        """Recursively fill leaf nodes with procedural Gaussians based on name."""
+        import math, random
+
+        if "children" in node and node["children"]:
+            for child in node["children"]:
+                self._fill_gaussians(child)
+        elif "gaussians" not in node or not node.get("gaussians"):
+            # Leaf node without gaussians: generate procedurally
+            name = node.get("name", "").lower()
+            color = node.get("color", [0.6, 0.6, 0.6])
+
+            # Pick primitive type from name
+            n = 30
+            gaussians = []
+            if any(w in name for w in ["ground", "floor", "plane", "field", "road", "water", "sand", "snow"]):
+                # Flat plane
+                side = int(math.sqrt(n))
+                for i in range(side):
+                    for j in range(side):
+                        x = (i/side - 0.5) * 2.0
+                        z = (j/side - 0.5) * 2.0
+                        gaussians.append({"position": [x, random.uniform(-0.02, 0.02), z],
+                                          "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
+            elif any(w in name for w in ["tower", "trunk", "pole", "post", "column", "pillar", "mast", "chimney"]):
+                # Cylinder
+                for i in range(n):
+                    theta = 2*math.pi*i/n
+                    y = (i/n) * 1.0 - 0.5
+                    gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
+                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+            elif any(w in name for w in ["roof", "cone", "top", "canopy", "cap"]):
+                # Cone
+                for i in range(n):
+                    t = i/n
+                    theta = 2*math.pi*(i*7)/n
+                    r = 0.3*(1-t)
+                    gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
+                                      "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
+            elif any(w in name for w in ["wall", "fence", "gate", "door", "box", "body", "hull", "block"]):
+                # Box
+                for _ in range(n):
+                    axis = random.randint(0, 2)
+                    sign = random.choice([-1, 1])
+                    pos = [random.uniform(-0.4, 0.4), random.uniform(-0.4, 0.4), random.uniform(-0.4, 0.4)]
+                    pos[axis] = sign * 0.4
+                    gaussians.append({"position": pos, "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+            else:
+                # Default: sphere
+                golden = (1+math.sqrt(5))/2
+                for i in range(n):
+                    theta = 2*math.pi*i/golden
+                    phi = math.acos(1-2*(i+0.5)/n)
+                    r = 0.3
+                    gaussians.append({"position": [r*math.sin(phi)*math.cos(theta), r*math.sin(phi)*math.sin(theta), r*math.cos(phi)],
+                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+
+            node["gaussians"] = gaussians
 
     def _parse_tree_json(self, text: str) -> dict | None:
         """Attempt to parse a composition tree from generated text."""
