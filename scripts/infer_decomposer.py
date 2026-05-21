@@ -37,7 +37,7 @@ def parse_args():
     p.add_argument("--serve", action="store_true", help="Launch web UI for interactive prompts")
     p.add_argument("--port", type=int, default=8003)
     p.add_argument("--host", default="127.0.0.1")
-    p.add_argument("--max-new", type=int, default=2048, help="Max tokens to generate for tree")
+    p.add_argument("--max-new", type=int, default=4096, help="Max tokens to generate for tree")
     p.add_argument("--temperature", type=float, default=0.3, help="Low temp for structured output")
     p.add_argument("--top-k", type=int, default=30)
     return p.parse_args()
@@ -130,7 +130,42 @@ class Decomposer:
                         return json.loads(text[start:i+1])
                     except json.JSONDecodeError:
                         return None
-        return None
+
+        # JSON was truncated (model hit max tokens). Try to repair by
+        # closing open brackets/braces.
+        truncated = text[start:]
+        # Count unclosed brackets
+        open_braces = truncated.count("{") - truncated.count("}")
+        open_brackets = truncated.count("[") - truncated.count("]")
+
+        # Truncate at last complete object/array entry
+        # Find the last comma or complete value
+        repair = truncated.rstrip()
+        if repair.endswith(","):
+            repair = repair[:-1]
+
+        # Close all open brackets
+        repair += "]" * open_brackets + "}" * open_braces
+
+        try:
+            return json.loads(repair)
+        except json.JSONDecodeError:
+            # More aggressive: truncate to last complete gaussians entry
+            # Find last complete "}" before the truncation
+            last_close = repair.rfind("}")
+            if last_close > 0:
+                # Try progressively shorter substrings
+                for cut in range(last_close, max(last_close - 200, 0), -1):
+                    if repair[cut] == "}":
+                        attempt = repair[:cut+1]
+                        ob = attempt.count("{") - attempt.count("}")
+                        obrk = attempt.count("[") - attempt.count("]")
+                        attempt += "]" * obrk + "}" * ob
+                        try:
+                            return json.loads(attempt)
+                        except json.JSONDecodeError:
+                            continue
+            return None
 
 
 VIEWER_HTML = """<!doctype html>
