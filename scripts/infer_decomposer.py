@@ -278,7 +278,30 @@ def main():
             temperature=args.temperature, top_k=args.top_k,
         )
         if tree_dict is None:
-            print("ERROR: failed to generate valid JSON tree")
+            # Debug: show what was generated
+            input_text = f"DECOMPOSE: {args.prompt}\nTREE: "
+            input_ids = decomposer.sp.encode(input_text, out_type=int)
+            ids_t = torch.tensor([input_ids], dtype=torch.long, device=device)
+            generated = []
+            with torch.no_grad():
+                for _ in range(500):
+                    if ids_t.shape[1] > 512:
+                        ids_t = ids_t[:, -512:]
+                    logits = decomposer.model(ids_t)
+                    next_logits = logits[0, -1, :] / args.temperature
+                    topk_vals, topk_idx = next_logits.topk(args.top_k)
+                    mask_t = torch.full_like(next_logits, float("-inf"))
+                    mask_t.scatter_(0, topk_idx, topk_vals)
+                    probs = torch.softmax(mask_t, dim=-1)
+                    next_id = torch.multinomial(probs, 1).item()
+                    if next_id == decomposer.sp.eos_id():
+                        break
+                    generated.append(next_id)
+                    ids_t = torch.cat([ids_t, torch.tensor([[next_id]], device=device)], dim=1)
+            raw = decomposer.sp.decode(generated)
+            print(f"ERROR: failed to generate valid JSON tree")
+            print(f"\nRaw output (first 500 chars):")
+            print(raw[:500])
             sys.exit(1)
 
         tree = CompositionNode.from_dict(tree_dict)
