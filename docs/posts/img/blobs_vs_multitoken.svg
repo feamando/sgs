@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="380" fill="#0a0a0f"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#f5f1e8" font-size="15" font-weight="700">Multi-Token Prediction vs Blob Retrieval</text>
+
+  <!-- Divider -->
+  <line x1="400" y1="45" x2="400" y2="360" stroke="#1f1f2a" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- LEFT: Multi-Token Prediction -->
+  <text x="200" y="60" text-anchor="middle" fill="#ff6b6b" font-size="12" font-weight="700">MULTI-TOKEN PREDICTION</text>
+  <text x="200" y="76" text-anchor="middle" fill="#8a8598" font-size="10">(Meta, 2024)</text>
+
+  <!-- Input -->
+  <rect x="100" y="90" width="200" height="30" rx="5" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="200" y="109" text-anchor="middle" fill="#f5f1e8" font-size="10">Input: token_1 ... token_t</text>
+
+  <!-- Arrow -->
+  <path d="M200 120 L200 145" stroke="#ff6b6b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+  <!-- Shared trunk -->
+  <rect x="120" y="148" width="160" height="40" rx="5" fill="#2a1a1a" stroke="#ff6b6b"/>
+  <text x="200" y="172" text-anchor="middle" fill="#ff6b6b" font-size="11" font-weight="600">Shared Trunk</text>
+
+  <!-- Arrow fans out -->
+  <path d="M160 188 L130 215" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <path d="M180 188 L170 215" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <path d="M200 188 L200 215" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <path d="M220 188 L230 215" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <path d="M240 188 L270 215" stroke="#ff6b6b" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <!-- Output tokens -->
+  <rect x="110" y="218" width="40" height="25" rx="4" fill="#1a1a2e" stroke="#ff6b6b"/>
+  <text x="130" y="234" text-anchor="middle" fill="#f5f1e8" font-size="9">t+1</text>
+  <rect x="155" y="218" width="40" height="25" rx="4" fill="#1a1a2e" stroke="#ff6b6b"/>
+  <text x="175" y="234" text-anchor="middle" fill="#f5f1e8" font-size="9">t+2</text>
+  <rect x="200" y="218" width="40" height="25" rx="4" fill="#1a1a2e" stroke="#ff6b6b"/>
+  <text x="220" y="234" text-anchor="middle" fill="#f5f1e8" font-size="9">t+3</text>
+  <rect x="245" y="218" width="40" height="25" rx="4" fill="#1a1a2e" stroke="#ff6b6b"/>
+  <text x="265" y="234" text-anchor="middle" fill="#f5f1e8" font-size="9">...</text>
+
+  <!-- Label -->
+  <text x="200" y="265" text-anchor="middle" fill="#ff6b6b" font-size="10" font-weight="600">Predict N tokens simultaneously</text>
+
+  <!-- Amortizes box -->
+  <rect x="100" y="285" width="200" height="50" rx="6" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="200" y="305" text-anchor="middle" fill="#f5f1e8" font-size="10" font-weight="600">Amortizes: OUTPUT</text>
+  <text x="200" y="322" text-anchor="middle" fill="#8a8598" font-size="9">Fewer autoregressive steps.</text>
+  <text x="200" y="335" text-anchor="middle" fill="#8a8598" font-size="9">Trunk encodes "next N steps."</text>
+
+  <!-- RIGHT: Blob Retrieval -->
+  <text x="600" y="60" text-anchor="middle" fill="#ffb347" font-size="12" font-weight="700">BLOB RETRIEVAL</text>
+  <text x="600" y="76" text-anchor="middle" fill="#8a8598" font-size="10">(SGS, 2025-2026)</text>
+
+  <!-- Input + Query -->
+  <rect x="500" y="90" width="200" height="30" rx="5" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="600" y="109" text-anchor="middle" fill="#f5f1e8" font-size="10">Query: current input</text>
+
+  <!-- Arrow -->
+  <path d="M600 120 L600 145" stroke="#ffb347" stroke-width="2" marker-end="url(#arrowOrange)"/>
+
+  <!-- Blob store -->
+  <rect x="520" y="148" width="160" height="40" rx="5" fill="#2a2a1a" stroke="#ffb347"/>
+  <text x="600" y="165" text-anchor="middle" fill="#ffb347" font-size="11" font-weight="600">Blob Store</text>
+  <text x="600" y="180" text-anchor="middle" fill="#8a8598" font-size="9">(200k chunks as Gaussians)</text>
+
+  <!-- Arrow down -->
+  <path d="M600 188 L600 215" stroke="#ffb347" stroke-width="2" marker-end="url(#arrowOrange)"/>
+
+  <!-- Retrieved blobs -->
+  <rect x="500" y="218" width="200" height="30" rx="5" fill="#1a1a2e" stroke="#ffb347"/>
+  <text x="600" y="237" text-anchor="middle" fill="#ffb347" font-size="10">Top-k blobs (one pass)</text>
+
+  <!-- Arrow down -->
+  <path d="M600 248 L600 268" stroke="#6bcfff" stroke-width="2" marker-end="url(#arrowBlue2)"/>
+
+  <!-- Word rendering -->
+  <text x="600" y="280" text-anchor="middle" fill="#6bcfff" font-size="10">+ Word rendering in remaining T</text>
+
+  <!-- Amortizes box -->
+  <rect x="500" y="295" width="200" height="50" rx="6" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="600" y="315" text-anchor="middle" fill="#f5f1e8" font-size="10" font-weight="600">Amortizes: INPUT</text>
+  <text x="600" y="332" text-anchor="middle" fill="#8a8598" font-size="9">Skip re-reading old context.</text>
+  <text x="600" y="345" text-anchor="middle" fill="#8a8598" font-size="9">One blob = one passage, one vector.</text>
+
+  <!-- Bottom connection -->
+  <text x="400" y="372" text-anchor="middle" fill="#f5f1e8" font-size="10" font-weight="600">Both force compositional representations at coarser grain</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#ff6b6b" stroke-width="1.5"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#ffb347" stroke-width="1.5"/>
+    </marker>
+    <marker id="arrowBlue2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#6bcfff" stroke-width="1.5"/>
+    </marker>
+  </defs>
+</svg>

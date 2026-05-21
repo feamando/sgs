@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="500" fill="#0a0a0f"/>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" fill="#f5f1e8" font-size="18" font-weight="700">What is a Blob?</text>
+  <text x="400" y="58" text-anchor="middle" fill="#8a8598" font-size="12">One passage compressed into one vector. Retrieved by similarity. Rendered alongside words.</text>
+
+  <!-- STEP 1: Compress -->
+  <text x="130" y="100" text-anchor="middle" fill="#ffb347" font-size="13" font-weight="700">1. COMPRESS</text>
+
+  <rect x="30" y="115" width="200" height="65" rx="8" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+  <text x="130" y="137" text-anchor="middle" fill="#f5f1e8" font-size="11">The capital of France</text>
+  <text x="130" y="154" text-anchor="middle" fill="#f5f1e8" font-size="11">is Paris. Paris is known</text>
+  <text x="130" y="171" text-anchor="middle" fill="#f5f1e8" font-size="11">for the Eiffel Tower...</text>
+
+  <!-- Arrow -->
+  <path d="M130 180 L130 210" stroke="#ffb347" stroke-width="2.5"/>
+  <polygon points="122,210 130,222 138,210" fill="#ffb347"/>
+
+  <!-- Blob -->
+  <ellipse cx="130" cy="252" rx="45" ry="25" fill="#2a2a1a" stroke="#ffb347" stroke-width="2"/>
+  <circle cx="130" cy="252" r="6" fill="#ffb347"/>
+  <text x="130" y="256" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">blob</text>
+  <text x="130" y="295" text-anchor="middle" fill="#8a8598" font-size="10">Single vector</text>
+  <text x="130" y="309" text-anchor="middle" fill="#8a8598" font-size="10">(1000 dimensions)</text>
+
+  <!-- STEP 2: Store -->
+  <text x="400" y="100" text-anchor="middle" fill="#ffb347" font-size="13" font-weight="700">2. STORE</text>
+
+  <!-- Blob store visualization -->
+  <rect x="300" y="115" width="200" height="200" rx="8" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+  <text x="400" y="138" text-anchor="middle" fill="#8a8598" font-size="10">BLOB STORE (200,000 blobs)</text>
+
+  <!-- Blobs in store -->
+  <ellipse cx="345" cy="175" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="345" cy="175" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <ellipse cx="400" cy="165" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="400" cy="165" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <ellipse cx="455" cy="180" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="455" cy="180" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <ellipse cx="365" cy="220" rx="20" ry="12" fill="none" stroke="#ffb347" stroke-width="2"/>
+  <circle cx="365" cy="220" r="4" fill="#ffb347"/>
+  <text x="365" y="245" text-anchor="middle" fill="#ffb347" font-size="8">France/Paris</text>
+
+  <ellipse cx="435" cy="225" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="435" cy="225" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <ellipse cx="370" cy="275" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="370" cy="275" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <ellipse cx="430" cy="270" rx="20" ry="12" fill="none" stroke="#8a8598" stroke-width="1" opacity="0.5"/>
+  <circle cx="430" cy="270" r="3" fill="#8a8598" opacity="0.5"/>
+
+  <!-- Arrow from blob to store -->
+  <path d="M175 252 L298 230" stroke="#ffb347" stroke-width="2" stroke-dasharray="5,3"/>
+  <polygon points="296,224 305,230 296,236" fill="#ffb347"/>
+
+  <!-- STEP 3: Retrieve + Render -->
+  <text x="660" y="100" text-anchor="middle" fill="#6bcfff" font-size="13" font-weight="700">3. RETRIEVE</text>
+
+  <!-- Query -->
+  <rect x="560" y="115" width="200" height="40" rx="8" fill="#1a2a2e" stroke="#6bcfff" stroke-width="1.5"/>
+  <text x="660" y="140" text-anchor="middle" fill="#6bcfff" font-size="11">"What is the capital of France?"</text>
+
+  <!-- Arrow -->
+  <path d="M660 155 L660 185" stroke="#6bcfff" stroke-width="2.5"/>
+  <polygon points="652,185 660,197 668,185" fill="#6bcfff"/>
+
+  <!-- Match -->
+  <rect x="580" y="200" width="160" height="35" rx="6" fill="#12121a" stroke="#6bcfff" stroke-width="1.5"/>
+  <text x="660" y="215" text-anchor="middle" fill="#8a8598" font-size="10">cosine similarity</text>
+  <text x="660" y="230" text-anchor="middle" fill="#6bcfff" font-size="10" font-weight="600">find best match</text>
+
+  <!-- Arrow from store to match -->
+  <path d="M502 230 L578 218" stroke="#ffb347" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Arrow down -->
+  <path d="M660 235 L660 265" stroke="#4ade80" stroke-width="2.5"/>
+  <polygon points="652,265 660,277 668,265" fill="#4ade80"/>
+
+  <!-- Retrieved -->
+  <ellipse cx="660" cy="300" rx="45" ry="22" fill="#1a2e1a" stroke="#4ade80" stroke-width="2"/>
+  <text x="660" y="305" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="600">France/Paris blob</text>
+
+  <!-- BOTTOM: Two-pass render explanation -->
+  <rect x="100" y="360" width="600" height="110" rx="10" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+
+  <text x="400" y="385" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">Two-Pass Rendering</text>
+
+  <!-- Pass 1 -->
+  <rect x="130" y="400" width="250" height="30" rx="5" fill="#2a2a1a" stroke="#ffb347" stroke-width="1.5"/>
+  <text x="255" y="419" text-anchor="middle" fill="#ffb347" font-size="11">Pass 1: Render blob (background knowledge)</text>
+
+  <!-- Pass 2 -->
+  <rect x="130" y="438" width="250" height="30" rx="5" fill="#1a1a2e" stroke="#6bcfff" stroke-width="1.5"/>
+  <text x="255" y="457" text-anchor="middle" fill="#6bcfff" font-size="11">Pass 2: Render words (current input)</text>
+
+  <!-- Equals -->
+  <text x="420" y="435" fill="#f5f1e8" font-size="22" font-weight="700">=</text>
+
+  <!-- Output -->
+  <rect x="460" y="410" width="210" height="50" rx="8" fill="#1a2e1a" stroke="#4ade80" stroke-width="2"/>
+  <text x="565" y="433" text-anchor="middle" fill="#f5f1e8" font-size="11">Complete understanding:</text>
+  <text x="565" y="451" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="600">retrieved knowledge + current context</text>
+</svg>
