@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Radiance Labs — Pitch Deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://rsms.me/"/>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --panel: #12121a;
+  --ink: #f5f1e8;
+  --ink-dim: #8a8598;
+  --accent: #ffb347;
+  --accent-coral: #ff6b6b;
+  --border: #1f1f2a;
+  --green: #4ade80;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--ink);
+  font-family: "Inter", -apple-system, sans-serif; scroll-behavior: smooth; }
+
+.slide {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 80px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.slide-number {
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  font-family: ui-monospace, monospace;
+}
+
+h1 { font-size: 48px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 24px; }
+h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 20px; }
+h3 { font-size: 20px; font-weight: 600; margin-bottom: 12px; color: var(--accent); }
+p { font-size: 18px; line-height: 1.6; color: var(--ink-dim); max-width: 700px; margin-bottom: 16px; }
+.highlight { color: var(--accent); font-weight: 600; }
+.coral { color: var(--accent-coral); }
+.green { color: var(--green); }
+
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+.brand-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.brand-name { font-size: 14px; font-weight: 600; color: var(--ink-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+
+ul { list-style: none; padding: 0; }
+ul li { font-size: 17px; color: var(--ink-dim); line-height: 1.7; padding-left: 24px; position: relative; }
+ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--accent); opacity: 0.7; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 30px; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card h3 { margin-bottom: 8px; }
+.card p { font-size: 15px; margin-bottom: 0; }
+
+.metric { text-align: center; padding: 20px; }
+.metric .value { font-size: 42px; font-weight: 800; color: var(--accent); }
+.metric .label { font-size: 13px; color: var(--ink-dim); margin-top: 6px; }
+
+.arch-diagram {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 30px;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--ink-dim);
+  white-space: pre;
+  line-height: 1.5;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.timeline { margin-top: 30px; }
+.timeline-item { display: flex; gap: 20px; margin-bottom: 20px; align-items: flex-start; }
+.timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0; }
+.timeline-dot.done { background: var(--green); }
+.timeline-dot.next { background: var(--accent-coral); }
+.timeline-content { flex: 1; }
+.timeline-content strong { color: var(--ink); font-size: 16px; }
+.timeline-content span { font-size: 14px; color: var(--ink-dim); }
+
+.fig-placeholder {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.cta { margin-top: 40px; padding: 20px 30px; background: var(--accent); color: var(--bg);
+  border-radius: 8px; display: inline-block; font-weight: 700; font-size: 16px; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Title -->
+<div class="slide">
+  <div class="brand"><div class="brand-dot"></div><div class="brand-name">Radiance Labs</div></div>
+  <h1>Structured 3D from Language.<br/>Every Gaussian Has a Name.</h1>
+  <p>Recursive semantic-to-geometric decomposition via Gaussian splatting. Text in, editable 3D scene graphs out.</p>
+  <p style="color: var(--ink-dim); font-size: 14px; margin-top: 40px;">May 2026 / github.com/feamando/sgs</p>
+  <div class="slide-number">1 / 8</div>
+</div>
+
+<!-- SLIDE 2: Problem -->
+<div class="slide">
+  <h2>The Problem</h2>
+  <h3>Text-to-3D is stuck at monolithic generation</h3>
+  <div class="grid-2">
+    <div>
+      <p>Current systems (DreamFusion, DALL-E 3D) produce <span class="coral">opaque blobs</span>. No parts. No labels. No editing without full re-generation.</p>
+      <ul>
+        <li>Cannot change roof color without regenerating entire scene</li>
+        <li>Cannot move one object without affecting others</li>
+        <li>Cannot query "what is left of the gate?"</li>
+        <li>1-4 GPU-hours per scene, $50-200 per generation</li>
+      </ul>
+    </div>
+    <div>
+      <div class="fig-placeholder">[Screenshot: monolithic 3D blob vs structured decomposition]</div>
+    </div>
+  </div>
+  <div class="slide-number">2 / 8</div>
+</div>
+
+<!-- SLIDE 3: Solution -->
+<div class="slide">
+  <h2>Our Solution</h2>
+  <h3>Recursive Semantic-to-Geometric Decomposition</h3>
+  <p>A language model decomposes prompts into <span class="highlight">composition trees</span>. Each node is a named sub-concept with spatial relations. Terminal nodes are individual Gaussian splats.</p>
+  <div class="arch-diagram">
+"a castle on a hill"
+        |
+        v
+  [Decomposer LM]  -->  Composition Tree:
+        |                   scene
+        v                   +-- castle (pos=[0,0.8,0])
+  [Recursive               |   +-- tower_1 (cylinder + cone)
+   Renderer]               |   +-- tower_2 (cylinder + cone)
+        |                  |   +-- keep (box + cone)
+        v                  |   +-- gate (arch)
+  [3D Gaussians]           +-- hill (dome, green)
+        |
+        v
+  Editable Scene Graph + 3D Render</div>
+  <div class="slide-number">3 / 8</div>
+</div>
+
+<!-- SLIDE 4: Key Innovation -->
+<div class="slide">
+  <h2>Key Innovation</h2>
+  <h3>Same math from language to geometry</h3>
+  <div class="grid-3">
+    <div class="card">
+      <h3>Proven Foundation</h3>
+      <p>Alpha-compositing (our rendering equation) is a <span class="highlight">strict superset</span> of softmax attention. Formally verified in Lean 4. Submitted to JMLR.</p>
+    </div>
+    <div class="card">
+      <h3>Editable by Design</h3>
+      <p>The composition tree IS the representation. Change a node name, position, or color; re-render instantly. No re-generation needed.</p>
+    </div>
+    <div class="card">
+      <h3>Compositional Memory</h3>
+      <p>Knowledge stored as "blobs" (Gaussian primitives). 40% retrieval recall at 90-turn distance. Flat cost per turn regardless of history length.</p>
+    </div>
+  </div>
+  <div class="slide-number">4 / 8</div>
+</div>
+
+<!-- SLIDE 5: Results -->
+<div class="slide">
+  <h2>Current Results</h2>
+  <div class="grid-3">
+    <div class="metric"><div class="value">100%</div><div class="label">Object accuracy<br/>(flat routing, 300 classes)</div></div>
+    <div class="metric"><div class="value">1,124</div><div class="label">Gaussians per scene<br/>(castle decomposition)</div></div>
+    <div class="metric"><div class="value">40%</div><div class="label">Retrieval recall<br/>(90 turns, zero tuning)</div></div>
+  </div>
+  <div class="grid-2" style="margin-top: 40px;">
+    <div class="fig-placeholder">[Screenshot: Castle on a hill - 4 towers, walls, keep, gate, green hill]</div>
+    <div class="fig-placeholder">[Screenshot: Pirate ship - hull, masts, sails, ocean]</div>
+  </div>
+  <p style="margin-top: 20px;">End-to-end pipeline working: text prompt enters, composition tree generated, Gaussians rendered in browser. 3 levels of hierarchy, real-time orbit/zoom.</p>
+  <div class="slide-number">5 / 8</div>
+</div>
+
+<!-- SLIDE 6: Applications -->
+<div class="slide">
+  <h2>Applications</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Game Asset Generation</h3>
+      <p>"Medieval village with a blacksmith" -> editable scene with labeled buildings, props, and terrain. Drag to reposition. Swap components from library.</p>
+    </div>
+    <div class="card">
+      <h3>Architectural Visualization</h3>
+      <p>Building descriptions -> 3D walkthroughs with editable floor plans. Change materials, add rooms, modify layout through language.</p>
+    </div>
+    <div class="card">
+      <h3>Film Pre-visualization</h3>
+      <p>Script descriptions -> scene layouts -> 3D previews. Directors iterate on composition before any modeling work begins.</p>
+    </div>
+    <div class="card">
+      <h3>Education / Scientific</h3>
+      <p>"Show me a cell with the mitochondria highlighted" -> labeled 3D model with queryable parts. Interactive, decomposable, accessible.</p>
+    </div>
+  </div>
+  <div class="slide-number">6 / 8</div>
+</div>
+
+<!-- SLIDE 7: Roadmap -->
+<div class="slide">
+  <h2>Roadmap</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot done"></div>
+      <div class="timeline-content"><strong>Planck 1.3</strong> (shipped)<br/><span>100M LM, Wikipedia-trained, blob retrieval proven</span></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot done"></div>
+      <div class="timeline-content"><strong>Raum 0.1</strong> (shipped)<br/><span>300-class text-to-3D demo, editable DSL, spatial relations</span></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot done"></div>
+      <div class="timeline-content"><strong>Raum 1.3</strong> (prototype)<br/><span>Recursive decomposition pipeline end-to-end, 5 hand-authored scenes</span></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot next"></div>
+      <div class="timeline-content"><strong>Hertz 1.2</strong> (next)<br/><span>1B param model, larger context, conditional tree generation</span></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot next"></div>
+      <div class="timeline-content"><strong>API Beta</strong> (Q4 2026)<br/><span>Prompt -> structured 3D JSON + real-time render. SDK for game engines.</span></div>
+    </div>
+  </div>
+  <div class="slide-number">7 / 8</div>
+</div>
+
+<!-- SLIDE 8: Ask -->
+<div class="slide">
+  <div class="brand"><div class="brand-dot"></div><div class="brand-name">Radiance Labs</div></div>
+  <h1>Structured 3D.<br/>From Language.<br/>At Scale.</h1>
+  <p>We are building the decomposition layer between language models and 3D rendering. Every Gaussian has a name, a parent, and a position in a tree that mirrors how humans think about scenes.</p>
+  <p style="color: var(--ink); font-weight: 600; margin-top: 30px;">Nikita Gorshkov, Founder</p>
+  <p>github.com/feamando/sgs</p>
+  <div class="slide-number">8 / 8</div>
+</div>
+
+</body>
+</html>
