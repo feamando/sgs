@@ -106,6 +106,9 @@ class Decomposer:
         # Decode and parse JSON
         output_text = self.sp.decode(generated)
 
+        # Debug: always print raw output
+        print(f"  Raw ({len(generated)} tokens): {output_text[:300]}...")
+
         # Try to extract JSON from the output
         tree = self._parse_tree_json(output_text)
 
