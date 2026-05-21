@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="450" fill="#0a0a0f"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#f5f1e8" font-size="15" font-weight="700">Needle-in-Conversation Experiment (Planck 1.4)</text>
+
+  <!-- Timeline -->
+  <line x1="60" y1="80" x2="740" y2="80" stroke="#1f1f2a" stroke-width="2"/>
+
+  <!-- Turn markers -->
+  <circle cx="100" cy="80" r="6" fill="#8a8598"/>
+  <text x="100" y="100" text-anchor="middle" fill="#8a8598" font-size="9">Turn 1</text>
+
+  <circle cx="200" cy="80" r="6" fill="#8a8598"/>
+  <text x="200" y="100" text-anchor="middle" fill="#8a8598" font-size="9">Turn 5</text>
+
+  <!-- Needle turn -->
+  <circle cx="300" cy="80" r="10" fill="#ffb347" stroke="#ffb347" stroke-width="2"/>
+  <text x="300" y="84" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">N</text>
+  <text x="300" y="100" text-anchor="middle" fill="#ffb347" font-size="9" font-weight="600">Turn 10</text>
+  <text x="300" y="113" text-anchor="middle" fill="#ffb347" font-size="8">NEEDLE</text>
+
+  <!-- Filler turns -->
+  <circle cx="400" cy="80" r="4" fill="#8a8598"/>
+  <circle cx="430" cy="80" r="4" fill="#8a8598"/>
+  <circle cx="460" cy="80" r="4" fill="#8a8598"/>
+  <text x="430" y="100" text-anchor="middle" fill="#8a8598" font-size="9">... 89 filler turns ...</text>
+
+  <!-- Query turn -->
+  <circle cx="680" cy="80" r="10" fill="#6bcfff" stroke="#6bcfff" stroke-width="2"/>
+  <text x="680" y="84" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">Q</text>
+  <text x="680" y="100" text-anchor="middle" fill="#6bcfff" font-size="9" font-weight="600">Turn 100</text>
+  <text x="680" y="113" text-anchor="middle" fill="#6bcfff" font-size="8">QUERY</text>
+
+  <!-- Needle content -->
+  <rect x="180" y="125" width="240" height="30" rx="5" fill="#2a2a1a" stroke="#ffb347"/>
+  <text x="300" y="144" text-anchor="middle" fill="#ffb347" font-size="10">"The largest planet is Jupiter"</text>
+
+  <!-- Query content -->
+  <rect x="560" y="125" width="240" height="30" rx="5" fill="#1a2a2e" stroke="#6bcfff"/>
+  <text x="680" y="144" text-anchor="middle" fill="#6bcfff" font-size="10">"What is the largest planet?"</text>
+
+  <!-- Blob Store section -->
+  <text x="400" y="185" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="600">BLOB STORE (100 blobs written, one per turn)</text>
+
+  <rect x="100" y="195" width="600" height="40" rx="5" fill="#12121a" stroke="#1f1f2a"/>
+  <!-- Mini blobs -->
+  <circle cx="130" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="155" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="180" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="205" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="230" cy="215" r="10" fill="#ffb347"/>
+  <text x="230" y="219" text-anchor="middle" fill="#0a0a0f" font-size="7" font-weight="700">10</text>
+  <circle cx="260" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="285" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="310" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <text x="360" y="219" fill="#8a8598" font-size="10">...</text>
+  <circle cx="420" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="445" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="470" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="495" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="520" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="545" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="570" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="595" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="620" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="645" cy="215" r="6" fill="#8a8598" opacity="0.4"/>
+  <circle cx="670" cy="215" r="6" fill="#6bcfff" opacity="0.6"/>
+
+  <!-- Retrieval arrow -->
+  <path d="M680 155 L680 195" stroke="#6bcfff" stroke-width="2" marker-end="url(#arrowB)"/>
+  <text x="720" y="178" fill="#6bcfff" font-size="9">cosine</text>
+  <text x="720" y="189" fill="#6bcfff" font-size="9">match</text>
+
+  <!-- Match line -->
+  <path d="M230 225 L400 270" stroke="#4ade80" stroke-width="2" stroke-dasharray="4,3"/>
+  <path d="M680 225 L500 270" stroke="#6bcfff" stroke-width="2" stroke-dasharray="4,3"/>
+
+  <!-- Results box -->
+  <rect x="150" y="260" width="500" height="100" rx="8" fill="#12121a" stroke="#1f1f2a" stroke-width="2"/>
+  <text x="400" y="285" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">RESULTS (10 trials, 100 turns each)</text>
+
+  <!-- Result rows -->
+  <rect x="180" y="298" width="200" height="22" rx="4" fill="#1a2e1a"/>
+  <text x="280" y="313" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="600">Similarity-only: 40% retrieval</text>
+
+  <rect x="180" y="324" width="200" height="22" rx="4" fill="#2e1a1a"/>
+  <text x="280" y="339" text-anchor="middle" fill="#ff6b6b" font-size="10">Hybrid (decay=0.05): 0%</text>
+
+  <rect x="420" y="298" width="200" height="22" rx="4" fill="#2e1a1a"/>
+  <text x="520" y="313" text-anchor="middle" fill="#ff6b6b" font-size="10">No-retrieval: 0%</text>
+
+  <rect x="420" y="324" width="200" height="22" rx="4" fill="#1a1a2e"/>
+  <text x="520" y="339" text-anchor="middle" fill="#8a8598" font-size="10">Generation recall: 0% (expected)</text>
+
+  <!-- Bottom insight -->
+  <rect x="150" y="380" width="500" height="50" rx="6" fill="#1a2e1a" stroke="#4ade80" stroke-width="1"/>
+  <text x="400" y="400" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="600">Retrieval mechanism works. Model scale is the bottleneck.</text>
+  <text x="400" y="418" text-anchor="middle" fill="#8a8598" font-size="10">At Hertz scale (1B) with instruction tuning, generation gap closes.</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#6bcfff" stroke-width="1.5"/>
+    </marker>
+  </defs>
+</svg>
