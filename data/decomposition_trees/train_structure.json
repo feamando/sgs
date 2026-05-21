@@ -1,0 +1,4437 @@
+[
+  {
+    "prompt": "a castle on a hill",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            -0.8,
+            0.8,
+            0.5
+          ],
+          "scale": 0.3,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tower",
+          "position": [
+            0.8,
+            0.8,
+            0.5
+          ],
+          "scale": 0.3,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.7,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a red barn in a green field",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.5,
+            0,
+            0.5
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a lighthouse on rocky cliffs",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.5,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rock",
+          "position": [
+            -0.5,
+            -0.3,
+            0
+          ]
+        },
+        {
+          "name": "rock",
+          "position": [
+            0.5,
+            -0.4,
+            0.3
+          ],
+          "scale": 0.8
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            -1.0,
+            1.5
+          ],
+          "scale": 1.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a pirate ship on the ocean",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "boat",
+          "position": [
+            0,
+            0.1,
+            0
+          ],
+          "scale": 1.2,
+          "children": [
+            {
+              "name": "hull",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "mast",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            },
+            {
+              "name": "sail",
+              "position": [
+                0.1,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 3.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a treehouse in a tall oak",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tree",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "scale": 1.5,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "house",
+          "position": [
+            0.1,
+            1.2,
+            0
+          ],
+          "scale": 0.3,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a windmill in a tulip field",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "bush",
+          "position": [
+            1.0,
+            -0.3,
+            0.5
+          ],
+          "scale": 0.4
+        },
+        {
+          "name": "bush",
+          "position": [
+            -1.0,
+            -0.3,
+            -0.5
+          ],
+          "scale": 0.4
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a bridge over a river",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "box_gaussians",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a campfire in a forest clearing",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.1,
+            0
+          ],
+          "scale": 0.3
+        },
+        {
+          "name": "tree",
+          "position": [
+            -1.5,
+            0,
+            1
+          ],
+          "scale": 0.7,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.5,
+            0,
+            -0.5
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.3,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a snowman in a winter garden",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ball",
+          "position": [
+            0,
+            -0.1,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.35
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.55,
+            0
+          ],
+          "scale": 0.25
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a robot in a factory",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "box_gaussians",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.4
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.7,
+            0
+          ],
+          "scale": 0.2
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a dragon on a mountain peak",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "rock",
+          "position": [
+            0,
+            -0.3,
+            0
+          ],
+          "scale": 1.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.5,
+            0
+          ],
+          "scale": 0.6
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a cottage with a chimney",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.7,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "chimney",
+          "position": [
+            0.3,
+            0.6,
+            0
+          ],
+          "scale": 0.3
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a fountain in a courtyard",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "cylinder_obj",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.3
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.1,
+            0
+          ],
+          "scale": 0.8
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a rocket on a launch pad",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.5,
+            0
+          ],
+          "scale": 0.4,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 1.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a sailboat near an island",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "boat",
+          "position": [
+            -0.8,
+            0,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "hull",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "mast",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            },
+            {
+              "name": "sail",
+              "position": [
+                0.1,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rock",
+          "position": [
+            1.2,
+            -0.2,
+            0
+          ],
+          "scale": 0.8
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.3,
+            0.3,
+            0
+          ],
+          "scale": 0.4,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 3.0
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a temple in the jungle",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            -1.5,
+            0.2,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.5,
+            0.2,
+            0.5
+          ],
+          "scale": 0.7,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a helicopter on a rooftop",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "house",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.5,
+            0
+          ],
+          "scale": 0.3
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a tower with a clock",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.3,
+            0
+          ],
+          "scale": 0.7,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.8,
+            0.25
+          ],
+          "scale": 0.1
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 1.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a log cabin by a lake",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "house",
+          "position": [
+            -0.5,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "water",
+          "position": [
+            1.0,
+            -0.4,
+            0
+          ],
+          "scale": 1.5
+        },
+        {
+          "name": "tree",
+          "position": [
+            -1.5,
+            0.2,
+            0.5
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a crane at a construction site",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.8,
+            0
+          ],
+          "scale": 0.3,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "box_gaussians",
+          "position": [
+            1.0,
+            -0.2,
+            0
+          ],
+          "scale": 0.4
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a church on a village green",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a submarine surfacing",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "boat",
+          "position": [
+            0,
+            0.1,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "hull",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "mast",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            },
+            {
+              "name": "sail",
+              "position": [
+                0.1,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a hot air balloon over fields",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a train at a station",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a ferris wheel by the pier",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a greenhouse with plants",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a pagoda in a zen garden",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "bush",
+          "position": [
+            1.32,
+            -0.3,
+            -0.46
+          ],
+          "scale": 0.3
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a waterfall into a pool",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a volcano at sunset",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a farm with a silo",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a playground with a slide",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a piano on a stage",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a telescope on a cliff",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "rock",
+          "position": [
+            0.42,
+            -0.2,
+            0.08
+          ],
+          "scale": 0.7
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a throne in a hall",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a well in a square",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a tent in the desert",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "sand",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a birdhouse on a pole",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a lantern on a post",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "lamp",
+          "position": [
+            0.8,
+            0,
+            0.3
+          ],
+          "scale": 0.4,
+          "children": [
+            {
+              "name": "post",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "light",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a swing from a tree branch",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tree",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.4,
+            0.1,
+            -0.37
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            -1.3,
+            0.1,
+            0.42
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a mushroom in the woods",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.37,
+            0.1,
+            0.39
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "bush",
+          "position": [
+            1.21,
+            -0.3,
+            0.14
+          ],
+          "scale": 0.3
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a cactus in the desert",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "sand",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a crown on a cushion",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a sword in stone",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "rock",
+          "position": [
+            0.98,
+            -0.2,
+            -0.06
+          ],
+          "scale": 0.7
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a candle on a table",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a globe on a desk",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a chess set on a board",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a guitar on a stand",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a trophy on a shelf",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a ship in a bottle",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "boat",
+          "position": [
+            0,
+            0.1,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "hull",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "mast",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            },
+            {
+              "name": "sail",
+              "position": [
+                0.1,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a flower in a vase",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "bush",
+          "position": [
+            0.59,
+            -0.3,
+            0.1
+          ],
+          "scale": 0.3
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a flag on a flagpole",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a bell in a tower",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a lamp on a nightstand",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "lamp",
+          "position": [
+            0.8,
+            0,
+            0.3
+          ],
+          "scale": 0.4,
+          "children": [
+            {
+              "name": "post",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "light",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a painting on a wall",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a window with shutters",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a door with an arch",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a gate with pillars",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a fence around a yard",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a path through meadows",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a dock on still water",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a bench under a tree",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tree",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.22,
+            0.1,
+            -0.46
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            -1.3,
+            0.1,
+            -0.34
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a statue in a park",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a pyramid in sand",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "sand",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a dome on columns",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "an arch over a path",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a staircase in a tower",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a balcony with flowers",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a weathervane on a barn",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a sundial on a pedestal",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "an anchor on a beach",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "sand",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a drawbridge over water",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a turret on a wall",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a catapult on grass",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a wagon on a trail",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a windmill by the sea",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a covered bridge",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a stone circle on a plain",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "rock",
+          "position": [
+            -0.81,
+            -0.2,
+            0.23
+          ],
+          "scale": 0.7
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a totem pole in forest",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tree",
+          "position": [
+            1.5,
+            0.1,
+            -0.2
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a gazebo in a park",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a obelisk in a plaza",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a minaret at dawn",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a water tower on a hill",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0.4,
+            0
+          ],
+          "scale": 0.5,
+          "children": [
+            {
+              "name": "body",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a grain elevator by tracks",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a fire truck at a station",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a biplane in the sky",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a gondola on a canal",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "boat",
+          "position": [
+            0,
+            0.1,
+            0
+          ],
+          "scale": 0.8,
+          "children": [
+            {
+              "name": "hull",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "mast",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            },
+            {
+              "name": "sail",
+              "position": [
+                0.1,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a rickshaw on a street",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a yurt on a steppe",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a igloo under aurora",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a houseboat on a river",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "water",
+          "position": [
+            0,
+            -0.6,
+            0
+          ],
+          "scale": 2.5
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a treestump with mushrooms",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a beehive on a branch",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "tree",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "children": [
+            {
+              "name": "trunk",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "canopy",
+              "position": [
+                0,
+                0.5,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a anthill in grass",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a scarecrow in a field",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a mailbox at a road",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a phone booth on a corner",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "house",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.6,
+          "children": [
+            {
+              "name": "walls",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "roof",
+              "position": [
+                0,
+                0.4,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a bus stop with bench",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a streetlight at dusk",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        },
+        {
+          "name": "lamp",
+          "position": [
+            0.8,
+            0,
+            0.3
+          ],
+          "scale": 0.4,
+          "children": [
+            {
+              "name": "post",
+              "position": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "name": "light",
+              "position": [
+                0,
+                0.6,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a fire hydrant on sidewalk",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a manhole in a road",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "a park fountain at night",
+    "tree": {
+      "name": "scene",
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "children": [
+        {
+          "name": "ground",
+          "position": [
+            0,
+            -0.5,
+            0
+          ],
+          "scale": 2.0
+        },
+        {
+          "name": "ball",
+          "position": [
+            0,
+            0.2,
+            0
+          ],
+          "scale": 0.5
+        }
+      ]
+    }
+  }
+]
