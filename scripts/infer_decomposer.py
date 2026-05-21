@@ -112,8 +112,22 @@ class Decomposer:
         # If we got a tree, fill in gaussians procedurally for leaf nodes
         if tree:
             self._fill_gaussians(tree)
+            self._shift_above_ground(tree)
 
         return tree
+
+    def _shift_above_ground(self, tree: dict):
+        """Shift the entire scene so all Gaussians sit above Y=0."""
+        from src.raum.decomposition import CompositionNode, tree_to_tensors
+        node = CompositionNode.from_dict(tree)
+        tensors = tree_to_tensors(node)
+        if tensors["means"].shape[0] == 0:
+            return
+        min_y = tensors["means"][:, 1].min().item()
+        if min_y < 0:
+            # Shift root position up
+            pos = tree.get("position", [0, 0, 0])
+            tree["position"] = [pos[0], pos[1] - min_y + 0.1, pos[2]]
 
     def _fill_gaussians(self, node: dict):
         """Recursively fill leaf nodes with procedural Gaussians based on name."""
