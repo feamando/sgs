@@ -30,8 +30,8 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
   padding: 80px 80px 60px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  background-image: radial-gradient(circle, rgba(255,179,71,0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(255,179,71,0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* Fixed header navigation */
@@ -273,12 +273,11 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
   <h3>Current text-to-3D produces monolithic, non-divisible output</h3>
   <div class="grid-2">
     <div>
-      <p>Today's generative approaches predict pixels or radiance fields directly through diffusion. They do not produce structured, decomposed, editable scenes.</p>
+      <p>Today's generative approaches predict pixels or radiance fields directly through diffusion. They do not produce structured, decomposed, editable scenes. None use compositional Gaussians. None produce labeled parts. None allow editing without full re-generation.</p>
       <ul>
         <li><span class="coral">Video diffusion</span> (Sora, Runway): generates frame sequences. Output is non-divisible video, not 3D objects.</li>
         <li><span class="coral">Image diffusion</span> (DALL-E, Midjourney): produces flat rasters. No geometry, no depth, no parts.</li>
         <li><span class="coral">3D diffusion</span> (DreamFusion, Point-E): predicts radiance fields or point clouds directly. Output is an opaque volume of floats.</li>
-        <li>None use compositional Gaussians. None produce labeled parts. None allow editing without full re-generation.</li>
       </ul>
     </div>
     <div>
@@ -532,8 +531,8 @@ PROMPT: "a castle on a hill"
 
 <!-- SLIDE 9: Demonstration - Hand-Authored -->
 <div class="slide" id="results-hand">
-  <h2>Demonstration: Hand-Authored (Target Quality)</h2>
-  <p>These scenes represent what the pipeline produces with a capable decomposer. Hand-authored composition trees rendered through the same pipeline, demonstrating the target quality for Hertz-scale generation.</p>
+  <h2>Demonstration: Hand-Authored (Iteration 2 with Larger Model)</h2>
+  <p>These scenes demonstrate what the pipeline produces with a more capable decomposer. Hand-authored composition trees rendered through the same pipeline, representing the output quality expected from Hertz-scale (1B+) generation.</p>
   <div class="grid-3">
     <div>
       <img src="img/castle.png" alt="Castle on a hill, 1124 Gaussians" class="scene-img"/>
@@ -600,33 +599,56 @@ PROMPT: "a castle on a hill"
 <!-- SLIDE 11: Roadmap -->
 <div class="slide" id="roadmap">
   <h2>Roadmap</h2>
-  <h3>Key milestones</h3>
-  <iframe src="../../pm/index.html" style="width:100%;height:400px;border:1px solid var(--border);border-radius:8px;margin-top:20px;"></iframe>
-  <div class="timeline" style="margin-top: 30px;">
-    <div class="timeline-item">
-      <div class="timeline-dot done"></div>
-      <div class="timeline-content"><strong>Planck 1.3</strong> (complete)<br/><span>100M param LM trained on Wikipedia. Blob retrieval proven at 40% recall over 90 turns.</span></div>
+  <h3>From proof-of-concept to production API</h3>
+  <div class="grid-2">
+    <div>
+      <h3 style="color: var(--green);">Completed</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-content"><strong>Planck 1.0-1.3</strong><br/><span>100M LM, Wikipedia base, blob retrieval (40% recall at 90 turns)</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-content"><strong>Raum 0.1</strong><br/><span>300-class text-to-3D demo, editable DSL, spatial relations</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-content"><strong>Raum 1.3</strong><br/><span>Recursive decomposition pipeline, 5 scenes, WebGL renderer</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-content"><strong>JMLR Submission</strong><br/><span>Alpha-compositing superset proof, Lean 4 verified</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-content"><strong>Planck 1.4</strong><br/><span>Conversation memory blobs, per-turn storage, hybrid retrieval</span></div>
+        </div>
+      </div>
     </div>
-    <div class="timeline-item">
-      <div class="timeline-dot done"></div>
-      <div class="timeline-content"><strong>Raum 1.3</strong> (complete)<br/><span>Full recursive decomposition pipeline. 300-class vocabulary. DSL v1. 5+ hand-authored scenes. WebGL renderer.</span></div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot done"></div>
-      <div class="timeline-content"><strong>Lean 4 Proof</strong> (complete)<br/><span>Alpha-compositing superset theorem formally verified. Paper submitted to JMLR.</span></div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot next"></div>
-      <div class="timeline-content"><strong>Hertz 1.2</strong> (in progress)<br/><span>1B param model. Larger context window. Conditional tree generation for interactive editing.</span></div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-dot next"></div>
-      <div class="timeline-content"><strong>API Beta</strong> (Q4 2026)<br/><span>Prompt to structured 3D JSON + real-time render. SDK for Unity and Unreal Engine.</span></div>
+    <div>
+      <h3 style="color: var(--accent-coral);">Next</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot next"></div>
+          <div class="timeline-content"><strong>Hertz 1.2</strong> (Q3 2026)<br/><span>1B param model, 2048 context, conditional tree generation</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot next"></div>
+          <div class="timeline-content"><strong>Raum 2.0</strong> (Q3 2026)<br/><span>Hertz-powered decomposer, learned geometry, real-time editing</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot next"></div>
+          <div class="timeline-content"><strong>API Beta</strong> (Q4 2026)<br/><span>REST API: prompt to structured 3D JSON + render endpoint</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot next"></div>
+          <div class="timeline-content"><strong>SDK</strong> (Q1 2027)<br/><span>Unity and Unreal Engine plugins, streaming scene updates</span></div>
+        </div>
+      </div>
     </div>
   </div>
-  <p style="margin-top: 20px; font-size: 14px; color: var(--ink-dim); font-family: ui-monospace, monospace;">
-    Interactive roadmap above. If the iframe does not load, open <span class="highlight">pm/index.html</span> directly in your browser.
-  </p>
+  <p style="margin-top: 24px; font-size: 13px; color: var(--ink-dim);">Full interactive roadmap visualizer: <span class="highlight">pm/index.html</span> in the repository (reads roadmap.md and renders swimlanes).</p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
     <span class="slide-number">11 / 12</span>
