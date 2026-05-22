@@ -34,14 +34,29 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
   break-after: page;
 }
 @page {
-  size: 13.333in 7.5in;
+  size: landscape;
   margin: 0;
 }
 @media print {
-  .slide { min-height: auto; height: 7.5in; width: 13.333in; overflow: hidden; padding: 50px 60px 40px; }
-  .site-header { display: none; }
-  #title-canvas { display: none; }
-  body { background: var(--bg); }
+  html, body { height: auto; background: #0a0a0f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .slide {
+    min-height: 0;
+    height: 100vh;
+    padding: 40px 60px 30px;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    background-color: #0a0a0f !important;
+  }
+  .slide:last-child { page-break-after: avoid; }
+  .site-header { display: none !important; }
+  #title-canvas { display: none !important; }
+  #title { background: #0a0a0f !important; }
+  .card { background: #12121a !important; border-color: #1f1f2a !important; }
+  h1 { font-size: 36px; }
+  h2 { font-size: 26px; }
+  p { font-size: 14px; }
+  ul li { font-size: 13px; }
 }
 /* Title slide gets the animated dithering background */
 #title {
