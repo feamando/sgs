@@ -191,7 +191,7 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
 
 .innovations-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
   margin-top: 24px;
 }
@@ -230,13 +230,15 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
   <nav>
     <ul class="header-nav">
       <li><a href="#title">Title</a></li>
-      <li><a href="#blobs">Blobs</a></li>
       <li><a href="#problem">Problem</a></li>
       <li><a href="#solution">Solution</a></li>
+      <li><a href="#sgs">SGS</a></li>
+      <li><a href="#blobs">Blobs</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
       <li><a href="#innovations">Innovations</a></li>
-      <li><a href="#results-hand">Results</a></li>
       <li><a href="#results-model">Model</a></li>
-      <li><a href="#applications">Applications</a></li>
+      <li><a href="#results-hand">Hand</a></li>
+      <li><a href="#applications">Apps</a></li>
       <li><a href="#roadmap">Roadmap</a></li>
       <li><a href="#ask">Ask</a></li>
     </ul>
@@ -257,33 +259,133 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
     <div class="brand-name">Radiance Labs</div>
   </div>
   <h1>Structured 3D from Language.<br/>Every Gaussian Has a Name.</h1>
-  <p>Recursive semantic-to-geometric decomposition via Gaussian splatting. Text in, editable 3D scene graphs out.</p>
+  <p>Recursive semantic-to-geometric decomposition via Gaussian splatting. A language model breaks prompts into composition trees, each leaf becomes a named, positioned Gaussian primitive, and the full scene renders in real time.</p>
   <p style="color: var(--ink-dim); font-size: 14px; margin-top: 40px;">May 2026 / Pre-seed</p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">1 / 10</span>
+    <span class="slide-number">1 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 2: What are Semantic Gaussian Blobs? -->
+<!-- SLIDE 2: The Problem -->
+<div class="slide" id="problem">
+  <h2>The Problem</h2>
+  <h3>Current text-to-3D produces monolithic, non-divisible output</h3>
+  <div class="grid-2">
+    <div>
+      <p>Today's generative approaches predict pixels or radiance fields directly through diffusion. They do not produce structured, decomposed, editable scenes.</p>
+      <ul>
+        <li><span class="coral">Video diffusion</span> (Sora, Runway): generates frame sequences. Output is non-divisible video, not 3D objects.</li>
+        <li><span class="coral">Image diffusion</span> (DALL-E, Midjourney): produces flat rasters. No geometry, no depth, no parts.</li>
+        <li><span class="coral">3D diffusion</span> (DreamFusion, Point-E): predicts radiance fields or point clouds directly. Output is an opaque volume of floats.</li>
+        <li>None use compositional Gaussians. None produce labeled parts. None allow editing without full re-generation.</li>
+      </ul>
+    </div>
+    <div>
+      <p style="font-size: 15px; margin-bottom: 16px;">The gap in the market:</p>
+      <div class="card" style="margin-bottom: 16px;">
+        <h3 style="color: var(--accent-coral);">Monolithic (Status Quo)</h3>
+        <p>Input: prompt. Output: 10M unstructured floats (pixels, voxels, radiance values). No parts. No labels. No semantic structure. Edit: start over entirely.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--green);">Structured (SGS)</h3>
+        <p>Input: prompt. Output: a complete Gaussian space, renderable, physically accurate, decomposed into atomic blobs with names and a tree hierarchy. Edit: change one node, re-render in milliseconds.</p>
+      </div>
+      <p style="font-size: 14px; margin-top: 16px;">No existing system delivers compositional structure, semantic labels, queryable parts, or editing without re-generation. We fill that gap using emerging Gaussian splatting technology.</p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
+    <span class="slide-number">2 / 12</span>
+  </div>
+</div>
+
+<!-- SLIDE 3: Our Solution (overview) -->
+<div class="slide" id="solution">
+  <h2>Our Solution</h2>
+  <h3>Recursive Semantic-to-Geometric Decomposition (RSGD)</h3>
+  <p>A language model decomposes prompts into <span class="highlight">composition trees</span>. Each node is a named sub-concept with spatial relations. Terminal nodes become individual Gaussian splats with semantic embeddings. The tree IS the editable representation.</p>
+  <div class="arch-diagram">
+"a castle on a hill"
+        |
+        v
+  [Decomposer LM]  -->  Composition Tree:
+        |                   scene
+        v                   +-- castle (pos=[0,0.8,0])
+  [Recursive                |   +-- tower_1 (cylinder + cone)
+   Renderer]                |   +-- tower_2 (cylinder + cone)
+        |                   |   +-- keep (box + cone)
+        v                   |   +-- gate (arch)
+  [3D Gaussians             +-- hill (dome, green)
+   + Embeddings]
+        |
+        v
+  Editable Scene Graph + Real-time 3D Render + Semantic Query</div>
+  <p style="margin-top: 20px;">Each blob carries its label and embedding. The scene graph is the representation. No separate mesh, no baking, no re-generation needed for edits.</p>
+  <div class="slide-footer">
+    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
+    <span class="slide-number">3 / 12</span>
+  </div>
+</div>
+
+<!-- SLIDE 4: What is Semantic Gaussian Splatting? -->
+<div class="slide" id="sgs">
+  <h2>What Is Semantic Gaussian Splatting?</h2>
+  <p>SGS is the rendering formalism that unifies language understanding and 3D geometry under one equation. A single Gaussian primitive encodes both spatial structure and semantic meaning.</p>
+  <div class="grid-2">
+    <div>
+      <h3>The SGS Primitive</h3>
+      <p style="font-size: 15px; font-family: ui-monospace, monospace; color: var(--ink); margin-bottom: 20px;">G = (mu, Sigma, alpha, f)</p>
+      <ul>
+        <li><span class="highlight">mu</span> (position): center point in splatting space</li>
+        <li><span class="highlight">Sigma</span> (covariance): shape and orientation of the ellipsoid</li>
+        <li><span class="highlight">alpha</span> (opacity): transmittance weight during rendering</li>
+        <li><span class="highlight">f</span> (features): semantic embedding vector encoding meaning</li>
+      </ul>
+      <h3 style="margin-top: 24px;">Key Insight</h3>
+      <p style="font-size: 15px;">The same alpha-compositing rendering equation governs both language understanding (attention as transmittance-weighted feature aggregation) and 3D geometry (Gaussian splatting). This is not an analogy. It is a mathematical identity, proven in Lean 4 and submitted to JMLR.</p>
+    </div>
+    <div>
+      <h3>Multi-Pass Transmittance Rendering</h3>
+      <div class="card" style="margin-bottom: 16px;">
+        <h3 style="font-size: 14px;">Rendering Equation</h3>
+        <p style="font-family: ui-monospace, monospace; font-size: 13px;">C(x) = sum_i( T_i * alpha_i * f_i )<br/>T_i = prod_j&lt;i( 1 - alpha_j )<br/><br/>Where T_i is accumulated transmittance,<br/>alpha_i is per-Gaussian opacity,<br/>f_i is the feature vector (color, embedding, or both).</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size: 14px;">Why This Matters</h3>
+        <p>Softmax attention is a special case of this equation (proved). Any transformer layer can be expressed as alpha-compositing over Gaussians. This means SGS can represent anything a language model can, plus explicit 3D structure.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">
+    Superset proof formally verified in Lean 4. Paper submitted to JMLR (Journal of Machine Learning Research), 2026. Preprint available at docs/papers/ in the repository.
+  </div>
+  <div class="slide-footer">
+    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
+    <span class="slide-number">4 / 12</span>
+  </div>
+</div>
+
+<!-- SLIDE 5: What are Semantic Gaussian Blobs? -->
 <div class="slide" id="blobs">
   <h2>What Are Semantic Gaussian Blobs?</h2>
-  <p>A Gaussian blob is the atomic unit of SGS: a 3D ellipsoid that stores both geometric shape and semantic meaning in a single structure.</p>
+  <p>A blob is a pre-computed chunk of meaning stored as a Gaussian. One blob equals one passage, concept, or object compressed into a single primitive. Blobs bridge language memory and 3D scene composition.</p>
   <div class="grid-2">
     <div>
       <h3>Anatomy of a Blob</h3>
       <ul>
-        <li><span class="highlight">Position</span> (x, y, z) in 3D space</li>
-        <li><span class="highlight">Covariance</span> (shape and orientation of the ellipsoid)</li>
-        <li><span class="highlight">Color + Opacity</span> (visual appearance)</li>
-        <li><span class="highlight">Semantic embedding</span> (what it means, as a vector)</li>
-        <li><span class="highlight">Label</span> (human-readable name: "tower_1", "roof")</li>
+        <li><span class="highlight">Position</span> (x, y, z) in representation space</li>
+        <li><span class="highlight">Covariance</span> (shape and orientation of the distribution)</li>
+        <li><span class="highlight">Opacity</span> (contribution weight during alpha-compositing)</li>
+        <li><span class="highlight">Semantic embedding</span> (the meaning it encodes, as a vector)</li>
+        <li><span class="highlight">Label</span> (human-readable name: "tower_1", "roof", "concept_42")</li>
       </ul>
       <h3 style="margin-top: 24px;">Two-Pass Rendering</h3>
       <ul>
-        <li><span class="green">Pass 1:</span> Semantic query via cosine similarity over blob embeddings</li>
-        <li><span class="green">Pass 2:</span> Geometric alpha-compositing of matched blobs into pixels</li>
+        <li><span class="green">Pass 1 (blobs):</span> Retrieve background knowledge by cosine similarity over blob embeddings. These form the scene context.</li>
+        <li><span class="green">Pass 2 (words):</span> Alpha-composite the current input (word-level Gaussians) over the retrieved blob layer.</li>
       </ul>
+      <p style="font-size: 14px; margin-top: 16px;">This two-pass design lets the system recall prior scenes, reuse memorized components, and compose new structures from existing blobs without retraining.</p>
     </div>
     <div class="blob-diagram">
       <svg width="320" height="280" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
@@ -307,86 +409,72 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
         <line x1="100" y1="155" x2="50" y2="200" stroke="#8a8598" stroke-width="0.5" stroke-dasharray="3,3"/>
         <text x="15" y="215" fill="#ffb347" font-size="9" font-family="ui-monospace, monospace">label: "tower_1"</text>
         <!-- Alpha compositing note -->
-        <text x="160" y="265" text-anchor="middle" fill="#4ade80" font-size="10" font-family="ui-monospace, monospace">alpha-compositing = superset of softmax attention</text>
+        <text x="160" y="265" text-anchor="middle" fill="#4ade80" font-size="10" font-family="ui-monospace, monospace">retrieved by similarity, rendered via alpha-compositing</text>
       </svg>
     </div>
   </div>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">2 / 10</span>
+    <span class="slide-number">5 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 3: Problem -->
-<div class="slide" id="problem">
-  <h2>The Problem</h2>
-  <h3>Text-to-3D is stuck at monolithic generation</h3>
+<!-- SLIDE 6: How We Use SGS + Blobs to Render -->
+<div class="slide" id="pipeline">
+  <h2>How We Use SGS + Blobs to Render</h2>
+  <h3>The full rendering pipeline from prompt to final scene</h3>
   <div class="grid-2">
     <div>
-      <p>Current systems (DreamFusion, DALL-E 3D, Point-E) produce <span class="coral">opaque blobs</span>. No parts. No labels. No editing without full re-generation.</p>
+      <p style="font-size: 15px;">The pipeline connects language decomposition to geometric rendering through four stages, each using the same alpha-compositing math.</p>
       <ul>
-        <li>Cannot change roof color without regenerating the entire scene</li>
-        <li>Cannot move one object without affecting others</li>
-        <li>Cannot query "what is left of the gate?"</li>
-        <li>Cannot compose scenes from reusable parts</li>
-        <li>1-4 GPU-hours per scene, $50-200 per generation</li>
-        <li>No structured output, only pixel grids or point clouds</li>
+        <li><span class="highlight">1. Decomposition:</span> The Decomposer LM parses a prompt into a composition tree. Each node is a named sub-concept with position, shape class, and spatial relations to siblings.</li>
+        <li><span class="highlight">2. Blob Mapping:</span> Each tree node maps to a distribution over possible shapes (blobs from the vocabulary). Known shapes resolve instantly; novel shapes use OOV nearest-neighbor lookup.</li>
+        <li><span class="highlight">3. Gaussian Instantiation:</span> Terminal nodes become individual Gaussians with learned parameters (mu, Sigma, alpha, f). Internal nodes aggregate their children.</li>
+        <li><span class="highlight">4. Alpha-Compositing:</span> The full scene renders via front-to-back transmittance-weighted compositing. Mathematically identical to attention, but producing 3D pixels.</li>
       </ul>
     </div>
-    <div>
-      <p style="font-size: 15px; margin-bottom: 16px;">Compare the two paradigms:</p>
-      <div class="card" style="margin-bottom: 16px;">
-        <h3 style="color: var(--accent-coral);">Monolithic (Status Quo)</h3>
-        <p>Input: prompt. Output: 10M unstructured floats. Edit: start over.</p>
-      </div>
-      <div class="card">
-        <h3 style="color: var(--green);">Structured (SGS)</h3>
-        <p>Input: prompt. Output: labeled tree of named Gaussians. Edit: change one node, re-render in milliseconds.</p>
-      </div>
-    </div>
+    <div class="arch-diagram" style="font-size: 12px; line-height: 1.6;">
+PROMPT: "a castle on a hill"
+           |
+           v
+    +----------------+
+    | DECOMPOSER LM  |  (Planck 1.3 / Hertz 1.2)
+    +----------------+
+           |
+           v  (composition tree JSON)
+    +----------------+
+    | BLOB MAPPING   |  shape vocabulary lookup
+    +----------------+  OOV: GloVe cosine NN
+           |
+           v  (blob IDs + positions)
+    +----------------+
+    | INSTANTIATION  |  G = (mu, Sigma, alpha, f)
+    +----------------+  per terminal node
+           |
+           v  (flat Gaussian list)
+    +----------------+
+    | ALPHA-COMPOSE  |  C(x) = sum(T_i * a_i * f_i)
+    +----------------+
+           |
+           v
+    RENDERED 3D SCENE
+    (editable, queryable, labeled)</div>
   </div>
+  <p style="margin-top: 20px; font-size: 15px;">The same mathematical operation (transmittance-weighted sum) appears at every stage. This is not a coincidence. It is why the system works: language decomposition and geometric rendering share a single formalism.</p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">3 / 10</span>
+    <span class="slide-number">6 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 4: Solution -->
-<div class="slide" id="solution">
-  <h2>Our Solution</h2>
-  <h3>Recursive Semantic-to-Geometric Decomposition (RSGD)</h3>
-  <p>A language model decomposes prompts into <span class="highlight">composition trees</span>. Each node is a named sub-concept with spatial relations. Terminal nodes become individual Gaussian splats with semantic embeddings.</p>
-  <div class="arch-diagram">
-"a castle on a hill"
-        |
-        v
-  [Decomposer LM]  -->  Composition Tree:
-        |                   scene
-        v                   +-- castle (pos=[0,0.8,0])
-  [Recursive                |   +-- tower_1 (cylinder + cone)
-   Renderer]                |   +-- tower_2 (cylinder + cone)
-        |                   |   +-- keep (box + cone)
-        v                   |   +-- gate (arch)
-  [3D Gaussians             +-- hill (dome, green)
-   + Embeddings]
-        |
-        v
-  Editable Scene Graph + Real-time 3D Render + Semantic Query</div>
-  <p style="margin-top: 20px;">Each blob carries its label and embedding. The scene graph is the representation. No separate mesh, no baking, no re-generation needed for edits.</p>
-  <div class="slide-footer">
-    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">4 / 10</span>
-  </div>
-</div>
-
-<!-- SLIDE 5: Key Innovations -->
+<!-- SLIDE 7: Key Innovations -->
 <div class="slide" id="innovations">
   <h2>Key Innovations</h2>
   <h3>Five pillars from theory to implementation</h3>
   <div class="innovations-grid">
     <div class="card">
       <h3>Alpha-Compositing Superset Proof</h3>
-      <p>We prove that Gaussian alpha-compositing is a <span class="highlight">strict superset</span> of softmax attention. This means Gaussian splatting can represent anything a transformer attention layer can, plus geometric structure. Formally verified in Lean 4.</p>
+      <p>We prove that Gaussian alpha-compositing is a <span class="highlight">strict superset</span> of softmax attention. Gaussian splatting can represent anything a transformer attention layer can, plus geometric structure. Formally verified in Lean 4, submitted to JMLR.</p>
     </div>
     <div class="card">
       <h3>Recursive Decomposition</h3>
@@ -400,24 +488,52 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
       <h3>Editable Scene Graphs (DSL v1)</h3>
       <p>A declarative DSL describes scenes as labeled nodes with spatial relations. Users edit nodes by name, reposition, recolor, or swap geometry. Re-render is instantaneous because only affected blobs update.</p>
     </div>
-    <div class="card" style="grid-column: span 2;">
-      <h3>OOV Policy (Out-of-Vocabulary Handling)</h3>
-      <p>When the decomposer encounters an unknown object class, it falls back to GloVe cosine nearest-neighbor lookup across the 300-class vocabulary. This guarantees every token maps to a renderable primitive, even for novel prompts outside training distribution.</p>
+    <div class="card">
+      <h3>OOV Policy (Out-of-Vocabulary)</h3>
+      <p>When the decomposer encounters an unknown object class, it falls back to GloVe cosine nearest-neighbor lookup across the 300-class vocabulary. Every token maps to a renderable primitive, even for novel prompts outside training distribution.</p>
     </div>
-  </div>
-  <div class="footnote">
-    Superset proof formally verified in Lean 4. Paper submitted to JMLR (Journal of Machine Learning Research), 2026. Preprint available at docs/papers/ in the repository.
+    <div class="card" style="opacity: 0;"></div>
   </div>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">5 / 10</span>
+    <span class="slide-number">7 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 6: Results - Hand-authored -->
+<!-- SLIDE 8: Demonstration - Model Generated -->
+<div class="slide" id="results-model">
+  <h2>Demonstration: Model-Generated Results</h2>
+  <p>End-to-end pipeline output from Planck 1.3 (100M params, structure-only generation). Text prompt enters the Decomposer LM, a composition tree is produced, Gaussians render in the browser with full hierarchy and labels.</p>
+  <div class="grid-3">
+    <div>
+      <img src="img/decomposer_castle.png" alt="Model-generated castle in web UI" class="scene-img"/>
+      <div class="scene-img-caption">Prompt: "a castle on a hill"<br/>Decomposer output with tree visible</div>
+    </div>
+    <div>
+      <img src="img/decomposer_ship.png" alt="Model-generated ship in web UI" class="scene-img"/>
+      <div class="scene-img-caption">Prompt: "a pirate ship"<br/>Hull, masts, sails decomposed</div>
+    </div>
+    <div>
+      <img src="img/decomposer_lighthouse.png" alt="Model-generated lighthouse in web UI" class="scene-img"/>
+      <div class="scene-img-caption">Prompt: "a lighthouse on rocks"<br/>Tower, light, rocks, water</div>
+    </div>
+  </div>
+  <p style="margin-top: 24px; font-size: 15px;">Limited by 100M model context (512 tokens). Hertz (1B+) will produce richer trees with deeper hierarchy, more detailed sub-components, and better spatial reasoning.</p>
+  <div class="grid-3" style="margin-top: 20px;">
+    <div class="metric"><div class="value">100M</div><div class="label">Planck 1.3 parameters</div></div>
+    <div class="metric"><div class="value">512</div><div class="label">Max context tokens</div></div>
+    <div class="metric"><div class="value">3</div><div class="label">Hierarchy levels generated</div></div>
+  </div>
+  <div class="slide-footer">
+    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
+    <span class="slide-number">8 / 12</span>
+  </div>
+</div>
+
+<!-- SLIDE 9: Demonstration - Hand-Authored -->
 <div class="slide" id="results-hand">
-  <h2>Results: Hand-Authored Scenes</h2>
-  <p>Scenes authored via the DSL, rendered in real-time in the browser. Each scene is a fully labeled, queryable, editable tree of Gaussian splats.</p>
+  <h2>Demonstration: Hand-Authored (Target Quality)</h2>
+  <p>These scenes represent what the pipeline produces with a capable decomposer. Hand-authored composition trees rendered through the same pipeline, demonstrating the target quality for Hertz-scale generation.</p>
   <div class="grid-3">
     <div>
       <img src="img/castle.png" alt="Castle on a hill, 1124 Gaussians" class="scene-img"/>
@@ -437,47 +553,17 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
     <div class="metric"><div class="value">100%</div><div class="label">Object accuracy<br/>(flat routing, 300 classes)</div></div>
     <div class="metric"><div class="value">60fps</div><div class="label">Render performance<br/>(WebGL, real-time orbit)</div></div>
   </div>
+  <p style="margin-top: 20px; font-size: 14px;">Hand-authored composition trees rendered through the same alpha-compositing pipeline. These demonstrate the target quality for Hertz-scale automated generation.</p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">6 / 10</span>
+    <span class="slide-number">9 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 7: Results - Model-generated -->
-<div class="slide" id="results-model">
-  <h2>Results: Model-Generated Decompositions</h2>
-  <p>End-to-end pipeline: text prompt enters the Decomposer LM, a composition tree is generated, Gaussians are rendered in the browser with full hierarchy and labels.</p>
-  <div class="grid-2">
-    <div>
-      <img src="img/decomposer_castle.png" alt="Model-generated castle in web UI" class="scene-img"/>
-      <div class="scene-img-caption">Decomposer output: castle (web UI, tree visible)</div>
-    </div>
-    <div>
-      <img src="img/decomposer_ship.png" alt="Model-generated ship in web UI" class="scene-img"/>
-      <div class="scene-img-caption">Decomposer output: pirate ship (hull, masts, sails)</div>
-    </div>
-  </div>
-  <div class="grid-2" style="margin-top: 24px;">
-    <div>
-      <img src="img/decomposer_lighthouse.png" alt="Model-generated lighthouse in web UI" class="scene-img"/>
-      <div class="scene-img-caption">Decomposer output: lighthouse (tower, light, rocks, water)</div>
-    </div>
-    <div>
-      <img src="img/decomposer_simple.png" alt="Simple model output" class="scene-img"/>
-      <div class="scene-img-caption">Simplified output view (flat tree, basic geometry)</div>
-    </div>
-  </div>
-  <p style="margin-top: 24px;">The Decomposer LM produces structured JSON trees that map directly to renderable Gaussian scenes. 3 levels of hierarchy, real-time orbit/zoom, editable via the DSL.</p>
-  <div class="slide-footer">
-    <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">7 / 10</span>
-  </div>
-</div>
-
-<!-- SLIDE 8: Applications -->
+<!-- SLIDE 10: Applications -->
 <div class="slide" id="applications">
   <h2>Applications</h2>
-  <h3>Modeled 3D scenes with labeled, queryable, recomposable parts</h3>
+  <h3>Structured, queryable, recomposable 3D scenes</h3>
   <p>Unlike monolithic generation, SGS scenes are structured data. Every part has a name, a parent, a position, and an embedding. This enables applications that require understanding, not just appearance.</p>
   <div class="grid-2">
     <div class="card">
@@ -507,15 +593,16 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
   </div>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">8 / 10</span>
+    <span class="slide-number">10 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 9: Roadmap -->
+<!-- SLIDE 11: Roadmap -->
 <div class="slide" id="roadmap">
   <h2>Roadmap</h2>
   <h3>Key milestones</h3>
-  <div class="timeline">
+  <iframe src="../../pm/index.html" style="width:100%;height:400px;border:1px solid var(--border);border-radius:8px;margin-top:20px;"></iframe>
+  <div class="timeline" style="margin-top: 30px;">
     <div class="timeline-item">
       <div class="timeline-dot done"></div>
       <div class="timeline-content"><strong>Planck 1.3</strong> (complete)<br/><span>100M param LM trained on Wikipedia. Blob retrieval proven at 40% recall over 90 turns.</span></div>
@@ -537,16 +624,16 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
       <div class="timeline-content"><strong>API Beta</strong> (Q4 2026)<br/><span>Prompt to structured 3D JSON + real-time render. SDK for Unity and Unreal Engine.</span></div>
     </div>
   </div>
-  <p style="margin-top: 30px; font-size: 14px; color: var(--ink-dim); font-family: ui-monospace, monospace;">
-    Full roadmap with all sub-milestones available at <span class="highlight">roadmap.md</span> in the repository.
+  <p style="margin-top: 20px; font-size: 14px; color: var(--ink-dim); font-family: ui-monospace, monospace;">
+    Interactive roadmap above. If the iframe does not load, open <span class="highlight">pm/index.html</span> directly in your browser.
   </p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">9 / 10</span>
+    <span class="slide-number">11 / 12</span>
   </div>
 </div>
 
-<!-- SLIDE 10: Team / Ask -->
+<!-- SLIDE 12: Team / Ask -->
 <div class="slide" id="ask">
   <div class="brand">
     <svg class="logo-svg" width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -576,7 +663,7 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
   </p>
   <div class="slide-footer">
     <span>Radiance Labs 2026 / CC-BY-SA / <a href="https://github.com/feamando/sgs">github.com/feamando/sgs</a></span>
-    <span class="slide-number">10 / 10</span>
+    <span class="slide-number">12 / 12</span>
   </div>
 </div>
 
