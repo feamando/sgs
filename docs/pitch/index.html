@@ -21,7 +21,6 @@
 html, body { height: 100%; background: var(--bg); color: var(--ink);
   font-family: "Inter", -apple-system, sans-serif; scroll-behavior: smooth; }
 
-/* Dithering dot pattern overlay */
 .slide {
   min-height: 100vh;
   display: flex;
@@ -31,11 +30,19 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
   border-bottom: 1px solid var(--border);
   position: relative;
   background-color: var(--bg);
-  background-image:
-    radial-gradient(circle, #1f1f2a 1.2px, transparent 1.2px),
-    radial-gradient(circle, #1a1a25 0.8px, transparent 0.8px);
-  background-size: 18px 18px, 32px 32px;
-  background-position: 0 0, 9px 9px;
+}
+/* Title slide gets the WebGL dithering background */
+#title {
+  position: relative;
+  overflow: hidden;
+}
+#title-bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 /* Fixed header navigation */
@@ -251,6 +258,7 @@ ul li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px;
 
 <!-- SLIDE 1: Title -->
 <div class="slide" id="title">
+  <canvas id="title-bg-canvas"></canvas>
   <div class="brand">
     <svg class="logo-svg" width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
       <circle cx="20" cy="24" r="15" fill="#ffb347" opacity="0.5"/>
@@ -693,5 +701,125 @@ PROMPT: "a castle on a hill"
   </div>
 </div>
 
+<script>
+// WebGL dithering background for title slide
+(function() {
+  const canvas = document.getElementById('title-bg-canvas');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: false });
+  if (!gl) return;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * dpr;
+    canvas.height = canvas.clientHeight * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const VERT = `#version 300 es
+  precision mediump float;
+  layout(location=0) in vec4 a_position;
+  void main(){ gl_Position = a_position; }`;
+
+  const FRAG = `#version 300 es
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2 u_resolution;
+  out vec4 fragColor;
+
+  float hash21(vec2 p){
+    p = fract(p * vec2(0.3183099, 0.3678794)) + 0.1;
+    p += dot(p, p + 19.19);
+    return fract(p.x * p.y);
+  }
+
+  void main(){
+    float t = u_time * 0.3;
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+    vec2 pixUv = gl_FragCoord.xy;
+
+    // Multiple soft dithered blobs spread across the viewport
+    float acc = 0.0;
+    vec3 color = vec3(0.0);
+
+    // Blob positions (normalized, drifting slowly)
+    vec2 blobs[5];
+    blobs[0] = vec2(0.2 + 0.05*sin(t*0.7), 0.3 + 0.04*cos(t*0.5));
+    blobs[1] = vec2(0.7 + 0.06*cos(t*0.4), 0.6 + 0.05*sin(t*0.6));
+    blobs[2] = vec2(0.5 + 0.04*sin(t*0.8), 0.2 + 0.03*cos(t*0.9));
+    blobs[3] = vec2(0.3 + 0.05*cos(t*0.6), 0.7 + 0.04*sin(t*0.3));
+    blobs[4] = vec2(0.8 + 0.03*sin(t*0.5), 0.4 + 0.06*cos(t*0.7));
+
+    vec3 colors[5];
+    colors[0] = vec3(1.0, 0.7, 0.28);  // amber
+    colors[1] = vec3(1.0, 0.42, 0.42); // coral
+    colors[2] = vec3(1.0, 0.84, 0.0);  // gold
+    colors[3] = vec3(1.0, 0.7, 0.28);  // amber
+    colors[4] = vec3(1.0, 0.42, 0.42); // coral
+
+    float sizes[5];
+    sizes[0] = 0.25; sizes[1] = 0.2; sizes[2] = 0.18; sizes[3] = 0.22; sizes[4] = 0.15;
+
+    for (int i = 0; i < 5; i++) {
+      float d = length(uv - blobs[i]) / sizes[i];
+      float shape = max(0.0, 1.0 - d * d);
+      // Dithering
+      float dither = step(hash21(pixUv + float(i) * 100.0), shape * 0.6);
+      acc += dither * 0.15;
+      color += colors[i] * dither * 0.15;
+    }
+
+    fragColor = vec4(color, acc);
+  }`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER,
+    new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  const start = performance.now();
+  function render() {
+    const t = (performance.now() - start) * 0.001;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(prog);
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+</script>
 </body>
 </html>
