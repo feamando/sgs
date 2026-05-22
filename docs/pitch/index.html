@@ -47,11 +47,15 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
 }
 #title > .brand,
 #title > h1,
-#title > p,
-#title > .slide-footer {
+#title > p {
   position: relative;
   z-index: 1;
   max-width: 50%;
+}
+#title > .slide-footer {
+  position: absolute;
+  z-index: 1;
+  max-width: none;
 }
 
 /* Fixed header navigation */
