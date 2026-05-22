@@ -30,8 +30,12 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
   padding: 80px 80px 60px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  background-image: radial-gradient(circle, rgba(255,179,71,0.08) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle, #1f1f2a 1.2px, transparent 1.2px),
+    radial-gradient(circle, #1a1a25 0.8px, transparent 0.8px);
+  background-size: 18px 18px, 32px 32px;
+  background-position: 0 0, 9px 9px;
 }
 
 /* Fixed header navigation */
