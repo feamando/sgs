@@ -30,6 +30,13 @@ html, body { height: 100%; background: var(--bg); color: var(--ink);
   border-bottom: 1px solid var(--border);
   position: relative;
   background-color: var(--bg);
+  page-break-after: always;
+  break-after: page;
+}
+@media print {
+  .slide { min-height: auto; height: 100vh; overflow: hidden; }
+  .site-header { display: none; }
+  #title-canvas { display: none; }
 }
 /* Title slide gets the animated dithering background */
 #title {
