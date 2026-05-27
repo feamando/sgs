@@ -262,10 +262,12 @@ class Decomposer:
 
 def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs"):
     """Apply subdivision + densification + optional refinement to a composition tree."""
-    from scripts.subdivide_scene import subdivide_tree
+    from scripts.subdivide_scene import subdivide_tree, set_templates_dir
     from src.raum.densify import DensifyConfig, densify_loop
 
-    # Step 1: Subdivide (60 -> ~5K-13K)
+    # Step 1: Subdivide (60 -> ~5K-13K) using templates when available
+    tpl_path = Path(templates_dir) if templates_dir else None
+    set_templates_dir(tpl_path)
     tree = subdivide_tree(tree, n_children=12)
     tensors = tree_to_tensors(tree)
     n_sub = tensors["means"].shape[0]

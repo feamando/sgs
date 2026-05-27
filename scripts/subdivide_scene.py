@@ -20,12 +20,111 @@ from src.raum.decomposition import (
 )
 
 
+def load_template_for_name(name: str, templates_dir: Path) -> list[list[float]] | None:
+    """
+    Try to find a template matching this node name from the template library.
+
+    Searches category directories for a match (exact or partial).
+    Returns positions as list of [x,y,z] or None if not found.
+    """
+    if not templates_dir or not templates_dir.exists():
+        return None
+
+    import torch
+
+    name_lower = name.lower().strip()
+
+    # Direct category match
+    for cat_dir in templates_dir.iterdir():
+        if not cat_dir.is_dir():
+            continue
+        cat_name = cat_dir.name.lower()
+        if cat_name in name_lower or name_lower in cat_name:
+            # Find first model.pt in this category
+            for obj_dir in sorted(cat_dir.iterdir()):
+                model_path = obj_dir / "model.pt"
+                if model_path.exists():
+                    data = torch.load(model_path, map_location="cpu", weights_only=True)
+                    positions = data["positions"].tolist()
+                    return positions
+
+    # Partial keyword match
+    keywords = {
+        "tower": ["tower", "turret", "spire", "minaret"],
+        "wall": ["wall", "fence", "barrier", "fortification"],
+        "rock": ["rock", "stone", "boulder", "cliff", "mountain", "hill"],
+        "tree": ["tree", "oak", "pine", "forest", "wood"],
+        "gate": ["gate", "door", "entrance", "arch", "portal"],
+        "roof": ["roof", "top", "chimney"],
+        "floor": ["floor", "ground", "path", "road"],
+        "bush": ["bush", "shrub", "hedge", "grass", "vegetation"],
+        "stairs": ["stairs", "step", "staircase"],
+        "column": ["column", "pillar", "post"],
+        "brick": ["brick", "block"],
+    }
+
+    for cat, words in keywords.items():
+        if any(w in name_lower for w in words):
+            cat_dir = templates_dir / cat
+            if cat_dir.exists():
+                for obj_dir in sorted(cat_dir.iterdir()):
+                    model_path = obj_dir / "model.pt"
+                    if model_path.exists():
+                        data = torch.load(model_path, map_location="cpu", weights_only=True)
+                        return data["positions"].tolist()
+
+    return None
+
+
+def template_subdivide(gaussians: list[GaussianParams], template_positions: list[list[float]]) -> list[GaussianParams]:
+    """
+    Subdivide using a real template shape instead of a sphere.
+
+    Scales and positions the template's point cloud relative to each parent Gaussian.
+    """
+    import numpy as np
+
+    tpl = np.array(template_positions)
+    # Normalize template to unit sphere
+    center = tpl.mean(axis=0)
+    tpl = tpl - center
+    extent = np.abs(tpl).max() + 1e-6
+    tpl = tpl / extent
+
+    # Subsample template to reasonable count per parent
+    max_per_parent = 20
+    if len(tpl) > max_per_parent:
+        idx = np.linspace(0, len(tpl) - 1, max_per_parent, dtype=int)
+        tpl = tpl[idx]
+
+    result = []
+    for g in gaussians:
+        parent_scale = sum(math.exp(s) for s in g.scale) / 3.0
+        spread = parent_scale * 0.4
+
+        for pos in tpl:
+            child = GaussianParams(
+                position=[
+                    g.position[0] + pos[0] * spread,
+                    g.position[1] + pos[1] * spread,
+                    g.position[2] + pos[2] * spread,
+                ],
+                scale=[s - 0.7 for s in g.scale],
+                opacity=g.opacity,
+                color=g.color,
+                rotation=g.rotation,
+            )
+            result.append(child)
+
+    return result
+
+
 def procedural_subdivide(gaussians: list[GaussianParams], n_children: int = 12) -> list[GaussianParams]:
     """
     Procedural subdivision fallback: expand each Gaussian into a small cluster.
 
     Creates n_children Gaussians in a sphere around the parent, with smaller
-    scale and inherited color. Used when no trained model is available.
+    scale and inherited color. Used when no template is available.
     """
     import math
 
@@ -55,14 +154,28 @@ def procedural_subdivide(gaussians: list[GaussianParams], n_children: int = 12) 
     return result
 
 
+_templates_dir: Path | None = None
+
+
+def set_templates_dir(path: Path | None):
+    """Set the global templates directory for subdivision."""
+    global _templates_dir
+    _templates_dir = path
+
+
 def subdivide_tree(tree: CompositionNode, n_children: int = 12) -> CompositionNode:
     """
-    Subdivide all leaf Gaussians in the tree using procedural expansion.
+    Subdivide all leaf Gaussians in the tree.
 
-    Modifies the tree in-place and returns it.
+    Uses template library if available (matches node name to architecture scans).
+    Falls back to procedural sphere distribution for unmatched nodes.
     """
     if tree.is_leaf and tree.gaussians:
-        tree.gaussians = procedural_subdivide(tree.gaussians, n_children)
+        template = load_template_for_name(tree.name, _templates_dir) if _templates_dir else None
+        if template:
+            tree.gaussians = template_subdivide(tree.gaussians, template)
+        else:
+            tree.gaussians = procedural_subdivide(tree.gaussians, n_children)
     else:
         for child in tree.children:
             subdivide_tree(child, n_children)
