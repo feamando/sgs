@@ -6,17 +6,17 @@ Generated: refinement_comparison_v3.md
 
 | Metric | SGS-native | External | Winner |
 |--------|-----------|----------|--------|
-| Gaussian count | 51721.0000 | 56561.0000 | External |
-| Avg NN distance | 0.0008 | 0.0006 | External |
-| Uniformity (std/mean NN) | 3.2357 | 0.8040 | External |
+| Gaussian count | 52018.0000 | 56561.0000 | External |
+| Avg NN distance | 0.0007 | 0.0006 | External |
+| Uniformity (std/mean NN) | 4.3567 | 0.8040 | External |
 | Avg opacity | 0.8822 | 0.8774 | SGS |
 | Low-opacity fraction | 0.0000 | 0.0000 | Tie |
-| Color variance | 0.0296 | 0.0295 | SGS |
-| Density (G/vol) | 1589.4052 | 1738.1396 | External |
+| Color variance | 0.0297 | 0.0295 | SGS |
+| Density (G/vol) | 1583.4376 | 1738.1396 | External |
 
 ## Bounding Box
 
-- SGS: [4.05, 1.98, 4.06] (vol=32.54)
+- SGS: [4.14, 1.98, 4.01] (vol=32.85)
 - Ext: [4.05, 1.98, 4.06] (vol=32.54)
 
 ## Interpretation
