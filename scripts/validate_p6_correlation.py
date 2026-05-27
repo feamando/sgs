@@ -193,6 +193,68 @@ def generate_random_embeddings(vocab: list[str], dim: int = 300, seed: int = 42)
     return embeddings
 
 
+def load_planck_embeddings(checkpoint_path: Path, tokenizer_path: Path,
+                           vocab: set[str]) -> dict[str, np.ndarray]:
+    """
+    Extract contextual embeddings from Planck 1.3 for material words.
+
+    Uses the model's hidden states as embeddings. For multi-token words,
+    averages the token embeddings.
+    """
+    try:
+        import sentencepiece as spm
+    except ImportError:
+        print("sentencepiece required: pip install sentencepiece")
+        return {}
+
+    sp = spm.SentencePieceProcessor(model_file=str(tokenizer_path))
+
+    # Load model
+    ckpt = torch.load(str(checkpoint_path), map_location="cpu", weights_only=False)
+    state = ckpt["model"] if "model" in ckpt else ckpt
+
+    # Find embedding dimension from the state dict
+    embed_key = None
+    for key in state:
+        if "embed" in key.lower() and "weight" in key.lower():
+            embed_key = key
+            break
+        if "token" in key.lower() and "embed" in key.lower():
+            embed_key = key
+            break
+
+    if embed_key is None:
+        # Try common key patterns
+        for key in ["embedding.weight", "token_embedding.weight", "embed_tokens.weight",
+                    "transformer.wte.weight", "model.embed_tokens.weight"]:
+            if key in state:
+                embed_key = key
+                break
+
+    if embed_key is None:
+        print(f"Could not find embedding layer in checkpoint. Keys: {list(state.keys())[:10]}")
+        return {}
+
+    embed_weights = state[embed_key].numpy()  # [vocab_size, d_model]
+    d_model = embed_weights.shape[1]
+    print(f"Planck embedding dim: {d_model} (from {embed_key})")
+
+    embeddings = {}
+    for word in vocab:
+        token_ids = sp.encode(word)
+        if not token_ids:
+            continue
+        # Average the token embeddings for this word
+        vecs = []
+        for tid in token_ids:
+            if tid < embed_weights.shape[0]:
+                vecs.append(embed_weights[tid])
+        if vecs:
+            embeddings[word] = np.mean(vecs, axis=0).astype(np.float32)
+
+    return embeddings
+
+
 def run_validation(embeddings: dict[str, np.ndarray], materials: dict[str, list[float]],
                    n_splits: int = 5, epochs: int = 500) -> dict:
     """Run k-fold cross-validation of physics prediction from embeddings."""
@@ -341,12 +403,27 @@ def main():
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--augment-features", action="store_true",
                         help="Add geometric proxy features (scale, opacity, covariance) to input")
+    parser.add_argument("--embedding-source", choices=["glove", "planck"], default="glove",
+                        help="Embedding source: glove (file) or planck (checkpoint)")
+    parser.add_argument("--checkpoint", default=None,
+                        help="Planck checkpoint path (for --embedding-source planck)")
+    parser.add_argument("--tokenizer", default=None,
+                        help="SentencePiece tokenizer path (for --embedding-source planck)")
     args = parser.parse_args()
 
     materials = {k: v for k, v in MATERIAL_TABLE.items() if len(v) == 8}
     print(f"Material table: {len(materials)} entries, {len(PROPERTY_NAMES)} properties each")
 
-    if args.glove_path and Path(args.glove_path).exists():
+    if args.embedding_source == "planck":
+        if not args.checkpoint or not args.tokenizer:
+            print("Planck mode requires --checkpoint and --tokenizer")
+            sys.exit(1)
+        print(f"Loading Planck embeddings from {args.checkpoint}...")
+        embeddings = load_planck_embeddings(
+            Path(args.checkpoint), Path(args.tokenizer), set(materials.keys())
+        )
+        print(f"Loaded {len(embeddings)} / {len(materials)} material embeddings")
+    elif args.glove_path and Path(args.glove_path).exists():
         print(f"Loading GloVe from {args.glove_path}...")
         embeddings = load_glove(Path(args.glove_path), set(materials.keys()))
         print(f"Loaded {len(embeddings)} / {len(materials)} material embeddings")
