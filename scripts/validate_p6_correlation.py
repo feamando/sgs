@@ -224,9 +224,10 @@ def load_planck_embeddings(checkpoint_path: Path, tokenizer_path: Path,
             break
 
     if embed_key is None:
-        # Try common key patterns
+        # Try common key patterns (including SGS-specific ones)
         for key in ["embedding.weight", "token_embedding.weight", "embed_tokens.weight",
-                    "transformer.wte.weight", "model.embed_tokens.weight"]:
+                    "transformer.wte.weight", "model.embed_tokens.weight",
+                    "tok_mu.weight", "tok_features.weight"]:
             if key in state:
                 embed_key = key
                 break
@@ -264,7 +265,15 @@ def run_validation(embeddings: dict[str, np.ndarray], materials: dict[str, list[
 
     if len(valid_materials) < 10:
         print(f"Only {len(valid_materials)} materials have embeddings. Need at least 10.")
-        return {"r2": 0.0, "n_materials": len(valid_materials)}
+        return {
+            "overall_r2": 0.0,
+            "fold_r2_mean": 0.0,
+            "fold_r2_std": 0.0,
+            "per_property_r2": {name: 0.0 for name in PROPERTY_NAMES},
+            "n_materials": len(valid_materials),
+            "n_splits": n_splits,
+            "hypothesis_holds": False,
+        }
 
     print(f"Valid materials with embeddings: {len(valid_materials)}")
 
