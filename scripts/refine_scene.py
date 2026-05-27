@@ -218,6 +218,12 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
         opacity_prune_threshold=0.01,
     )
 
+    # Store template targets without masks (recompute assignments each time)
+    template_targets = []
+    if targets:
+        for mask, target, center, extent in targets:
+            template_targets.append((center, extent, target))
+
     print(f"Refining {scene.n_gaussians:,} Gaussians, {n_iterations} iterations...")
 
     for i in range(n_iterations):
@@ -226,14 +232,21 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
         loss = torch.tensor(0.0)
 
         # Loss 1: Per-cluster Chamfer distance to matched templates
-        if targets:
-            for mask, target, center, extent in targets:
-                cluster_pos = scene.positions[mask]
-                if len(cluster_pos) < 10:
+        if template_targets:
+            pos = scene.positions
+            # Reassign points to nearest cluster center each iteration
+            centers = torch.stack([t[0] for t in template_targets])
+            dists_to_centers = torch.cdist(pos.detach(), centers)
+            assignments = dists_to_centers.argmin(dim=1)
+
+            for c_idx, (center, extent, target) in enumerate(template_targets):
+                mask = assignments == c_idx
+                if mask.sum() < 10:
                     continue
+                cluster_pos = pos[mask]
                 cluster_norm = (cluster_pos - center) / extent
                 loss_chamfer = chamfer_loss(cluster_norm, target)
-                loss = loss + loss_chamfer * (1.0 / len(targets))
+                loss = loss + loss_chamfer * (1.0 / len(template_targets))
 
         # Loss 2: Uniformity (penalize isolated Gaussians)
         n = min(scene.n_gaussians, 2000)
