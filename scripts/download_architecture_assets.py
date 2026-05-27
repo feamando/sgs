@@ -34,8 +34,9 @@ from urllib.error import HTTPError
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
-# Sketchfab search queries for architectural components
+# Sketchfab search queries: architecture + nature/landscape
 SKETCHFAB_QUERIES = {
+    # Architecture
     "tower": "castle tower medieval photogrammetry",
     "wall": "stone wall medieval photogrammetry",
     "arch": "stone arch gothic photogrammetry",
@@ -45,9 +46,19 @@ SKETCHFAB_QUERIES = {
     "battlement": "battlement merlon castle scan",
     "stairs": "stone stairs medieval scan",
     "brick": "brick wall texture scan photogrammetry",
-    "rock": "rock boulder scan photogrammetry",
     "window": "gothic window arch stone scan",
     "floor": "stone floor cobblestone scan",
+    # Nature and landscape (for "castle on a hill" surroundings)
+    "rock": "rock boulder scan photogrammetry",
+    "cliff": "cliff rock face terrain photogrammetry",
+    "hill": "hillside terrain grass photogrammetry",
+    "tree": "tree trunk bark photogrammetry scan",
+    "bush": "bush shrub vegetation photogrammetry",
+    "grass": "grass ground terrain photogrammetry",
+    "forest": "forest floor moss roots photogrammetry",
+    "path": "dirt path trail ground photogrammetry",
+    "moss": "moss covered stone rock photogrammetry",
+    "soil": "soil earth ground terrain scan",
 }
 
 # OpenGameArt direct download URLs (modular castle/medieval kits)
