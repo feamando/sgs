@@ -117,8 +117,8 @@ Example for "a castle on a hill":
 {"name":"scene","position":[0,0,0],"children":[{"name":"hill","position":[0,-0.3,0],"scale":2.5,"children":[{"name":"slope_front","position":[0,0,1],"scale":1.5},{"name":"slope_back","position":[0,0,-1],"scale":1.2}]},{"name":"castle","position":[0,1.2,0],"scale":1.5,"children":[{"name":"keep","position":[0,0.5,0],"scale":1.0},{"name":"tower_nw","position":[-0.8,0.3,0.8],"scale":0.6},{"name":"tower_ne","position":[0.8,0.3,0.8],"scale":0.6},{"name":"tower_sw","position":[-0.8,0.3,-0.8],"scale":0.6},{"name":"tower_se","position":[0.8,0.3,-0.8],"scale":0.6},{"name":"wall_north","position":[0,0,1],"scale":0.8},{"name":"wall_south","position":[0,0,-1],"scale":0.8},{"name":"gate","position":[0,-0.1,1.2],"scale":0.5}]}]}"""
 
 
-def generate_tree(prompt: str, client) -> dict | None:
-    """Generate one composition tree via Claude Haiku."""
+def generate_tree_anthropic(prompt: str, client) -> dict | None:
+    """Generate one composition tree via Anthropic direct API."""
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
@@ -127,19 +127,54 @@ def generate_tree(prompt: str, client) -> dict | None:
             messages=[{"role": "user", "content": f"Decompose: {prompt}"}],
         )
         text = response.content[0].text.strip()
+        return _parse_tree_text(text)
+    except Exception as e:
+        print(f"  API error: {e}")
+        return None
 
-        # Try to parse JSON (sometimes model adds markdown)
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
 
+def generate_tree_bedrock(prompt: str, client, model_id: str) -> dict | None:
+    """Generate one composition tree via AWS Bedrock."""
+    import json as json_mod
+    try:
+        body = json_mod.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "system": SYSTEM_PROMPT,
+            "messages": [{"role": "user", "content": f"Decompose: {prompt}"}],
+        })
+        response = client.invoke_model(
+            modelId=model_id,
+            body=body,
+            contentType="application/json",
+            accept="application/json",
+        )
+        result = json_mod.loads(response["body"].read())
+        text = result["content"][0]["text"].strip()
+        return _parse_tree_text(text)
+    except Exception as e:
+        print(f"  Bedrock error: {e}")
+        return None
+
+
+def _parse_tree_text(text: str) -> dict | None:
+    """Parse tree JSON from model output (handles markdown fencing)."""
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    try:
         tree = json.loads(text)
         return tree
     except json.JSONDecodeError:
-        return None
-    except Exception as e:
-        print(f"  API error: {e}")
+        # Try to find JSON object in the text
+        start = text.find("{")
+        if start >= 0:
+            try:
+                return json.loads(text[start:])
+            except json.JSONDecodeError:
+                pass
         return None
 
 
@@ -153,25 +188,43 @@ def count_nodes(tree: dict) -> int:
 
 def main():
     parser = argparse.ArgumentParser(description="Generate training trees via Claude Haiku")
-    parser.add_argument("--n-trees", type=int, default=1000)
+    parser.add_argument("--n-trees", type=int, default=10000)
     parser.add_argument("--output", default="data/training_trees",
                         help="Output directory for tree JSONs")
-    parser.add_argument("--batch-size", type=int, default=50,
+    parser.add_argument("--batch-size", type=int, default=100,
                         help="Save progress every N trees")
+    parser.add_argument("--backend", choices=["bedrock", "anthropic"], default="bedrock",
+                        help="API backend (default: bedrock)")
+    parser.add_argument("--region", default="us-east-1",
+                        help="AWS region for Bedrock (default: us-east-1)")
+    parser.add_argument("--model-id", default="us.anthropic.claude-haiku-4-5-20251001-v1:0",
+                        help="Bedrock model ID")
     args = parser.parse_args()
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("Set ANTHROPIC_API_KEY environment variable")
-        sys.exit(1)
-
-    try:
-        import anthropic
-    except ImportError:
-        print("pip install anthropic")
-        sys.exit(1)
-
-    client = anthropic.Anthropic(api_key=api_key)
+    if args.backend == "bedrock":
+        try:
+            import boto3
+        except ImportError:
+            print("pip install boto3")
+            sys.exit(1)
+        session = boto3.Session(profile_name=os.environ.get("AWS_PROFILE", "bedrock"))
+        client = session.client("bedrock-runtime", region_name=args.region)
+        generate_fn = lambda prompt: generate_tree_bedrock(prompt, client, args.model_id)
+        print(f"Backend: AWS Bedrock ({args.region})")
+        print(f"Model: {args.model_id}")
+    else:
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            print("Set ANTHROPIC_API_KEY environment variable")
+            sys.exit(1)
+        try:
+            import anthropic
+        except ImportError:
+            print("pip install anthropic")
+            sys.exit(1)
+        client = anthropic.Anthropic(api_key=api_key)
+        generate_fn = lambda prompt: generate_tree_anthropic(prompt, client)
+        print(f"Backend: Anthropic direct API")
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -181,19 +234,35 @@ def main():
         "", " at dawn", " at night", " in winter", " in autumn",
         " from the east", " with a moat", " surrounded by trees",
         " on a cliff", " by the sea", " in the desert", " in the mountains",
+        " in the rain", " covered in snow", " at sunset", " with fog",
+        " from above", " in spring", " abandoned", " newly built",
+        " small", " massive", " ancient", " futuristic",
+    ]
+
+    scale_mods = [
+        "", " (3 objects)", " (5-7 objects)", " (10+ objects, complex)",
+        " (simple, 3 parts)", " (detailed, many sub-parts)",
     ]
 
     for prompt in SCENE_PROMPTS:
         for var in variations:
-            all_prompts.append(prompt + var)
+            for scale in scale_mods:
+                all_prompts.append(prompt + var + scale)
+                if len(all_prompts) >= args.n_trees:
+                    break
             if len(all_prompts) >= args.n_trees:
                 break
         if len(all_prompts) >= args.n_trees:
             break
 
-    # If still need more, repeat base prompts
+    # If still need more, repeat with shuffled combinations
+    import random
+    random.seed(42)
     while len(all_prompts) < args.n_trees:
-        all_prompts.extend(SCENE_PROMPTS)
+        base = random.choice(SCENE_PROMPTS)
+        var = random.choice(variations)
+        scale = random.choice(scale_mods)
+        all_prompts.append(base + var + scale)
     all_prompts = all_prompts[:args.n_trees]
 
     print(f"Generating {args.n_trees} trees via Claude Haiku...")
@@ -205,7 +274,7 @@ def main():
     total_nodes = 0
 
     for i, prompt in enumerate(all_prompts):
-        tree = generate_tree(prompt, client)
+        tree = generate_fn(prompt)
 
         if tree and "name" in tree:
             n_nodes = count_nodes(tree)
