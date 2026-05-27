@@ -278,6 +278,59 @@ def run_validation(embeddings: dict[str, np.ndarray], materials: dict[str, list[
     }
 
 
+# Geometric proxy features for each material (typical scale, opacity, covariance shape)
+# These represent what the material "looks like" geometrically as Gaussians
+# Format: [scale_x, scale_y, scale_z, opacity, cov_flat_x6] = 10 features
+GEOMETRIC_PROXIES = {
+    # Hard solids: small scale, high opacity, isotropic
+    "stone": [0.1, 0.1, 0.1, 0.95, 0.01, 0.0, 0.0, 0.01, 0.0, 0.01],
+    "granite": [0.08, 0.08, 0.08, 0.98, 0.01, 0.0, 0.0, 0.01, 0.0, 0.01],
+    "marble": [0.1, 0.1, 0.1, 0.97, 0.01, 0.0, 0.0, 0.01, 0.0, 0.01],
+    "steel": [0.05, 0.05, 0.05, 0.99, 0.005, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "iron": [0.06, 0.06, 0.06, 0.99, 0.005, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "diamond": [0.03, 0.03, 0.03, 0.95, 0.003, 0.0, 0.0, 0.003, 0.0, 0.003],
+    "glass": [0.08, 0.08, 0.02, 0.40, 0.01, 0.0, 0.0, 0.01, 0.0, 0.002],
+    "ceramic": [0.07, 0.07, 0.07, 0.97, 0.008, 0.0, 0.0, 0.008, 0.0, 0.008],
+    "concrete": [0.12, 0.12, 0.12, 0.96, 0.015, 0.0, 0.0, 0.015, 0.0, 0.015],
+    "brick": [0.15, 0.08, 0.08, 0.96, 0.02, 0.0, 0.0, 0.008, 0.0, 0.008],
+    # Soft materials: larger scale, lower opacity, anisotropic
+    "cloth": [0.3, 0.3, 0.01, 0.70, 0.05, 0.0, 0.0, 0.05, 0.0, 0.001],
+    "rubber": [0.1, 0.1, 0.1, 0.90, 0.02, 0.0, 0.0, 0.02, 0.0, 0.02],
+    "foam": [0.2, 0.2, 0.2, 0.50, 0.04, 0.0, 0.0, 0.04, 0.0, 0.04],
+    "leather": [0.2, 0.2, 0.02, 0.85, 0.03, 0.0, 0.0, 0.03, 0.0, 0.002],
+    "cotton": [0.25, 0.25, 0.02, 0.65, 0.04, 0.0, 0.0, 0.04, 0.0, 0.001],
+    "wool": [0.2, 0.2, 0.05, 0.60, 0.03, 0.0, 0.0, 0.03, 0.0, 0.005],
+    "silk": [0.3, 0.3, 0.005, 0.55, 0.05, 0.0, 0.0, 0.05, 0.0, 0.0005],
+    # Liquids: large scale, low opacity, very isotropic
+    "water": [0.5, 0.5, 0.5, 0.20, 0.1, 0.0, 0.0, 0.1, 0.0, 0.1],
+    "oil": [0.4, 0.4, 0.4, 0.25, 0.08, 0.0, 0.0, 0.08, 0.0, 0.08],
+    "honey": [0.3, 0.3, 0.3, 0.35, 0.06, 0.0, 0.0, 0.06, 0.0, 0.06],
+    # Wood: medium, anisotropic along grain
+    "wood": [0.15, 0.05, 0.05, 0.92, 0.02, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "oak": [0.12, 0.05, 0.05, 0.95, 0.015, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "pine": [0.18, 0.06, 0.06, 0.90, 0.025, 0.0, 0.0, 0.006, 0.0, 0.006],
+    "bamboo": [0.25, 0.03, 0.03, 0.90, 0.03, 0.0, 0.0, 0.002, 0.0, 0.002],
+    # Nature: varied
+    "grass": [0.4, 0.4, 0.02, 0.50, 0.08, 0.0, 0.0, 0.08, 0.0, 0.001],
+    "sand": [0.05, 0.05, 0.05, 0.80, 0.005, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "soil": [0.1, 0.1, 0.1, 0.85, 0.015, 0.0, 0.0, 0.015, 0.0, 0.015],
+    "rock": [0.15, 0.12, 0.1, 0.95, 0.02, 0.0, 0.0, 0.015, 0.0, 0.012],
+    "mud": [0.15, 0.15, 0.15, 0.75, 0.025, 0.0, 0.0, 0.025, 0.0, 0.025],
+    "ice": [0.1, 0.1, 0.1, 0.50, 0.01, 0.0, 0.0, 0.01, 0.0, 0.01],
+    "snow": [0.3, 0.3, 0.3, 0.40, 0.06, 0.0, 0.0, 0.06, 0.0, 0.06],
+    # Metals
+    "aluminum": [0.05, 0.05, 0.05, 0.98, 0.005, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "copper": [0.05, 0.05, 0.05, 0.99, 0.005, 0.0, 0.0, 0.005, 0.0, 0.005],
+    "gold": [0.04, 0.04, 0.04, 0.99, 0.004, 0.0, 0.0, 0.004, 0.0, 0.004],
+    "silver": [0.04, 0.04, 0.04, 0.99, 0.004, 0.0, 0.0, 0.004, 0.0, 0.004],
+    "bronze": [0.06, 0.06, 0.06, 0.98, 0.006, 0.0, 0.0, 0.006, 0.0, 0.006],
+    "lead": [0.07, 0.07, 0.07, 0.99, 0.007, 0.0, 0.0, 0.007, 0.0, 0.007],
+}
+
+# Default geometric proxy for materials not in the table above
+DEFAULT_GEOMETRIC_PROXY = [0.1, 0.1, 0.1, 0.85, 0.01, 0.0, 0.0, 0.01, 0.0, 0.01]
+
+
 def main():
     parser = argparse.ArgumentParser(description="Validate P6 correlation hypothesis")
     parser.add_argument("--glove-path", default=None,
@@ -286,6 +339,8 @@ def main():
                         help="Output results JSON")
     parser.add_argument("--epochs", type=int, default=500)
     parser.add_argument("--folds", type=int, default=5)
+    parser.add_argument("--augment-features", action="store_true",
+                        help="Add geometric proxy features (scale, opacity, covariance) to input")
     args = parser.parse_args()
 
     materials = {k: v for k, v in MATERIAL_TABLE.items() if len(v) == 8}
@@ -299,6 +354,13 @@ def main():
         print("No GloVe file provided. Using random embeddings (for pipeline testing).")
         print("For real validation, provide: --glove-path data/glove.6B.300d.txt")
         embeddings = generate_random_embeddings(list(materials.keys()))
+
+    if args.augment_features:
+        print("Augmenting with geometric proxy features (+10 dimensions)")
+        for word in list(embeddings.keys()):
+            geo = GEOMETRIC_PROXIES.get(word, DEFAULT_GEOMETRIC_PROXY)
+            embeddings[word] = np.concatenate([embeddings[word], np.array(geo, dtype=np.float32)])
+        print(f"Input dimension: {len(next(iter(embeddings.values())))}d")
 
     print(f"\nRunning {args.folds}-fold cross-validation ({args.epochs} epochs/fold)...")
     results = run_validation(embeddings, materials, n_splits=args.folds, epochs=args.epochs)
