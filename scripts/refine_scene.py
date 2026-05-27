@@ -116,14 +116,79 @@ def chamfer_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return d1 + d2
 
 
+def find_local_templates(positions: torch.Tensor, library: dict[str, list[torch.Tensor]],
+                         n_clusters: int = 8) -> list[torch.Tensor]:
+    """
+    Split the scene into spatial clusters and find the best template for each.
+
+    Instead of matching the entire scene to one template, we partition into
+    local regions (approximating composition tree nodes) and match each to
+    the closest template from any category. Returns a list of target point
+    clouds, one per cluster.
+    """
+    n = positions.shape[0]
+    if n < n_clusters * 10:
+        n_clusters = max(2, n // 50)
+
+    # Simple spatial clustering via k-means (1 iteration for speed)
+    # Pick random centroids
+    idx = torch.randperm(n)[:n_clusters]
+    centroids = positions[idx].clone()
+
+    # Assign points to nearest centroid
+    dists = torch.cdist(positions, centroids)
+    assignments = dists.argmin(dim=1)
+
+    # For each cluster, find best matching template
+    all_templates_flat = []
+    for cat_templates in library.values():
+        all_templates_flat.extend(cat_templates)
+
+    targets = []
+    for c in range(n_clusters):
+        mask = assignments == c
+        if mask.sum() < 10:
+            continue
+        cluster_pos = positions[mask]
+
+        # Normalize cluster
+        center = cluster_pos.mean(dim=0)
+        extent = (cluster_pos - center).abs().max() + 1e-6
+        cluster_norm = (cluster_pos - center) / extent
+
+        # Find best template for this cluster
+        best_dist = float("inf")
+        best_tpl = None
+        sample_n = min(len(cluster_norm), 300)
+
+        for tpl_pos in all_templates_flat:
+            t_center = tpl_pos.mean(dim=0)
+            t_extent = (tpl_pos - t_center).abs().max() + 1e-6
+            tpl_norm = (tpl_pos - t_center) / t_extent
+
+            p1 = cluster_norm[:sample_n]
+            p2 = tpl_norm[:min(len(tpl_norm), 300)]
+            d = torch.cdist(p1, p2)
+            chamfer = d.min(dim=1).values.mean() + d.min(dim=0).values.mean()
+
+            if chamfer.item() < best_dist:
+                best_dist = chamfer.item()
+                best_tpl = tpl_norm
+
+        if best_tpl is not None:
+            targets.append((mask, best_tpl, center, extent))
+
+    return targets
+
+
 def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
                n_iterations: int = 100, lr: float = 5e-4) -> dict[str, torch.Tensor]:
     """
-    SGS-native refinement: optimize Gaussians toward nearest template shape.
+    SGS-native refinement: optimize Gaussians toward nearest template shapes.
 
-    For the full scene, find the closest template and use Chamfer distance
-    as the optimization target. The template represents "what this should
-    look like as Gaussians" based on real 3D scans.
+    Splits the scene into spatial clusters (approximating composition nodes)
+    and matches each cluster to its best template. Each cluster is optimized
+    toward its own target shape via Chamfer distance.
 
     Also applies:
     - Nearest-neighbor uniformity loss (no gaps)
@@ -135,16 +200,14 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
     if not library:
         print(f"Warning: no templates found at {templates_dir}")
         print("Falling back to self-supervised refinement (uniformity + opacity only)")
-        target = None
+        targets = None
     else:
         n_templates = sum(len(v) for v in library.values())
         print(f"Loaded {n_templates} templates across {len(library)} categories")
 
-        # Find nearest template for the whole scene
-        print("Finding nearest template...")
-        target = find_nearest_template(tensors["means"], library)
-        if target is not None:
-            print(f"Best template: {target.shape[0]} points")
+        print("Matching local clusters to templates...")
+        targets = find_local_templates(tensors["means"], library, n_clusters=12)
+        print(f"Matched {len(targets)} local regions to templates")
 
     scene = GaussianScene.from_tensors(tensors)
     optimizer = torch.optim.Adam([scene.positions, scene.colors, scene.opacities], lr=lr)
@@ -162,15 +225,15 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
 
         loss = torch.tensor(0.0)
 
-        # Loss 1: Chamfer distance to template (shape matching)
-        if target is not None:
-            # Normalize current positions to match template's canonical space
-            pos = scene.positions
-            center = pos.mean(dim=0)
-            extent = (pos - center).abs().max().detach() + 1e-6
-            pos_norm = (pos - center) / extent
-            loss_chamfer = chamfer_loss(pos_norm, target)
-            loss = loss + loss_chamfer * 1.0
+        # Loss 1: Per-cluster Chamfer distance to matched templates
+        if targets:
+            for mask, target, center, extent in targets:
+                cluster_pos = scene.positions[mask]
+                if len(cluster_pos) < 10:
+                    continue
+                cluster_norm = (cluster_pos - center) / extent
+                loss_chamfer = chamfer_loss(cluster_norm, target)
+                loss = loss + loss_chamfer * (1.0 / len(targets))
 
         # Loss 2: Uniformity (penalize isolated Gaussians)
         n = min(scene.n_gaussians, 2000)
@@ -180,7 +243,7 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
         dists = dists + diag_mask.float() * 1e10
         nn_dist = dists.min(dim=1).values
         loss_uniform = nn_dist.mean()
-        loss = loss + loss_uniform * 0.3
+        loss = loss + loss_uniform * 0.5
 
         # Loss 3: Opacity encouragement (push toward visible)
         opacity_sigmoid = torch.sigmoid(scene.opacities)
