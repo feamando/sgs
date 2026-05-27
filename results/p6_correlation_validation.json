@@ -1,0 +1,18 @@
+{
+  "overall_r2": 0.23894812064147564,
+  "fold_r2_mean": 0.033347029388561336,
+  "fold_r2_std": 0.3056542744707828,
+  "per_property_r2": {
+    "hardness": 0.5433180271431941,
+    "elasticity": 0.01532308954778927,
+    "friction": -0.22344526804094,
+    "density": 0.42160826545463126,
+    "brittleness": 0.17021869831613357,
+    "thermal_conductivity": 0.3568181657620534,
+    "transparency": 0.02826854912063248,
+    "deformability": 0.2861549033764976
+  },
+  "n_materials": 77,
+  "n_splits": 5,
+  "hypothesis_holds": false
+}
