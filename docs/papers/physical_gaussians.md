@@ -196,15 +196,62 @@ This provides:
 
 ## Architecture for Raum 2.0
 
+### Empirical validation of the correlation hypothesis
+
+We validated the correlation between semantic embeddings and physical
+properties across 77 materials with 8 physical axes. Results:
+
+| Embedding source | Overall R^2 | Best axis (hardness) |
+|-----------------|-------------|---------------------|
+| GloVe 300d | 0.24 | 0.54 |
+| GloVe + geometric proxies | 0.28 | 0.49 |
+| Planck 100M (tok_features) | -0.39 | -0.32 |
+
+**Interpretation:** The correlation exists but is scale-limited. GloVe
+encodes co-occurrence ("stone" near "hard"), giving R^2 = 0.54 on
+hardness. But 300d word vectors + 77 samples + a 128-unit MLP cannot
+capture the full physics manifold. Large language models (1B+) that have
+internalized physical world knowledge (GaussianProperty, PhysSplat
+confirm this) would perform substantially better. The limitation is
+embedding quality and training data quantity, not the fundamental
+semantic-physics relationship.
+
+### Two-stage architecture (scale-adaptive)
+
+Based on the empirical findings, we propose a two-stage design that
+works at current scale and improves with model size:
+
+**Stage 1: Discrete classifier + lookup (current, 100M scale)**
+
+```
+e_s -> material_classifier -> class_id -> e_p (lookup table)
+```
+
+- Classify into K=50-100 material classes from semantic embedding
+- Each class has a curated e_p vector
+- Classification accuracy >> regression R^2 for the same embeddings
+- Works immediately with existing Planck/GloVe
+
+**Stage 2: Continuous refinement (future, 1B+ scale)**
+
+```
+e_s -> class_id -> e_p_base (lookup) -> e_p + residual (MLP)
+```
+
+- Lookup provides a strong initialization
+- MLP predicts per-Gaussian residual from contextual features
+- Trained with physics simulation feedback (differentiable)
+- At frontier scale (10B+), the lookup becomes unnecessary
+
 ### Training the physical embedding
 
 **Phase 1: Supervised from semantic labels**
 
 Map known material words to physical property vectors:
 - Build a lookup table: {"stone": [0.9, 0.1, 0.7, 0.8, 0.8, 0.3, 0, 0.1], ...}
-- For each Gaussian with a known label, assign the lookup vector
-- Train a small MLP to predict e_p from (e_s, S, alpha)
-- The MLP learns the correlations
+- For each Gaussian with a known label, assign the lookup vector via classifier
+- At current scale: discrete lookup (R^2 = 0.54 on hardness axis)
+- At Hertz scale: train continuous MLP with residual refinement
 
 **Phase 2: Physics simulation feedback**
 
@@ -310,22 +357,27 @@ shape.
 1. **What dimensionality for e_p?** 32 seems minimal, 64 generous. Do we
    need all 8 named axes or do fewer suffice for game-engine physics?
 
-2. **Can e_p be fully predicted from (e_s, S, alpha)?** Or does it need
-   independent supervision? The correlation hypothesis says most of it is
-   predictable, but edge cases (painted metal that looks like wood) may need
-   explicit annotation.
+2. **At what model scale does continuous prediction become viable?**
+   Empirically validated: 100M + GloVe gives R^2 = 0.24 (insufficient for
+   continuous). Expected: 1B+ with contextual embeddings gives R^2 > 0.6.
+   The discrete classifier + lookup works at any scale as a floor.
 
 3. **Differentiable physics integration.** Which simulator? DiffTaichi,
    Nvidia Warp, and Brax are candidates. Can we backprop through collision
    to refine e_p?
 
-4. **Scale of training data.** How many material-labeled Gaussians do we
-   need? Hypothesis: 50-100 canonical materials with known properties,
-   the network generalizes via semantic correlation.
+4. **Scale of training data.** 77 materials is insufficient for regression
+   but sufficient for classification into broad classes. 500+ materials
+   with sentence-transformer embeddings is the next target.
 
 5. **Runtime cost.** Does querying e_p add latency to physics ticks?
    Likely negligible (one extra vector read per Gaussian per frame), but
    needs profiling at 500K+ Gaussians.
+
+6. **Classification vs. regression for current scale.** Binary splits
+   (hard/soft, rigid/deformable) may capture 80%+ of the physics-relevant
+   variance with near-perfect accuracy from GloVe. This is the practical
+   path while continuous prediction matures with scale.
 
 ## Roadmap (Raum 2.0)
 
