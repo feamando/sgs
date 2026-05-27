@@ -30,7 +30,7 @@ from src.raum.decomposition import CompositionNode, tree_to_tensors, print_tree
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Raum 1.3 inference: prompt -> tree -> render")
+    p = argparse.ArgumentParser(description="Raum 1.3/1.4 inference: prompt -> tree -> render")
     p.add_argument("--checkpoint", required=True, help="Fine-tuned decomposer checkpoint")
     p.add_argument("--tokenizer", required=True, help="SentencePiece model")
     p.add_argument("--prompt", type=str, default=None, help="Single prompt to decompose")
@@ -40,6 +40,12 @@ def parse_args():
     p.add_argument("--max-new", type=int, default=4096, help="Max tokens to generate for tree")
     p.add_argument("--temperature", type=float, default=0.3, help="Low temp for structured output")
     p.add_argument("--top-k", type=int, default=30)
+    p.add_argument("--fidelity", choices=["low", "high"], default="low",
+                   help="low=Raum 1.3 skeleton, high=subdivision+densification+refinement")
+    p.add_argument("--refine-mode", choices=["sgs", "multiview", "none"], default="sgs",
+                   help="Refinement mode for high fidelity (default: sgs)")
+    p.add_argument("--templates", default="data/architecture_gs",
+                   help="Template library path for SGS refinement")
     return p.parse_args()
 
 
@@ -254,6 +260,32 @@ class Decomposer:
             return None
 
 
+def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs"):
+    """Apply subdivision + densification + optional refinement to a composition tree."""
+    from scripts.subdivide_scene import subdivide_tree
+    from src.raum.densify import DensifyConfig, densify_loop
+
+    # Step 1: Subdivide (60 -> ~5K-13K)
+    tree = subdivide_tree(tree, n_children=12)
+    tensors = tree_to_tensors(tree)
+    n_sub = tensors["means"].shape[0]
+
+    # Step 2: Densify (5K -> ~50K)
+    config = DensifyConfig(grad_threshold=0.0002, max_gaussians=60000)
+    tensors = densify_loop(tensors, n_iterations=30, config=config)
+    n_dense = tensors["means"].shape[0]
+
+    # Step 3: Refine (optional)
+    if refine_mode == "sgs":
+        from scripts.refine_scene import refine_sgs
+        tensors = refine_sgs(tensors, Path(templates_dir), n_iterations=50, lr=5e-4)
+    elif refine_mode == "multiview":
+        from scripts.refine_scene import refine_multiview
+        tensors = refine_multiview(tensors, n_iterations=50, n_views=8, lr=1e-4)
+
+    return tensors, {"n_subdivided": n_sub, "n_densified": n_dense, "n_refined": tensors["means"].shape[0]}
+
+
 VIEWER_HTML = """<!doctype html>
 <html><head><meta charset="utf-8"/><title>Raum 1.3: Recursive Decomposition</title>
 <style>
@@ -283,14 +315,26 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
   background: rgba(18,18,26,0.9); padding: 8px 12px; border-radius: 6px; }
 </style></head><body>
 <header>
-  <h1>Raum 1.3 / Recursive Decomposition</h1>
+  <h1>Raum 1.4 / High-Fidelity Scene Generation</h1>
   <span class="status" id="status">ready</span>
 </header>
 <main>
   <div class="sidebar">
     <label>Scene prompt</label>
     <textarea id="prompt" placeholder="a castle on a hill">a castle on a hill</textarea>
+    <label style="margin-top:10px">Fidelity</label>
+    <select id="fidelity" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
+      <option value="low">Low (skeleton, ~60 splats, instant)</option>
+      <option value="high" selected>High (subdivide+densify+refine, ~50K splats, ~10s)</option>
+    </select>
+    <label style="margin-top:8px">Refinement mode</label>
+    <select id="refine-mode" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
+      <option value="sgs" selected>SGS Native (template Chamfer)</option>
+      <option value="multiview">Multi-view consistency</option>
+      <option value="none">None (densify only)</option>
+    </select>
     <button id="generate">Decompose + Render</button>
+    <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
     <div class="tree-output" id="tree-panel">
       <div class="stats" id="stats"></div>
       <pre id="tree-text"></pre>
@@ -342,7 +386,10 @@ function animate() { requestAnimationFrame(animate); controls.update(); renderer
 animate();
 
 const btn = document.getElementById('generate');
+const exportBtn = document.getElementById('export-btn');
 const promptEl = document.getElementById('prompt');
+const fidelityEl = document.getElementById('fidelity');
+const refineModeEl = document.getElementById('refine-mode');
 const statusEl = document.getElementById('status');
 const statsEl = document.getElementById('stats');
 const treeEl = document.getElementById('tree-text');
@@ -351,12 +398,15 @@ btn.addEventListener('click', async () => {
   const prompt = promptEl.value.trim();
   if (!prompt) return;
   btn.disabled = true;
-  statusEl.textContent = 'decomposing...';
+  exportBtn.disabled = true;
+  const fidelity = fidelityEl.value;
+  const refineMode = refineModeEl.value;
+  statusEl.textContent = fidelity === 'high' ? 'generating (high fidelity, ~10s)...' : 'decomposing...';
   try {
     const r = await fetch('/decompose', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({prompt}),
+      body: JSON.stringify({prompt, fidelity, refine_mode: refineMode}),
     });
     const data = await r.json();
     if (data.error) {
@@ -365,12 +415,29 @@ btn.addEventListener('click', async () => {
       return;
     }
     renderSplats(data.splats);
-    statsEl.textContent = `${data.n_gaussians} gaussians | depth ${data.depth} | ${data.n_children} top-level parts`;
+    let stats = `${data.n_gaussians} gaussians`;
+    if (data.pipeline) stats += ` | ${data.pipeline}`;
+    else stats += ` | depth ${data.depth} | ${data.n_children} top-level parts`;
+    statsEl.textContent = stats;
     treeEl.textContent = JSON.stringify(data.tree, null, 2);
     statusEl.textContent = 'ready';
+    exportBtn.disabled = false;
   } catch(e) {
     statusEl.textContent = 'error: ' + e.message;
   } finally { btn.disabled = false; }
+});
+
+exportBtn.addEventListener('click', async () => {
+  statusEl.textContent = 'exporting .ply...';
+  try {
+    const r = await fetch('/export_ply');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'scene.ply'; a.click();
+    URL.revokeObjectURL(url);
+    statusEl.textContent = 'ready';
+  } catch(e) { statusEl.textContent = 'export error: ' + e.message; }
 });
 
 window.addEventListener('resize', () => {
@@ -443,13 +510,17 @@ def main():
     elif args.serve:
         # Web UI mode
         from fastapi import FastAPI
-        from fastapi.responses import HTMLResponse, JSONResponse
+        from fastapi.responses import HTMLResponse, JSONResponse, Response
         from pydantic import BaseModel
+        import tempfile
 
         app = FastAPI()
+        last_tensors = {}  # store for export
 
         class DecomposeRequest(BaseModel):
             prompt: str
+            fidelity: str = "low"
+            refine_mode: str = "sgs"
 
         @app.get("/", response_class=HTMLResponse)
         def index():
@@ -457,6 +528,7 @@ def main():
 
         @app.post("/decompose")
         def decompose(req: DecomposeRequest):
+            nonlocal last_tensors
             prompt = req.prompt.strip()
             if not prompt:
                 return JSONResponse({"error": "empty prompt"})
@@ -471,27 +543,79 @@ def main():
 
             try:
                 tree = CompositionNode.from_dict(tree_dict)
-                tensors = tree_to_tensors(tree)
             except Exception as e:
                 return JSONResponse({"error": f"tree parse error: {e}"})
 
+            fidelity = req.fidelity if req.fidelity else args.fidelity
+            refine_mode = req.refine_mode if req.refine_mode else args.refine_mode
+
+            pipeline_info = None
+            if fidelity == "high":
+                try:
+                    tensors, info = apply_high_fidelity(
+                        tree, refine_mode=refine_mode,
+                        templates_dir=args.templates,
+                    )
+                    pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
+                except Exception as e:
+                    return JSONResponse({"error": f"high-fidelity pipeline error: {e}"})
+            else:
+                tensors = tree_to_tensors(tree)
+
+            last_tensors = tensors
             n = tensors["means"].shape[0]
-            return JSONResponse({
+
+            # Subsample for JSON transfer if too many points
+            max_json_splats = 100000
+            if n > max_json_splats:
+                idx = torch.randperm(n)[:max_json_splats]
+                means_out = tensors["means"][idx].tolist()
+                colors_out = tensors["colors"][idx].tolist()
+                scales_out = tensors["scales_log"][idx].tolist()
+                opacities_out = torch.sigmoid(tensors["opacities"][idx]).tolist()
+                n_out = max_json_splats
+            else:
+                means_out = tensors["means"].tolist()
+                colors_out = tensors["colors"].tolist()
+                scales_out = tensors["scales_log"].tolist()
+                opacities_out = torch.sigmoid(tensors["opacities"]).tolist()
+                n_out = n
+
+            response = {
                 "tree": tree_dict,
                 "splats": {
-                    "means": tensors["means"].tolist(),
-                    "scales": tensors["scales_log"].tolist(),
-                    "opacities": torch.sigmoid(tensors["opacities"]).tolist(),
-                    "colors": tensors["colors"].tolist(),
-                    "n_splats": n,
+                    "means": means_out,
+                    "scales": scales_out,
+                    "opacities": opacities_out,
+                    "colors": colors_out,
+                    "n_splats": n_out,
                 },
                 "n_gaussians": n,
                 "depth": tree.depth,
                 "n_children": len(tree.children),
-            })
+            }
+            if pipeline_info:
+                response["pipeline"] = pipeline_info
+
+            return JSONResponse(response)
+
+        @app.get("/export_ply")
+        def export_ply():
+            if not last_tensors:
+                return JSONResponse({"error": "no scene generated yet"}, status_code=400)
+            from src.export.ply import write_ply
+            tmp = tempfile.mktemp(suffix=".ply")
+            write_ply(last_tensors, tmp)
+            with open(tmp, "rb") as f:
+                data = f.read()
+            Path(tmp).unlink(missing_ok=True)
+            return Response(content=data, media_type="application/octet-stream",
+                           headers={"Content-Disposition": "attachment; filename=scene.ply"})
 
         import uvicorn
         print(f"\nServing at http://{args.host}:{args.port}")
+        print(f"Fidelity: {args.fidelity} | Refine mode: {args.refine_mode}")
+        print(f"Templates: {args.templates}")
         print("Enter a prompt in the UI to decompose + render.")
         uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
 
