@@ -33,9 +33,9 @@
 
 | # | Claim | Priority | Aristotle ID | Status |
 |---|---|---|---|---|
-| 17 | **P1** Covariance SPD from quat + scale | P1 (CRITICAL) | — | READY (lean file written) |
-| 18 | **P2** Material similarity bounded [0,1], self=1 | P3 (HIGH) | — | READY (lean file written) |
-| 19 | **P4** Covariance similarity well-defined for SPD | P4 (HIGH) | — | READY (lean file written) |
+| 17 | **P1** Covariance SPD from quat + scale | P1 (CRITICAL) | `6fce0b10-b73c-4e88-bc58-23c83a2046da` | QUEUED |
+| 18 | **P2** Material similarity bounded [0,1], self=1 | P3 (HIGH) | `466538bb-8100-4791-aad1-14fae6d08224` | QUEUED |
+| 19 | **P4** Covariance similarity well-defined for SPD | P4 (HIGH) | `28420e6a-ab3d-4a1c-a893-a383adfecb07` | QUEUED |
 | 20 | **P5** Physics prediction continuity (MLP) | P6 (MEDIUM) | — | PENDING |
 | 21 | **P6** Correlation hypothesis (info-theoretic) | P2 (CRITICAL) | — | PENDING (hardest) |
 | 22 | **P8** Densification preserves material coherence | P5 (HIGH) | — | PENDING |
