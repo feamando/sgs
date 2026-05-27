@@ -29,6 +29,20 @@
 | 15 | **H2** Expressiveness under T_max cap | P2 (CRITICAL) | `d3ba9b30-d03e-45b2-a3a0-d5a3258e9048` | COMPLETE |
 | 16 | **H4** Total weight is permutation-invariant | P3 (HIGH) | `6fa7e757-9065-41e7-80a0-dcf746bd6e69` | COMPLETE |
 
+## Physical Gaussians Proofs (Prepared 2026-05-27)
+
+| # | Claim | Priority | Aristotle ID | Status |
+|---|---|---|---|---|
+| 17 | **P1** Covariance SPD from quat + scale | P1 (CRITICAL) | — | READY (lean file written) |
+| 18 | **P2** Material similarity bounded [0,1], self=1 | P3 (HIGH) | — | READY (lean file written) |
+| 19 | **P4** Covariance similarity well-defined for SPD | P4 (HIGH) | — | READY (lean file written) |
+| 20 | **P5** Physics prediction continuity (MLP) | P6 (MEDIUM) | — | PENDING |
+| 21 | **P6** Correlation hypothesis (info-theoretic) | P2 (CRITICAL) | — | PENDING (hardest) |
+| 22 | **P8** Densification preserves material coherence | P5 (HIGH) | — | PENDING |
+| 23 | **P9** Dimensionality sufficiency for K classes | P7 (MEDIUM) | — | PENDING |
+
+Formal specification: `docs/proofs/physical_gaussians_math.md`
+
 ## Commands
 
 ```bash
