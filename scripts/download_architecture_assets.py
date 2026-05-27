@@ -194,6 +194,12 @@ def download_sketchfab(token: str, output_dir: Path, max_per_category: int = 10)
         for i, model in enumerate(results):
             uid = model["uid"]
             name = model.get("name", uid)[:50]
+
+            # Skip if already downloaded
+            if (cat_dir / uid).exists():
+                print(f"  ({i+1}/{len(results)}) {name}... EXISTS (skip)")
+                continue
+
             print(f"  ({i+1}/{len(results)}) {name}...", end=" ")
 
             if sketchfab_download(uid, token, cat_dir):
