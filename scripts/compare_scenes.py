@@ -32,14 +32,35 @@ def compute_metrics(tensors: dict[str, torch.Tensor]) -> dict[str, float]:
     bb_extent = (bb_max - bb_min).tolist()
     bb_volume = float((bb_max - bb_min).prod())
 
-    # Surface uniformity: average nearest-neighbor distance
+    # Nearest-neighbor distance (packing density)
     sample_n = min(n, 3000)
     subset = means[:sample_n]
     dists = torch.cdist(subset, subset)
     dists.fill_diagonal_(float("inf"))
     nn_dists = dists.min(dim=1).values
     avg_nn_dist = nn_dists.mean().item()
-    std_nn_dist = nn_dists.std().item()
+
+    # Surface coverage: what fraction of the bounding box grid cells contain Gaussians
+    grid_res = 32
+    bb_range = bb_max - bb_min + 1e-6
+    grid_coords = ((means - bb_min) / bb_range * grid_res).long().clamp(0, grid_res - 1)
+    occupied_cells = set()
+    for i in range(min(n, 10000)):
+        cell = (grid_coords[i, 0].item(), grid_coords[i, 1].item(), grid_coords[i, 2].item())
+        occupied_cells.add(cell)
+    total_cells = grid_res ** 3
+    surface_coverage = len(occupied_cells) / total_cells
+
+    # Per-cluster compactness: how tight are local neighborhoods
+    # (low = Gaussians form dense local clusters, good for solid objects)
+    k = min(10, sample_n - 1)
+    _, nn_indices = dists[:, :sample_n].topk(k, dim=1, largest=False)
+    local_spreads = []
+    for i in range(min(200, sample_n)):
+        neighbors = subset[nn_indices[i]]
+        spread = neighbors.std(dim=0).mean().item()
+        local_spreads.append(spread)
+    avg_compactness = float(np.mean(local_spreads))
 
     # Opacity statistics
     opacity_sigmoid = torch.sigmoid(opacities)
@@ -52,6 +73,14 @@ def compute_metrics(tensors: dict[str, torch.Tensor]) -> dict[str, float]:
     # Density: Gaussians per unit volume
     density = n / max(bb_volume, 1e-10)
 
+    # Silhouette density: project to XZ plane, measure fill ratio
+    xz_grid_res = 64
+    xz_coords = ((means[:, [0, 2]] - bb_min[[0, 2]]) / bb_range[[0, 2]] * xz_grid_res).long().clamp(0, xz_grid_res - 1)
+    xz_cells = set()
+    for i in range(min(n, 20000)):
+        xz_cells.add((xz_coords[i, 0].item(), xz_coords[i, 1].item()))
+    silhouette_fill = len(xz_cells) / (xz_grid_res ** 2)
+
     return {
         "n_gaussians": n,
         "bb_extent_x": bb_extent[0],
@@ -59,8 +88,9 @@ def compute_metrics(tensors: dict[str, torch.Tensor]) -> dict[str, float]:
         "bb_extent_z": bb_extent[2],
         "bb_volume": bb_volume,
         "avg_nn_distance": avg_nn_dist,
-        "std_nn_distance": std_nn_dist,
-        "uniformity_ratio": std_nn_dist / max(avg_nn_dist, 1e-10),
+        "surface_coverage": surface_coverage,
+        "silhouette_fill": silhouette_fill,
+        "avg_compactness": avg_compactness,
         "avg_opacity": avg_opacity,
         "low_opacity_fraction": low_opacity_frac,
         "color_variance": color_var,
@@ -83,8 +113,10 @@ def generate_report(metrics_sgs: dict, metrics_ext: dict, output_path: Path):
 
     comparisons = {
         "n_gaussians": ("Gaussian count", "higher"),
-        "avg_nn_distance": ("Avg NN distance", "lower"),
-        "uniformity_ratio": ("Uniformity (std/mean NN)", "lower"),
+        "avg_nn_distance": ("Avg NN distance (packing)", "lower"),
+        "surface_coverage": ("Surface coverage (3D fill %)", "higher"),
+        "silhouette_fill": ("Silhouette fill (top-down %)", "higher"),
+        "avg_compactness": ("Local compactness", "lower"),
         "avg_opacity": ("Avg opacity", "higher"),
         "low_opacity_fraction": ("Low-opacity fraction", "lower"),
         "color_variance": ("Color variance", "higher"),
@@ -112,7 +144,9 @@ def generate_report(metrics_sgs: dict, metrics_ext: dict, output_path: Path):
         "## Interpretation",
         "",
         "- **Avg NN distance**: lower = denser packing, more solid surfaces",
-        "- **Uniformity ratio**: lower = more even distribution (fewer gaps/clusters)",
+        "- **Surface coverage**: higher = more of the 3D volume is occupied (solid, not hollow)",
+        "- **Silhouette fill**: higher = the scene fills more of its footprint from above",
+        "- **Local compactness**: lower = local neighborhoods are tighter (solid objects)",
         "- **Low-opacity fraction**: lower = fewer invisible/useless Gaussians",
         "- **Color variance**: higher = more visual diversity (not all same color)",
         "- **Density**: higher = more detail per unit of space",
@@ -150,7 +184,7 @@ def main():
 
     # Print summary
     print("\n--- Quick Summary ---")
-    for key in ["avg_nn_distance", "uniformity_ratio", "avg_opacity", "density_per_unit_vol"]:
+    for key in ["avg_nn_distance", "surface_coverage", "silhouette_fill", "avg_compactness", "density_per_unit_vol"]:
         print(f"  {key}: SGS={metrics_sgs[key]:.4f}  Ext={metrics_ext[key]:.4f}")
 
 
