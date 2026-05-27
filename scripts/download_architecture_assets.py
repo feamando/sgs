@@ -85,16 +85,17 @@ def download_file(url: str, dest: Path, headers: dict = None) -> bool:
 
 
 def sketchfab_search(query: str, token: str, max_results: int = 10) -> list[dict]:
-    """Search Sketchfab for downloadable CC-licensed models."""
-    base_url = "https://api.sketchfab.com/v3/search"
-    params = (
-        f"?type=models&q={query.replace(' ', '+')}"
-        f"&downloadable=true"
-        f"&license=by,by-sa,cc0"
-        f"&sort_by=-likeCount"
-        f"&count={max_results}"
-    )
-    url = base_url + params
+    """Search Sketchfab for downloadable models."""
+    from urllib.parse import urlencode
+
+    params = urlencode({
+        "type": "models",
+        "q": query,
+        "downloadable": "true",
+        "sort_by": "-likeCount",
+        "count": str(max_results),
+    })
+    url = f"https://api.sketchfab.com/v3/search?{params}"
     headers = {"Authorization": f"Token {token}"}
 
     try:
@@ -103,7 +104,13 @@ def sketchfab_search(query: str, token: str, max_results: int = 10) -> list[dict
             req.add_header(k, v)
         with urlopen(req, timeout=30) as response:
             data = json.loads(response.read().decode())
-            return data.get("results", [])
+            # Filter for CC licenses client-side
+            results = []
+            for r in data.get("results", []):
+                lic = r.get("license", {}).get("label", "")
+                if "CC" in lic or "Creative Commons" in lic:
+                    results.append(r)
+            return results if results else data.get("results", [])[:max_results]
     except Exception as e:
         print(f"  Search failed for '{query}': {e}")
         return []

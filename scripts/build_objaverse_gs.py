@@ -198,17 +198,27 @@ def main():
         # Process from local directory
         obj_dir = Path(args.objaverse_dir)
         processed = 0
-        for cat in categories:
-            cat_dir = obj_dir / cat
-            if not cat_dir.exists():
+        mesh_extensions = ["*.obj", "*.stl", "*.gltf", "*.glb", "*.fbx", "*.ply"]
+
+        for cat_dir in sorted(obj_dir.iterdir()):
+            if not cat_dir.is_dir():
                 continue
-            for obj_file in cat_dir.glob("*.obj"):
+            cat = cat_dir.name
+            if cat in ("game_kits", "kenney", "manifest.json"):
+                continue
+
+            # Find all mesh files in this category (including in subdirectories)
+            mesh_files = []
+            for ext in mesh_extensions:
+                mesh_files.extend(cat_dir.rglob(ext))
+
+            for obj_file in sorted(mesh_files):
                 if processed >= args.n_objects:
                     break
-                obj_id = obj_file.stem
+                obj_id = obj_file.parent.name if obj_file.name == "scene.gltf" else obj_file.stem
                 if process_object(obj_file, output_dir, cat, obj_id, args.n_points):
                     processed += 1
-                    if processed % 50 == 0:
+                    if processed % 10 == 0:
                         print(f"  Processed {processed}/{args.n_objects}")
             if processed >= args.n_objects:
                 break
