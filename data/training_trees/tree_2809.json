@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "river_main", "position": [0, -0.2, 0], "scale": 1.5}, {"name": "sandbar_left", "position": [-0.6, -0.15, 0.8], "scale": 0.7}, {"name": "sandbar_right", "position": [0.6, -0.15, 0.8], "scale": 0.7}]}

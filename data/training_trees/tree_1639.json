@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "mosque_dome", "position": [0, 0.8, 0], "scale": 1.2}, {"name": "minaret_left", "position": [-1.2, 1.5, 0], "scale": 0.5}, {"name": "minaret_right", "position": [1.2, 1.5, 0], "scale": 0.5}]}

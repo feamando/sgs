@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "pyramid_base", "position": [0, 0, 0], "scale": 2.0}, {"name": "holographic_capstone", "position": [0, 1.8, 0], "scale": 0.6}, {"name": "energy_beacon", "position": [0, 2.0, 0], "scale": 0.3}]}

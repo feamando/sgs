@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "water_surface", "position": [0, 0, 0], "scale": 3.0}, {"name": "coral_reef", "position": [0, 0.3, 0], "scale": 1.5, "children": [{"name": "branching_coral", "position": [0.5, 0, 0]}, {"name": "dome_coral", "position": [-0.4, 0.1, 0.3]}]}, {"name": "autumn_sky", "position": [0, 2.0, 0], "scale": 2.0}]}

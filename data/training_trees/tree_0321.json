@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "river", "position": [0, -0.5, 0], "scale": 3.0}, {"name": "bridge", "position": [0, 0, 0], "scale": 1.0, "children": [{"name": "arch", "position": [0, 0.3, 0], "scale": 1.2}, {"name": "stone_supports", "position": [0, -0.2, 0], "scale": 1.5}]}, {"name": "eastern_bank", "position": [1.5, -0.3, 0], "scale": 1.8}]}

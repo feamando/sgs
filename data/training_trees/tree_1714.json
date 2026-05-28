@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "outer_wall", "position": [0, 0.1, 0], "scale": 2.0}, {"name": "arena_floor", "position": [0, 0, 0], "scale": 1.2}, {"name": "seating_tiers", "position": [0, 0.05, 0], "scale": 1.8}]}

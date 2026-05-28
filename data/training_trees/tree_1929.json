@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "mountain", "position": [0, 0.5, -2], "scale": 2.0}, {"name": "lake", "position": [0, 0, 0], "scale": 1.8}, {"name": "pine_trees", "position": [0, 0.2, 1.5], "scale": 1.2}]}

@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "swamp_ground", "position": [0, -0.2, 0], "scale": 2.0}, {"name": "dead_tree_left", "position": [-1.2, 0.8, -0.5], "scale": 0.9}, {"name": "dead_tree_right", "position": [1.5, 0.7, 0.8], "scale": 1.1}]}

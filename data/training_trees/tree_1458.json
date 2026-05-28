@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "ground", "position": [0, -0.2, 0], "scale": 1.5}, {"name": "longhouse", "position": [0, 0, 0], "scale": 1.0, "children": [{"name": "main_hull", "position": [0, 0.3, 0], "scale": 1.0}, {"name": "roof", "position": [0, 0.8, 0], "scale": 1.1}, {"name": "entrance_door", "position": [0, 0.2, 1.2], "scale": 0.4}]}]}

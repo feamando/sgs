@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "futuristic_longhouse", "position": [0, 0.5, 0], "scale": 2.0, "children": [{"name": "curved_hull_body", "position": [0, 0, 0], "scale": 1.5}, {"name": "glowing_neon_stripes", "position": [0, 0.1, 0], "scale": 1.6}, {"name": "holographic_dragon_prow", "position": [0, 0.3, 1.2], "scale": 0.8}]}]}

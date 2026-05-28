@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "ocean", "position": [0, -0.5, 0], "scale": 3.0}, {"name": "volcanic_island", "position": [0, 0.2, 0], "scale": 1.8, "children": [{"name": "volcano_peak", "position": [0, 1.2, 0], "scale": 0.7}]}, {"name": "lava_flow", "position": [0.4, 0.1, -0.3], "scale": 0.6}]}

@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "base_platform", "position": [0, 0, 0], "scale": 1.2}, {"name": "pagoda_tower", "position": [0, 0.8, 0], "scale": 0.8, "children": [{"name": "roof_top", "position": [0, 1.2, 0], "scale": 0.6}]}, {"name": "ground", "position": [0, -0.1, 0], "scale": 1.5}]}

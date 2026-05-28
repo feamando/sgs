@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "lake_ice", "position": [0, 0, 0], "scale": 2.0}, {"name": "ice_formation_left", "position": [-1.2, 0.3, -0.5], "scale": 0.8}, {"name": "ice_formation_right", "position": [1.5, 0.25, 0.8], "scale": 0.7}]}

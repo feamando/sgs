@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "church_building", "position": [0, 0, 0], "scale": 1.0}, {"name": "bell_tower", "position": [0, 1.2, -0.6], "scale": 0.7}, {"name": "spring_garden", "position": [0, -0.1, 0], "scale": 2.0}]}

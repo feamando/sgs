@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "market_square", "position": [0, 0, 0], "scale": 1.5, "children": [{"name": "cobblestone_ground", "position": [0, 0, 0], "scale": 2.0}, {"name": "merchant_stall", "position": [-1.2, 0.3, 0], "scale": 0.8}, {"name": "fountain", "position": [0.8, 0.2, 0], "scale": 0.6}]}]}

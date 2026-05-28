@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "sky_dawn", "position": [0, 2, 0], "scale": 3.0}, {"name": "ground", "position": [0, -0.5, 0], "scale": 2.0}, {"name": "gothic_cathedral", "position": [0, 0.8, 0], "scale": 1.5, "children": [{"name": "nave", "position": [0, 0, 0], "scale": 1.0}, {"name": "twin_spires", "position": [0, 1.2, 0], "scale": 0.8}]}]}

@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "ruined_abbey", "position": [0, 0, 0], "scale": 1.0, "children": [{"name": "main_nave", "position": [0, 0.6, 0], "scale": 1.5}, {"name": "bell_tower", "position": [0, 1.4, -0.8], "scale": 0.8}, {"name": "collapsed_ruins", "position": [0, 0.2, 0.8], "scale": 1.2}]}]}

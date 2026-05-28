@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "forest", "position": [0, 0, 0], "scale": 2.0, "children": [{"name": "trees_north", "position": [0, 0.5, 2.0], "scale": 1.2}, {"name": "trees_south", "position": [0, 0.5, -2.0], "scale": 1.2}]}, {"name": "clearing", "position": [0, 0, 0], "scale": 1.5}, {"name": "wildflowers", "position": [0, 0.1, 0], "scale": 0.8}]}

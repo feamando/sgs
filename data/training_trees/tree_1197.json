@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "wall_left", "position": [-1.5, 0, 0], "scale": 1.0}, {"name": "gate", "position": [0, 0, 0], "scale": 1.0, "children": [{"name": "gate_arch", "position": [0, 0.8, 0], "scale": 0.8}, {"name": "gate_door", "position": [0, 0.3, 0], "scale": 0.6}]}, {"name": "wall_right", "position": [1.5, 0, 0], "scale": 1.0}]}

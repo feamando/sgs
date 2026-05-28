@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "colosseum", "position": [0, 0, 0], "scale": 2.0, "children": [{"name": "outer_wall", "position": [0, 0.5, 0], "scale": 1.0}, {"name": "arena_floor", "position": [0, 0, 0], "scale": 0.8}]}, {"name": "night_sky", "position": [0, 2.5, 0], "scale": 3.0}, {"name": "torches", "position": [0, 0.8, 0], "scale": 0.6}]}

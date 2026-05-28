@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "pyramid_main", "position": [0, 0.8, 0], "scale": 2.0}, {"name": "sandy_base", "position": [0, -0.2, 0], "scale": 2.5}, {"name": "sphinx_statue", "position": [0, 0.1, 3.0], "scale": 1.2}]}

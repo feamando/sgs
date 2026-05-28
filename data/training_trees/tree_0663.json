@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "nave", "position": [0, 0.2, 0], "scale": 2.0}, {"name": "bell_tower", "position": [0, 1.5, -1.2], "scale": 0.8}, {"name": "cloister_courtyard", "position": [1.5, 0.1, 0.5], "scale": 1.2}]}

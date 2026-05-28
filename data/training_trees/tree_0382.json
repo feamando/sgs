@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "river", "position": [0, -0.5, 0], "scale": 3.0}, {"name": "bridge", "position": [0, 0.2, 0], "scale": 1.5, "children": [{"name": "stone_arch", "position": [0, 0, 0], "scale": 1.0}, {"name": "bridge_deck", "position": [0, 0.3, 0], "scale": 1.2}, {"name": "support_pillar", "position": [0, -0.2, 0], "scale": 0.8}]}]}

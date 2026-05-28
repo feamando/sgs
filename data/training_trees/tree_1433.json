@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "longhouse", "position": [0, 0.5, 0], "scale": 1.8, "children": [{"name": "wooden_walls", "position": [0, 0, 0], "scale": 1.0}, {"name": "thatched_roof", "position": [0, 0.6, 0], "scale": 1.0}]}, {"name": "ground", "position": [0, -0.1, 0], "scale": 2.5}, {"name": "sunset_sky", "position": [0, 2, 0], "scale": 3.0}]}

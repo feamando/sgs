@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "base_platform", "position": [0, 0, 0], "scale": 1.2}, {"name": "main_tower", "position": [0, 0.8, 0], "scale": 1.0, "children": [{"name": "lower_roof", "position": [0, 0.3, 0], "scale": 1.0}, {"name": "upper_roof", "position": [0, 0.7, 0], "scale": 0.7}]}, {"name": "spire", "position": [0, 1.4, 0], "scale": 0.3}]}

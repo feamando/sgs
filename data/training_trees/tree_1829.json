@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "sand_base", "position": [0, -0.2, 0], "scale": 1.5}, {"name": "pyramid", "position": [0, 0.8, 0], "scale": 1.0}, {"name": "entrance_chamber", "position": [0, 0.3, 0.6], "scale": 0.4}]}

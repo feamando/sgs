@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "bamboo_grove_left", "position": [-0.6, 0, 0], "scale": 0.8}, {"name": "bamboo_grove_center", "position": [0, 0, 0], "scale": 1.2}, {"name": "bamboo_grove_right", "position": [0.6, 0, 0], "scale": 0.9}]}

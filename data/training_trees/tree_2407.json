@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "frozen_lake_surface", "position": [0, 0, 0], "scale": 3.0}, {"name": "ice_spikes_formation_center", "position": [0, 0.8, 0], "scale": 1.5}, {"name": "ice_shelf_ridge", "position": [0, 0.4, -1.5], "scale": 2.0}]}

@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "snow_mountain", "position": [0, 0, 0], "scale": 2.0}, {"name": "futuristic_base_station", "position": [0, 1.8, 0], "scale": 0.8}, {"name": "holographic_beacon", "position": [0, 2.5, 0], "scale": 0.4}]}

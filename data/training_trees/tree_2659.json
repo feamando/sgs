@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "ocean", "position": [0, -0.5, 2], "scale": 3.0, "children": [{"name": "waves", "position": [0, 0.2, 0], "scale": 1.0}]}, {"name": "cliff_face", "position": [0, 0.8, 0], "scale": 1.5}, {"name": "cliff_top", "position": [0, 2.0, -1], "scale": 2.0}]}

@@ -1,0 +1,1 @@
+{"name": "scene", "position": [0, 0, 0], "children": [{"name": "moat", "position": [0, -0.2, 0], "scale": 2.0}, {"name": "clearing", "position": [0, 0, 0], "scale": 1.5}, {"name": "wildflowers", "position": [0, 0.1, 0], "scale": 1.2}]}
