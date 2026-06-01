@@ -147,14 +147,89 @@ class Decomposer:
         if "children" in node and node["children"]:
             for child in node["children"]:
                 self._fill_gaussians(child)
-        elif "gaussians" not in node or not node.get("gaussians"):
+            return
+
+        # Raum 1.5: expand a shallow grammar PART leaf (tower/wall/keep/tree/
+        # gate) into its atomic compound, so a model that emits a shallow
+        # skeleton renders identically to the 0.5 grammar. Falls through to the
+        # generic per-name fill below for non-part leaves.
+        if "gaussians" not in node or not node.get("gaussians"):
+            try:
+                from scripts.castle_grammar import expand_part
+                part = expand_part(node.get("name", ""), color=node.get("color"))
+            except Exception:
+                part = None
+            if part is not None:
+                pd = part.to_dict()
+                # Lift the expanded compound's sub-parts directly under this
+                # node (avoid a redundant tower_NE -> tower_NE nesting).
+                if pd.get("children"):
+                    node["children"] = pd["children"]
+                else:
+                    node["gaussians"] = pd.get("gaussians", [])
+                for child in node.get("children", []):
+                    self._fill_gaussians(child)
+                return
+
+        if "gaussians" not in node or not node.get("gaussians"):
             # Leaf node without gaussians: generate procedurally
             name = node.get("name", "").lower()
             color = node.get("color", [0.6, 0.6, 0.6])
 
-            # Pick primitive type from name
+            # Pick primitive type from name.
             n = 60
             gaussians = []
+
+            # Suffix-aware routing for grammar compound names (Raum 0.5/1.5).
+            # The semantic part is the trailing token: tower_NE_roof -> "roof",
+            # keep_body -> "body" (prefix "keep"). This must run BEFORE the
+            # substring chain, or "tower"/"keep" in the prefix would wrongly
+            # win (e.g. tower_NE_roof matching "tower" -> cylinder).
+            toks = name.replace("-", "_").split("_")
+            suffix = toks[-1] if toks else name
+            prefix = toks[0] if toks else name
+            grammar_shape = None
+            if suffix in ("roof", "canopy", "cap", "cone"):
+                grammar_shape = "cone"
+            elif suffix in ("trunk",):
+                grammar_shape = "cylinder"
+            elif suffix in ("crenellation", "battlement", "merlon", "face",
+                            "arch", "brick", "stone"):
+                grammar_shape = "box"
+            elif suffix == "body":
+                # tower bodies are round; keep / building bodies are boxes
+                grammar_shape = "cylinder" if prefix in ("tower", "turret", "spire") else "box"
+
+            if grammar_shape == "cone":
+                for i in range(n):
+                    t = i/n
+                    theta = 2*math.pi*(i*7)/n
+                    r = 0.3*(1-t)
+                    gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
+                                      "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
+                node["gaussians"] = gaussians
+                return
+            elif grammar_shape == "cylinder":
+                for i in range(n):
+                    theta = 2*math.pi*i/n
+                    y = (i/n) * 1.0 - 0.5
+                    gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
+                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+                node["gaussians"] = gaussians
+                return
+            elif grammar_shape == "box":
+                side = max(3, round(n ** (1.0/3.0)))
+                for ix in range(side):
+                    for iy in range(side):
+                        for iz in range(side):
+                            x = (ix/(side-1) - 0.5) * 0.8
+                            y = (iy/(side-1) - 0.5) * 0.8
+                            z = (iz/(side-1) - 0.5) * 0.8
+                            gaussians.append({"position": [x, y, z],
+                                              "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+                node["gaussians"] = gaussians
+                return
+
             if any(w in name for w in ["ground", "floor", "plane", "field", "road",
                                        "water", "sand", "snow",
                                        # open spaces read as a flat slab

@@ -373,6 +373,38 @@ PRESETS = {
 }
 
 
+# ── Part expansion (for inference: shallow skeleton -> atomic compound) ─
+
+def expand_part(name: str, color=None, courses: int = 6,
+                rng: random.Random = None) -> CompositionNode | None:
+    """
+    Expand a shallow part leaf (e.g. "tower_NE", "wall_S", "keep", "hill",
+    "tree_3") into its atomic compound CompositionNode using the grammar
+    builders. Returns None if the name is not a known part (caller falls
+    back to the generic fill).
+
+    This is the inference-side mirror of the grammar: a model that emits a
+    shallow skeleton gets the SAME atomic geometry the 0.5 full grammar
+    produces. The returned node is in LOCAL frame (position [0,0,0]); the
+    caller keeps the skeleton node's own position/scale.
+    """
+    rng = rng or random
+    stone = color or [0.62, 0.58, 0.53]
+    kind = _part_kind(name)
+    if kind == "tower":
+        return build_tower(name, [0, 0, 0], courses + 2, 0.18, stone)
+    if kind == "wall":
+        is_gate = "gate" in name.lower() or name.lower().endswith("_s")
+        return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=is_gate)
+    if kind == "gate":
+        return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=True)
+    if kind == "keep":
+        return build_keep(courses + 3, stone)
+    if kind == "tree":
+        return build_tree(name, [0, 0, 0], 1.0)
+    return None
+
+
 # ── Training-data sampling (for Raum 1.5) ─────────────────────────────
 
 PARAPHRASES = {
@@ -385,9 +417,47 @@ PARAPHRASES = {
 }
 
 
+# Part names the fill stage knows how to expand into an atomic compound.
+# A SHALLOW skeleton stops at these; the fill stage rebuilds their sub-parts.
+EXPANDABLE_PARTS = ("tower", "wall", "keep", "tree", "gate")
+
+
+def _part_kind(name: str) -> str | None:
+    """Map a node name to an expandable part kind (tower_NE -> tower)."""
+    n = name.lower()
+    for kind in EXPANDABLE_PARTS:
+        if n == kind or n.startswith(kind + "_") or ("_" + kind) in n:
+            return kind
+    return None
+
+
+def skeleton_dict(node: CompositionNode, shallow: bool = True) -> dict:
+    """
+    Serialize a tree to its STRUCTURAL skeleton: name, position, scale, color.
+
+    shallow=True (default): stop at expandable PARTS (tower/wall/keep/tree),
+    dropping their sub-parts. This keeps the JSON inside the model's 512-token
+    context. The fill stage re-expands each part into its atomic compound
+    (tower -> body + crenellation + roof) at inference, using the SAME grammar
+    builders, so the model path and the 0.5 grammar path render identically.
+
+    shallow=False: keep the full nested structure (no Gaussians either way).
+    """
+    d = {"name": node.name, "position": [round(v, 3) for v in node.position],
+         "scale": round(node.scale, 3)}
+    if node.color:
+        d["color"] = [round(c, 3) for c in node.color]
+    # Collapse expandable parts to leaves in shallow mode.
+    if shallow and _part_kind(node.name) is not None:
+        return d
+    if node.children:
+        d["children"] = [skeleton_dict(c, shallow) for c in node.children]
+    return d
+
+
 def sample_training_set(n: int, domains: list[str], paraphrase: bool,
                         out_dir: Path, seed: int = 0):
-    """Emit n randomized labeled trees as {prompt, tree} records."""
+    """Emit n randomized labeled trees as {prompt, tree} records (skeletons)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(seed)
     records = []
@@ -408,8 +478,9 @@ def sample_training_set(n: int, domains: list[str], paraphrase: bool,
             "castle_on_hill" if builder is build_castle_on_hill else domain,
             [domain.replace("_", " ")])
         chosen = rng.sample(prompts, k=min(len(prompts), 3) if paraphrase else 1)
+        skel = skeleton_dict(tree)
         for p in chosen:
-            records.append({"prompt": p, "tree": tree.to_dict()})
+            records.append({"prompt": p, "tree": skel})
     rng.shuffle(records)
     split = int(len(records) * 0.9)
     (out_dir / "train.json").write_text(json.dumps(records[:split]))
