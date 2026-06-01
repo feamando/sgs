@@ -51,17 +51,24 @@ def load_template_for_name(name: str, templates_dir: Path) -> list[list[float]] 
 
     # Partial keyword match
     keywords = {
-        "tower": ["tower", "turret", "spire", "minaret"],
-        "wall": ["wall", "fence", "barrier", "fortification"],
+        "tower": ["tower", "turret", "spire", "minaret", "keep"],
+        "wall": ["wall", "fence", "barrier", "fortification",
+                 # building bodies route to the wall (box-like) template
+                 "building", "wing", "hall", "house", "palace", "castle",
+                 "manor", "mansion", "structure", "room", "hut", "cabin",
+                 "barn", "shed", "fort", "annex", "block"],
         "rock": ["rock", "stone", "boulder", "cliff", "mountain", "hill"],
         "tree": ["tree", "oak", "pine", "forest", "wood"],
         "gate": ["gate", "door", "entrance", "arch", "portal"],
         "roof": ["roof", "top", "chimney"],
-        "floor": ["floor", "ground", "path", "road"],
+        "floor": ["floor", "ground", "path", "road",
+                  # open spaces route to the flat floor template
+                  "courtyard", "yard", "plaza", "terrace", "patio",
+                  "base", "foundation", "platform", "square"],
         "bush": ["bush", "shrub", "hedge", "grass", "vegetation"],
         "stairs": ["stairs", "step", "staircase"],
         "column": ["column", "pillar", "post"],
-        "brick": ["brick", "block"],
+        "brick": ["brick"],
     }
 
     for cat, words in keywords.items():
@@ -122,33 +129,42 @@ def template_subdivide(gaussians: list[GaussianParams], template_positions: list
 
 def procedural_subdivide(gaussians: list[GaussianParams], n_children: int = 12) -> list[GaussianParams]:
     """
-    Procedural subdivision fallback: expand each Gaussian into a small cluster.
+    Procedural subdivision fallback: expand each Gaussian into a solid box.
 
-    Creates n_children Gaussians in a sphere around the parent, with smaller
-    scale and inherited color. Used when no template is available.
+    Fills a filled cuboid (grid of Gaussians) around the parent rather than a
+    sphere shell. Most unmatched nodes in architecture scenes are structural
+    (buildings, wings, blocks), so a box reads far better than a ball. Used
+    when no template matches the node name.
     """
-    result = []
-    golden = (1.0 + math.sqrt(5.0)) / 2.0
+    # Cube-root grid sized to roughly n_children total points. Floor of 4 per
+    # axis (64 points) so the box fills as a solid block, not a sparse shell.
+    side = max(4, round(n_children ** (1.0 / 3.0)))
 
+    result = []
     for g in gaussians:
         parent_scale = sum(math.exp(s) for s in g.scale) / 3.0
+        spread = parent_scale * 0.5  # half-extent of the box
 
-        for i in range(n_children):
-            # Fibonacci sphere distribution
-            theta = 2.0 * math.pi * i / golden
-            phi = math.acos(1.0 - 2.0 * (i + 0.5) / n_children)
-            dx = math.sin(phi) * math.cos(theta) * parent_scale * 0.3
-            dy = math.sin(phi) * math.sin(theta) * parent_scale * 0.3
-            dz = math.cos(phi) * parent_scale * 0.3
+        for ix in range(side):
+            for iy in range(side):
+                for iz in range(side):
+                    # Map grid index to [-1, 1] along each axis
+                    fx = (ix / (side - 1)) * 2.0 - 1.0
+                    fy = (iy / (side - 1)) * 2.0 - 1.0
+                    fz = (iz / (side - 1)) * 2.0 - 1.0
 
-            child = GaussianParams(
-                position=[g.position[0] + dx, g.position[1] + dy, g.position[2] + dz],
-                scale=[s - 0.7 for s in g.scale],  # smaller
-                opacity=g.opacity,
-                color=g.color,
-                rotation=g.rotation,
-            )
-            result.append(child)
+                    child = GaussianParams(
+                        position=[
+                            g.position[0] + fx * spread,
+                            g.position[1] + fy * spread,
+                            g.position[2] + fz * spread,
+                        ],
+                        scale=[s - 0.7 for s in g.scale],  # smaller
+                        opacity=g.opacity,
+                        color=g.color,
+                        rotation=g.rotation,
+                    )
+                    result.append(child)
 
     return result
 
