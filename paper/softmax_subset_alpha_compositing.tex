@@ -1,22 +1,24 @@
-\documentclass[11pt]{article}
+\documentclass[twoside,11pt]{article}
 
-% ── Packages ──
+% ── JMLR style (jmlr2e.sty must be in the same directory / Overleaf project).
+%    jmlr2e already loads: amssymb, natbib, graphicx, hyperref, epsfig, and
+%    defines the theorem/lemma/corollary/definition/proof/example environments.
+%    Do NOT re-load those or re-declare \newtheorem (it errors). ──
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{hyperref}
+\usepackage{jmlr2e}
+
+% ── Additional packages (loaded AFTER jmlr2e) ──
+\usepackage{amsmath}   % align/equation* etc. (jmlr2e provides amssymb only)
 \usepackage{booktabs}
-\usepackage{geometry}
 \usepackage{listings}
 \usepackage{xcolor}
 
-\geometry{margin=1in}
-
-% ── Theorem environments ──
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}{Definition}
+% ── JMLR running headers (volume/year/pages auto-filled by editor on accept) ──
+\usepackage{lastpage}
+\jmlrheading{1}{2026}{1-\pageref{LastPage}}{6/26}{}{00-0000}{Nikita Gorshkov}
+\ShortHeadings{Alpha-Compositing $\supsetneq$ Softmax Attention}{Gorshkov}
+\firstpageno{1}
 
 % ── Lean listing style ──
 \lstdefinelanguage{Lean}{
@@ -38,21 +40,28 @@
   numberstyle=\tiny\color{gray},
 }
 
-% ── Metadata ──
+\begin{document}
+
 \title{On the Expressiveness of Alpha-Compositing:\\
 A Strict Superset of Softmax Attention}
-\author{Nikita Gorshkov\\
-Senefelderstr.\ 29a, 10437 Berlin, Germany\\
-\texttt{ngorshkov@protom.me}}
-\date{June 2026}
 
-\begin{document}
+\author{\name Nikita Gorshkov \email ngorshkov@protom.me \\
+       \addr Senefelderstr.\ 29a\\
+       10437 Berlin, Germany}
+
+% Action editor is assigned by JMLR; leave the placeholder until then.
+\editor{}
+
 \maketitle
 
 % ════════════════════════════════════════════════════════════
-\begin{abstract}
+\begin{abstract}%
 We establish a strict inclusion between two fundamental weighted aggregation schemes used in modern AI and computer graphics. Specifically, we prove that (1) the set of weight vectors achievable by softmax attention is a proper subset of those achievable by alpha-compositing, and (2) provide a constructive mapping from any softmax weight vector to equivalent alpha-compositing parameters via a telescoping tail-sum formula. The converse fails because alpha-compositing can produce exact-zero weights (hard sparsity) and sub-unity weight sums (residual transmittance), both structurally impossible under softmax. Both theorems are machine-verified in Lean~4 with Mathlib, requiring zero unproven assertions and depending only on standard axioms. This result formally grounds the use of volume-rendering equations as drop-in replacements for attention in neural architectures, confirming that no expressiveness is lost and strict additional capability is gained.
 \end{abstract}
+
+\begin{keywords}
+  attention mechanisms, alpha-compositing, volume rendering, expressiveness, formal verification (Lean~4)
+\end{keywords}
 
 % ════════════════════════════════════════════════════════════
 \section{Introduction}
@@ -121,7 +130,7 @@ T_i = \frac{R_2}{R_1} \cdot \frac{R_3}{R_2} \cdots \frac{R_i}{R_{i-1}} = \frac{R
 
 Therefore the alpha-compositing weight at position $i$ is:
 \begin{equation}
-w_i^{\text{alpha}} = a_i \cdot T_i = \frac{w_i}{R_i} \cdot R_i = w_i \qedhere
+w_i^{\text{alpha}} = a_i \cdot T_i = \frac{w_i}{R_i} \cdot R_i = w_i
 \end{equation}
 \end{proof}
 
@@ -157,7 +166,12 @@ The standard alpha-compositing pipeline used in rendering is strictly more power
 We have proven that the set of weight vectors achievable by softmax attention is a strict subset of those achievable by alpha-compositing. The proof is constructive: given any softmax weights, the telescoping tail-sum formula $a_i = w_i / \sum_{j \geq i} w_j$ produces alpha-compositing parameters that exactly recover those weights. The result is machine-verified in Lean~4 with zero unproven assertions. This formally grounds architectures that replace attention with volume-rendering equations, confirming no expressiveness is lost.
 
 % ════════════════════════════════════════════════════════════
-\bibliographystyle{plain}
+% JMLR requires a funding + competing-interests disclosure.
+\acks{The author received no specific funding for this work and declares no
+competing interests.}
+
+% ════════════════════════════════════════════════════════════
+\bibliographystyle{plainnat}
 \begin{thebibliography}{9}
 
 \bibitem{vaswani2017}

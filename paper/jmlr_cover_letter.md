@@ -125,17 +125,15 @@ ngorshkov@protom.me
 
 ## Pre-submission checklist (manuscript side — not part of the letter text)
 
-- [ ] Manuscript compiled in the **JMLR LaTeX style** (papers not in JMLR style
-      are rejected without review). For the JMLR *journal*, that is
-      `\documentclass[twoside,11pt]{article}` + `\usepackage{jmlr2e}` (the
-      `jmlr2e.sty` package, downloadable from jmlr.org/format). Do NOT use the
-      PMLR `jmlr.cls` / `\documentclass[wcp]{jmlr}` (that is for proceedings).
-      **Current state:** the LaTeX source `paper/softmax_subset_alpha_compositing.tex`
-      exists and is Overleaf-ready (`overleaf_paper.zip`), but it is plain
-      `article`, **not yet `jmlr2e`**. Before final submission, add `jmlr2e.sty`
-      and switch the preamble. (Title + author block already match the cover
-      letter.) `theorem_paper.md` is the Markdown working copy; the `.tex` is the
-      submission artifact.
+- [x] Manuscript in the **JMLR LaTeX style**. DONE:
+      `paper/softmax_subset_alpha_compositing.tex` now uses
+      `\documentclass[twoside,11pt]{article}` + `\usepackage{jmlr2e}` with the
+      official `jmlr2e.sty` (from github.com/JmlrOrg/jmlr-style-file), JMLR
+      title/author/`\editor`/abstract/keywords block, `\jmlrheading`,
+      `\ShortHeadings`, and an `\acks` funding/competing-interests disclosure.
+      `overleaf_paper.zip` bundles the `.tex` + `jmlr2e.sty` and compiles to PDF
+      on Overleaf as-is. (`theorem_paper.md` is the Markdown working copy; the
+      `.tex` is the submission artifact. NOT the PMLR `jmlr.cls`.)
 - [x] Cover letter as compilable LaTeX: `paper/jmlr_cover_letter.tex`
       (`overleaf_cover_letter.zip`). Markdown `jmlr_cover_letter.md` is the
       source of record; keep both in sync.
