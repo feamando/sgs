@@ -400,15 +400,50 @@ function renderSplats(data) {
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(n_splats * 3);
   const col = new Float32Array(n_splats * 3);
+  const siz = new Float32Array(n_splats);
   for (let i = 0; i < n_splats; i++) {
     pos[i*3] = means[i][0]; pos[i*3+1] = means[i][1]; pos[i*3+2] = means[i][2];
     col[i*3] = colors[i][0]; col[i*3+1] = colors[i][1]; col[i*3+2] = colors[i][2];
+    // Per-Gaussian world size from log-scale (mean of the 3 axes), exp'd.
+    // 6x factor so neighbouring splats overlap into a solid surface.
+    const s = scales[i];
+    const sigma = (Math.exp(s[0]) + Math.exp(s[1]) + Math.exp(s[2])) / 3.0;
+    siz[i] = Math.max(sigma * 6.0, 0.04);
   }
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  points = new THREE.Points(geo, new THREE.PointsMaterial({
-    size: 0.03, vertexColors: true, sizeAttenuation: true, transparent: true, opacity: 0.85
-  }));
+  geo.setAttribute('psize', new THREE.BufferAttribute(siz, 1));
+
+  // Soft round splats sized per-Gaussian. PointsMaterial can't do per-point
+  // size, so use a small ShaderMaterial: gl_PointSize from the psize attribute
+  // (perspective-attenuated), circular alpha falloff in the fragment shader.
+  const mat = new THREE.ShaderMaterial({
+    vertexColors: true, transparent: true, depthWrite: true,
+    uniforms: { viewportH: { value: window.innerHeight } },
+    vertexShader: `
+      attribute float psize;
+      varying vec3 vColor;
+      uniform float viewportH;
+      void main() {
+        vColor = color;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        // world size -> screen pixels, perspective-attenuated
+        gl_PointSize = psize * viewportH / -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() {
+        vec2 d = gl_PointCoord - vec2(0.5);
+        float r2 = dot(d, d);
+        if (r2 > 0.25) discard;            // circular cutout
+        float a = exp(-r2 * 8.0) * 0.9;    // gaussian-ish falloff
+        gl_FragColor = vec4(vColor, a);
+      }`,
+  });
+  // ShaderMaterial needs vertex colors enabled via the attribute name 'color'
+  mat.vertexColors = true;
+  points = new THREE.Points(geo, mat);
   scene.add(points);
   document.getElementById('info').textContent = `${n_splats} gaussians`;
 }
