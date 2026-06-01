@@ -251,15 +251,20 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
                 loss_chamfer = chamfer_loss(cluster_norm, target)
                 loss = loss + loss_chamfer * (1.0 / len(template_targets))
 
-        # Loss 2: Uniformity (penalize isolated Gaussians)
+        # Loss 2: Gap-filling (pull only the most isolated Gaussians inward).
+        # NB: penalizing mean NN distance collapses the whole cloud into clumps
+        # and destroys the macro shape. Instead, penalize only the worst gaps
+        # (top-decile NN distance) with a small weight so structure survives.
         n = min(scene.n_gaussians, 2000)
         subset = scene.positions[:n]
         dists = torch.cdist(subset, subset)
-        diag_mask = torch.eye(n, dtype=torch.bool)
+        diag_mask = torch.eye(n, dtype=torch.bool, device=dists.device)
         dists = dists + diag_mask.float() * 1e10
         nn_dist = dists.min(dim=1).values
-        loss_uniform = nn_dist.mean()
-        loss = loss + loss_uniform * 0.5
+        k = max(1, n // 10)
+        worst_gaps = torch.topk(nn_dist, k).values
+        loss_uniform = worst_gaps.mean()
+        loss = loss + loss_uniform * 0.05
 
         # Loss 3: Opacity encouragement (push toward visible)
         opacity_sigmoid = torch.sigmoid(scene.opacities)

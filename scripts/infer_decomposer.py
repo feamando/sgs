@@ -151,9 +151,14 @@ class Decomposer:
             color = node.get("color", [0.6, 0.6, 0.6])
 
             # Pick primitive type from name
-            n = 30
+            n = 60
             gaussians = []
-            if any(w in name for w in ["ground", "floor", "plane", "field", "road", "water", "sand", "snow"]):
+            if any(w in name for w in ["ground", "floor", "plane", "field", "road",
+                                       "water", "sand", "snow",
+                                       # open spaces read as a flat slab
+                                       "courtyard", "yard", "plaza", "terrace",
+                                       "patio", "square", "base", "foundation",
+                                       "platform"]):
                 # Flat plane
                 side = int(math.sqrt(n))
                 for i in range(side):
@@ -162,7 +167,22 @@ class Decomposer:
                         z = (j/side - 0.5) * 2.0
                         gaussians.append({"position": [x, random.uniform(-0.02, 0.02), z],
                                           "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
-            elif any(w in name for w in ["tower", "trunk", "pole", "post", "column", "pillar", "mast", "chimney"]):
+            elif any(w in name for w in ["hill", "mound", "knoll", "dune", "mountain",
+                                         "dome", "rise"]):
+                # Dome / mound (hemisphere bulging up from y=0)
+                golden = (1+math.sqrt(5))/2
+                for i in range(n):
+                    theta = 2*math.pi*i/golden
+                    # upper hemisphere only
+                    phi = math.acos(1 - (i+0.5)/n)
+                    r = 0.8
+                    gaussians.append({"position": [r*math.sin(phi)*math.cos(theta),
+                                                   r*math.cos(phi) - 0.1,
+                                                   r*math.sin(phi)*math.sin(theta)],
+                                      "scale": [-2.6, -2.6, -2.6], "opacity": 2.0, "color": color})
+            elif any(w in name for w in ["tower", "trunk", "pole", "post", "column",
+                                         "pillar", "mast", "chimney", "turret",
+                                         "spire", "keep", "minaret"]):
                 # Cylinder
                 for i in range(n):
                     theta = 2*math.pi*i/n
@@ -177,14 +197,23 @@ class Decomposer:
                     r = 0.3*(1-t)
                     gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
                                       "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
-            elif any(w in name for w in ["wall", "fence", "gate", "door", "box", "body", "hull", "block"]):
-                # Box
-                for _ in range(n):
-                    axis = random.randint(0, 2)
-                    sign = random.choice([-1, 1])
-                    pos = [random.uniform(-0.4, 0.4), random.uniform(-0.4, 0.4), random.uniform(-0.4, 0.4)]
-                    pos[axis] = sign * 0.4
-                    gaussians.append({"position": pos, "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+            elif any(w in name for w in ["wall", "fence", "gate", "door", "box",
+                                         "body", "hull", "block", "brick",
+                                         # building bodies are solid boxes
+                                         "building", "wing", "hall", "house",
+                                         "palace", "castle", "manor", "mansion",
+                                         "structure", "room", "hut", "cabin",
+                                         "barn", "shed", "fort", "annex", "main"]):
+                # Solid box (filled grid, not a shell, so it reads as mass)
+                side = max(3, round(n ** (1.0/3.0)))
+                for ix in range(side):
+                    for iy in range(side):
+                        for iz in range(side):
+                            x = (ix/(side-1) - 0.5) * 0.8
+                            y = (iy/(side-1) - 0.5) * 0.8
+                            z = (iz/(side-1) - 0.5) * 0.8
+                            gaussians.append({"position": [x, y, z],
+                                              "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
             else:
                 # Default: sphere
                 golden = (1+math.sqrt(5))/2
