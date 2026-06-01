@@ -1,4 +1,4 @@
-# JMLR Cover Letter — STUB
+# JMLR Cover Letter
 
 > **Paper:** *On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention*
 > **Author:** Nikita Gorshkov
@@ -116,13 +116,15 @@ ngorshkov@protom.me
 
 ## Pre-submission checklist (manuscript side — not part of the letter text)
 
-- [ ] Manuscript compiled in the **JMLR LaTeX style file** `jmlr2e.cls` (papers
-      not in JMLR style are rejected without review). **BLOCKER:** the current
-      draft is Markdown (`paper/theorem_paper.md`) and the repo has **no** JMLR
-      style file. Download `jmlr2e.zip` from jmlr.org and convert the Markdown to
-      a `\documentclass[wcp]{jmlr2e}` source. (The existing `.tex` in the repo,
-      `docs/papers/recursive_sgs_decomposition.tex`, uses plain `article` — not
-      reusable as-is for JMLR.)
+- [ ] Manuscript compiled in the **JMLR LaTeX style** (papers not in JMLR style
+      are rejected without review). For the JMLR *journal*, that is
+      `\documentclass[twoside,11pt]{article}` + `\usepackage{jmlr2e}` (the
+      `jmlr2e.sty` package, downloadable from jmlr.org/format). **BLOCKER:** the
+      current draft is Markdown (`paper/theorem_paper.md`) and the repo has **no**
+      JMLR style file — convert it. (The existing `.tex` in the repo,
+      `docs/papers/recursive_sgs_decomposition.tex`, is plain `article` with no
+      `jmlr2e` — not reusable as-is. Do NOT use the PMLR `jmlr.cls` /
+      `\documentclass[wcp]{jmlr}`; that is for proceedings, not the journal.)
 - [ ] PDF only; archive multiple files as tar/zip; total **< 5 MB**.
 - [ ] Title page: corresponding author name + **postal address** + email.
 - [ ] **Running title ≤ 50 characters.** Suggested: `Alpha-Compositing ⊋ Softmax Attention` (37 chars). OK.
