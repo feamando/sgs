@@ -1,0 +1,110 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+% Cover letter for JMLR submission.
+% Source of record: jmlr_cover_letter.md. Keep the two in sync.
+% Open items before submission: (1) preprint/arXiv status in Sec. 1;
+% (2) confirm reviewer emails in Sec. 5.
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\noindent Nikita Gorshkov\\
+Senefelderstr.\ 29a, 10437 Berlin, Germany\\
+\texttt{ngorshkov@protom.me}\\[1em]
+\noindent\today\\[1em]
+
+\noindent To the Editors of the \emph{Journal of Machine Learning Research},\\
+
+I am submitting the manuscript \emph{On the Expressiveness of Alpha-Compositing:
+A Strict Superset of Softmax Attention} for consideration for publication in JMLR.
+
+\paragraph{Summary.}
+The paper proves that the set of weight vectors achievable by alpha-compositing
+(the rendering equation of volume rendering and 3D Gaussian Splatting) strictly
+contains those achievable by softmax attention: every softmax weighting can be
+exactly reproduced by alpha-compositing via an explicit constructive map, but not
+conversely. Alpha-compositing additionally realizes exact zero weights (hard
+sparsity) and sub-unity weight sums (residual capacity). The complete result is
+formally verified in Lean~4 with Mathlib (v4.28.0), with zero \texttt{sorry}
+statements and only the standard axioms. The contribution sits at the
+intersection of attention-mechanism theory and computer graphics, and adds a
+third characterization to the softmax-attention literature alongside the
+Hopfield-network (Ramsauer et al., 2021) and kernel (Katharopoulos et al., 2020;
+Choromanski et al., 2021) views.
+
+\section*{1.~Overlapping or prior publications}
+\begin{itemize}[leftmargin=1.4em]
+  \item This manuscript has \textbf{not} been published in, or simultaneously
+    submitted to, any other journal or conference.
+  \item \textbf{[TODO: confirm preprint status]} A preprint version
+    \texttt{[is / is not]} posted at \texttt{[arXiv ID or ``n/a'']}. (arXiv
+    preprints are permitted by JMLR.)
+  \item Related but distinct work by the author: \emph{Semantic Gaussian
+    Splatting: Alpha-Compositing as a Composition Mechanism for Language}
+    (Gorshkov, 2026, preprint), cited as the empirical companion in Sec.~4.2.
+    That paper reports empirical NLP results; \textbf{this} paper is the
+    formal/theoretical result and shares no overlapping theorems, figures, or
+    text beyond standard background. \textbf{[TODO: confirm the companion is not
+    under review at a venue that would create a dual-submission conflict.]}
+\end{itemize}
+
+\section*{2.~Co-author awareness and consent}
+Single-author submission (Nikita Gorshkov). No co-authors to notify.
+
+\section*{3.~Conflicts of interest}
+The author declares \textbf{no conflicts of interest} with the suggested action
+editors or reviewers (no family/close-friend, advisor/advisee, or collaboration
+within the past three years), and \textbf{no funding and no competing interests}
+for the prior 36 months.
+
+\section*{4.~Suggested Action Editors}
+Drawn from the current JMLR Action Editor list. No AE lists
+``attention/transformers'' or ``formal verification'' explicitly, so these are
+chosen from learning theory, theoretical deep learning, and kernel methods --- the
+paper's actual lanes (expressiveness theory + the softmax-as-kernel connection in
+Sec.~4.3).
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Mehryar Mohri} --- learning theory (all aspects); fit for an
+    expressiveness / set-inclusion result.
+  \item \textbf{Joan Bruna} --- deep learning theory; fit for the
+    architectural-inductive-bias framing (Sec.~4.1--4.2).
+  \item \textbf{G\'abor Lugosi} --- statistical learning theory, online prediction.
+  \item \textbf{Bharath Sriperumbudur} --- kernel methods; fit for the
+    softmax-as-kernel / linear-attention connection (Sec.~4.3).
+  \item \textbf{Maxim Raginsky} --- theory of deep learning (optional).
+\end{enumerate}
+
+\section*{5.~Suggested Reviewers}
+The author has no collaboration with any of these.
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Angelos Katharopoulos} --- Apple Machine Learning Research;
+    ``Transformers are RNNs'' (linear attention). \texttt{a\_katharopoulos@apple.com}
+  \item \textbf{Krzysztof Choromanski} --- Google DeepMind / Columbia University;
+    Performers / kernel view of attention.
+  \item \textbf{Sepp Hochreiter} --- Institute for Machine Learning, JKU Linz;
+    senior author of ``Hopfield Networks is All You Need.''
+  \item \textbf{George Drettakis} --- Research Director, Inria (GraphDeco);
+    co-author of 3D Gaussian Splatting. (optional)
+\end{enumerate}
+
+\section*{6.~Keywords}
+attention mechanisms; alpha-compositing; volume rendering; expressiveness; formal
+verification (Lean~4).
+
+\bigskip
+\noindent Thank you for considering this submission.
+
+\bigskip
+\noindent Sincerely,\\[0.5em]
+Nikita Gorshkov (corresponding author)\\
+Senefelderstr.\ 29a, 10437 Berlin, Germany\\
+\texttt{ngorshkov@protom.me}
+
+\end{document}

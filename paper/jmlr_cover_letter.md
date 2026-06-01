@@ -80,20 +80,29 @@ et al., 2020; Choromanski et al., 2021) views.
 ## 5. Suggested Reviewers (3–5, conflict-free)
 
 > Suggested from the paper's own citation neighborhood and adjacent expertise.
-> The author has no collaboration with any of these. `[TODO: fill current
-> affiliation + email for each and re-confirm no conflict before submitting.]`
+> The author has no collaboration with any of these. Emails below are
+> best-effort from public pages (verified 2026-06-01 where marked ✓); confirm
+> each before submission.
 
-1. **Hubert Ramsauer** (JKU Linz) — lead author of "Hopfield Networks is All You
-   Need"; directly relevant to the attention-as-aggregation characterization
-   (§4.3). `[affiliation/email TODO]`
-2. **Angelos Katharopoulos** (EPFL / Apple) — "Transformers are RNNs" (linear
-   attention); fit for the weighted-aggregation hierarchy. `[TODO]`
-3. **Krzysztof Choromanski** (Google DeepMind) — Performers / kernel view of
-   attention; fit for §4.3. `[TODO]`
-4. **George Drettakis** (Inria) — 3D Gaussian Splatting; fit for the
-   alpha-compositing / rendering-equation side (§4.4). (optional) `[TODO]`
-5. **Sebastian Ullrich** or another Lean 4 / formalization researcher — to vet
-   the formal-verification claims. (optional) `[TODO]`
+1. **Angelos Katharopoulos** — Apple Machine Learning Research. Author of
+   "Transformers are RNNs" (linear attention); fit for the weighted-aggregation
+   hierarchy (§4.3). Email: `a_katharopoulos@apple.com` ✓
+2. **Krzysztof Choromanski** — Google DeepMind (New York) and Columbia
+   University. Author of Performers / the kernel view of attention; fit for §4.3.
+   `[email: public DeepMind/Columbia address — confirm]`
+3. **Sepp Hochreiter** — Institute for Machine Learning, JKU Linz. Senior author
+   of "Hopfield Networks is All You Need"; directly relevant to the
+   attention-as-aggregation framing (§4.3). `[email: @ml.jku.at — confirm]`
+4. **George Drettakis** — Research Director, Inria (GraphDeco, Sophia Antipolis).
+   Co-author of 3D Gaussian Splatting; fit for the alpha-compositing /
+   rendering-equation side (§4.4). (optional) `[email: @inria.fr — confirm]`
+5. *(Optional fifth)* a Lean 4 / formal-verification researcher to vet the
+   mechanized proof, e.g. from the Lean FRO or a Mathlib maintainer.
+   `[name + email TODO, or omit — four suffices]`
+
+> Note: emails are not strictly required by JMLR for reviewer suggestions
+> (name + affiliation + area is enough for the editor to identify the person),
+> so an unconfirmed email can be omitted rather than guessed.
 
 ## 6. Keywords
 
@@ -119,12 +128,17 @@ ngorshkov@protom.me
 - [ ] Manuscript compiled in the **JMLR LaTeX style** (papers not in JMLR style
       are rejected without review). For the JMLR *journal*, that is
       `\documentclass[twoside,11pt]{article}` + `\usepackage{jmlr2e}` (the
-      `jmlr2e.sty` package, downloadable from jmlr.org/format). **BLOCKER:** the
-      current draft is Markdown (`paper/theorem_paper.md`) and the repo has **no**
-      JMLR style file — convert it. (The existing `.tex` in the repo,
-      `docs/papers/recursive_sgs_decomposition.tex`, is plain `article` with no
-      `jmlr2e` — not reusable as-is. Do NOT use the PMLR `jmlr.cls` /
-      `\documentclass[wcp]{jmlr}`; that is for proceedings, not the journal.)
+      `jmlr2e.sty` package, downloadable from jmlr.org/format). Do NOT use the
+      PMLR `jmlr.cls` / `\documentclass[wcp]{jmlr}` (that is for proceedings).
+      **Current state:** the LaTeX source `paper/softmax_subset_alpha_compositing.tex`
+      exists and is Overleaf-ready (`overleaf_paper.zip`), but it is plain
+      `article`, **not yet `jmlr2e`**. Before final submission, add `jmlr2e.sty`
+      and switch the preamble. (Title + author block already match the cover
+      letter.) `theorem_paper.md` is the Markdown working copy; the `.tex` is the
+      submission artifact.
+- [x] Cover letter as compilable LaTeX: `paper/jmlr_cover_letter.tex`
+      (`overleaf_cover_letter.zip`). Markdown `jmlr_cover_letter.md` is the
+      source of record; keep both in sync.
 - [ ] PDF only; archive multiple files as tar/zip; total **< 5 MB**.
 - [ ] Title page: corresponding author name + **postal address** + email.
 - [ ] **Running title ≤ 50 characters.** Suggested: `Alpha-Compositing ⊋ Softmax Attention` (37 chars). OK.
