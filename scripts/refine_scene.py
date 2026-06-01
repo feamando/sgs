@@ -210,6 +210,9 @@ def refine_sgs(tensors: dict[str, torch.Tensor], templates_dir: Path,
         print(f"Matched {len(targets)} local regions to templates")
 
     scene = GaussianScene.from_tensors(tensors)
+    if scene.n_gaussians == 0:
+        print("Warning: refine_sgs received an empty scene; skipping refinement.")
+        return scene.to_tensors()
     optimizer = torch.optim.Adam([scene.positions, scene.colors, scene.opacities], lr=lr)
 
     config = DensifyConfig(

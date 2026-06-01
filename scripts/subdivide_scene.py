@@ -8,6 +8,7 @@ each Gaussian into a small cluster (useful for testing the pipeline).
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -126,8 +127,6 @@ def procedural_subdivide(gaussians: list[GaussianParams], n_children: int = 12) 
     Creates n_children Gaussians in a sphere around the parent, with smaller
     scale and inherited color. Used when no template is available.
     """
-    import math
-
     result = []
     golden = (1.0 + math.sqrt(5.0)) / 2.0
 

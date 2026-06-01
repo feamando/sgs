@@ -568,7 +568,11 @@ def main():
                     )
                     pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
                 except Exception as e:
-                    return JSONResponse({"error": f"high-fidelity pipeline error: {e}"})
+                    import traceback
+                    print("\n=== high-fidelity pipeline error ===", file=sys.stderr)
+                    traceback.print_exc()
+                    print("=====================================\n", file=sys.stderr)
+                    return JSONResponse({"error": f"high-fidelity pipeline error: {type(e).__name__}: {e}"})
             else:
                 tensors = tree_to_tensors(tree)
 
