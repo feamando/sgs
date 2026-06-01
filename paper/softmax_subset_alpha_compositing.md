@@ -4,9 +4,12 @@
 
 Nikita Gorshkov
 
-Radiance Labs, 2026
+ngorshkov@proton.me
 
 Machine-verified in Lean 4 / Mathlib (zero `sorry`, standard axioms only)
+
+> Note: this Markdown is an early draft. The submission artifact is
+> `softmax_subset_alpha_compositing.tex` (JMLR jmlr2e style).
 
 ---
 
@@ -190,7 +193,7 @@ We have proven that the set of weight vectors achievable by softmax attention is
 6. Katharopoulos, A., Vyas, A., Pappas, N., Fleuret, F. (2020). "Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention." ICML 2020.
 7. Ramsauer, H., Schafl, B., Lehner, J., et al. (2021). "Hopfield Networks is All You Need." ICLR 2021.
 8. de Moura, L. and Ullrich, S. (2021). "The Lean 4 Theorem Prover and Programming Language." CADE 2021.
-9. Gorshkov, N. (2025). "Semantic Gaussian Splatting." Radiance Labs. github.com/feamando/sgs
+9. Semantic Gaussian Splatting (SGS). Source code repository. github.com/feamando/sgs
 
 ```lean
 import Mathlib

@@ -2,7 +2,7 @@
 
 **Nikita Gorshkov** (corresponding author)
 Senefelderstr. 29a, 10437 Berlin, Germany
-ngorshkov@protom.me
+ngorshkov@proton.me
 
 ---
 
@@ -146,7 +146,7 @@ Theorem 2 establishes that alpha-compositing can simulate softmax, but the conve
 
 We emphasize that Theorem 2 is a statement about the set of *achievable weight vectors*, not about which scheme produces better models. A more expressive scheme can represent more functions but also has a larger hypothesis space to search during optimization. The practical question is whether alpha-compositing's specific structure — transmittance-gated, order-dependent, supporting exact zeros — provides useful inductive bias for specific tasks.
 
-Concurrent empirical work (Gorshkov, 2026) suggests that alpha-compositing provides a stronger inductive bias for sentence composition in NLP: better zero-shot and few-shot performance than softmax with limited data, converging to equivalent performance at scale. This is consistent with the theoretical picture: alpha-compositing's structural constraints (ordering, transmittance) encode useful compositional structure, while softmax's flexibility allows it to learn equivalent structure given sufficient data.
+One hypothesis this raises is that alpha-compositing's specific structure provides a useful inductive bias for sentence composition in NLP: its structural constraints (ordering, transmittance) may encode compositional structure that softmax must instead learn from data. Empirical exploration of this direction is ongoing in the Semantic Gaussian Splatting code repository [SGS]. The theorem in this paper makes no empirical claim; it establishes only the set-theoretic relationship between the two weighting schemes.
 
 ### 4.3 Connection to Prior Work
 
@@ -198,7 +198,7 @@ Choromanski, K., Likhosherstov, V., Dohan, D., Song, X., Gane, A., Sarlos, T., H
 
 de Moura, L. & Ullrich, S. (2021). The Lean 4 Theorem Prover and Programming Language. In *International Conference on Automated Deduction*.
 
-Gorshkov, N. (2026). Semantic Gaussian Splatting: Alpha-Compositing as a Composition Mechanism for Language. *Preprint*.
+Semantic Gaussian Splatting (SGS). Source code repository. https://github.com/feamando/sgs
 
 Katharopoulos, A., Vyas, A., Pappas, N., & Fleuret, F. (2020). Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention. In *International Conference on Machine Learning*.
 

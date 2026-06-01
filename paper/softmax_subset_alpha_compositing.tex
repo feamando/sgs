@@ -45,7 +45,7 @@
 \title{On the Expressiveness of Alpha-Compositing:\\
 A Strict Superset of Softmax Attention}
 
-\author{\name Nikita Gorshkov \email ngorshkov@protom.me \\
+\author{\name Nikita Gorshkov \email ngorshkov@proton.me \\
        \addr Senefelderstr.\ 29a\\
        10437 Berlin, Germany}
 
@@ -148,7 +148,7 @@ Alpha-compositing can additionally produce weight vectors with exact zeros and w
 
 This theorem establishes that the rendering equation from computer graphics is provably at least as expressive as the attention mechanism in transformers for computing weighted aggregations. Any computation a transformer performs through attention weights can be exactly replicated by alpha-compositing, plus alpha-compositing offers additional capabilities (exact sparsity, sub-unity sums) that softmax structurally cannot provide.
 
-This is relevant to the Semantic Gaussian Splatting (SGS) proposal~\cite{gorshkov2025}, which replaces transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting. The theorem proves this replacement does not lose expressiveness.
+This is relevant to architectures that replace transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting, as explored in the Semantic Gaussian Splatting (SGS) code repository~\cite{sgs-repo}. The theorem proves this replacement does not lose expressiveness.
 
 \subsection{Implications for Computer Graphics}
 
@@ -214,10 +214,9 @@ L.~de~Moura and S.~Ullrich.
 \newblock The {L}ean 4 theorem prover and programming language.
 \newblock In \emph{CADE}, 2021.
 
-\bibitem{gorshkov2025}
-N.~Gorshkov.
-\newblock Semantic {G}aussian splatting.
-\newblock Radiance Labs, 2025.
+\bibitem{sgs-repo}
+Semantic {G}aussian {S}platting (SGS).
+\newblock Source code repository.
 \newblock \url{https://github.com/feamando/sgs}.
 
 \end{thebibliography}

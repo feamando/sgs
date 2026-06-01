@@ -39,13 +39,8 @@ et al., 2020; Choromanski et al., 2021) views.
   any other journal or conference.
 - No preprint of this manuscript has been posted (no arXiv or other preprint
   server). This is the first public release of the work.
-- Related but distinct work by the author: *Semantic Gaussian Splatting:
-  Alpha-Compositing as a Composition Mechanism for Language* (Gorshkov, 2026,
-  preprint), cited as the empirical companion in §4.2. That paper reports
-  empirical NLP results; **this** paper is the formal/theoretical result and
-  shares no overlapping theorems, figures, or text beyond standard background.
-  `[TODO: confirm the companion is not under review at a venue that would create
-  a dual-submission conflict.]`
+- There are no prior or related publications by the author that overlap with
+  this manuscript.
 
 ## 2. Co-author awareness and consent
 
@@ -119,7 +114,7 @@ Sincerely,
 
 Nikita Gorshkov (corresponding author)
 Senefelderstr. 29a, 10437 Berlin, Germany
-ngorshkov@protom.me
+ngorshkov@proton.me
 
 ---
 
