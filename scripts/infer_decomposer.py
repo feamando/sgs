@@ -26,13 +26,15 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.raum.decomposition import CompositionNode, tree_to_tensors, print_tree
+from src.raum.decomposition import CompositionNode, tree_to_tensors, print_tree, save_tree
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Raum 1.3/1.4 inference: prompt -> tree -> render")
-    p.add_argument("--checkpoint", required=True, help="Fine-tuned decomposer checkpoint")
-    p.add_argument("--tokenizer", required=True, help="SentencePiece model")
+    p.add_argument("--checkpoint", help="Fine-tuned decomposer checkpoint (not needed with --scene-file)")
+    p.add_argument("--tokenizer", help="SentencePiece model (not needed with --scene-file)")
+    p.add_argument("--scene-file", type=str, default=None,
+                   help="Raum 0.5: render a fixed pre-built scene tree (JSON) with no model in the loop")
     p.add_argument("--prompt", type=str, default=None, help="Single prompt to decompose")
     p.add_argument("--serve", action="store_true", help="Launch web UI for interactive prompts")
     p.add_argument("--port", type=int, default=8003)
@@ -289,16 +291,27 @@ class Decomposer:
             return None
 
 
-def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs"):
-    """Apply subdivision + densification + optional refinement to a composition tree."""
+def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs",
+                        prebuilt=False):
+    """Apply subdivision + densification + optional refinement to a composition tree.
+
+    prebuilt=True (Raum 0.5): the tree already has dense ATOMIC leaves from the
+    grammar (stones, crenellations), so subdivision is skipped. Subdividing
+    atomic parts only inflates them into redundant 64-point blobs. Densify then
+    only fills genuine gaps.
+    """
     from scripts.subdivide_scene import subdivide_tree, set_templates_dir
     from src.raum.densify import DensifyConfig, densify_loop
 
-    # Step 1: Subdivide (60 -> ~5K-13K) using templates when available
-    tpl_path = Path(templates_dir) if templates_dir else None
-    set_templates_dir(tpl_path)
-    tree = subdivide_tree(tree, n_children=12)
-    tensors = tree_to_tensors(tree)
+    # Step 1: Subdivide (60 -> ~5K-13K) using templates when available.
+    # Skipped for prebuilt grammar scenes whose leaves are already atomic.
+    if prebuilt:
+        tensors = tree_to_tensors(tree)
+    else:
+        tpl_path = Path(templates_dir) if templates_dir else None
+        set_templates_dir(tpl_path)
+        tree = subdivide_tree(tree, n_children=12)
+        tensors = tree_to_tensors(tree)
     n_sub = tensors["means"].shape[0]
 
     # Step 2: Densify (5K -> ~50K)
@@ -517,14 +530,46 @@ window.addEventListener('resize', () => {
 </script></body></html>"""
 
 
+def _load_scene_tree(path):
+    """Raum 0.5: load a pre-built composition tree from JSON (no model)."""
+    with open(path) as f:
+        return CompositionNode.from_dict(json.load(f))
+
+
 def main():
     args = parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    print(f"Loading decomposer: {args.checkpoint}")
-    decomposer = Decomposer(args.checkpoint, args.tokenizer, device)
-    print(f"  Vocab: {decomposer.vocab_size}, ready.")
+    # Raum 0.5: fixed-scene mode. Skip the model entirely; the tree is the
+    # grammar's output, fed straight into fill -> densify -> refine -> render.
+    scene_mode = args.scene_file is not None
+    decomposer = None
+    if scene_mode:
+        print(f"Fixed-scene mode (no model): {args.scene_file}")
+    else:
+        if not args.checkpoint or not args.tokenizer:
+            raise SystemExit("--checkpoint and --tokenizer are required unless --scene-file is given")
+        print(f"Loading decomposer: {args.checkpoint}")
+        decomposer = Decomposer(args.checkpoint, args.tokenizer, device)
+        print(f"  Vocab: {decomposer.vocab_size}, ready.")
+
+    # Fixed-scene single render: load, run pipeline, save, exit.
+    if scene_mode and not args.serve:
+        tree = _load_scene_tree(args.scene_file)
+        print_tree(tree)
+        if args.fidelity == "high":
+            print(f"\n  High fidelity: densify -> refine ({args.refine_mode}), subdivision skipped (atomic parts)...")
+            tensors, info = apply_high_fidelity(
+                tree, refine_mode=args.refine_mode, templates_dir=args.templates,
+                prebuilt=True)
+            print(f"  Pipeline: parts:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}")
+        else:
+            tensors = tree_to_tensors(tree)
+        out = Path("data/scenes/generated_scene.json")
+        save_tree(tree, out)
+        print(f"  Gaussians: {tensors['means'].shape[0]}  |  saved tree: {out}")
+        return
 
     if args.prompt and not args.serve:
         # Single inference
@@ -606,22 +651,29 @@ def main():
         @app.post("/decompose")
         def decompose(req: DecomposeRequest):
             nonlocal last_tensors
-            prompt = req.prompt.strip()
-            if not prompt:
-                return JSONResponse({"error": "empty prompt"})
 
-            tree_dict = decomposer.generate_tree(
-                prompt, max_new=args.max_new,
-                temperature=args.temperature, top_k=args.top_k,
-            )
+            # Raum 0.5 fixed-scene mode: ignore the prompt, render the grammar
+            # tree. Lets the existing UI button render the fixed scene.
+            if scene_mode:
+                tree = _load_scene_tree(args.scene_file)
+                tree_dict = tree.to_dict()
+            else:
+                prompt = req.prompt.strip()
+                if not prompt:
+                    return JSONResponse({"error": "empty prompt"})
 
-            if tree_dict is None:
-                return JSONResponse({"error": "failed to parse tree JSON", "raw_output": ""})
+                tree_dict = decomposer.generate_tree(
+                    prompt, max_new=args.max_new,
+                    temperature=args.temperature, top_k=args.top_k,
+                )
 
-            try:
-                tree = CompositionNode.from_dict(tree_dict)
-            except Exception as e:
-                return JSONResponse({"error": f"tree parse error: {e}"})
+                if tree_dict is None:
+                    return JSONResponse({"error": "failed to parse tree JSON", "raw_output": ""})
+
+                try:
+                    tree = CompositionNode.from_dict(tree_dict)
+                except Exception as e:
+                    return JSONResponse({"error": f"tree parse error: {e}"})
 
             fidelity = req.fidelity if req.fidelity else args.fidelity
             refine_mode = req.refine_mode if req.refine_mode else args.refine_mode
@@ -632,6 +684,7 @@ def main():
                     tensors, info = apply_high_fidelity(
                         tree, refine_mode=refine_mode,
                         templates_dir=args.templates,
+                        prebuilt=scene_mode,
                     )
                     pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
                 except Exception as e:
