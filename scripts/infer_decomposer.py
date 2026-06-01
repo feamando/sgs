@@ -414,11 +414,13 @@ function renderSplats(data) {
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   geo.setAttribute('psize', new THREE.BufferAttribute(siz, 1));
 
-  // Soft round splats sized per-Gaussian. PointsMaterial can't do per-point
-  // size, so use a small ShaderMaterial: gl_PointSize from the psize attribute
-  // (perspective-attenuated), circular alpha falloff in the fragment shader.
+  // Opaque round splats sized per-Gaussian. PointsMaterial can't do per-point
+  // size, so use a ShaderMaterial: gl_PointSize from the psize attribute
+  // (perspective-attenuated). OPAQUE discs (not transparent) so overlapping
+  // splats merge into a solid surface via the depth buffer -- transparent
+  // splats with depthWrite read as discrete fuzzy balls instead of mass.
   const mat = new THREE.ShaderMaterial({
-    vertexColors: true, transparent: true, depthWrite: true,
+    vertexColors: true, transparent: false, depthWrite: true, depthTest: true,
     uniforms: { viewportH: { value: window.innerHeight } },
     vertexShader: `
       attribute float psize;
@@ -428,7 +430,7 @@ function renderSplats(data) {
         vColor = color;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         // world size -> screen pixels, perspective-attenuated
-        gl_PointSize = psize * viewportH / -mv.z;
+        gl_PointSize = clamp(psize * viewportH / -mv.z, 2.0, 64.0);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `
@@ -436,9 +438,10 @@ function renderSplats(data) {
       void main() {
         vec2 d = gl_PointCoord - vec2(0.5);
         float r2 = dot(d, d);
-        if (r2 > 0.25) discard;            // circular cutout
-        float a = exp(-r2 * 8.0) * 0.9;    // gaussian-ish falloff
-        gl_FragColor = vec4(vColor, a);
+        if (r2 > 0.25) discard;                  // circular cutout
+        // simple radial shading so overlapping discs read as rounded mass
+        float shade = 1.0 - r2 * 0.6;
+        gl_FragColor = vec4(vColor * shade, 1.0);
       }`,
   });
   // ShaderMaterial needs vertex colors enabled via the attribute name 'color'
