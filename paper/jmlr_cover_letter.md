@@ -2,8 +2,8 @@
 
 > **Paper:** *On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention*
 > **Author:** Nikita Gorshkov
-> **Status:** DRAFT — only two open items remain (preprint/arXiv status in §1;
-> filling reviewer affiliations/emails in §5). Everything else is complete.
+> **Status:** READY. One optional item: reviewer emails in §5 (not required by
+> JMLR — name + affiliation suffices). All mandated content is complete.
 > **Reference:** JMLR author guidelines, https://www.jmlr.org/author-info.html (verified 2026-06-01).
 >
 > JMLR requires the cover letter to be a PDF or plain-text file accompanying the
@@ -37,8 +37,8 @@ et al., 2020; Choromanski et al., 2021) views.
 
 - This manuscript has **not** been published in, or simultaneously submitted to,
   any other journal or conference.
-- `[TODO: confirm preprint status]` A preprint version `[is / is not]` posted at
-  `[arXiv ID or "n/a"]`. (arXiv preprints are permitted by JMLR.)
+- No preprint of this manuscript has been posted (no arXiv or other preprint
+  server). This is the first public release of the work.
 - Related but distinct work by the author: *Semantic Gaussian Splatting:
   Alpha-Compositing as a Composition Mechanism for Language* (Gorshkov, 2026,
   preprint), cited as the empirical companion in §4.2. That paper reports
