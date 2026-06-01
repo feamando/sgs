@@ -1,0 +1,87 @@
+name = "RequestProject"
+defaultTargets = ["claim_1_1_cholesky_psd", "claim_2_1_mercer_kernel", "claim_2_2_mahalanobis_chi_squared", "claim_2_4_sparsity_bound", "claim_3_1_weights_sum_bounded", "claim_3_2_monotonic_transmittance", "claim_3_3_gradient_flow", "claim_3_4_order_dependence", "claim_3_5_softmax_subset_alpha", "claim_4_1_projected_covariance_psd", "claim_5_1_multipass_bounded", "claim_5_2_opacity_monotonicity", "claim_7_1_split_mass_preservation", "claim_H1_two_pass_partition", "claim_H2_transmittance_scaling", "claim_H4_permutation_invariance", "claim_P1_covariance_spd_rotation", "claim_P2_material_similarity_bounded", "claim_P4_covariance_similarity_well_defined", "claim_P9_material_dimension"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "v4.28.0"
+
+[[lean_lib]]
+name = "claim_1_1_cholesky_psd"
+globs = ["claim_1_1_cholesky_psd"]
+
+[[lean_lib]]
+name = "claim_2_1_mercer_kernel"
+globs = ["claim_2_1_mercer_kernel"]
+
+[[lean_lib]]
+name = "claim_2_2_mahalanobis_chi_squared"
+globs = ["claim_2_2_mahalanobis_chi_squared"]
+
+[[lean_lib]]
+name = "claim_2_4_sparsity_bound"
+globs = ["claim_2_4_sparsity_bound"]
+
+[[lean_lib]]
+name = "claim_3_1_weights_sum_bounded"
+globs = ["claim_3_1_weights_sum_bounded"]
+
+[[lean_lib]]
+name = "claim_3_2_monotonic_transmittance"
+globs = ["claim_3_2_monotonic_transmittance"]
+
+[[lean_lib]]
+name = "claim_3_3_gradient_flow"
+globs = ["claim_3_3_gradient_flow"]
+
+[[lean_lib]]
+name = "claim_3_4_order_dependence"
+globs = ["claim_3_4_order_dependence"]
+
+[[lean_lib]]
+name = "claim_3_5_softmax_subset_alpha"
+globs = ["claim_3_5_softmax_subset_alpha"]
+
+[[lean_lib]]
+name = "claim_4_1_projected_covariance_psd"
+globs = ["claim_4_1_projected_covariance_psd"]
+
+[[lean_lib]]
+name = "claim_5_1_multipass_bounded"
+globs = ["claim_5_1_multipass_bounded"]
+
+[[lean_lib]]
+name = "claim_5_2_opacity_monotonicity"
+globs = ["claim_5_2_opacity_monotonicity"]
+
+[[lean_lib]]
+name = "claim_7_1_split_mass_preservation"
+globs = ["claim_7_1_split_mass_preservation"]
+
+[[lean_lib]]
+name = "claim_H1_two_pass_partition"
+globs = ["claim_H1_two_pass_partition"]
+
+[[lean_lib]]
+name = "claim_H2_transmittance_scaling"
+globs = ["claim_H2_transmittance_scaling"]
+
+[[lean_lib]]
+name = "claim_H4_permutation_invariance"
+globs = ["claim_H4_permutation_invariance"]
+
+[[lean_lib]]
+name = "claim_P1_covariance_spd_rotation"
+globs = ["claim_P1_covariance_spd_rotation"]
+
+[[lean_lib]]
+name = "claim_P2_material_similarity_bounded"
+globs = ["claim_P2_material_similarity_bounded"]
+
+[[lean_lib]]
+name = "claim_P4_covariance_similarity_well_defined"
+globs = ["claim_P4_covariance_similarity_well_defined"]
+
+[[lean_lib]]
+name = "claim_P9_material_dimension"
+globs = ["claim_P9_material_dimension"]

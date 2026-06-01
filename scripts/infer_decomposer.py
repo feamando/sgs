@@ -498,7 +498,15 @@ def main():
         print(f"\n=== Composition Tree ===")
         print_tree(tree)
 
-        tensors = tree_to_tensors(tree)
+        if args.fidelity == "high":
+            print(f"\n  High fidelity: subdivide -> densify -> refine ({args.refine_mode})...")
+            tensors, info = apply_high_fidelity(
+                tree, refine_mode=args.refine_mode,
+                templates_dir=args.templates,
+            )
+            print(f"  Pipeline: sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}")
+        else:
+            tensors = tree_to_tensors(tree)
         print(f"\n  Gaussians: {tensors['means'].shape[0]}")
 
         # Save

@@ -1,6 +1,8 @@
 # On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention
 
-Nikita Gorshkov
+**Nikita Gorshkov** (corresponding author)
+Senefelderstr. 29a, 10437 Berlin, Germany
+ngorshkov@protom.me
 
 ---
 

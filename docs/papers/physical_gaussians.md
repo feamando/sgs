@@ -352,6 +352,46 @@ Our contribution: the material is not a label on top of the geometry.
 It is part of the primitive. The Gaussian IS the material, not just the
 shape.
 
+## Formal Guarantees
+
+The Physical Gaussian primitive and its associated operators rest on a set
+of mathematical claims (full statements in `docs/proofs/physical_gaussians_math.md`).
+Six of these are machine-verified in Lean 4 via the Aristotle prover. Each
+compiles with **zero `sorry`** and uses only the standard axioms (`propext`,
+`Classical.choice`, `Quot.sound`). Verified 2026-05-31.
+
+| Claim | Statement | Why it matters | Status |
+|-------|-----------|----------------|--------|
+| **P1** | Σ = R(q)·diag(exp(2S))·R(q)ᵀ is symmetric positive definite for any unit quaternion q and any log-scale S | The covariance of every Physical Gaussian is well-defined, so covariance similarity (P4) and the physics/render collapse operators are meaningful | ✅ Proven |
+| **P2** | Material similarity M(·,·) ∈ [0,1] and M(G,G)=1 | Region clustering (Def. 1.6) is well-posed; the similarity threshold τ has a fixed, bounded scale | ✅ Proven |
+| **P4** | Covariance similarity Φ(A,B) ∈ (0,1], Φ(A,A)=1, Φ symmetric, for SPD A,B | The covariance term in M is bounded and order-independent | ✅ Proven |
+| **P5** | f_phys (feedforward net with continuous activations) is continuous | Small changes in semantic embedding produce small changes in predicted physics: no discontinuous material jumps | ✅ Proven |
+| **P8** | Cloning/splitting a Gaussian yields children with M(G_a,G_b) ≥ 1 − (Σ wₖLₖ)·ε | Densification preserves material coherence; children stay in the same material region under bounded perturbation | ✅ Proven |
+| **P9** | d_p ≥ ⌈log₂ K⌉ separates K material classes; d_p = O(K) allows continuous interpolation. At K=100, d_p=32 suffices | Justifies the chosen physical-embedding dimension (32–64) | ✅ Proven |
+| **P6** | I(e_p ; e_s, S, α) ≥ I(e_p ; e_s): semantic features carry information about physics (the correlation hypothesis) | The core hypothesis enabling prediction over independent learning | Empirical (GloVe R²=0.54 on hardness); no formal proof intended |
+| **P3, P7** | Material regions partition V (graph connectivity); collapse operators π_X are idempotent projections | Definitional / standard results; not separately mechanized | Standard |
+
+### What the proofs establish (and what they do not)
+
+The verified claims guarantee the representation is **internally consistent**:
+the covariance is always a valid SPD matrix (P1, P4), the similarity metric
+that defines material regions is bounded and self-maximal (P2, P4), the
+prediction network behaves continuously (P5), densification cannot silently
+split a material region (P8), and the chosen embedding width is sufficient
+to encode the target material classes (P9).
+
+They do **not** establish that predicted physics are *correct* — that the e_p
+vector assigned to "stone" produces the right rigid-body behavior. That is the
+content of the correlation hypothesis (P6), which is empirical. The current
+evidence (GloVe R²=0.54 on hardness, scale-limited) is a necessary signal, not
+a proof. The two-stage architecture is designed precisely so that the
+floor (discrete classifier + lookup) holds even where the continuous
+hypothesis is weak at 100M scale.
+
+Proof artifacts (Lean source + Aristotle summaries) are under
+`docs/proofs/results/P{1,2,4,5,8,9}_dir/`; submission tracking is in
+`docs/proofs/aristotle_proof_tracker.md`.
+
 ## Research Questions
 
 1. **What dimensionality for e_p?** 32 seems minimal, 64 generous. Do we
@@ -409,3 +449,35 @@ primitive of physical representation. A castle is not one blob. It is a
 tree of sub-concepts, each carrying full semantic, geometric, and physical
 information, bottoming out at thousands of individually meaningful splats
 that know what they are, where they are, and how they behave.
+
+## References
+
+Physics-aware Gaussian splatting:
+- Xie, T., Zong, Z., Qiu, Y., Li, X., Feng, Y., Yang, Y., & Jiang, C. (2024). PhysGaussian: Physics-Integrated 3D Gaussians for Generative Dynamics. *CVPR*.
+- Huang, T., et al. (2025). DreamPhysics: Learning Physical Properties of Dynamic 3D Gaussians with Video Diffusion Priors. *AAAI*.
+- Zhang, T., et al. (2024). PhysDreamer: Physics-Based Interaction with 3D Objects via Video Generation. *ECCV*.
+- Borycki, P., et al. (2024). GASP: Gaussian Splatting for Physic-Based Simulations.
+- Zhao, H., et al. (2025). PhysSplat (Efficient Physics Simulation for 3D Scenes via MLLM-Guided Gaussian Splatting). *ICCV*.
+- Lee, Jacobson, & Xue (2026). PG-3DGS: Differentiable Physics in 3D Gaussian Splatting Optimization.
+- Xu, X., et al. (2025). GaussianProperty: Integrating Physical Properties to 3D Gaussians with LMMs. *ICCV*.
+
+Material property prediction:
+- Li, X., et al. (2023). PAC-NeRF: Physics Augmented Continuum Neural Radiance Fields for Geometry-Agnostic System Identification. *ICLR*.
+- Izadyar & Schneider (2025). LLM-Guided Material Inference from Point Cloud Geometry.
+
+Per-Gaussian feature / semantic splatting:
+- Ye, M., Danelljan, M., Yu, F., & Ke, L. (2024). Gaussian Grouping: Segment and Edit Anything in 3D Scenes. *ECCV*.
+- Qin, M., et al. (2024). LangSplat: 3D Language Gaussian Splatting. *CVPR*.
+- Zhou, S., et al. (2024). Feature 3DGS: Supercharging 3D Gaussian Splatting to Enable Distilled Feature Fields. *CVPR*.
+
+Audio from Gaussians:
+- Bhosale, S., et al. (2024). AV-GS: Audio-Visual Gaussian Splatting. *NeurIPS*.
+- Pang, et al. (2025). VibraVerse: A Large-Scale Geometry-Material-Sound Dataset.
+
+Foundations:
+- Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G. (2023). 3D Gaussian Splatting for Real-Time Radiance Field Rendering. *ACM ToG (SIGGRAPH)*, 42(4).
+- Max, N. (1995). Optical Models for Direct Volume Rendering. *IEEE TVCG*, 1(2), 99–108.
+- Gorshkov, N. (2026). On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention. *Preprint*.
+- de Moura, L., & Ullrich, S. (2021). The Lean 4 Theorem Prover and Programming Language. *CADE*.
+
+*Note: venues/years for several 2024–2026 entries are drawn from the literature review (`docs/papers/physical_gaussians_literature_review.md`) and should be confirmed against the published versions before external submission.*

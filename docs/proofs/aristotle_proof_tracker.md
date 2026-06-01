@@ -33,25 +33,31 @@
 
 | # | Claim | Priority | Aristotle ID | Status |
 |---|---|---|---|---|
-| 17 | **P1** Covariance SPD from quat + scale | P1 (CRITICAL) | `fd283703-c420-44d8-b5f7-4a751e70ad92` | QUEUED (resubmit, prev had 4 sorry) |
-| 18 | **P2** Material similarity bounded [0,1], self=1 | P3 (HIGH) | `466538bb-8100-4791-aad1-14fae6d08224` | QUEUED |
-| 19 | **P4** Covariance similarity well-defined for SPD | P4 (HIGH) | `28420e6a-ab3d-4a1c-a893-a383adfecb07` | QUEUED |
-| 20 | **P5** Physics prediction continuity (MLP) | P6 (MEDIUM) | `2a12752e-a9c3-4216-949e-bce39218476e` | QUEUED |
-| 21 | **P6** Correlation hypothesis (info-theoretic) | P2 (CRITICAL) | — | PENDING (empirical first) |
-| 22 | **P8** Densification preserves material coherence | P5 (HIGH) | `aed03b38-96aa-4156-a583-57e9c5229a7c` | QUEUED |
-| 23 | **P9** Dimensionality sufficiency for K classes | P7 (MEDIUM) | `38fec731-50b1-40be-a4ad-102a0a5d31d8` | QUEUED |
+| 17 | **P1** Covariance SPD from quat + scale | P1 (CRITICAL) | `fd283703-c420-44d8-b5f7-4a751e70ad92` | ✅ COMPLETE (0 sorry; results/P1_v2_dir) |
+| 18 | **P2** Material similarity bounded [0,1], self=1 | P3 (HIGH) | `466538bb-8100-4791-aad1-14fae6d08224` | ✅ COMPLETE (0 sorry; results/P2_dir) |
+| 19 | **P4** Covariance similarity well-defined for SPD | P4 (HIGH) | `28420e6a-ab3d-4a1c-a893-a383adfecb07` | ✅ COMPLETE (0 sorry; results/P4_dir) |
+| 20 | **P5** Physics prediction continuity (MLP) | P6 (MEDIUM) | `2a12752e-a9c3-4216-949e-bce39218476e` | ✅ COMPLETE (0 sorry; results/P5_dir) |
+| 21 | **P6** Correlation hypothesis (info-theoretic) | P2 (CRITICAL) | — | PENDING (empirical first; GloVe R²=0.54) |
+| 22 | **P8** Densification preserves material coherence | P5 (HIGH) | `aed03b38-96aa-4156-a583-57e9c5229a7c` | ✅ COMPLETE (0 sorry; results/P8_dir) |
+| 23 | **P9** Dimensionality sufficiency for K classes | P7 (MEDIUM) | `38fec731-50b1-40be-a4ad-102a0a5d31d8` | ✅ COMPLETE (0 sorry; results/P9_dir) |
 
 Formal specification: `docs/proofs/physical_gaussians_math.md`
+
+**Status verified 2026-05-31:** All 6 formalizable Physical Gaussians claims (P1, P2, P4, P5, P8, P9) returned COMPLETE from Aristotle with 0 `sorry` and standard axioms only. Downloaded per own project ID via `aristotle result <id> --destination <new-path>`. P6 stays empirical (no formal proof intended). NOTE: the `sorry`-bearing P2/P4 files inside `results/P9_dir` and `results/P1_v2_dir` are stale secondary stubs from multi-claim bundles — ignore them; the authoritative proof for each claim is in its own `results/P*_dir`.
 
 ## Commands
 
 ```bash
-# Check status
+# Check status (current CLI: submit / formalize / result / list / cancel)
 export ARISTOTLE_API_KEY='arstl_oztlKEDfQez7GVY52wyG99zIkpdYvKHTLAHs9jSwC8M'
 aristotle list
 
-# Get result for a specific proof
-aristotle result <ID> --destination ./proofs/<claim>/
+# Get result for a specific proof — --destination must be a NEW path (CLI creates it;
+# passing an existing dir raises IsADirectoryError). Result lands as a .tar.gz of the Lean project.
+aristotle result <ID> --destination docs/proofs/results/<claim>_dir
+
+# Submit a new / resubmit proof (prompt is positional; --project-dir holds the lean files)
+aristotle submit "<instructions>" --project-dir <dir> --wait --destination <new-path>
 
 # Cancel a proof
 aristotle cancel <ID>
