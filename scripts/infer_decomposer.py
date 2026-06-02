@@ -366,6 +366,59 @@ class Decomposer:
             return None
 
 
+def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
+    """Raum 1.6 grammar-validated decoding.
+
+    Walk the generated tree and ensure every leaf name is renderable: it must
+    either be an expandable grammar part (tower/wall/gate/...) or hit a known
+    generic-fill keyword. Leaves that match nothing would silently become a
+    default sphere, so we drop them and report. Returns (clean_tree, report).
+    """
+    try:
+        from scripts.castle_grammar import _part_kind
+    except Exception:
+        _part_kind = lambda n: None
+
+    GENERIC = ("ground", "floor", "plane", "field", "road", "water", "sand",
+               "snow", "courtyard", "yard", "plaza", "terrace", "patio",
+               "square", "base", "foundation", "platform", "hill", "mound",
+               "knoll", "dune", "mountain", "dome", "rise", "tower", "trunk",
+               "pole", "post", "column", "pillar", "mast", "chimney", "turret",
+               "spire", "keep", "minaret", "roof", "cone", "top", "canopy",
+               "cap", "wall", "fence", "gate", "door", "box", "body", "hull",
+               "block", "brick", "building", "wing", "hall", "house", "palace",
+               "castle", "scene")
+    report = {"dropped": [], "kept_leaves": 0, "total_nodes": 0}
+
+    def known(name: str) -> bool:
+        n = (name or "").lower()
+        if _part_kind(n) is not None:
+            return True
+        return any(w in n for w in GENERIC)
+
+    def clean(node: dict) -> dict | None:
+        report["total_nodes"] += 1
+        kids = node.get("children")
+        if kids:
+            cleaned = [c for c in (clean(k) for k in kids) if c is not None]
+            node["children"] = cleaned
+            # an internal node with all children dropped becomes a bare leaf;
+            # keep it only if its own name is renderable
+            if not cleaned and not known(node.get("name", "")):
+                report["dropped"].append(node.get("name", "?"))
+                return None
+            return node
+        # leaf
+        if known(node.get("name", "")) or node.get("gaussians"):
+            report["kept_leaves"] += 1
+            return node
+        report["dropped"].append(node.get("name", "?"))
+        return None
+
+    clean_tree = clean(tree_dict) or {"name": "scene", "children": []}
+    return clean_tree, report
+
+
 def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs",
                         prebuilt=False):
     """Apply subdivision + densification + optional refinement to a composition tree.
@@ -744,6 +797,12 @@ def main():
 
                 if tree_dict is None:
                     return JSONResponse({"error": "failed to parse tree JSON", "raw_output": ""})
+
+                # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
+                tree_dict, vreport = validate_tree(tree_dict)
+                if vreport["dropped"]:
+                    print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
+                          f"{vreport['dropped'][:8]}", file=sys.stderr)
 
                 try:
                     tree = CompositionNode.from_dict(tree_dict)

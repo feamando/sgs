@@ -295,6 +295,168 @@ def build_tree(name: str, pos, scale: float) -> CompositionNode:
     return t
 
 
+# ── Additional atomic elements (Raum 1.6 compositional catalog) ───────
+
+def recessed_box(w: float, h: float, d: float, color, n: int = 40):
+    """A small filled box of dark stones — a recessed opening (door/window)."""
+    out = []
+    nx = max(2, int(w / STONE)); ny = max(2, int(h / STONE))
+    for ix in range(nx):
+        for iy in range(ny):
+            x = (ix / max(nx - 1, 1) - 0.5) * w
+            y = (iy / max(ny - 1, 1) - 0.5) * h
+            out.append(GaussianParams(position=[x, y, -d], scale=_stone_log_scale(STONE),
+                                      opacity=2.0, color=_shift(color, 0.02)))
+    return out
+
+
+def build_door(name: str = "door", pos=None, color=None) -> CompositionNode:
+    """A wooden door: a tall recessed dark panel with an arched top."""
+    wood = color or [0.32, 0.2, 0.1]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0, color=wood)
+    node.gaussians = recessed_box(0.22, 0.34, STONE, wood)
+    # arched lintel
+    for i in range(7):
+        t = i / 6
+        node.gaussians.append(GaussianParams(
+            position=[(t - 0.5) * 0.22, 0.17 + math.sin(t * math.pi) * STONE * 1.5, 0],
+            scale=_stone_log_scale(STONE), opacity=2.0, color=_shift([0.45, 0.3, 0.2], 0.02)))
+    return node
+
+
+def build_window(name: str = "window", pos=None, color=None, arched: bool = True) -> CompositionNode:
+    """A window: a small recessed dark opening, optionally arched."""
+    dark = color or [0.1, 0.1, 0.13]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0, color=dark)
+    node.gaussians = recessed_box(0.14, 0.2, STONE, dark)
+    if arched:
+        for i in range(5):
+            t = i / 4
+            node.gaussians.append(GaussianParams(
+                position=[(t - 0.5) * 0.14, 0.1 + math.sin(t * math.pi) * STONE, 0],
+                scale=_stone_log_scale(STONE), opacity=2.0, color=_shift([0.55, 0.5, 0.45], 0.02)))
+    return node
+
+
+def build_arrow_slit(name: str = "arrow_slit", pos=None, color=None) -> CompositionNode:
+    """A tall thin recessed slit for archers."""
+    dark = color or [0.08, 0.08, 0.1]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0, color=dark)
+    node.gaussians = recessed_box(STONE * 1.2, 0.26, STONE, dark)
+    return node
+
+
+def build_arch(name: str = "arch", pos=None, color=None) -> CompositionNode:
+    """A freestanding stone arch: two piers + a curved span."""
+    stone = color or [0.62, 0.58, 0.53]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0, color=stone)
+    g = []
+    # two piers
+    for side in (-1, 1):
+        for c in range(6):
+            g.append(GaussianParams(position=[side * 0.2, c * STONE * 1.5 - 0.15, 0],
+                     scale=_stone_log_scale(STONE), opacity=2.0, color=_shift(stone, 0.03)))
+    # curved span
+    for i in range(11):
+        t = i / 10
+        g.append(GaussianParams(position=[(t - 0.5) * 0.4, 0.3 + math.sin(t * math.pi) * 0.18, 0],
+                 scale=_stone_log_scale(STONE), opacity=2.0, color=_shift(stone, 0.03)))
+    node.gaussians = g
+    return node
+
+
+def build_gatehouse(name: str = "gatehouse", pos=None, courses: int = 6,
+                    stone_color=None) -> CompositionNode:
+    """A gate flanked by two short towers."""
+    stone = stone_color or [0.62, 0.58, 0.53]
+    gh = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0)
+    gh.children.append(build_wall(f"{name}_wall", [0, 0, 0], 0.9, courses, stone, is_gate=True))
+    gh.children.append(build_tower(f"{name}_tower_L", [-0.5, 0, 0], courses + 1, 0.15, stone))
+    gh.children.append(build_tower(f"{name}_tower_R", [0.5, 0, 0], courses + 1, 0.15, stone))
+    return gh
+
+
+def build_cliff(name: str = "cliff", pos=None, color=None) -> CompositionNode:
+    """A steep rocky cliff face (taller, blockier, greyer than a hill)."""
+    rock = color or [0.45, 0.42, 0.4]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0, color=rock)
+    g = []
+    # stacked irregular rock shelves
+    for c in range(10):
+        y = c * STONE * 2.2
+        r = 0.9 * (1 - c / 14)
+        n_around = max(6, int(2 * math.pi * r / (STONE * 2)))
+        for i in range(n_around):
+            theta = 2 * math.pi * i / n_around
+            jit = random.uniform(-STONE, STONE)
+            g.append(GaussianParams(position=[(r + jit) * math.cos(theta), y,
+                                              (r + jit) * math.sin(theta)],
+                     scale=_stone_log_scale(STONE * 2), opacity=2.0, color=_shift(rock, 0.06)))
+    node.gaussians = g
+    return node
+
+
+def build_rock(name: str = "rock", pos=None, color=None, scale: float = 1.0) -> CompositionNode:
+    """A boulder: a small irregular sphere of stones."""
+    rock = color or [0.5, 0.47, 0.43]
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=scale, color=rock)
+    golden = (1 + math.sqrt(5)) / 2
+    r = 0.18
+    g = []
+    for i in range(24):
+        theta = 2 * math.pi * i / golden
+        phi = math.acos(1 - 2 * (i + 0.5) / 24)
+        jit = random.uniform(-0.03, 0.03)
+        g.append(GaussianParams(
+            position=[(r + jit) * math.sin(phi) * math.cos(theta),
+                      (r + jit) * math.cos(phi), (r + jit) * math.sin(phi) * math.sin(theta)],
+            scale=_stone_log_scale(STONE * 1.5), opacity=2.0, color=_shift(rock, 0.05)))
+    node.gaussians = g
+    return node
+
+
+def build_woods(name: str = "woods", pos=None, n_trees: int = 7,
+                rng: random.Random = None) -> CompositionNode:
+    """A small cluster of trees."""
+    rng = rng or random
+    node = CompositionNode(name=name, position=pos or [0, 0, 0], scale=1.0)
+    for i in range(n_trees):
+        ang = rng.uniform(0, 2 * math.pi)
+        rr = rng.uniform(0.1, 0.7)
+        node.children.append(build_tree(
+            f"{name}_tree_{i}", [rr * math.cos(ang), 0, rr * math.sin(ang)],
+            rng.uniform(0.6, 1.0)))
+    return node
+
+
+def build_square_tower(name: str, pos, courses: int, stone_color,
+                       with_roof: bool = True) -> CompositionNode:
+    """Square tower: four stone faces + crenellation + optional pyramidal roof."""
+    tower = CompositionNode(name=name, position=pos, scale=1.0)
+    height = courses * STONE * 1.6
+    side = 0.34
+    body = CompositionNode(name=f"{name}_body", color=stone_color)
+    for (px, pz, rot) in [(0, side / 2, None), (0, -side / 2, None),
+                          (side / 2, 0, [0.7071, 0, 0.7071, 0]),
+                          (-side / 2, 0, [0.7071, 0, 0.7071, 0])]:
+        for c in range(courses):
+            y = (c / max(courses - 1, 1)) * height
+            face = stone_wall_face(side, STONE * 1.6, 1, STONE, stone_color)
+            body.gaussians.extend(_placed(
+                [GaussianParams(position=[gp.position[0], y, gp.position[2]],
+                                scale=gp.scale, opacity=gp.opacity, color=gp.color)
+                 for gp in face], dx=px, dz=pz, rot=rot))
+    tower.children.append(body)
+    tower.children.append(CompositionNode(
+        name=f"{name}_crenellation", position=[0, height, 0], color=stone_color,
+        gaussians=crenellation_strip(side, STONE, stone_color)))
+    if with_roof:
+        tower.children.append(CompositionNode(
+            name=f"{name}_roof", position=[0, height + STONE, 0], color=[0.5, 0.2, 0.12],
+            gaussians=cone_roof(side * 0.8, side * 1.4, STONE, [0.5, 0.2, 0.12])))
+    return tower
+
+
 # ── Scene assembly ────────────────────────────────────────────────────
 
 def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
@@ -391,10 +553,15 @@ def expand_part(name: str, color=None, courses: int = 6,
     rng = rng or random
     stone = color or [0.62, 0.58, 0.53]
     kind = _part_kind(name)
+    n = name.lower()
     if kind == "tower":
+        if "square" in n:
+            return build_square_tower(name, [0, 0, 0], courses + 2, stone)
         return build_tower(name, [0, 0, 0], courses + 2, 0.18, stone)
+    if kind == "gatehouse":
+        return build_gatehouse(name, [0, 0, 0], courses, stone)
     if kind == "wall":
-        is_gate = "gate" in name.lower() or name.lower().endswith("_s")
+        is_gate = "gate" in n or n.endswith("_s")
         return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=is_gate)
     if kind == "gate":
         return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=True)
@@ -402,6 +569,20 @@ def expand_part(name: str, color=None, courses: int = 6,
         return build_keep(courses + 3, stone)
     if kind == "tree":
         return build_tree(name, [0, 0, 0], 1.0)
+    if kind == "woods":
+        return build_woods(name, rng=rng)
+    if kind == "door":
+        return build_door(name)
+    if kind == "window":
+        return build_window(name, arched="arch" in n)
+    if kind in ("arrow_slit", "slit"):
+        return build_arrow_slit(name)
+    if kind == "arch":
+        return build_arch(name)
+    if kind == "cliff":
+        return build_cliff(name)
+    if kind == "rock":
+        return build_rock(name)
     return None
 
 
@@ -419,7 +600,11 @@ PARAPHRASES = {
 
 # Part names the fill stage knows how to expand into an atomic compound.
 # A SHALLOW skeleton stops at these; the fill stage rebuilds their sub-parts.
-EXPANDABLE_PARTS = ("tower", "wall", "keep", "tree", "gate")
+# Order matters: more specific names first (gatehouse before gate, arrow_slit
+# before slit) so the longest match wins.
+EXPANDABLE_PARTS = ("gatehouse", "arrow_slit", "slit", "tower", "wall",
+                    "keep", "woods", "tree", "gate", "door", "window",
+                    "arch", "cliff", "rock")
 
 
 def _part_kind(name: str) -> str | None:
@@ -455,38 +640,221 @@ def skeleton_dict(node: CompositionNode, shallow: bool = True) -> dict:
     return d
 
 
+# ── SceneSpec: prompt-conditioned structure (Raum 1.6 accuracy core) ──
+#
+# A SceneSpec is the single source for BOTH the tree and the prompt text, so
+# they can never disagree. This is the fix for "a wall with a gate -> whole
+# castle": the structure is determined by the spec, and the prompt describes
+# exactly that spec. Counts and presence become learnable signal.
+
+# Numbers as words, for prompt synthesis.
+_NUMWORDS = {0: "no", 1: "a", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six"}
+
+
+def build_from_spec(spec: dict, rng: random.Random) -> CompositionNode:
+    """Build a scene tree from a structured spec.
+
+    spec = {
+      "archetype": "single" | "feature" | "composition" | "castle",
+      "element": str,            # primary element for single/feature
+      "feature": str | None,     # an added element (gate/door/window/...)
+      "towers": int, "with_gate": bool, "trees": int,
+      "ground": "hill"|"cliff"|"ground"|None, "tower_shape": "round"|"square",
+    }
+    """
+    stone = [rng.uniform(0.58, 0.68), rng.uniform(0.55, 0.62), rng.uniform(0.5, 0.58)]
+    grass = [rng.uniform(0.25, 0.35), rng.uniform(0.5, 0.62), rng.uniform(0.15, 0.25)]
+    arch = spec["archetype"]
+
+    if arch == "castle":
+        return build_castle_on_hill(
+            towers=spec.get("towers", 4), wall_courses=rng.choice([5, 6, 7]),
+            with_gate=spec.get("with_gate", True), trees=spec.get("trees", 6),
+            hill_radius=rng.uniform(1.3, 1.9), rng=rng)
+
+    scene = CompositionNode(name="scene", position=[0, 0, 0], scale=1.0)
+    # ground for standalone elements
+    gtype = spec.get("ground")
+    if gtype == "hill":
+        scene.children.append(CompositionNode(name="hill", position=[0, -0.1, 0],
+                              color=grass, gaussians=dome(1.2, 0.5, STONE * 2, grass)))
+    elif gtype == "cliff":
+        scene.children.append(build_cliff("cliff", [0, -0.3, 0]))
+    elif gtype == "ground":
+        scene.children.append(CompositionNode(name="ground", position=[0, -0.1, 0],
+                              color=grass, gaussians=dome(0.8, 0.15, STONE * 2, grass)))
+
+    elem = spec["element"]
+    feature = spec.get("feature")
+    y = 0.1
+    # primary element
+    def _tower():
+        if spec.get("tower_shape") == "square":
+            return build_square_tower("tower", [0, y, 0], 10, stone)
+        return build_tower("tower", [0, y, 0], 10, 0.22, stone)
+
+    builders = {
+        "tower": _tower,
+        "wall": lambda: build_wall("wall", [0, y, 0], 1.4, 6, stone,
+                                   is_gate=(feature == "gate")),
+        "gate": lambda: build_wall("gate_wall", [0, y, 0], 1.4, 6, stone, is_gate=True),
+        "gatehouse": lambda: build_gatehouse("gatehouse", [0, y, 0], 6, stone),
+        "keep": lambda: build_keep(9, stone),
+        "arch": lambda: build_arch("arch", [0, y, 0]),
+        "door": lambda: build_door("door", [0, y, 0]),
+        "window": lambda: build_window("window", [0, y, 0]),
+        "arrow_slit": lambda: build_arrow_slit("arrow_slit", [0, y, 0]),
+        "tree": lambda: build_tree("tree", [0, y, 0], 1.0),
+        "woods": lambda: build_woods("woods", [0, y, 0], rng.choice([5, 7, 9]), rng=rng),
+        "rock": lambda: build_rock("rock", [0, y, 0]),
+        "cliff": lambda: build_cliff("cliff", [0, y, 0]),
+    }
+    node = builders.get(elem, builders["tower"])()
+    scene.children.append(node)
+
+    # a feature added to the primary element (e.g. tower + gate, wall + window)
+    # walls embed the gate themselves; others are placed adjacent
+    if feature and not (elem == "wall" and feature == "gate"):
+        feat_builders = {
+            "gate": lambda: build_wall("gate", [0, y - 0.1, 0.3], 0.8, 5, stone, is_gate=True),
+            "door": lambda: build_door("door", [0, y - 0.05, 0.25]),
+            "window": lambda: build_window("window", [0, y + 0.2, 0.25]),
+            "arrow_slit": lambda: build_arrow_slit("arrow_slit", [0, y + 0.1, 0.25]),
+        }
+        if feature in feat_builders:
+            scene.children.append(feat_builders[feature]())
+    return scene
+
+
+def spec_to_prompts(spec: dict, rng: random.Random, paraphrase: bool) -> list[str]:
+    """Synthesize prompt phrasings that DESCRIBE the spec exactly."""
+    arch = spec["archetype"]
+    out = []
+    if arch == "castle":
+        t = spec.get("towers", 4)
+        base = "a castle" if spec.get("ground") != "cliff" else "a castle on a cliff"
+        if spec.get("ground") == "hill":
+            base = "a castle on a hill"
+        variants = [base, "a fortress" + (" on a hill" if spec.get("ground") == "hill" else ""),
+                    "a hilltop castle" if spec.get("ground") == "hill" else "a stone castle"]
+        if t in (2, 3):
+            variants = [f"a castle with {_NUMWORDS[t]} towers",
+                        f"a small fort with {_NUMWORDS[t]} towers", base]
+        if spec.get("trees", 0) == 0:
+            variants = [v + " without trees" for v in variants[:2]] + [base]
+        elif spec.get("trees", 0) >= 6:
+            variants = [base + " with trees", base + " surrounded by woods", base]
+        out = variants
+    else:
+        elem = spec["element"].replace("_", " ")
+        article = "an" if elem[0] in "aeiou" else "a"
+        feature = spec.get("feature")
+        if feature:
+            f = feature.replace("_", " ")
+            fart = "an" if f[0] in "aeiou" else "a"
+            out = [f"{article} {elem} with {fart} {f}",
+                   f"{article} {elem} and {fart} {f}",
+                   f"{article} stone {elem} with {fart} {f}"]
+        else:
+            adj = {"tower": ["stone", "tall", "round"], "wall": ["stone", "long"],
+                   "keep": ["stone", "tall"], "woods": ["dense", "small"]}.get(spec["element"], ["stone"])
+            a2 = rng.choice(adj)
+            art2 = "an" if a2[0] in "aeiou" else "a"
+            out = [f"{article} {elem}", f"{art2} {a2} {elem}"]
+            if spec["element"] == "woods":
+                out = ["woods", "a forest", "a cluster of trees"]
+    # dedup, optionally trim
+    seen, uniq = set(), []
+    for p in out:
+        if p not in seen:
+            seen.add(p); uniq.append(p)
+    k = min(len(uniq), 3) if paraphrase else 1
+    return rng.sample(uniq, k) if len(uniq) > k else uniq
+
+
+# Elements that can stand alone, with whether they take a "ground".
+_STANDALONE = ["tower", "wall", "gate", "gatehouse", "keep", "arch", "door",
+               "window", "arrow_slit", "tree", "woods", "rock", "cliff"]
+_FEATURE_HOSTS = ["tower", "wall", "keep", "gatehouse"]
+_FEATURES = ["gate", "door", "window", "arrow_slit"]
+
+
+def sample_spec(rng: random.Random) -> dict:
+    """Sample one SceneSpec across the combinatorial archetype space."""
+    arch = rng.choices(
+        ["single", "feature", "castle"],
+        weights=[0.4, 0.3, 0.3])[0]
+    if arch == "castle":
+        return {"archetype": "castle",
+                "towers": rng.choice([2, 3, 4, 4, 4]),
+                "with_gate": rng.random() > 0.15,
+                "trees": rng.choice([0, 0, 4, 6, 8, 10]),
+                "ground": rng.choice(["hill", "hill", "cliff", "ground"]),
+                "tower_shape": rng.choice(["round", "round", "square"])}
+    if arch == "feature":
+        host = rng.choice(_FEATURE_HOSTS)
+        return {"archetype": "feature", "element": host,
+                "feature": rng.choice(_FEATURES),
+                "ground": rng.choice([None, "ground", "hill"]),
+                "tower_shape": rng.choice(["round", "square"])}
+    return {"archetype": "single", "element": rng.choice(_STANDALONE),
+            "feature": None, "ground": rng.choice([None, "ground", "hill"]),
+            "tower_shape": rng.choice(["round", "square"])}
+
+
 def sample_training_set(n: int, domains: list[str], paraphrase: bool,
-                        out_dir: Path, seed: int = 0):
-    """Emit n randomized labeled trees as {prompt, tree} records (skeletons)."""
+                        out_dir: Path, seed: int = 0, conditioned: bool = False):
+    """Emit n randomized labeled trees as {prompt, tree} records (skeletons).
+
+    conditioned=True (Raum 1.6): use the SceneSpec system -- structure and
+    prompt come from the same spec, covering the full element catalog and
+    count/presence grid. This is the accuracy fix.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(seed)
     records = []
-    for i in range(n):
-        domain = domains[i % len(domains)]
-        builder = PRESETS.get(domain, build_castle_on_hill)
-        # randomized structural params per sample
-        kw = dict(rng=rng)
-        if domain == "castle_on_hill" or domain in ("castle", "hill", "village", "keep"):
-            builder = build_castle_on_hill
-            kw.update(towers=rng.choice([3, 4, 4, 4]),
-                      wall_courses=rng.choice([5, 6, 7]),
-                      with_gate=rng.random() > 0.15,
-                      trees=rng.choice([0, 4, 6, 8, 10]),
-                      hill_radius=rng.uniform(1.3, 1.9))
-        tree = builder(**kw)
-        prompts = PARAPHRASES.get(
-            "castle_on_hill" if builder is build_castle_on_hill else domain,
-            [domain.replace("_", " ")])
-        chosen = rng.sample(prompts, k=min(len(prompts), 3) if paraphrase else 1)
-        skel = skeleton_dict(tree)
-        for p in chosen:
-            records.append({"prompt": p, "tree": skel})
+    over_512 = 0
+
+    if conditioned:
+        for i in range(n):
+            spec = sample_spec(rng)
+            tree = build_from_spec(spec, rng)
+            skel = skeleton_dict(tree)
+            for p in spec_to_prompts(spec, rng, paraphrase):
+                js = json.dumps(skel, separators=(",", ":"))
+                if len(js) > 1400:   # ~512 tokens; log+drop, never truncate
+                    over_512 += 1
+                    continue
+                records.append({"prompt": p, "tree": skel})
+    else:
+        for i in range(n):
+            domain = domains[i % len(domains)]
+            builder = PRESETS.get(domain, build_castle_on_hill)
+            kw = dict(rng=rng)
+            if domain == "castle_on_hill" or domain in ("castle", "hill", "village", "keep"):
+                builder = build_castle_on_hill
+                kw.update(towers=rng.choice([3, 4, 4, 4]),
+                          wall_courses=rng.choice([5, 6, 7]),
+                          with_gate=rng.random() > 0.15,
+                          trees=rng.choice([0, 4, 6, 8, 10]),
+                          hill_radius=rng.uniform(1.3, 1.9))
+            tree = builder(**kw)
+            prompts = PARAPHRASES.get(
+                "castle_on_hill" if builder is build_castle_on_hill else domain,
+                [domain.replace("_", " ")])
+            chosen = rng.sample(prompts, k=min(len(prompts), 3) if paraphrase else 1)
+            skel = skeleton_dict(tree)
+            for p in chosen:
+                records.append({"prompt": p, "tree": skel})
+
     rng.shuffle(records)
     split = int(len(records) * 0.9)
     (out_dir / "train.json").write_text(json.dumps(records[:split]))
     (out_dir / "val.json").write_text(json.dumps(records[split:]))
     print(f"Wrote {split} train / {len(records) - split} val records to {out_dir}")
-    print(f"  domains={domains} paraphrase={paraphrase} scenes={n}")
+    print(f"  conditioned={conditioned} paraphrase={paraphrase} specs={n}")
+    if over_512:
+        print(f"  dropped {over_512} records over ~512 tokens (logged, not truncated)")
 
 
 # ── CLI ───────────────────────────────────────────────────────────────
@@ -508,12 +876,16 @@ def main():
     p.add_argument("--domain", default="castle_on_hill",
                    help="Comma-separated domains for --sample")
     p.add_argument("--paraphrase", action="store_true", default=False)
+    p.add_argument("--conditioned", action="store_true", default=False,
+                   help="Raum 1.6: SceneSpec system (prompt describes structure, "
+                        "full element catalog + count/presence grid)")
     p.add_argument("--output-dir", default="data/decomposition_trees/castle_15")
     args = p.parse_args()
 
     if args.sample > 0:
         sample_training_set(args.sample, [d.strip() for d in args.domain.split(",")],
-                            args.paraphrase, Path(args.output_dir), args.seed)
+                            args.paraphrase, Path(args.output_dir), args.seed,
+                            conditioned=args.conditioned)
         return
 
     rng = random.Random(args.seed)
