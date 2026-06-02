@@ -87,14 +87,25 @@ def stone_course(n_around: int, radius: float, y: float, stone_size: float,
 
 
 def stone_wall_face(length: float, height: float, courses: int, stone_size: float,
-                    color, gap_center: float = 0.0) -> list[GaussianParams]:
+                    color, gap_center: float = 0.0,
+                    openings: list[tuple] | None = None) -> list[GaussianParams]:
     """
     A flat wall built from courses of stones along X, stacked in Y.
 
     gap_center > 0 omits stones within that half-width of x=0 (the gate void).
+    openings: list of (cx, cy, half_w, half_h) rectangles (wall-local) to carve
+    out of the face -- where windows/doors/slits sit.
     """
     out = []
+    openings = openings or []
     n_along = max(2, int(length / stone_size))
+
+    def in_opening(x, y):
+        for (cx, cy, hw, hh) in openings:
+            if abs(x - cx) < hw and abs(y - cy) < hh:
+                return True
+        return False
+
     for c in range(courses):
         y = (c / max(courses - 1, 1) - 0.5) * height
         # brick-offset alternate courses
@@ -105,6 +116,9 @@ def stone_wall_face(length: float, height: float, courses: int, stone_size: floa
                 continue
             # gate void: leave a hole in the lower courses
             if gap_center > 0 and abs(x) < gap_center and y < height * 0.15:
+                continue
+            # window/door/slit voids
+            if in_opening(x, y):
                 continue
             # flat brick: wide in X/Y, thin in Z (into the wall)
             out.append(GaussianParams(
@@ -234,16 +248,39 @@ def build_tower(name: str, pos, courses: int, radius: float, stone_color,
 
 
 def build_wall(name: str, pos, length: float, courses: int, stone_color,
-               rot=None, is_gate: bool = False) -> CompositionNode:
-    """Wall segment: stone face + crenellation top. Gate omits center stones."""
+               rot=None, is_gate: bool = False, windows: int = 0,
+               slits: int = 0) -> CompositionNode:
+    """Wall segment: stone face + crenellation top. Gate omits center stones.
+
+    windows/slits > 0 carve evenly-spaced recessed openings in the face.
+    """
     height = courses * STONE * 1.6
     wall = CompositionNode(name=name, position=pos, scale=1.0,
                            rotation=rot or [1.0, 0.0, 0.0, 0.0])
     gap = length * 0.22 if is_gate else 0.0
+
+    # plan the openings (carve from the face, then place recessed dark nodes)
+    openings, opening_nodes = [], []
+    win_hw, win_hh = STONE * 1.2, STONE * 1.6
+    slit_hw, slit_hh = STONE * 0.5, STONE * 2.0
+    n_open = windows + slits
+    if n_open and not is_gate:
+        for k in range(n_open):
+            cx = (((k + 1) / (n_open + 1)) - 0.5) * length * 0.9
+            cy = height * 0.12
+            is_slit = k >= windows
+            hw, hh = (slit_hw, slit_hh) if is_slit else (win_hw, win_hh)
+            openings.append((cx, cy, hw, hh))
+            dark = [0.08, 0.08, 0.1]
+            node = build_arrow_slit(f"{name}_slit_{k}", [cx, cy, -STONE * 0.5]) if is_slit \
+                else build_window(f"{name}_window_{k}", [cx, cy, -STONE * 0.5])
+            opening_nodes.append(node)
+
     wall.children.append(CompositionNode(
         name=f"{name}_face", color=stone_color,
         gaussians=stone_wall_face(length, height, courses, STONE, stone_color,
-                                  gap_center=gap)))
+                                  gap_center=gap, openings=openings)))
+    wall.children.extend(opening_nodes)
     wall.children.append(CompositionNode(
         name=f"{name}_crenellation", position=[0, height / 2 + STONE, 0],
         color=stone_color, gaussians=crenellation_strip(length, STONE, stone_color)))
@@ -501,8 +538,12 @@ def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
         ("wall_W", [-ring, 0, 0], [0.7071, 0, 0.7071, 0], False),
     ]
     for nm, pos, rot, gate in wall_specs:
+        # non-gate walls get a couple of arrow-slits; the back wall a window
+        slits = 0 if gate else 2
+        windows = 1 if (nm == "wall_N" and not gate) else 0
         castle.children.append(build_wall(
-            nm, pos, ring * 2, wall_courses, stone, rot=rot, is_gate=gate))
+            nm, pos, ring * 2, wall_courses, stone, rot=rot, is_gate=gate,
+            windows=windows, slits=slits))
 
     # keep, centered, taller
     castle.children.append(build_keep(wall_courses + 3, stone))
@@ -574,7 +615,11 @@ def expand_part(name: str, color=None, courses: int = 6,
         return build_gatehouse(name, [0, 0, 0], courses, stone)
     if kind == "wall":
         is_gate = "gate" in n or n.endswith("_s")
-        return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=is_gate)
+        # match the castle assembly: non-gate walls carry slits (+ a window on N)
+        slits = 0 if is_gate else 2
+        windows = 1 if (n.endswith("_n") and not is_gate) else 0
+        return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=is_gate,
+                          windows=windows, slits=slits)
     if kind == "gate":
         return build_wall(name, [0, 0, 0], 1.4, courses, stone, is_gate=True)
     if kind == "keep":
