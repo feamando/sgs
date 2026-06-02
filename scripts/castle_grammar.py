@@ -53,9 +53,19 @@ from src.raum.decomposition import (
 # and densification adds detail rather than inflating one blob.
 
 def _stone_log_scale(stone_size: float) -> list[float]:
-    """Log-scale for a single stone roughly stone_size across."""
+    """Log-scale for an isotropic stone roughly stone_size across."""
     v = math.log(max(stone_size * 0.5, 1e-3))
     return [v, v, v]
+
+
+def _slab_log_scale(sx: float, sy: float, sz: float) -> list[float]:
+    """Anisotropic log-scale (Raum 0.6): a flat brick-shaped stone.
+
+    Walls/faces use a thin Z (depth into the wall) and wider X/Y so the
+    oriented-ellipsoid renderer shows masonry blocks, not round beads.
+    """
+    return [math.log(max(sx, 1e-3)), math.log(max(sy, 1e-3)),
+            math.log(max(sz, 1e-3))]
 
 
 def stone_course(n_around: int, radius: float, y: float, stone_size: float,
@@ -96,8 +106,10 @@ def stone_wall_face(length: float, height: float, courses: int, stone_size: floa
             # gate void: leave a hole in the lower courses
             if gap_center > 0 and abs(x) < gap_center and y < height * 0.15:
                 continue
+            # flat brick: wide in X/Y, thin in Z (into the wall)
             out.append(GaussianParams(
-                position=[x, y, 0.0], scale=_stone_log_scale(stone_size),
+                position=[x, y, 0.0],
+                scale=_slab_log_scale(stone_size * 0.55, stone_size * 0.40, stone_size * 0.22),
                 opacity=2.0, color=_shift(color, 0.04),
             ))
     return out

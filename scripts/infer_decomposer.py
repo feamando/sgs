@@ -533,61 +533,60 @@ const controls = new OrbitControls(camera, renderer.domElement);
 scene.add(new THREE.GridHelper(10, 20, 0x1f1f2a, 0x1f1f2a));
 scene.add(new THREE.AxesHelper(2));
 
+// Lighting for the lit-ellipsoid renderer (Raum 0.6): a key sun, soft fill,
+// and sky/ground hemisphere so geometry reads with shading and fake AO.
+const sun = new THREE.DirectionalLight(0xfff4e6, 2.0);
+sun.position.set(4, 8, 5);
+scene.add(sun);
+scene.add(new THREE.DirectionalLight(0xaecbff, 0.5).position.set(-5, 2, -4));
+scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x2a2418, 0.7));
+scene.add(new THREE.AmbientLight(0x404040, 0.4));
+
 let points = null;
 
-function renderSplats(data) {
-  if (points) scene.remove(points);
-  const { means, colors, scales, n_splats } = data;
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(n_splats * 3);
-  const col = new Float32Array(n_splats * 3);
-  const siz = new Float32Array(n_splats);
-  for (let i = 0; i < n_splats; i++) {
-    pos[i*3] = means[i][0]; pos[i*3+1] = means[i][1]; pos[i*3+2] = means[i][2];
-    col[i*3] = colors[i][0]; col[i*3+1] = colors[i][1]; col[i*3+2] = colors[i][2];
-    // Per-Gaussian world size from log-scale (mean of the 3 axes), exp'd.
-    // 6x factor so neighbouring splats overlap into a solid surface.
-    const s = scales[i];
-    const sigma = (Math.exp(s[0]) + Math.exp(s[1]) + Math.exp(s[2])) / 3.0;
-    siz[i] = Math.max(sigma * 6.0, 0.04);
-  }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  geo.setAttribute('psize', new THREE.BufferAttribute(siz, 1));
+// Raum 0.6: render each Gaussian as a lit, ORIENTED ELLIPSOID instance, not a
+// screen-aligned round disc. Per-instance matrix = translate * quaternion *
+// per-axis scale, so flat slab-stones read as masonry and the scene has true
+// 3D shading + fake AO from the lights. InstancedMesh keeps ~50-100K cheap.
+const _unitSphere = new THREE.SphereGeometry(1.0, 6, 4);  // low-poly; scaled per instance
+const _m4 = new THREE.Matrix4();
+const _q = new THREE.Quaternion();
+const _t = new THREE.Vector3();
+const _s = new THREE.Vector3();
+const _col = new THREE.Color();
 
-  // Opaque round splats sized per-Gaussian. PointsMaterial can't do per-point
-  // size, so use a ShaderMaterial: gl_PointSize from the psize attribute
-  // (perspective-attenuated). OPAQUE discs (not transparent) so overlapping
-  // splats merge into a solid surface via the depth buffer -- transparent
-  // splats with depthWrite read as discrete fuzzy balls instead of mass.
-  const mat = new THREE.ShaderMaterial({
-    vertexColors: true, transparent: false, depthWrite: true, depthTest: true,
-    uniforms: { viewportH: { value: window.innerHeight } },
-    vertexShader: `
-      attribute float psize;
-      varying vec3 vColor;
-      uniform float viewportH;
-      void main() {
-        vColor = color;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        // world size -> screen pixels, perspective-attenuated
-        gl_PointSize = clamp(psize * viewportH / -mv.z, 2.0, 64.0);
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: `
-      varying vec3 vColor;
-      void main() {
-        vec2 d = gl_PointCoord - vec2(0.5);
-        float r2 = dot(d, d);
-        if (r2 > 0.25) discard;                  // circular cutout
-        // simple radial shading so overlapping discs read as rounded mass
-        float shade = 1.0 - r2 * 0.6;
-        gl_FragColor = vec4(vColor * shade, 1.0);
-      }`,
-  });
-  // ShaderMaterial needs vertex colors enabled via the attribute name 'color'
-  mat.vertexColors = true;
-  points = new THREE.Points(geo, mat);
+function renderSplats(data) {
+  if (points) { scene.remove(points); points.geometry?.dispose?.(); points.material?.dispose?.(); }
+  const { means, colors, scales, rotations, n_splats } = data;
+
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const mesh = new THREE.InstancedMesh(_unitSphere, mat, n_splats);
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+  for (let i = 0; i < n_splats; i++) {
+    _t.set(means[i][0], means[i][1], means[i][2]);
+    // log-scale -> world radius per axis; 1.6x so neighbours overlap into a
+    // continuous surface, clamped so no single splat balloons.
+    const sl = scales[i];
+    _s.set(
+      Math.min(Math.exp(sl[0]) * 1.6, 0.25),
+      Math.min(Math.exp(sl[1]) * 1.6, 0.25),
+      Math.min(Math.exp(sl[2]) * 1.6, 0.25)
+    );
+    // quaternion stored [w,x,y,z]; THREE wants (x,y,z,w)
+    if (rotations && rotations[i]) {
+      const r = rotations[i];
+      _q.set(r[1], r[2], r[3], r[0]);
+    } else { _q.set(0, 0, 0, 1); }
+    _m4.compose(_t, _q, _s);
+    mesh.setMatrixAt(i, _m4);
+    _col.setRGB(colors[i][0], colors[i][1], colors[i][2]);
+    mesh.setColorAt(i, _col);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+  points = mesh;
   scene.add(points);
   document.getElementById('info').textContent = `${n_splats} gaussians`;
 }
@@ -840,12 +839,14 @@ def main():
                 means_out = tensors["means"][idx].tolist()
                 colors_out = tensors["colors"][idx].tolist()
                 scales_out = tensors["scales_log"][idx].tolist()
+                rots_out = tensors["rotations"][idx].tolist()
                 opacities_out = torch.sigmoid(tensors["opacities"][idx]).tolist()
                 n_out = max_json_splats
             else:
                 means_out = tensors["means"].tolist()
                 colors_out = tensors["colors"].tolist()
                 scales_out = tensors["scales_log"].tolist()
+                rots_out = tensors["rotations"].tolist()
                 opacities_out = torch.sigmoid(tensors["opacities"]).tolist()
                 n_out = n
 
@@ -854,6 +855,7 @@ def main():
                 "splats": {
                     "means": means_out,
                     "scales": scales_out,
+                    "rotations": rots_out,
                     "opacities": opacities_out,
                     "colors": colors_out,
                     "n_splats": n_out,
