@@ -240,10 +240,12 @@ def build_tower(name: str, pos, courses: int, radius: float, stone_color,
         name=f"{name}_crenellation", position=[0, height, 0],
         color=stone_color, gaussians=crenellation_ring(radius, STONE, stone_color)))
     if with_roof:
+        # shallower, slightly-overhanging conical roof (was radius*1.8 tall ->
+        # spiky "christmas tree"; radius*1.1 reads as a stocky tower cap)
         tower.children.append(CompositionNode(
             name=f"{name}_roof", position=[0, height + STONE, 0],
             color=[0.5, 0.2, 0.12],
-            gaussians=cone_roof(radius * 1.1, radius * 1.8, STONE, [0.5, 0.2, 0.12])))
+            gaussians=cone_roof(radius * 1.25, radius * 1.1, STONE, [0.5, 0.2, 0.12])))
     return tower
 
 
@@ -528,7 +530,7 @@ def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
     for i in range(min(towers, 4)):
         cx, cz = corners[i]
         castle.children.append(build_tower(
-            names[i], [cx, 0, cz], wall_courses + 2, 0.18, stone))
+            names[i], [cx, 0, cz], wall_courses + 1, 0.26, stone))
 
     # walls between adjacent towers; front (south, -Z toward viewer) is the gate
     wall_specs = [
@@ -578,7 +580,7 @@ def build_lone_tower(rng: random.Random = None) -> CompositionNode:
     scene.children.append(CompositionNode(
         name="ground", position=[0, -0.1, 0], color=grass,
         gaussians=dome(0.7, 0.15, STONE * 2, grass)))
-    scene.children.append(build_tower("tower", [0, 0.1, 0], 10, 0.22, stone))
+    scene.children.append(build_tower("tower", [0, 0.1, 0], 9, 0.3, stone))
     return scene
 
 
@@ -609,8 +611,8 @@ def expand_part(name: str, color=None, courses: int = 6,
     n = name.lower()
     if kind == "tower":
         if "square" in n:
-            return build_square_tower(name, [0, 0, 0], courses + 2, stone)
-        return build_tower(name, [0, 0, 0], courses + 2, 0.18, stone)
+            return build_square_tower(name, [0, 0, 0], courses + 1, stone)
+        return build_tower(name, [0, 0, 0], courses + 1, 0.26, stone)
     if kind == "gatehouse":
         return build_gatehouse(name, [0, 0, 0], courses, stone)
     if kind == "wall":
@@ -748,7 +750,7 @@ def build_from_spec(spec: dict, rng: random.Random) -> CompositionNode:
     def _tower():
         if spec.get("tower_shape") == "square":
             return build_square_tower("tower", [0, y, 0], 10, stone)
-        return build_tower("tower", [0, y, 0], 10, 0.22, stone)
+        return build_tower("tower", [0, y, 0], 9, 0.3, stone)
 
     builders = {
         "tower": _tower,
