@@ -41,8 +41,9 @@ def parse_args():
     p.add_argument("--port", type=int, default=8003)
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--max-new", type=int, default=4096, help="Max tokens to generate for tree")
-    p.add_argument("--temperature", type=float, default=0.3, help="Low temp for structured output")
-    p.add_argument("--top-k", type=int, default=30)
+    p.add_argument("--temperature", type=float, default=0.1,
+                   help="Near-greedy for structured JSON; higher temps derail mid-tree")
+    p.add_argument("--top-k", type=int, default=3)
     p.add_argument("--fidelity", choices=["low", "high"], default="low",
                    help="low=Raum 1.3 skeleton, high=subdivision+densification+refinement")
     p.add_argument("--refine-mode", choices=["sgs", "multiview", "none"], default="sgs",
@@ -73,9 +74,30 @@ class Decomposer:
 
     @torch.no_grad()
     def generate_tree(self, prompt: str, max_new: int = 4096,
-                      temperature: float = 0.3, top_k: int = 30) -> dict | None:
+                      temperature: float = 0.1, top_k: int = 3,
+                      retries: int = 3) -> dict | None:
+        """Generate + parse a tree, retrying on parse failure.
+
+        Structured JSON is near-deterministic, so attempt 1 is GREEDY (the most
+        reliable). If the model derails into garbage and parsing fails, retry
+        with the requested sampling (which varies the path and usually recovers
+        on the next try). Returns the parsed tree, or None after `retries`.
         """
-        Generate a composition tree from a text prompt.
+        attempt0 = self._generate_once(prompt, max_new, temperature=0.0, top_k=1)
+        if attempt0 is not None:
+            return attempt0
+        for _ in range(max(0, retries - 1)):
+            tree = self._generate_once(prompt, max_new,
+                                       temperature=max(temperature, 0.2), top_k=max(top_k, 5))
+            if tree is not None:
+                return tree
+        return None
+
+    @torch.no_grad()
+    def _generate_once(self, prompt: str, max_new: int = 4096,
+                       temperature: float = 0.1, top_k: int = 3) -> dict | None:
+        """
+        Generate a composition tree from a text prompt (single attempt).
 
         The model generates a STRUCTURE-ONLY tree (names, positions, scales,
         children) without gaussians. Gaussians are filled in procedurally
@@ -95,16 +117,20 @@ class Decomposer:
                 ids_t = ids_t[:, -512:]
 
             logits = self.model(ids_t)
-            next_logits = logits[0, -1, :] / temperature
+            raw_logits = logits[0, -1, :]
 
-            if top_k > 0:
-                topk_vals, topk_idx = next_logits.topk(top_k)
-                mask = torch.full_like(next_logits, float("-inf"))
-                mask.scatter_(0, topk_idx, topk_vals)
-                next_logits = mask
-
-            probs = torch.softmax(next_logits, dim=-1)
-            next_id = torch.multinomial(probs, 1).item()
+            if temperature <= 0.0:
+                # greedy: most reliable for structured JSON
+                next_id = int(raw_logits.argmax().item())
+            else:
+                next_logits = raw_logits / temperature
+                if top_k > 0:
+                    topk_vals, topk_idx = next_logits.topk(top_k)
+                    mask = torch.full_like(next_logits, float("-inf"))
+                    mask.scatter_(0, topk_idx, topk_vals)
+                    next_logits = mask
+                probs = torch.softmax(next_logits, dim=-1)
+                next_id = torch.multinomial(probs, 1).item()
 
             if next_id == self.sp.eos_id():
                 break
