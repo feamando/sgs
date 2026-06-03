@@ -46,8 +46,11 @@ def parse_args():
     p.add_argument("--top-k", type=int, default=3)
     p.add_argument("--fidelity", choices=["low", "high"], default="low",
                    help="low=Raum 1.3 skeleton, high=subdivision+densification+refinement")
-    p.add_argument("--refine-mode", choices=["sgs", "multiview", "none"], default="sgs",
-                   help="Refinement mode for high fidelity (default: sgs)")
+    p.add_argument("--refine-mode", choices=["sgs", "multiview", "none"], default="none",
+                   help="Refinement for high fidelity. Default 'none': the grammar "
+                        "now produces clean atomic geometry, so SGS Chamfer-to-template "
+                        "refine only drags the snapped layout toward random scans and "
+                        "distorts it. Use 'sgs' only for messy/un-snapped inputs.")
     p.add_argument("--templates", default="data/architecture_gs",
                    help="Template library path for SGS refinement")
     return p.parse_args()
@@ -721,9 +724,9 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
     </select>
     <label style="margin-top:8px">Refinement mode</label>
     <select id="refine-mode" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
-      <option value="sgs" selected>SGS Native (template Chamfer)</option>
+      <option value="none" selected>None (densify only) - clean grammar geometry</option>
+      <option value="sgs">SGS Native (template Chamfer)</option>
       <option value="multiview">Multi-view consistency</option>
-      <option value="none">None (densify only)</option>
     </select>
     <button id="generate">Decompose + Render</button>
     <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
