@@ -559,7 +559,10 @@ function renderSplats(data) {
   if (points) { scene.remove(points); points.geometry?.dispose?.(); points.material?.dispose?.(); }
   const { means, colors, scales, rotations, n_splats } = data;
 
-  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // NB: do NOT set vertexColors -- InstancedMesh per-instance color comes from
+  // setColorAt/instanceColor, which THREE injects automatically. vertexColors
+  // would make it look for a (nonexistent) per-vertex color attribute -> black.
+  const mat = new THREE.MeshLambertMaterial();
   const mesh = new THREE.InstancedMesh(_unitSphere, mat, n_splats);
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
