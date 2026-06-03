@@ -837,10 +837,16 @@ def main():
             pipeline_info = None
             if fidelity == "high":
                 try:
+                    # Both paths arrive here with an ALREADY-ATOMIC, filled tree:
+                    # scene-file loads the grammar scene; the model path ran
+                    # generate_tree -> _fill_gaussians which expanded the shallow
+                    # skeleton into atomic compounds. So always prebuilt -- never
+                    # re-subdivide atomic stones (that inflates ~2.5K parts into
+                    # ~160K redundant blobs and blows up the pipeline).
                     tensors, info = apply_high_fidelity(
                         tree, refine_mode=refine_mode,
                         templates_dir=args.templates,
-                        prebuilt=scene_mode,
+                        prebuilt=True,
                     )
                     pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
                 except Exception as e:
