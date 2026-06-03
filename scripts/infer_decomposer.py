@@ -554,34 +554,52 @@ def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
 
 
 # Canonical grammar layout (mirrors castle_grammar.build_castle_on_hill).
+# Each entry is (position, scale). The model is noisy on BOTH position and
+# scale, and scale noise is what makes castles "wonky" (towers of random
+# heights, vertical stretch). Structured output -> snap the full transform.
 _RING = 0.7
 _CASTLE_LAYOUT = {
-    "tower_sw": [-_RING, 0, -_RING], "tower_se": [_RING, 0, -_RING],
-    "tower_ne": [_RING, 0, _RING], "tower_nw": [-_RING, 0, _RING],
-    "wall_s": [0, 0, -_RING], "wall_n": [0, 0, _RING],
-    "wall_e": [_RING, 0, 0], "wall_w": [-_RING, 0, 0],
-    "keep": [0, 0, 0],
+    "tower_sw": ([-_RING, 0, -_RING], 1.0), "tower_se": ([_RING, 0, -_RING], 1.0),
+    "tower_ne": ([_RING, 0, _RING], 1.0), "tower_nw": ([-_RING, 0, _RING], 1.0),
+    "wall_s": ([0, 0, -_RING], 1.0), "wall_n": ([0, 0, _RING], 1.0),
+    "wall_e": ([_RING, 0, 0], 1.0), "wall_w": ([-_RING, 0, 0], 1.0),
+    "keep": ([0, 0, 0], 1.0),
 }
 _CASTLE_ROT = {"wall_e": [0.7071, 0, 0.7071, 0], "wall_w": [0.7071, 0, 0.7071, 0]}
+# the castle and hill containers themselves (canonical from the grammar)
+_CONTAINER_XFORM = {
+    "castle": ([0, 0.79, 0], 0.9),   # sits on the hill dome top
+    "hill": ([0, -0.1, 0], 1.0),
+}
 
 
 def snap_layout(tree: dict, report: dict):
-    """Raum 1.6: snap named parts to their canonical grammar positions.
+    """Raum 1.6: snap named parts to their canonical grammar transform.
 
-    The model is reliable about WHICH elements exist but noisy about WHERE.
-    Inside a castle node, snap corner towers to the wall-ring corners, walls to
-    the face midpoints, and the keep to center -- removing the float/scatter so
-    the layout matches the deterministic 0.5 grammar. Standalone scenes are left
-    as the model placed them.
+    The model is reliable about WHICH elements exist but noisy about WHERE and
+    HOW BIG. Snap the full transform (position + scale, + rotation for E/W
+    walls) of every recognized castle part and the castle/hill containers to
+    the deterministic 0.5 grammar values. This removes the float/scatter AND
+    the vertical stretch from noisy scales. Standalone non-castle scenes keep
+    the model's placement (only their own container is normalized).
     """
     snapped = [0]
 
     def walk(node: dict):
-        if node.get("name", "").lower() == "castle" and node.get("children"):
+        name = node.get("name", "").lower()
+        # normalize the castle/hill containers
+        if name in _CONTAINER_XFORM:
+            pos, sc = _CONTAINER_XFORM[name]
+            node["position"] = list(pos)
+            node["scale"] = sc
+        # snap castle sub-parts
+        if name == "castle" and node.get("children"):
             for c in node["children"]:
                 key = c.get("name", "").lower()
                 if key in _CASTLE_LAYOUT:
-                    c["position"] = list(_CASTLE_LAYOUT[key])
+                    pos, sc = _CASTLE_LAYOUT[key]
+                    c["position"] = list(pos)
+                    c["scale"] = sc
                     if key in _CASTLE_ROT:
                         c["rotation"] = list(_CASTLE_ROT[key])
                     snapped[0] += 1
