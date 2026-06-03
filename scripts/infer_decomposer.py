@@ -316,25 +316,26 @@ class Decomposer:
                                           "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
             elif any(w in name for w in ["hill", "mound", "knoll", "dune", "mountain",
                                          "dome", "rise"]):
-                # Dome / mound: a wide, FILLED hemisphere that must comfortably
-                # contain a castle footprint (ring +/-0.7 * castle_scale ~0.86).
-                # Filled in concentric shells (not a thin shell of 60 pts) so it
-                # reads as solid raised ground, not a flat patch.
-                golden = (1+math.sqrt(5))/2
-                hill_r = 2.0          # > castle footprint, so the castle sits ON it
-                hill_h = 0.9          # vertical bulge
-                shells = 4
-                hn = 360              # plenty of coverage
-                k = 0
-                for sh in range(shells):
-                    rs = hill_r * (0.4 + 0.6 * sh / max(shells - 1, 1))
-                    for i in range(hn // shells):
-                        theta = 2*math.pi*k/golden; k += 1
-                        phi = math.acos(1 - (i+0.5)/(hn//shells))
-                        gaussians.append({"position": [rs*math.sin(phi)*math.cos(theta),
-                                                       rs*math.cos(phi)*hill_h - 0.1,
-                                                       rs*math.sin(phi)*math.sin(theta)],
-                                          "scale": [-2.3, -2.3, -2.3], "opacity": 2.0, "color": color})
+                # Dome / mound: a wide, DENSE filled disc of small splats that
+                # reads as solid raised ground wider than the castle footprint
+                # (ring +/-0.7 * castle_scale ~0.86). Sample a grid over the
+                # disc and lift each point to the dome surface -> no gaps, no
+                # giant balls. Small per-splat scale so they tile, not blob.
+                hill_r = 2.0
+                hill_h = 0.85
+                step = 0.07           # grid spacing -> dense coverage
+                x = -hill_r
+                while x <= hill_r:
+                    z = -hill_r
+                    while z <= hill_r:
+                        rr = math.hypot(x, z)
+                        if rr <= hill_r:
+                            y = hill_h * math.cos(min(rr / hill_r, 1.0) * math.pi / 2) - 0.1
+                            gaussians.append({"position": [x, y, z],
+                                              "scale": [-3.2, -3.2, -3.2], "opacity": 2.0,
+                                              "color": [min(1.0, max(0.0, c + random.uniform(-0.04, 0.04))) for c in color]})
+                        z += step
+                    x += step
             elif any(w in name for w in ["tower", "trunk", "pole", "post", "column",
                                          "pillar", "mast", "chimney", "turret",
                                          "spire", "keep", "minaret"]):
@@ -598,9 +599,9 @@ _CASTLE_LAYOUT = {
 _CASTLE_ROT = {"wall_e": [0.7071, 0, 0.7071, 0], "wall_w": [0.7071, 0, 0.7071, 0]}
 # the castle and hill containers themselves (canonical from the grammar)
 _CONTAINER_XFORM = {
-    # castle base sits near the dome surface at its footprint radius (~y1.5 for
-    # the filled hill); slightly lower so tower bases meet the ground, not float
-    "castle": ([0, 1.35, 0], 0.9),
+    # castle base meets the dome surface at its footprint radius (~y0.56 for the
+    # dense filled hill); slightly lower so tower bases sit in, not float above
+    "castle": ([0, 0.5, 0], 0.9),
     "hill": ([0, -0.1, 0], 1.0),
 }
 
