@@ -323,20 +323,38 @@ class Decomposer:
 
             node["gaussians"] = gaussians
 
+    @staticmethod
+    def _sanitize_json(s: str) -> str:
+        """Repair common model JSON malformations before parsing.
+
+        At low temperature the model occasionally emits trailing commas
+        (`[0,0,]`, `{...,}`) or bare/partial numbers (`0.`, `-.`) that
+        json.loads rejects even when the structure is otherwise complete.
+        """
+        import re
+        # trailing commas before a closing ] or }
+        s = re.sub(r",\s*([\]}])", r"\1", s)
+        # bare decimal point: 0. -> 0.0,  .5 -> 0.5,  -. -> 0
+        s = re.sub(r"(?<![\d.])-?\.(?![\d])", "0", s)   # lone "." or "-."
+        s = re.sub(r"(\d)\.(?=[,\]\}])", r"\1.0", s)     # "0." -> "0.0"
+        s = re.sub(r"(?<![\d.])\.(\d)", r"0.\1", s)      # ".5" -> "0.5"
+        return s
+
     def _parse_tree_json(self, text: str) -> dict | None:
         """Attempt to parse a composition tree from generated text."""
-        # Try direct parse
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            pass
+        # Try direct parse, then a sanitized parse
+        for candidate in (text, self._sanitize_json(text)):
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError:
+                pass
 
         # Try to find JSON object in the text
         start = text.find("{")
         if start == -1:
             return None
 
-        # Find matching closing brace
+        # Find matching closing brace; on parse failure, fall through to repair
         depth = 0
         for i in range(start, len(text)):
             if text[i] == "{":
@@ -344,14 +362,17 @@ class Decomposer:
             elif text[i] == "}":
                 depth -= 1
                 if depth == 0:
-                    try:
-                        return json.loads(text[start:i+1])
-                    except json.JSONDecodeError:
-                        return None
+                    sub = text[start:i+1]
+                    for candidate in (sub, self._sanitize_json(sub)):
+                        try:
+                            return json.loads(candidate)
+                        except json.JSONDecodeError:
+                            pass
+                    break  # balanced but unparseable -> try the repair path below
 
         # JSON was truncated (model hit max tokens). Try to repair by
         # closing open brackets/braces.
-        truncated = text[start:]
+        truncated = self._sanitize_json(text[start:])
         # Count unclosed brackets
         open_braces = truncated.count("{") - truncated.count("}")
         open_brackets = truncated.count("[") - truncated.count("]")
@@ -380,7 +401,7 @@ class Decomposer:
                         obrk = attempt.count("[") - attempt.count("]")
                         attempt += "]" * obrk + "}" * ob
                         try:
-                            return json.loads(attempt)
+                            return json.loads(self._sanitize_json(attempt))
                         except json.JSONDecodeError:
                             continue
             return None
