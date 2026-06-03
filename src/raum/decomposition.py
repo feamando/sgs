@@ -38,6 +38,22 @@ def _quat_mul(q1: list[float], q2: list[float]) -> list[float]:
     ]
 
 
+def _quat_rotate_vec(q: list[float], v: list[float]) -> list[float]:
+    """Rotate vector v=[x,y,z] by unit quaternion q=[w,x,y,z]."""
+    w, x, y, z = q
+    vx, vy, vz = v
+    # t = 2 * cross(q.xyz, v)
+    tx = 2 * (y * vz - z * vy)
+    ty = 2 * (z * vx - x * vz)
+    tz = 2 * (x * vy - y * vx)
+    # v' = v + w*t + cross(q.xyz, t)
+    return [
+        vx + w * tx + (y * tz - z * ty),
+        vy + w * ty + (z * tx - x * tz),
+        vz + w * tz + (x * ty - y * tx),
+    ]
+
+
 @dataclass
 class GaussianParams:
     """Terminal Gaussian splat parameters."""
@@ -115,8 +131,13 @@ class CompositionNode:
             result = []
             for g in self.gaussians:
                 g_world_rot = _quat_mul(world_rot, g.rotation)
+                # rotate the (scaled) local position by the node rotation, THEN
+                # translate -- otherwise a node rotation (e.g. a wall yawed 90deg
+                # to run along Z) never actually moves its gaussians.
+                scaled = [g.position[i] * world_scale for i in range(3)]
+                rotated = _quat_rotate_vec(world_rot, scaled)
                 world_g = GaussianParams(
-                    position=[world_pos[i] + g.position[i] * world_scale for i in range(3)],
+                    position=[world_pos[i] + rotated[i] for i in range(3)],
                     scale=[g.scale[i] + math.log(max(world_scale, 1e-6)) for i in range(3)],
                     opacity=g.opacity,
                     color=g.color if self.color is None else self.color,
