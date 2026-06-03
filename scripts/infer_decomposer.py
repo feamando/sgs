@@ -316,17 +316,25 @@ class Decomposer:
                                           "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
             elif any(w in name for w in ["hill", "mound", "knoll", "dune", "mountain",
                                          "dome", "rise"]):
-                # Dome / mound (hemisphere bulging up from y=0)
+                # Dome / mound: a wide, FILLED hemisphere that must comfortably
+                # contain a castle footprint (ring +/-0.7 * castle_scale ~0.86).
+                # Filled in concentric shells (not a thin shell of 60 pts) so it
+                # reads as solid raised ground, not a flat patch.
                 golden = (1+math.sqrt(5))/2
-                for i in range(n):
-                    theta = 2*math.pi*i/golden
-                    # upper hemisphere only
-                    phi = math.acos(1 - (i+0.5)/n)
-                    r = 0.8
-                    gaussians.append({"position": [r*math.sin(phi)*math.cos(theta),
-                                                   r*math.cos(phi) - 0.1,
-                                                   r*math.sin(phi)*math.sin(theta)],
-                                      "scale": [-2.6, -2.6, -2.6], "opacity": 2.0, "color": color})
+                hill_r = 2.0          # > castle footprint, so the castle sits ON it
+                hill_h = 0.9          # vertical bulge
+                shells = 4
+                hn = 360              # plenty of coverage
+                k = 0
+                for sh in range(shells):
+                    rs = hill_r * (0.4 + 0.6 * sh / max(shells - 1, 1))
+                    for i in range(hn // shells):
+                        theta = 2*math.pi*k/golden; k += 1
+                        phi = math.acos(1 - (i+0.5)/(hn//shells))
+                        gaussians.append({"position": [rs*math.sin(phi)*math.cos(theta),
+                                                       rs*math.cos(phi)*hill_h - 0.1,
+                                                       rs*math.sin(phi)*math.sin(theta)],
+                                          "scale": [-2.3, -2.3, -2.3], "opacity": 2.0, "color": color})
             elif any(w in name for w in ["tower", "trunk", "pole", "post", "column",
                                          "pillar", "mast", "chimney", "turret",
                                          "spire", "keep", "minaret"]):
@@ -590,7 +598,9 @@ _CASTLE_LAYOUT = {
 _CASTLE_ROT = {"wall_e": [0.7071, 0, 0.7071, 0], "wall_w": [0.7071, 0, 0.7071, 0]}
 # the castle and hill containers themselves (canonical from the grammar)
 _CONTAINER_XFORM = {
-    "castle": ([0, 0.79, 0], 0.9),   # sits on the hill dome top
+    # castle base sits near the dome surface at its footprint radius (~y1.5 for
+    # the filled hill); slightly lower so tower bases meet the ground, not float
+    "castle": ([0, 1.35, 0], 0.9),
     "hill": ([0, -0.1, 0], 1.0),
 }
 
