@@ -53,6 +53,10 @@ def parse_args():
                         "distorts it. Use 'sgs' only for messy/un-snapped inputs.")
     p.add_argument("--templates", default="data/architecture_gs",
                    help="Template library path for SGS refinement")
+    p.add_argument("--use-scans", action="store_true", default=False,
+                   help="Raum 0.6 §5.2: fill parts from real scanned splats "
+                        "(--templates dir) instead of procedural primitives. "
+                        "Falls back to procedural per-part if a scan is missing.")
     return p.parse_args()
 
 
@@ -199,6 +203,21 @@ class Decomposer:
             for child in node["children"]:
                 self._fill_gaussians(child)
             return
+
+        # Raum 0.6 §5.2: route a PART leaf to a real scanned splat first (real
+        # proportions). Falls through to the procedural builder if no scan
+        # library is loaded or the category has no scan.
+        if (getattr(self, "scan_library", None)
+                and ("gaussians" not in node or not node.get("gaussians"))):
+            try:
+                from scripts.scan_routing import route_part_to_scan
+                scan_node = route_part_to_scan(
+                    node.get("name", ""), self.scan_library, color=node.get("color"))
+            except Exception:
+                scan_node = None
+            if scan_node is not None:
+                node["gaussians"] = scan_node.to_dict().get("gaussians", [])
+                return
 
         # Raum 1.5: expand a shallow grammar PART leaf (tower/wall/keep/tree/
         # gate) into its atomic compound, so a model that emits a shallow
@@ -906,6 +925,18 @@ def main():
         print(f"Loading decomposer: {args.checkpoint}")
         decomposer = Decomposer(args.checkpoint, args.tokenizer, device)
         print(f"  Vocab: {decomposer.vocab_size}, ready.")
+        # Raum 0.6 §5.2: optionally load the real-scan library for part fill.
+        decomposer.scan_library = None
+        if args.use_scans:
+            from scripts.scan_routing import load_scan_library
+            decomposer.scan_library = load_scan_library(args.templates)
+            n_cats = len(decomposer.scan_library)
+            n_scans = sum(len(v) for v in decomposer.scan_library.values())
+            if n_scans:
+                print(f"  Scan routing ON: {n_scans} scans across {n_cats} categories")
+            else:
+                print(f"  Scan routing requested but no scans found at {args.templates}; "
+                      f"using procedural fill")
 
     # Fixed-scene single render: load, run pipeline, save, exit.
     if scene_mode and not args.serve:
