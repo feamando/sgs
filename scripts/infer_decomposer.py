@@ -592,17 +592,46 @@ def snap_layout(tree: dict, report: dict):
             pos, sc = _CONTAINER_XFORM[name]
             node["position"] = list(pos)
             node["scale"] = sc
-        # snap castle sub-parts
+        # snap castle sub-parts by KIND (robust to the model emitting extra or
+        # oddly-named towers like tower_1, or fewer than 4): assign towers to
+        # the 4 ring corners in order, walls to the 4 faces, keep to center.
         if name == "castle" and node.get("children"):
+            try:
+                from scripts.castle_grammar import _part_kind
+            except Exception:
+                _part_kind = lambda n: None
+            corners = [(-_RING, -_RING), (_RING, -_RING), (_RING, _RING), (-_RING, _RING)]
+            faces = {  # canonical wall slots
+                "s": ([0, 0, -_RING], None), "n": ([0, 0, _RING], None),
+                "e": ([_RING, 0, 0], [0.7071, 0, 0.7071, 0]),
+                "w": ([-_RING, 0, 0], [0.7071, 0, 0.7071, 0]),
+            }
+            face_order = ["s", "n", "e", "w"]
+            ti = wi = 0
+            kept = []
             for c in node["children"]:
-                key = c.get("name", "").lower()
-                if key in _CASTLE_LAYOUT:
-                    pos, sc = _CASTLE_LAYOUT[key]
-                    c["position"] = list(pos)
-                    c["scale"] = sc
-                    if key in _CASTLE_ROT:
-                        c["rotation"] = list(_CASTLE_ROT[key])
-                    snapped[0] += 1
+                k = _part_kind(c.get("name", ""))
+                if k in ("tower", "gatehouse"):
+                    if ti < 4:                       # keep at most 4 towers
+                        cx, cz = corners[ti]; ti += 1
+                        c["position"] = [cx, 0, cz]; c["scale"] = 1.0
+                        c["rotation"] = [1.0, 0, 0, 0]
+                        snapped[0] += 1; kept.append(c)
+                    # extra towers beyond 4 are dropped (clutter)
+                elif k == "wall" or k == "gate":
+                    if wi < 4:
+                        slot = face_order[wi]; wi += 1
+                        pos, rot = faces[slot]
+                        c["position"] = list(pos); c["scale"] = 1.0
+                        c["rotation"] = list(rot) if rot else [1.0, 0, 0, 0]
+                        snapped[0] += 1; kept.append(c)
+                elif k == "keep":
+                    c["position"] = [0, 0, 0]; c["scale"] = 1.0
+                    c["rotation"] = [1.0, 0, 0, 0]
+                    snapped[0] += 1; kept.append(c)
+                else:
+                    kept.append(c)  # unknown -> leave as-is
+            node["children"] = kept
         for c in node.get("children", []) or []:
             walk(c)
 
@@ -999,6 +1028,22 @@ def main():
                     except Exception:
                         pass
                     return JSONResponse({"error": "failed to parse tree JSON", "raw_output": ""})
+
+                # Debug: dump the raw generated tree (pre-validate) so the exact
+                # node names/counts the model emits are inspectable.
+                try:
+                    Path("data/scenes").mkdir(parents=True, exist_ok=True)
+                    Path("data/scenes/last_tree.json").write_text(
+                        json.dumps(tree_dict, indent=2), encoding="utf-8")
+                    def _top(d):
+                        return [c.get("name") for c in d.get("children", [])]
+                    cas = next((c for c in tree_dict.get("children", [])
+                                if c.get("name", "").lower() == "castle"), None)
+                    print(f"  tree top-level: {_top(tree_dict)}", file=sys.stderr)
+                    if cas:
+                        print(f"  castle parts: {_top(cas)}", file=sys.stderr)
+                except Exception:
+                    pass
 
                 # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
                 tree_dict, vreport = validate_tree(tree_dict)
