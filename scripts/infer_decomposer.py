@@ -89,7 +89,7 @@ class Decomposer:
         ids_t = torch.tensor([input_ids], dtype=torch.long, device=self.device)
         generated = []
 
-        for _ in range(max_new):
+        for step in range(max_new):
             if ids_t.shape[1] > 512:
                 ids_t = ids_t[:, -512:]
 
@@ -110,6 +110,26 @@ class Decomposer:
 
             generated.append(next_id)
             ids_t = torch.cat([ids_t, torch.tensor([[next_id]], device=self.device)], dim=1)
+
+            # Early stop: the model often does not emit EOS and would run to
+            # max_new, appending garbage after a valid tree that then truncates
+            # unparseably. Once the first top-level JSON object is balanced
+            # (brace depth back to 0 after the opening brace), stop. Check
+            # periodically since decode is O(n).
+            if step > 8 and step % 16 == 0:
+                txt = self.sp.decode(generated)
+                s = txt.find("{")
+                if s != -1:
+                    depth = 0
+                    for ch in txt[s:]:
+                        if ch == "{":
+                            depth += 1
+                        elif ch == "}":
+                            depth -= 1
+                            if depth == 0:
+                                break
+                    if depth == 0:
+                        break
 
         # Decode and parse JSON
         output_text = self.sp.decode(generated)
