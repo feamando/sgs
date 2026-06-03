@@ -436,7 +436,47 @@ def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
         return None
 
     clean_tree = clean(tree_dict) or {"name": "scene", "children": []}
+    snap_layout(clean_tree, report)
     return clean_tree, report
+
+
+# Canonical grammar layout (mirrors castle_grammar.build_castle_on_hill).
+_RING = 0.7
+_CASTLE_LAYOUT = {
+    "tower_sw": [-_RING, 0, -_RING], "tower_se": [_RING, 0, -_RING],
+    "tower_ne": [_RING, 0, _RING], "tower_nw": [-_RING, 0, _RING],
+    "wall_s": [0, 0, -_RING], "wall_n": [0, 0, _RING],
+    "wall_e": [_RING, 0, 0], "wall_w": [-_RING, 0, 0],
+    "keep": [0, 0, 0],
+}
+_CASTLE_ROT = {"wall_e": [0.7071, 0, 0.7071, 0], "wall_w": [0.7071, 0, 0.7071, 0]}
+
+
+def snap_layout(tree: dict, report: dict):
+    """Raum 1.6: snap named parts to their canonical grammar positions.
+
+    The model is reliable about WHICH elements exist but noisy about WHERE.
+    Inside a castle node, snap corner towers to the wall-ring corners, walls to
+    the face midpoints, and the keep to center -- removing the float/scatter so
+    the layout matches the deterministic 0.5 grammar. Standalone scenes are left
+    as the model placed them.
+    """
+    snapped = [0]
+
+    def walk(node: dict):
+        if node.get("name", "").lower() == "castle" and node.get("children"):
+            for c in node["children"]:
+                key = c.get("name", "").lower()
+                if key in _CASTLE_LAYOUT:
+                    c["position"] = list(_CASTLE_LAYOUT[key])
+                    if key in _CASTLE_ROT:
+                        c["rotation"] = list(_CASTLE_ROT[key])
+                    snapped[0] += 1
+        for c in node.get("children", []) or []:
+            walk(c)
+
+    walk(tree)
+    report["snapped"] = snapped[0]
 
 
 def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architecture_gs",
@@ -825,6 +865,9 @@ def main():
                 if vreport["dropped"]:
                     print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
                           f"{vreport['dropped'][:8]}", file=sys.stderr)
+                if vreport.get("snapped"):
+                    print(f"  validate: snapped {vreport['snapped']} castle parts to "
+                          f"canonical layout", file=sys.stderr)
 
                 try:
                     tree = CompositionNode.from_dict(tree_dict)
