@@ -520,9 +520,15 @@ def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
 
     ring = 0.7          # half-width of the square wall ring
     hill_h = 0.55
-    castle_y = hill_h * hill_radius * 0.8  # sit castle on the dome top
+    castle_scale = 0.9
+    # The hill must comfortably contain the castle footprint with a grass skirt.
+    # Footprint half-width = (ring + tower_radius) * castle_scale; give ~1.9x so
+    # towers sit well inside the dome rather than spilling over its edge.
+    footprint = (ring + 0.26) * castle_scale
+    hill_radius = max(hill_radius, footprint * 1.9)
+    castle_y = hill_h * hill_radius * 0.45  # nestle the castle into the dome, not perched on a peak
 
-    castle = CompositionNode(name="castle", position=[0, castle_y, 0], scale=0.9)
+    castle = CompositionNode(name="castle", position=[0, castle_y, 0], scale=castle_scale)
 
     # 4 corner towers (or fewer if requested)
     corners = [(-ring, -ring), (ring, -ring), (ring, ring), (-ring, ring)]
