@@ -30,6 +30,27 @@ import torch
 from src.raum.decomposition import CompositionNode, GaussianParams
 
 
+# Canonical per-axis half-extent each part should occupy in its LOCAL frame,
+# so a scan is stretched to the part's real shape (tower = tall, wall = long &
+# thin) instead of squashed into a uniform cube. Mirrors the procedural
+# builders' footprints in castle_grammar.
+_PART_HALF_EXTENT = {
+    "tower": (0.30, 0.55, 0.30),
+    "keep": (0.40, 0.70, 0.40),
+    "wall": (0.70, 0.33, 0.10),
+    "gate": (0.70, 0.33, 0.10),
+    "gatehouse": (0.70, 0.45, 0.30),
+    "arch": (0.30, 0.35, 0.10),
+    "door": (0.12, 0.20, 0.06),
+    "window": (0.10, 0.14, 0.06),
+    "arrow_slit": (0.05, 0.16, 0.06),
+    "slit": (0.05, 0.16, 0.06),
+    "rock": (0.25, 0.20, 0.25),
+    "cliff": (0.9, 0.9, 0.9),
+    "roof": (0.35, 0.25, 0.35),
+}
+
+
 # part-kind -> scan category directory name (architecture_gs/<category>)
 _KIND_TO_CATEGORY = {
     "tower": "tower",
@@ -104,13 +125,22 @@ def _stable_index(name: str, n: int) -> int:
     return h % max(n, 1)
 
 
+def _part_kind_for(name: str) -> str | None:
+    try:
+        from scripts.castle_grammar import _part_kind
+        return _part_kind(name)
+    except Exception:
+        return None
+
+
 def route_part_to_scan(name: str, library: dict[str, list[dict]],
-                       color=None, target_half: float = 0.35) -> CompositionNode | None:
+                       color=None) -> CompositionNode | None:
     """Return a CompositionNode of real scan Gaussians for this part, or None.
 
-    The scan is normalized to a unit-ish box of half-extent `target_half` in
-    local frame (the caller keeps the part node's own position/scale), and
-    optionally tinted toward `color` so it blends with the scene palette.
+    The scan is stretched to the part's CANONICAL PER-AXIS half-extent (tower =
+    tall, wall = long & thin) so it keeps the part's silhouette instead of
+    being squashed into a uniform cube. The caller keeps the part node's own
+    position/scale; optional tint toward `color`.
     """
     if not library:
         return None
@@ -123,16 +153,20 @@ def route_part_to_scan(name: str, library: dict[str, list[dict]],
     pos = scan["positions"].float()
     if pos.shape[0] == 0:
         return None
-    # normalize to centered box of half-extent target_half
+    # per-axis normalize: map the scan's bbox to the part's canonical half-extent
+    kind = _part_kind_for(name) or category
+    half = _PART_HALF_EXTENT.get(kind, (0.35, 0.35, 0.35))
     center = pos.mean(dim=0)
     pos = pos - center
-    extent = pos.abs().max().clamp(min=1e-6)
-    pos = pos / extent * target_half
+    span = pos.abs().amax(dim=0).clamp(min=1e-6)   # per-axis half-span of the scan
+    target = torch.tensor(half, dtype=pos.dtype)
+    pos = pos / span * target
     # rest fields, with sensible defaults if missing
     n = pos.shape[0]
     scales = scan.get("scales")
     if scales is None:
-        v = math.log(max(target_half * 0.05, 1e-3))
+        # splat size ~ a small fraction of the part's smallest axis
+        v = math.log(max(min(half) * 0.12, 1e-3))
         scales = torch.full((n, 3), v)
     else:
         scales = scales.float()
