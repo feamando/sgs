@@ -19,6 +19,7 @@ Usage:
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -133,6 +134,7 @@ class Decomposer:
 
         # Decode and parse JSON
         output_text = self.sp.decode(generated)
+        self.last_raw = output_text
 
         # Debug: always print raw output
         print(f"  Raw ({len(generated)} tokens): {output_text[:300]}...")
@@ -332,13 +334,76 @@ class Decomposer:
         json.loads rejects even when the structure is otherwise complete.
         """
         import re
-        # trailing commas before a closing ] or }
-        s = re.sub(r",\s*([\]}])", r"\1", s)
         # bare decimal point: 0. -> 0.0,  .5 -> 0.5,  -. -> 0
         s = re.sub(r"(?<![\d.])-?\.(?![\d])", "0", s)   # lone "." or "-."
-        s = re.sub(r"(\d)\.(?=[,\]\}])", r"\1.0", s)     # "0." -> "0.0"
+        s = re.sub(r"(\d)\.(?=[,\]\}\s])", r"\1.0", s)   # "0." -> "0.0"
         s = re.sub(r"(?<![\d.])\.(\d)", r"0.\1", s)      # ".5" -> "0.5"
+        # non-standard literals
+        s = re.sub(r"\bNaN\b|\bInfinity\b|\b-Infinity\b", "0", s)
+        # collapse repeated commas (`,,` -> `,`)
+        s = re.sub(r",\s*,+", ",", s)
+        # leading commas right after an opening bracket
+        s = re.sub(r"([\[{])\s*,", r"\1", s)
+        # trailing commas before a closing ] or } (after the above)
+        s = re.sub(r",\s*([\]}])", r"\1", s)
         return s
+
+    @staticmethod
+    def _recover_json(text: str) -> dict | None:
+        """Structural recovery: scan the text as JSON, tracking bracket depth
+        and string state, and close everything at the last position where the
+        structure was valid. Robust to truncation anywhere (mid-array,
+        mid-value, mid-key) regardless of the specific malformation.
+        """
+        start = text.find("{")
+        if start == -1:
+            return None
+        s = text
+        # Walk char-by-char tracking string state and the bracket stack. Record
+        # a "safe prefix" snapshot every time we are cleanly positioned AFTER a
+        # complete element and BEFORE the next key/value -- i.e. right after a
+        # closing } or ], or right after a separating comma. At those points the
+        # text so far, plus the closers for the open brackets, is valid JSON.
+        # Truncation anywhere later (mid-key, mid-string, mid-number) just falls
+        # back to the last safe snapshot.
+        stack, in_str, esc = [], False, False
+        best = None  # (cut_index, closers_string)
+        for i in range(start, len(s)):
+            ch = s[i]
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+            else:
+                if ch == '"':
+                    in_str = True
+                elif ch in "{[":
+                    stack.append("}" if ch == "{" else "]")
+                    # right after an opening bracket, an empty container is a
+                    # valid (if minimal) cut point
+                    best = (i + 1, "".join(reversed(stack)))
+                elif ch in "}]":
+                    if stack:
+                        stack.pop()
+                    # after a complete value/container -> safe boundary
+                    best = (i + 1, "".join(reversed(stack)))
+                elif ch == ",":
+                    # comma at array level (next char is a value, not a key) is
+                    # a safe cut: drop the comma and close. Only when the
+                    # enclosing container is an array.
+                    if stack and stack[-1] == "]":
+                        best = (i, "".join(reversed(stack)))
+        if best is None:
+            return None
+        cut, closers = best
+        closed = s[start:cut] + closers
+        try:
+            return json.loads(closed)
+        except json.JSONDecodeError:
+            return None
 
     def _parse_tree_json(self, text: str) -> dict | None:
         """Attempt to parse a composition tree from generated text."""
@@ -404,7 +469,8 @@ class Decomposer:
                             return json.loads(self._sanitize_json(attempt))
                         except json.JSONDecodeError:
                             continue
-            return None
+            # Last resort: structural recovery on the sanitized text.
+            return self._recover_json(self._sanitize_json(text))
 
 
 def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
@@ -879,6 +945,15 @@ def main():
                 )
 
                 if tree_dict is None:
+                    # dump the raw model output so the exact malformation is
+                    # inspectable instead of lost
+                    try:
+                        Path("data/scenes").mkdir(parents=True, exist_ok=True)
+                        dbg = Path("data/scenes/last_parse_failure.txt")
+                        dbg.write_text(decomposer.last_raw or "", encoding="utf-8")
+                        print(f"  parse FAILED; raw dumped to {dbg}", file=sys.stderr)
+                    except Exception:
+                        pass
                     return JSONResponse({"error": "failed to parse tree JSON", "raw_output": ""})
 
                 # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
