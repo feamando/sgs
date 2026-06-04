@@ -11,3 +11,4 @@ wandb/
 ablation_results.json
 pitch/
 glove.6B.zip
+.venv-sds/
