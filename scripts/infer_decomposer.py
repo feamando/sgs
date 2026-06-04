@@ -711,6 +711,44 @@ def apply_high_fidelity(tree, refine_mode="sgs", templates_dir="data/architectur
     return tensors, {"n_subdivided": n_sub, "n_densified": n_dense, "n_refined": tensors["means"].shape[0]}
 
 
+SPLAT_VIEWER_HTML = """<!doctype html>
+<html><head><meta charset="utf-8"/><title>Raum 0.7: Gaussian Splat View</title>
+<style>
+  html,body { margin:0; height:100%; background:#0a0a0f; color:#f5f1e8;
+    font-family:Inter,sans-serif; overflow:hidden; }
+  #bar { position:absolute; top:0; left:0; right:0; padding:10px 16px; z-index:10;
+    display:flex; gap:16px; align-items:center; background:rgba(10,10,15,0.7); }
+  #bar a { color:#ffb347; text-decoration:none; font-size:13px; }
+  #status { font-size:12px; color:#8a8598; }
+</style></head>
+<body>
+<div id="bar">
+  <strong style="font-size:13px">Raum 0.7 - Gaussian Splat View</strong>
+  <a href="/">&larr; ellipsoid view</a>
+  <span id="status">loading splats...</span>
+</div>
+<script type="importmap">{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "@mkkellogg/gaussian-splats-3d":"https://unpkg.com/@mkkellogg/gaussian-splats-3d@0.4.5/build/gaussian-splats-3d.module.js"
+}}</script>
+<script type="module">
+import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
+const statusEl = document.getElementById('status');
+// A real 3DGS rasterizer: proper anisotropic splatting + SH from the PLY,
+// fed by the existing standard-3DGS /scene.ply export.
+const viewer = new GaussianSplats3D.Viewer({
+  cameraUp: [0, 1, 0],
+  initialCameraPosition: [4, 3, 6],
+  initialCameraLookAt: [0, 1, 0],
+  sphericalHarmonicsDegree: 2,
+});
+viewer.addSplatScene('/scene.ply', { showLoadingUI: false, format: 0 })
+  .then(() => { statusEl.textContent = 'splats loaded'; viewer.start(); })
+  .catch(e => { statusEl.textContent = 'load failed: ' + e; console.error(e); });
+</script>
+</body></html>"""
+
+
 VIEWER_HTML = """<!doctype html>
 <html><head><meta charset="utf-8"/><title>Raum 1.3: Recursive Decomposition</title>
 <style>
@@ -760,6 +798,7 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
     </select>
     <button id="generate">Decompose + Render</button>
     <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
+    <a id="splat-link" href="/splat" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:6px;background:#1f1f2a;color:#7fd1ff;border:1px solid #7fd1ff;border-radius:6px;font-size:12px;text-decoration:none">Open Gaussian-splat view (0.7)</a>
     <div class="tree-output" id="tree-panel">
       <div class="stats" id="stats"></div>
       <pre id="tree-text"></pre>
@@ -1183,6 +1222,25 @@ def main():
             Path(tmp).unlink(missing_ok=True)
             return Response(content=data, media_type="application/octet-stream",
                            headers={"Content-Disposition": "attachment; filename=scene.ply"})
+
+        @app.get("/scene.ply")
+        def scene_ply():
+            # inline PLY (no attachment header) for the in-browser gsplat viewer
+            if not last_tensors:
+                return JSONResponse({"error": "no scene generated yet"}, status_code=400)
+            from src.export.ply import write_ply
+            tmp = tempfile.mktemp(suffix=".ply")
+            write_ply(last_tensors, tmp)
+            data = Path(tmp).read_bytes()
+            Path(tmp).unlink(missing_ok=True)
+            return Response(content=data, media_type="application/octet-stream")
+
+        @app.get("/splat", response_class=HTMLResponse)
+        def splat_view():
+            # Raum 0.7.2: a real Gaussian-splat renderer (mkkellogg
+            # gaussian-splats-3d via CDN) loading the exported PLY. Standalone
+            # page so the known-good ellipsoid view at "/" stays untouched.
+            return SPLAT_VIEWER_HTML
 
         import uvicorn
         print(f"\nServing at http://{args.host}:{args.port}")
