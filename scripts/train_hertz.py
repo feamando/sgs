@@ -17,6 +17,15 @@ import sys
 import time
 from pathlib import Path
 
+# Force UTF-8 stdout/stderr so non-ASCII characters in log strings (arrows,
+# em-dashes) don't crash on the Windows console (cp1252) with UnicodeEncodeError.
+# errors="replace" degrades any stray glyph to '?' instead of aborting the run.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 import numpy as np
 import torch
 import torch.nn.functional as F

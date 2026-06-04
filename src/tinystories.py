@@ -11,6 +11,7 @@ Stores tokenized data as memory-mapped uint16 arrays for fast loading.
 """
 
 import os
+import sys
 import json
 import struct
 import numpy as np
@@ -208,7 +209,7 @@ def tokenize_to_binary(
         print(f"  Binary already exists: {output_file} ({len(data):,} tokens)")
         return len(data)
 
-    print(f"Tokenizing {len(texts):,} texts → {output_file}")
+    print(f"Tokenizing {len(texts):,} texts -> {output_file}")
     bos, eos = sp.bos_id(), sp.eos_id()
 
     # Batch tokenize for speed (sentencepiece supports batch encoding)
@@ -501,7 +502,7 @@ def load_wikipedia_texts(
     split_idx = int(n * (1.0 - val_fraction))
     train_texts = list(texts[:split_idx])
     val_texts = list(texts[split_idx:])
-    print(f"  {n:,} articles → train {len(train_texts):,}, val {len(val_texts):,}")
+    print(f"  {n:,} articles -> train {len(train_texts):,}, val {len(val_texts):,}")
     return train_texts, val_texts
 
 
@@ -588,7 +589,7 @@ def prepare_fineweb_wiki_mix(
 
     fw_tokens = int(max_tokens * (1.0 - wiki_fraction))
     wiki_tokens = int(max_tokens * wiki_fraction)
-    print(f"\nMix budget: {max_tokens/1e9:.1f}B total → "
+    print(f"\nMix budget: {max_tokens/1e9:.1f}B total -> "
           f"FineWeb {fw_tokens/1e9:.2f}B + Wikipedia {wiki_tokens/1e9:.2f}B "
           f"(wiki_fraction={wiki_fraction})")
 
@@ -656,6 +657,14 @@ def prepare_fineweb_wiki_mix(
 
 if __name__ == "__main__":
     import argparse
+
+    # UTF-8 stdout/stderr so arrows/em-dashes in log strings don't crash the
+    # Windows console (cp1252). Mirrors the guard in scripts/train_hertz.py.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
 
     parser = argparse.ArgumentParser(description="Prepare training data")
     parser.add_argument("--data-dir", default="data/tinystories")
