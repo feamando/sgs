@@ -20,7 +20,7 @@ So this is mostly **verify + fill small gaps + run**, not build-from-scratch. Th
 | Decision | Choice | Why |
 |----------|--------|-----|
 | Multimodal base? | **No, text-only** | Raum = frozen-Hertz + decomposer head later. Don't couple two unsolved problems on an unattended run. |
-| Corpus | **FineWeb-Edu first** (already wired); Wikipedia + code mix is the gap to fill if time permits | `prepare_fineweb` exists and works today; the mix needs a small builder |
+| Corpus | **FineWeb-Edu + Wikipedia mix** (now the default, `--dataset fineweb-wiki-mix`, 30% wiki) | one shared tokenizer over both; aligns base + blob retrieval distribution |
 | Tokenizer | **Reuse the existing 32K SP** for this run | `train_hertz.py` defaults to it; training a new one is a separate task, not blocker for kickoff |
 | Blobs | **Deferred** — built post-pretrain (Faiss, no GPU) when back | Not part of the GPU run |
 | Optimizer | **Plain AdamW** | Muon is a confirmed regression ([[project_sgs_accel_shelved]]) |
@@ -89,19 +89,25 @@ REAL config first and watch four things: no OOM, measured tok/s, disk delta, and
 that a resume works.
 
 ```powershell
-# ~100 optimizer steps on a tiny token budget, real architecture.
+# ~100 optimizer steps on a tiny token budget, real architecture + mix corpus.
 python scripts\train_hertz.py `
+  --dataset fineweb-wiki-mix --wiki-fraction 0.3 `
   --max-tokens 200M `
   --epochs 1 `
   --save-interval 50 `
   --keep-last 2 `
+  --bf16-milestone-interval 100 `
   --eval-interval 50 `
   --save-dir checkpoints\hertz12_smoke 2>&1 | Tee-Object runs\hertz12_smoke.log
 ```
 
 Check after it runs a few hundred steps (Ctrl-C is fine):
 - **No OOM** at `--batch-size 2 --grad-accum 32 --d-f 5000` (the 1B default).
-- **tok/s** printed in the log → use it to set the real token budget (§3.3).
+- **tok/s AND the `ETA …h (…d)`** now printed on each log line → directly tells
+  you whether `--max-tokens` finishes inside the trip window (§3.2). This is the
+  throughput-sanity check; if ETA is too long, lower `--max-tokens` or `--d-f`.
+- **bf16 milestone** (`milestone_*_bf16.pt`, ~2 GB) written at step 100 — confirm
+  it appears and is ~2 GB, not 12 GB.
 - **Disk delta** of `checkpoints\hertz12_smoke` → with `--keep-last 2` it should
   plateau at ~2 full checkpoints, not grow unbounded.
 - **Resume works:**
@@ -132,6 +138,7 @@ the token cap or you resume after.
 # Adjust --max-tokens from the smoke test. Logs to file; survives terminal close
 # if launched via Start-Process or a Scheduled Task.
 python scripts\train_hertz.py `
+  --dataset fineweb-wiki-mix --wiki-fraction 0.3 `
   --max-tokens 10B `
   --epochs 1 `
   --batch-size 2 --grad-accum 32 `
@@ -139,6 +146,7 @@ python scripts\train_hertz.py `
   --mixed-precision bf16 `
   --lr 3e-4 --warmup-steps 2000 `
   --save-interval 5000 --keep-last 3 `
+  --bf16-milestone-interval 10000 `
   --eval-interval 1000 `
   --save-dir checkpoints\hertz12 2>&1 | Tee-Object runs\hertz12_train.log
 ```
@@ -181,33 +189,35 @@ Hertz 1B defaults (`train_hertz.py`, validated against `src/sgs_lm.py`):
 
 ## What needs to be built (honest gap list)
 
-Ordered by whether it blocks the kickoff.
+### DONE (this session, 2026-06-04)
+- ✅ **FineWeb-Edu + Wikipedia mix** — `prepare_fineweb_wiki_mix` in
+  `src/tinystories.py`, wired into `train_hertz.py` as the default
+  `--dataset fineweb-wiki-mix` (`--wiki-fraction`, default 0.3). One shared
+  tokenizer over both; writes a reproducibility `manifest.json`.
+- ✅ **bf16 weights-only milestone save** — `--bf16-milestone-interval`
+  (default 10000); `_save_bf16_milestone` writes ~2 GB model-only snapshots,
+  never rotated.
+- ✅ **Throughput sanity** — each log line now prints `ETA …h (…d)` to finish the
+  token budget at the current tok/s, so a too-slow run is visible in the smoke
+  test. (`--profile-steps` still available for deep diagnosis.)
 
 ### Blocks nothing — run can start today
-Nothing. The text-only FineWeb-Edu run is runnable now with the existing script.
+Nothing. The mix run is runnable now.
 
-### Should-have before kickoff (small, ~1-3 hrs each)
-1. **bf16 weights-only milestone save.** `_save` currently writes full fp32
-   model+optimizer (~12 GB) for every kind of checkpoint. Add an option to also
-   drop a periodic **model-only bf16** snapshot (~2 GB) so milestones are cheap.
-   *Not strictly required* because `--keep-last` already caps step checkpoints,
-   but it makes long-run disk safer and gives portable inference checkpoints.
-2. **Throughput sanity.** The script's own comments flag a regression (~10k→~2k
-   tok/s after `d_f` 3700→5000). Run `--profile-steps` once in the smoke test;
-   if tok/s is too low for the trip window, either lower `d_f` toward 3700-4000
-   (smaller model, faster) or accept fewer tokens. Decide before kickoff.
+### Optional decision before kickoff
+- **`d_f` throughput tradeoff.** If the smoke-test ETA is too long for the trip,
+  lower `--d-f` toward 3700-4000 (smaller, faster) or cut `--max-tokens`. No code
+  needed — both are flags.
 
-### Nice-to-have (improves quality, NOT needed for a first 1B base)
-3. **Multi-source corpus builder** (`build_hertz_corpus.py`): mix
-   FineWeb-Edu + Wikipedia + code into one tokenized `.bin` with a pinned
-   `manifest.json`. Today the trainer is single-source. FineWeb-Edu alone is a
-   legitimate base; the mix is a density upgrade for a later run.
-4. **New code-aware tokenizer** (~48-64K). Reuse the 32K SP for now.
+### Nice-to-have (later quality upgrades)
+- **Code slice in the mix** (The Stack v2). The mix builder currently does
+  FineWeb+Wiki; adding code is a third source in the same pattern.
+- **New code-aware tokenizer** (~48-64K). Reuse the 32K SP for now.
 
 ### Deferred by design (post-pretrain / later milestones)
-5. **Blob index build + QA** (Faiss, CPU) — when back, reuse Planck 1.3 pipeline.
-6. **Raum decomposer head** on frozen Hertz — the multimodal step, a later track.
-7. **Full blob-count sweep / progressive blob schedule** — supervised, later.
+- **Blob index build + QA** (Faiss, CPU) — when back, reuse Planck 1.3 pipeline.
+- **Raum decomposer head** on frozen Hertz — the multimodal step, a later track.
+- **Full blob-count sweep / progressive blob schedule** — supervised, later.
 
 ### Do NOT build
 - Muon / compound accel recipes (confirmed regressions, [[project_sgs_accel_shelved]]).

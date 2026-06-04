@@ -541,6 +541,119 @@ def prepare_wikipedia(
     return result
 
 
+# ────────────────────────────────────────────────────────────
+# FineWeb-Edu + Wikipedia mix (for Hertz 1.2)
+# ────────────────────────────────────────────────────────────
+
+
+def _truncate_to_char_budget(texts: list[str], char_budget: int) -> list[str]:
+    """Keep texts in order until their cumulative length hits char_budget."""
+    if char_budget <= 0:
+        return []
+    out = []
+    total = 0
+    for t in texts:
+        out.append(t)
+        total += len(t)
+        if total >= char_budget:
+            break
+    return out
+
+
+def prepare_fineweb_wiki_mix(
+    data_dir: str = "data/hertz_mix",
+    vocab_size: int = 32000,
+    context_length: int = 512,
+    max_tokens: int = 10_000_000_000,
+    wiki_fraction: float = 0.3,
+    hf_cache_dir: str = "data/wikipedia/hf",
+    revision: str = WIKIPEDIA_DEFAULT_REVISION,
+    seed: int = 1234,
+) -> dict:
+    """End-to-end FineWeb-Edu + Wikipedia mix.
+
+    Mixes at the TEXT level (before tokenization) so a single shared tokenizer
+    covers both corpora and the blob/retrieval distribution stays aligned with
+    the base (the Planck 1.3 rationale). Token proportions are approximated by
+    a 4-chars-per-token char budget per source. Reproducible: the manifest
+    (sources, revision, fractions, budget, seed) is written to data_dir.
+
+    `max_tokens` is the TOTAL budget across both sources; FineWeb gets
+    (1 - wiki_fraction), Wikipedia gets wiki_fraction.
+    """
+    import random
+
+    data_dir = Path(data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    fw_tokens = int(max_tokens * (1.0 - wiki_fraction))
+    wiki_tokens = int(max_tokens * wiki_fraction)
+    print(f"\nMix budget: {max_tokens/1e9:.1f}B total → "
+          f"FineWeb {fw_tokens/1e9:.2f}B + Wikipedia {wiki_tokens/1e9:.2f}B "
+          f"(wiki_fraction={wiki_fraction})")
+
+    # 1. FineWeb-Edu (download_fineweb_edu limits shards by token budget)
+    fw_train, fw_val = download_fineweb_edu(str(data_dir / "fineweb_raw"), fw_tokens)
+
+    # 2. Wikipedia (load full, then truncate to its char budget to cap memory)
+    wk_train_all, wk_val_all = load_wikipedia_texts(hf_cache_dir, revision)
+    wk_train = _truncate_to_char_budget(wk_train_all, wiki_tokens * 4)
+    wk_val = _truncate_to_char_budget(wk_val_all, max(wiki_tokens * 4 // 100, 1))
+    del wk_train_all, wk_val_all
+    print(f"  Wikipedia after budget trim: train {len(wk_train):,}, val {len(wk_val):,}")
+
+    # 3. Combine + deterministic shuffle (interleave the two distributions)
+    rng = random.Random(seed)
+    train_texts = fw_train + wk_train
+    val_texts = fw_val + wk_val
+    rng.shuffle(train_texts)
+    rng.shuffle(val_texts)
+    del fw_train, fw_val, wk_train, wk_val
+    print(f"  Combined: train {len(train_texts):,}, val {len(val_texts):,}")
+
+    # 4. ONE shared tokenizer over the combined corpus
+    tok_prefix = str(data_dir / "tokenizer")
+    sp = train_tokenizer(train_texts, tok_prefix, vocab_size)
+
+    # 5. Tokenize each split to binary
+    train_bin = str(data_dir / "train.bin")
+    val_bin = str(data_dir / "val.bin")
+    n_train = tokenize_to_binary(train_texts, sp, train_bin)
+    n_val = tokenize_to_binary(val_texts, sp, val_bin)
+    del train_texts, val_texts
+
+    # 6. Reproducibility manifest
+    manifest = {
+        "sources": {
+            "fineweb-edu": {"dataset": FINEWEB_DATASET, "target_tokens": fw_tokens},
+            "wikipedia": {"dataset": WIKIPEDIA_DATASET, "revision": revision,
+                          "target_tokens": wiki_tokens},
+        },
+        "wiki_fraction": wiki_fraction,
+        "max_tokens": max_tokens,
+        "vocab_size": sp.get_piece_size(),
+        "context_length": context_length,
+        "seed": seed,
+        "n_train_tokens": n_train,
+        "n_val_tokens": n_val,
+    }
+    with open(data_dir / "manifest.json", "w") as f:
+        json.dump(manifest, f, indent=2)
+
+    result = {
+        "train_bin": train_bin,
+        "val_bin": val_bin,
+        "tokenizer": tok_prefix + ".model",
+        "n_train_tokens": n_train,
+        "n_val_tokens": n_val,
+        "vocab_size": sp.get_piece_size(),
+    }
+    print(f"\nMix data ready (manifest: {data_dir / 'manifest.json'}):")
+    for k, v in result.items():
+        print(f"  {k}: {v}")
+    return result
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -548,8 +661,10 @@ if __name__ == "__main__":
     parser.add_argument("--data-dir", default="data/tinystories")
     parser.add_argument("--vocab-size", type=int, default=32000)
     parser.add_argument("--dataset", default="tinystories",
-                        choices=["tinystories", "fineweb-edu", "wikipedia"],
+                        choices=["tinystories", "fineweb-edu", "wikipedia", "fineweb-wiki-mix"],
                         help="Which dataset to download and prepare")
+    parser.add_argument("--wiki-fraction", type=float, default=0.3,
+                        help="Wikipedia share of the mix (fineweb-wiki-mix only)")
     parser.add_argument("--max-tokens", default="10B",
                         help="Max tokens for FineWeb-Edu (e.g., 1B, 5B, 10B)")
     parser.add_argument("--hf-cache-dir", default="data/wikipedia/hf",
@@ -575,4 +690,15 @@ if __name__ == "__main__":
             hf_cache_dir=args.hf_cache_dir,
             revision=args.revision,
             vocab_size=args.vocab_size,
+        )
+    elif args.dataset == "fineweb-wiki-mix":
+        if args.data_dir == "data/tinystories":
+            args.data_dir = "data/hertz_mix"
+        prepare_fineweb_wiki_mix(
+            args.data_dir,
+            vocab_size=args.vocab_size,
+            max_tokens=max_tokens,
+            wiki_fraction=args.wiki_fraction,
+            hf_cache_dir=args.hf_cache_dir,
+            revision=args.revision,
         )

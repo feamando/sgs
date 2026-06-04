@@ -26,17 +26,26 @@ from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.sgs_lm import SGSLanguageModel
-from src.tinystories import prepare_fineweb, get_dataloader
+from src.tinystories import prepare_fineweb, prepare_fineweb_wiki_mix, get_dataloader
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train Radiance Hertz (~640M-1B)")
 
     # Data
-    p.add_argument("--data-dir", default="data/fineweb")
+    p.add_argument("--data-dir", default=None,
+                   help="Data dir. Defaults by --dataset: data/hertz_mix (mix) "
+                        "or data/fineweb (fineweb-edu).")
+    p.add_argument("--dataset", default="fineweb-wiki-mix",
+                   choices=["fineweb-edu", "fineweb-wiki-mix"],
+                   help="Corpus: FineWeb-Edu alone, or a FineWeb-Edu + Wikipedia "
+                        "mix (default). The mix shares one tokenizer across both.")
+    p.add_argument("--wiki-fraction", type=float, default=0.3,
+                   help="Wikipedia share of the mix (fineweb-wiki-mix only)")
     p.add_argument("--vocab-size", type=int, default=32000)
     p.add_argument("--max-tokens", default="2B",
-                   help="Max tokens to download (2B default — feasible on single GPU)")
+                   help="Max tokens to download/prepare (total budget; for the "
+                        "mix it is split fineweb/(1-wiki_fraction) + wiki).")
 
     # Architecture — Hertz 1B defaults
     p.add_argument("--d-s", type=int, default=256)
@@ -78,6 +87,10 @@ def parse_args():
     p.add_argument("--eval-interval", type=int, default=1000)
     p.add_argument("--eval-steps", type=int, default=50)
     p.add_argument("--save-interval", type=int, default=5000)
+    p.add_argument("--bf16-milestone-interval", type=int, default=10000,
+                   help="Every N optimizer steps, save a model-only bf16 "
+                        "snapshot (~2GB for 1B). Portable inference checkpoint, "
+                        "never rotated. 0 disables.")
     p.add_argument("--save-dir", default="checkpoints/hertz")
     p.add_argument("--keep-last", type=int, default=3,
                    help="Rotate step_*.pt: keep only the N most recent. "
@@ -180,6 +193,10 @@ def main():
     print("PHASE 1: Data preparation")
     print(f"{'='*60}")
 
+    # Resolve data dir from dataset choice if not given explicitly.
+    if args.data_dir is None:
+        args.data_dir = ("data/hertz_mix" if args.dataset == "fineweb-wiki-mix"
+                         else "data/fineweb")
     data_dir = Path(args.data_dir)
     train_bin = data_dir / "train.bin"
     val_bin = data_dir / "val.bin"
@@ -195,6 +212,17 @@ def main():
         n_val = os.path.getsize(val_bin) // 2
         print(f"  Train: {n_train:,} tokens, Val: {n_val:,} tokens")
         print(f"  Vocab: {actual_vocab}")
+    elif args.dataset == "fineweb-wiki-mix":
+        print(f"  Preparing FineWeb-Edu + Wikipedia mix ({args.max_tokens} total, "
+              f"wiki_fraction={args.wiki_fraction})...")
+        data = prepare_fineweb_wiki_mix(
+            str(data_dir), vocab_size=args.vocab_size,
+            context_length=args.context_len, max_tokens=max_tokens,
+            wiki_fraction=args.wiki_fraction,
+        )
+        train_bin = data["train_bin"]
+        val_bin = data["val_bin"]
+        actual_vocab = data["vocab_size"]
     else:
         print(f"  Downloading and preparing FineWeb-Edu ({args.max_tokens} tokens)...")
         data = prepare_fineweb(
@@ -474,13 +502,20 @@ def main():
                     window_tokens = 0
                     window_t0 = time.time()
 
+                    # Throughput sanity: ETA to finish the token budget at the
+                    # current rate. Surfaces a too-slow run early (the d_f=5000
+                    # regression risk) so the budget can be cut before vacation.
+                    tokens_remaining = max(max_tokens - epoch_tokens, 0)
+                    eta_hours = tokens_remaining / max(tok_per_sec, 1e-9) / 3600.0
+
                     epoch_avg = epoch_loss_sum / max(epoch_tokens, 1)
                     print(
                         f"  epoch {epoch+1} opt_step {opt_step:>7d} | "
                         f"loss {interval_avg:.4f} avg {epoch_avg:.4f} | "
                         f"lr {lr:.2e} gnorm {grad_norm:.2f} | "
                         f"tau {model.tau.item():.1f} | "
-                        f"{tok_per_sec:.0f} tok/s"
+                        f"{tok_per_sec:.0f} tok/s | "
+                        f"ETA {eta_hours:.1f}h ({eta_hours/24:.1f}d)"
                     )
                     if args.wandb:
                         import wandb
@@ -516,6 +551,11 @@ def main():
                           epoch, global_step, opt_step,
                           save_dir / f"step_{opt_step}.pt")
                     _rotate_step_checkpoints(save_dir, args.keep_last)
+
+                # ── bf16 milestone (model-only, ~2GB, never rotated) ──
+                if (args.bf16_milestone_interval > 0
+                        and opt_step % args.bf16_milestone_interval == 0):
+                    _save_bf16_milestone(model, opt_step, save_dir)
 
         # End of epoch
         # Fold any remaining (sub-log-interval) loss into the epoch total.
@@ -562,6 +602,22 @@ def _save(model, optimizer, scheduler, scaler, epoch, global_step, opt_step, pat
         ckpt["scaler"] = scaler.state_dict()
     torch.save(ckpt, path)
     print(f"  Saved {path}")
+
+
+def _save_bf16_milestone(model, opt_step: int, save_dir: Path) -> None:
+    """Save a model-only, bf16 snapshot (~2 GB for 1B vs ~12 GB full ckpt).
+
+    Portable inference checkpoint: no optimizer/scheduler, weights cast to bf16.
+    Not resumable for training (use the full step_*.pt for that). These are kept
+    forever (not rotated) since they're cheap and mark training progress.
+    """
+    raw_model = getattr(model, "_orig_mod", model)
+    state = {k: (v.to(torch.bfloat16) if v.is_floating_point() else v)
+             for k, v in raw_model.state_dict().items()}
+    path = save_dir / f"milestone_{opt_step}_bf16.pt"
+    torch.save({"model": state, "opt_step": opt_step, "dtype": "bfloat16"}, path)
+    size_gb = path.stat().st_size / 1e9
+    print(f"  Saved bf16 milestone {path.name} ({size_gb:.1f} GB)")
 
 
 def _rotate_step_checkpoints(save_dir: Path, keep_last: int) -> None:
