@@ -20,7 +20,9 @@ So this is mostly **verify + fill small gaps + run**, not build-from-scratch. Th
 | Decision | Choice | Why |
 |----------|--------|-----|
 | Multimodal base? | **No, text-only** | Raum = frozen-Hertz + decomposer head later. Don't couple two unsolved problems on an unattended run. |
-| Corpus | **FineWeb-Edu + Wikipedia mix** (now the default, `--dataset fineweb-wiki-mix`, 30% wiki) | one shared tokenizer over both; aligns base + blob retrieval distribution |
+| Corpus | **FineWeb-Edu + Wikipedia mix** (default, `--dataset fineweb-wiki-mix`, 30% wiki) | one shared tokenizer over both; aligns base + blob retrieval distribution |
+| Model size | **`d_f=3700` → 640M** (not the 1.04B default) | measured ~20k tok/s vs ~2k at d_f=5000; fits a 7-day run (§3.2) |
+| Token budget | **`--max-tokens 10B`** | ~5.8 days at 20k tok/s, ~1 day cushion for a 7-day trip |
 | Tokenizer | **Reuse the existing 32K SP** for this run | `train_hertz.py` defaults to it; training a new one is a separate task, not blocker for kickoff |
 | Blobs | **Deferred** — built post-pretrain (Faiss, no GPU) when back | Not part of the GPU run |
 | Optimizer | **Plain AdamW** | Muon is a confirmed regression ([[project_sgs_accel_shelved]]) |
@@ -120,42 +122,56 @@ Check after it runs a few hundred steps (Ctrl-C is fine):
 If OOM: enable `--grad-checkpoint` (costs ~30-40% throughput but fits VRAM), or
 drop `--batch-size` to 1 and raise `--grad-accum` to 64.
 
-### 3.2 Set the token budget from measured tok/s
+### 3.2 Measured throughput → locked config (2026-06-04)
 
-| Measured tok/s | ~tokens/day | 14-day trip budget | Recommended `--max-tokens` |
-|----------------|-------------|--------------------|-----------------------------|
-| ~2,000 (pessimistic) | ~170M | ~2.4B | `2B` |
-| ~6,000 | ~520M | ~7.3B | `6B` |
-| ~11,800 (optimistic, prior best) | ~1.0B | ~14B | `10B`–`14B` |
+Smoke test on the actual 4090 settled this empirically:
 
-Pick a budget the trip window can actually finish (or cleanly checkpoint). The
-run is resumable either way, so erring slightly high is fine — it just stops at
-the token cap or you resume after.
+| Config | Params | Measured tok/s | Verdict |
+|--------|--------|----------------|---------|
+| `d_f=5000` (1.04B) | 1.04B | ~1,100 (with save+eval every 50 steps; clean ~2k) | **too slow** — 10B ≈ weeks |
+| **`d_f=3700` (640M)** | **640M** | **~20,000** | **locked — this is the run** |
 
-### 3.3 Kick off the real run
+`d_f=3700` reverts the regression the script's own comments flag (`d_f`
+3700→5000 caused ~10k→~2k tok/s). It trains a legitimate ~640M base, ~18× faster.
+
+**7-day trip budget at ~20k tok/s:**
+- ~1.73B tokens/day → ~12.1B raw ceiling in 7 days.
+- **`--max-tokens 10B`** = ~5.8 days pure compute, ~1 day cushion for save/eval
+  overhead. Also Chinchilla-comfortable for 640M (20 tok/param = 12.8B).
+- Conservative alternative if you want a guaranteed finish: `8B` (~4.6 days).
+
+**Disk for 10B (1 TB, fine):** `train.bin` ~20 GB + checkpoints
+(3×12.5 keep-last + best 12.5 + ~6 bf16 milestones ×2) ≈ ~62 GB → **~85 GB total.**
+
+### 3.3 Kick off the real run — LOCKED COMMAND
+
+The smoke test is done; this is the exact command to run before leaving.
+`python -u` = unbuffered stdout so the log flushes live (Tee-Object buffers
+otherwise and the log lags badly — confirmed in the smoke test).
 
 ```powershell
-# Adjust --max-tokens from the smoke test. Logs to file; survives terminal close
-# if launched via Start-Process or a Scheduled Task.
-python scripts\train_hertz.py `
+python -u scripts\train_hertz.py `
   --dataset fineweb-wiki-mix --wiki-fraction 0.3 `
+  --d-f 3700 --n-passes 3 --n-heads 4 --context-len 512 `
   --max-tokens 10B `
   --epochs 1 `
   --batch-size 2 --grad-accum 32 `
-  --d-f 5000 --n-passes 3 --n-heads 4 --context-len 512 `
   --mixed-precision bf16 `
   --lr 3e-4 --warmup-steps 2000 `
-  --save-interval 5000 --keep-last 3 `
-  --bf16-milestone-interval 10000 `
-  --eval-interval 1000 `
+  --save-interval 2000 --keep-last 3 `
+  --bf16-milestone-interval 5000 `
+  --eval-interval 2000 `
   --save-dir checkpoints\hertz12 2>&1 | Tee-Object runs\hertz12_train.log
 ```
 
-To make it survive a closed terminal / logout:
+At ~20k tok/s: `--save-interval 2000` ≈ every ~1.8h (crash loses little);
+bf16 milestone every 5000 steps ≈ every ~4.5h.
+
+To survive a closed terminal / logout (note `-u` and the `-df 3700`):
 
 ```powershell
 Start-Process -NoNewWindow -FilePath python `
-  -ArgumentList "scripts\train_hertz.py --max-tokens 10B --epochs 1 --save-dir checkpoints\hertz12 --keep-last 3" `
+  -ArgumentList "-u scripts\train_hertz.py --dataset fineweb-wiki-mix --wiki-fraction 0.3 --d-f 3700 --max-tokens 10B --epochs 1 --save-interval 2000 --keep-last 3 --bf16-milestone-interval 5000 --eval-interval 2000 --save-dir checkpoints\hertz12" `
   -RedirectStandardOutput runs\hertz12_train.log -RedirectStandardError runs\hertz12_err.log
 ```
 
@@ -179,11 +195,16 @@ Start-Process -NoNewWindow -FilePath python `
 
 ## 4. Architecture (for reference)
 
-Hertz 1B defaults (`train_hertz.py`, validated against `src/sgs_lm.py`):
-- `d_s=256, d_f=5000, n_passes=3, n_heads=4, context_len=512` → ~1.04B params
+**LOCKED for this run: `d_f=3700` → 640M params** (chosen for ~20k tok/s; see §3.2).
+The `d_f=5000` / 1.04B default is too slow on the 4090 for a 7-day window.
+
+- `d_s=256, d_f=3700, n_passes=3, n_heads=4, context_len=512` → ~640M params
 - bf16 mixed precision, AdamW (betas 0.9/0.95, wd 0.1, fused), cosine + warmup
 - torch.compile mode=default (no CUDA graphs — incompatible with grad accum here)
-- Checkpoint = model + optimizer + scheduler (~12 GB); rotation keeps last N
+- Checkpoint = model + optimizer + scheduler (~12.5 GB); rotation keeps last N;
+  bf16 milestone = model-only (~2 GB)
+- Verified at kickoff: GPU 100%, ~23.7 GB used (fits 25.8 GB), loss falling
+  cleanly from ~8.9, no OOM.
 
 ---
 
