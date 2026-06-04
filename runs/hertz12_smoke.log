@@ -1,0 +1,24 @@
+============================================================
+Traceback (most recent call last):
+RADIANCE HERTZ ù 1B SGS Language Model
+============================================================
+Device: cuda
+  GPU: NVIDIA GeForce RTX 4090
+  VRAM: 25.8 GB
+  BLAS: default (cuBLASLt preference unsupported on Windows)
+
+============================================================
+PHASE 1: Data preparation
+============================================================
+  Preparing FineWeb-Edu + Wikipedia mix (200M total, wiki_fraction=0.3)...
+  File "C:\Users\feama\sgs\scripts\train_hertz.py", line 649, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\train_hertz.py", line 218, in main
+    data = prepare_fineweb_wiki_mix(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\src\tinystories.py", line 591, in prepare_fineweb_wiki_mix
+    print(f"\nMix budget: {max_tokens/1e9:.1f}B total \u2192 "
+  File "C:\Users\feama\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 25: character maps to <undefined>
