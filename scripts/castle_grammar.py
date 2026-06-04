@@ -236,19 +236,22 @@ def _weathered(base, var: float = 0.04, y: float = 0.0, y_span: float = 1.0):
     r, g, b = base
     # height term: -1 at the part's base, +1 near its top
     h = max(-1.0, min(1.0, (y / max(y_span, 1e-6)) * 2.0)) if y_span else 0.0
-    light = 0.06 * h  # tops lighter, bases darker
+    # STRONG height shading: tops clearly sun-bleached, bases clearly in shadow.
+    light = 0.18 * h
     r += light; g += light; b += light
-    # occasional weathering tint
+    # weathering tints, applied to a large fraction and at high strength so the
+    # variation actually reads through the splat blending.
     roll = random.random()
-    if h < -0.2 and roll < 0.22:        # moss/dirt low down
+    if h < 0.1 and roll < 0.55:         # moss/dirt over the lower half
         tint = _MOSS if random.random() < 0.6 else _DIRT
-        m = random.uniform(0.25, 0.5)
+        m = random.uniform(0.4, 0.75)   # heavy blend
         r = r*(1-m) + tint[0]*m; g = g*(1-m) + tint[1]*m; b = b*(1-m) + tint[2]*m
-    elif roll < 0.10:                   # scattered lichen patches anywhere
-        m = random.uniform(0.15, 0.3)
+    elif roll < 0.30:                   # frequent lichen patches anywhere
+        m = random.uniform(0.3, 0.55)
         r = r*(1-m) + _LICHEN[0]*m; g = g*(1-m) + _LICHEN[1]*m; b = b*(1-m) + _LICHEN[2]*m
-    # fine per-stone jitter on top
-    r += random.uniform(-var, var); g += random.uniform(-var, var); b += random.uniform(-var, var)
+    # coarse per-stone jitter on top (bigger so individual stones differ)
+    j = max(var, 0.07)
+    r += random.uniform(-j, j); g += random.uniform(-j, j); b += random.uniform(-j, j)
     return [min(1.0, max(0.0, c)) for c in (r, g, b)]
 
 

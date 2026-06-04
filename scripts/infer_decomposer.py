@@ -659,7 +659,10 @@ def snap_layout(tree: dict, report: dict):
                         c["rotation"] = list(rot) if rot else [1.0, 0, 0, 0]
                         snapped[0] += 1; kept.append(c)
                 elif k == "keep":
-                    c["position"] = [0, 0, 0]; c["scale"] = 1.0
+                    # lift the keep: the dome bulges higher at the centre (~0.2
+                    # above the ring), so a keep at castle-local 0 sinks into the
+                    # hill. Raise it to sit on the centre ground.
+                    c["position"] = [0, 0.2, 0]; c["scale"] = 1.0
                     c["rotation"] = [1.0, 0, 0, 0]
                     snapped[0] += 1; kept.append(c)
                 else:
