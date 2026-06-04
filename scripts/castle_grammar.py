@@ -342,8 +342,10 @@ def build_keep(courses: int, stone_color) -> CompositionNode:
     keep = CompositionNode(name="keep", position=[0, 0, 0], scale=1.0)
     height = courses * STONE * 1.6
     side = 0.5
-    faces = CompositionNode(name="keep_body", color=stone_color)
-    # four faces
+    faces = CompositionNode(name="keep_body")
+    # four faces. stone_wall_face centres courses on y=0 (spans +/-height/2);
+    # lift by height/2 so the keep is BASE-ALIGNED like a tower (base at y=0),
+    # otherwise its lower half sinks below the ground.
     for (px, pz, rot, ln) in [
         (0, side / 2, None, side), (0, -side / 2, None, side),
         (side / 2, 0, [0.7071, 0, 0.7071, 0], side),
@@ -351,15 +353,15 @@ def build_keep(courses: int, stone_color) -> CompositionNode:
     ]:
         faces.gaussians.extend(
             _placed(stone_wall_face(ln, height, courses, STONE, stone_color),
-                    dx=px, dz=pz, rot=rot))
+                    dx=px, dz=pz, rot=rot, dy=height / 2))
     keep.children.append(faces)
     keep.children.append(CompositionNode(
-        name="keep_roof", position=[0, height / 2 + STONE, 0], color=[0.45, 0.2, 0.13],
+        name="keep_roof", position=[0, height + STONE, 0], color=[0.45, 0.2, 0.13],
         gaussians=cone_roof(side * 0.8, side * 0.9, STONE, [0.45, 0.2, 0.13])))
     return keep
 
 
-def _placed(gaussians, dx=0.0, dz=0.0, rot=None):
+def _placed(gaussians, dx=0.0, dz=0.0, rot=None, dy=0.0):
     """Translate (and optionally yaw 90deg) a list of gaussians in-place copy."""
     out = []
     yaw = rot is not None
@@ -367,7 +369,7 @@ def _placed(gaussians, dx=0.0, dz=0.0, rot=None):
         x, y, z = g.position
         if yaw:  # swap x,z for a 90deg face
             x, z = z, x
-        out.append(GaussianParams(position=[x + dx, y, z + dz], scale=g.scale,
+        out.append(GaussianParams(position=[x + dx, y + dy, z + dz], scale=g.scale,
                                   opacity=g.opacity, color=g.color))
     return out
 

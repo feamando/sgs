@@ -136,11 +136,16 @@ class CompositionNode:
                 # to run along Z) never actually moves its gaussians.
                 scaled = [g.position[i] * world_scale for i in range(3)]
                 rotated = _quat_rotate_vec(world_rot, scaled)
+                # Per-gaussian color is the source of truth (carries per-stone
+                # weathering). A node color only acts as a FALLBACK for stones
+                # that have none -- it must NOT overwrite real per-stone colors,
+                # or it flattens the whole part to one tone.
+                g_color = g.color if g.color is not None else self.color
                 world_g = GaussianParams(
                     position=[world_pos[i] + rotated[i] for i in range(3)],
                     scale=[g.scale[i] + math.log(max(world_scale, 1e-6)) for i in range(3)],
                     opacity=g.opacity,
-                    color=g.color if self.color is None else self.color,
+                    color=g_color,
                     rotation=g_world_rot,
                     sh_degree=g.sh_degree,
                     sh_coeffs=g.sh_coeffs,
