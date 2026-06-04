@@ -736,13 +736,21 @@ import * as GaussianSplats3D from '@mkkellogg/gaussian-splats-3d';
 const statusEl = document.getElementById('status');
 // A real 3DGS rasterizer: proper anisotropic splatting + SH from the PLY,
 // fed by the existing standard-3DGS /scene.ply export.
+// sharedMemoryForWorkers:false -- the default shared-memory workers need
+// cross-origin-isolation (COOP/COEP) headers a plain server doesn't send, and
+// silently hang on "loading splats..." without them. With it off, the lib
+// recommends gpuAcceleratedSort:false too.
 const viewer = new GaussianSplats3D.Viewer({
   cameraUp: [0, 1, 0],
   initialCameraPosition: [4, 3, 6],
   initialCameraLookAt: [0, 1, 0],
   sphericalHarmonicsDegree: 2,
+  sharedMemoryForWorkers: false,
+  gpuAcceleratedSort: false,
 });
-viewer.addSplatScene('/scene.ply', { showLoadingUI: false, format: 0 })
+// format auto-detects from the .ply extension (omitting it avoids depending on
+// the SceneFormat enum shape across lib versions).
+viewer.addSplatScene('/scene.ply', { showLoadingUI: true })
   .then(() => { statusEl.textContent = 'splats loaded'; viewer.start(); })
   .catch(e => { statusEl.textContent = 'load failed: ' + e; console.error(e); });
 </script>
