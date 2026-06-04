@@ -69,7 +69,7 @@ def _slab_log_scale(sx: float, sy: float, sz: float) -> list[float]:
 
 
 def stone_course(n_around: int, radius: float, y: float, stone_size: float,
-                 color, jitter: float = 0.0) -> list[GaussianParams]:
+                 color, jitter: float = 0.0, y_span: float = 1.0) -> list[GaussianParams]:
     """One horizontal ring of stones at height y (a course of a round tower)."""
     out = []
     for i in range(n_around):
@@ -81,7 +81,7 @@ def stone_course(n_around: int, radius: float, y: float, stone_size: float,
             z += random.uniform(-jitter, jitter)
         out.append(GaussianParams(
             position=[x, y, z], scale=_stone_log_scale(stone_size),
-            opacity=2.0, color=_shift(color, 0.04),
+            opacity=2.0, color=_weathered(color, 0.04, y - y_span * 0.5, y_span),
         ))
     return out
 
@@ -124,7 +124,7 @@ def stone_wall_face(length: float, height: float, courses: int, stone_size: floa
             out.append(GaussianParams(
                 position=[x, y, 0.0],
                 scale=_slab_log_scale(stone_size * 0.55, stone_size * 0.40, stone_size * 0.22),
-                opacity=2.0, color=_shift(color, 0.04),
+                opacity=2.0, color=_weathered(color, 0.04, y, height),
             ))
     return out
 
@@ -220,6 +220,38 @@ def _shift(color, var: float):
     return [min(1.0, max(0.0, c + random.uniform(-var, var))) for c in color]
 
 
+# Raum 0.7 material: weathering palettes blended into stone for aged masonry.
+_MOSS = [0.30, 0.42, 0.22]      # green growth in damp/low areas
+_DIRT = [0.34, 0.28, 0.20]      # brown grime
+_LICHEN = [0.66, 0.66, 0.58]    # pale crusty patches
+
+
+def _weathered(base, var: float = 0.04, y: float = 0.0, y_span: float = 1.0):
+    """Per-stone aged-masonry color (Raum 0.7 material axis).
+
+    Beyond flat jitter: stones near the bottom of a part trend toward moss/dirt,
+    tops are lighter (sun-bleached), and a fraction get a lichen/dirt tint. Gives
+    correlated, believable variation instead of uniform noise.
+    """
+    r, g, b = base
+    # height term: -1 at the part's base, +1 near its top
+    h = max(-1.0, min(1.0, (y / max(y_span, 1e-6)) * 2.0)) if y_span else 0.0
+    light = 0.06 * h  # tops lighter, bases darker
+    r += light; g += light; b += light
+    # occasional weathering tint
+    roll = random.random()
+    if h < -0.2 and roll < 0.22:        # moss/dirt low down
+        tint = _MOSS if random.random() < 0.6 else _DIRT
+        m = random.uniform(0.25, 0.5)
+        r = r*(1-m) + tint[0]*m; g = g*(1-m) + tint[1]*m; b = b*(1-m) + tint[2]*m
+    elif roll < 0.10:                   # scattered lichen patches anywhere
+        m = random.uniform(0.15, 0.3)
+        r = r*(1-m) + _LICHEN[0]*m; g = g*(1-m) + _LICHEN[1]*m; b = b*(1-m) + _LICHEN[2]*m
+    # fine per-stone jitter on top
+    r += random.uniform(-var, var); g += random.uniform(-var, var); b += random.uniform(-var, var)
+    return [min(1.0, max(0.0, c)) for c in (r, g, b)]
+
+
 # ── Compositional builders ────────────────────────────────────────────
 
 STONE = 0.06  # atomic stone size in castle-local units
@@ -234,7 +266,8 @@ def build_tower(name: str, pos, courses: int, radius: float, stone_color,
     for c in range(courses):
         y = (c / max(courses - 1, 1)) * height
         body.gaussians.extend(stone_course(
-            max(6, int(2 * math.pi * radius / STONE)), radius, y, STONE, stone_color))
+            max(6, int(2 * math.pi * radius / STONE)), radius, y, STONE, stone_color,
+            y_span=height))
     tower.children.append(body)
     tower.children.append(CompositionNode(
         name=f"{name}_crenellation", position=[0, height, 0],
