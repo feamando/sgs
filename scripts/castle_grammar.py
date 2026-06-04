@@ -296,6 +296,10 @@ def build_wall(name: str, pos, length: float, courses: int, stone_color,
     wall = CompositionNode(name=name, position=pos, scale=1.0,
                            rotation=rot or [1.0, 0.0, 0.0, 0.0])
     gap = length * 0.22 if is_gate else 0.0
+    # stone_wall_face centres courses on y=0 (spans +/-height/2). Lift the whole
+    # wall by height/2 so it is BASE-ALIGNED like the towers/keep (base at y=0),
+    # otherwise the lower half sinks below the ground.
+    base_lift = height / 2
 
     # plan the openings (carve from the face, then place recessed dark nodes)
     openings, opening_nodes = [], []
@@ -309,18 +313,17 @@ def build_wall(name: str, pos, length: float, courses: int, stone_color,
             is_slit = k >= windows
             hw, hh = (slit_hw, slit_hh) if is_slit else (win_hw, win_hh)
             openings.append((cx, cy, hw, hh))
-            dark = [0.08, 0.08, 0.1]
-            node = build_arrow_slit(f"{name}_slit_{k}", [cx, cy, -STONE * 0.5]) if is_slit \
-                else build_window(f"{name}_window_{k}", [cx, cy, -STONE * 0.5])
+            node = build_arrow_slit(f"{name}_slit_{k}", [cx, cy + base_lift, -STONE * 0.5]) if is_slit \
+                else build_window(f"{name}_window_{k}", [cx, cy + base_lift, -STONE * 0.5])
             opening_nodes.append(node)
 
     wall.children.append(CompositionNode(
-        name=f"{name}_face", color=stone_color,
+        name=f"{name}_face", position=[0, base_lift, 0],
         gaussians=stone_wall_face(length, height, courses, STONE, stone_color,
                                   gap_center=gap, openings=openings)))
     wall.children.extend(opening_nodes)
     wall.children.append(CompositionNode(
-        name=f"{name}_crenellation", position=[0, height / 2 + STONE, 0],
+        name=f"{name}_crenellation", position=[0, height + STONE, 0],
         color=stone_color, gaussians=crenellation_strip(length, STONE, stone_color)))
     if is_gate:
         # arch lintel over the void
@@ -329,7 +332,7 @@ def build_wall(name: str, pos, length: float, courses: int, stone_color,
         for i in range(7):
             t = i / 6
             ax = (t - 0.5) * gap * 2
-            ay = -height * 0.5 + height * 0.18 + math.sin(t * math.pi) * STONE * 2
+            ay = base_lift - height * 0.5 + height * 0.18 + math.sin(t * math.pi) * STONE * 2
             arch.append(GaussianParams(position=[ax, ay, 0],
                         scale=_stone_log_scale(STONE), opacity=2.0, color=arch_color))
         wall.children.append(CompositionNode(
