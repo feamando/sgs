@@ -213,11 +213,21 @@ def run_sds(args, device):
         with torch.no_grad():
             colors.add_(torch.randn_like(colors) * 0.2).clamp_(0, 1)
 
-    opt = torch.optim.Adam([
-        {"params": [means], "lr": args.lr * 0.5},
-        {"params": [scales], "lr": args.lr * 0.5},
-        {"params": [colors], "lr": args.lr},
-    ])
+    # Stage 1 finding: free positions let SDS SCATTER the stones chasing
+    # texture. For an appearance/material win, freeze positions by default and
+    # optimize only colour (+ gentle scale). --free-positions to allow drift.
+    param_groups = [{"params": [colors], "lr": args.lr}]
+    if not args.freeze_scales:
+        param_groups.append({"params": [scales], "lr": args.lr * 0.25})
+    if args.free_positions:
+        means.requires_grad_(True)
+        param_groups.append({"params": [means], "lr": args.lr * 0.2})
+    else:
+        means.requires_grad_(False)
+    opt = torch.optim.Adam(param_groups)
+    print(f"[sds] optimizing: colors{' + scales' if not args.freeze_scales else ''}"
+          f"{' + positions' if args.free_positions else ' (positions FROZEN)'}; "
+          f"guidance={args.guidance}")
     for i in range(args.iters):
         opt.zero_grad()
         frac = (i % 16) / 16.0
@@ -232,7 +242,8 @@ def run_sds(args, device):
         else:
             loss = guidance.loss(rgb, rng_t=frac)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_([means, scales, colors], 1.0)
+        grad_params = [p for grp in opt.param_groups for p in grp["params"]]
+        torch.nn.utils.clip_grad_norm_(grad_params, 1.0)
         opt.step()
         with torch.no_grad():
             colors.clamp_(0, 1)
@@ -265,10 +276,16 @@ def main():
     p.add_argument("--scene", default="output/castle_06.json")
     p.add_argument("--prompt", default="a stone castle on a green hill")
     p.add_argument("--out", default="output/castle_sds.json")
-    p.add_argument("--iters", type=int, default=200)
-    p.add_argument("--img", type=int, default=128)
+    p.add_argument("--iters", type=int, default=150)
+    p.add_argument("--img", type=int, default=256,
+                   help="render resolution; 256 gives SD a sharper gradient than 128")
     p.add_argument("--lr", type=float, default=0.01)
-    p.add_argument("--guidance", type=float, default=100.0)
+    p.add_argument("--guidance", type=float, default=40.0,
+                   help="SDS guidance scale; 100 over-powers and scatters, 40 is gentler")
+    p.add_argument("--free-positions", action="store_true", default=False,
+                   help="let SDS move splat positions (scatters geometry); default OFF")
+    p.add_argument("--freeze-scales", action="store_true", default=False,
+                   help="also freeze per-splat scale (optimize colour only)")
     args = p.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
