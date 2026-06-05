@@ -185,6 +185,31 @@ Start-Process -NoNewWindow -FilePath python `
 - [ ] Launched so it survives terminal close (Start-Process / Scheduled Task)
 - [ ] A hard `--max-tokens` cap so it STOPS cleanly, never runs to disk-full
 
+### 3.4b Before you walk out the door (final gate — do NOT skip)
+
+Don't start this and immediately leave. `--max-tokens 10B` triggers a fresh,
+larger download + re-tokenize (data\hertz_mix only had ~808M from the smoke
+test), so there's a long Phase-1 stretch BEFORE training. Watch it reach a
+healthy steady state first, then leave.
+
+- [ ] **Launch detached** (the `Start-Process` variant in §3.3) so a closed
+      terminal / logout doesn't kill the multi-day run.
+- [ ] **Watch it clear Phase 1** — fresh FineWeb+Wiki download (~20 GB train.bin)
+      + new shared tokenizer over the bigger corpus. Quiet, can take a while;
+      not a hang (check `data\hertz_mix\train.bin` growing if unsure).
+- [ ] **See Phase 2 actually start:** first 2-3 `loss … | NNNN tok/s | ETA …h
+      (…d)` lines printed. Confirm tok/s ≈ 20k and **ETA ≈ 5-6 days** (fits the
+      7-day window). If ETA is way off, stop and re-check `--d-f 3700`.
+- [ ] **First bf16 milestone lands** (`checkpoints\hertz12\milestone_5000_bf16.pt`,
+      ~2 GB not 12 GB) — proves milestone saves work over the long run.
+- [ ] **`step_*.pt` rotation** keeps only the last 3 (disk won't fill).
+- [ ] **Disk free** still > 200 GB after data prep + first checkpoints.
+- [ ] Note the start time + the run command in `runs\` so resume is obvious if
+      it dies (`--resume checkpoints\hertz12\step_<N>.pt`, or `--warm-start` if
+      resume throughput collapses).
+
+Only once all the above are green is it safe to leave for 7 days.
+
 ### 3.5 When you're back
 
 1. Check `runs\hertz12_train.log` final val loss/ppl; confirm `final.pt` or latest `step_*.pt`.
