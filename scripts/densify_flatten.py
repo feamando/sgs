@@ -166,24 +166,28 @@ def densify_flatten_arrays(pos, scale_log, opac, rot, col, *,
     """Combined surface pass on a flat Gaussian cloud. All knobs are uniform
     globals -- no per-part tuning.
 
-      flatten   0..1  squash each splat onto its local tangent plane (disk)
-      density   >0     in-plane footprint multiplier (overlap/coverage; the
-                       solid-vs-airy knob, independent of count)
-      densify   int    clones per splat, jittered IN THE TANGENT PLANE so they
-                       stay on the surface (not a volume fog). Opacity is split
-                       compositing-correct: a_split = 1-(1-a0)**(1/k), so k
-                       overlapping clones alpha-composite back to the original
-                       coverage instead of a translucent smear.
+      flatten   0..1  disk RATIO: thin the normal axis relative to the tangent
+                       face (0 = sphere, ->1 = flat disk). Controls SHAPE only.
+      density   >0     UNIFORM size multiplier on the whole splat (all 3 axes),
+                       the solid<->airy / overlap knob. Does NOT change the disk
+                       ratio -- so cranking density never stretches a splat into
+                       a streak (the image-88 bug: density used to scale only the
+                       in-plane axes while flatten thinned the normal -> 8:1
+                       slivers that aligned radially on the hill).
+      densify   int    clones per splat, jittered in 3D so they keep volume.
+                       Opacity stays near-opaque (stone is solid; the front
+                       splat wins) rather than split see-through.
       weathering 0..1  per-clone colour jitter so a surface reads as aged stone
     """
     rng = rng or np.random.default_rng(0)
     k = max(1, int(densify))
     lin = np.exp(scale_log)                                   # linear sigma/axis
-    stone = lin.mean(1)                                       # per-stone size (pre-flatten)
-    inplane = lin[:, :2].mean(1) * max(density, 1e-3)         # tangent footprint
+    base = lin.mean(1) * max(density, 1e-3)                   # uniform stone size
+    stone = base                                              # 3D-jitter spread basis
     if flatten > 0:
         frames, _ = _surface_frames(pos, knn)
-        thin = lin.max(1) * (1.0 - flatten)
+        inplane = base                                        # tangent face
+        thin = base * (1.0 - flatten)                         # ratio only, same base
         base_scale = np.log(np.stack([
             np.maximum(inplane, 1e-6), np.maximum(inplane, 1e-6),
             np.maximum(thin, 1e-6)], axis=1))
