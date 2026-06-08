@@ -808,6 +808,17 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
       <option value="sgs">SGS Native (template Chamfer)</option>
       <option value="multiview">Multi-view consistency</option>
     </select>
+    <div id="splat-controls" style="margin-top:12px;padding-top:10px;border-top:1px solid #1f1f2a">
+      <label style="color:#7fd1ff;font-weight:600">Splat appearance (0.7)</label>
+      <label style="margin-top:8px">Total splats: <span id="splats-val">30000</span></label>
+      <input id="splats" type="range" min="3000" max="120000" step="1000" value="30000" style="width:100%">
+      <label style="margin-top:8px">Density (footprint): <span id="density-val">1.0</span></label>
+      <input id="density" type="range" min="0.4" max="2.5" step="0.1" value="1.0" style="width:100%">
+      <label style="margin-top:8px">Flatness: <span id="flatten-val">0.4</span></label>
+      <input id="flatten" type="range" min="0" max="0.9" step="0.05" value="0.4" style="width:100%">
+      <label style="margin-top:8px">Weathering: <span id="weathering-val">0.3</span></label>
+      <input id="weathering" type="range" min="0" max="1" step="0.05" value="0.3" style="width:100%">
+    </div>
     <button id="generate">Decompose + Render</button>
     <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
     <a id="splat-link" href="/splat" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:6px;background:#1f1f2a;color:#7fd1ff;border:1px solid #7fd1ff;border-radius:6px;font-size:12px;text-decoration:none">Open Gaussian-splat view (0.7)</a>
@@ -910,6 +921,15 @@ const statusEl = document.getElementById('status');
 const statsEl = document.getElementById('stats');
 const treeEl = document.getElementById('tree-text');
 
+// Splat appearance controls (0.7): live label update
+const ctlIds = ['splats','density','flatten','weathering'];
+const ctl = {};
+ctlIds.forEach(id => {
+  ctl[id] = document.getElementById(id);
+  const lbl = document.getElementById(id + '-val');
+  ctl[id].addEventListener('input', () => { lbl.textContent = ctl[id].value; });
+});
+
 btn.addEventListener('click', async () => {
   const prompt = promptEl.value.trim();
   if (!prompt) return;
@@ -922,7 +942,9 @@ btn.addEventListener('click', async () => {
     const r = await fetch('/decompose', {
       method: 'POST',
       headers: {'content-type': 'application/json'},
-      body: JSON.stringify({prompt, fidelity, refine_mode: refineMode}),
+      body: JSON.stringify({prompt, fidelity, refine_mode: refineMode,
+        splats: +ctl.splats.value, density: +ctl.density.value,
+        flatten: +ctl.flatten.value, weathering: +ctl.weathering.value}),
     });
     const data = await r.json();
     if (data.error) {
@@ -1089,6 +1111,11 @@ def main():
             prompt: str
             fidelity: str = "low"
             refine_mode: str = "sgs"
+            # Raum 0.7 splat-appearance controls (0 splats = leave as-is)
+            splats: int = 0
+            density: float = 1.0
+            flatten: float = 0.0
+            weathering: float = 0.0
 
         @app.get("/", response_class=HTMLResponse)
         def index():
@@ -1181,6 +1208,38 @@ def main():
                     return JSONResponse({"error": f"high-fidelity pipeline error: {type(e).__name__}: {e}"})
             else:
                 tensors = tree_to_tensors(tree)
+
+            # Raum 0.7 splat-appearance pass: densify + flatten-to-surface +
+            # weathering, driven by the UI sliders. Operates on the flat tensor
+            # cloud; uniform global knobs only (no per-part tuning).
+            if req.flatten > 0 or req.splats > 0 or req.density != 1.0 or req.weathering > 0:
+                try:
+                    from scripts.densify_flatten import densify_flatten_arrays
+                    import numpy as _np
+                    pos = tensors["means"].cpu().numpy().astype(float)
+                    sl = tensors["scales_log"].cpu().numpy().astype(float)
+                    op = tensors["opacities"].cpu().numpy().astype(float)
+                    rt = tensors["rotations"].cpu().numpy().astype(float)
+                    cl = tensors["colors"].cpu().numpy().astype(float)
+                    n_in = pos.shape[0]
+                    dens = max(1, round(req.splats / max(n_in, 1))) if req.splats > 0 else 1
+                    pos, sl, op, rt, cl = densify_flatten_arrays(
+                        pos, sl, op, rt, cl, densify=dens, flatten=req.flatten,
+                        density=req.density, weathering=req.weathering,
+                        rng=_np.random.default_rng(0))
+                    tensors = {
+                        "means": torch.tensor(pos, dtype=torch.float32),
+                        "scales_log": torch.tensor(sl, dtype=torch.float32),
+                        "opacities": torch.tensor(op, dtype=torch.float32),
+                        "rotations": torch.tensor(rt, dtype=torch.float32),
+                        "colors": torch.tensor(cl, dtype=torch.float32),
+                    }
+                    pipeline_info = (f"{n_in} -> {pos.shape[0]} splats "
+                                     f"(x{dens}, density={req.density}, "
+                                     f"flat={req.flatten}, weather={req.weathering})")
+                except Exception as e:
+                    import traceback; traceback.print_exc()
+                    return JSONResponse({"error": f"splat-appearance pass: {type(e).__name__}: {e}"})
 
             last_tensors = tensors
             n = tensors["means"].shape[0]

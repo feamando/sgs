@@ -145,52 +145,75 @@ def estimate_normals(pos, k=8):
     return normals
 
 
-def flatten_to_surface(pos, scale_log, rot, amount, k=8):
-    """Orient each splat's short axis to the local surface normal and squash it
-    along that axis by `amount` (0 = unchanged, ->1 = fully flat disk).
-
-    We REPLACE the rotation with a frame whose 3rd axis = normal, and scale the
-    3rd (log) axis down. The in-plane axes keep the mean of the original two
-    so footprint area is roughly preserved."""
-    if amount <= 0:
-        return scale_log, rot
-    normals = estimate_normals(pos, k=k)
-    new_scale = scale_log.copy()
-    new_rot = rot.copy()
-    lin = np.exp(scale_log)                       # linear per-axis sigma
-    inplane = lin[:, :2].mean(1)                  # keep tangent footprint
-    thin = lin.max(1) * (1.0 - amount)            # squash normal axis
-    for i in range(pos.shape[0]):
+def _surface_frames(pos, knn):
+    """Per-point orthonormal frame [tx, ty, nz] with nz = local surface normal.
+    Returns (frames [N,3,3] with axes as columns, normals [N,3])."""
+    normals = estimate_normals(pos, k=knn)
+    n = pos.shape[0]
+    frames = np.zeros((n, 3, 3))
+    for i in range(n):
         nz = normals[i]
-        # build an orthonormal frame [tx, ty, nz]
         a = np.array([1.0, 0.0, 0.0]) if abs(nz[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
         tx = np.cross(a, nz); tx /= (np.linalg.norm(tx) or 1.0)
         ty = np.cross(nz, tx)
-        R = np.column_stack([tx, ty, nz])         # columns = splat local axes
-        new_rot[i] = mat_to_quat(R)
-        new_scale[i] = np.log(np.array([
-            max(inplane[i], 1e-6), max(inplane[i], 1e-6), max(thin[i], 1e-6)]))
-    return new_scale, new_rot
+        frames[i] = np.column_stack([tx, ty, nz])
+    return frames, normals
 
 
-def densify(pos, scale_log, opac, rot, col, k, rng):
-    """Jitter-clone each gaussian k times inside its own footprint. Opacity is
-    split across clones (logit space -> probability -> /k -> logit) so total
-    coverage is conserved rather than k-fold brighter."""
-    if k <= 1:
-        return pos, scale_log, opac, rot, col
-    sigma = np.exp(scale_log)                      # linear per-axis sigma
-    p = 1.0 / (1.0 + np.exp(-opac))                # sigmoid -> coverage prob
-    p_split = np.clip(p / k, 1e-4, 1 - 1e-4)
-    opac_split = np.log(p_split / (1 - p_split))   # back to logit
+def densify_flatten_arrays(pos, scale_log, opac, rot, col, *,
+                           densify=4, flatten=0.4, density=1.0,
+                           weathering=0.0, knn=8, rng=None):
+    """Combined surface pass on a flat Gaussian cloud. All knobs are uniform
+    globals -- no per-part tuning.
+
+      flatten   0..1  squash each splat onto its local tangent plane (disk)
+      density   >0     in-plane footprint multiplier (overlap/coverage; the
+                       solid-vs-airy knob, independent of count)
+      densify   int    clones per splat, jittered IN THE TANGENT PLANE so they
+                       stay on the surface (not a volume fog). Opacity is split
+                       compositing-correct: a_split = 1-(1-a0)**(1/k), so k
+                       overlapping clones alpha-composite back to the original
+                       coverage instead of a translucent smear.
+      weathering 0..1  per-clone colour jitter so a surface reads as aged stone
+    """
+    rng = rng or np.random.default_rng(0)
+    k = max(1, int(densify))
+    lin = np.exp(scale_log)                                   # linear sigma/axis
+    inplane = lin[:, :2].mean(1) * max(density, 1e-3)         # tangent footprint
+    if flatten > 0:
+        frames, _ = _surface_frames(pos, knn)
+        thin = lin.max(1) * (1.0 - flatten)
+        base_scale = np.log(np.stack([
+            np.maximum(inplane, 1e-6), np.maximum(inplane, 1e-6),
+            np.maximum(thin, 1e-6)], axis=1))
+        base_rot = np.array([mat_to_quat(frames[i]) for i in range(pos.shape[0])])
+    else:
+        # density still scales footprint, but keep original orientation
+        frames = None
+        base_scale = scale_log + math.log(max(density, 1e-3))
+        base_rot = rot
+
+    # compositing-correct opacity split (the smear fix)
+    a0 = 1.0 / (1.0 + np.exp(-opac))
+    a_split = 1.0 - np.power(1.0 - np.clip(a0, 1e-4, 1 - 1e-4), 1.0 / k)
+    a_split = np.clip(a_split, 1e-4, 1 - 1e-4)
+    opac_split = np.log(a_split / (1.0 - a_split))
+
     P, S, O, R, C = [], [], [], [], []
     for c in range(k):
-        jitter = rng.normal(0, 1, size=pos.shape) * sigma * 0.6 if c > 0 else np.zeros_like(pos)
-        P.append(pos + jitter)
-        S.append(scale_log)
-        O.append(opac_split)
-        R.append(rot)
-        C.append(col)
+        if c == 0:
+            offset = np.zeros_like(pos)
+        elif frames is not None:
+            # jitter within the tangent plane (tx, ty), not along the normal
+            uv = rng.normal(0, 1, size=(pos.shape[0], 2)) * inplane[:, None] * 0.7
+            offset = uv[:, 0:1] * frames[:, :, 0] + uv[:, 1:2] * frames[:, :, 1]
+        else:
+            offset = rng.normal(0, 1, size=pos.shape) * inplane[:, None] * 0.7
+        cc = col.copy()
+        if weathering > 0:
+            cc = np.clip(cc + rng.normal(0, weathering * 0.12, size=col.shape), 0, 1)
+        P.append(pos + offset); S.append(base_scale); O.append(opac_split)
+        R.append(base_rot); C.append(cc)
     return (np.concatenate(P), np.concatenate(S), np.concatenate(O),
             np.concatenate(R), np.concatenate(C))
 
@@ -217,10 +240,17 @@ def main():
     p = argparse.ArgumentParser(description="Raum 0.7 densify + flatten-to-surface")
     p.add_argument("--in", dest="inp", required=True, help="input scene JSON")
     p.add_argument("--out", required=True, help="output scene JSON ('-' = stats only)")
+    p.add_argument("--splats", type=int, default=0,
+                   help="TARGET total splat count; derives densify from input size "
+                        "(overrides --densify when >0)")
     p.add_argument("--densify", type=int, default=4,
-                   help="clones per gaussian (1 = off); opacity split to conserve coverage")
-    p.add_argument("--flatten", type=float, default=0.35,
+                   help="clones per gaussian (1 = off); opacity split compositing-correct")
+    p.add_argument("--density", type=float, default=1.0,
+                   help="in-plane footprint multiplier (solid<->airy, independent of count)")
+    p.add_argument("--flatten", type=float, default=0.4,
                    help="squash toward a surface disk, 0..1 (0 = off)")
+    p.add_argument("--weathering", type=float, default=0.0,
+                   help="per-clone colour jitter, 0..1 (aged-stone variation)")
     p.add_argument("--knn", type=int, default=8, help="neighbours for normal estimate")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--stats", action="store_true", help="print before/after counts")
@@ -232,17 +262,23 @@ def main():
     pos, scale_log, opac, rot, col = to_arrays(gaussians)
     n0 = pos.shape[0]
 
-    # flatten FIRST (normals estimated on the clean cloud), then densify so
-    # clones inherit the flattened, surface-aligned frame.
-    scale_log, rot = flatten_to_surface(pos, scale_log, rot, args.flatten, k=args.knn)
-    pos, scale_log, opac, rot, col = densify(pos, scale_log, opac, rot, col, args.densify, rng)
+    densify = args.densify
+    if args.splats > 0:
+        densify = max(1, round(args.splats / max(n0, 1)))
+
+    pos, scale_log, opac, rot, col = densify_flatten_arrays(
+        pos, scale_log, opac, rot, col,
+        densify=densify, flatten=args.flatten, density=args.density,
+        weathering=args.weathering, knn=args.knn, rng=rng)
     n1 = pos.shape[0]
 
     if args.stats or args.out == "-":
         aniso = np.exp(scale_log).max(1) / np.maximum(np.exp(scale_log).min(1), 1e-9)
+        ap = 1.0 / (1.0 + np.exp(-opac))
         print(f"[densify_flatten] {n0} -> {n1} gaussians "
-              f"(x{args.densify} densify, flatten={args.flatten})")
-        print(f"   anisotropy median={np.median(aniso):.2f} p90={np.percentile(aniso,90):.2f}")
+              f"(x{densify} densify, density={args.density}, flatten={args.flatten}, "
+              f"weathering={args.weathering})")
+        print(f"   anisotropy median={np.median(aniso):.2f}  opacity-prob median={np.median(ap):.3f}")
         if args.out == "-":
             return
 
