@@ -567,7 +567,15 @@ def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
     # towers sit well inside the dome rather than spilling over its edge.
     footprint = (ring + 0.26) * castle_scale
     hill_radius = max(hill_radius, footprint * 1.9)
-    castle_y = hill_h * hill_radius * 0.45  # nestle the castle into the dome, not perched on a peak
+    # Seat the castle base ON the hill surface, not sunk into it. The dome height
+    # at horizontal radius r is hill_h * sqrt(hill_radius**2 - r**2), minus the
+    # hill node's own -0.1 y-offset. Seat at the corner-tower radius so all four
+    # towers rest on the ground; walls/keep (nearer the centre, where the dome is
+    # higher) then sit at-or-above the surface. The old flat `hill_h*hill_radius
+    # *0.45` ignored dome curvature and put the base ~0.25 below the surface ->
+    # walls and keep buried (the "sunk castle" bug, 2026-06-05 screenshots).
+    corner_r = ring * castle_scale * math.sqrt(2.0)
+    castle_y = hill_h * math.sqrt(max(hill_radius ** 2 - corner_r ** 2, 0.0)) - 0.1
 
     castle = CompositionNode(name="castle", position=[0, castle_y, 0], scale=castle_scale)
 
