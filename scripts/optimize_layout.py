@@ -83,7 +83,11 @@ def initial_params():
     return np.array([0.7, 1.0, 6.0, 1.0, 0.5])
 
 def param_sigma():
-    return np.array([0.10, 0.12, 0.8, 0.12, 0.08])
+    # wall_courses lives on a ~6 scale; its sigma must be proportional or the ES
+    # treats it as near-frozen noise yet still drifts it to the clip floor over
+    # many iters (the 2026-06-08 wall-collapse: courses fell to 0.18 -> walls
+    # ~1/3 tower height, stubby). sigma ~0.5 lets it explore 5-8 sanely.
+    return np.array([0.10, 0.12, 0.5, 0.12, 0.08])
 
 
 def params_to_tree(p, rng_seed=0):
@@ -96,7 +100,9 @@ def params_to_tree(p, rng_seed=0):
     stone = [0.62, 0.58, 0.53]
     ring = float(np.clip(p[0], 0.3, 1.4))
     tower_s = float(np.clip(p[1], 0.4, 2.0))
-    wall_courses = int(round(np.clip(p[2], 3, 12)))
+    # clamp to a sane castle-wall range so SDS can vary height without
+    # collapsing walls to stubs (floor was 3 -> degenerate; 5-8 stays a wall).
+    wall_courses = int(round(np.clip(p[2], 5, 8)))
     keep_s = float(np.clip(p[3], 0.4, 2.0))
     castle_y = float(np.clip(p[4], 0.0, 1.2))
     castle_scale = 0.9
