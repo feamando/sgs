@@ -202,24 +202,55 @@ def make_sds_objective(device, prompt, img, n_views):
 
 # ── pure-numpy (mu, lambda) evolution strategy ─────────────────────────
 
-def evolution_search(score_fn, iters, pop=12, elite=4, seed=0, start=None):
+def evolution_search(score_fn, iters, pop=12, elite=None, seed=0, start=None):
+    """(mu, lambda) ES with proper step-size control.
+
+    The naive version drove sigma from elite-std, which collapses to ~0 as soon
+    as the elites cluster -> premature convergence (the v1 stall: sigma 0.011 by
+    iter 29, never reached the target). Fixes:
+      - weighted recombination (better elites pull harder than a flat mean)
+      - GLOBAL step-size adapted by a 1/5-success rule, DECOUPLED from elite
+        spread, so progress keeps the step large and only stagnation shrinks it
+      - a sigma FLOOR (never below 25% of the initial scale) so the search can
+        always escape a shallow basin
+    """
     rng = np.random.default_rng(seed)
-    mean = initial_params() if start is None else start.copy()
-    sigma = param_sigma()
+    mean = (initial_params() if start is None else start.copy()).astype(float)
+    base_sigma = param_sigma()
+    sigma_floor = base_sigma * 0.25
+    step = 1.0                                       # global step-size multiplier
+    mu = elite or max(2, pop // 3)
+    # log-decreasing recombination weights (CMA-style)
+    w = np.log(mu + 0.5) - np.log(np.arange(1, mu + 1))
+    w = w / w.sum()
     best_p, best_s = mean.copy(), score_fn(mean)
-    print(f"[es] init score={best_s:.5f}")
+    init_s = best_s
+    print(f"[es] init score={best_s:.5f}  pop={pop} mu={mu}")
     for it in range(iters):
-        pop_p = mean[None, :] + rng.normal(0, 1, (pop, N_PARAMS)) * sigma[None, :]
+        eff_sigma = np.maximum(base_sigma * step, sigma_floor)
+        pop_p = mean[None, :] + rng.normal(0, 1, (pop, N_PARAMS)) * eff_sigma[None, :]
         scores = np.array([score_fn(pop_p[j]) for j in range(pop)])
-        order = np.argsort(-scores)                 # descending
-        elites = pop_p[order[:elite]]
-        mean = elites.mean(0)                        # recombine
-        sigma = 0.7 * sigma + 0.3 * elites.std(0)    # adapt step
-        sigma = np.maximum(sigma, 0.01)
-        if scores[order[0]] > best_s:
-            best_s, best_p = float(scores[order[0]]), pop_p[order[0]].copy()
+        order = np.argsort(-scores)                  # descending
+        elites = pop_p[order[:mu]]
+        new_mean = (w[:, None] * elites).sum(0)      # weighted recombination
+        # 1/5-success rule on the global step: if the new centre beats the old,
+        # we're making progress -> grow the step; else shrink it.
+        improved = score_fn(new_mean) > best_s
+        step *= 1.05 if improved else 0.85       # gentle grow, firmer shrink: converge
+        step = float(np.clip(step, 0.2, 1.6))     # cap growth so it doesn't wander wide
+        mean = new_mean
+        gen_best = float(scores[order[0]])
+        if gen_best > best_s:
+            best_s, best_p = gen_best, pop_p[order[0]].copy()
         if it % 5 == 0 or it == iters - 1:
-            print(f"[es] iter {it:3d}  best={best_s:.5f}  mean_sigma={sigma.mean():.3f}")
+            print(f"[es] iter {it:3d}  best={best_s:.5f}  step={step:.2f}  "
+                  f"eff_sigma={eff_sigma.mean():.3f}")
+    # the metric that matters for a degenerate (symmetric) target: how much of
+    # the starting render error did we remove? Absolute score is misleading when
+    # many layouts render near-identically.
+    if init_s < -1e-9:
+        print(f"[es] error reduction: {100 * (1 - best_s / init_s):.1f}% "
+              f"({init_s:.5f} -> {best_s:.5f})")
     return best_p, best_s
 
 
