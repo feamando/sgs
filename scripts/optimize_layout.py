@@ -60,65 +60,63 @@ from scripts.castle_grammar import (
 # global ring radius, castle y-seat, keep height. The grammar builders fill
 # stones from these -- we never touch individual stones.
 
-PARAM_NAMES = (
-    [f"tower{i}_{a}" for i in range(4) for a in ("dx", "dz", "s")]   # 12
-    + [f"wall{i}_s" for i in range(4)]                                # 4
-    + ["keep_s", "ring", "castle_y"]                                  # 3
-)
-N_PARAMS = len(PARAM_NAMES)   # 19
+# Structure-preserving parameterization. The v1 set gave each tower a FREE
+# (dx, dz) nudge while walls stayed pinned to fixed faces -> the search pulled
+# towers off the ring and the walls no longer connected them (image 90: stringy
+# disconnected walls, asymmetric towers). Same "free params scatter geometry"
+# trap Stage 1 hit. Fix: the 4-fold castle symmetry is enforced BY CONSTRUCTION
+# -- towers ALWAYS sit on the ring corners, walls ALWAYS span the ring, ONE
+# shared tower scale. The search controls only the meaningful PROPORTIONS, so a
+# disconnected/asymmetric castle is unreachable.
+PARAM_NAMES = [
+    "ring",        # half-width of the square wall ring (tower corners + wall span)
+    "tower_s",     # shared tower scale (all 4 identical -> symmetric)
+    "wall_courses",# wall height in courses (height only; LENGTH follows ring)
+    "keep_s",      # keep scale
+    "castle_y",    # castle seat height on the hill
+]
+N_PARAMS = len(PARAM_NAMES)   # 5
 
-# initial guess + per-param search sigma. Deliberately NOT the snapped values
-# as a hard prior -- ring/castle_y start near plausible but the ES is free to
-# move. (Starting near a sane point just speeds convergence; the gate forbids
-# READING _CASTLE_LAYOUT, not starting from a reasonable scale.)
 def initial_params():
-    p = np.zeros(N_PARAMS)
-    for i in range(4):
-        p[i * 3 + 2] = 1.0          # tower scale
-    p[12:16] = 1.0                  # wall scales
-    p[16] = 1.0                     # keep scale
-    p[17] = 0.7                     # ring radius (free; not pinned to _RING)
-    p[18] = 0.5                     # castle y-seat
-    return p
+    # plausible start (NOT read from _CASTLE_LAYOUT; the gate forbids reading the
+    # snap constants, not starting from a sane scale).
+    return np.array([0.7, 1.0, 6.0, 1.0, 0.5])
 
 def param_sigma():
-    s = np.full(N_PARAMS, 0.08)
-    s[17] = 0.12                    # ring can move more
-    s[18] = 0.10
-    return s
+    return np.array([0.10, 0.12, 0.8, 0.12, 0.08])
 
 
 def params_to_tree(p, rng_seed=0):
-    """Build a castle tree from the free layout vector. Mirrors
-    build_castle_on_hill's STRUCTURE but every magic constant is now a param."""
-    import random
-    rng = random.Random(rng_seed)
+    """Build a castle from the 5 PROPORTION params. Structure (4 towers on a
+    ring, 4 walls spanning it, centred keep) is fixed; only proportions vary.
+
+    Walls take their LENGTH from `ring` (so they always meet the towers) and
+    their HEIGHT from wall_courses -- NOT a node scale, which would stretch
+    length and position together and make walls overshoot the towers."""
     stone = [0.62, 0.58, 0.53]
-    ring = float(np.clip(p[17], 0.3, 1.4))
-    castle_y = float(np.clip(p[18], 0.0, 1.2))
+    ring = float(np.clip(p[0], 0.3, 1.4))
+    tower_s = float(np.clip(p[1], 0.4, 2.0))
+    wall_courses = int(round(np.clip(p[2], 3, 12)))
+    keep_s = float(np.clip(p[3], 0.4, 2.0))
+    castle_y = float(np.clip(p[4], 0.0, 1.2))
     castle_scale = 0.9
 
     castle = CompositionNode(name="castle", position=[0, castle_y, 0], scale=castle_scale)
-    # 4 towers at ring corners + learned (dx,dz) nudge + learned scale
-    base_corners = [(-1, -1), (1, -1), (1, 1), (-1, 1)]
-    for i, (sx, sz) in enumerate(base_corners):
-        dx, dz, ts = p[i * 3], p[i * 3 + 1], float(np.clip(p[i * 3 + 2], 0.4, 2.0))
-        cx, cz = sx * ring + dx, sz * ring + dz
-        t = build_tower(f"tower_{i}", [cx, 0, cz], 7, 0.26, stone)
-        t.scale = ts
+    # 4 towers ON the ring corners -- no independent nudge, shared scale
+    for i, (sx, sz) in enumerate([(-1, -1), (1, -1), (1, 1), (-1, 1)]):
+        t = build_tower(f"tower_{i}", [sx * ring, 0, sz * ring], 7, 0.26, stone)
+        t.scale = tower_s
         castle.children.append(t)
-    # 4 walls on the faces, learned scale
+    # 4 walls span the SAME ring (length = ring*2) so they always meet the
+    # towers; height varies via courses, scale stays 1.0 (no length stretch).
     faces = [([0, 0, -ring], None), ([0, 0, ring], None),
              ([ring, 0, 0], [0.7071, 0, 0.7071, 0]), ([-ring, 0, 0], [0.7071, 0, 0.7071, 0])]
     for i, (pos, rot) in enumerate(faces):
-        ws = float(np.clip(p[12 + i], 0.4, 2.0))
-        w = build_wall(f"wall_{i}", pos, ring * 2, 6, stone,
+        w = build_wall(f"wall_{i}", pos, ring * 2, wall_courses, stone,
                        rot=rot, is_gate=(i == 0), slits=(0 if i == 0 else 2))
-        w.scale = ws
         castle.children.append(w)
-    # keep, learned scale
     keep = build_keep(9, stone)
-    keep.scale = float(np.clip(p[16], 0.4, 2.0))
+    keep.scale = keep_s
     keep.position = [0, 0.2, 0]
     castle.children.append(keep)
 
