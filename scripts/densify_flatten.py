@@ -194,12 +194,16 @@ def densify_flatten_arrays(pos, scale_log, opac, rot, col, *,
         base_scale = scale_log + math.log(max(density, 1e-3))
         base_rot = rot
 
-    # compositing-correct opacity split (the smear fix): k overlapping clones
-    # alpha-composite back to the ORIGINAL coverage, not a translucent haze.
+    # Opacity: a stone castle is a SOLID, not a translucent volume. Keep clones
+    # near-opaque so the FRONT splat wins and back splats are occluded -> crisp
+    # surfaces. Earlier "conserve coverage" splitting (a=1-(1-a0)**(1/k)) dropped
+    # each clone to ~0.19 prob -> every splat see-through -> depth haze / the
+    # cloudy gsplat look. Alpha compositing caps at the splat colour, so opaque
+    # clones don't over-brighten; the front one just wins. Keep original opacity
+    # with a high floor.
     a0 = 1.0 / (1.0 + np.exp(-opac))
-    a_split = 1.0 - np.power(1.0 - np.clip(a0, 1e-4, 1 - 1e-4), 1.0 / k)
-    a_split = np.clip(a_split, 1e-4, 1 - 1e-4)
-    opac_split = np.log(a_split / (1.0 - a_split))
+    a_solid = np.clip(np.maximum(a0, 0.8), 1e-4, 0.999)
+    opac_split = np.log(a_solid / (1.0 - a_solid))
 
     # Jitter clones in 3D, scaled by the stone's ORIGINAL size (this is what
     # gave walls real thickness in the good build). Tangent-only jitter put
