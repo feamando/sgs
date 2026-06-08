@@ -99,8 +99,14 @@ def main():
     p.add_argument("--params", default="output/layout_opt.params.json",
                    help="Stage-2 optimized layout params")
     p.add_argument("--out", default="data/decomposition_trees/stage3_train.json")
-    p.add_argument("--repeat", type=int, default=4,
+    p.add_argument("--repeat", type=int, default=8,
                    help="duplicate each paraphrase N times (small dataset augmentation)")
+    p.add_argument("--mix", default="data/decomposition_trees/castle_16/train.json",
+                   help="blend NON-castle records from this 1.6 dataset to prevent "
+                        "catastrophic forgetting (empty string to disable)")
+    p.add_argument("--mix-n", type=int, default=400,
+                   help="how many non-castle records to mix in")
+    p.add_argument("--seed", type=int, default=0)
     args = p.parse_args()
 
     params = load_params(args.params)
@@ -113,12 +119,35 @@ def main():
     for prompt in CASTLE_PARAPHRASES:
         for _ in range(args.repeat):
             records.append({"prompt": prompt, "tree": skeleton})
-    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases x{args.repeat} = {len(records)} records")
+    n_castle = len(records)
+    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases x{args.repeat} = {n_castle} castle records")
     print(f"[stage3] ALL map to the ONE Stage-2 optimized layout (paraphrases of one scene)")
+
+    # Mix in NON-castle records from the 1.6 dataset so the fine-tune SHIFTS
+    # castle proportions without catastrophically forgetting the other scenes
+    # (walls/arches/gates/lighthouses/...) the 1.6 model already knows. We keep
+    # ONLY non-castle prompts so we don't reintroduce the OLD castle proportions
+    # that would fight the new Stage-2 targets.
+    if args.mix and Path(args.mix).exists():
+        import random
+        rng = random.Random(args.seed)
+        pool = json.load(open(args.mix))
+        non_castle = [r for r in pool
+                      if "castle" not in r["prompt"].lower()
+                      and "fortress" not in r["prompt"].lower()]
+        rng.shuffle(non_castle)
+        mix = non_castle[:args.mix_n]
+        records.extend(mix)
+        print(f"[stage3] mixed in {len(mix)} non-castle records from {args.mix} "
+              f"(anti-forgetting); total {len(records)}")
+    elif args.mix:
+        print(f"[stage3] WARN: --mix path {args.mix} not found; NO anti-forgetting "
+              f"mix. Fine-tuning on castle-only risks collapsing all prompts to "
+              f"castles.", file=sys.stderr)
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     json.dump(records, open(args.out, "w"), indent=2)
-    print(f"[stage3] saved -> {args.out}")
+    print(f"[stage3] saved -> {args.out} ({n_castle} castle + {len(records)-n_castle} mix)")
     print(f"[stage3] next: fine-tune with train_decomposer.py --data {args.out}")
 
 
