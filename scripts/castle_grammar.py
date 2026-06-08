@@ -620,7 +620,10 @@ def build_castle_on_hill(towers: int = 4, wall_courses: int = 6,
         ang = (i / max(trees, 1)) * 2 * math.pi + rng.uniform(-0.3, 0.3)
         rr = rng.uniform(hill_radius * 0.55, hill_radius * 0.85)
         tx, tz = rr * math.cos(ang), rr * math.sin(ang)
-        ty = hill_h * hill_radius * 0.8 * (1 - (rr / hill_radius) ** 2) - 0.15
+        # Seat trees ON the dome surface (sphere), same as the castle. The old
+        # parabola hill_h*hill_radius*0.8*(1-(rr/hill_radius)**2)-0.15 undershot
+        # the true sphere by ~0.3 -> trees sunk into the skirt (2026-06-05).
+        ty = hill_h * math.sqrt(max(hill_radius ** 2 - rr ** 2, 0.0)) - 0.1
         scene.children.append(build_tree(f"tree_{i}", [tx, ty, tz],
                                          rng.uniform(0.6, 1.0)))
     return scene
