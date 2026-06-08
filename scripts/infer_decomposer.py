@@ -53,6 +53,9 @@ def parse_args():
                         "distorts it. Use 'sgs' only for messy/un-snapped inputs.")
     p.add_argument("--templates", default="data/architecture_gs",
                    help="Template library path for SGS refinement")
+    p.add_argument("--no-snap", action="store_true", default=False,
+                   help="Raum 1.7 Stage 3: render the model's RAW emitted part "
+                        "transforms (disable snap_layout) to judge learned proportions")
     p.add_argument("--use-scans", action="store_true", default=False,
                    help="Raum 0.6 §5.2: fill parts from real scanned splats "
                         "(--templates dir) instead of procedural primitives. "
@@ -530,7 +533,7 @@ class Decomposer:
             return self._recover_json(self._sanitize_json(text))
 
 
-def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
+def validate_tree(tree_dict: dict, snap: bool = True) -> tuple[dict, dict]:
     """Raum 1.6 grammar-validated decoding.
 
     Walk the generated tree and ensure every leaf name is renderable: it must
@@ -580,7 +583,12 @@ def validate_tree(tree_dict: dict) -> tuple[dict, dict]:
         return None
 
     clean_tree = clean(tree_dict) or {"name": "scene", "children": []}
-    snap_layout(clean_tree, report)
+    # Raum 1.7 Stage 3: --no-snap renders the model's RAW emitted transforms so
+    # the learned proportions can be judged without the snapping scaffolding.
+    if snap:
+        snap_layout(clean_tree, report)
+    else:
+        report["snapped"] = 0
     return clean_tree, report
 
 
@@ -1169,7 +1177,7 @@ def main():
                     pass
 
                 # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
-                tree_dict, vreport = validate_tree(tree_dict)
+                tree_dict, vreport = validate_tree(tree_dict, snap=not args.no_snap)
                 if vreport["dropped"]:
                     print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
                           f"{vreport['dropped'][:8]}", file=sys.stderr)
