@@ -107,14 +107,28 @@ def to_arrays(gaussians):
 
 # ── the two operations ─────────────────────────────────────────────────
 
+def _knn_idx(pos, k):
+    """Indices of the k nearest neighbours per point, pure numpy (no scipy).
+    Brute-force is fine for the few-thousand-splat clouds we work with; chunked
+    so the [N,N] distance matrix never materializes in full."""
+    n = pos.shape[0]
+    k = min(k, n)
+    idx = np.empty((n, k), dtype=np.int64)
+    sq = (pos * pos).sum(1)                         # [N]
+    chunk = 1024
+    for s in range(0, n, chunk):
+        e = min(s + chunk, n)
+        # squared dist: |a|^2 - 2 a.b + |b|^2
+        d = sq[s:e, None] - 2.0 * (pos[s:e] @ pos.T) + sq[None, :]
+        idx[s:e] = np.argpartition(d, k - 1, axis=1)[:, :k]
+    return idx
+
+
 def estimate_normals(pos, k=8):
     """Per-point surface normal = smallest-eigenvector of the local neighbour
     covariance (PCA). Returns [N,3] unit normals."""
-    from scipy.spatial import cKDTree
     n = pos.shape[0]
-    k = min(k, n)
-    tree = cKDTree(pos)
-    _, idx = tree.query(pos, k=k)
+    idx = _knn_idx(pos, k)
     normals = np.zeros((n, 3))
     for i in range(n):
         nb = pos[idx[i]]
