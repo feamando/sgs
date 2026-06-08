@@ -179,6 +179,7 @@ def densify_flatten_arrays(pos, scale_log, opac, rot, col, *,
     rng = rng or np.random.default_rng(0)
     k = max(1, int(densify))
     lin = np.exp(scale_log)                                   # linear sigma/axis
+    stone = lin.mean(1)                                       # per-stone size (pre-flatten)
     inplane = lin[:, :2].mean(1) * max(density, 1e-3)         # tangent footprint
     if flatten > 0:
         frames, _ = _surface_frames(pos, knn)
@@ -193,22 +194,23 @@ def densify_flatten_arrays(pos, scale_log, opac, rot, col, *,
         base_scale = scale_log + math.log(max(density, 1e-3))
         base_rot = rot
 
-    # compositing-correct opacity split (the smear fix)
+    # compositing-correct opacity split (the smear fix): k overlapping clones
+    # alpha-composite back to the ORIGINAL coverage, not a translucent haze.
     a0 = 1.0 / (1.0 + np.exp(-opac))
     a_split = 1.0 - np.power(1.0 - np.clip(a0, 1e-4, 1 - 1e-4), 1.0 / k)
     a_split = np.clip(a_split, 1e-4, 1 - 1e-4)
     opac_split = np.log(a_split / (1.0 - a_split))
 
+    # Jitter clones in 3D, scaled by the stone's ORIGINAL size (this is what
+    # gave walls real thickness in the good build). Tangent-only jitter put
+    # every flattened disk coplanar -> walls collapsed to a single edge-on line
+    # and the hill scalloped. A stone-sized 3D blob keeps the surface-aligned
+    # disks stacked in offset layers -> solid volume. `density` scales spread.
+    spread = stone * max(density, 1e-3) * 0.6
     P, S, O, R, C = [], [], [], [], []
     for c in range(k):
-        if c == 0:
-            offset = np.zeros_like(pos)
-        elif frames is not None:
-            # jitter within the tangent plane (tx, ty), not along the normal
-            uv = rng.normal(0, 1, size=(pos.shape[0], 2)) * inplane[:, None] * 0.7
-            offset = uv[:, 0:1] * frames[:, :, 0] + uv[:, 1:2] * frames[:, :, 1]
-        else:
-            offset = rng.normal(0, 1, size=pos.shape) * inplane[:, None] * 0.7
+        offset = (np.zeros_like(pos) if c == 0
+                  else rng.normal(0, 1, size=pos.shape) * spread[:, None])
         cc = col.copy()
         if weathering > 0:
             cc = np.clip(cc + rng.normal(0, weathering * 0.12, size=col.shape), 0, 1)
