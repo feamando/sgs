@@ -38,14 +38,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.optimize_layout import params_to_tree, PARAM_NAMES, initial_params, param_sigma
 
 
-# the castle paraphrases (mirror scripts/castle_grammar.py PROMPTS["castle_on_hill"])
+# the castle paraphrases (mirror scripts/castle_grammar.py PROMPTS["castle_on_hill"]).
+# (prompt, weight): weight multiplies that paraphrase's record count. The terse
+# "a castle on a hill" under-recalled (emitted 1 tower, 2026-06-09 diagnostic)
+# because it was underrepresented vs the richer phrasings the Stage-2 search and
+# training leaned on. Weight it up so recall evens out across phrasings.
 CASTLE_PARAPHRASES = [
-    "a castle on a hill",
-    "a fortress atop a hill",
-    "a hilltop castle",
-    "a castle on a hill with trees",
-    "a stone castle on a green hill",
-    "a medieval fortress on a hill surrounded by trees",
+    ("a castle on a hill", 3),
+    ("a fortress atop a hill", 2),
+    ("a hilltop castle", 2),
+    ("a castle on a hill with trees", 1),
+    ("a stone castle on a green hill", 1),
+    ("a medieval fortress on a hill surrounded by trees", 1),
 ]
 
 
@@ -138,13 +142,13 @@ def main():
     print(f"[stage3] {len(variant_skeletons)} layout variant(s) (jitter={args.jitter})")
 
     records = []
-    for prompt in CASTLE_PARAPHRASES:
-        for r in range(args.repeat):
+    for prompt, weight in CASTLE_PARAPHRASES:
+        for r in range(args.repeat * weight):
             skeleton = variant_skeletons[r % len(variant_skeletons)]
             records.append({"prompt": prompt, "tree": skeleton})
     n_castle = len(records)
-    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases x{args.repeat} = {n_castle} castle records "
-          f"across {len(variant_skeletons)} layout variant(s)")
+    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases (weighted) x{args.repeat} = "
+          f"{n_castle} castle records across {len(variant_skeletons)} layout variant(s)")
 
     # Mix in NON-castle records from the 1.6 dataset so the fine-tune SHIFTS
     # castle proportions without catastrophically forgetting the other scenes
