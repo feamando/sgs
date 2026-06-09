@@ -1,4 +1,4 @@
-# Raum 1.7 LinkedIn Post — the model places the castle, not the grammar
+# Raum 1.7 LinkedIn Post: the model learns to place the castle
 
 Follow-up to the Raum 1.6 / 0.6 post. Tone: formal, plain, no em dashes, no
 "not X but Y" contrastives, precise numbers, honest about what broke.
