@@ -74,6 +74,11 @@ def shallow_skeleton(tree):
                "scale": round(node.scale, 3)}
         if getattr(node, "rotation", None) and node.rotation != [1.0, 0, 0, 0]:
             out["rotation"] = [round(x, 4) for x in node.rotation]
+        # preserve per-node color so the hill stays GREEN (and any colored part
+        # keeps its tone) after _fill_gaussians. Stripping it rendered the hill
+        # flat grey -- the 2026-06-09 "green hill missing" bug.
+        if getattr(node, "color", None):
+            out["color"] = [round(x, 4) for x in node.color]
         # a recognized PART is a leaf in the skeleton -- do not descend into its
         # stones. The container ("castle") and root ("scene") keep their children.
         if stop_at_part and is_part(node.name):
