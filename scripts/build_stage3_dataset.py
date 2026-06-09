@@ -35,7 +35,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from scripts.optimize_layout import params_to_tree, PARAM_NAMES, initial_params
+from scripts.optimize_layout import params_to_tree, PARAM_NAMES, initial_params, param_sigma
 
 
 # the castle paraphrases (mirror scripts/castle_grammar.py PROMPTS["castle_on_hill"])
@@ -101,6 +101,14 @@ def main():
     p.add_argument("--out", default="data/decomposition_trees/stage3_train.json")
     p.add_argument("--repeat", type=int, default=8,
                    help="duplicate each paraphrase N times (small dataset augmentation)")
+    p.add_argument("--variants", type=int, default=1,
+                   help="distinct castle layouts per paraphrase, each the Stage-2 "
+                        "params JITTERED slightly. Same STRUCTURE (4 towers/4 walls/"
+                        "keep) every time, varied proportions -> teaches the layout "
+                        "robustly instead of memorizing one tree. >1 targets the "
+                        "'model only emits some parts' recall failure.")
+    p.add_argument("--jitter", type=float, default=0.06,
+                   help="proportion-param jitter sigma for --variants")
     p.add_argument("--mix", default="data/decomposition_trees/castle_16/train.json",
                    help="blend NON-castle records from this 1.6 dataset to prevent "
                         "catastrophic forgetting (empty string to disable)")
@@ -112,16 +120,26 @@ def main():
     params = load_params(args.params)
     print(f"[stage3] layout params: {dict(zip(PARAM_NAMES, params.round(3).tolist()))}")
 
-    tree = params_to_tree(params)
-    skeleton = shallow_skeleton(tree)
+    # pre-build the variant skeletons (each = Stage-2 params jittered). Structure
+    # is identical across variants (params_to_tree always emits 4 towers/4 walls/
+    # keep); only proportions differ. variant 0 is the exact Stage-2 layout.
+    import numpy as _np
+    rng = _np.random.default_rng(args.seed)
+    sigma = param_sigma()
+    variant_skeletons = [shallow_skeleton(params_to_tree(params))]
+    for _ in range(max(0, args.variants - 1)):
+        jittered = params + rng.normal(0, 1, len(params)) * sigma * (args.jitter / 0.1)
+        variant_skeletons.append(shallow_skeleton(params_to_tree(jittered)))
+    print(f"[stage3] {len(variant_skeletons)} layout variant(s) (jitter={args.jitter})")
 
     records = []
     for prompt in CASTLE_PARAPHRASES:
-        for _ in range(args.repeat):
+        for r in range(args.repeat):
+            skeleton = variant_skeletons[r % len(variant_skeletons)]
             records.append({"prompt": prompt, "tree": skeleton})
     n_castle = len(records)
-    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases x{args.repeat} = {n_castle} castle records")
-    print(f"[stage3] ALL map to the ONE Stage-2 optimized layout (paraphrases of one scene)")
+    print(f"[stage3] {len(CASTLE_PARAPHRASES)} paraphrases x{args.repeat} = {n_castle} castle records "
+          f"across {len(variant_skeletons)} layout variant(s)")
 
     # Mix in NON-castle records from the 1.6 dataset so the fine-tune SHIFTS
     # castle proportions without catastrophically forgetting the other scenes
