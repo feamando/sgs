@@ -1,0 +1,180 @@
+[
+  {
+    "prompt": "a castle on a hill",
+    "parsed": true,
+    "counts": {
+      "tower": 4
+    },
+    "names": [
+      "tower",
+      "tower_body",
+      "tower_crenellation",
+      "tower_roof"
+    ],
+    "verdict": "PARTIAL (4/9 parts)"
+  },
+  {
+    "prompt": "a stone castle on a green hill",
+    "parsed": true,
+    "counts": {
+      "tower": 16,
+      "wall": 12,
+      "slit": 8,
+      "keep": 3
+    },
+    "names": [
+      "tower_0",
+      "tower_0_body",
+      "tower_0_crenellation",
+      "tower_0_roof",
+      "tower_1",
+      "tower_1_body",
+      "tower_1_crenellation",
+      "tower_1_roof",
+      "tower_2",
+      "tower_2_body",
+      "tower_2_crenellation",
+      "tower_2_roof",
+      "tower_3",
+      "tower_3_body",
+      "tower_3_crenellation",
+      "tower_3_roof",
+      "wall_0",
+      "wall_0_face",
+      "wall_0_slit_0",
+      "wall_0_slit_1",
+      "wall_0_crenellation",
+      "wall_1",
+      "wall_1_face",
+      "wall_1_slit_0",
+      "wall_1_slit_1",
+      "wall_1_crenellation",
+      "wall_2",
+      "wall_2_face",
+      "wall_2_slit_0",
+      "wall_2_slit_1",
+      "wall_2_crenellation",
+      "wall_3",
+      "wall_3_face",
+      "wall_3_slit_0",
+      "wall_3_slit_1",
+      "wall_3_crenellation",
+      "keep",
+      "keep_body",
+      "keep_roof"
+    ],
+    "verdict": "FULL layout (-> positioning?)"
+  },
+  {
+    "prompt": "a medieval fortress on a hill surrounded by trees",
+    "parsed": true,
+    "counts": {
+      "tower": 16,
+      "wall": 12,
+      "slit": 8,
+      "keep": 3
+    },
+    "names": [
+      "tower_0",
+      "tower_0_body",
+      "tower_0_crenellation",
+      "tower_0_roof",
+      "tower_1",
+      "tower_1_body",
+      "tower_1_crenellation",
+      "tower_1_roof",
+      "tower_2",
+      "tower_2_body",
+      "tower_2_crenellation",
+      "tower_2_roof",
+      "tower_3",
+      "tower_3_body",
+      "tower_3_crenellation",
+      "tower_3_roof",
+      "wall_0",
+      "wall_0_face",
+      "wall_0_slit_0",
+      "wall_0_slit_1",
+      "wall_0_crenellation",
+      "wall_1",
+      "wall_1_face",
+      "wall_1_slit_0",
+      "wall_1_slit_1",
+      "wall_1_crenellation",
+      "wall_2",
+      "wall_2_face",
+      "wall_2_slit_0",
+      "wall_2_slit_1",
+      "wall_2_crenellation",
+      "wall_3",
+      "wall_3_face",
+      "wall_3_slit_0",
+      "wall_3_slit_1",
+      "wall_3_crenellation",
+      "keep",
+      "keep_body",
+      "keep_roof"
+    ],
+    "verdict": "FULL layout (-> positioning?)"
+  },
+  {
+    "prompt": "a tower with a window",
+    "parsed": true,
+    "counts": {
+      "tower": 4,
+      "window": 1
+    },
+    "names": [
+      "tower",
+      "tower_body",
+      "tower_crenellation",
+      "tower_roof",
+      "window"
+    ],
+    "verdict": "emitted parts"
+  },
+  {
+    "prompt": "a wall with an arrow slit",
+    "parsed": true,
+    "counts": {
+      "tower": 4,
+      "arrow_slit": 1
+    },
+    "names": [
+      "tower",
+      "tower_body",
+      "tower_crenellation",
+      "tower_roof",
+      "arrow_slit"
+    ],
+    "verdict": "emitted parts"
+  },
+  {
+    "prompt": "a stone gatehouse with a gate",
+    "parsed": true,
+    "counts": {
+      "gatehouse": 13,
+      "gate": 4
+    },
+    "names": [
+      "gatehouse",
+      "gatehouse_wall",
+      "gatehouse_wall_face",
+      "gatehouse_wall_crenellation",
+      "gatehouse_wall_arch",
+      "gatehouse_tower_L",
+      "gatehouse_tower_L_body",
+      "gatehouse_tower_L_crenellation",
+      "gatehouse_tower_L_roof",
+      "gatehouse_tower_R",
+      "gatehouse_tower_R_body",
+      "gatehouse_tower_R_crenellation",
+      "gatehouse_tower_R_roof",
+      "gate",
+      "gate_face",
+      "gate_crenellation",
+      "gate_arch"
+    ],
+    "verdict": "emitted parts"
+  }
+]
