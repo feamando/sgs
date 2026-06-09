@@ -827,6 +827,10 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
       <label style="margin-top:8px">Weathering: <span id="weathering-val">0.3</span></label>
       <input id="weathering" type="range" min="0" max="1" step="0.05" value="0.3" style="width:100%">
     </div>
+    <label style="margin-top:10px;display:flex;align-items:center;gap:8px;color:#7fd1ff">
+      <input type="checkbox" id="snap" checked style="width:auto">
+      Snap layout (1.7: uncheck = raw model-emitted geometry)
+    </label>
     <button id="generate">Decompose + Render</button>
     <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
     <a id="splat-link" href="/splat" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:6px;background:#1f1f2a;color:#7fd1ff;border:1px solid #7fd1ff;border-radius:6px;font-size:12px;text-decoration:none">Open Gaussian-splat view (0.7)</a>
@@ -952,7 +956,8 @@ btn.addEventListener('click', async () => {
       headers: {'content-type': 'application/json'},
       body: JSON.stringify({prompt, fidelity, refine_mode: refineMode,
         splats: +ctl.splats.value, density: +ctl.density.value,
-        flatten: +ctl.flatten.value, weathering: +ctl.weathering.value}),
+        flatten: +ctl.flatten.value, weathering: +ctl.weathering.value,
+        snap: document.getElementById('snap').checked}),
     });
     const data = await r.json();
     if (data.error) {
@@ -1124,10 +1129,18 @@ def main():
             density: float = 1.0
             flatten: float = 0.0
             weathering: float = 0.0
+            # Raum 1.7 Stage 3: per-request snap toggle (None = use server default
+            # from --no-snap). Lets the UI compare raw-emitted vs snapped layout
+            # without restarting the server.
+            snap: bool | None = None
 
         @app.get("/", response_class=HTMLResponse)
         def index():
-            return VIEWER_HTML
+            # default the snap checkbox from the server --no-snap flag
+            html = VIEWER_HTML
+            if args.no_snap:
+                html = html.replace('id="snap" checked', 'id="snap"')
+            return html
 
         @app.post("/decompose")
         def decompose(req: DecomposeRequest):
@@ -1177,7 +1190,9 @@ def main():
                     pass
 
                 # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
-                tree_dict, vreport = validate_tree(tree_dict, snap=not args.no_snap)
+                # per-request snap overrides the server default when provided
+                use_snap = (not args.no_snap) if req.snap is None else req.snap
+                tree_dict, vreport = validate_tree(tree_dict, snap=use_snap)
                 if vreport["dropped"]:
                     print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
                           f"{vreport['dropped'][:8]}", file=sys.stderr)
