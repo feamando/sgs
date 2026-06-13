@@ -90,31 +90,58 @@ An unattended run that OOMs on hour 2 wastes the trip. Run a short job at the
 REAL config first and watch four things: no OOM, measured tok/s, disk delta, and
 that a resume works.
 
+**Two gotchas that bit a real smoke run (2026-06-12) — both baked into the
+command below:**
+
+1. **`--d-f 3700` is NOT a default.** The trainer defaults to `--d-f 5000`
+   (1.04B, ~1-2k tok/s — the slow regression). If you omit `--d-f 3700` you
+   smoke-test the WRONG architecture and measure useless throughput. The locked
+   run is `d_f=3700` (§3.2); the smoke test must match it.
+2. **`--max-tokens` does NOT size the smoke run, AND a stale data dir silently
+   overrides it.** Two distinct facts: (a) `--max-tokens` only bounds *data
+   prep*, never the training loop (§3.2b); (b) if `--data-dir` already contains
+   `train.bin` + `val.bin` + `tokenizer.model`, prep is **skipped entirely** and
+   the existing corpus is reused, ignoring both `--max-tokens` and
+   `--wiki-fraction`. The shared `data\hertz_mix` already holds ~808M tokens from
+   a prior prep, so a smoke test pointed there trains on 808M, not your tiny
+   budget. **Always give the smoke test its own fresh `--data-dir`.**
+
 ```powershell
-# ~100 optimizer steps on a tiny token budget, real architecture + mix corpus.
-python scripts\train_hertz.py `
-  --dataset fineweb-wiki-mix --wiki-fraction 0.3 `
-  --max-tokens 200M `
+# ~hundreds of optimizer steps, REAL architecture (d_f=3700), TINY fresh corpus.
+python -u scripts\train_hertz.py `
+  --dataset fineweb-wiki-mix --wiki-fraction 0.1 `
+  --data-dir data\hertz_smoke10m `
+  --max-tokens 10M `
+  --d-f 3700 --n-passes 3 --n-heads 4 --context-len 512 `
   --epochs 1 `
   --save-interval 50 `
-  --keep-last 2 `
+  --keep-last 5 `
   --bf16-milestone-interval 100 `
   --eval-interval 50 `
   --save-dir checkpoints\hertz12_smoke 2>&1 | Tee-Object runs\hertz12_smoke.log
 ```
 
 Check after it runs a few hundred steps (Ctrl-C is fine):
-- **No OOM** at `--batch-size 2 --grad-accum 32 --d-f 5000` (the 1B default).
-- **tok/s AND the `ETA …h (…d)`** now printed on each log line → directly tells
-  you whether `--max-tokens` finishes inside the trip window (§3.2). This is the
-  throughput-sanity check; if ETA is too long, lower `--max-tokens` or `--d-f`.
-- **bf16 milestone** (`milestone_*_bf16.pt`, ~2 GB) written at step 100 — confirm
-  it appears and is ~2 GB, not 12 GB.
-- **Disk delta** of `checkpoints\hertz12_smoke` → with `--keep-last 2` it should
-  plateau at ~2 full checkpoints, not grow unbounded.
-- **Resume works:**
+- **Phase 1 actually prepared ~10M tokens** — the log should say
+  `Mix budget: 0.0B total -> ...` then `Train: ~10,000,000 tokens`, NOT
+  `Data already prepared ... Train: 808,696,232 tokens`. If you see 808M, your
+  `--data-dir` collided with the old cache — stop and use a fresh dir.
+- **No OOM** at `--batch-size 2 --grad-accum 32 --d-f 3700`.
+- **tok/s ≈ 20k** (NOT ~2k). The `ETA …h (…d)` on each log line is computed for
+  the `--max-tokens` budget, so on this 10M smoke run ETA is meaningless; what
+  matters is the raw tok/s. ~2k means you're accidentally on `d_f=5000`.
+- **bf16 milestone** (`milestone_100_bf16.pt`, ~1.3 GB at 640M) written at step
+  100 — confirm it appears and is ~1-2 GB, not 12 GB.
+- **Disk delta** of `checkpoints\hertz12_smoke` → with `--keep-last 5` it
+  plateaus at ~5 step checkpoints, not unbounded.
+- **Resume works** — but `--keep-last` rotates early checkpoints away, so do NOT
+  hardcode `step_100.pt` (it may already be deleted; this is exactly what failed
+  on 2026-06-12). List the dir first and resume from whatever step exists:
   ```powershell
-  python scripts\train_hertz.py --resume checkpoints\hertz12_smoke\step_100.pt --max-tokens 200M --save-dir checkpoints\hertz12_smoke
+  dir checkpoints\hertz12_smoke\step_*.pt
+  # pick the highest-numbered file that's actually present, e.g. step_250.pt:
+  python -u scripts\train_hertz.py --resume checkpoints\hertz12_smoke\step_250.pt `
+    --data-dir data\hertz_smoke10m --save-dir checkpoints\hertz12_smoke
   ```
   If resume throughput collapses (known Adam-state-reload issue on Windows), use
   `--warm-start` instead of `--resume`.
@@ -143,15 +170,49 @@ Smoke test on the actual 4090 settled this empirically:
 **Disk for 10B (1 TB, fine):** `train.bin` ~20 GB + checkpoints
 (3×12.5 keep-last + best 12.5 + ~6 bf16 milestones ×2) ≈ ~62 GB → **~85 GB total.**
 
+### 3.2b What actually controls run length (verified in code 2026-06-12)
+
+`--max-tokens` is easy to misread as "train on this many tokens." It is not.
+There are TWO independent levers and one silent trap:
+
+- **`--max-tokens` sizes DATA PREP only.** `prepare_fineweb_wiki_mix` caps the
+  corpus at `max_tokens` via a 4-chars-per-token budget (FineWeb gets
+  `1 - wiki_fraction`, Wikipedia gets `wiki_fraction`). So a *fresh* prep at
+  `10B` writes a ~10B-token `train.bin`. Good.
+- **The training loop has NO token stop.** It runs `for epoch in range(--epochs)`
+  over the ENTIRE prepared corpus. `--max-tokens` appears in the loop only to
+  compute the displayed `ETA`. **Run length = corpus size × epochs**, full stop.
+- **THE TRAP — stale data dir.** If `--data-dir` already has `train.bin` +
+  `val.bin` + `tokenizer.model`, prep is **skipped** and the existing corpus is
+  reused, silently ignoring `--max-tokens` AND `--wiki-fraction`. The shared
+  `data\hertz_mix` currently holds **~808M tokens** from an earlier prep. Launch
+  the 10B run against that dir and it trains 1 epoch over 808M (~11h at 20k
+  tok/s), then idles for the rest of the trip — a badly undertrained model
+  (~1.3 tok/param vs the intended ~16), with NO error. This is the single most
+  dangerous failure mode for an unattended run.
+
+**Consequence for the real run:** you MUST either prep a fresh 10B corpus into a
+clean dir, or verify the existing `data\hertz_mix` genuinely contains ~10B
+tokens. The §3.3 command and §3.4b checklist below enforce this.
+
 ### 3.3 Kick off the real run — LOCKED COMMAND
 
 The smoke test is done; this is the exact command to run before leaving.
 `python -u` = unbuffered stdout so the log flushes live (Tee-Object buffers
 otherwise and the log lags badly — confirmed in the smoke test).
 
+**FIRST, force a clean 10B prep (avoids the §3.2b stale-cache trap).** The old
+`data\hertz_mix` holds ~808M tokens; do not let the run reuse it. Either point at
+a brand-new dir (preferred — keeps the smoke corpus around), or delete the old
+one:
+
 ```powershell
+# Preferred: a dedicated dir for the real 10B corpus.
+#   (If a previous *interrupted* 10B prep left a partial data\hertz12_data,
+#    delete it first so prep restarts clean: Remove-Item -Recurse data\hertz12_data)
 python -u scripts\train_hertz.py `
   --dataset fineweb-wiki-mix --wiki-fraction 0.3 `
+  --data-dir data\hertz12_data `
   --d-f 3700 --n-passes 3 --n-heads 4 --context-len 512 `
   --max-tokens 10B `
   --epochs 1 `
@@ -164,6 +225,10 @@ python -u scripts\train_hertz.py `
   --save-dir checkpoints\hertz12 2>&1 | Tee-Object runs\hertz12_train.log
 ```
 
+After it prints `Train: ...` confirm the count is **~10,000,000,000**, not 808M.
+If it says `Data already prepared` and shows 808M, you pointed at a stale dir —
+stop (Ctrl-C) and fix `--data-dir` before walking away.
+
 At ~20k tok/s: `--save-interval 2000` ≈ every ~1.8h (crash loses little);
 bf16 milestone every 5000 steps ≈ every ~4.5h.
 
@@ -171,32 +236,41 @@ To survive a closed terminal / logout (note `-u` and the `-df 3700`):
 
 ```powershell
 Start-Process -NoNewWindow -FilePath python `
-  -ArgumentList "-u scripts\train_hertz.py --dataset fineweb-wiki-mix --wiki-fraction 0.3 --d-f 3700 --max-tokens 10B --epochs 1 --save-interval 2000 --keep-last 3 --bf16-milestone-interval 5000 --eval-interval 2000 --save-dir checkpoints\hertz12" `
+  -ArgumentList "-u scripts\train_hertz.py --dataset fineweb-wiki-mix --wiki-fraction 0.3 --data-dir data\hertz12_data --d-f 3700 --max-tokens 10B --epochs 1 --save-interval 2000 --keep-last 3 --bf16-milestone-interval 5000 --eval-interval 2000 --save-dir checkpoints\hertz12" `
   -RedirectStandardOutput runs\hertz12_train.log -RedirectStandardError runs\hertz12_err.log
 ```
 
+Note `--data-dir data\hertz12_data` here too — without it the detached run reuses
+the stale ~808M `data\hertz_mix` (§3.2b) and you'd never see the error because the
+terminal is closed.
+
 ### 3.4 Unattended-safety checklist (tick before leaving)
 
-- [ ] Smoke test passed: no OOM, tok/s measured, disk plateaus with `--keep-last`, resume works
-- [ ] `--max-tokens` set from measured tok/s and trip length (§3.2)
+- [ ] Smoke test passed at **`--d-f 3700`**: tok/s ≈ 20k (not ~2k), no OOM, disk plateaus with `--keep-last`, resume works (from an *existing* step, not hardcoded step_100)
+- [ ] **Fresh `--data-dir` for the real run** (e.g. `data\hertz12_data`), OR the existing dir verified to hold ~10B tokens — NOT the stale 808M `data\hertz_mix` (§3.2b)
+- [ ] `--d-f 3700` present (it is NOT a default — default is the slow 5000)
 - [ ] `--keep-last 3` (or 2) set — caps step checkpoints; `*.pt` already gitignored
 - [ ] No `--wandb`; logging to `runs\hertz12_train.log`
 - [ ] Disk free > 200 GB after tokenization; raw cache deleted/transient
 - [ ] Launched so it survives terminal close (Start-Process / Scheduled Task)
-- [ ] A hard `--max-tokens` cap so it STOPS cleanly, never runs to disk-full
+- [ ] Run length understood: it trains **1 epoch over the prepared corpus** (§3.2b); `--max-tokens` does NOT stop the loop, so the corpus size IS the cap
 
 ### 3.4b Before you walk out the door (final gate — do NOT skip)
 
-Don't start this and immediately leave. `--max-tokens 10B` triggers a fresh,
-larger download + re-tokenize (data\hertz_mix only had ~808M from the smoke
-test), so there's a long Phase-1 stretch BEFORE training. Watch it reach a
-healthy steady state first, then leave.
+Don't start this and immediately leave. With a fresh `--data-dir` (§3.3),
+`--max-tokens 10B` triggers a fresh, large download + re-tokenize, so there's a
+long Phase-1 stretch BEFORE training. Watch it reach a healthy steady state
+first, then leave.
 
-- [ ] **Launch detached** (the `Start-Process` variant in §3.3) so a closed
-      terminal / logout doesn't kill the multi-day run.
+- [ ] **Confirm the corpus size FIRST.** The Phase-1 summary must print
+      `Train: ~10,000,000,000 tokens`. If it says `Data already prepared` and a
+      number like 808,696,232, you hit the stale-cache trap (§3.2b) — STOP, the
+      run would train on 8% of the budget and idle for days. Fix `--data-dir`.
+- [ ] **Launch detached** (the `Start-Process` variant in §3.3, with
+      `--data-dir`) so a closed terminal / logout doesn't kill the multi-day run.
 - [ ] **Watch it clear Phase 1** — fresh FineWeb+Wiki download (~20 GB train.bin)
-      + new shared tokenizer over the bigger corpus. Quiet, can take a while;
-      not a hang (check `data\hertz_mix\train.bin` growing if unsure).
+      + new shared tokenizer over the corpus. Quiet, can take a while; not a hang
+      (check `data\hertz12_data\train.bin` growing if unsure).
 - [ ] **See Phase 2 actually start:** first 2-3 `loss … | NNNN tok/s | ETA …h
       (…d)` lines printed. Confirm tok/s ≈ 20k and **ETA ≈ 5-6 days** (fits the
       7-day window). If ETA is way off, stop and re-check `--d-f 3700`.
