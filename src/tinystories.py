@@ -414,14 +414,20 @@ def download_fineweb_edu(data_dir: str, max_tokens: int = 10_000_000_000) -> tup
             break
 
         fname = os.path.basename(pf)
-        local = raw_dir / fname
-
-        if not local.exists():
-            url = f"{FINEWEB_HF_RESOLVE}/{pf}"
-            print(f"  Downloading shard {i+1}: {fname}...")
-            _download_file(url, str(local), desc=fname)
-        else:
-            print(f"  Already have {fname}")
+        print(f"  Shard {i+1}: {fname} ...")
+        # Use huggingface_hub (a `datasets` dependency, already pinned) instead
+        # of a hand-rolled urllib download. This gives resume-on-interrupt,
+        # automatic retries, and checksum validation for free — the old urllib
+        # path had no timeout/retry/resume and would hang silently on a stalled
+        # socket mid-shard (each shard is ~2 GB), leaving a truncated file that
+        # a naive `local.exists()` check would then treat as complete.
+        from huggingface_hub import hf_hub_download
+        local = hf_hub_download(
+            repo_id=FINEWEB_DATASET,
+            filename=pf,
+            repo_type="dataset",
+            local_dir=str(raw_dir),
+        )
 
         # Read and count
         df = pd.read_parquet(local)
