@@ -96,9 +96,24 @@ def main():
     p.add_argument("--no-glove", action="store_true",
                    help="skip GloVe (use a deterministic stub S); makes the probe run anywhere")
     p.add_argument("--out", default="results/vsp_gating.json")
+    p.add_argument("--derived", default=None,
+                   help="use AUTO-derived V/P from derive_vsp.py output (results/"
+                        "vsp_derived.json) instead of the hand-seeded --words table")
     args = p.parse_args()
 
-    entries = json.load(open(args.words))  # [{word, senses:[{label,visual,physical:{...}}]}]
+    if args.derived:
+        # derive_vsp.py already produced per-sense visual_dist + physical; convert
+        # to the {word, senses:[{label, visual, physical}]} shape, with visual as
+        # the soft distribution (not a one-hot category).
+        dd = json.load(open(args.derived))
+        entries = []
+        for e in dd["entries"]:
+            senses = [{"label": s["label"], "visual_dist": s["visual_dist"],
+                       "physical": s["physical"]} for s in e["senses"]]
+            entries.append({"word": e["word"], "senses": senses})
+        print(f"[vsp] using AUTO-derived V/P from {args.derived}")
+    else:
+        entries = json.load(open(args.words))  # hand-seeded table
     base_words = [e["word"] for e in entries]
 
     glove = {}
@@ -126,7 +141,11 @@ def main():
         # build S-only and V|S|P vectors per sense (S identical across senses)
         sense_vecs = []
         for sn in senses:
-            v = vis_vector(sn.get("visual", "none"))
+            # V: a soft distribution (auto-derived) or a one-hot (hand-seeded)
+            if "visual_dist" in sn:
+                v = np.array(sn["visual_dist"], dtype=np.float32)
+            else:
+                v = vis_vector(sn.get("visual", "none"))
             ph = phys_vector(sn.get("physical", {}))
             # scale-balance the three blocks to unit norm each before concat
             vsp = np.concatenate([_unit(v), _unit(s), _unit(ph)])
