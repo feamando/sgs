@@ -1,4 +1,4 @@
-# SGS — Path A (v1, current architecture) Setup, July 2026
+# SGS Path A (v1, current architecture) Setup, July 2026
 
 *Windows + RTX 4090, 1 TB drive. Other platforms not validated.*
 

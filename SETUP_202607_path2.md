@@ -1,4 +1,4 @@
-# SGS — Path B (Planck 2.0, VSP architecture) Setup, July 2026
+# SGS Path B (Planck 2.0, VSP architecture) Setup, July 2026
 
 *Windows + RTX 4090. Other platforms not validated.*
 
