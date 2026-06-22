@@ -40,16 +40,44 @@ Pick by VRAM headroom alongside the SGS model on the 4090: start with
 4090 has room or generation runs on a separate pass. Accept Google's license on
 the HF repo first.
 
+**DOWNLOAD ON THE BOX (do this so the harness has a model):**
+
 ```powershell
-# download with the hf CLI (accept license on the repo page first)
+# 1. accept Google's license on the repo page first:
+#    https://huggingface.co/google/gemma-4-E4B-it
+# 2. authenticate the hf CLI if not already (needs a HF token with gated access):
+hf auth login
+# 3. download (E4B = 8B, fits the 4090 alongside the SGS model; bump to 12B-it
+#    only if there's VRAM headroom, or run generation as a separate pass):
 hf download google/gemma-4-E4B-it --local-dir models/gemma-4-e4b-it
+# 4. the harness also needs transformers + accelerate in whatever venv runs it:
+pip install "transformers>=4.45" accelerate
 ```
+
+**Generate training data (harness BUILT: scripts/generate_trees_gemma.py):**
+
+```powershell
+# emits SHALLOW scene skeletons (parts as leaves, no gaussians) in the
+# castle_16 / build_stage3 format, constrained to the fill-renderable part
+# vocabulary. Starter prompt list: scripts/assets/gemma_scene_prompts.txt
+python scripts/generate_trees_gemma.py `
+  --model models/gemma-4-e4b-it `
+  --prompts scripts/assets/gemma_scene_prompts.txt `
+  --out data/decomposition_trees/gemma_train.json --n 200 --repeat 2
+# then mix gemma_train.json into the decomposer fine-tune data (§2) alongside
+# the castle_16 + stage3 records.
+```
+
+The harness's parse + validate logic is unit-verified (handles fenced JSON,
+drops unknown-part leaves the fill can't render, rejects garbage); only the
+model.generate call is untested until the model is local.
 
 PRINCIPLE (do not skip): **fill richness caps usable data richness.** Gemma can
 describe a billion parts; the learned fill can only learn the ones you can
-render-supervise. Generate data as rich as the fill can render, not as rich as
-Gemma can describe. Otherwise you teach the model to emit parts that render as
-nothing.
+render-supervise. The harness ENFORCES this -- it drops any part name the fill
+stage cannot expand (a "lighthouse" leaf is dropped; "lighthouse = tall tower"
+is kept). Generate data as rich as the fill can render, not as rich as Gemma
+can describe.
 
 ## 1. Hertz demo run (interpreter sanity)
 
