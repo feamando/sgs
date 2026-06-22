@@ -32,12 +32,24 @@ So this is mostly **verify + fill small gaps + run**, not build-from-scratch. Th
 
 ### 1.1 Repo + venv (Python 3.12)
 
+**Use the `py -3.12` launcher, NOT bare `python`.** Bare `python` picks up
+whatever is on PATH; on 2026-06-22 that was 3.13.7, and the resulting venv had a
+pandas whose compiled extensions (`pandas._libs.pandas_parser`) were missing for
+3.13 — data prep crashed before training. The compiled stack (torch,
+sentencepiece, triton-windows, pandas) wants 3.12 wheels.
+
 ```powershell
 cd $HOME\Documents\GitHub\sgs
 git pull
-python -m venv .venv
+py -3.12 -m venv .venv          # NOT `python -m venv` — pin 3.12 explicitly
 .venv\Scripts\Activate.ps1
+python --version                 # MUST print Python 3.12.x before continuing
 ```
+
+If you already have a 3.13 `.venv`, delete and recreate it:
+`Remove-Item -Recurse -Force .venv` then the commands above. (Install Python 3.12
+first if `py -3.12` is missing: https://www.python.org/downloads/ or `winget
+install Python.Python.3.12`.)
 
 ### 1.2 Core dependencies
 

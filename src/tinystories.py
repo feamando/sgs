@@ -116,8 +116,18 @@ def download_tinystories(data_dir: str) -> tuple[list[str], list[str]]:
     # Read parquet → extract text
     try:
         import pandas as pd
-    except ImportError:
-        raise ImportError("pandas is required: pip install pandas pyarrow")
+    except ImportError as e:
+        # Re-raise WITH the original cause. A bare "pip install pandas" message
+        # masks the real failure: pandas is often installed but its compiled
+        # C extensions are broken (e.g. ModuleNotFoundError: pandas._libs.*),
+        # which means a partial install or a Python-version/wheel mismatch
+        # (this repo targets Python 3.12; a 3.13 venv hit exactly this).
+        raise ImportError(
+            f"pandas failed to import ({e}). It may be installed but with "
+            "broken/incomplete compiled extensions, or built for a different "
+            "Python version. Try: pip install --force-reinstall --no-cache-dir "
+            "pandas pyarrow ; if on Python 3.13, rebuild the venv on 3.12."
+        ) from e
 
     print("Reading parquet files...")
     train_texts, val_texts = [], []
@@ -386,8 +396,18 @@ def download_fineweb_edu(data_dir: str, max_tokens: int = 10_000_000_000) -> tup
 
     try:
         import pandas as pd
-    except ImportError:
-        raise ImportError("pandas is required: pip install pandas pyarrow")
+    except ImportError as e:
+        # Re-raise WITH the original cause. A bare "pip install pandas" message
+        # masks the real failure: pandas is often installed but its compiled
+        # C extensions are broken (e.g. ModuleNotFoundError: pandas._libs.*),
+        # which means a partial install or a Python-version/wheel mismatch
+        # (this repo targets Python 3.12; a 3.13 venv hit exactly this).
+        raise ImportError(
+            f"pandas failed to import ({e}). It may be installed but with "
+            "broken/incomplete compiled extensions, or built for a different "
+            "Python version. Try: pip install --force-reinstall --no-cache-dir "
+            "pandas pyarrow ; if on Python 3.13, rebuild the venv on 3.12."
+        ) from e
 
     for i, pf in enumerate(parquet_files):
         if total_chars >= target_chars:
