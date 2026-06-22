@@ -14,38 +14,44 @@ PHASE 1: Data preparation
 Mix budget: 10.0B total -> FineWeb 7.00B + Wikipedia 3.00B (wiki_fraction=0.3)
 Fetching FineWeb-Edu file list from sample/10BT...
   Found 14 parquet shards
-Traceback (most recent call last):
-  File "C:\Users\feama\sgs\src\tinystories.py", line 388, in download_fineweb_edu
-    import pandas as pd
-  File "C:\Users\feama\sgs\.venv\Lib\site-packages\pandas\__init__.py", line 56, in <module>
-    import pandas.core.config_init  # pyright: ignore[reportUnusedImport] # noqa: F401
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\feama\sgs\.venv\Lib\site-packages\pandas\core\config_init.py", line 31, in <module>
-    from pandas.errors import Pandas4Warning
-  File "C:\Users\feama\sgs\.venv\Lib\site-packages\pandas\errors\__init__.py", line 12, in <module>
-    from pandas._libs.tslibs import (
-    ...<3 lines>...
-    )
-  File "C:\Users\feama\sgs\.venv\Lib\site-packages\pandas\_libs\__init__.py", line 16, in <module>
-    import pandas._libs.pandas_parser  # isort: skip # type: ignore[reportUnusedImport]
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-ModuleNotFoundError: No module named 'pandas._libs.pandas_parser'
+  Downloading shard 1: 000_00000.parquet...
 
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\feama\sgs\scripts\train_hertz.py", line 658, in <module>
-    main()
-    ~~~~^^
-  File "C:\Users\feama\sgs\scripts\train_hertz.py", line 227, in main
-    data = prepare_fineweb_wiki_mix(
-        str(data_dir), vocab_size=args.vocab_size,
-        context_length=args.context_len, max_tokens=max_tokens,
-        wiki_fraction=args.wiki_fraction,
-    )
-  File "C:\Users\feama\sgs\src\tinystories.py", line 597, in prepare_fineweb_wiki_mix
-    fw_train, fw_val = download_fineweb_edu(str(data_dir / "fineweb_raw"), fw_tokens)
-                       ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\feama\sgs\src\tinystories.py", line 390, in download_fineweb_edu
-    raise ImportError("pandas is required: pip install pandas pyarrow")
-ImportError: pandas is required: pip install pandas pyarrow
+  000_00000.parquet 1/2053 MB (0%)
+  000_00000.parquet 2/2053 MB (0%)
+  000_00000.parquet 3/2053 MB (0%)
+  000_00000.parquet 4/2053 MB (0%)
+  000_00000.parquet 5/2053 MB (0%)
+  000_00000.parquet 6/2053 MB (0%)
+  000_00000.parquet 7/2053 MB (0%)
+  000_00000.parquet 8/2053 MB (0%)
+  000_00000.parquet 9/2053 MB (0%)
+  000_00000.parquet 10/2053 MB (0%)
+  000_00000.parquet 11/2053 MB (0%)
+  000_00000.parquet 12/2053 MB (0%)
+  000_00000.parquet 13/2053 MB (0%)
+  000_00000.parquet 14/2053 MB (0%)
+  000_00000.parquet 15/2053 MB (0%)
+  000_00000.parquet 16/2053 MB (0%)
+  000_00000.parquet 17/2053 MB (0%)
+  000_00000.parquet 18/2053 MB (0%)
+  000_00000.parquet 19/2053 MB (0%)
+  000_00000.parquet 20/2053 MB (0%)
+  000_00000.parquet 21/2053 MB (1%)
+  000_00000.parquet 22/2053 MB (1%)
+  000_00000.parquet 23/2053 MB (1%)
+  000_00000.parquet 24/2053 MB (1%)
+  000_00000.parquet 25/2053 MB (1%)
+  000_00000.parquet 26/2053 MB (1%)
+  000_00000.parquet 27/2053 MB (1%)
+  000_00000.parquet 28/2053 MB (1%)
+  000_00000.parquet 29/2053 MB (1%)
+  000_00000.parquet 30/2053 MB (1%)
+  000_00000.parquet 31/2053 MB (1%)
+  000_00000.parquet 32/2053 MB (1%)
+  000_00000.parquet 33/2053 MB (1%)
+  000_00000.parquet 34/2053 MB (1%)
+  000_00000.parquet 35/2053 MB (1%)
+  000_00000.parquet 36/2053 MB (1%)
+  000_00000.parquet 37/2053 MB (1%)
+  000_00000.parquet 38/2053 MB (1%)
+  000_00000.parquet 39/2053 MB (1%)
