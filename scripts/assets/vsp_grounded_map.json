@@ -1,0 +1,85 @@
+{
+  "_doc": "Curated sense -> {synset, material} grounding for the VSP probe. This is the NON-TEXTUAL bridge: a human assigns each polysemous SENSE a ShapeNet synset (V identity, real 3D category) and a P6 MATERIAL_TABLE name (P from MEASURED values, not GloVe-predicted). synset is a ShapeNet/WordNet id from build_blobs_shapenet SYNSET_TO_NAME; vis_label is its human name; material must be a key in validate_p6_correlation MATERIAL_TABLE. Senses with no physical object use synset=null (abstract) -> zero V, zero P.",
+  "entries": [
+    {"word": "bank", "senses": [
+      {"label": "river-bank", "vis_label": "terrain", "synset": null, "material": "soil"},
+      {"label": "institution", "vis_label": "building", "synset": "04460130", "material": "concrete"}
+    ]},
+    {"word": "plane", "senses": [
+      {"label": "aircraft", "vis_label": "airplane", "synset": "02691156", "material": "aluminum"},
+      {"label": "flat-surface", "vis_label": "table", "synset": "04379243", "material": "wood"}
+    ]},
+    {"word": "bat", "senses": [
+      {"label": "animal", "vis_label": "animal", "synset": null, "material": "leather"},
+      {"label": "club", "vis_label": "knife", "synset": "03624134", "material": "wood"}
+    ]},
+    {"word": "spring", "senses": [
+      {"label": "water-source", "vis_label": "water", "synset": null, "material": "water"},
+      {"label": "coil", "vis_label": "knife", "synset": "03624134", "material": "steel"}
+    ]},
+    {"word": "crane", "senses": [
+      {"label": "bird", "vis_label": "animal", "synset": null, "material": "feather"},
+      {"label": "machine", "vis_label": "car", "synset": "02958343", "material": "steel"}
+    ]},
+    {"word": "mouse", "senses": [
+      {"label": "animal", "vis_label": "animal", "synset": null, "material": "leather"},
+      {"label": "device", "vis_label": "keyboard", "synset": "03085013", "material": "plastic"}
+    ]},
+    {"word": "rock", "senses": [
+      {"label": "stone", "vis_label": "terrain", "synset": null, "material": "granite"},
+      {"label": "music", "vis_label": "abstract", "synset": null, "material": null}
+    ]},
+    {"word": "palm", "senses": [
+      {"label": "tree", "vis_label": "plant", "synset": null, "material": "bark"},
+      {"label": "hand", "vis_label": "animal", "synset": null, "material": "leather"}
+    ]},
+    {"word": "table", "senses": [
+      {"label": "furniture", "vis_label": "table", "synset": "04379243", "material": "wood"},
+      {"label": "data-grid", "vis_label": "abstract", "synset": null, "material": null}
+    ]},
+    {"word": "tank", "senses": [
+      {"label": "vehicle", "vis_label": "car", "synset": "02958343", "material": "steel"},
+      {"label": "container", "vis_label": "bottle", "synset": "02876657", "material": "glass"}
+    ]},
+    {"word": "seal", "senses": [
+      {"label": "animal", "vis_label": "animal", "synset": null, "material": "leather"},
+      {"label": "stamp", "vis_label": "knife", "synset": "03624134", "material": "rubber"}
+    ]},
+    {"word": "bow", "senses": [
+      {"label": "weapon", "vis_label": "guitar", "synset": "03467517", "material": "wood"},
+      {"label": "ribbon", "vis_label": "cloth", "synset": null, "material": "silk"}
+    ]},
+    {"word": "nail", "senses": [
+      {"label": "fastener", "vis_label": "knife", "synset": "03624134", "material": "steel"},
+      {"label": "finger-nail", "vis_label": "animal", "synset": null, "material": "bone"}
+    ]},
+    {"word": "trunk", "senses": [
+      {"label": "tree", "vis_label": "plant", "synset": null, "material": "wood"},
+      {"label": "car-storage", "vis_label": "car", "synset": "02958343", "material": "steel"}
+    ]},
+    {"word": "scale", "senses": [
+      {"label": "fish-scale", "vis_label": "animal", "synset": null, "material": "shell"},
+      {"label": "weighing", "vis_label": "clock", "synset": "03046257", "material": "steel"}
+    ]},
+    {"word": "key", "senses": [
+      {"label": "lock-key", "vis_label": "knife", "synset": "03624134", "material": "brass"},
+      {"label": "musical", "vis_label": "piano", "synset": "03928116", "material": "ivory"}
+    ]},
+    {"word": "board", "senses": [
+      {"label": "plank", "vis_label": "table", "synset": "04379243", "material": "wood"},
+      {"label": "committee", "vis_label": "abstract", "synset": null, "material": null}
+    ]},
+    {"word": "pitcher", "senses": [
+      {"label": "container", "vis_label": "jar", "synset": "03593526", "material": "ceramic"},
+      {"label": "player", "vis_label": "animal", "synset": null, "material": "cloth"}
+    ]},
+    {"word": "well", "senses": [
+      {"label": "water-shaft", "vis_label": "terrain", "synset": null, "material": "stone"},
+      {"label": "adverb", "vis_label": "abstract", "synset": null, "material": null}
+    ]},
+    {"word": "iron", "senses": [
+      {"label": "metal", "vis_label": "abstract", "synset": null, "material": "iron"},
+      {"label": "appliance", "vis_label": "microwave", "synset": "03761084", "material": "steel"}
+    ]}
+  ]
+}
