@@ -1,0 +1,82 @@
+[
+  {"word": "bank", "senses": [
+    {"label": "river-bank", "visual": "terrain", "physical": {"hardness": 0.3, "density": 0.5, "deformability": 0.7, "transparency": 0.0}},
+    {"label": "institution", "visual": "building", "physical": {"hardness": 0.9, "density": 0.8, "deformability": 0.1, "transparency": 0.1}}
+  ]},
+  {"word": "plane", "senses": [
+    {"label": "aircraft", "visual": "aircraft", "physical": {"hardness": 0.8, "density": 0.6, "deformability": 0.2, "transparency": 0.1}},
+    {"label": "flat-surface", "visual": "flat_surface", "physical": {"hardness": 0.5, "density": 0.4, "deformability": 0.3, "transparency": 0.0}}
+  ]},
+  {"word": "bat", "senses": [
+    {"label": "animal", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.3, "deformability": 0.8, "transparency": 0.0}},
+    {"label": "club", "visual": "tool", "physical": {"hardness": 0.8, "density": 0.7, "deformability": 0.1, "transparency": 0.0}}
+  ]},
+  {"word": "spring", "senses": [
+    {"label": "water-source", "visual": "water", "physical": {"hardness": 0.0, "density": 0.5, "deformability": 1.0, "transparency": 0.9}},
+    {"label": "coil", "visual": "tool", "physical": {"hardness": 0.7, "density": 0.8, "elasticity": 0.9, "deformability": 0.6}}
+  ]},
+  {"word": "crane", "senses": [
+    {"label": "bird", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.3, "deformability": 0.8, "transparency": 0.0}},
+    {"label": "machine", "visual": "vehicle", "physical": {"hardness": 0.9, "density": 0.9, "deformability": 0.05, "transparency": 0.0}}
+  ]},
+  {"word": "mouse", "senses": [
+    {"label": "animal", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.3, "deformability": 0.8, "transparency": 0.0}},
+    {"label": "device", "visual": "tool", "physical": {"hardness": 0.6, "density": 0.4, "deformability": 0.2, "transparency": 0.1}}
+  ]},
+  {"word": "rock", "senses": [
+    {"label": "stone", "visual": "terrain", "physical": {"hardness": 0.95, "density": 0.9, "deformability": 0.05, "brittleness": 0.6}},
+    {"label": "music", "visual": "none", "physical": {}}
+  ]},
+  {"word": "palm", "senses": [
+    {"label": "tree", "visual": "plant", "physical": {"hardness": 0.4, "density": 0.4, "deformability": 0.5, "transparency": 0.0}},
+    {"label": "hand", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.5, "deformability": 0.7, "transparency": 0.0}}
+  ]},
+  {"word": "table", "senses": [
+    {"label": "furniture", "visual": "furniture", "physical": {"hardness": 0.7, "density": 0.6, "deformability": 0.1, "transparency": 0.0}},
+    {"label": "data-grid", "visual": "none", "physical": {}}
+  ]},
+  {"word": "tank", "senses": [
+    {"label": "vehicle", "visual": "vehicle", "physical": {"hardness": 0.95, "density": 0.95, "deformability": 0.02, "transparency": 0.0}},
+    {"label": "container", "visual": "furniture", "physical": {"hardness": 0.7, "density": 0.5, "deformability": 0.2, "transparency": 0.3}}
+  ]},
+  {"word": "seal", "senses": [
+    {"label": "animal", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.4, "deformability": 0.8, "transparency": 0.0}},
+    {"label": "stamp", "visual": "tool", "physical": {"hardness": 0.6, "density": 0.6, "deformability": 0.2, "transparency": 0.0}}
+  ]},
+  {"word": "pitcher", "senses": [
+    {"label": "container", "visual": "furniture", "physical": {"hardness": 0.6, "density": 0.5, "deformability": 0.2, "transparency": 0.4}},
+    {"label": "player", "visual": "animal", "physical": {"hardness": 0.2, "density": 0.5, "deformability": 0.7, "transparency": 0.0}}
+  ]},
+  {"word": "bow", "senses": [
+    {"label": "weapon", "visual": "tool", "physical": {"hardness": 0.7, "density": 0.5, "elasticity": 0.8, "deformability": 0.4}},
+    {"label": "ribbon", "visual": "none", "physical": {"hardness": 0.1, "density": 0.2, "deformability": 0.9, "transparency": 0.2}}
+  ]},
+  {"word": "well", "senses": [
+    {"label": "water-shaft", "visual": "terrain", "physical": {"hardness": 0.8, "density": 0.7, "deformability": 0.1, "transparency": 0.0}},
+    {"label": "adverb", "visual": "none", "physical": {}}
+  ]},
+  {"word": "nail", "senses": [
+    {"label": "fastener", "visual": "tool", "physical": {"hardness": 0.9, "density": 0.85, "deformability": 0.05, "transparency": 0.0}},
+    {"label": "finger-nail", "visual": "animal", "physical": {"hardness": 0.4, "density": 0.4, "deformability": 0.3, "transparency": 0.2}}
+  ]},
+  {"word": "trunk", "senses": [
+    {"label": "tree", "visual": "plant", "physical": {"hardness": 0.6, "density": 0.6, "deformability": 0.2, "transparency": 0.0}},
+    {"label": "car-storage", "visual": "vehicle", "physical": {"hardness": 0.8, "density": 0.6, "deformability": 0.1, "transparency": 0.0}}
+  ]},
+  {"word": "scale", "senses": [
+    {"label": "fish-scale", "visual": "animal", "physical": {"hardness": 0.4, "density": 0.4, "deformability": 0.4, "transparency": 0.3}},
+    {"label": "weighing", "visual": "tool", "physical": {"hardness": 0.7, "density": 0.6, "deformability": 0.1, "transparency": 0.0}}
+  ]},
+  {"word": "spring2", "senses": [
+    {"label": "season", "visual": "none", "physical": {}},
+    {"label": "coil", "visual": "tool", "physical": {"hardness": 0.7, "density": 0.8, "elasticity": 0.9, "deformability": 0.6}}
+  ]},
+  {"word": "key", "senses": [
+    {"label": "lock-key", "visual": "tool", "physical": {"hardness": 0.85, "density": 0.8, "deformability": 0.05, "transparency": 0.0}},
+    {"label": "musical", "visual": "none", "physical": {}}
+  ]},
+  {"word": "board", "senses": [
+    {"label": "plank", "visual": "flat_surface", "physical": {"hardness": 0.6, "density": 0.5, "deformability": 0.2, "transparency": 0.0}},
+    {"label": "committee", "visual": "none", "physical": {}}
+  ]}
+]
