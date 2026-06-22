@@ -14,44 +14,1346 @@ PHASE 1: Data preparation
 Mix budget: 10.0B total -> FineWeb 7.00B + Wikipedia 3.00B (wiki_fraction=0.3)
 Fetching FineWeb-Edu file list from sample/10BT...
   Found 14 parquet shards
-  Downloading shard 1: 000_00000.parquet...
+  Shard 1: 000_00000.parquet ...
+    726,000 texts, ~0.9B tokens so far (3.5B chars)
+  Shard 2: 001_00000.parquet ...
+    729,000 texts, ~1.7B tokens so far (6.9B chars)
+  Shard 3: 002_00000.parquet ...
+    727,000 texts, ~2.6B tokens so far (10.4B chars)
+  Shard 4: 003_00000.parquet ...
+    734,000 texts, ~3.5B tokens so far (13.8B chars)
+  Shard 5: 004_00000.parquet ...
+    745,000 texts, ~4.3B tokens so far (17.3B chars)
+  Shard 6: 005_00000.parquet ...
+    738,000 texts, ~5.2B tokens so far (20.7B chars)
+  Shard 7: 006_00000.parquet ...
+    732,000 texts, ~6.0B tokens so far (24.2B chars)
+  Shard 8: 007_00000.parquet ...
+    725,000 texts, ~6.9B tokens so far (27.6B chars)
+  Shard 9: 008_00000.parquet ...
+    724,000 texts, ~7.8B tokens so far (31.1B chars)
 
-  000_00000.parquet 1/2053 MB (0%)
-  000_00000.parquet 2/2053 MB (0%)
-  000_00000.parquet 3/2053 MB (0%)
-  000_00000.parquet 4/2053 MB (0%)
-  000_00000.parquet 5/2053 MB (0%)
-  000_00000.parquet 6/2053 MB (0%)
-  000_00000.parquet 7/2053 MB (0%)
-  000_00000.parquet 8/2053 MB (0%)
-  000_00000.parquet 9/2053 MB (0%)
-  000_00000.parquet 10/2053 MB (0%)
-  000_00000.parquet 11/2053 MB (0%)
-  000_00000.parquet 12/2053 MB (0%)
-  000_00000.parquet 13/2053 MB (0%)
-  000_00000.parquet 14/2053 MB (0%)
-  000_00000.parquet 15/2053 MB (0%)
-  000_00000.parquet 16/2053 MB (0%)
-  000_00000.parquet 17/2053 MB (0%)
-  000_00000.parquet 18/2053 MB (0%)
-  000_00000.parquet 19/2053 MB (0%)
-  000_00000.parquet 20/2053 MB (0%)
-  000_00000.parquet 21/2053 MB (1%)
-  000_00000.parquet 22/2053 MB (1%)
-  000_00000.parquet 23/2053 MB (1%)
-  000_00000.parquet 24/2053 MB (1%)
-  000_00000.parquet 25/2053 MB (1%)
-  000_00000.parquet 26/2053 MB (1%)
-  000_00000.parquet 27/2053 MB (1%)
-  000_00000.parquet 28/2053 MB (1%)
-  000_00000.parquet 29/2053 MB (1%)
-  000_00000.parquet 30/2053 MB (1%)
-  000_00000.parquet 31/2053 MB (1%)
-  000_00000.parquet 32/2053 MB (1%)
-  000_00000.parquet 33/2053 MB (1%)
-  000_00000.parquet 34/2053 MB (1%)
-  000_00000.parquet 35/2053 MB (1%)
-  000_00000.parquet 36/2053 MB (1%)
-  000_00000.parquet 37/2053 MB (1%)
-  000_00000.parquet 38/2053 MB (1%)
-  000_00000.parquet 39/2053 MB (1%)
+  Total: 6,580,000 texts, ~7.8B estimated tokens
+  Train: 6,514,200, Val: 65,800
+Loading wikimedia/wikipedia (20231101.en) from cache data/wikipedia/hf...
+  6,407,814 articles -> train 6,375,774, val 32,040
+  Wikipedia after budget trim: train 4,327,830, val 27,256
+  Combined: train 10,842,030, val 93,056
+Writing training corpus (10,842,030 texts)...
+Training BPE tokenizer (vocab_size=32000)...
+sentencepiece_trainer.cc(78) LOG(INFO) Starts training with : 
+trainer_spec {
+  input: data\hertz12_data\tokenizer_train_corpus.txt
+  input_format: 
+  model_prefix: data\hertz12_data\tokenizer
+  model_type: BPE
+  vocab_size: 32000
+  self_test_sample_size: 0
+  character_coverage: 1
+  input_sentence_size: 1000000
+  shuffle_input_sentence: 1
+  seed_sentencepiece_size: 1000000
+  shrinking_factor: 0.75
+  max_sentence_length: 16384
+  num_threads: 32
+  num_sub_iterations: 2
+  max_sentencepiece_length: 16
+  split_by_unicode_script: 1
+  split_by_number: 1
+  split_by_whitespace: 1
+  split_digits: 0
+  pretokenization_delimiter: 
+  treat_whitespace_as_suffix: 0
+  allow_whitespace_only_pieces: 0
+  required_chars: 
+  byte_fallback: 0
+  vocabulary_output_piece_score: 1
+  train_extremely_large_corpus: 0
+  seed_sentencepieces_file: 
+  hard_vocab_limit: 1
+  use_all_vocab: 0
+  unk_id: 3
+  bos_id: 1
+  eos_id: 2
+  pad_id: 0
+  unk_piece: <unk>
+  bos_piece: <s>
+  eos_piece: </s>
+  pad_piece: <pad>
+  unk_surface:  Γüç 
+  enable_differential_privacy: 0
+  differential_privacy_noise_level: 0
+  differential_privacy_clipping_threshold: 0
+}
+normalizer_spec {
+  name: nmt_nfkc
+  add_dummy_prefix: 1
+  remove_extra_whitespaces: 1
+  escape_whitespaces: 1
+  normalization_rule_tsv: 
+}
+denormalizer_spec {}
+trainer_interface.cc(355) LOG(INFO) SentenceIterator is not specified. Using MultiFileSentenceIterator.
+trainer_interface.cc(186) LOG(INFO) Loading corpus: data\hertz12_data\tokenizer_train_corpus.txt
+trainer_interface.cc(382) LOG(WARNING) Found too long line (22836 > 16384).
+trainer_interface.cc(384) LOG(WARNING) Too long lines are skipped in the training.
+trainer_interface.cc(385) LOG(WARNING) The maximum length can be changed with --max_sentence_length=<size> flag.
+trainer_interface.cc(148) LOG(INFO) Loaded 1000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 2000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 3000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 4000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 5000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 6000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 7000000 lines
+trainer_interface.cc(393) LOG(INFO) Reserved chars are found. Skipped: Friday, 7 April 2017 Coming all together to rebuild Afghanistan An existence guided by peace, stability and prosperity has always been a hope for Afghans, but it is only lately that the idea has acquired a concrete foundation. The positioning and engagement of youth in government, the notable reduction in corruption, a significant increase in the number of children attending school, the fall of maternal mortality rate and the steady but constant economic growth have certainly contributed to vivifying this hope. A number of initiatives, including AfghanistanΓÇÖs accession to the World Trade Organization (WTO) and the opening of the Chahbahar port in Iran, are now offering many potential trade opportunities. A COMMON HISTORY Afghans have historically dedicated and sacrificed their lives to their rich and beautiful country. Nevertheless, Afghanistan has suffered countless political upheavals, from Alexander the Great to this very day. For centuries, this fearless nation has fought and maintained independence with the high price of blood and devotion from countrymen and countrywomen alike. It is not the sole glory of one person, clan or ethnic group. The pride belongs to all those Afghans who were involved directly or indirectly through their tangible or intangible contributions. Those engaged directly in the fight have normally taken most credit for their dedication and heroic actions in resisting foreign occupation. For Afghans, they are the ones who are highly esteemed, and history will continue to praise their remarkable service in the name of their country. Afghans have many to remember from the pages of history, such as Malalai of Maiwand, a 19-year-old girl from Maiwand, Kandahar, who reunified local fighters against the British troops at the 1880 Battle of Maiwand. She fought alongside Ghazi Mohammad Ayub Khan, emir of Afghanistan, and is a national hero of Afghanistan, her history is being thaught in Afghan schoolbooks, and many schools, hospitals and other institutions named after her across the country. Another memorable event is the 1979 Herat Uprising against the Soviet-sponsored regimeΓÇöthe Democratic Republic of Afghanistan (DRA)ΓÇöafter it declared new socialist reform that contradicted traditions and values of Islam. People stood against the government and were joined by Afghan army troops. They held the city for about a week, but the regime recaptured the city with the support of Soviet air support. According to estimates, some 25,000 died in this uprising. This day has been continuously celebrated for years by the people in different part of the country, particularly in Herat. Many of those fighters were the so-called mujahedeen, leading the resistance against the Soviet invasion of Afghanistan, and gaining a lot of support across the Muslim world for their jihad. But it was always patriotism that inspired the majority of these figures. A deep love for the motherland, the ultimate respect for their fellow countrymen and women who deserve a better future ahead. Until now, millions of Afghans living overseas have not lost this passion and remain strongly and emotionally connected to home. Majority of them might be blue-collar workers, but they support the families and friends that have remained attached to the land. They wear Afghan clothes on Fridays, Nowroz and Eid, respect the famous Afghan tradition of hospitality, and contribute to educating the world about the social and cultural values that make all Afghans so proud. They are also active in the political life of Afghanistan, engaging in debate on social media and other platforms. ΓÇ£Every Afghan child is a politician,ΓÇ¥ said President Ashraf Ghani during his election campaign, and no sentence can describe better the deep passion that all Afghans have for their nation. This enthusiasm, however, sometimes leads to political frustrations. Due to the lack of extensive media coverage and the difficulty of accessing credible information, many Afghans limit their understanding to the news feeds on social media, which are rarely accurate. Any discussion with the absence of facts and figures leads to misunderstanding, sometimes resulting in heated exchanges of words. Very sensitive posts and comments made by friends often end in strong debates, mostly due to misunderstandings and lack of credible arguments and information used to sustain a point. In one instance the social media became abuzz with the news of the death of Sadiq Fitrat Nashnas, a prominent and much loved Afghan singer. Despite refutation by many people, including the singer himself, this fake news remained a topic of heated arguments for many days. In another instance, the Afghan government executed a number notorious criminals after a legal process. A section of Afghans, including the diaspora, started lionizing these characters on social media, based on mere hearsay. These two incidents further exhibited the difference of views between the resident and not resident Afghans. The most common altercations, however, happen when the expectations between Afghans abroad and those in the country clash. The Afghan diaspora sees the developments, standards, rules and regulations in the West and wants that change for Afghanistan at a snap of its fingers. That is not realistic. The changes that have taken place did not happen overnight. Afghans started from scratch not just once, but many times over. The unrest initiated as result of the revolution in 1978, the subsequent deployment of Soviet troops and the mujahedeen resistance culminated in the establishment of hardline Taliban regime in 1996, followed by the war efforts by the International Security Assistance Force (ISAF) that dislodged the Taliban in 2001. More than 30 years of war have affected our society deeply. It should be obvious that it would take a long while for opportunities present in developed countries to become a reality. Afghans at home also understand and feel the absence of standard schools, standard health services and jobs. According to the latest reports, almost a third of all children across the country are unable to go to school, and unemployment rate is above 40%. The majority of our students are still studying under the burning sun without furniture or blackboards, mothers do not have access to reproductive health facilities. They have more realistic expectations about the timeline for change. Long debates on how to reach the best result are pointless if we donΓÇÖt understand that our struggles are aimed at shared goals. We have to join the forces to prove that changes can come, and lost reputation can be regained. The recent developments show that we are on the right track. Those who used to wait to invest in construction and logistics projects are now thinking of production lines and long-term investments. According to the World BankΓÇÖs Afghanistan Development Update, the domestic revenues increased from 8.7% of GDP in 2014 to 10.4% of GDP in 2015. This will create jobs and other employment opportunities. The representatives of young people and women are more visible in the media and official discussions, showing the emergence of new ideas. The recent Transparency International report shows that Afghanistan is not on the list of top three corrupt countries anymore. This is a notable achievement, reached in part because of initiatives such as the first-ever anti-corruption commission sponsored by the President Ashraf Ghani and inaugurated last July. The Afghan diaspora has done an excellent job in serving the country and contributing to these achievements, particularly when the country needed them most. According to the one estimate by the International Organization for Migration (IOM), the remittances accounted for around 30% of GDP in 2006. But now, with access to education, jobs and new technologies, the disaporaΓÇÖs help is even more valuable. Afghanistan needs our love and patriotism, and each of us should contribute to this rebuilding phase without giving up. MAKING UP FOR SHORTAGES Even a positive and motivational word can bring a notable change in someoneΓÇÖs life. Afghans abroad should avoid never-ending debates that only keeps the country divided. We need a hand in any way possible to not let these divisions happen again. It can be financial support, standardization of education, mobilizing funds, assisting and connecting Afghan students to international universities, filing their applications for scholarships, advocating for gender rights, translating books-including books for children-or visiting Afghanistan during the holidays to contribute directly to the population. We have many shortages within the country and any type of contribution by our family members, friends and sympathizers abroad is fundamental. One example of this is Mahir Momand and his Moska Mobile Library. Momand is an Afghan who lives in Australia and in 2016 created the very first mobile library for the children of Afghanistan. A full-time librarian distributes books on a daily basis, traveling throughout the most remote areas and villages of the country. Since the project started, 35,000 children have received not only colorful storybooks, but also educational material on co-existence and peace. Another remarkable man is Baaz Mohammad, the head of Baaz Welfare Association in Nangarhar province. This association distributes wheelchairs and artificial hands to disabled Afghans. He mobilizes support for this project mainly via his Facebook page and his social media connections. He posts financial updates, reports and field pictures on his timeline to ensure transparency and accountability on his project. According to his last report, 494 wheelchairs and 70 artificial hands have been distributed in Kabul, Nangarhar and Laghman provincesΓÇö20% going to disabled women. Similarly, Ghousdin Ferotan, The CEO of first Afghan magazine for children, AKO BAKO, recently released the first copy of the magazine thanks to the technical and script support of members of the Afghan diaspora. There are many other lesser-known initiatives out there, including many efforts made by Afghans in sending money to family members or people in need at home. The generosity of our community would never stop to surprise, and I am confident that it contributes significantly to the wellbeing of people back home. This is why there should not be competition between those who have remained and those who have left. We all share an emotional and deep attachment to our roots. If you cannot contribute to the unity, you should certainly not contribute to disunity. Our divisions have blocked our rich culture for too long and contributed to the misunderstandings about our nation around the world. Inspired by the works and efforts of Afghans abroad and home, this attempt is to make my contribution by engaging in a call for patriotism and love. We Afghans have to remain united, even when far away from home. A positive journey toward a modern Afghanistan is in place, and it is incumbent upon us to at least maintain at present pace. Let us focus on the way forward where everyone will benefit. It could start by contributing to our economy. The open market is ours: Instead of investing in other countries, invest in AfghanistanΓÇöto prove to foreigners that we ourselves believe in the change. Modern times need modern heroes. You and I, and all of us, are the heroes of our change. >>> READ ORIGINAL ARTICLE Γûé Γûâ Γûà Γûå THE CONTENT OF THIS BLOG IS NOT INTENDED TO CAUSE HARM, but if You have any concerns about the contents of this Blog, contact me by filling out the email form below. Disagreeing with the content of this Blog does not constitute sufficient ground for You to ask me to remove or modify any parts of this Blog. Thank You for visiting my Blog, Ivo R.Toniut Γûé Γûâ Γûà Posted by Ivo Toniut
+trainer_interface.cc(148) LOG(INFO) Loaded 8000000 lines
+trainer_interface.cc(393) LOG(INFO) Reserved chars are found. Skipped: The prayer against brake failure is a prayer every religious Nigerian is conversant with. But have you ever wondered how brake failure occurs? Is it sudden and unpredictable? Is it something beyond your control, hence controlled by supernatural forces? The answer to these questions is a big, bold ΓÇ£NOΓÇ¥. While human error or action cannot be totally ruled out before a brake failure occurs, there are many signs you will most probably notice and that you need to pay attention to. These signs often spell the difference between safety and trouble. It begs the question: Do you know how the braking system in your car works? Do you know what a brake pad is and what it does? No need to panic! The braking system is one of the most vital parts in a car What you need to know about brake pads We would be exploring with you the meaning of a braking system and telling you what a brake pad is and the purpose it serves in your car. We would also briefly discuss the different types of brake pads and itemize some of the brake pads sold on the Nigerian market. We believe this content will help you learn something new. A braking system refers to all those component parts involved in the slowing down or halting of a car in motion. This is done by the conversion of kinetic energy to mechanical energy. Not so hard after all? What then is a brake pad and what does it do in my car? The brake pad is arguably the most vital component of your braking system. It is the part that is responsible for slowing or stopping the car by working against the rotor to bring the car to a halt. Without the brake pads, all parts such as the brake drum, caliper, disc, and rotor, will not function effectively. In addition, the brake pads protect all other component parts of the braking system from immediate wear. Essentially, the brake pad gets you home safe. The functions of a braking system in a car could be summarized as; - It helps in slowing down and stopping the vehicle. - It serves as a means to regulate the brake pressure, thereby enhancing the driverΓÇÖs ability to better control his speed. - It facilitates emergency stop when the need arises. - The conversion and absorption of kinetic energy to mechanical energy is also a vital role in the braking system. In this article, you will see what type of brake pad works for your car When do you change your brake pads? How can you know when it is time to change your brake pads? Well, it is often difficult to give a general or blanket statement on the length of time a brake pad will last, as it often varies from vehicle to vehicle. Also, the frequency of use and the average distance of that car will also play roles in determining the longevity of the brake pad. For instance, if you are the type to travel over a long distance weekly, your brake padΓÇÖs life span may likely be shorter than the average driver that goes to work over a short distance daily. How to know if your brake pad is faulty You may be wondering what signs to look out for in a faulty brake pad. We need to let you know at this point that, it doesnΓÇÖt matter the distance covered by your car, whether long or short. As long as you have been using the same vehicle over a long period of time, your brake pads will inevitably need to be changed. This is because, every time you apply your brakes, you inevitably chop off bits of the brake pad. The bit-by-bit chop off occurs as a result of the friction between the brake pad and the rotating disc when attempting to slow down or stop the car. We know ... we know; you want to know those signs to look out for when your brake pad is faulty. Some of those signs, as briefly stated, are: - You begin to hear squealing or screeching noises - The brake warning light on our dashboard begins to blink - When visual inspection of the brake pad reveals less than a quarter-inch of the brake pad. - When you hear metallic grinding and growling coming from the brake pad area. This video will teach you how to check how far gone your pads are. Check it out! Video: How To Check Brake Pads - How much Γûü Γûé Γûà is left? >>> Learn more about the braking system: Type of brake pads We did promise to give you the types of brake pads we have: 1. Semi-metallic brakes This type of brake is one that consists mostly of metals with a combination of steel wool, copper, wires, etc. The interesting thing about this kind of brake is that they are largely heat resistant and tend to be more gentle on the rotors. They perform well in low-temperature r cold weather conditions. These kinds of brakes are best used in sports cars. Sports cars often go with semi-metallic brakes 2. Non-Asbestos organic brakes This type of brake is made up of fiber, cellulose materials, rubber, Kevlar and other organic materials. Like the semi-metallic brake pads, the non-asbestos is also subtle but it wears out faster than all the others, despite its huge cost. Non-asbestos organic brakes are considered to be at high costs 3. Low metallic NAO brakes A product of the combination of copper and steel and other organic materials, the Low metallic NAO possess great braking and heat transfer capabilities, but produce a lot of noise and bring up brake dust. This is all the more reason why they are best suited to medium-sized cars like coupes, sedans, station wagons, etc. Its drawback is the noise it produces 4. Ceramic brakes Arguably the most popular choice of all the brakes, the Ceramic brakes are made from ceramic materials which give the unique advantage of being the quietest and cleanest of the lot. They can absorb heat and perform well under the harshest conditions and have excellent braking capability. They are also very expensive. If you have a high performance vehicle like a sports car, then this brakeΓÇÖs features are best utilized in your car. These are the most commonly used brake pads We have also gone ahead to compile some brake pads you can get on the Nigerian market to give you a fair picture of prices. Brake pads Premium ceramic with shims - Front set (Acura ILX, Honda Accord, Honda Civic, Honda CR-V, Honda Element, Honda Pilot) Price- Γéª5,225 Brake pads premium ceramic with shims Accura ilx - Generic Toyota Front brake pad (Highlander "09-14") Price- Γéª30,000 Generic Toyota Front brake pad for Highlander "09-14" - Asimco Front Brake Pad (Lexus LX 470 1998-2007, Toyota Land Cruiser 1998-2007) Price- Γéª6,400 Asimco Front Brake Pad for Lexus LX 470 1998-2007, Toyota Land Cruiser 1998-2007 While we are glad that we have been able to serve you with information on things you need to know about brake pads, we also advise that you consult with your local engineers and mechanic about your choice of brake pads. Good luck.
+trainer_interface.cc(148) LOG(INFO) Loaded 9000000 lines
+trainer_interface.cc(148) LOG(INFO) Loaded 10000000 lines
+trainer_interface.cc(413) LOG(INFO) Sampled 1000000 sentences from 10516338 sentences.
+trainer_interface.cc(418) LOG(INFO) Skipped 325690 too long sentences.
+trainer_interface.cc(427) LOG(INFO) Adding meta_piece: <pad>
+trainer_interface.cc(427) LOG(INFO) Adding meta_piece: <s>
+trainer_interface.cc(427) LOG(INFO) Adding meta_piece: </s>
+trainer_interface.cc(427) LOG(INFO) Adding meta_piece: <unk>
+trainer_interface.cc(432) LOG(INFO) Normalizing sentences...
+trainer_interface.cc(541) LOG(INFO) all chars count=3052228858
+trainer_interface.cc(552) LOG(INFO) Done: 100% characters are covered.
+trainer_interface.cc(562) LOG(INFO) Alphabet size=11908
+trainer_interface.cc(563) LOG(INFO) Final character coverage=1
+trainer_interface.cc(594) LOG(INFO) Done! preprocessed 1000000 sentences.
+trainer_interface.cc(600) LOG(INFO) Tokenizing input sentences with whitespace: 1000000
+trainer_interface.cc(611) LOG(INFO) Done! 8957393
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=60311529 min_freq=101
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18414175 size=20 all=143834 active=11032 piece=al
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9551201 size=40 all=147534 active=14732 piece=Γûüh
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5661067 size=60 all=151372 active=18570 piece=ation
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4831651 size=80 all=156044 active=23242 piece=ΓûüThe
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3527117 size=100 all=160501 active=27699 piece=Γûüwith
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=3517813 min_freq=1704
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3039876 size=120 all=164318 active=11780 piece=iv
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=2631796 size=140 all=169364 active=16826 piece=Γûüby
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=2259447 size=160 all=173988 active=21450 piece=ant
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1900287 size=180 all=178637 active=26099 piece=Γûü-
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1574515 size=200 all=183377 active=30839 piece=Γûünot
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=1572036 min_freq=5055
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1392098 size=220 all=188812 active=14507 piece=ΓûüK
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1268613 size=240 all=193937 active=19632 piece=der
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1149788 size=260 all=198685 active=24380 piece=Γûüad
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1068134 size=280 all=203641 active=29336 piece=ΓûüV
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=1002429 size=300 all=209450 active=35145 piece=Γûüne
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=995333 min_freq=5690
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=917351 size=320 all=213787 active=14687 piece=ance
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=857270 size=340 all=219576 active=20476 piece=ace
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=790475 size=360 all=222985 active=23885 piece=aus
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=738319 size=380 all=227609 active=28509 piece=ational
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=696264 size=400 all=232868 active=33768 piece=Γûüpeople
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=692840 min_freq=5609
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=651659 size=420 all=236424 active=15156 piece=Γûüinto
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=604770 size=440 all=239733 active=18465 piece=ob
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=572608 size=460 all=244686 active=23418 piece=ics
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=547827 size=480 all=249214 active=27946 piece=ause
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=518670 size=500 all=252020 active=30752 piece=ied
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=518186 min_freq=5292
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=501318 size=520 all=254861 active=15084 piece=oth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=479809 size=540 all=259979 active=20202 piece=aw
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=456222 size=560 all=264205 active=24428 piece=ily
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=435790 size=580 all=269266 active=29489 piece=ink
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=414314 size=600 all=273677 active=33900 piece=ferences
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=413907 min_freq=4981
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=396838 size=620 all=276675 active=16626 piece=Γûümed
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=383055 size=640 all=280956 active=20907 piece=ural
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=368914 size=660 all=284859 active=24810 piece=xt
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=354056 size=680 all=287802 active=27753 piece=oot
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=341716 size=700 all=292164 active=32115 piece=ferent
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=340222 min_freq=4626
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=330277 size=720 all=296649 active=19011 piece=arm
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=321263 size=740 all=300964 active=23326 piece=vern
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=315776 size=760 all=304298 active=26660 piece=Γûüsaid
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=306975 size=780 all=307101 active=29463 piece=ason
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=299861 size=800 all=310298 active=32660 piece=ΓûüEng
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=299800 min_freq=4313
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=289079 size=820 all=313637 active=18741 piece=Γûüpat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=283458 size=840 all=316897 active=22001 piece=au
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=274968 size=860 all=321127 active=26231 piece=Γûüsame
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=266818 size=880 all=324267 active=29371 piece=Γûüsmall
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=260324 size=900 all=327896 active=33000 piece=Γûübuild
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=259961 min_freq=4049
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=252473 size=920 all=331515 active=19984 piece=Γûüproble
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=246887 size=940 all=336116 active=24585 piece=ΓûüCon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=240899 size=960 all=339737 active=28206 piece=Γûüoften
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=236150 size=980 all=343517 active=31986 piece=ΓûüWhat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=228731 size=1000 all=346371 active=34840 piece=Γûüprof
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=228652 min_freq=3749
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=222219 size=1020 all=348677 active=19570 piece=Γûüconst
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=218760 size=1040 all=352890 active=23783 piece=Γûübo
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=211488 size=1060 all=355856 active=26749 piece=ΓûüOr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=206800 size=1080 all=359811 active=30704 piece=Γûüfin
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=202096 size=1100 all=362784 active=33677 piece=ries
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=201984 min_freq=3535
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=197445 size=1120 all=365975 active=21108 piece=Γûüconf
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=193675 size=1140 all=369162 active=24295 piece=Γûüexample
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=190779 size=1160 all=372015 active=27148 piece=Γûüopen
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=187324 size=1180 all=373995 active=29128 piece=Γûü16
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=184258 size=1200 all=376080 active=31213 piece=ΓûüTr
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=183951 min_freq=3401
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=181586 size=1220 all=379881 active=22433 piece=ental
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=177975 size=1240 all=383388 active=25940 piece=Γûüsit
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=175817 size=1260 all=385694 active=28246 piece=Γûübased
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=172501 size=1280 all=388149 active=30701 piece=ΓûüMay
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=168953 size=1300 all=391564 active=34116 piece=Γûüess
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=168860 min_freq=3208
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=165456 size=1320 all=394941 active=22912 piece=-1
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=162968 size=1340 all=399161 active=27132 piece=ried
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=159096 size=1360 all=402884 active=30855 piece=Γûülow
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=156063 size=1380 all=407069 active=35040 piece=Γûüalong
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=154212 size=1400 all=408891 active=36862 piece=Γûüplant
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=154077 min_freq=3043
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=151453 size=1420 all=412271 active=23741 piece=ole
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=149335 size=1440 all=416761 active=28231 piece=lege
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=147516 size=1460 all=419099 active=30569 piece=ogn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=145439 size=1480 all=422961 active=34431 piece=ΓûüMan
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=142222 size=1500 all=426317 active=37787 piece=Γûücity
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=142029 min_freq=2887
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=139644 size=1520 all=428841 active=23811 piece=Γûüseries
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=137350 size=1540 all=431060 active=26030 piece=Γûüdra
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=135478 size=1560 all=434181 active=29151 piece=Γûüeducation
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=133387 size=1580 all=439478 active=34448 piece=Γûüpe
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=130138 size=1600 all=444406 active=39376 piece=ches
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=130091 min_freq=2735
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=128422 size=1620 all=446960 active=24551 piece=Γûücase
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=126444 size=1640 all=449599 active=27190 piece=uture
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=124963 size=1660 all=452323 active=29914 piece=ee
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=122954 size=1680 all=456104 active=33695 piece=Γûütoget
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=121556 size=1700 all=461009 active=38600 piece=Γûü11
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=121402 min_freq=2587
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=119900 size=1720 all=462834 active=24789 piece=ression
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=118740 size=1740 all=466568 active=28523 piece=Γûüdam
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=117582 size=1760 all=468688 active=30643 piece=ively
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=115781 size=1780 all=470540 active=32495 piece=Γûütoday
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=114232 size=1800 all=474029 active=35984 piece=ΓûüAcc
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=114204 min_freq=2480
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=112803 size=1820 all=476128 active=25694 piece=Γûüarr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=111592 size=1840 all=478335 active=27901 piece=ΓûüApril
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=110354 size=1860 all=480341 active=29907 piece=ream
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=109204 size=1880 all=482742 active=32308 piece=ille
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=108112 size=1900 all=486638 active=36204 piece=ΓûüResear
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=108083 min_freq=2382
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=107106 size=1920 all=489158 active=26848 piece=Γûüconditions
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=106038 size=1940 all=491636 active=29326 piece=cember
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=104168 size=1960 all=494197 active=31887 piece=ivil
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=102674 size=1980 all=497370 active=35060 piece=Γûüespecially
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=101184 size=2000 all=499146 active=36836 piece=Γûüliving
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=101177 min_freq=2295
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=100206 size=2020 all=502824 active=28621 piece=acks
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=99080 size=2040 all=504668 active=30465 piece=Γûüchall
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=97843 size=2060 all=507102 active=32899 piece=Γûüstudies
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=96888 size=2080 all=508659 active=34456 piece=Γûüpred
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=95993 size=2100 all=512276 active=38073 piece=Γûüeff
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=95966 min_freq=2200
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=95271 size=2120 all=515858 active=29141 piece=Γûüfamil
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=94192 size=2140 all=516815 active=30098 piece=lex
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=92551 size=2160 all=519933 active=33216 piece=ops
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=91862 size=2180 all=522927 active=36210 piece=Γûücut
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=90701 size=2200 all=525733 active=39016 piece=Γûüfail
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=90668 min_freq=2102
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=89779 size=2220 all=528635 active=29164 piece=Γûüschools
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=88991 size=2240 all=530199 active=30728 piece=Γûügrowth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=87909 size=2260 all=532266 active=32795 piece=Γûüvalue
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=86874 size=2280 all=535560 active=36089 piece=osis
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=86178 size=2300 all=537542 active=38071 piece=ΓûüAssoci
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=86115 min_freq=2033
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=85233 size=2320 all=540128 active=29447 piece=Γûüquestions
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=84264 size=2340 all=541966 active=31285 piece=Γûürate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=83575 size=2360 all=543813 active=33132 piece=che
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=83025 size=2380 all=547127 active=36446 piece=Γûügreen
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=82042 size=2400 all=549519 active=38838 piece=riate
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=82024 min_freq=1955
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=81375 size=2420 all=551514 active=29436 piece=Γûüjob
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=80371 size=2440 all=554571 active=32493 piece=Γûüability
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=79637 size=2460 all=556049 active=33971 piece=Γûüclaim
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=78617 size=2480 all=557916 active=35838 piece=Γûügas
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=77918 size=2500 all=560269 active=38191 piece=Γûüsurv
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=77875 min_freq=1900
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=77096 size=2520 all=562092 active=29813 piece=lymp
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=76292 size=2540 all=564990 active=32711 piece=Γûüprote
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=75812 size=2560 all=567786 active=35507 piece=ider
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=74950 size=2580 all=568790 active=36511 piece=orge
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=73917 size=2600 all=571423 active=39144 piece=1)
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=73900 min_freq=1851
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=73084 size=2620 all=573492 active=30428 piece=Γûüinvolved
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=72415 size=2640 all=575585 active=32521 piece=Γûümeasure
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=71535 size=2660 all=577185 active=34121 piece=5)
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=70806 size=2680 all=579360 active=36296 piece=Γûücheck
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=70148 size=2700 all=580788 active=37724 piece=Γûüsil
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=70060 min_freq=1814
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=69475 size=2720 all=581935 active=30083 piece=Γûütherap
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=68770 size=2740 all=582765 active=30913 piece=eration
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=68069 size=2760 all=584050 active=32198 piece=Γûüstandard
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=67546 size=2780 all=587263 active=35411 piece=Γûünovel
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=66758 size=2800 all=589456 active=37604 piece=ribution
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=66746 min_freq=1771
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=66063 size=2820 all=592271 active=32239 piece=ength
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=65310 size=2840 all=594725 active=34693 piece=odes
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=64652 size=2860 all=599034 active=39002 piece=back
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=64212 size=2880 all=602165 active=42133 piece=ΓûüNow
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=63747 size=2900 all=604299 active=44267 piece=Γûüfeet
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=63746 min_freq=1703
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=63136 size=2920 all=607495 active=33396 piece=Γûüthing
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=62766 size=2940 all=609024 active=34925 piece=pro
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=62346 size=2960 all=610593 active=36494 piece=iff
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=61924 size=2980 all=613566 active=39467 piece=Γûüsomeone
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=61486 size=3000 all=614394 active=40295 piece=ΓûüUK
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=61468 min_freq=1657
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=60917 size=3020 all=616414 active=32694 piece=Γûüannoun
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=60509 size=3040 all=618725 active=35005 piece=ΓûüTex
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=60014 size=3060 all=621136 active=37416 piece=Γûüessential
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=59295 size=3080 all=623948 active=40228 piece=oma
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=58857 size=3100 all=627314 active=43594 piece=Γûülaun
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=58830 min_freq=1595
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=58548 size=3120 all=630609 active=34648 piece=Γûü2008
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=58073 size=3140 all=632858 active=36897 piece=Γûücit
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=57387 size=3160 all=635782 active=39821 piece=Γûüachieve
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=56847 size=3180 all=637326 active=41365 piece=Γûüdefin
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=56391 size=3200 all=638777 active=42816 piece=Γûüimmedi
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=56337 min_freq=1550
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=56052 size=3220 all=640121 active=33274 piece=ΓûüHum
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=55666 size=3240 all=642231 active=35384 piece=iques
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=55121 size=3260 all=644573 active=37726 piece=ΓûüMusic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=54806 size=3280 all=646374 active=39527 piece=Γûüprojects
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=54507 size=3300 all=647668 active=40821 piece=Γûühighly
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=54464 min_freq=1520
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=53948 size=3320 all=649896 active=34604 piece=Γûücoast
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=53488 size=3340 all=653529 active=38237 piece=Γûürail
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=53139 size=3360 all=656609 active=41317 piece=Γûübit
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=52593 size=3380 all=658007 active=42715 piece=orpor
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=52124 size=3400 all=661189 active=45897 piece=Γûürecorded
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=52081 min_freq=1465
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=51737 size=3420 all=662509 active=34374 piece=fort
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=51304 size=3440 all=665076 active=36941 piece=Γûüenjoy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=51007 size=3460 all=666990 active=38855 piece=Γûürelationship
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=50524 size=3480 all=669244 active=41109 piece=Γûüaspect
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=50290 size=3500 all=671740 active=43605 piece=Γûüult
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=50265 min_freq=1424
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=50021 size=3520 all=674447 active=36256 piece=BC
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=49740 size=3540 all=676264 active=38073 piece=ΓûüDivision
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=49450 size=3560 all=677768 active=39577 piece=Γûüplaying
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=49153 size=3580 all=680169 active=41978 piece=ΓûüSecond
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=48853 size=3600 all=683019 active=44828 piece=Γûüriver
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=48836 min_freq=1383
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=48468 size=3620 all=685191 active=36279 piece=ΓûüRev
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=48063 size=3640 all=688697 active=39785 piece=Γûübacteria
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=47724 size=3660 all=691063 active=42151 piece=Γûümention
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=47371 size=3680 all=692763 active=43851 piece=Γûücold
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=47128 size=3700 all=695243 active=46331 piece=ΓÇô2
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=47120 min_freq=1344
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=46918 size=3720 all=697821 active=37156 piece=ΓûüMexico
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=46596 size=3740 all=699322 active=38657 piece=Γûürequires
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=46254 size=3760 all=701817 active=41152 piece=Γûüannounced
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=45975 size=3780 all=704378 active=43713 piece=Γûücommonly
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=45622 size=3800 all=707136 active=46471 piece=ΓûüProt
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=45609 min_freq=1305
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=45396 size=3820 all=709904 active=37988 piece=istan
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=45128 size=3840 all=712293 active=40377 piece=ΓûüInst
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=44730 size=3860 all=714207 active=42291 piece=Γûüexamples
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=44410 size=3880 all=716848 active=44932 piece=rong
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=44229 size=3900 all=719173 active=47257 piece=itable
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=44146 min_freq=1270
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=43779 size=3920 all=722157 active=38868 piece=mosp
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=43409 size=3940 all=724235 active=40946 piece=Γûüobjects
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=43063 size=3960 all=726030 active=42741 piece=ΓûüEnvironment
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=42820 size=3980 all=727838 active=44549 piece=Γûühighest
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=42549 size=4000 all=730306 active=47017 piece=Γûüdemand
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=42540 min_freq=1237
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=42316 size=4020 all=732331 active=38517 piece=Γûü28
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=41992 size=4040 all=733263 active=39449 piece=Γûüwear
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=41602 size=4060 all=736144 active=42330 piece=Γûüfile
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=41386 size=4080 all=739000 active=45186 piece=zil
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=41110 size=4100 all=741890 active=48076 piece=Γûüpow
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=41072 min_freq=1202
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=40818 size=4120 all=743898 active=39067 piece=ΓûüPeter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=40542 size=4140 all=746507 active=41676 piece=Γûüspent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=40182 size=4160 all=748857 active=44026 piece=ΓûüOffic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=39918 size=4180 all=751569 active=46738 piece=ΓûüFrank
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=39584 size=4200 all=752767 active=47936 piece=Γûütox
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=39540 min_freq=1171
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=39214 size=4220 all=754987 active=39816 piece=iated
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=39067 size=4240 all=756863 active=41692 piece=Γûücry
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=38664 size=4260 all=759376 active=44205 piece=Γûüreached
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=38501 size=4280 all=761958 active=46787 piece=Γûühelped
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=38289 size=4300 all=764349 active=49178 piece=Γûüaim
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=38278 min_freq=1143
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=38033 size=4320 all=767167 active=41006 piece=Γûühuge
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=37865 size=4340 all=768687 active=42526 piece=Γûüdetails
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=37549 size=4360 all=770227 active=44066 piece=Γûülegisl
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=37279 size=4380 all=772317 active=46156 piece=Γûübatter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=37038 size=4400 all=774046 active=47885 piece=ΓûüBill
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=37020 min_freq=1116
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=36823 size=4420 all=776312 active=40839 piece=ario
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=36635 size=4440 all=780092 active=44619 piece=ΓûüCommon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=36418 size=4460 all=781893 active=46420 piece=Γûücra
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=36261 size=4480 all=783294 active=47821 piece=grad
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=36060 size=4500 all=784857 active=49384 piece=Γûüsubsequ
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=36051 min_freq=1090
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=35860 size=4520 all=787188 active=41563 piece=14
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=35525 size=4540 all=788720 active=43095 piece=ishop
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=35303 size=4560 all=791112 active=45487 piece=Γûü3,
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=35070 size=4580 all=793127 active=47502 piece=Γûücomplic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=34885 size=4600 all=794861 active=49236 piece=Γûüeasier
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=34874 min_freq=1065
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=34691 size=4620 all=797547 active=42425 piece=down
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=34426 size=4640 all=799866 active=44744 piece=Γûüadapt
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=34306 size=4660 all=800868 active=45746 piece=Γûübone
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=34124 size=4680 all=803057 active=47935 piece=Γûümuseum
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33902 size=4700 all=804828 active=49706 piece=Γûüadvanced
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=33901 min_freq=1044
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33785 size=4720 all=807134 active=42543 piece=Γûürul
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33627 size=4740 all=809051 active=44460 piece=Γûürecommended
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33424 size=4760 all=811079 active=46488 piece=Γûüarm
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33220 size=4780 all=813090 active=48499 piece=ΓûüDen
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=33126 size=4800 all=815175 active=50584 piece=Γûüreality
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=33075 min_freq=1023
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32940 size=4820 all=816951 active=42524 piece=oung
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32786 size=4840 all=819445 active=45018 piece=ΓûüSaint
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32514 size=4860 all=821391 active=46964 piece=rey
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32333 size=4880 all=823195 active=48768 piece=ii
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32177 size=4900 all=825537 active=51110 piece=ΓûüOlympic
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=32175 min_freq=1000
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=32027 size=4920 all=826536 active=42273 piece=ΓûüDesp
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=31832 size=4940 all=828206 active=43943 piece=riculum
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=31619 size=4960 all=829369 active=45106 piece=ockey
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=31518 size=4980 all=831979 active=47716 piece=lers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=31345 size=5000 all=834752 active=50489 piece=ΓûüInformation
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=31340 min_freq=981
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=31162 size=5020 all=836778 active=43723 piece=Γûümentioned
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30996 size=5040 all=838575 active=45520 piece=icy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30813 size=5060 all=840675 active=47620 piece=Γûühus
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30567 size=5080 all=842095 active=49040 piece=ndrome
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30393 size=5100 all=843550 active=50495 piece=ΓûüEr
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=30383 min_freq=963
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30296 size=5120 all=845374 active=43722 piece=ΓûüDespite
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=30134 size=5140 all=846518 active=44866 piece=Γûüperman
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29935 size=5160 all=847930 active=46278 piece=orter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29778 size=5180 all=849510 active=47858 piece=ΓûüAD
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29596 size=5200 all=851216 active=49564 piece=riz
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=29577 min_freq=949
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29400 size=5220 all=852610 active=43647 piece=Γûüarmy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29295 size=5240 all=853364 active=44401 piece=Γûüemotional
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=29081 size=5260 all=856355 active=47392 piece=Γûüwealth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=28908 size=5280 all=857694 active=48731 piece=ΓûüManagement
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=28701 size=5300 all=859541 active=50578 piece=Γûürelationships
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=28699 min_freq=933
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=28467 size=5320 all=860837 active=44266 piece=ht
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=28367 size=5340 all=863716 active=47145 piece=Γûüatmosphere
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=28144 size=5360 all=864792 active=48221 piece=45
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27986 size=5380 all=866405 active=49834 piece=Γûü1950
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27833 size=5400 all=868708 active=52137 piece=Γûüended
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=27833 min_freq=916
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27728 size=5420 all=869668 active=44393 piece=Γûü35
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27551 size=5440 all=873052 active=47777 piece=Γûügenus
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27455 size=5460 all=874594 active=49319 piece=Γûüphone
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27299 size=5480 all=876422 active=51147 piece=Γûüseat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27207 size=5500 all=877280 active=52005 piece=raction
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=27207 min_freq=901
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=27064 size=5520 all=880922 active=47413 piece=ΓûüScotland
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26924 size=5540 all=882201 active=48692 piece=ΓûüSecret
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26829 size=5560 all=883795 active=50286 piece=Γûüflight
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26696 size=5580 all=884834 active=51325 piece=Γûüfaster
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26578 size=5600 all=886543 active=53034 piece=una
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=26574 min_freq=882
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26441 size=5620 all=889446 active=46776 piece=ΓûüGlobal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26279 size=5640 all=891429 active=48759 piece=FL
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26153 size=5660 all=893715 active=51045 piece=ΓûüJews
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=26022 size=5680 all=895371 active=52701 piece=Γûüentered
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25864 size=5700 all=897806 active=55136 piece=Γûüadvoc
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=25864 min_freq=864
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25768 size=5720 all=899443 active=46508 piece=Γûüobvious
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25586 size=5740 all=901037 active=48102 piece=obe
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25449 size=5760 all=902985 active=50050 piece=Γûüoral
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25337 size=5780 all=903929 active=50994 piece=Γûüaffects
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25247 size=5800 all=905256 active=52321 piece=Γûülose
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=25239 min_freq=850
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25115 size=5820 all=906749 active=46753 piece=Γûüfell
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=25013 size=5840 all=909238 active=49242 piece=Γûüwid
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24947 size=5860 all=910641 active=50645 piece=ΓûüDesc
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24816 size=5880 all=912831 active=52835 piece=Γûüroots
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24680 size=5900 all=914800 active=54804 piece=adel
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=24679 min_freq=833
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24577 size=5920 all=916842 active=47508 piece=ΓûüVen
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24467 size=5940 all=919810 active=50476 piece=Γûüauthority
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24330 size=5960 all=921933 active=52599 piece=Γûü8.
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24229 size=5980 all=923854 active=54520 piece=ΓûüEth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24154 size=6000 all=925383 active=56049 piece=ΓûüJack
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=24154 min_freq=816
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=24025 size=6020 all=927134 active=47927 piece=ΓûüTenn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23924 size=6040 all=929074 active=49867 piece=Γûüinitially
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23806 size=6060 all=930823 active=51616 piece=free
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23727 size=6080 all=932357 active=53150 piece=Γûüwindow
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23611 size=6100 all=933294 active=54087 piece=ΓûüConference
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=23611 min_freq=805
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23482 size=6120 all=935173 active=48536 piece=ΓûüIslands
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23396 size=6140 all=937604 active=50967 piece=ΓûüArgent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23271 size=6160 all=941205 active=54568 piece=ΓûüEngineering
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23146 size=6180 all=942928 active=56291 piece=Γûüfib
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=23044 size=6200 all=944946 active=58309 piece=Γûüacts
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=23039 min_freq=788
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22935 size=6220 all=947480 active=49780 piece=ache
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22843 size=6240 all=949463 active=51763 piece=Γûüdepart
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22712 size=6260 all=950707 active=53007 piece=Γûü(20
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22652 size=6280 all=952802 active=55102 piece=Γûüpair
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22511 size=6300 all=954761 active=57061 piece=Γûüconcerned
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=22506 min_freq=773
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22421 size=6320 all=957609 active=50584 piece=ΓûüTre
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22340 size=6340 all=958800 active=51775 piece=icide
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22255 size=6360 all=961068 active=54043 piece=iology
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22158 size=6380 all=963142 active=56117 piece=100
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=22076 size=6400 all=965497 active=58472 piece=Γûüpoliticians
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=22066 min_freq=759
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21963 size=6420 all=967140 active=49915 piece=Γûümoon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21859 size=6440 all=969071 active=51846 piece=Γûüdecrease
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21777 size=6460 all=970615 active=53390 piece=riend
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21668 size=6480 all=971749 active=54524 piece=iary
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21577 size=6500 all=974938 active=57713 piece=Γûüstands
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=21576 min_freq=746
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21516 size=6520 all=976843 active=50650 piece=ΓûüExt
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21423 size=6540 all=977720 active=51527 piece=Γûüdepos
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21319 size=6560 all=979778 active=53585 piece=phone
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21266 size=6580 all=981112 active=54919 piece=Γûügenerate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21177 size=6600 all=982345 active=56152 piece=ela
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=21177 min_freq=737
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21128 size=6620 all=985116 active=51389 piece=Γûüaccounts
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=21065 size=6640 all=986530 active=52803 piece=ΓûüPrem
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20984 size=6660 all=988200 active=54473 piece=Γûüfasc
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20911 size=6680 all=990768 active=57041 piece=ΓûüPot
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20862 size=6700 all=991660 active=57933 piece=erman
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=20862 min_freq=724
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20721 size=6720 all=994004 active=51604 piece=ether
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20619 size=6740 all=995603 active=53203 piece=ΓûüDif
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20550 size=6760 all=997088 active=54688 piece=ΓûüCambridge
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20454 size=6780 all=998131 active=55731 piece=Γûüpossess
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20367 size=6800 all=999908 active=57508 piece=Γûümunicipality
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=20366 min_freq=715
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20262 size=6820 all=1002336 active=52422 piece=Γûümedian
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20171 size=6840 all=1004847 active=54933 piece=Γûü10,
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=20094 size=6860 all=1005737 active=55823 piece=Γûüadministrative
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19978 size=6880 all=1007095 active=57181 piece=Γûülaunch
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19922 size=6900 all=1008588 active=58674 piece=Γûümand
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=19916 min_freq=705
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19847 size=6920 all=1009552 active=51289 piece=ribed
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19789 size=6940 all=1012069 active=53806 piece=Γûüdamaged
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19720 size=6960 all=1014396 active=56133 piece=while
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19654 size=6980 all=1016376 active=58113 piece=Γûüparam
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19581 size=7000 all=1018341 active=60078 piece=ito
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=19571 min_freq=694
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19483 size=7020 all=1019577 active=51566 piece=Γûüaged
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19413 size=7040 all=1021730 active=53719 piece=Γûü2012.
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19339 size=7060 all=1023110 active=55099 piece=Γûüdiox
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19264 size=7080 all=1024716 active=56705 piece=ΓûüMaryland
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19179 size=7100 all=1026583 active=58572 piece=Γûüdebate
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=19177 min_freq=685
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19076 size=7120 all=1029476 active=54216 piece=HO
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=19016 size=7140 all=1031297 active=56037 piece=Γûüoutbre
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18923 size=7160 all=1032437 active=57177 piece=track
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18851 size=7180 all=1034515 active=59255 piece=ΓûüBad
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18773 size=7200 all=1035674 active=60414 piece=Γûülie
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=18772 min_freq=674
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18705 size=7220 all=1037040 active=53112 piece=ji
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18637 size=7240 all=1039904 active=55976 piece=Γûü2021
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18533 size=7260 all=1041624 active=57696 piece=DP
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18478 size=7280 all=1043581 active=59653 piece=Γûümultip
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18381 size=7300 all=1044943 active=61015 piece=Γûücomments
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=18376 min_freq=665
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18298 size=7320 all=1046217 active=53521 piece=Γûürelief
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18234 size=7340 all=1047423 active=54727 piece=Γûüpassing
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18139 size=7360 all=1048500 active=55804 piece=aired
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18089 size=7380 all=1049736 active=57040 piece=Γûühall
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=18008 size=7400 all=1051049 active=58353 piece=Γûü1/
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=17990 min_freq=657
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17912 size=7420 all=1052052 active=53456 piece=ΓûüChapter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17813 size=7440 all=1053458 active=54862 piece=Γûüeveryday
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17756 size=7460 all=1054467 active=55871 piece=Γûüille
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17707 size=7480 all=1056087 active=57491 piece=Γûü15,
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17641 size=7500 all=1058039 active=59443 piece=Γûüwasn
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=17633 min_freq=649
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17569 size=7520 all=1059233 active=54089 piece=eg
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17522 size=7540 all=1061798 active=56654 piece=Γûümode
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17456 size=7560 all=1063124 active=57980 piece=Γûülaid
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17397 size=7580 all=1064615 active=59471 piece=Γûümigr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17337 size=7600 all=1066031 active=60887 piece=Γûüben
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=17336 min_freq=639
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17278 size=7620 all=1068475 active=55629 piece=Γûücryst
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17180 size=7640 all=1070513 active=57667 piece=Γûünecessarily
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17101 size=7660 all=1071573 active=58727 piece=rates
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=17037 size=7680 all=1073360 active=60514 piece=eenth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16987 size=7700 all=1074521 active=61675 piece=ΓûüLady
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=16981 min_freq=629
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16944 size=7720 all=1076224 active=55390 piece=Γûüflower
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16859 size=7740 all=1077849 active=57015 piece=Γûünegot
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16804 size=7760 all=1079064 active=58230 piece=Γûüdisturb
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16753 size=7780 all=1080235 active=59401 piece=Γûümetres
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16688 size=7800 all=1081870 active=61036 piece=Γûüorganisms
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=16686 min_freq=622
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16646 size=7820 all=1083417 active=55631 piece=ΓûüNorwegian
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16580 size=7840 all=1084287 active=56501 piece=azon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16514 size=7860 all=1086502 active=58716 piece=Γûüsought
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16432 size=7880 all=1087405 active=59619 piece=2).
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16359 size=7900 all=1088811 active=61025 piece=ΓûüHaving
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=16358 min_freq=614
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16297 size=7920 all=1089758 active=55386 piece=Γûüalter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16249 size=7940 all=1091321 active=56949 piece=Γûümarks
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16190 size=7960 all=1093003 active=58631 piece=ΓûüFacebook
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16122 size=7980 all=1093518 active=59146 piece=Γûüproved
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=16063 size=8000 all=1094526 active=60154 piece=gressive
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=16058 min_freq=608
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15999 size=8020 all=1096378 active=56549 piece=Γûücopper
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15964 size=8040 all=1098038 active=58209 piece=Γûüliteracy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15913 size=8060 all=1098691 active=58862 piece=Γûüdemonstrated
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15840 size=8080 all=1100421 active=60592 piece=Γûüdollars
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15760 size=8100 all=1103140 active=63311 piece=Γûüentertain
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=15757 min_freq=600
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15706 size=8120 all=1105004 active=57013 piece=ΓûüWars
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15659 size=8140 all=1106947 active=58956 piece=IDS
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15615 size=8160 all=1109506 active=61515 piece=Γûü2016.
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15562 size=8180 all=1112713 active=64722 piece=Γûügiant
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15515 size=8200 all=1114135 active=66144 piece=Γûücomplicated
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=15514 min_freq=590
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15451 size=8220 all=1115915 active=57482 piece=ΓûüAntar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15407 size=8240 all=1116853 active=58420 piece=ΓûüTai
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15342 size=8260 all=1118689 active=60256 piece=ΓûüLeon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15267 size=8280 all=1120547 active=62114 piece=Γûü48
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15217 size=8300 all=1121952 active=63519 piece=Γûüassociate
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=15216 min_freq=582
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15156 size=8320 all=1123629 active=57772 piece=68
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15097 size=8340 all=1126062 active=60205 piece=Γûüforming
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15049 size=8360 all=1127405 active=61548 piece=Γûürugby
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=15015 size=8380 all=1128479 active=62622 piece=ΓûüSteve
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14954 size=8400 all=1130052 active=64195 piece=tes
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=14954 min_freq=574
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14905 size=8420 all=1130966 active=57140 piece=ortion
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14842 size=8440 all=1132501 active=58675 piece=Γûü;
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14786 size=8460 all=1133923 active=60097 piece=ΓûüAlaska
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14727 size=8480 all=1135630 active=61804 piece=31
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14676 size=8500 all=1138645 active=64819 piece=Γûüadvantages
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=14671 min_freq=567
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14609 size=8520 all=1140313 active=58597 piece=run
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14550 size=8540 all=1142638 active=60922 piece=Γûünovels
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14522 size=8560 all=1144485 active=62769 piece=emb
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14464 size=8580 all=1146528 active=64812 piece=Γûüsurprising
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14425 size=8600 all=1149193 active=67477 piece=Γûüdriven
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=14424 min_freq=557
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14387 size=8620 all=1150786 active=59051 piece=ΓûüWed
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14337 size=8640 all=1152469 active=60734 piece=Γûüforth
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14282 size=8660 all=1153650 active=61915 piece=ΓûüComputer
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14228 size=8680 all=1155188 active=63453 piece=ΓûüGard
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14186 size=8700 all=1156438 active=64703 piece=Γûütemporary
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=14184 min_freq=551
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14146 size=8720 all=1158544 active=59926 piece=ΓûüFull
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14115 size=8740 all=1160230 active=61612 piece=ΓûüMind
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14065 size=8760 all=1160926 active=62308 piece=omatic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=14026 size=8780 all=1163215 active=64597 piece=ΓûüRound
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13971 size=8800 all=1164340 active=65722 piece=Γûüassets
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=13970 min_freq=544
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13940 size=8820 all=1164985 active=58855 piece=ΓûüAustria
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13893 size=8840 all=1167037 active=60907 piece=?"
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13845 size=8860 all=1169100 active=62970 piece=ΓûüDiego
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13814 size=8880 all=1170175 active=64045 piece=Γûüscope
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13785 size=8900 all=1171327 active=65197 piece=ΓûüVitamin
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=13781 min_freq=539
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13725 size=8920 all=1172803 active=60030 piece=ΓûüPremier
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13677 size=8940 all=1173746 active=60973 piece=Γûüplanting
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13647 size=8960 all=1175862 active=63089 piece=Γûüinjured
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13603 size=8980 all=1176983 active=64210 piece=Γûüholiday
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13548 size=9000 all=1178296 active=65523 piece=iley
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=13547 min_freq=533
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13514 size=9020 all=1180114 active=60604 piece=burn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13461 size=9040 all=1182122 active=62612 piece=ΓûüHarry
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13412 size=9060 all=1184345 active=64835 piece=Γûüproviders
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13362 size=9080 all=1186694 active=67184 piece=Γûülighting
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13313 size=9100 all=1187920 active=68410 piece=ailed
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=13313 min_freq=525
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13288 size=9120 all=1189949 active=61349 piece=owned
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13241 size=9140 all=1191281 active=62681 piece=atively
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13208 size=9160 all=1192611 active=64011 piece=Γûüsucceeded
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13142 size=9180 all=1193309 active=64709 piece=Γûüwaiting
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13108 size=9200 all=1193781 active=65181 piece=Γûüsessions
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=13105 min_freq=521
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13075 size=9220 all=1194892 active=60798 piece=Γûülowest
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13054 size=9240 all=1195966 active=61872 piece=olves
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=13012 size=9260 all=1197825 active=63731 piece=Γûümedieval
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12973 size=9280 all=1199199 active=65105 piece=Γûüassembly
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12934 size=9300 all=1201099 active=67005 piece=Γûüharder
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12933 min_freq=515
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12904 size=9320 all=1202086 active=61038 piece=ΓûüDaily
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12865 size=9340 all=1203169 active=62121 piece=athered
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12821 size=9360 all=1204545 active=63497 piece=Γûükeeps
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12787 size=9380 all=1205949 active=64901 piece=Γûümold
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12749 size=9400 all=1206776 active=65728 piece=ΓûüPrint
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12749 min_freq=510
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12710 size=9420 all=1208189 active=61693 piece=rac
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12675 size=9440 all=1209945 active=63449 piece=Γûüvalley
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12632 size=9460 all=1211189 active=64693 piece=ΓûüAND
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12602 size=9480 all=1212335 active=65839 piece=Γûü55
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12576 size=9500 all=1213749 active=67253 piece=Γûüclassification
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12575 min_freq=505
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12556 size=9520 all=1216234 active=63168 piece=Γûücarbohyd
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12511 size=9540 all=1217999 active=64933 piece=Γûücoat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12473 size=9560 all=1218902 active=65836 piece=ifier
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12447 size=9580 all=1220885 active=67819 piece=ΓûüNeb
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12418 size=9600 all=1222775 active=69709 piece=Γûüconsumed
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12417 min_freq=499
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12389 size=9620 all=1225182 active=63545 piece=ΓûüConsider
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12351 size=9640 all=1227508 active=65871 piece=Γûüappointment
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12318 size=9660 all=1228195 active=66558 piece=Γûüflexible
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12279 size=9680 all=1229163 active=67526 piece=ΓûüHouston
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12249 size=9700 all=1231293 active=69656 piece=├¡a
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12249 min_freq=493
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12211 size=9720 all=1233641 active=63629 piece=ΓûüEric
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12180 size=9740 all=1235325 active=65313 piece=ΓûüRoc
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12135 size=9760 all=1237096 active=67084 piece=Γûüsafely
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12100 size=9780 all=1238822 active=68810 piece=ΓûüBron
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12068 size=9800 all=1242200 active=72188 piece=ΓûüGord
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=12065 min_freq=486
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12038 size=9820 all=1243522 active=63353 piece=ΓûüSelf
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=12007 size=9840 all=1245998 active=65829 piece=ΓûüFlow
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11978 size=9860 all=1248329 active=68160 piece=Γûü2)
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11940 size=9880 all=1249570 active=69401 piece=ΓûüProble
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11913 size=9900 all=1250621 active=70452 piece=Γûüinstallation
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11910 min_freq=480
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11855 size=9920 all=1251557 active=63466 piece=atial
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11817 size=9940 all=1253182 active=65091 piece=ΓûüMathemat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11793 size=9960 all=1254383 active=66292 piece=Γûücolleges
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11761 size=9980 all=1255916 active=67825 piece=Γûüapplying
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11729 size=10000 all=1256616 active=68525 piece=Γûüasc
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11727 min_freq=476
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11698 size=10020 all=1257869 active=64029 piece=Γûüargue
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11635 size=10040 all=1259369 active=65529 piece=ΓûüBulgar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11591 size=10060 all=1260866 active=67026 piece=Γûüvisits
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11561 size=10080 all=1262088 active=68248 piece=Γûücommander
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11527 size=10100 all=1263638 active=69798 piece=olid
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11525 min_freq=471
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11472 size=10120 all=1265157 active=64517 piece=Γûülicense
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11445 size=10140 all=1267179 active=66539 piece=ΓûüAle
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11416 size=10160 all=1268575 active=67935 piece=ΓûüZh
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11391 size=10180 all=1270247 active=69607 piece=ΓûüTun
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11362 size=10200 all=1271418 active=70778 piece=olished
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11358 min_freq=467
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11339 size=10220 all=1272435 active=64576 piece=Γûüethical
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11302 size=10240 all=1273734 active=65875 piece=Γûüjournals
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11270 size=10260 all=1276598 active=68739 piece=Γûücyber
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11242 size=10280 all=1277988 active=70129 piece=ΓûüpH
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11216 size=10300 all=1278855 active=70996 piece=ΓûüSportspeople
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11215 min_freq=462
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11184 size=10320 all=1280202 active=65290 piece=Γûüecological
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11135 size=10340 all=1281119 active=66207 piece=sky
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11084 size=10360 all=1283213 active=68301 piece=Γûücheap
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11051 size=10380 all=1284393 active=69481 piece=Γûü10,000
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11030 size=10400 all=1285723 active=70811 piece=Γûüpowder
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=11030 min_freq=457
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=11006 size=10420 all=1286699 active=65246 piece=Γûü(17
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10974 size=10440 all=1288774 active=67321 piece=wick
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10952 size=10460 all=1290455 active=69002 piece=ΓûüSleep
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10920 size=10480 all=1291571 active=70118 piece=Γûüfinance
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10882 size=10500 all=1292763 active=71310 piece=Γûütrem
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10878 min_freq=453
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10850 size=10520 all=1295724 active=67560 piece=ΓûüEuro
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10823 size=10540 all=1297412 active=69248 piece=Γûüwisdom
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10794 size=10560 all=1299395 active=71231 piece=Γûü42
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10763 size=10580 all=1300561 active=72397 piece=count
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10744 size=10600 all=1301628 active=73464 piece=aughters
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10742 min_freq=447
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10704 size=10620 all=1302458 active=65900 piece=Γûüaccord
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10679 size=10640 all=1304003 active=67445 piece=Γûürevers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10653 size=10660 all=1305644 active=69086 piece=Γûüarchitectural
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10623 size=10680 all=1306720 active=70162 piece=Γûüglob
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10584 size=10700 all=1309083 active=72525 piece=5).
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10582 min_freq=443
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10551 size=10720 all=1310631 active=66788 piece=ΓûüUkrainian
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10517 size=10740 all=1312443 active=68600 piece=Γûü800
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10481 size=10760 all=1313964 active=70121 piece=Γûüconclus
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10452 size=10780 all=1316243 active=72400 piece=ΓûüKam
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10420 size=10800 all=1318337 active=74494 piece=ΓûüGordon
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10420 min_freq=437
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10404 size=10820 all=1319335 active=66898 piece=Γûümail
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10387 size=10840 all=1321347 active=68910 piece=indergart
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10360 size=10860 all=1322540 active=70103 piece=Γûütribe
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10322 size=10880 all=1323686 active=71249 piece=Γûü31,
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10289 size=10900 all=1324481 active=72044 piece=unar
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10288 min_freq=433
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10259 size=10920 all=1325666 active=67275 piece=ΓûüVice
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10236 size=10940 all=1327914 active=69523 piece=ΓûüIntegr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10203 size=10960 all=1328629 active=70238 piece=ΓûüCapital
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10176 size=10980 all=1329592 active=71201 piece=Γûügrey
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10145 size=11000 all=1330889 active=72498 piece=Γûüpesticides
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10144 min_freq=429
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10125 size=11020 all=1331678 active=67332 piece=ΓûüTowns
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10098 size=11040 all=1332948 active=68602 piece=rise
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10075 size=11060 all=1334171 active=69825 piece=ΓûüDublin
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10037 size=11080 all=1334893 active=70547 piece=Γûüspeakers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=10002 size=11100 all=1335967 active=71621 piece=ΓûüWas
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=10002 min_freq=426
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9980 size=11120 all=1336504 active=67194 piece=oys
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9954 size=11140 all=1337911 active=68601 piece=Γûüattractive
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9930 size=11160 all=1338466 active=69156 piece=itus
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9905 size=11180 all=1339372 active=70062 piece=Γûüdementia
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9876 size=11200 all=1340449 active=71139 piece=Γûüachieving
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9875 min_freq=423
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9848 size=11220 all=1341320 active=67893 piece=arma
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9818 size=11240 all=1343024 active=69597 piece=gcolor
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9782 size=11260 all=1344281 active=70854 piece=Γûüsalmon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9753 size=11280 all=1345127 active=71700 piece=ΓûüBasketball
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9729 size=11300 all=1345793 active=72366 piece=Our
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9729 min_freq=420
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9702 size=11320 all=1348111 active=69509 piece=Γûüprivile
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9677 size=11340 all=1350635 active=72033 piece=Γûülibraries
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9649 size=11360 all=1352707 active=74105 piece=Γûüstruggling
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9615 size=11380 all=1354068 active=75466 piece=Γûüarrive
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9598 size=11400 all=1355015 active=76413 piece=Γûüfleet
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9595 min_freq=415
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9575 size=11420 all=1357334 active=70058 piece=ΓûüSingles
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9548 size=11440 all=1358809 active=71533 piece=Γûüarter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9516 size=11460 all=1359990 active=72714 piece=Γûülarvae
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9488 size=11480 all=1361266 active=73990 piece=onymous
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9462 size=11500 all=1362070 active=74794 piece=ΓûüFreedom
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9460 min_freq=411
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9440 size=11520 all=1363355 active=69369 piece=52
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9414 size=11540 all=1365660 active=71674 piece=Γûüirregular
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9394 size=11560 all=1366327 active=72341 piece=ho
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9383 size=11580 all=1369195 active=75209 piece=8).
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9365 size=11600 all=1370397 active=76411 piece=otypes
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9365 min_freq=407
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9342 size=11620 all=1371864 active=69896 piece=Γûü2002.
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9328 size=11640 all=1373124 active=71156 piece=ΓûüEntertainment
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9299 size=11660 all=1374100 active=72132 piece=Γûüsecretary
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9275 size=11680 all=1375009 active=73041 piece=Γûüpneum
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9253 size=11700 all=1376871 active=74903 piece=Γûütransformation
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9252 min_freq=403
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9232 size=11720 all=1377850 active=69818 piece=Γûüerosion
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9212 size=11740 all=1378480 active=70448 piece=antine
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9196 size=11760 all=1380245 active=72213 piece=Γûüadministered
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9176 size=11780 all=1381332 active=73300 piece=Γûümonument
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9156 size=11800 all=1382952 active=74920 piece=ΓûüCathedral
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9153 min_freq=399
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9130 size=11820 all=1384147 active=70336 piece=ΓûüHold
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9105 size=11840 all=1385478 active=71667 piece=ΓûüPlayer
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9081 size=11860 all=1386182 active=72371 piece=DL
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9061 size=11880 all=1387940 active=74129 piece=Γûüirrigation
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9040 size=11900 all=1390026 active=76215 piece=arios
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=9040 min_freq=395
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=9019 size=11920 all=1391955 active=71320 piece=inate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8983 size=11940 all=1394429 active=73794 piece=thal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8948 size=11960 all=1396843 active=76208 piece=thood
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8917 size=11980 all=1397307 active=76672 piece=ΓûüRNA
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8896 size=12000 all=1398587 active=77952 piece=Γûüattending
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8894 min_freq=390
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8863 size=12020 all=1400288 active=71630 piece=Γûüfraction
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8837 size=12040 all=1402733 active=74075 piece=Γûüalgae
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8817 size=12060 all=1403796 active=75138 piece=Γûüaffordable
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8788 size=12080 all=1405320 active=76662 piece=raid
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8757 size=12100 all=1406604 active=77946 piece=ΓûüFriends
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8756 min_freq=386
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8729 size=12120 all=1407716 active=71427 piece=ΓûüCrown
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8700 size=12140 all=1408744 active=72455 piece=itic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8680 size=12160 all=1409338 active=73049 piece=ΓûüGive
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8658 size=12180 all=1409804 active=73515 piece=Γûüloyal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8640 size=12200 all=1411034 active=74745 piece=Γûüscrap
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8640 min_freq=384
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8622 size=12220 all=1411444 active=70943 piece=Γûüimprison
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8609 size=12240 all=1412485 active=71984 piece=ΓûüRud
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8586 size=12260 all=1414680 active=74179 piece=ΓûüCatal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8566 size=12280 all=1415192 active=74691 piece=Γûüretained
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8546 size=12300 all=1416531 active=76030 piece=ashi
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8546 min_freq=381
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8521 size=12320 all=1418333 active=72313 piece=Γûüenabled
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8503 size=12340 all=1419208 active=73188 piece=ref
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8483 size=12360 all=1422125 active=76105 piece=ΓûüSTEM
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8467 size=12380 all=1423431 active=77411 piece=Γûücampaigns
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8449 size=12400 all=1424647 active=78627 piece=Γûükeys
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8449 min_freq=377
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8422 size=12420 all=1426275 active=72851 piece=ΓûüAthletics
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8398 size=12440 all=1428454 active=75030 piece=Γûütransplant
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8383 size=12460 all=1429761 active=76337 piece=Γûümuc
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8365 size=12480 all=1431384 active=77960 piece=Γûüspatial
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8345 size=12500 all=1432544 active=79120 piece=ΓûüOrchestra
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8345 min_freq=373
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8326 size=12520 all=1433306 active=72380 piece=ΓûüAntarctic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8301 size=12540 all=1433941 active=73015 piece=Γûülikelihood
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8276 size=12560 all=1434639 active=73713 piece=ΓûüChemistry
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8255 size=12580 all=1435904 active=74978 piece=affeine
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8242 size=12600 all=1436532 active=75606 piece=ΓûüPersonnel
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8240 min_freq=371
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8216 size=12620 all=1437611 active=72899 piece=ΓûüGlas
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8196 size=12640 all=1438870 active=74158 piece=Γûübold
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8174 size=12660 all=1439782 active=75070 piece=Γûülawn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8159 size=12680 all=1441580 active=76868 piece=Γûüdictionary
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8146 size=12700 all=1442716 active=78004 piece=Γûüspir
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8146 min_freq=368
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8125 size=12720 all=1444130 active=73506 piece=ΓûüAges
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8106 size=12740 all=1444943 active=74319 piece=Γûüphrases
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8091 size=12760 all=1446817 active=76193 piece=Γûüdiagnose
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8067 size=12780 all=1448347 active=77723 piece=ΓûüComplete
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8045 size=12800 all=1449939 active=79315 piece=Γûüpurple
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=8042 min_freq=365
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8027 size=12820 all=1451509 active=74053 piece=Γûüsigning
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=8008 size=12840 all=1452859 active=75403 piece=avalry
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7995 size=12860 all=1453809 active=76353 piece=Γûüvector
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7975 size=12880 all=1455286 active=77830 piece=actic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7950 size=12900 all=1456237 active=78781 piece=cat
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7950 min_freq=362
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7929 size=12920 all=1457336 active=73473 piece=ΓûüMunicipality
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7911 size=12940 all=1458066 active=74203 piece=imedia
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7899 size=12960 all=1459931 active=76068 piece=Γûüchip
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7885 size=12980 all=1460437 active=76574 piece=Γûübanned
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7873 size=13000 all=1461732 active=77869 piece=Γûücompat
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7873 min_freq=359
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7858 size=13020 all=1462652 active=73996 piece=Γûüincredible
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7841 size=13040 all=1463850 active=75194 piece=Γûüsovere
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7827 size=13060 all=1465441 active=76785 piece=Γûüweekend
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7805 size=13080 all=1466577 active=77921 piece=asures
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7784 size=13100 all=1467592 active=78936 piece=fold
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7784 min_freq=357
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7754 size=13120 all=1468830 active=74444 piece=Γûüchains
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7731 size=13140 all=1470143 active=75757 piece=ΓûüFal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7715 size=13160 all=1472116 active=77730 piece=ΓûüCharlotte
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7700 size=13180 all=1473372 active=78986 piece=Γûüsegments
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7682 size=13200 all=1474869 active=80483 piece=Γûüoutdoors
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7681 min_freq=353
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7664 size=13220 all=1476267 active=75135 piece=ΓûüBengal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7647 size=13240 all=1478191 active=77059 piece=ΓûüWing
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7626 size=13260 all=1479638 active=78506 piece=Γûüdepict
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7609 size=13280 all=1480722 active=79590 piece=Γûüdollar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7595 size=13300 all=1481434 active=80302 piece=Γûüsyll
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7595 min_freq=350
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7580 size=13320 all=1481909 active=74540 piece=Γûübeta
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7557 size=13340 all=1482461 active=75092 piece=Γûüsurvivors
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7530 size=13360 all=1484133 active=76764 piece=Te
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7505 size=13380 all=1486719 active=79350 piece=Γûüfestivals
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7481 size=13400 all=1487826 active=80457 piece=Γûüenact
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7480 min_freq=348
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7461 size=13420 all=1488992 active=75547 piece=Γûümarginal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7444 size=13440 all=1491303 active=77858 piece=ΓûüNova
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7427 size=13460 all=1492581 active=79136 piece=Γûüsymptom
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7413 size=13480 all=1492925 active=79480 piece=Γûügolf
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7405 size=13500 all=1493782 active=80337 piece=Γûümi
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7404 min_freq=345
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7379 size=13520 all=1495007 active=75826 piece=ΓûüEug
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7366 size=13540 all=1496590 active=77409 piece=ΓûüDelaware
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7351 size=13560 all=1497897 active=78716 piece=ΓûüTol
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7336 size=13580 all=1498950 active=79769 piece=ΓûüWeight
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7325 size=13600 all=1500338 active=81157 piece=Γûüfloating
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7323 min_freq=342
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7305 size=13620 all=1501917 active=76594 piece=ΓûüBasin
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7286 size=13640 all=1502835 active=77512 piece=Γûüpraised
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7267 size=13660 all=1504174 active=78851 piece=Γûüclusters
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7250 size=13680 all=1505054 active=79731 piece=web
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7237 size=13700 all=1506243 active=80920 piece=stad
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7236 min_freq=339
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7217 size=13720 all=1507970 active=76603 piece=Γûüank
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7200 size=13740 all=1508773 active=77406 piece=Γûüyoungest
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7186 size=13760 all=1509550 active=78183 piece=Γûüprecious
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7177 size=13780 all=1510351 active=78984 piece=Γûüicon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7159 size=13800 all=1512155 active=80788 piece=Γûünavigation
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7156 min_freq=337
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7139 size=13820 all=1514289 active=77732 piece=ΓûüHorse
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7126 size=13840 all=1515174 active=78617 piece=Γûüwatershed
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7115 size=13860 all=1516394 active=79837 piece=ΓûüStevens
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7099 size=13880 all=1517726 active=81169 piece=Γûücompassion
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7082 size=13900 all=1520001 active=83444 piece=ΓûüCany
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7082 min_freq=334
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7066 size=13920 all=1522070 active=78054 piece=Γûüwra
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7053 size=13940 all=1523291 active=79275 piece=Γûüformations
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7038 size=13960 all=1524120 active=80104 piece=Γûübrilliant
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7019 size=13980 all=1525103 active=81087 piece=Γûüsore
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=7006 size=14000 all=1526103 active=82087 piece=opt
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=7006 min_freq=331
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6992 size=14020 all=1527789 active=77598 piece=ΓûüShare
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6973 size=14040 all=1529123 active=78932 piece=ΓûüFOR
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6961 size=14060 all=1530500 active=80309 piece=NC
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6944 size=14080 all=1532795 active=82604 piece=ΓûüAntarctica
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6933 size=14100 all=1533696 active=83505 piece=Γûüsanct
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6932 min_freq=329
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6914 size=14120 all=1535404 active=78351 piece=Γûübowel
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6895 size=14140 all=1536272 active=79219 piece=bet
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6880 size=14160 all=1538006 active=80953 piece=birds
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6867 size=14180 all=1539702 active=82649 piece=Γûüunnecessary
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6849 size=14200 all=1540766 active=83713 piece=umm
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6848 min_freq=326
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6835 size=14220 all=1542323 active=78326 piece=ΓûüMaced
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6827 size=14240 all=1543857 active=79860 piece=holm
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6814 size=14260 all=1545272 active=81275 piece=Γûüsurveillance
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6800 size=14280 all=1546014 active=82017 piece=Γûüpremature
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6783 size=14300 all=1547806 active=83809 piece=Γûüenvironmentally
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6782 min_freq=323
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6772 size=14320 all=1548441 active=78026 piece=Γûüpublish
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6753 size=14340 all=1549572 active=79157 piece=Γûücoaching
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6738 size=14360 all=1550973 active=80558 piece=With
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6722 size=14380 all=1551737 active=81322 piece=La
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6706 size=14400 all=1553589 active=83174 piece=ΓûüBert
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6706 min_freq=321
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6689 size=14420 all=1556419 active=80332 piece=Γûüdecides
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6672 size=14440 all=1559267 active=83180 piece=Γûüglasses
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6659 size=14460 all=1560743 active=84656 piece=verning
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6648 size=14480 all=1561460 active=85373 piece=ΓûüIsaac
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6633 size=14500 all=1562934 active=86847 piece=Γûüpromised
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6632 min_freq=318
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6615 size=14520 all=1563838 active=79051 piece=ΓûüGent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6603 size=14540 all=1564426 active=79639 piece=ΓûüPod
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6588 size=14560 all=1566126 active=81339 piece=Γûüdegradation
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6573 size=14580 all=1567669 active=82882 piece=ΓûüVincent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6559 size=14600 all=1568646 active=83859 piece=Γûüresort
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6559 min_freq=316
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6547 size=14620 all=1569209 active=78993 piece=Γûülining
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6534 size=14640 all=1570884 active=80668 piece=Γûüexpend
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6517 size=14660 all=1571528 active=81312 piece=ΓûüCricket
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6506 size=14680 all=1572178 active=81962 piece=ichi
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6490 size=14700 all=1573260 active=83044 piece=aba
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6490 min_freq=314
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6475 size=14720 all=1575613 active=80493 piece=uning
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6462 size=14740 all=1576552 active=81432 piece=ΓûüCM
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6452 size=14760 all=1577894 active=82774 piece=Γûühate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6435 size=14780 all=1579552 active=84432 piece=Γûü1922
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6421 size=14800 all=1580556 active=85436 piece=ocate
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6421 min_freq=311
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6402 size=14820 all=1581512 active=79929 piece=proof
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6394 size=14840 all=1582417 active=80834 piece=Γûüconcentrate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6378 size=14860 all=1583475 active=81892 piece=Γûüaug
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6364 size=14880 all=1584322 active=82739 piece=large
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6353 size=14900 all=1585782 active=84199 piece=ΓûüMC
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6353 min_freq=309
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6340 size=14920 all=1586813 active=80211 piece=Γûücareg
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6327 size=14940 all=1587636 active=81034 piece=ARS
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6312 size=14960 all=1588813 active=82211 piece=hored
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6298 size=14980 all=1590612 active=84010 piece=Γûübush
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6282 size=15000 all=1592299 active=85697 piece=Γûücarn
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6282 min_freq=307
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6271 size=15020 all=1593449 active=80717 piece=TER
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6254 size=15040 all=1594888 active=82156 piece=ΓûüKirk
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6242 size=15060 all=1595764 active=83032 piece=ΓûüSaturn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6224 size=15080 all=1597143 active=84411 piece=ΓûüCL
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6214 size=15100 all=1598348 active=85616 piece=Γûüinnovations
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6213 min_freq=304
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6202 size=15120 all=1599381 active=80948 piece=ΓûüGeor
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6185 size=15140 all=1600404 active=81971 piece=Γûügardening
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6172 size=15160 all=1601425 active=82992 piece=ΓûüRalph
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6156 size=15180 all=1603181 active=84748 piece=ΓûüMann
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6141 size=15200 all=1604876 active=86443 piece=Γûüselecting
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6140 min_freq=302
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6132 size=15220 all=1605721 active=81088 piece=Γûüagreements
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6122 size=15240 all=1606268 active=81635 piece=ΓûüRoot
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6108 size=15260 all=1607527 active=82894 piece=Γûüpreferences
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6097 size=15280 all=1608528 active=83895 piece=Γûüwalked
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6088 size=15300 all=1609352 active=84719 piece=verages
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6088 min_freq=301
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6072 size=15320 all=1610726 active=81834 piece=ait
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6056 size=15340 all=1611837 active=82945 piece=rill
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6041 size=15360 all=1613044 active=84152 piece=ΓûüVolunte
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6023 size=15380 all=1613627 active=84735 piece=Γûüchecks
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6013 size=15400 all=1614419 active=85527 piece=50,000
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=6012 min_freq=299
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=6001 size=15420 all=1615428 active=81603 piece=Γûüpilgr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5994 size=15440 all=1616166 active=82341 piece=Γûücookies
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5983 size=15460 all=1616822 active=82997 piece=ΓûüGuardian
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5961 size=15480 all=1617815 active=83990 piece=ΓûüKnights
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5951 size=15500 all=1618788 active=84963 piece=ΓûüJerry
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5951 min_freq=297
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5940 size=15520 all=1620020 active=82162 piece=Γûümetall
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5930 size=15540 all=1621177 active=83319 piece=Γûütriple
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5920 size=15560 all=1623292 active=85434 piece=Γûüholidays
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5906 size=15580 all=1624914 active=87056 piece=ΓûüFleet
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5898 size=15600 all=1626092 active=88234 piece=Γûüdesper
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5896 min_freq=294
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5884 size=15620 all=1626831 active=82031 piece=Γûügoverning
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5873 size=15640 all=1628287 active=83487 piece=Γûüsacrific
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5862 size=15660 all=1629775 active=84975 piece=Γûühurricane
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5852 size=15680 all=1631480 active=86680 piece=organisms
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5844 size=15700 all=1632618 active=87818 piece=ΓûüKrish
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5844 min_freq=292
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5837 size=15720 all=1633097 active=82077 piece=Γûüpresentations
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5823 size=15740 all=1633944 active=82924 piece=Γûükindergarten
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5803 size=15760 all=1635156 active=84136 piece=ΓûüCele
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5794 size=15780 all=1636212 active=85192 piece=food
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5784 size=15800 all=1638344 active=87324 piece=Γûüleather
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5782 min_freq=290
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5772 size=15820 all=1639047 active=82598 piece=imir
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5763 size=15840 all=1640791 active=84342 piece=Γûüpotent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5757 size=15860 all=1643073 active=86624 piece=Γûüuncomfortable
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5747 size=15880 all=1643605 active=87156 piece=ΓûüBuch
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5737 size=15900 all=1644999 active=88550 piece=Γûüconsiderations
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5736 min_freq=288
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5728 size=15920 all=1646540 active=83790 piece=Γûüstrat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5712 size=15940 all=1648038 active=85288 piece=Γûüdialect
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5694 size=15960 all=1649855 active=87105 piece=ΓûüCarn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5682 size=15980 all=1650508 active=87758 piece=Γûürefined
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5673 size=16000 all=1652934 active=90184 piece=Γûüfier
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5673 min_freq=285
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5659 size=16020 all=1654261 active=83959 piece=dec
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5651 size=16040 all=1655244 active=84942 piece=Γûü1909
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5641 size=16060 all=1657229 active=86927 piece=Γûüseam
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5624 size=16080 all=1658617 active=88315 piece=ocy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5612 size=16100 all=1659781 active=89479 piece=ogg
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5611 min_freq=283
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5601 size=16120 all=1661226 active=84247 piece=Γûüconsultant
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5590 size=16140 all=1662091 active=85112 piece=aders
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5581 size=16160 all=1663104 active=86125 piece=ΓûüKol
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5567 size=16180 all=1663936 active=86957 piece=rawn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5555 size=16200 all=1666029 active=89050 piece=Γûücompress
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5554 min_freq=281
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5542 size=16220 all=1666799 active=84050 piece=ΓûüAgainst
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5529 size=16240 all=1667539 active=84790 piece=MM
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5519 size=16260 all=1668643 active=85894 piece=Γûügasoline
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5509 size=16280 all=1669539 active=86790 piece=half
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5502 size=16300 all=1670278 active=87529 piece=Γûüremedy
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5502 min_freq=280
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5492 size=16320 all=1671073 active=84307 piece=ullivan
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5483 size=16340 all=1672408 active=85642 piece=Γûücharging
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5474 size=16360 all=1673293 active=86527 piece=ΓûüMom
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5459 size=16380 all=1675300 active=88534 piece=notes
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5452 size=16400 all=1677140 active=90374 piece=Γûüpicking
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5450 min_freq=278
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5441 size=16420 all=1678051 active=84768 piece=Γûübod
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5427 size=16440 all=1679777 active=86494 piece=agasc
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5415 size=16460 all=1680734 active=87451 piece=mons
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5403 size=16480 all=1682078 active=88795 piece=Γûübesides
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5393 size=16500 all=1683217 active=89934 piece=selling
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5393 min_freq=276
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5385 size=16520 all=1684651 active=85578 piece=Γûüaccompanying
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5374 size=16540 all=1685454 active=86381 piece=hett
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5367 size=16560 all=1685844 active=86771 piece=ΓûüDol
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5354 size=16580 all=1687284 active=88211 piece=ΓûüNapoleon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5344 size=16600 all=1689442 active=90369 piece=ΓûüApplications
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5342 min_freq=274
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5333 size=16620 all=1691168 active=86193 piece=ighthouse
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5326 size=16640 all=1693250 active=88275 piece=ollen
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5320 size=16660 all=1694036 active=89061 piece=ΓûüFilmography
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5311 size=16680 all=1695997 active=91022 piece=ΓûüVegas
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5298 size=16700 all=1697573 active=92598 piece=Γûüdestroying
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5296 min_freq=271
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5288 size=16720 all=1699029 active=86334 piece=ΓûüEcology
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5278 size=16740 all=1701097 active=88402 piece=Γûü2.0
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5267 size=16760 all=1702796 active=90101 piece=ΓûüSold
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5256 size=16780 all=1703354 active=90659 piece=atis
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5245 size=16800 all=1704715 active=92020 piece=Γûüfranchise
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5244 min_freq=269
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5238 size=16820 all=1706395 active=86913 piece=ΓûüVa
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5228 size=16840 all=1707776 active=88294 piece=Γûülaying
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5218 size=16860 all=1708971 active=89489 piece=hene
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5209 size=16880 all=1710171 active=90689 piece=ecution
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5196 size=16900 all=1711255 active=91773 piece=ockets
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5196 min_freq=267
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5188 size=16920 all=1712571 active=86857 piece=Γûüwolf
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5179 size=16940 all=1713656 active=87942 piece=Γûüeleg
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5170 size=16960 all=1714728 active=89014 piece=Γûühitting
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5155 size=16980 all=1716163 active=90449 piece=osynthesis
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5146 size=17000 all=1717083 active=91369 piece=cephal
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5146 min_freq=265
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5136 size=17020 all=1718158 active=86799 piece=ΓûüFranco
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5128 size=17040 all=1719337 active=87978 piece=Γûümetaphor
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5118 size=17060 all=1720035 active=88676 piece=Γûüanyway
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5108 size=17080 all=1720999 active=89640 piece=Γûücables
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5099 size=17100 all=1721558 active=90199 piece=Γûüsailed
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5099 min_freq=264
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5089 size=17120 all=1721900 active=86420 piece=Γûüdermat
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5077 size=17140 all=1723133 active=87653 piece=ΓûüInternal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5067 size=17160 all=1724146 active=88666 piece=ratic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5058 size=17180 all=1725661 active=90181 piece=ΓûüStef
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5050 size=17200 all=1726251 active=90771 piece=Γûüsubstrate
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=5050 min_freq=262
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5041 size=17220 all=1728532 active=88594 piece=Γûürulers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5032 size=17240 all=1729479 active=89541 piece=Γûüparameter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5019 size=17260 all=1730446 active=90508 piece=ΓûüCha
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5012 size=17280 all=1731350 active=91412 piece=ΓûüJennifer
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=5000 size=17300 all=1731833 active=91895 piece=Γûüsuccession
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4999 min_freq=261
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4987 size=17320 all=1732882 active=87634 piece=Γûüappar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4979 size=17340 all=1733362 active=88114 piece=Γûücontroller
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4968 size=17360 all=1734046 active=88798 piece=Γûü1903
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4962 size=17380 all=1735216 active=89968 piece=Γûü(2011)
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4951 size=17400 all=1736326 active=91078 piece=ooting
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4951 min_freq=260
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4944 size=17420 all=1737106 active=87558 piece=haw
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4934 size=17440 all=1738220 active=88672 piece=Γûüsailing
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4922 size=17460 all=1739299 active=89751 piece=Γûüsatisfied
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4909 size=17480 all=1741067 active=91519 piece=geon
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4899 size=17500 all=1742061 active=92513 piece=Γûüfarther
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4899 min_freq=258
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4888 size=17520 all=1743937 active=88979 piece=atta
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4880 size=17540 all=1745377 active=90419 piece=Γûüratings
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4872 size=17560 all=1746178 active=91220 piece=ΓûüCec
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4865 size=17580 all=1747173 active=92215 piece=GB
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4857 size=17600 all=1748223 active=93265 piece=sim
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4857 min_freq=256
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4848 size=17620 all=1749332 active=88321 piece=Γûücorrosion
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4841 size=17640 all=1751496 active=90485 piece=ΓûüHep
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4834 size=17660 all=1752709 active=91698 piece=ΓûüStrategy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4823 size=17680 all=1753807 active=92796 piece=Γûü1988.
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4809 size=17700 all=1754241 active=93230 piece=Γûütomato
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4809 min_freq=254
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4803 size=17720 all=1754934 active=88404 piece=ΓûüPH
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4795 size=17740 all=1756333 active=89803 piece=ΓûüWinn
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4785 size=17760 all=1757947 active=91417 piece=ΓûüHero
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4779 size=17780 all=1759327 active=92797 piece=ΓûüJohannes
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4768 size=17800 all=1759815 active=93285 piece=ΓûüSchw
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4768 min_freq=253
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4760 size=17820 all=1760897 active=88933 piece=Γûüpronunciation
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4749 size=17840 all=1761765 active=89801 piece=Γûüsiege
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4741 size=17860 all=1763135 active=91171 piece=Γûüpier
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4726 size=17880 all=1763491 active=91527 piece=ΓûüGol
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4720 size=17900 all=1764134 active=92170 piece=Γûürepairs
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4720 min_freq=252
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4709 size=17920 all=1764786 active=88858 piece=ΓûüCox
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4703 size=17940 all=1765681 active=89753 piece=Γûüdropping
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4696 size=17960 all=1766302 active=90374 piece=Γûü3.5
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4689 size=17980 all=1767719 active=91791 piece=Γûüsuggestion
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4682 size=18000 all=1768800 active=92872 piece=Γûüprost
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4682 min_freq=250
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4673 size=18020 all=1770056 active=89650 piece=eri
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4664 size=18040 all=1770944 active=90538 piece=opause
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4656 size=18060 all=1772254 active=91848 piece=isse
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4647 size=18080 all=1773774 active=93368 piece=Γûüfibr
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4638 size=18100 all=1774670 active=94264 piece=note
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4638 min_freq=249
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4629 size=18120 all=1775302 active=89269 piece=Γûücollapsed
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4623 size=18140 all=1776475 active=90442 piece=Γûü1840
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4614 size=18160 all=1777135 active=91102 piece=Γûülbs
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4609 size=18180 all=1777788 active=91755 piece=ΓûüKem
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4601 size=18200 all=1778432 active=92399 piece=Γûüdeposited
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4601 min_freq=248
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4590 size=18220 all=1779535 active=90024 piece=Γûüprecurs
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4582 size=18240 all=1780392 active=90881 piece=Γûüpolym
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4572 size=18260 all=1781821 active=92310 piece=awi
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4568 size=18280 all=1783649 active=94138 piece=Γûügloves
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4561 size=18300 all=1785403 active=95892 piece=Γûülithium
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4561 min_freq=246
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4555 size=18320 all=1786646 active=90509 piece=Γûüairplane
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4546 size=18340 all=1787245 active=91108 piece=Γûüedible
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4535 size=18360 all=1788357 active=92220 piece=keepers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4528 size=18380 all=1789024 active=92887 piece=check
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4521 size=18400 all=1789743 active=93606 piece=othel
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4520 min_freq=244
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4512 size=18420 all=1790669 active=90366 piece=plan
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4507 size=18440 all=1792129 active=91826 piece=Γûügrinding
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4500 size=18460 all=1792904 active=92601 piece=ΓûüAnyone
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4494 size=18480 all=1794342 active=94039 piece=Γûücontag
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4484 size=18500 all=1794816 active=94513 piece=caster
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4483 min_freq=243
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4476 size=18520 all=1795985 active=90855 piece=ΓûüGross
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4469 size=18540 all=1797107 active=91977 piece=ΓûüClassification
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4463 size=18560 all=1798163 active=93033 piece=Γûühatch
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4456 size=18580 all=1799116 active=93986 piece=ΓûüRecovery
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4449 size=18600 all=1800626 active=95496 piece=plants
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4449 min_freq=242
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4445 size=18620 all=1801548 active=90862 piece=Γûüfighters
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4436 size=18640 all=1802964 active=92278 piece=Γûühull
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4426 size=18660 all=1804227 active=93541 piece=Γûü1Γüä2
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4418 size=18680 all=1805453 active=94767 piece=ΓûüEbola
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4413 size=18700 all=1806948 active=96262 piece=reading
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4412 min_freq=240
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4404 size=18720 all=1808180 active=91446 piece=ΓûüBolivia
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4397 size=18740 all=1809487 active=92753 piece=ΓûüSpecific
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4392 size=18760 all=1810457 active=93723 piece=prov
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4385 size=18780 all=1812199 active=95465 piece=ΓûüMaurice
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4377 size=18800 all=1812750 active=96016 piece=Γûüneurop
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4377 min_freq=239
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4365 size=18820 all=1814687 active=92548 piece=optera
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4353 size=18840 all=1815374 active=93235 piece=Γûücoconut
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4345 size=18860 all=1816314 active=94175 piece=Γûüunderwent
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4338 size=18880 all=1817117 active=94978 piece=Γûüposterior
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4332 size=18900 all=1818128 active=95989 piece=Γûüsynonym
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4331 min_freq=237
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4323 size=18920 all=1818951 active=91713 piece=tracks
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4317 size=18940 all=1820251 active=93013 piece=Γûümars
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4310 size=18960 all=1820708 active=93470 piece=INE
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4304 size=18980 all=1821482 active=94244 piece=Γûüdifferentiate
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4295 size=19000 all=1822210 active=94972 piece=Γûüpitched
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4295 min_freq=236
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4289 size=19020 all=1823336 active=92237 piece=Γûüdur
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4281 size=19040 all=1824714 active=93615 piece=store
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4274 size=19060 all=1825492 active=94393 piece=Γûüannot
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4267 size=19080 all=1826172 active=95073 piece=Γûütended
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4260 size=19100 all=1826630 active=95531 piece=Γûü1978,
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4260 min_freq=235
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4253 size=19120 all=1827980 active=92675 piece=Γûü98
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4247 size=19140 all=1828813 active=93508 piece=ΓûüIndies
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4241 size=19160 all=1829714 active=94409 piece=ΓûüCornwall
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4233 size=19180 all=1831068 active=95763 piece=ΓûüEpisode
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4225 size=19200 all=1831875 active=96570 piece=occup
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4225 min_freq=233
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4217 size=19220 all=1832394 active=92072 piece=Γûüthrew
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4212 size=19240 all=1833288 active=92966 piece=Γûüdiscovering
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4205 size=19260 all=1834100 active=93778 piece=Γûücancelled
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4198 size=19280 all=1835528 active=95206 piece=ΓûüGuatemala
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4192 size=19300 all=1836956 active=96634 piece=Γûühamlet
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4192 min_freq=232
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4183 size=19320 all=1837489 active=92379 piece=Now
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4177 size=19340 all=1839380 active=94270 piece=ΓûüCoastal
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4171 size=19360 all=1840118 active=95008 piece=Γûüdetecting
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4164 size=19380 all=1841180 active=96070 piece=ΓûüGuitar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4160 size=19400 all=1841636 active=96526 piece=Γûüenterprises
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4159 min_freq=231
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4153 size=19420 all=1842490 active=92929 piece=ΓûüBhar
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4146 size=19440 all=1844448 active=94887 piece=ΓûüUCLA
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4137 size=19460 all=1845092 active=95531 piece=Γûütiger
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4130 size=19480 all=1845957 active=96396 piece=2.5
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4121 size=19500 all=1847542 active=97981 piece=ometers
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4121 min_freq=229
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4115 size=19520 all=1848905 active=93628 piece=NET
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4107 size=19540 all=1849980 active=94703 piece=ΓûüGy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4098 size=19560 all=1850873 active=95596 piece=First
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4094 size=19580 all=1851635 active=96358 piece=ΓûüPlain
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4087 size=19600 all=1852599 active=97322 piece=Γûüworkout
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4086 min_freq=228
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4081 size=19620 all=1854031 active=94059 piece=Γûüdigits
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4076 size=19640 all=1854960 active=94988 piece=ΓûüFighter
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4068 size=19660 all=1856386 active=96414 piece=Γûüfolder
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4063 size=19680 all=1857356 active=97384 piece=ΓûüEy
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4054 size=19700 all=1858071 active=98099 piece=ΓûüLecture
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4053 min_freq=227
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4047 size=19720 all=1859568 active=94393 piece=ΓûüOv
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4038 size=19740 all=1860508 active=95333 piece=ΓûüRoh
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4032 size=19760 all=1861300 active=96125 piece=designated
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4026 size=19780 all=1862331 active=97156 piece=ΓûüGR
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4019 size=19800 all=1863519 active=98344 piece=ishi
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=4019 min_freq=226
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4012 size=19820 all=1864601 active=94007 piece=Γûü1885
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=4006 size=19840 all=1865889 active=95295 piece=Γûü(5)
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3996 size=19860 all=1866669 active=96075 piece=ΓûüPione
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3985 size=19880 all=1867313 active=96719 piece=Γûübunch
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3973 size=19900 all=1868990 active=98396 piece=Γûütrout
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=3973 min_freq=224
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3967 size=19920 all=1870652 active=95107 piece=Γûüduplic
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3960 size=19940 all=1871912 active=96367 piece=umption
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3953 size=19960 all=1872537 active=96992 piece=ΓûüAbdul
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3948 size=19980 all=1873099 active=97554 piece=ΓûüJulie
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3942 size=20000 all=1873701 active=98156 piece=roportion
+bpe_model_trainer.cc(159) LOG(INFO) Updating active symbols. max_freq=3942 min_freq=223
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3937 size=20020 all=1875325 active=95291 piece=kers
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3930 size=20040 all=1876742 active=96708 piece=ΓûüBalk
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3925 size=20060 all=1877965 active=97931 piece=ΓûüBedford
+bpe_model_trainer.cc(268) LOG(INFO) Added: freq=3918 size=20080 all=1878413 active=98379 piece=ΓûüExcess
+trainer_interface.cc(689) LOG(INFO) Saving model: data\hertz12_data\tokenizer.model
+trainer_interface.cc(701) LOG(INFO) Saving vocabs: data\hertz12_data\tokenizer.vocab
+Tokenizer saved: data\hertz12_data\tokenizer.model
+Tokenizing 10,842,030 texts -> data\hertz12_data\train.bin
+  500,000/10,842,030 (448,640,408 tokens)
+  1,000,000/10,842,030 (893,423,494 tokens)
+  1,500,000/10,842,030 (1,339,713,979 tokens)
+  2,000,000/10,842,030 (1,787,668,005 tokens)
+  2,500,000/10,842,030 (2,235,097,842 tokens)
+  3,000,000/10,842,030 (2,680,464,443 tokens)
+  3,500,000/10,842,030 (3,128,100,727 tokens)
+  4,000,000/10,842,030 (3,574,547,533 tokens)
+  4,500,000/10,842,030 (4,020,818,906 tokens)
+  5,000,000/10,842,030 (4,470,009,813 tokens)
+  5,500,000/10,842,030 (4,916,183,009 tokens)
+  6,000,000/10,842,030 (5,363,637,954 tokens)
+  6,500,000/10,842,030 (5,809,778,087 tokens)
+  7,000,000/10,842,030 (6,256,896,590 tokens)
+  7,500,000/10,842,030 (6,703,350,757 tokens)
+  8,000,000/10,842,030 (7,150,199,734 tokens)
+  8,500,000/10,842,030 (7,596,486,723 tokens)
+  9,000,000/10,842,030 (8,042,609,057 tokens)
+  9,500,000/10,842,030 (8,489,211,986 tokens)
+  10,000,000/10,842,030 (8,937,928,991 tokens)
+  10,500,000/10,842,030 (9,384,158,504 tokens)
+  Done: 9,690,152,306 tokens (18482 MB)
+Tokenizing 93,056 texts -> data\hertz12_data\val.bin
+  Done: 99,665,599 tokens (190 MB)
