@@ -49,12 +49,34 @@ Procedure:
    bank-institution) where S-only COLLAPSES them (close/identical).
 
 ```powershell
-python scripts/vsp_gating_probe.py --words data/vsp/polysemous_20.json `
-  --out results/vsp_gating.json   # TO BUILD
+# hand-seeded V/P (proves the representation CAN separate):
+python scripts/vsp_gating_probe.py --words scripts/assets/vsp_polysemous.json `
+  --glove data/glove.6B.300d.txt --out results/vsp_gating.json
+# AUTO-derived V/P (the honest test -- V/P from sense terms, not hand labels):
+python scripts/derive_vsp.py --senses scripts/assets/vsp_sense_terms.json `
+  --glove data/glove.6B.300d.txt --out results/vsp_derived.json
+python scripts/vsp_gating_probe.py --derived results/vsp_derived.json `
+  --glove data/glove.6B.300d.txt --out results/vsp_gating_derived.json
 ```
 
-PASS = senses separate under V/S/P, collapse under S-only -> VSP is real, proceed.
-FAIL = no separation -> stop; the binding does not buy disambiguation, rethink.
+**RESULT (2026-06-22), and it reshapes Path B:**
+- Hand-seeded V/P: separation gain **0.48, PASS**. The representation is sound --
+  V|S|P bundling DOES separate senses S-only collapses (S-only sim = 1.000).
+- AUTO-derived V/P (P from the P6 MLP on the term's GloVe; V from category-anchor
+  similarity): gain **0.13, FAIL**. Words with distinct sense-terms separate
+  (table 0.23, scale 0.26, mouse 0.21) but the cases that MOST need
+  disambiguation -- IDENTICAL surface form (crane bird vs machine 0.00, plane
+  0.00) -- collapse, because text-derived V/P has only the colliding word to go
+  on, and text is the very signal that collapses. Circular.
+
+**The bottleneck is sense->asset GROUNDING, not the bundling.** V and P must come
+from NON-textual sources keyed to senses: actual Objaverse/ShapeNet 3D blobs (V)
+and actual P6 MEASURED material values (P), mapped to senses by something other
+than GloVe similarity. Until that grounding exists, deriving V/P from text adds
+little over S alone on the hard (colliding) cases. NEXT before Planck 2.0: build
+the sense->asset map (e.g. WordNet-synset -> ShapeNet-synset for V, sense ->
+material label for P) and re-run the derived gate. Train Planck 2.0 only if the
+GROUNDED-derived gate passes, not the hand-seeded one.
 
 ## 2. VSPS tokenization experiment
 
