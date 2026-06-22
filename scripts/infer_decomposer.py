@@ -56,6 +56,9 @@ def parse_args():
     p.add_argument("--no-snap", action="store_true", default=False,
                    help="Raum 1.7 Stage 3: render the model's RAW emitted part "
                         "transforms (disable snap_layout) to judge learned proportions")
+    p.add_argument("--fill-checkpoint", default=None,
+                   help="Path A: load a trained FillModel (train_fill.py) so the UI "
+                        "can hotswap grammar vs learned fill per request")
     p.add_argument("--use-scans", action="store_true", default=False,
                    help="Raum 0.6 §5.2: fill parts from real scanned splats "
                         "(--templates dir) instead of procedural primitives. "
@@ -533,6 +536,75 @@ class Decomposer:
             return self._recover_json(self._sanitize_json(text))
 
 
+def fill_tree_with_model(tree, fill_model, device):
+    """Path A: fill PART leaves with the learned FillModel instead of the grammar.
+
+    Walks the (already-validated) CompositionNode tree; for each leaf whose name
+    is a known part kind, runs the FillModel to emit that part's Gaussians, then
+    transforms them by the leaf's world pose (position+scale, gathered down the
+    tree). Returns renderer-ready tensors, same shape as tree_to_tensors.
+    Non-part leaves fall back to their existing grammar gaussians.
+    """
+    import torch
+    from scripts.train_fill import PART_TO_ID
+    from scripts.castle_grammar import _part_kind
+    from src.raum.decomposition import tree_to_tensors
+
+    kinds = getattr(fill_model, "_part_kinds", None) or list(PART_TO_ID)
+    parts_means, parts_scales, parts_rots, parts_opac, parts_cols = [], [], [], [], []
+
+    def walk(node, wpos, wscale):
+        pos = node.position if hasattr(node, "position") else [0, 0, 0]
+        sc = node.scale if hasattr(node, "scale") else 1.0
+        cur = [wpos[i] + pos[i] * wscale for i in range(3)]
+        cur_s = wscale * sc
+        children = node.children if hasattr(node, "children") else []
+        kind = _part_kind(node.name) if hasattr(node, "name") else None
+        if not children and kind in kinds:
+            # learned fill for this part
+            pid = torch.tensor([kinds.index(kind)], device=device)
+            color = getattr(node, "color", None) or [0.62, 0.58, 0.53]
+            pose = torch.tensor([[0.6] + list(color)], dtype=torch.float32, device=device)
+            with torch.no_grad():
+                out = fill_model(pid, pose)
+            active = (torch.sigmoid(out["active"][0]) > 0.5)
+            if active.sum() == 0:
+                active = out["active"][0] > out["active"][0].median()
+            m = out["means"][0][active]
+            # transform to world: scale then translate (rotation left identity;
+            # the learned scale-log absorbs cur_s via an additive log term)
+            m = m * cur_s + torch.tensor(cur, device=device)
+            parts_means.append(m)
+            parts_scales.append(out["scales_log"][0][active] + float(torch.log(torch.tensor(max(cur_s, 1e-6)))))
+            parts_rots.append(out["rotations"][0][active])
+            parts_opac.append(out["opacities"][0][active])
+            parts_cols.append(out["colors"][0][active])
+            return
+        if not children:
+            # non-part leaf: keep its grammar gaussians via tree_to_tensors
+            t = tree_to_tensors(node)
+            if t["means"].shape[0]:
+                parts_means.append(t["means"].to(device))
+                parts_scales.append(t["scales_log"].to(device))
+                parts_rots.append(t["rotations"].to(device))
+                parts_opac.append(t["opacities"].to(device))
+                parts_cols.append(t["colors"].to(device))
+            return
+        for c in children:
+            walk(c, cur, cur_s)
+
+    walk(tree, [0.0, 0.0, 0.0], 1.0)
+    if not parts_means:
+        return tree_to_tensors(tree)
+    return {
+        "means": torch.cat(parts_means),
+        "scales_log": torch.cat(parts_scales),
+        "rotations": torch.cat(parts_rots),
+        "opacities": torch.cat(parts_opac),
+        "colors": torch.cat(parts_cols),
+    }
+
+
 def validate_tree(tree_dict: dict, snap: bool = True) -> tuple[dict, dict]:
     """Raum 1.6 grammar-validated decoding.
 
@@ -831,6 +903,11 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
       <input type="checkbox" id="snap" checked style="width:auto">
       Snap layout (1.7: uncheck = raw model-emitted geometry)
     </label>
+    <label style="margin-top:8px">Fill method (Path A hotswap)</label>
+    <select id="fill-method" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
+      <option value="grammar" selected>Grammar (hand-built expand_part)</option>
+      <option value="learned">Learned (trained FillModel, needs --fill-checkpoint)</option>
+    </select>
     <button id="generate">Decompose + Render</button>
     <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
     <a id="splat-link" href="/splat" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:6px;background:#1f1f2a;color:#7fd1ff;border:1px solid #7fd1ff;border-radius:6px;font-size:12px;text-decoration:none">Open Gaussian-splat view (0.7)</a>
@@ -957,7 +1034,8 @@ btn.addEventListener('click', async () => {
       body: JSON.stringify({prompt, fidelity, refine_mode: refineMode,
         splats: +ctl.splats.value, density: +ctl.density.value,
         flatten: +ctl.flatten.value, weathering: +ctl.weathering.value,
-        snap: document.getElementById('snap').checked}),
+        snap: document.getElementById('snap').checked,
+        fill_method: document.getElementById('fill-method').value}),
     });
     const data = await r.json();
     if (data.error) {
@@ -1120,6 +1198,23 @@ def main():
         app = FastAPI()
         last_tensors = {}  # store for export
 
+        # Path A: load the trained FillModel once at launch (if provided) so the
+        # UI's learned-fill toggle has a model to call. CUDA + a trained
+        # checkpoint (train_fill.py) required; absent -> toggle falls back to
+        # grammar fill with a status note.
+        app.state.fill_model = None
+        if args.fill_checkpoint:
+            try:
+                from scripts.train_fill import FillModel
+                fck = torch.load(args.fill_checkpoint, map_location=device, weights_only=False)
+                fm = FillModel(max_gaussians=fck.get("max_gaussians", 512)).to(device).eval()
+                fm.load_state_dict(fck["model"])
+                fm._part_kinds = fck.get("part_kinds")
+                app.state.fill_model = fm
+                print(f"  Loaded fill model: {args.fill_checkpoint}")
+            except Exception as e:
+                print(f"  WARN fill model load failed ({e}); grammar fill only", file=sys.stderr)
+
         class DecomposeRequest(BaseModel):
             prompt: str
             fidelity: str = "low"
@@ -1133,6 +1228,12 @@ def main():
             # from --no-snap). Lets the UI compare raw-emitted vs snapped layout
             # without restarting the server.
             snap: bool | None = None
+            # Path A hotswap: fill method per request. "grammar" = the hand-built
+            # expand_part fill (default); "learned" = the trained FillModel (only
+            # if --fill-checkpoint was loaded at launch). Lets the demo compare
+            # grammar vs learned fill live. (Interpreter/decomposer are heavy
+            # model loads -> selected at launch via --checkpoint, not per-request.)
+            fill_method: str = "grammar"
 
         @app.get("/", response_class=HTMLResponse)
         def index():
@@ -1231,6 +1332,21 @@ def main():
                     return JSONResponse({"error": f"high-fidelity pipeline error: {type(e).__name__}: {e}"})
             else:
                 tensors = tree_to_tensors(tree)
+
+            # Path A hotswap: replace grammar-filled parts with the learned
+            # FillModel's Gaussians when requested AND a checkpoint is loaded.
+            # Falls back to the grammar fill (already in `tensors`) otherwise, so
+            # the toggle degrades gracefully if no --fill-checkpoint was given.
+            if req.fill_method == "learned":
+                if getattr(app.state, "fill_model", None) is None:
+                    pipeline_info = (pipeline_info or "") + " [learned-fill requested but no --fill-checkpoint; using grammar]"
+                else:
+                    try:
+                        tensors = fill_tree_with_model(tree, app.state.fill_model, device)
+                        pipeline_info = (pipeline_info or "") + " [learned fill]"
+                    except Exception as e:
+                        import traceback; traceback.print_exc()
+                        pipeline_info = (pipeline_info or "") + f" [learned-fill error: {type(e).__name__}; grammar fallback]"
 
             # Raum 0.7 splat-appearance pass: densify + flatten-to-surface +
             # weathering, driven by the UI sliders. Operates on the flat tensor
