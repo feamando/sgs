@@ -1,4 +1,4 @@
-# LinkedIn Post 1 — the VSP idea (why a token should be more than a word)
+# LinkedIn Post 1: the VSP idea (why a token should be more than a word)
 
 Illustration: docs/posts/img/vsp_token.svg
 Tone: rigorous but accessible, no em dashes. Plain text below for paste.

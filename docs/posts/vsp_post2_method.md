@@ -1,4 +1,4 @@
-# LinkedIn Post 2 — the method (four experiments, one honest decision)
+# LinkedIn Post 2: the method (four experiments, one honest decision)
 
 Illustration: docs/posts/img/vsp_grounding.svg
 Tone: rigorous but accessible, no em dashes. Plain text below for paste.
