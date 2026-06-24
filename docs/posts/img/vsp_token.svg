@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="500" fill="#0a0a0f"/>
+
+  <text x="400" y="34" text-anchor="middle" fill="#f5f1e8" font-size="18" font-weight="700">One word, three groundings</text>
+  <text x="400" y="57" text-anchor="middle" fill="#8a8598" font-size="12">A token should carry what a thing looks like, means, and is made of. Not just its spelling.</text>
+
+  <!-- LEFT: the collapse -->
+  <text x="200" y="98" text-anchor="middle" fill="#D9534F" font-size="13" font-weight="700">TODAY: text only</text>
+  <rect x="70" y="115" width="260" height="120" rx="10" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+  <text x="200" y="150" text-anchor="middle" fill="#f5f1e8" font-size="15" font-weight="700">"crane"</text>
+  <text x="200" y="178" text-anchor="middle" fill="#8a8598" font-size="11">one vector</text>
+  <circle cx="150" cy="205" r="9" fill="#D9534F" opacity="0.85"/>
+  <circle cx="200" cy="205" r="9" fill="#D9534F" opacity="0.85"/>
+  <circle cx="250" cy="205" r="9" fill="#D9534F" opacity="0.85"/>
+  <text x="200" y="252" text-anchor="middle" fill="#8a8598" font-size="11">bird and machine collapse</text>
+  <text x="200" y="268" text-anchor="middle" fill="#8a8598" font-size="11">into the same token</text>
+
+  <!-- arrow -->
+  <path d="M345 200 L405 200" stroke="#ffb347" stroke-width="2.5"/>
+  <polygon points="405,192 420,200 405,208" fill="#ffb347"/>
+
+  <!-- RIGHT: the V/S/P bundle, two senses pulled apart -->
+  <text x="600" y="98" text-anchor="middle" fill="#4CAF50" font-size="13" font-weight="700">VSP: bundle of three</text>
+
+  <!-- sense A -->
+  <rect x="440" y="115" width="320" height="80" rx="10" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+  <text x="455" y="140" fill="#f5f1e8" font-size="12" font-weight="700">crane (bird)</text>
+  <circle cx="500" cy="168" r="11" fill="#3B82F6"/><text x="500" y="172" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">V</text>
+  <circle cx="545" cy="168" r="11" fill="#ffb347"/><text x="545" y="172" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">S</text>
+  <circle cx="590" cy="168" r="11" fill="#E69500"/><text x="590" y="172" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">P</text>
+  <text x="660" y="172" fill="#8a8598" font-size="10">feathers, light</text>
+
+  <!-- sense B -->
+  <rect x="440" y="205" width="320" height="80" rx="10" fill="#12121a" stroke="#1f1f2a" stroke-width="1.5"/>
+  <text x="455" y="230" fill="#f5f1e8" font-size="12" font-weight="700">crane (machine)</text>
+  <circle cx="500" cy="258" r="11" fill="#3B82F6"/><text x="500" y="262" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">V</text>
+  <circle cx="545" cy="258" r="11" fill="#ffb347"/><text x="545" y="262" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">S</text>
+  <circle cx="590" cy="258" r="11" fill="#E69500"/><text x="590" y="262" text-anchor="middle" fill="#0a0a0f" font-size="8" font-weight="700">P</text>
+  <text x="660" y="262" fill="#8a8598" font-size="10">steel, heavy</text>
+
+  <!-- legend -->
+  <text x="400" y="345" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">V = Visual &#183; S = Semantic &#183; P = Physical</text>
+  <text x="400" y="372" text-anchor="middle" fill="#8a8598" font-size="12">Same spelling, different bundle. The senses separate because what they</text>
+  <text x="400" y="390" text-anchor="middle" fill="#8a8598" font-size="12">LOOK like and are MADE of differ, even when the word does not.</text>
+
+  <text x="400" y="455" text-anchor="middle" fill="#ffb347" font-size="13" font-weight="700">Radiance Labs</text>
+  <text x="400" y="474" text-anchor="middle" fill="#8a8598" font-size="11">Meaning, rendered.</text>
+</svg>

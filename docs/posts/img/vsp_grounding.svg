@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="520" fill="#0a0a0f"/>
+
+  <text x="400" y="34" text-anchor="middle" fill="#f5f1e8" font-size="18" font-weight="700">Where should a sense get its grounding?</text>
+  <text x="400" y="57" text-anchor="middle" fill="#8a8598" font-size="12">We tested four ways to separate "crane the bird" from "crane the machine". Higher bar = better separation.</text>
+
+  <!-- baseline line for the gate -->
+  <line x1="90" y1="300" x2="710" y2="300" stroke="#1f1f2a" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <text x="715" y="304" fill="#8a8598" font-size="10">gate</text>
+
+  <!-- bars: x, label, gain(0-0.6 scaled), pass -->
+  <!-- chart area top y=110 (gain .6) bottom y=380 (gain 0); scale 270px / .6 = 450 -->
+  <!-- gate 0.30 -> y = 380 - 0.30*450 = 245 ... but drawn dashed at 300 for visual; use bars relative -->
+
+  <!-- hand-seeded 0.48 -->
+  <rect x="120" y="164" width="90" height="216" rx="5" fill="#B0B0B0"/>
+  <text x="165" y="156" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.48</text>
+  <text x="165" y="400" text-anchor="middle" fill="#f5f1e8" font-size="11">hand-seeded</text>
+  <text x="165" y="416" text-anchor="middle" fill="#8a8598" font-size="10">(graded our own</text>
+  <text x="165" y="430" text-anchor="middle" fill="#8a8598" font-size="10">labels)</text>
+
+  <!-- text-GloVe 0.13 FAIL -->
+  <rect x="245" y="321" width="90" height="59" rx="5" fill="#D9534F"/>
+  <text x="290" y="313" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.13</text>
+  <text x="290" y="400" text-anchor="middle" fill="#f5f1e8" font-size="11">text (GloVe)</text>
+  <text x="290" y="416" text-anchor="middle" fill="#D9534F" font-size="10" font-weight="700">FAIL</text>
+
+  <!-- synset one-hot 0.41 -->
+  <rect x="370" y="195" width="90" height="185" rx="5" fill="#E69500"/>
+  <text x="415" y="187" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.41</text>
+  <text x="415" y="400" text-anchor="middle" fill="#f5f1e8" font-size="11">synset id</text>
+  <text x="415" y="416" text-anchor="middle" fill="#8a8598" font-size="10">passes, but</text>
+  <text x="415" y="430" text-anchor="middle" fill="#8a8598" font-size="10">tautological</text>
+
+  <!-- CLIP-text 0.18 FAIL -->
+  <rect x="495" y="299" width="90" height="81" rx="5" fill="#D9534F"/>
+  <text x="540" y="291" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.18</text>
+  <text x="540" y="400" text-anchor="middle" fill="#f5f1e8" font-size="11">CLIP-text</text>
+  <text x="540" y="416" text-anchor="middle" fill="#D9534F" font-size="10" font-weight="700">FAIL</text>
+
+  <!-- CLIP-image ? -->
+  <rect x="620" y="150" width="90" height="230" rx="5" fill="none" stroke="#4CAF50" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <text x="665" y="142" text-anchor="middle" fill="#4CAF50" font-size="16" font-weight="700">?</text>
+  <text x="665" y="400" text-anchor="middle" fill="#4CAF50" font-size="11" font-weight="700">CLIP-image</text>
+  <text x="665" y="416" text-anchor="middle" fill="#8a8598" font-size="10">the real test</text>
+  <text x="665" y="430" text-anchor="middle" fill="#8a8598" font-size="10">(generated views)</text>
+
+  <text x="400" y="466" text-anchor="middle" fill="#f5f1e8" font-size="12">Every TEXT-based grounding collapses. A picture of a bird and a picture of a</text>
+  <text x="400" y="484" text-anchor="middle" fill="#f5f1e8" font-size="12">construction crane cannot. So we ground meaning in generated IMAGES.</text>
+
+  <text x="400" y="510" text-anchor="middle" fill="#ffb347" font-size="12" font-weight="700">Radiance Labs &#183; Meaning, rendered.</text>
+</svg>
