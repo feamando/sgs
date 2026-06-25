@@ -1,30 +1,23 @@
-# LinkedIn Post 2: the method (four experiments, one honest decision)
+# LinkedIn Post 2: the method (four experiments, one decision)
 
 Illustration: docs/posts/img/vsp_grounding.svg
-Tone: rigorous but accessible, no em dashes. Plain text below for paste.
+Tone: plain, factual, understated. No em dashes. Plain text below for paste.
 
 ---
 
-How do you prove an idea is real before you spend a month training a model on it?
+A follow-up on the token representation we are testing at Radiance Labs.
 
-We had a claim: a token that carries what a thing looks like (V), means (S), and is made of (P) should separate senses that a normal model collapses. "Crane the bird" from "crane the machine." The test is whether V, S, and P together push the two senses apart when language alone holds them together.
+The claim to check: a token carrying what a thing looks like (V), means (S), and is made of (P) should separate senses that a normal embedding merges. The test case is "crane the bird" versus "crane the machine".
 
-Instead of training first and hoping, we ran the cheapest version of the experiment four ways. Each one taught us something, and three of them said no.
+Before training anything, we ran a small separation test four ways and measured how far apart the two senses landed.
 
-1. Hand-authored V and P. Separation worked (gain 0.48). But we wrote the labels, so we were partly grading our own homework. Promising, not proof.
+1. Hand-written V and P: separated well (0.48), but we wrote the labels, so this mostly confirms the setup, not the idea.
+2. V and P derived from the word's text embedding: did not separate (0.13). The hardest cases share spelling, and text alone cannot tell them apart.
+3. V from a fixed 3D-object category id: separated (0.41), but largely because different ids are different by definition. It also limits us to a small set of categories.
+4. V from a vision-language model reading the word as text: did not separate (0.18).
 
-2. V and P derived from the word's text embedding. Failed (0.13). The cases that most need help, the ones with identical spelling, collapsed completely, because text is the very signal that confuses them. Circular.
+The pattern: anything derived from text collapses the two senses. Images do not, since a picture of a bird and a picture of a construction crane are visually unrelated.
 
-3. V from a curated 3D-asset category id. Passed (0.41), but the separation was almost tautological: different ids are different by construction. It also caps us at a few dozen object categories.
+So the next step is to ground the visual part in generated images rather than text or a fixed category list. The plan is to enumerate a word's senses, generate views of each, embed them, and keep the senses that occupy clearly different regions of image space.
 
-4. V from a CLIP reading of the word. Failed (0.18). Even a vision-language model, fed text, still sees the shared word and merges the senses.
-
-The pattern is unmistakable. Every grounding that starts from TEXT collapses. The thing that cannot collapse is a picture: an image of a bird and an image of a construction crane are visually unrelated, no matter that they share a name.
-
-So the direction is set. We ground the visual component in GENERATED IMAGES. We ask a model to enumerate a word's distinct senses, generate views of each, embed them, and keep only the senses that occupy genuinely different regions of image space. Open vocabulary, no fixed category list, and senses that separate because they look different, not because we labeled them.
-
-The decisive test runs next, on real generated views. If it holds, it becomes the basis for Radiance Planck 2.0 and a paper on grounding meaning in rendered images.
-
-The lesson we keep relearning: a cheap experiment that says no is worth more than an expensive one that says what you hoped.
-
-Meaning, rendered.
+That test runs next on real generated views. If it holds, it informs our next model and a short write-up. If it does not, we will say so.

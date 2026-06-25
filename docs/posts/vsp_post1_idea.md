@@ -1,26 +1,20 @@
 # LinkedIn Post 1: the VSP idea (why a token should be more than a word)
 
 Illustration: docs/posts/img/vsp_token.svg
-Tone: rigorous but accessible, no em dashes. Plain text below for paste.
+Tone: plain, factual, understated. No em dashes. Plain text below for paste.
 
 ---
 
-A language model thinks the word "crane" is one thing.
+A note on something we are working on at Radiance Labs.
 
-It is at least two. A crane is a bird. A crane is a machine that lifts steel. They are spelled the same, so a normal tokenizer gives them ONE vector and lets context sort it out later. Most of the time that works. Sometimes it does not, and the model has quietly merged a bird with a construction site.
+Most language models give the word "crane" a single vector. But a crane is a bird and also a machine that lifts steel. Same spelling, two unrelated things. The model relies on surrounding context to tell them apart, which usually works and sometimes does not.
 
-We are building language models a different way at Radiance Labs. Our models compose meaning using the rendering equation from 3D Gaussian Splatting, the same math a graphics engine uses to compose light. That gives us a natural question the usual approach never asks: if a token can be rendered, what should it actually contain?
+We are testing a different representation. Our models compose meaning using the rendering equation from 3D Gaussian Splatting, so a token can carry more than a word embedding. We are looking at giving each grounded token three parts:
 
-Our answer is VSP. Every grounded token carries three things, bundled from birth:
+V, visual: what the thing looks like, derived from images.
+S, semantic: the usual language embedding.
+P, physical: material properties like hardness and density.
 
-V, the visual. What the thing looks like, taken from images, not from its spelling.
-S, the semantic. What the word means in language, the usual embedding.
-P, the physical. What it is made of and how it behaves: hardness, density, transparency.
+The bird and the machine share the same S. Their V and P are different. If you combine all three, the two senses end up far apart without any special rule to separate them.
 
-A bird and a construction crane have the same S, because they share a word. But their V is completely different (feathers versus steel girders) and their P is completely different (light and soft versus heavy and rigid). Bundle all three and the two senses pull apart on their own. You do not need a disambiguation rule. The representation does it, because meaning was never only semantic.
-
-This is the foundation for our next model, Radiance Planck 2.0. The bet is simple to state and hard to earn: a model that knows what words LOOK like and are MADE of, not just what they mean, should understand them more precisely.
-
-We are testing that bet now, and being honest about what passes and what does not. More on that next.
-
-Meaning, rendered.
+This is an experiment, not a result yet. We are checking whether it actually holds before building a model on it. Notes to follow.
