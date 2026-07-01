@@ -11,7 +11,14 @@ Run on the training box (needs the weights + val.bin there):
 """
 import argparse
 import math
+import sys
+from pathlib import Path
+
 import torch
+
+# Running a script from scripts/ puts scripts/ on sys.path, not the repo root,
+# so `src` isn't importable. Add the repo root, same as train_hertz.py.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.sgs_lm import SGSLanguageModel
 from src.tinystories import get_dataloader
