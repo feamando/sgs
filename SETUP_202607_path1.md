@@ -50,9 +50,21 @@ hf auth login
 # 3. download (E4B = 8B, fits the 4090 alongside the SGS model; bump to 12B-it
 #    only if there's VRAM headroom, or run generation as a separate pass):
 hf download google/gemma-4-E4B-it --local-dir models/gemma-4-e4b-it
-# 4. the harness also needs transformers + accelerate in whatever venv runs it:
-pip install "transformers>=4.45" accelerate
+# 4. the harness also needs transformers + accelerate in whatever venv runs it.
+#    Gemma 4's tokenizer.json uses a newer schema; transformers>=4.45 (and its
+#    bundled tokenizers) is TOO OLD and fails with:
+#      "data did not match any variant of untagged enum ModelWrapper"
+#    Pin to a floor that ships the Gemma-4 tokenizer support:
+pip install -U "transformers>=4.50" "tokenizers>=0.21" accelerate
+#    If it STILL raises the ModelWrapper enum error, stable isn't new enough for
+#    Gemma 4 yet -> install the version named on the model card (likely a git
+#    build):  pip install "git+https://github.com/huggingface/transformers"
 ```
+
+VENV NOTE: Gemma data-gen needs NO gsplat/SDS deps, so run it in the main
+`.venv` (torch 2.6 / py3.12), NOT `.venv-sds`. Upgrading transformers inside
+`.venv-sds` risks a diffusers version conflict; keep that env pinned for the
+differentiable-render step only.
 
 **Generate training data (harness BUILT: scripts/generate_trees_gemma.py):**
 
