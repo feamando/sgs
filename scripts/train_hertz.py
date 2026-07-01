@@ -437,7 +437,15 @@ def main():
         )
         profiler_ctx.__enter__()
 
+    # Hard optimizer-step budget. The data loader running dry is NOT a reliable
+    # stop: on --resume we restart the epoch at data-position 0 while opt_step
+    # and the LR scheduler carry forward, so letting the loader exhaust re-trains
+    # a whole extra pass on an already-decayed (then rising) cosine LR. Stop at
+    # the planned optimizer-step count regardless of loader position.
+    reached_budget = False
     for epoch in range(start_epoch, args.epochs):
+        if reached_budget:
+            break
         epoch_loss_sum = 0.0
         epoch_tokens = 0
         window_tokens = 0
@@ -565,6 +573,15 @@ def main():
                 if (args.bf16_milestone_interval > 0
                         and opt_step % args.bf16_milestone_interval == 0):
                     _save_bf16_milestone(model, opt_step, save_dir)
+
+                # ── Stop at the planned budget ──
+                # Placed after log/eval/checkpoint so the final step is recorded.
+                # Guards against the resume-restart trap: once we've done the
+                # scheduled opt_steps, the cosine LR has finished its decay and
+                # would otherwise start rising again on re-seen data.
+                if opt_step >= opt_steps:
+                    reached_budget = True
+                    break
 
         # End of epoch
         # Fold any remaining (sub-log-interval) loss into the epoch total.
