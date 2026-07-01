@@ -245,11 +245,23 @@ class SatzRuntime:
 
     @torch.no_grad()
     def generate(self, prompt: str, k: int | None = None, max_new: int | None = None,
-                 temperature: float | None = None) -> dict:
-        """Generate text and (if this model has blobs) retrieve blobs."""
+                 temperature: float | None = None, top_k: int | None = None,
+                 top_p: float | None = None, repetition_penalty: float | None = None,
+                 no_repeat_ngram: int | None = None) -> dict:
+        """Generate text and (if this model has blobs) retrieve blobs.
+
+        Decoding defaults are tuned to suppress the base-model degeneration
+        (verbatim loops) that a small 1-epoch LM falls into under plain top-k:
+        a repetition penalty, no-repeat n-gram blocking, and nucleus (top-p)
+        sampling on top of top-k.
+        """
         k = self.k if k is None else k
         max_new = self.max_new if max_new is None else max_new
         temperature = self.temperature if temperature is None else temperature
+        top_k = 50 if top_k is None else top_k
+        top_p = 0.92 if top_p is None else top_p
+        repetition_penalty = 1.3 if repetition_penalty is None else repetition_penalty
+        no_repeat_ngram = 3 if no_repeat_ngram is None else no_repeat_ngram
 
         prompt_ids = self._tokenize(prompt)  # [1, L]
         prompt_len = prompt_ids.shape[1]
@@ -261,11 +273,45 @@ class SatzRuntime:
         generated_tokens = []
         for _ in range(max_new):
             ctx = ids[:, -self.model.max_len:]
-            logits = self.model.forward(ctx)[:, -1, :]
+            logits = self.model.forward(ctx)[:, -1, :]  # [1, V]
+
+            # ── Repetition penalty (CTRL-style): divide logits of already-seen
+            #    tokens so they're less likely to be picked again. ──
+            if repetition_penalty and repetition_penalty != 1.0:
+                seen = torch.unique(ids[0])
+                sel = logits[0, seen]
+                logits[0, seen] = torch.where(
+                    sel > 0, sel / repetition_penalty, sel * repetition_penalty)
+
+            # ── No-repeat n-gram: hard-ban any token that would complete an
+            #    n-gram already generated (kills exact phrase loops). ──
+            if no_repeat_ngram and no_repeat_ngram > 0 and len(generated_tokens) >= no_repeat_ngram - 1:
+                seq = generated_tokens
+                prefix = tuple(seq[-(no_repeat_ngram - 1):]) if no_repeat_ngram > 1 else tuple()
+                banned = set()
+                for i in range(len(seq) - no_repeat_ngram + 1):
+                    if tuple(seq[i:i + no_repeat_ngram - 1]) == prefix:
+                        banned.add(seq[i + no_repeat_ngram - 1])
+                for tok in banned:
+                    logits[0, tok] = float("-inf")
+
             logits = logits / max(temperature, 1e-8)
-            top_k_val = 50
-            v, _ = logits.topk(min(top_k_val, logits.size(-1)))
-            logits[logits < v[:, [-1]]] = float("-inf")
+
+            # ── top-k ──
+            if top_k and top_k > 0:
+                v, _ = logits.topk(min(top_k, logits.size(-1)))
+                logits[logits < v[:, [-1]]] = float("-inf")
+
+            # ── top-p (nucleus): keep the smallest set whose cumulative prob
+            #    exceeds top_p; drop the long improbable tail. ──
+            if top_p and 0.0 < top_p < 1.0:
+                sorted_logits, sorted_idx = torch.sort(logits, descending=True)
+                cumprobs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+                remove = cumprobs > top_p
+                remove[..., 1:] = remove[..., :-1].clone()
+                remove[..., 0] = False
+                logits[0, sorted_idx[0, remove[0]]] = float("-inf")
+
             probs = F.softmax(logits, dim=-1)
             next_id = torch.multinomial(probs, 1)
             ids = torch.cat([ids, next_id], dim=1)
@@ -284,6 +330,10 @@ class SatzRuntime:
             "generated_tokens": n_gen,
             "k": k,
             "temperature": temperature,
+            "top_k": top_k,
+            "top_p": top_p,
+            "repetition_penalty": repetition_penalty,
+            "no_repeat_ngram": no_repeat_ngram,
             "gen_seconds": round(gen_seconds, 3),
             "tokens_per_sec": round(n_gen / gen_seconds, 1) if gen_seconds > 0 else None,
             "blobs": blobs_info,
@@ -343,6 +393,10 @@ class GenerateRequest(BaseModel):
     k: int | None = None
     max_new: int | None = None
     temperature: float | None = None
+    top_k: int | None = None
+    top_p: float | None = None
+    repetition_penalty: float | None = None
+    no_repeat_ngram: int | None = None
     session_id: str | None = None  # optional client-supplied conversation id
 
 
@@ -396,7 +450,10 @@ def generate(req: GenerateRequest):
             raise HTTPException(status_code=503, detail=f"cannot load {req.model}: {e}")
     try:
         result = manager.active.generate(
-            prompt, k=req.k, max_new=req.max_new, temperature=req.temperature)
+            prompt, k=req.k, max_new=req.max_new, temperature=req.temperature,
+            top_k=req.top_k, top_p=req.top_p,
+            repetition_penalty=req.repetition_penalty,
+            no_repeat_ngram=req.no_repeat_ngram)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
