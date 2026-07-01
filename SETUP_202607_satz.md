@@ -103,6 +103,32 @@ back to Planck, blob panel returns and re-ranks. Both on localhost.
 - **Hertz `milestone_*_bf16.pt` are inference-only** and would also work for
   Satz (model-only), if you'd rather serve the lighter bf16 snapshot.
 
+## 4b. Conversation logging (for analysis)
+
+On by default. Every generation appends one JSON line to
+`runs/satz_conversations.jsonl`: timestamp, session id (one per browser page
+load), model, prompt, output, token counts, gen latency + tok/s, and retrieved
+blob indices/scores. Writes are lock-guarded and best-effort (a log failure
+never breaks a request).
+
+```powershell
+python -m satz.app --model hertz                              # logs to runs/satz_conversations.jsonl
+python -m satz.app --model hertz --log-file runs\demo_day.jsonl   # custom path
+python -m satz.app --model hertz --no-log                     # disable
+```
+
+Analyze:
+
+```powershell
+python -m satz.analyze_log --log runs\satz_conversations.jsonl
+python -m satz.analyze_log --log runs\satz_conversations.jsonl --model hertz --show 5
+# or: import pandas as pd; pd.read_json("runs/satz_conversations.jsonl", lines=True)
+```
+
+**PRIVACY:** the log holds real user prompts and the repo is PUBLIC. The log
+files are gitignored (`runs/satz_conversations*.jsonl`). Do NOT commit them or
+paste raw prompts into public posts.
+
 ## 5. Scope
 v0.2 = selector + blob-free Hertz (option A). Do NOT build a Hertz blob index or
 streaming in this pass; log them as v0.3. Stop if Hertz generation quality is

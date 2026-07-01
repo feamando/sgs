@@ -12,3 +12,7 @@ ablation_results.json
 pitch/
 glove.6B.zip
 .venv-sds/
+
+# Satz conversation logs (may contain user prompts; keep local)
+runs/satz_conversations*.jsonl
+satz_conversations*.jsonl

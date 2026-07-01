@@ -19,7 +19,11 @@ Then open http://localhost:8001 in a browser.
 import argparse
 import json
 import sys
+import time
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
+from threading import Lock
 
 import torch
 import torch.nn.functional as F
@@ -73,7 +77,43 @@ def parse_args():
     p.add_argument("--checkpoint", default=None, help="Override checkpoint path")
     p.add_argument("--tokenizer", default=None, help="Override tokenizer path")
     p.add_argument("--blobs-dir", default=None, help="Override blob directory")
+    # Conversation logging (on by default; one JSONL line per generation).
+    p.add_argument("--log-file", default="runs/satz_conversations.jsonl",
+                   help="JSONL file to append each generation to")
+    p.add_argument("--no-log", action="store_true",
+                   help="Disable conversation logging")
     return p.parse_args()
+
+
+class ConversationLogger:
+    """Appends one JSON line per generation for later analysis.
+
+    JSONL (one self-contained record per line) is append-only, crash-safe, and
+    trivial to load with pandas / jq. Writes are lock-guarded so concurrent
+    requests don't interleave. A failed write never breaks generation.
+    """
+
+    def __init__(self, log_file: str | None):
+        self.path = None
+        self._lock = Lock()
+        if not log_file:
+            print("[satz] conversation logging: OFF")
+            return
+        p = Path(log_file)
+        if not p.is_absolute():
+            p = ROOT / p
+        p.parent.mkdir(parents=True, exist_ok=True)
+        self.path = p
+        print(f"[satz] conversation log: {self.path}")
+
+    def log(self, record: dict) -> None:
+        if self.path is None:
+            return
+        try:
+            with self._lock, open(self.path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        except Exception as e:  # logging must never break a request
+            print(f"[satz] WARN: failed to write conversation log: {e}")
 
 
 def _resolve(path_str: str) -> Path:
@@ -216,6 +256,7 @@ class SatzRuntime:
 
         blobs_info = self._retrieve_blobs(prompt_ids, k)
 
+        t0 = time.perf_counter()
         ids = prompt_ids.clone()
         generated_tokens = []
         for _ in range(max_new):
@@ -229,8 +270,10 @@ class SatzRuntime:
             next_id = torch.multinomial(probs, 1)
             ids = torch.cat([ids, next_id], dim=1)
             generated_tokens.append(int(next_id[0, 0].item()))
+        gen_seconds = time.perf_counter() - t0
 
         generated_text = self._decode(generated_tokens)
+        n_gen = len(generated_tokens)
         return {
             "model": self.name,
             "model_label": self.label,
@@ -238,9 +281,11 @@ class SatzRuntime:
             "prompt": prompt,
             "generated_text": generated_text,
             "prompt_tokens": prompt_len,
-            "generated_tokens": len(generated_tokens),
+            "generated_tokens": n_gen,
             "k": k,
             "temperature": temperature,
+            "gen_seconds": round(gen_seconds, 3),
+            "tokens_per_sec": round(n_gen / gen_seconds, 1) if gen_seconds > 0 else None,
             "blobs": blobs_info,
         }
 
@@ -286,6 +331,7 @@ class RuntimeManager:
 
 app = FastAPI(title="Satz demo v0.2")
 manager: RuntimeManager | None = None
+conversation_log: ConversationLogger | None = None
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -297,6 +343,7 @@ class GenerateRequest(BaseModel):
     k: int | None = None
     max_new: int | None = None
     temperature: float | None = None
+    session_id: str | None = None  # optional client-supplied conversation id
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -352,12 +399,35 @@ def generate(req: GenerateRequest):
             prompt, k=req.k, max_new=req.max_new, temperature=req.temperature)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+    # ── Log the conversation turn (best-effort; never blocks the response) ──
+    if conversation_log is not None:
+        record = {
+            "id": uuid.uuid4().hex,
+            "session_id": req.session_id,
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "model": result["model"],
+            "prompt": result["prompt"],
+            "generated_text": result["generated_text"],
+            "prompt_tokens": result["prompt_tokens"],
+            "generated_tokens": result["generated_tokens"],
+            "k": result["k"],
+            "temperature": result["temperature"],
+            "gen_seconds": result.get("gen_seconds"),
+            "tokens_per_sec": result.get("tokens_per_sec"),
+            "has_blobs": result["has_blobs"],
+            # Store blob indices/scores only (compact); full features live in the store.
+            "blobs": [{"index": b["index"], "score": b["score"]} for b in result["blobs"]],
+        }
+        conversation_log.log(record)
+
     return JSONResponse(result)
 
 
 def main():
-    global manager
+    global manager, conversation_log
     args = parse_args()
+    conversation_log = ConversationLogger(None if args.no_log else args.log_file)
     manager = RuntimeManager(args)
     import uvicorn
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")

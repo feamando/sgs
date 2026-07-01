@@ -22,6 +22,13 @@
   // Which models have a blob store, keyed by name. Populated from /models.
   const modelHasBlobs = {};
 
+  // One session id per page load, so the logger can group turns into a
+  // conversation. Not for auth, just for later analysis.
+  const sessionId =
+    (window.crypto && window.crypto.randomUUID)
+      ? window.crypto.randomUUID()
+      : "sess-" + Date.now() + "-" + Math.floor(Math.random() * 1e6);
+
   // ── Populate the model selector ──
   async function loadModels() {
     try {
@@ -113,6 +120,7 @@
           k: k,
           max_new: maxNew,
           temperature: temperature,
+          session_id: sessionId,
         }),
       });
 
