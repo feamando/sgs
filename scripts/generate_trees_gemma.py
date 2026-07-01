@@ -130,7 +130,7 @@ def main():
     print(f"[gemma] loading {args.model} ...")
     tok = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(
-        args.model, torch_dtype=torch.bfloat16,
+        args.model, dtype=torch.bfloat16,
         device_map="auto" if torch.cuda.is_available() else None)
     model.eval()
 
@@ -141,13 +141,17 @@ def main():
     for i, scene in enumerate(prompts):
         for _ in range(args.repeat):
             msgs = [{"role": "user", "content": build_prompt(scene)}]
-            inputs = tok.apply_chat_template(msgs, add_generation_prompt=True,
-                                             return_tensors="pt").to(model.device)
+            # Newer transformers returns a BatchEncoding (dict-like) from
+            # apply_chat_template; generate() wants **inputs, not a bare tensor.
+            inputs = tok.apply_chat_template(
+                msgs, add_generation_prompt=True,
+                return_tensors="pt", return_dict=True).to(model.device)
+            input_len = inputs["input_ids"].shape[1]
             with torch.no_grad():
-                gen = model.generate(inputs, max_new_tokens=args.max_new,
+                gen = model.generate(**inputs, max_new_tokens=args.max_new,
                                      do_sample=args.temperature > 0,
                                      temperature=max(args.temperature, 1e-4))
-            text = tok.decode(gen[0][inputs.shape[1]:], skip_special_tokens=True)
+            text = tok.decode(gen[0][input_len:], skip_special_tokens=True)
             tree = parse_tree(text)
             if tree is None:
                 n_fail += 1
