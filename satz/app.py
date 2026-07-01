@@ -1,15 +1,18 @@
 """
-Satz demo v0.1: local web app.
+Satz demo v0.2: local web app with a model selector (Planck <-> Hertz).
 
-Loads a trained Planck 1.3 checkpoint + blob store and serves a FastAPI
-endpoint that generates text and shows which blobs are retrieved for a
-given prompt.
+Loads a trained SGS LM checkpoint and serves a FastAPI endpoint that generates
+text. For models that have a blob store (Planck), it also shows which blobs are
+retrieved for a prompt. Hertz has no blob store, so it runs blob-free and the
+UI greys the blob panel.
 
-Run:
-    python -m satz.app --checkpoint checkpoints/planck/best.pt `
-                       --tokenizer data/wikipedia/tokenizer.model `
-                       --blobs-dir data/blobs/wikipedia
+Run (default model = planck):
+    python -m satz.app --model planck
 
+Switch the default at launch:
+    python -m satz.app --model hertz
+
+Paths default from the registry below; override per-flag if your layout differs.
 Then open http://localhost:8001 in a browser.
 """
 
@@ -32,14 +35,33 @@ from src.sgs_lm import SGSLanguageModel, migrate_state_dict
 from src.blob_store import BlobStore
 
 
+# ── Model registry ─────────────────────────────────────────────────────────
+# Arch MUST match the checkpoint or load_state_dict fails on shape mismatch.
+# blobs_dir=None means the model runs blob-free (blob panel greyed in the UI).
+MODELS = {
+    "planck": {
+        "label": "Planck 1.3 (~100M, blobs)",
+        "checkpoint": "checkpoints/planck/best.pt",
+        "tokenizer": "data/wikipedia/tokenizer.model",
+        "blobs_dir": "data/blobs/wikipedia",
+        "arch": dict(d_s=128, d_f=1000, n_passes=3, n_heads=4,
+                     context_len=512, ffn_mult=4),
+    },
+    "hertz": {
+        "label": "Hertz 1.2 (0.64B, blob-free)",
+        "checkpoint": "checkpoints/hertz12/best.pt",
+        "tokenizer": "data/hertz12_data/tokenizer.model",
+        "blobs_dir": None,
+        "arch": dict(d_s=256, d_f=3700, n_passes=3, n_heads=4,
+                     context_len=512, ffn_mult=4),
+    },
+}
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Satz demo server")
-    p.add_argument("--checkpoint", required=True,
-                   help="Path to Planck 1.3 best.pt checkpoint")
-    p.add_argument("--tokenizer", default="data/wikipedia/tokenizer.model",
-                   help="SentencePiece model file")
-    p.add_argument("--blobs-dir", default="data/blobs/wikipedia",
-                   help="Directory containing blobs.pt and meta.json")
+    p.add_argument("--model", default="planck", choices=list(MODELS.keys()),
+                   help="Model to load at startup (default: planck)")
     p.add_argument("--k", type=int, default=8,
                    help="Top-k blobs to retrieve (default 8)")
     p.add_argument("--host", default="127.0.0.1")
@@ -47,74 +69,92 @@ def parse_args():
     p.add_argument("--max-new", type=int, default=200,
                    help="Max tokens to generate")
     p.add_argument("--temperature", type=float, default=0.8)
-    # Architecture (must match checkpoint)
-    p.add_argument("--d-s", type=int, default=128)
-    p.add_argument("--d-f", type=int, default=1000)
-    p.add_argument("--n-passes", type=int, default=3)
-    p.add_argument("--n-heads", type=int, default=4)
-    p.add_argument("--context-len", type=int, default=512)
-    p.add_argument("--ffn-mult", type=int, default=4)
+    # Per-model path overrides (optional; default from the registry).
+    p.add_argument("--checkpoint", default=None, help="Override checkpoint path")
+    p.add_argument("--tokenizer", default=None, help="Override tokenizer path")
+    p.add_argument("--blobs-dir", default=None, help="Override blob directory")
     return p.parse_args()
 
 
-class SatzRuntime:
-    """Loads Planck checkpoint + blob store, generates text + retrieves blobs."""
+def _resolve(path_str: str) -> Path:
+    """Resolve a path relative to cwd, then to the project root."""
+    p = Path(path_str)
+    if p.exists():
+        return p
+    alt = ROOT / path_str
+    return alt if alt.exists() else p
 
-    def __init__(self, args):
-        self.max_new = args.max_new
-        self.temperature = args.temperature
-        self.k = args.k
+
+class SatzRuntime:
+    """Loads one SGS LM checkpoint (+ optional blob store) and generates text."""
+
+    def __init__(self, name: str, spec: dict, k: int, max_new: int,
+                 temperature: float):
+        self.name = name
+        self.label = spec["label"]
+        self.arch = spec["arch"]
+        self.max_new = max_new
+        self.temperature = temperature
+        self.k = k
+        self.has_blobs = spec.get("blobs_dir") is not None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # ── Load tokenizer ──
-        tokenizer_path = Path(args.tokenizer)
-        if not tokenizer_path.exists():
-            # Try relative to project root
-            tokenizer_path = ROOT / args.tokenizer
-        if not tokenizer_path.exists():
-            print(f"[satz] ERROR: tokenizer not found at {args.tokenizer}")
-            print(f"       Checked: {Path(args.tokenizer).resolve()}")
-            print(f"       Checked: {tokenizer_path}")
-            sys.exit(1)
-
+        # ── Tokenizer ──
+        tok_path = _resolve(spec["tokenizer"])
+        if not tok_path.exists():
+            raise FileNotFoundError(f"tokenizer not found: {spec['tokenizer']}")
         import sentencepiece as spm
         self.sp = spm.SentencePieceProcessor()
-        self.sp.load(str(tokenizer_path))
+        self.sp.load(str(tok_path))
         self.vocab_size = self.sp.get_piece_size()
-        print(f"[satz] tokenizer: {tokenizer_path} ({self.vocab_size} tokens)")
+        print(f"[satz:{name}] tokenizer: {tok_path} ({self.vocab_size} tokens)")
 
-        # ── Load blob store ──
-        blobs_dir = Path(args.blobs_dir)
-        if not blobs_dir.exists():
-            blobs_dir = ROOT / args.blobs_dir
-        if not blobs_dir.exists():
-            print(f"[satz] ERROR: blob directory not found at {args.blobs_dir}")
-            print(f"       Run scripts/build_blobs.py first to create the blob index.")
-            sys.exit(1)
+        # ── Blob store (optional) ──
+        self.blob_store = None
+        self.n_blobs = 0
+        if self.has_blobs:
+            self._load_blobs(spec["blobs_dir"])
 
+        # ── Model ──
+        ckpt_path = _resolve(spec["checkpoint"])
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f"checkpoint not found: {spec['checkpoint']}")
+        print(f"[satz:{name}] loading checkpoint: {ckpt_path}")
+        ckpt = torch.load(ckpt_path, map_location=self.device, weights_only=False)
+        state = ckpt["model"] if "model" in ckpt else ckpt
+        state = migrate_state_dict(state)
+
+        ckpt_vocab_size = state["tok_mu.weight"].shape[0]
+        self.model = SGSLanguageModel(
+            vocab_size=ckpt_vocab_size,
+            d_s=self.arch["d_s"],
+            d_f=self.arch["d_f"],
+            n_passes=self.arch["n_passes"],
+            n_heads=self.arch["n_heads"],
+            max_len=self.arch["context_len"],
+            ffn_mult=self.arch["ffn_mult"],
+        )
+        self.model.load_state_dict(state)
+        self.model.to(self.device).eval()
+        print(f"[satz:{name}] model: {self.model.count_parameters()/1e6:.1f}M "
+              f"params on {self.device} | blobs={'yes' if self.has_blobs else 'no'}")
+        print(f"[satz:{name}] ready.")
+
+    def _load_blobs(self, blobs_dir_str: str):
+        blobs_dir = _resolve(blobs_dir_str)
         blobs_pt = blobs_dir / "blobs.pt"
-        meta_json = blobs_dir / "meta.json"
         if not blobs_pt.exists():
-            print(f"[satz] ERROR: blobs.pt not found in {blobs_dir}")
-            print(f"       Run scripts/build_blobs.py first.")
-            sys.exit(1)
-
-        print(f"[satz] loading blobs from {blobs_dir} ...")
+            raise FileNotFoundError(
+                f"blobs.pt not found in {blobs_dir}. Run scripts/build_blobs.py first.")
+        print(f"[satz:{self.name}] loading blobs from {blobs_dir} ...")
         blob_data = torch.load(blobs_pt, map_location="cpu", weights_only=False)
-        n_blobs = blob_data["mu"].shape[0]
-
-        meta = {}
-        if meta_json.exists():
-            with open(meta_json) as f:
-                meta = json.load(f)
-
-        print(f"[satz] blob store: {n_blobs:,} blobs, "
+        self.n_blobs = blob_data["mu"].shape[0]
+        print(f"[satz:{self.name}] blob store: {self.n_blobs:,} blobs, "
               f"d_s={blob_data['mu'].shape[1]}, d_f={blob_data['features'].shape[1]}")
-
         self.blob_store = BlobStore(
-            n_blobs=n_blobs,
-            d_s=args.d_s,
-            d_f=args.d_f,
+            n_blobs=self.n_blobs,
+            d_s=self.arch["d_s"],
+            d_f=self.arch["d_f"],
             k=self.k,
         )
         self.blob_store.init_from_clusters(
@@ -125,41 +165,11 @@ class SatzRuntime:
         )
         self.blob_store.to(self.device).eval()
 
-        # ── Load Planck model ──
-        ckpt_path = Path(args.checkpoint)
-        if not ckpt_path.exists():
-            ckpt_path = ROOT / args.checkpoint
-        if not ckpt_path.exists():
-            print(f"[satz] ERROR: checkpoint not found at {args.checkpoint}")
-            sys.exit(1)
-
-        print(f"[satz] loading checkpoint: {ckpt_path}")
-        ckpt = torch.load(ckpt_path, map_location=self.device, weights_only=False)
-        state = ckpt["model"] if "model" in ckpt else ckpt
-        state = migrate_state_dict(state)
-
-        ckpt_vocab_size = state["tok_mu.weight"].shape[0]
-        self.model = SGSLanguageModel(
-            vocab_size=ckpt_vocab_size,
-            d_s=args.d_s,
-            d_f=args.d_f,
-            n_passes=args.n_passes,
-            n_heads=args.n_heads,
-            max_len=args.context_len,
-            ffn_mult=args.ffn_mult,
-        )
-        self.model.load_state_dict(state)
-        self.model.to(self.device).eval()
-        print(f"[satz] model: {self.model.count_parameters()/1e6:.1f}M params on {self.device}")
-        print(f"[satz] ready.")
-
     def _tokenize(self, text: str) -> torch.Tensor:
-        """Encode text to token IDs using SentencePiece."""
         ids = self.sp.encode(text)
         return torch.tensor([ids], dtype=torch.long, device=self.device)
 
     def _decode(self, ids: list[int]) -> str:
-        """Decode token IDs to text."""
         return self.sp.decode(ids)
 
     def _compute_query(self, token_ids: torch.Tensor) -> torch.Tensor:
@@ -170,67 +180,20 @@ class SatzRuntime:
             mu = mu + self.model.pos_mu(pos).unsqueeze(0)
             return mu.mean(dim=1)  # [B, d_s]
 
-    @torch.no_grad()
-    def generate(self, prompt: str, k: int | None = None, max_new: int | None = None,
-                 temperature: float | None = None) -> dict:
-        """Generate text and retrieve blobs for a prompt."""
-        if k is not None:
-            self.blob_store.k = k
-        else:
-            k = self.blob_store.k
-
-        if max_new is None:
-            max_new = self.max_new
-        if temperature is None:
-            temperature = self.temperature
-
-        # Tokenize
-        prompt_ids = self._tokenize(prompt)  # [1, L]
-        prompt_len = prompt_ids.shape[1]
-
-        # Retrieve blobs based on prompt
-        query = self._compute_query(prompt_ids)  # [1, d_s]
-        top_idx, top_scores = self.blob_store.retrieve(query)  # [1, k]
-
-        # Get blob feature norms as a proxy for content richness
+    def _retrieve_blobs(self, prompt_ids: torch.Tensor, k: int) -> list:
+        """Retrieve top-k blobs for the prompt. Empty list if blob-free."""
+        if not self.has_blobs:
+            return []
+        self.blob_store.k = k
+        query = self._compute_query(prompt_ids)
+        top_idx, top_scores = self.blob_store.retrieve(query)
         blob_indices = top_idx[0].cpu().tolist()
         blob_scores = top_scores[0].cpu().tolist()
-        blob_feature_norms = []
-        for idx in blob_indices:
-            feat = self.blob_store.features[idx]
-            blob_feature_norms.append(float(feat.norm().item()))
-
-        # Normalize scores to [0, 1] for display
         max_score = max(blob_scores) if blob_scores else 1.0
-        blob_scores_normalized = [s / max_score if max_score > 0 else 0.0 for s in blob_scores]
-
-        # Generate text autoregressively
-        ids = prompt_ids.clone()
-        generated_tokens = []
-
-        for _ in range(max_new):
-            ctx = ids[:, -self.model.max_len:]
-            logits = self.model.forward(ctx)[:, -1, :]
-            logits = logits / max(temperature, 1e-8)
-
-            # Top-k sampling
-            top_k_val = 50
-            v, _ = logits.topk(min(top_k_val, logits.size(-1)))
-            logits[logits < v[:, [-1]]] = float("-inf")
-
-            probs = F.softmax(logits, dim=-1)
-            next_id = torch.multinomial(probs, 1)
-            ids = torch.cat([ids, next_id], dim=1)
-            generated_tokens.append(int(next_id[0, 0].item()))
-
-        # Decode generated text
-        generated_text = self._decode(generated_tokens)
-
-        # Build blob info for response
         blobs_info = []
-        for i, (idx, score, score_norm, feat_norm) in enumerate(
-            zip(blob_indices, blob_scores, blob_scores_normalized, blob_feature_norms)
-        ):
+        for i, (idx, score) in enumerate(zip(blob_indices, blob_scores)):
+            feat_norm = float(self.blob_store.features[idx].norm().item())
+            score_norm = score / max_score if max_score > 0 else 0.0
             blobs_info.append({
                 "rank": i + 1,
                 "index": idx,
@@ -238,8 +201,40 @@ class SatzRuntime:
                 "score_normalized": round(score_norm, 4),
                 "feature_norm": round(feat_norm, 4),
             })
+        return blobs_info
 
+    @torch.no_grad()
+    def generate(self, prompt: str, k: int | None = None, max_new: int | None = None,
+                 temperature: float | None = None) -> dict:
+        """Generate text and (if this model has blobs) retrieve blobs."""
+        k = self.k if k is None else k
+        max_new = self.max_new if max_new is None else max_new
+        temperature = self.temperature if temperature is None else temperature
+
+        prompt_ids = self._tokenize(prompt)  # [1, L]
+        prompt_len = prompt_ids.shape[1]
+
+        blobs_info = self._retrieve_blobs(prompt_ids, k)
+
+        ids = prompt_ids.clone()
+        generated_tokens = []
+        for _ in range(max_new):
+            ctx = ids[:, -self.model.max_len:]
+            logits = self.model.forward(ctx)[:, -1, :]
+            logits = logits / max(temperature, 1e-8)
+            top_k_val = 50
+            v, _ = logits.topk(min(top_k_val, logits.size(-1)))
+            logits[logits < v[:, [-1]]] = float("-inf")
+            probs = F.softmax(logits, dim=-1)
+            next_id = torch.multinomial(probs, 1)
+            ids = torch.cat([ids, next_id], dim=1)
+            generated_tokens.append(int(next_id[0, 0].item()))
+
+        generated_text = self._decode(generated_tokens)
         return {
+            "model": self.name,
+            "model_label": self.label,
+            "has_blobs": self.has_blobs,
             "prompt": prompt,
             "generated_text": generated_text,
             "prompt_tokens": prompt_len,
@@ -250,10 +245,47 @@ class SatzRuntime:
         }
 
 
-# ── FastAPI app ──
+class RuntimeManager:
+    """Lazily loads runtimes and tracks the active model. One per model name."""
 
-app = FastAPI(title="Satz demo v0.1")
-runtime: SatzRuntime | None = None
+    def __init__(self, args):
+        self.args = args
+        self.runtimes: dict[str, SatzRuntime] = {}
+        self.active_name: str | None = None
+        # Startup path overrides apply only to the initially-loaded model.
+        self._overrides = {
+            "checkpoint": args.checkpoint,
+            "tokenizer": args.tokenizer,
+            "blobs_dir": args.blobs_dir,
+        }
+        self.load(args.model, apply_overrides=True)
+
+    def load(self, name: str, apply_overrides: bool = False) -> SatzRuntime:
+        if name not in MODELS:
+            raise KeyError(f"unknown model '{name}'")
+        if name not in self.runtimes:
+            spec = dict(MODELS[name])
+            if apply_overrides:
+                for key, val in self._overrides.items():
+                    if val is not None:
+                        spec[key] = val
+                # An explicit --blobs-dir override implies blobs are present.
+                if self._overrides["blobs_dir"] is not None:
+                    spec["blobs_dir"] = self._overrides["blobs_dir"]
+            self.runtimes[name] = SatzRuntime(
+                name, spec, self.args.k, self.args.max_new, self.args.temperature)
+        self.active_name = name
+        return self.runtimes[name]
+
+    @property
+    def active(self) -> SatzRuntime:
+        return self.runtimes[self.active_name]
+
+
+# ── FastAPI app ─────────────────────────────────────────────────────────────
+
+app = FastAPI(title="Satz demo v0.2")
+manager: RuntimeManager | None = None
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -261,6 +293,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 class GenerateRequest(BaseModel):
     prompt: str
+    model: str | None = None
     k: int | None = None
     max_new: int | None = None
     temperature: float | None = None
@@ -271,39 +304,61 @@ def index():
     return FileResponse(STATIC_DIR / "index.html")
 
 
+@app.get("/models")
+def models():
+    """Registry keys + whether each has blobs + which is active."""
+    return {
+        "active": manager.active_name if manager else None,
+        "models": [
+            {"name": name, "label": spec["label"],
+             "has_blobs": spec.get("blobs_dir") is not None,
+             "loaded": name in manager.runtimes if manager else False}
+            for name, spec in MODELS.items()
+        ],
+    }
+
+
 @app.get("/health")
 def health():
+    rt = manager.active if manager else None
     return {
-        "ok": True,
-        "device": str(runtime.device) if runtime else "uninitialised",
-        "model_params": f"{runtime.model.count_parameters()/1e6:.1f}M" if runtime else None,
-        "n_blobs": runtime.blob_store.n_blobs if runtime else None,
+        "ok": rt is not None,
+        "model": rt.name if rt else None,
+        "model_label": rt.label if rt else None,
+        "device": str(rt.device) if rt else "uninitialised",
+        "model_params": f"{rt.model.count_parameters()/1e6:.1f}M" if rt else None,
+        "has_blobs": rt.has_blobs if rt else None,
+        "n_blobs": rt.n_blobs if rt else None,
     }
 
 
 @app.post("/generate")
 def generate(req: GenerateRequest):
-    if runtime is None:
+    if manager is None:
         raise HTTPException(status_code=503, detail="runtime not initialised")
     prompt = (req.prompt or "").strip()
     if not prompt:
         raise HTTPException(status_code=400, detail="empty prompt")
+    # Switch model if requested (lazy-loads on first use).
+    if req.model and req.model != manager.active_name:
+        if req.model not in MODELS:
+            raise HTTPException(status_code=400, detail=f"unknown model '{req.model}'")
+        try:
+            manager.load(req.model)
+        except FileNotFoundError as e:
+            raise HTTPException(status_code=503, detail=f"cannot load {req.model}: {e}")
     try:
-        result = runtime.generate(
-            prompt,
-            k=req.k,
-            max_new=req.max_new,
-            temperature=req.temperature,
-        )
+        result = manager.active.generate(
+            prompt, k=req.k, max_new=req.max_new, temperature=req.temperature)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(result)
 
 
 def main():
-    global runtime
+    global manager
     args = parse_args()
-    runtime = SatzRuntime(args)
+    manager = RuntimeManager(args)
     import uvicorn
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 

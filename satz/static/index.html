@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Satz 0.1 - Radiance Labs</title>
+  <title>Satz - Radiance Labs</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <header>
     <div>
       <span class="brand">Radiance Labs</span>
-      <span class="brand-sub">Satz demo v0.1</span>
+      <span class="brand-sub">Satz demo v0.2</span>
     </div>
     <span class="meta" id="device-info">loading...</span>
   </header>
 
   <main>
     <div class="input-section">
+      <div class="controls">
+        <div class="control-group">
+          <label for="model-select">model</label>
+          <select id="model-select"></select>
+        </div>
+      </div>
       <label for="prompt">Prompt</label>
       <textarea id="prompt" placeholder="Type a prompt and press Generate..."></textarea>
       <div class="controls">
