@@ -45,7 +45,7 @@ from src.blob_store import BlobStore
 MODELS = {
     "planck": {
         "label": "Planck 1.3 (~100M, blobs)",
-        "checkpoint": "checkpoints/planck/best.pt",
+        "checkpoint": "checkpoints/planck13/best.pt",
         "tokenizer": "data/wikipedia/tokenizer.model",
         "blobs_dir": "data/blobs/wikipedia",
         "arch": dict(d_s=128, d_f=1000, n_passes=3, n_heads=4,

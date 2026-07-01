@@ -22,13 +22,13 @@ python -c "import fastapi, uvicorn; print('satz deps ok')"
 
 | Model | Checkpoint | Tokenizer | Blob store | Arch (d_s / d_f / passes / heads / ctx) |
 |---|---|---|---|---|
-| **Planck 1.3** | `checkpoints/planck/best.pt` | `data/wikipedia/tokenizer.model` | `data/blobs/wikipedia/{blobs.pt,meta.json}` | 128 / 1000 / 3 / 4 / 512 |
+| **Planck 1.3** | `checkpoints/planck13/best.pt` | `data/wikipedia/tokenizer.model` | `data/blobs/wikipedia/{blobs.pt,meta.json}` | 128 / 1000 / 3 / 4 / 512 |
 | **Hertz 1.2** | `checkpoints/hertz12/best.pt` | `data/hertz12_data/tokenizer.model` (32K SP) | *none built* | 256 / 3700 / 3 / 4 / 512 |
 
 Confirm what's actually present before assuming:
 
 ```powershell
-Get-ChildItem checkpoints\planck\best.pt, checkpoints\hertz12\best.pt -ErrorAction SilentlyContinue
+Get-ChildItem checkpoints\planck13\best.pt, checkpoints\hertz12\best.pt -ErrorAction SilentlyContinue
 Get-ChildItem data\blobs\wikipedia\blobs.pt -ErrorAction SilentlyContinue
 Get-ChildItem data\wikipedia\tokenizer.model, data\hertz12_data\tokenizer.model -ErrorAction SilentlyContinue
 ```
@@ -41,7 +41,7 @@ would load with the wrong shapes, hence the selector below.
 
 ```powershell
 python -m satz.app `
-  --checkpoint checkpoints\planck\best.pt `
+  --checkpoint checkpoints\planck13\best.pt `
   --tokenizer data\wikipedia\tokenizer.model `
   --blobs-dir data\blobs\wikipedia `
   --d-s 128 --d-f 1000 --n-passes 3 --n-heads 4 --context-len 512 `
