@@ -98,14 +98,27 @@ Before retraining anything, confirm the running Hertz 1.2 base (640M, see
 the checkpoint, run a few prompts, confirm coherent next-token behaviour.
 
 ```powershell
-# inspect the latest Hertz checkpoint + run a quick generation
-python scripts/eval_lm.py --checkpoint checkpoints/hertz12/best.pt `
-  --tokenizer data/wikipedia/tokenizer.model --prompt "a castle on a hill"
+# inspect the latest Hertz checkpoint + run a quick generation.
+# Use scripts/generate.py (eval_lm.py never existed). It auto-infers arch from
+# the checkpoint (infer_arch), so no --d-s/--d-f flags needed.
+python scripts/generate.py --checkpoint checkpoints/hertz12/best.pt `
+  --tokenizer data/hertz12_data/tokenizer.model `
+  --prompt "A castle on a hill" --temperature 0.7 --top-k 40
 ```
 
-GATE: Hertz produces coherent output and loads as an SGS LM. If Hertz 1.2 is
-still mid-run, use the latest rotated checkpoint (read-only; do NOT interrupt
-the training run -- it shares the GPU).
+TOKENIZER: Hertz trained its OWN shared 32K SP at
+`data/hertz12_data/tokenizer.model` (SETUP_hertz_202606_1.md), NOT the Planck
+`data/wikipedia/tokenizer.model`. Passing the wrong one decodes to garbage.
+
+DECODING: `generate.py` only supports `--top-k` (no repetition penalty / top-p),
+so a base model loops verbatim at high temperature. Keep temperature ~0.7 for
+the sanity check. (Satz's server has the fuller anti-loop decoder if you want a
+nicer demo: `python -m satz.app --model hertz`.)
+
+GATE: Hertz produces coherent output and loads as an SGS LM. Note it's a BASE
+completion model, feed it a sentence START ("A castle on a hill"), not a
+question. If Hertz 1.2 is still mid-run, use the latest rotated checkpoint
+(read-only; do NOT interrupt the training run -- it shares the GPU).
 
 NOTE (512 lever): the decomposer's OUTPUT tree is capped by generation context.
 Blobs (src/blob_store.py) overcome the INPUT-knowledge limit (a retrieved blob
