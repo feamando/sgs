@@ -99,6 +99,37 @@ class FillModel(nn.Module):
 
 # ── order-free set loss (chamfer on positions + matched attributes) ────
 
+def hungarian_set_loss(pred, target_means, target_attrs, n_target):
+    """DETR-style one-to-one set loss via optimal bipartite matching.
+
+    Each target stone is matched to a UNIQUE predicted slot (Hungarian on the
+    position cost matrix), so slots can't pile onto the same stone -- the blob
+    failure the Chamfer loss couldn't prevent. Matched slots are supervised on
+    position + attributes; the active mask fires exactly the matched slots.
+
+    Needs scipy; caller falls back to chamfer_set_loss if unavailable.
+    """
+    from scipy.optimize import linear_sum_assignment
+    max_g = pred["means"].shape[0]
+    pm = pred["means"]                                  # [max_g,3]
+    M = target_means.shape[0]
+    d = torch.cdist(pm, target_means)                   # [max_g, M]
+    # optimal assignment on the detached cost; supervise with live tensors.
+    row, col = linear_sum_assignment(d.detach().cpu().numpy())  # len min(max_g,M)=M
+    row = torch.as_tensor(row, device=pm.device, dtype=torch.long)
+    col = torch.as_tensor(col, device=pm.device, dtype=torch.long)
+
+    active_tgt = torch.zeros(max_g, device=pm.device)
+    active_tgt[row] = 1.0
+    loss_active = F.binary_cross_entropy_with_logits(pred["active"], active_tgt)
+
+    loss_pos = F.mse_loss(pm[row], target_means[col])
+    loss_scale = F.mse_loss(pred["scales_log"][row], target_attrs["scales_log"][col])
+    loss_color = F.mse_loss(pred["colors"][row], target_attrs["colors"][col])
+    loss_opac = F.mse_loss(pred["opacities"][row], target_attrs["opacities"][col])
+    return loss_pos + 0.5 * loss_scale + 0.5 * loss_color + 0.2 * loss_opac + loss_active
+
+
 def chamfer_set_loss(pred, target_means, target_attrs, n_target):
     """pred: model output dict (single example, [max_g, *]).
     target_means [M,3], target_attrs dict of [M,*], n_target=M.
@@ -178,16 +209,22 @@ def selftest(device):
              "colors": torch.rand(20, 3, device=device),
              "opacities": torch.full((20,), 2.0, device=device)}
     opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    # Exercise the default (Hungarian) loss if scipy is present, else Chamfer.
+    try:
+        from scipy.optimize import linear_sum_assignment  # noqa: F401
+        loss_fn, which = hungarian_set_loss, "hungarian"
+    except ImportError:
+        loss_fn, which = chamfer_set_loss, "chamfer"
     losses = []
     for _ in range(50):
         opt.zero_grad()
         out = model(pid, pose)
         single = {k: v[0] for k, v in out.items()}
-        loss = chamfer_set_loss(single, tgt_m, tgt_a, 20)
+        loss = loss_fn(single, tgt_m, tgt_a, 20)
         loss.backward(); opt.step()
         losses.append(loss.item())
     ok = losses[-1] < losses[0]
-    print(f"[selftest] loss {losses[0]:.4f} -> {losses[-1]:.4f} "
+    print(f"[selftest] {which} loss {losses[0]:.4f} -> {losses[-1]:.4f} "
           f"({'DECREASING, grads flow' if ok else 'NOT decreasing -- bug'})")
     return ok
 
@@ -212,6 +249,20 @@ def train(args, device):
               "can beat the grammar.")
         render_sup = False
 
+    # Pick the set loss. Hungarian (one-to-one) prevents the slot-pileup blobs
+    # that Chamfer allows; fall back to Chamfer if scipy isn't installed.
+    loss_fn = chamfer_set_loss
+    if args.match == "hungarian":
+        try:
+            from scipy.optimize import linear_sum_assignment  # noqa: F401
+            loss_fn = hungarian_set_loss
+            print("[fill] set loss: Hungarian (one-to-one bipartite match)")
+        except ImportError:
+            print("[fill] WARNING: --match hungarian needs scipy (pip install scipy); "
+                  "falling back to Chamfer.")
+    else:
+        print("[fill] set loss: Chamfer (bidirectional)")
+
     import random
     rng = random.Random(args.seed)
     for epoch in range(args.epochs):
@@ -222,7 +273,7 @@ def train(args, device):
             pid = torch.tensor([ex["part_id"]], device=device)
             out = model(pid, ex["pose"].unsqueeze(0))
             single = {k: v[0] for k, v in out.items()}
-            loss = chamfer_set_loss(single, ex["means"], ex["attrs"], ex["n"])
+            loss = loss_fn(single, ex["means"], ex["attrs"], ex["n"])
             # TODO Stage B: add an SDS render-score term here (against `guide`)
             # so parts LOOK right, not just match the grammar template. Until
             # then --render-supervision sds is a no-op (see the warning above).
@@ -247,6 +298,9 @@ def main():
     p.add_argument("--epochs", type=int, default=30)
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--max-gaussians", type=int, default=512)
+    p.add_argument("--match", choices=["hungarian", "chamfer"], default="hungarian",
+                   help="Set-matching loss. hungarian = one-to-one (best, needs "
+                        "scipy); chamfer = bidirectional nearest-neighbour.")
     p.add_argument("--render-supervision", choices=["none", "sds"], default="none")
     p.add_argument("--selftest", action="store_true")
     p.add_argument("--seed", type=int, default=0)
