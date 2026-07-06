@@ -166,12 +166,42 @@ def main():
                         "(SCALE GUARD; the rest fall to S-only). Needs --wordfreq.")
     p.add_argument("--wordfreq", default=None,
                    help="{word: freq} json to rank words for --limit-words")
+    p.add_argument("--no-visual-filter", action="store_true",
+                   help="keep non-depictable senses (surname/album/film/...); "
+                        "by default they're dropped so SD doesn't waste generations")
     p.add_argument("--out", default="results/vsp_clip.json")
     args = p.parse_args()
 
     entries = json.load(open(args.senses))
     if isinstance(entries, dict) and "entries" in entries:
         entries = entries["entries"]
+
+    # NON-VISUAL FILTER: Wikipedia disambiguation senses include many that can't
+    # be depicted (crane=surname, X=album/film/song, Y=given name). SD would just
+    # generate garbage and pollute the vocab with junk-V tokens. Drop senses whose
+    # qualifier is non-visual; drop words left with <2 senses. These words still
+    # exist as S-only abstract tokens downstream.
+    if not args.no_visual_filter:
+        NONVISUAL = ("surname", "given name", "name", "disambiguation", "album",
+                     "film", "song", "band", "ep", "single", "tv series", "series",
+                     "novel", "book", "magazine", "newspaper", "company", "organization",
+                     "political party", "footballer", "musician", "singer", "actor",
+                     "writer", "politician", "language", "dialect", "month", "year")
+        def visual(s):
+            q = (s.get("label") or "").replace("-", " ").lower()
+            return not any(nv == q or nv in q.split() for nv in NONVISUAL)
+        before_w = len(entries)
+        before_s = sum(len(e["senses"]) for e in entries)
+        filtered = []
+        for e in entries:
+            vs = [s for s in e["senses"] if visual(s)]
+            if len(vs) >= 2:
+                filtered.append({**e, "senses": vs})
+        after_s = sum(len(e["senses"]) for e in filtered)
+        print(f"[clip] non-visual filter: {before_w}->{len(filtered)} words, "
+              f"{before_s}->{after_s} senses (dropped non-depictable senses; "
+              f"--no-visual-filter to keep all).")
+        entries = filtered
 
     # SCALE GUARD: grounding = ~n_views SD generations PER SENSE. The full
     # Wikipedia dump has ~150k polysemous words (~450k senses ~= days of GPU).
