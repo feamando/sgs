@@ -192,7 +192,7 @@ diagnose whether it's the embedding wiring or frozen-V starving the model.
 |-------|------|------------------|
 | 0 | grounding gate (V+S+P separate senses) | **PASS 2026-07-06, 0.37** (auto V + derived P) |
 | 0.2 | Wikipedia corpus + disambiguation senses | **prepare_wikipedia_senses.py BUILT** (selftest: Crane->bird/machine/surname). COCO tried+rejected (low polysemy). |
-| 0.3 | Gemma sense enumeration + caption-to-sense V | TO BUILD enumerate_senses_gemma.py; KILL if Gemma sense recall too low |
+| 0.3 | native V from Wikimedia lead images | wire derive_vsp_clip.py to embed image_refs (SD fallback already works); KILL if disambiguation sense yield too low |
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | TO BUILD train_planck2.py. plain AdamW, frozen-V warm start, hard step budget |
