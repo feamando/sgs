@@ -60,97 +60,79 @@ python -c "import torch, sentencepiece; print('base ok')"
 # for grounding at corpus scale (SD + CLIP), switch to .venv-sds as in path2 §0.
 ```
 
-## 0.2 Corpus: image-caption text (COCO / Visual Genome), NOT TinyStories
+## 0.2 Corpus: filtered Wikipedia (disambiguation senses), NOT COCO/TinyStories
 
-Decision (2026-07-06): train on **image-caption text**, not TinyStories.
-Reasoning:
-- **Density**: every caption describes a physical scene, so the corpus is
-  saturated with concrete, groundable, often-polysemous nouns (bat, plane, bank,
-  crane) -- exactly what a sense-disambiguating tokenizer must be stressed on.
-  TinyStories is deliberately SIMPLE vocabulary = the wrong test.
-- **Native V grounding (the big win)**: captions come WITH their image. So V is
-  the CLIP embedding of the ACTUAL image the caption describes -- not an SD
-  generation. This REMOVES the "garbage generated views -> garbage V" caveat
-  from the probe entirely. V is real photographic grounding.
-- **Raum-relevant**: captions ARE scene descriptions (text -> visual scene), the
-  same shape as Raum's text -> 3D task.
+Decision history:
+- TinyStories rejected: deliberately SIMPLE vocab = no polysemy to disambiguate.
+- COCO captions TRIED then rejected (2026-07-06): visually dense with native
+  images, BUT people-centric and LOW-polysemy (200k captions, only 16.9k unique
+  words; top nouns man/woman/street/table). It doesn't CONTAIN both senses of the
+  words VSP targets, and it's off-domain for Raum. (COCO scripts kept, reusable.)
+- **Wikipedia CHOSEN**: genuine polysemy (an encyclopedia has crane-bird AND
+  crane-machine), concrete/material/structural vocab (Raum's domain when
+  filtered), and the sense inventory is FREE + title-labeled. Wikipedia's
+  DISAMBIGUATION PAGES enumerate senses directly: "Crane" -> {Crane (bird),
+  Crane (machine), Crane (surname)}, each its own article with its own lead
+  image. No Gemma enumeration, no caption sense-guessing; native V is
+  BETTER-labeled than COCO (the article title states the sense).
 
-Sources (HF datasets, same loader family as tinystories.py):
-- **COCO Captions** (~120k images, ~600k captions) -- clean, short, concrete.
-- **Visual Genome** region descriptions -- denser, per-object, more polysemy.
-Start with COCO; add VG regions if sense coverage is thin.
+## 0.3 Sense inventory + V/P at corpus scale (Wikipedia pipeline)
 
-```powershell
-# prepare_coco_vsp.py BUILT. Use a PARQUET mirror (script-based HuggingFaceM4/COCO
-# fails on modern datasets: "Dataset scripts are no longer supported").
-python scripts/prepare_coco_vsp.py --split train --max-images 40000 `
-  --dataset-id yerevann/coco-karpathy `
-  --out data/coco_vsp   # writes captions.jsonl + wordfreq.json + image refs
-# fallbacks if the schema differs: nlphuji/coco_captions, sayakpaul/coco-30-val-2014
-```
-
-## 0.3 Building V and P at corpus scale (the Gemma pipeline)
-
-The probe hand-listed 20 words. At corpus scale, Gemma 4 does the enumeration
-and matching (your 2026-07-06 plan). Pipeline, once at vocab-build (cached):
-
-1. **Sense inventory (Gemma)**: over the corpus's frequent concrete nouns,
-   Gemma 4 enumerates each word's distinct senses (text). Reuses the local-Gemma
-   harness (generate_trees_gemma.py pattern; transformers>=4.50, generate(**inputs)).
-2. **V, native from captions (the COCO win)**: for each sense, collect the
-   caption-image pairs whose caption uses the word in that sense (Gemma tags
-   which sense a caption instance is), CLIP-image-embed those real images, mean
-   = the sense's V. Dedup across senses (cosine >= thr = same sense) exactly as
-   the probe. NO SD generation needed -- real photos.
-   Fallback for senses with no caption image: SD-generate (derive_vsp_clip.py
-   --v-source clip-image), the probe path.
-3. **P, derived**: derive_p6_from_vector.py -- P6 MLP predicts material props
-   from the sense phrase. NO hand material table (the tautology lesson).
+1. **Sense inventory (FREE, no Gemma)**: `prepare_wikipedia_senses.py` scans the
+   dump, finds disambiguation pages, parses "Word (qualifier)" links -> per-word
+   senses with a concrete grounding phrase ("a crane bird"). Keeps words with
+   >=2 senses. Also writes a domain-filtered wordfreq for the abstract tier.
+2. **V**: native lead image per sense-article via Wikimedia REST (`--with-images`),
+   CLIP-embed; SD-generate from the phrase as fallback (derive_vsp_clip.py, the
+   proven probe path). Non-visual senses (crane=surname) get zero-V -> S-only,
+   correct.
+3. **P, derived**: derive_p6_from_vector.py -- P6 MLP from the sense phrase. NO
+   hand material table (the tautology lesson).
 4. **S**: GloVe (later: the model's own learned S).
 5. **Cache** V/S/P per sense token so training reads a lookup, not a live pass.
 
-Gemma's role = corpus prep + sense enumeration + caption-to-sense matching (the
-curation that was manual in the probe). Its recall is a real knob (a missed rare
-sense = a missing token); the dedup threshold trades splitting vs merging.
-
 ```powershell
-# TO BUILD: scripts/enumerate_senses_gemma.py  (word -> senses, + caption tagging)
-python scripts/enumerate_senses_gemma.py --corpus data/coco_vsp `
-  --model models/gemma-4-e4b-it --min-freq 50 --out data/vsps/senses_coco.json
-# then V (native captions + SD fallback), then derived P, then vocab:
-python scripts/derive_vsp_clip.py --senses data/vsps/senses_coco.json `
-  --v-source clip-image --save-views results/vsp_views_coco `
-  --out data/vsps/coco_clip.json          # (extend to accept caption images)
-python scripts/derive_p6_from_vector.py --in data/vsps/coco_clip.json `
-  --glove data/glove.6B.300d.txt --out data/vsps/coco_pderiv.json
+# 1. sense inventory + abstract-tier wordfreq (prepare_wikipedia_senses.py BUILT)
+python scripts/prepare_wikipedia_senses.py --hf-cache data/wikipedia/hf `
+  --with-images `                              # native Wikimedia lead images for V
+  --out data/vsps/senses_wiki.json --wordfreq-out data/wiki_vsp/wordfreq.json
+# 2. V (native images if present, else SD), then derived P:
+python scripts/derive_vsp_clip.py --senses data/vsps/senses_wiki.json `
+  --v-source clip-image --save-views results/vsp_views_wiki `
+  --out data/vsps/wiki_clip.json               # (extend to embed image_refs when present)
+python scripts/derive_p6_from_vector.py --in data/vsps/wiki_clip.json `
+  --glove data/glove.6B.300d.txt --out data/vsps/wiki_pderiv.json
 ```
+
+(Gemma is NOT needed for Wikipedia sense enumeration; enumerate_senses_gemma.py
+and the COCO prep scripts stay for caption corpora if that path is revisited.)
 
 ## 1. VSPS vocabulary (TO BUILD: scripts/build_vsps_vocab.py)
 
 Mint a two-tier vocabulary. Reuse the gate's grounding pipeline at corpus scale.
 
 - **Grounded tokens** — one per concrete SENSE, carrying (CLIP-image V, derived P,
-  GloVe S). Senses come from Gemma-enumerate + CLIP-image-dedup, NOT a splitter.
+  GloVe S). Senses come from Wikipedia disambiguation pages (§0.3), NOT a splitter.
 - **Abstract tokens** — function words / abstractions, S-only, no V/P.
 
 ```powershell
-# corpus-scale senses (COCO) for grounded tier; corpus word-freq for abstract tier
+# corpus-scale senses (Wikipedia) for grounded tier; wordfreq for abstract tier
 python scripts/build_vsps_vocab.py `
-  --senses data/vsps/coco_pderiv.json `            # CLIP-image V (native photos) + DERIVED P
+  --senses data/vsps/wiki_pderiv.json `            # CLIP-image V (native photos) + DERIVED P
   --glove data/glove.6B.300d.txt `                 # S
-  --corpus-vocab data/coco_vsp/wordfreq.json `     # abstract (S-only) tier
+  --corpus-vocab data/wiki_vsp/wordfreq.json `     # abstract (S-only) tier
   --out data/vsps/vocab.json
 # (build_vsps_vocab.py is BUILT + selftested; ran on the 20-word probe = 44 tokens)
 ```
 
 GATE: grounded vocab covers the common concrete-noun space at a manageable blowup
 (most words 1-3 senses → nouns expand ~1-3x; abstract vocab unchanged). Measure
-actual coverage on the COCO caption vocab before assuming. Open item: groundable
-words with no caption image AND no SD asset → S-only fallback.
+actual coverage on the Wikipedia sense inventory before assuming. Open item:
+groundable words with no lead image AND no SD asset → S-only fallback.
 
 ## 2. VSPS tokenize the corpus (tokenize_vsps.py — BUILT)
 
-Sense-tag the COCO caption corpus (dense concrete nouns) before Planck 2.0.
+Sense-tag the Wikipedia corpus (genuine polysemy, Raum-domain) before Planck 2.0.
 
 - **Sense-tag each grounded word occurrence**: embedding-Lesk — pick the sense
   whose descriptive term best matches the sentence context. WSD at tokenize time,
@@ -158,14 +140,14 @@ Sense-tag the COCO caption corpus (dense concrete nouns) before Planck 2.0.
 - **Cache V/S/P per token** so training reads a lookup, not a live CLIP pass.
 
 ```powershell
-python scripts/tokenize_vsps.py --corpus data/coco_vsp `
+python scripts/tokenize_vsps.py --corpus data/wiki_vsp `
   --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt `
-  --out data/coco_vsps
+  --out data/wiki_vsps
 # NOTE: load GloVe over the FULL corpus vocab so context words contribute to WSD
 # (the probe run only loaded term+surface words).
 ```
 
-GATE: VSPS round-trips COCO captions, and polysemous words get SENSE-CORRECT
+GATE: VSPS round-trips Wikipedia text, and polysemous words get SENSE-CORRECT
 tokens (the disambiguation the thesis promises) where SentencePiece merged them.
 
 ## 3. Planck 2.0 training (TO BUILD: scripts/train_planck2.py)
@@ -187,7 +169,7 @@ IS the V/S/P bundle, not S alone.
    ([[project_sgs_path1_outcome]] — Planck/Hertz shapes differ; never hardcode).
 
 ```powershell
-python scripts/train_planck2.py --data data/coco_vsps `
+python scripts/train_planck2.py --data data/wiki_vsps `
   --vocab data/vsps/vocab.json --d-f 1000 --freeze-vp `
   --save-dir checkpoints/planck2 --tokens 1B   # TO BUILD; mirror train_planck11.py
 ```
@@ -209,10 +191,10 @@ diagnose whether it's the embedding wiring or frozen-V starving the model.
 | Phase | What | Status / kill-if |
 |-------|------|------------------|
 | 0 | grounding gate (V+S+P separate senses) | **PASS 2026-07-06, 0.37** (auto V + derived P) |
-| 0.2 | COCO caption corpus prep | TO BUILD prepare_coco_vsp.py |
+| 0.2 | Wikipedia corpus + disambiguation senses | **prepare_wikipedia_senses.py BUILT** (selftest: Crane->bird/machine/surname). COCO tried+rejected (low polysemy). |
 | 0.3 | Gemma sense enumeration + caption-to-sense V | TO BUILD enumerate_senses_gemma.py; KILL if Gemma sense recall too low |
-| 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on COCO senses. |
-| 2 | VSPS tokenize COCO | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on COCO; load GloVe over full corpus vocab. |
+| 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
+| 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | TO BUILD train_planck2.py. plain AdamW, frozen-V warm start, hard step budget |
 | 4 | disambiguation benchmark | TO BUILD. KILL claim if no win vs SentencePiece baseline at matched compute |
 
