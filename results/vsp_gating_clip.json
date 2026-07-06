@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "word": "bat",
+      "sense_a": "animal",
+      "sense_b": "club",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.8828,
+      "separation_gain": 0.1172
+    },
+    {
+      "word": "spring",
+      "sense_a": "water-source",
+      "sense_b": "coil",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.7312,
+      "separation_gain": 0.2688
+    },
+    {
+      "word": "mouse",
+      "sense_a": "animal",
+      "sense_b": "device",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.9159,
+      "separation_gain": 0.0841
+    },
+    {
+      "word": "palm",
+      "sense_a": "tree",
+      "sense_b": "hand",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.8985,
+      "separation_gain": 0.1015
+    },
+    {
+      "word": "table",
+      "sense_a": "furniture",
+      "sense_b": "data-grid",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.7499,
+      "separation_gain": 0.2501
+    },
+    {
+      "word": "seal",
+      "sense_a": "animal",
+      "sense_b": "stamp",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.9232,
+      "separation_gain": 0.0768
+    },
+    {
+      "word": "bow",
+      "sense_a": "weapon",
+      "sense_b": "ribbon",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.7489,
+      "separation_gain": 0.2511
+    },
+    {
+      "word": "nail",
+      "sense_a": "fastener",
+      "sense_b": "finger-nail",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.8785,
+      "separation_gain": 0.1215
+    },
+    {
+      "word": "trunk",
+      "sense_a": "tree",
+      "sense_b": "car-storage",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.8528,
+      "separation_gain": 0.1472
+    },
+    {
+      "word": "scale",
+      "sense_a": "fish-scale",
+      "sense_b": "weighing",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.8659,
+      "separation_gain": 0.1341
+    },
+    {
+      "word": "key",
+      "sense_a": "lock-key",
+      "sense_b": "musical",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.716,
+      "separation_gain": 0.284
+    },
+    {
+      "word": "board",
+      "sense_a": "plank",
+      "sense_b": "committee",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.7019,
+      "separation_gain": 0.2981
+    },
+    {
+      "word": "pitcher",
+      "sense_a": "container",
+      "sense_b": "player",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.6983,
+      "separation_gain": 0.3017
+    },
+    {
+      "word": "iron",
+      "sense_a": "metal",
+      "sense_b": "appliance",
+      "s_only_sim": 1.0,
+      "vsp_sim": 0.9116,
+      "separation_gain": 0.0884
+    }
+  ],
+  "mean_s_only": 0.9999999787126269,
+  "mean_vsp": 0.8196607317243304,
+  "separation_gain": 0.1803392469882965,
+  "pass": false
+}

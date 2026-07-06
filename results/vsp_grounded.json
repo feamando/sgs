@@ -1,0 +1,1439 @@
+{
+  "vis_categories": [
+    "abstract",
+    "04460130",
+    "02691156",
+    "04379243",
+    "03624134",
+    "02958343",
+    "03085013",
+    "02876657",
+    "03467517",
+    "03046257",
+    "03928116",
+    "03593526",
+    "03761084"
+  ],
+  "entries": [
+    {
+      "word": "bank",
+      "senses": [
+        {
+          "label": "river-bank",
+          "synset": null,
+          "material": "soil",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.2,
+            "elasticity": 0.15,
+            "friction": 0.7,
+            "density": 0.45,
+            "brittleness": 0.1,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.6
+          }
+        },
+        {
+          "label": "institution",
+          "synset": "04460130",
+          "material": "concrete",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.7,
+            "elasticity": 0.05,
+            "friction": 0.7,
+            "density": 0.7,
+            "brittleness": 0.65,
+            "thermal_conductivity": 0.25,
+            "transparency": 0.0,
+            "deformability": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "word": "plane",
+      "senses": [
+        {
+          "label": "aircraft",
+          "synset": "02691156",
+          "material": "aluminum",
+          "visual_dist": [
+            -0.0021,
+            0.0178,
+            -0.0042,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.5,
+            "elasticity": 0.35,
+            "friction": 0.4,
+            "density": 0.45,
+            "brittleness": 0.15,
+            "thermal_conductivity": 0.9,
+            "transparency": 0.0,
+            "deformability": 0.3
+          }
+        },
+        {
+          "label": "flat-surface",
+          "synset": "04379243",
+          "material": "wood",
+          "visual_dist": [
+            -0.0078,
+            0.1145,
+            0.0045,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "word": "bat",
+      "senses": [
+        {
+          "label": "animal",
+          "synset": null,
+          "material": "leather",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.3,
+            "elasticity": 0.4,
+            "friction": 0.7,
+            "density": 0.35,
+            "brittleness": 0.1,
+            "thermal_conductivity": 0.08,
+            "transparency": 0.0,
+            "deformability": 0.6
+          }
+        },
+        {
+          "label": "club",
+          "synset": "03624134",
+          "material": "wood",
+          "visual_dist": [
+            -0.0004,
+            -0.1555,
+            -0.0233,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "word": "spring",
+      "senses": [
+        {
+          "label": "water-source",
+          "synset": null,
+          "material": "water",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.95,
+            "friction": 0.05,
+            "density": 0.5,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.3,
+            "transparency": 0.9,
+            "deformability": 1.0
+          }
+        },
+        {
+          "label": "coil",
+          "synset": "03624134",
+          "material": "steel",
+          "visual_dist": [
+            -0.0004,
+            -0.1555,
+            -0.0233,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "word": "crane",
+      "senses": [
+        {
+          "label": "bird",
+          "synset": null,
+          "material": "feather",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.05,
+            "elasticity": 0.3,
+            "friction": 0.4,
+            "density": 0.02,
+            "brittleness": 0.05,
+            "thermal_conductivity": 0.02,
+            "transparency": 0.0,
+            "deformability": 0.8
+          }
+        },
+        {
+          "label": "machine",
+          "synset": "02958343",
+          "material": "steel",
+          "visual_dist": [
+            0.0027,
+            0.0449,
+            -0.0024,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "word": "mouse",
+      "senses": [
+        {
+          "label": "animal",
+          "synset": null,
+          "material": "leather",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.3,
+            "elasticity": 0.4,
+            "friction": 0.7,
+            "density": 0.35,
+            "brittleness": 0.1,
+            "thermal_conductivity": 0.08,
+            "transparency": 0.0,
+            "deformability": 0.6
+          }
+        },
+        {
+          "label": "device",
+          "synset": "03085013",
+          "material": "plastic",
+          "visual_dist": [
+            0.0155,
+            -0.0179,
+            -0.0067,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.45,
+            "friction": 0.4,
+            "density": 0.3,
+            "brittleness": 0.3,
+            "thermal_conductivity": 0.05,
+            "transparency": 0.2,
+            "deformability": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "word": "rock",
+      "senses": [
+        {
+          "label": "stone",
+          "synset": null,
+          "material": "granite",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.03,
+            "friction": 0.65,
+            "density": 0.8,
+            "brittleness": 0.85,
+            "thermal_conductivity": 0.35,
+            "transparency": 0.0,
+            "deformability": 0.03
+          }
+        },
+        {
+          "label": "music",
+          "synset": null,
+          "material": null,
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.0,
+            "friction": 0.0,
+            "density": 0.0,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.0,
+            "transparency": 0.0,
+            "deformability": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "word": "palm",
+      "senses": [
+        {
+          "label": "tree",
+          "synset": null,
+          "material": "bark",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.35,
+            "elasticity": 0.15,
+            "friction": 0.8,
+            "density": 0.3,
+            "brittleness": 0.35,
+            "thermal_conductivity": 0.05,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        },
+        {
+          "label": "hand",
+          "synset": null,
+          "material": "leather",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.3,
+            "elasticity": 0.4,
+            "friction": 0.7,
+            "density": 0.35,
+            "brittleness": 0.1,
+            "thermal_conductivity": 0.08,
+            "transparency": 0.0,
+            "deformability": 0.6
+          }
+        }
+      ]
+    },
+    {
+      "word": "table",
+      "senses": [
+        {
+          "label": "furniture",
+          "synset": "04379243",
+          "material": "wood",
+          "visual_dist": [
+            -0.0078,
+            0.1145,
+            0.0045,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        },
+        {
+          "label": "data-grid",
+          "synset": null,
+          "material": null,
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.0,
+            "friction": 0.0,
+            "density": 0.0,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.0,
+            "transparency": 0.0,
+            "deformability": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "word": "tank",
+      "senses": [
+        {
+          "label": "vehicle",
+          "synset": "02958343",
+          "material": "steel",
+          "visual_dist": [
+            0.0027,
+            0.0449,
+            -0.0024,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        },
+        {
+          "label": "container",
+          "synset": "02876657",
+          "material": "glass",
+          "visual_dist": [
+            0.0015,
+            -0.1766,
+            -0.0006,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.7,
+            "elasticity": 0.05,
+            "friction": 0.2,
+            "density": 0.72,
+            "brittleness": 0.95,
+            "thermal_conductivity": 0.5,
+            "transparency": 0.95,
+            "deformability": 0.02
+          }
+        }
+      ]
+    },
+    {
+      "word": "seal",
+      "senses": [
+        {
+          "label": "animal",
+          "synset": null,
+          "material": "leather",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.3,
+            "elasticity": 0.4,
+            "friction": 0.7,
+            "density": 0.35,
+            "brittleness": 0.1,
+            "thermal_conductivity": 0.08,
+            "transparency": 0.0,
+            "deformability": 0.6
+          }
+        },
+        {
+          "label": "stamp",
+          "synset": "03624134",
+          "material": "rubber",
+          "visual_dist": [
+            -0.0004,
+            -0.1555,
+            -0.0233,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.2,
+            "elasticity": 0.9,
+            "friction": 0.85,
+            "density": 0.35,
+            "brittleness": 0.05,
+            "thermal_conductivity": 0.05,
+            "transparency": 0.0,
+            "deformability": 0.9
+          }
+        }
+      ]
+    },
+    {
+      "word": "bow",
+      "senses": [
+        {
+          "label": "weapon",
+          "synset": "03467517",
+          "material": "wood",
+          "visual_dist": [
+            0.0008,
+            -0.2631,
+            -0.0116,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        },
+        {
+          "label": "ribbon",
+          "synset": null,
+          "material": "silk",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.08,
+            "elasticity": 0.25,
+            "friction": 0.3,
+            "density": 0.12,
+            "brittleness": 0.05,
+            "thermal_conductivity": 0.04,
+            "transparency": 0.1,
+            "deformability": 0.92
+          }
+        }
+      ]
+    },
+    {
+      "word": "nail",
+      "senses": [
+        {
+          "label": "fastener",
+          "synset": "03624134",
+          "material": "steel",
+          "visual_dist": [
+            -0.0004,
+            -0.1555,
+            -0.0233,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        },
+        {
+          "label": "finger-nail",
+          "synset": null,
+          "material": "bone",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.65,
+            "elasticity": 0.15,
+            "friction": 0.5,
+            "density": 0.55,
+            "brittleness": 0.5,
+            "thermal_conductivity": 0.15,
+            "transparency": 0.0,
+            "deformability": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "word": "trunk",
+      "senses": [
+        {
+          "label": "tree",
+          "synset": null,
+          "material": "wood",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        },
+        {
+          "label": "car-storage",
+          "synset": "02958343",
+          "material": "steel",
+          "visual_dist": [
+            0.0027,
+            0.0449,
+            -0.0024,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "word": "scale",
+      "senses": [
+        {
+          "label": "fish-scale",
+          "synset": null,
+          "material": "shell",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.55,
+            "elasticity": 0.1,
+            "friction": 0.45,
+            "density": 0.6,
+            "brittleness": 0.65,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.08
+          }
+        },
+        {
+          "label": "weighing",
+          "synset": "03046257",
+          "material": "steel",
+          "visual_dist": [
+            0.0071,
+            -0.1685,
+            -0.0553,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        }
+      ]
+    },
+    {
+      "word": "key",
+      "senses": [
+        {
+          "label": "lock-key",
+          "synset": "03624134",
+          "material": "brass",
+          "visual_dist": [
+            -0.0004,
+            -0.1555,
+            -0.0233,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.0,
+            "friction": 0.0,
+            "density": 0.0,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.0,
+            "transparency": 0.0,
+            "deformability": 0.0
+          }
+        },
+        {
+          "label": "musical",
+          "synset": "03928116",
+          "material": "ivory",
+          "visual_dist": [
+            -0.0485,
+            0.079,
+            -0.0733,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.6,
+            "elasticity": 0.12,
+            "friction": 0.4,
+            "density": 0.55,
+            "brittleness": 0.55,
+            "thermal_conductivity": 0.12,
+            "transparency": 0.05,
+            "deformability": 0.08
+          }
+        }
+      ]
+    },
+    {
+      "word": "board",
+      "senses": [
+        {
+          "label": "plank",
+          "synset": "04379243",
+          "material": "wood",
+          "visual_dist": [
+            -0.0078,
+            0.1145,
+            0.0045,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.4,
+            "elasticity": 0.2,
+            "friction": 0.6,
+            "density": 0.35,
+            "brittleness": 0.4,
+            "thermal_conductivity": 0.1,
+            "transparency": 0.0,
+            "deformability": 0.2
+          }
+        },
+        {
+          "label": "committee",
+          "synset": null,
+          "material": null,
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.0,
+            "friction": 0.0,
+            "density": 0.0,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.0,
+            "transparency": 0.0,
+            "deformability": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "word": "pitcher",
+      "senses": [
+        {
+          "label": "container",
+          "synset": "03593526",
+          "material": "ceramic",
+          "visual_dist": [
+            -0.0004,
+            -0.121,
+            -0.0046,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.75,
+            "elasticity": 0.03,
+            "friction": 0.5,
+            "density": 0.7,
+            "brittleness": 0.9,
+            "thermal_conductivity": 0.2,
+            "transparency": 0.0,
+            "deformability": 0.03
+          }
+        },
+        {
+          "label": "player",
+          "synset": null,
+          "material": "cloth",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.05,
+            "elasticity": 0.3,
+            "friction": 0.6,
+            "density": 0.15,
+            "brittleness": 0.02,
+            "thermal_conductivity": 0.05,
+            "transparency": 0.0,
+            "deformability": 0.95
+          }
+        }
+      ]
+    },
+    {
+      "word": "well",
+      "senses": [
+        {
+          "label": "water-shaft",
+          "synset": null,
+          "material": "stone",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.85,
+            "elasticity": 0.05,
+            "friction": 0.7,
+            "density": 0.75,
+            "brittleness": 0.8,
+            "thermal_conductivity": 0.3,
+            "transparency": 0.0,
+            "deformability": 0.05
+          }
+        },
+        {
+          "label": "adverb",
+          "synset": null,
+          "material": null,
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.0,
+            "elasticity": 0.0,
+            "friction": 0.0,
+            "density": 0.0,
+            "brittleness": 0.0,
+            "thermal_conductivity": 0.0,
+            "transparency": 0.0,
+            "deformability": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "word": "iron",
+      "senses": [
+        {
+          "label": "metal",
+          "synset": null,
+          "material": "iron",
+          "visual_dist": [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "physical": {
+            "hardness": 0.85,
+            "elasticity": 0.25,
+            "friction": 0.55,
+            "density": 0.88,
+            "brittleness": 0.25,
+            "thermal_conductivity": 0.8,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        },
+        {
+          "label": "appliance",
+          "synset": "03761084",
+          "material": "steel",
+          "visual_dist": [
+            0.0027,
+            0.0294,
+            0.0669,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "physical": {
+            "hardness": 0.9,
+            "elasticity": 0.3,
+            "friction": 0.5,
+            "density": 0.9,
+            "brittleness": 0.2,
+            "thermal_conductivity": 0.85,
+            "transparency": 0.0,
+            "deformability": 0.15
+          }
+        }
+      ]
+    }
+  ]
+}
