@@ -106,12 +106,16 @@ def main():
     p = argparse.ArgumentParser(description="Wikipedia disambiguation -> VSP senses")
     p.add_argument("--hf-cache", default="data/wikipedia/hf")
     p.add_argument("--revision", default="20231101.en")
-    p.add_argument("--max-articles", type=int, default=None,
-                   help="cap for a quick run; None = full dump")
+    p.add_argument("--max-articles", type=int, default=300000,
+                   help="scan cap (default 300k ~= all disambiguation pages appear "
+                        "early-ish; set 0 for the FULL ~6.4M dump, slow)")
+    p.add_argument("--log-every", type=int, default=20000,
+                   help="print progress every N articles scanned")
     p.add_argument("--out", default="data/vsps/senses_wiki.json")
     p.add_argument("--wordfreq-out", default="data/wiki_vsp/wordfreq.json")
     p.add_argument("--with-images", action="store_true",
-                   help="fetch each sense-article's Wikimedia lead image for native V (REST API)")
+                   help="fetch each sense-article's Wikimedia lead image for native V "
+                        "(serial REST calls; SLOW, off by default; SD fallback works)")
     p.add_argument("--selftest", action="store_true")
     args = p.parse_args()
 
@@ -125,6 +129,9 @@ def main():
 
     entries, wf = [], Counter()
     n_seen, n_disambig = 0, 0
+    cap = args.max_articles  # None = full dump (~6.4M, slow); default is a cap
+    import time
+    t0 = time.time()
     for ex in ds:
         title, text = ex.get("title"), ex.get("text")
         n_seen += 1
@@ -134,15 +141,21 @@ def main():
             if e:
                 entries.append(e)
         else:
-            # domain-relevant article -> contribute to abstract-tier wordfreq
             head = (text or "")[:600].lower()
             if any(h in head for h in DOMAIN_HINTS):
                 wf.update(w for w in WORD_RE.findall(head) if len(w) > 2)
-        if args.max_articles and n_seen >= args.max_articles:
+        if n_seen % args.log_every == 0:
+            rate = n_seen / max(time.time() - t0, 1e-6)
+            print(f"[wiki] {n_seen:,} scanned | {n_disambig:,} disambig | "
+                  f"{len(entries):,} polysemous words | {rate:,.0f} art/s", flush=True)
+        if cap and n_seen >= cap:
+            print(f"[wiki] hit --max-articles cap ({cap:,}); stopping scan.", flush=True)
             break
 
     if args.with_images:
-        _attach_lead_images(entries)
+        print(f"[wiki] fetching lead images for {len(entries)} words "
+              f"(serial REST calls; use --no-images to skip)...", flush=True)
+        _attach_lead_images(entries, log_every=50)
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     json.dump({"source": "wikipedia-disambiguation", "entries": entries},
@@ -156,16 +169,18 @@ def main():
     print(f"[wiki] senses -> {args.out}")
 
 
-def _attach_lead_images(entries):
+def _attach_lead_images(entries, log_every=50):
     """Fetch each sense-article's lead image URL via the Wikimedia REST summary
     API. Best-effort; senses without an image fall back to SD generation later."""
     import urllib.request, urllib.parse
     base = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+    done, hits = 0, 0
     for e in entries:
         for s in e["senses"]:
             art = s.get("article")
             if not art:
                 continue
+            done += 1
             try:
                 url = base + urllib.parse.quote(art.replace(" ", "_"))
                 req = urllib.request.Request(url, headers={"User-Agent": "sgs-vsp/1.0"})
@@ -173,9 +188,13 @@ def _attach_lead_images(entries):
                     data = json.load(r)
                 img = (data.get("originalimage") or data.get("thumbnail") or {}).get("source")
                 if img:
-                    s["image_refs"] = [img]
+                    s["image_refs"] = [img]; hits += 1
             except Exception:
                 pass  # SD fallback downstream
+            if done % log_every == 0:
+                print(f"[wiki]   images: {done} senses queried, {hits} with a photo",
+                      flush=True)
+    print(f"[wiki]   images done: {hits}/{done} senses got a lead photo", flush=True)
 
 
 if __name__ == "__main__":
