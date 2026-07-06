@@ -161,10 +161,34 @@ def main():
     p.add_argument("--save-views", default=None,
                    help="dir to dump generated SD images (clip-image only) so you "
                         "can eyeball view quality before trusting the embeddings")
+    p.add_argument("--limit-words", type=int, default=None,
+                   help="ground only the top-N most frequent polysemous words "
+                        "(SCALE GUARD; the rest fall to S-only). Needs --wordfreq.")
+    p.add_argument("--wordfreq", default=None,
+                   help="{word: freq} json to rank words for --limit-words")
     p.add_argument("--out", default="results/vsp_clip.json")
     args = p.parse_args()
 
     entries = json.load(open(args.senses))
+    if isinstance(entries, dict) and "entries" in entries:
+        entries = entries["entries"]
+
+    # SCALE GUARD: grounding = ~n_views SD generations PER SENSE. The full
+    # Wikipedia dump has ~150k polysemous words (~450k senses ~= days of GPU).
+    # Ground only the top-N most FREQUENT words (--limit-words), ranked by the
+    # corpus wordfreq. The rest fall to S-only, which is correct for rare words.
+    if args.limit_words and len(entries) > args.limit_words:
+        rank = {}
+        if args.wordfreq and Path(args.wordfreq).exists():
+            rank = json.load(open(args.wordfreq))
+        entries.sort(key=lambda e: -rank.get(e["word"], 0))
+        dropped = len(entries) - args.limit_words
+        entries = entries[:args.limit_words]
+        n_sense = sum(len(e["senses"]) for e in entries)
+        print(f"[clip] limit-words {args.limit_words}: grounding {len(entries)} words "
+              f"/ {n_sense} senses (~{n_sense*args.n_views} SD images); "
+              f"dropped {dropped} rarer words -> S-only.")
+
     # material lookup by (word,label) from the grounded map, for P
     matmap = {}
     if Path(args.material_map).exists():
