@@ -60,6 +60,68 @@ python -c "import torch, sentencepiece; print('base ok')"
 # for grounding at corpus scale (SD + CLIP), switch to .venv-sds as in path2 §0.
 ```
 
+## 0.2 Corpus: image-caption text (COCO / Visual Genome), NOT TinyStories
+
+Decision (2026-07-06): train on **image-caption text**, not TinyStories.
+Reasoning:
+- **Density**: every caption describes a physical scene, so the corpus is
+  saturated with concrete, groundable, often-polysemous nouns (bat, plane, bank,
+  crane) -- exactly what a sense-disambiguating tokenizer must be stressed on.
+  TinyStories is deliberately SIMPLE vocabulary = the wrong test.
+- **Native V grounding (the big win)**: captions come WITH their image. So V is
+  the CLIP embedding of the ACTUAL image the caption describes -- not an SD
+  generation. This REMOVES the "garbage generated views -> garbage V" caveat
+  from the probe entirely. V is real photographic grounding.
+- **Raum-relevant**: captions ARE scene descriptions (text -> visual scene), the
+  same shape as Raum's text -> 3D task.
+
+Sources (HF datasets, same loader family as tinystories.py):
+- **COCO Captions** (~120k images, ~600k captions) -- clean, short, concrete.
+- **Visual Genome** region descriptions -- denser, per-object, more polysemy.
+Start with COCO; add VG regions if sense coverage is thin.
+
+```powershell
+# TO BUILD: scripts/prepare_coco_vsp.py -- pull COCO caption+image pairs via HF
+python scripts/prepare_coco_vsp.py --split train --max-images 40000 `
+  --out data/coco_vsp   # writes captions.jsonl + image refs (or cached CLIP V)
+```
+
+## 0.3 Building V and P at corpus scale (the Gemma pipeline)
+
+The probe hand-listed 20 words. At corpus scale, Gemma 4 does the enumeration
+and matching (your 2026-07-06 plan). Pipeline, once at vocab-build (cached):
+
+1. **Sense inventory (Gemma)**: over the corpus's frequent concrete nouns,
+   Gemma 4 enumerates each word's distinct senses (text). Reuses the local-Gemma
+   harness (generate_trees_gemma.py pattern; transformers>=4.50, generate(**inputs)).
+2. **V, native from captions (the COCO win)**: for each sense, collect the
+   caption-image pairs whose caption uses the word in that sense (Gemma tags
+   which sense a caption instance is), CLIP-image-embed those real images, mean
+   = the sense's V. Dedup across senses (cosine >= thr = same sense) exactly as
+   the probe. NO SD generation needed -- real photos.
+   Fallback for senses with no caption image: SD-generate (derive_vsp_clip.py
+   --v-source clip-image), the probe path.
+3. **P, derived**: derive_p6_from_vector.py -- P6 MLP predicts material props
+   from the sense phrase. NO hand material table (the tautology lesson).
+4. **S**: GloVe (later: the model's own learned S).
+5. **Cache** V/S/P per sense token so training reads a lookup, not a live pass.
+
+Gemma's role = corpus prep + sense enumeration + caption-to-sense matching (the
+curation that was manual in the probe). Its recall is a real knob (a missed rare
+sense = a missing token); the dedup threshold trades splitting vs merging.
+
+```powershell
+# TO BUILD: scripts/enumerate_senses_gemma.py  (word -> senses, + caption tagging)
+python scripts/enumerate_senses_gemma.py --corpus data/coco_vsp `
+  --model models/gemma-4-e4b-it --min-freq 50 --out data/vsps/senses_coco.json
+# then V (native captions + SD fallback), then derived P, then vocab:
+python scripts/derive_vsp_clip.py --senses data/vsps/senses_coco.json `
+  --v-source clip-image --save-views results/vsp_views_coco `
+  --out data/vsps/coco_clip.json          # (extend to accept caption images)
+python scripts/derive_p6_from_vector.py --in data/vsps/coco_clip.json `
+  --glove data/glove.6B.300d.txt --out data/vsps/coco_pderiv.json
+```
+
 ## 1. VSPS vocabulary (TO BUILD: scripts/build_vsps_vocab.py)
 
 Mint a two-tier vocabulary. Reuse the gate's grounding pipeline at corpus scale.
@@ -69,34 +131,39 @@ Mint a two-tier vocabulary. Reuse the gate's grounding pipeline at corpus scale.
 - **Abstract tokens** — function words / abstractions, S-only, no V/P.
 
 ```powershell
+# corpus-scale senses (COCO) for grounded tier; corpus word-freq for abstract tier
 python scripts/build_vsps_vocab.py `
-  --senses results/vsp_clip_image_pderiv.json `   # CLIP-image V + DERIVED P + dedup'd senses
+  --senses data/vsps/coco_pderiv.json `            # CLIP-image V (native photos) + DERIVED P
   --glove data/glove.6B.300d.txt `                 # S
-  --out data/vsps/vocab.json   # TO BUILD
+  --corpus-vocab data/coco_vsp/wordfreq.json `     # abstract (S-only) tier
+  --out data/vsps/vocab.json
+# (build_vsps_vocab.py is BUILT + selftested; ran on the 20-word probe = 44 tokens)
 ```
 
 GATE: grounded vocab covers the common concrete-noun space at a manageable blowup
 (most words 1-3 senses → nouns expand ~1-3x; abstract vocab unchanged). Measure
-actual coverage on TinyStories before assuming. Open item: groundable words with
-no generated asset yet → S-only fallback or generate on demand.
+actual coverage on the COCO caption vocab before assuming. Open item: groundable
+words with no caption image AND no SD asset → S-only fallback.
 
-## 2. VSPS tokenize a corpus (TO BUILD: scripts/tokenize_vsps.py)
+## 2. VSPS tokenize the corpus (tokenize_vsps.py — BUILT)
 
-Validate on TinyStories (small, clean, concrete nouns) before Planck 2.0.
+Sense-tag the COCO caption corpus (dense concrete nouns) before Planck 2.0.
 
-- **Sense-tag each grounded word occurrence**: assign the dedup'd sense whose
-  V/S/P best matches context. This is WSD at tokenize time — the step
-  SentencePiece skips and why it collapses senses.
-- **Cache V/S/P per token** so training reads a lookup, not a live SD+CLIP pass
-  (generation is the expensive step; do it ONCE at vocab-build).
+- **Sense-tag each grounded word occurrence**: embedding-Lesk — pick the sense
+  whose descriptive term best matches the sentence context. WSD at tokenize time,
+  the step SentencePiece skips. (BUILT + selftested: 5/5 on minimal pairs.)
+- **Cache V/S/P per token** so training reads a lookup, not a live CLIP pass.
 
 ```powershell
-python scripts/tokenize_vsps.py --corpus data/tinystories `
-  --vocab data/vsps/vocab.json --out data/tinystories_vsps   # TO BUILD
+python scripts/tokenize_vsps.py --corpus data/coco_vsp `
+  --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt `
+  --out data/coco_vsps
+# NOTE: load GloVe over the FULL corpus vocab so context words contribute to WSD
+# (the probe run only loaded term+surface words).
 ```
 
-GATE: VSPS round-trips TinyStories, and polysemous words get SENSE-CORRECT tokens
-(the disambiguation the thesis promises) where SentencePiece merged them.
+GATE: VSPS round-trips COCO captions, and polysemous words get SENSE-CORRECT
+tokens (the disambiguation the thesis promises) where SentencePiece merged them.
 
 ## 3. Planck 2.0 training (TO BUILD: scripts/train_planck2.py)
 
@@ -117,7 +184,7 @@ IS the V/S/P bundle, not S alone.
    ([[project_sgs_path1_outcome]] — Planck/Hertz shapes differ; never hardcode).
 
 ```powershell
-python scripts/train_planck2.py --data data/tinystories_vsps `
+python scripts/train_planck2.py --data data/coco_vsps `
   --vocab data/vsps/vocab.json --d-f 1000 --freeze-vp `
   --save-dir checkpoints/planck2 --tokens 1B   # TO BUILD; mirror train_planck11.py
 ```
@@ -139,10 +206,12 @@ diagnose whether it's the embedding wiring or frozen-V starving the model.
 | Phase | What | Status / kill-if |
 |-------|------|------------------|
 | 0 | grounding gate (V+S+P separate senses) | **PASS 2026-07-06, 0.37** (auto V + derived P) |
-| 1 | VSPS vocab (two-tier, corpus-scale senses) | KILL if grounding coverage too thin or vocab blowup explodes |
-| 2 | VSPS tokenize TinyStories | KILL if it doesn't round-trip or WSD is wrong |
-| 3 | Planck 2.0 training | plain AdamW, frozen-V warm start, hard step budget |
-| 4 | disambiguation benchmark | KILL claim if no win vs SentencePiece baseline at matched compute |
+| 0.2 | COCO caption corpus prep | TO BUILD prepare_coco_vsp.py |
+| 0.3 | Gemma sense enumeration + caption-to-sense V | TO BUILD enumerate_senses_gemma.py; KILL if Gemma sense recall too low |
+| 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on COCO senses. |
+| 2 | VSPS tokenize COCO | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on COCO; load GloVe over full corpus vocab. |
+| 3 | Planck 2.0 training | TO BUILD train_planck2.py. plain AdamW, frozen-V warm start, hard step budget |
+| 4 | disambiguation benchmark | TO BUILD. KILL claim if no win vs SentencePiece baseline at matched compute |
 
 ## Papers this feeds
 
