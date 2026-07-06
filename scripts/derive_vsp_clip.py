@@ -83,26 +83,52 @@ def clip_text_vectors(phrases, device="cpu"):
     return out
 
 
-def clip_image_vectors(phrases, gen_model, n_views, device="cuda", save_views=None):
+def clip_image_vectors(phrases, gen_model, n_views, device="cuda", save_views=None,
+                       cache_path=None, flush_every=25):
     """Real path (box): SD-generate n_views per phrase, CLIP image-encode, mean.
     Open-vocabulary V grounded in generated appearance, not text or a synset.
 
     save_views: if set, write every generated image to that dir so the SD output
     can be eyeballed before trusting the embeddings (garbage views -> garbage V).
+
+    cache_path: RESUMABLE grounding for long overnight runs. Already-computed
+    phrase->V are loaded and skipped; new ones are flushed to the cache every
+    `flush_every` phrases. A crash/Ctrl-C loses at most `flush_every` phrases,
+    and re-running resumes where it stopped. Essential at 5k-word / ~10h scale.
     """
     import torch
     import re
+    import time
     from diffusers import StableDiffusionPipeline
     from transformers import CLIPModel, CLIPProcessor
+
+    # resume: load cached vectors
+    out = {}
+    if cache_path and Path(cache_path).exists():
+        raw = json.load(open(cache_path))
+        out = {k: np.array(v, dtype=np.float32) for k, v in raw.items()}
+        print(f"[clip] resume: loaded {len(out)} cached phrase vectors from {cache_path}")
+    todo = [p for p in phrases if p not in out]
+    print(f"[clip] {len(todo)} phrases to generate ({len(out)} already cached)")
+    if not todo:
+        return out
+
     sd = StableDiffusionPipeline.from_pretrained(gen_model, torch_dtype=torch.float16).to(device)
     clip = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device).eval()
     proc = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     views = ["", " side view", " front view", " 3/4 view"][:n_views]
     if save_views:
         Path(save_views).mkdir(parents=True, exist_ok=True)
-        print(f"[clip] saving generated views to {save_views}/")
-    out = {}
-    for ph in phrases:
+
+    def _flush():
+        if cache_path:
+            tmp = str(cache_path) + ".tmp"
+            json.dump({k: [round(float(x), 5) for x in v] for k, v in out.items()},
+                      open(tmp, "w"))
+            Path(tmp).replace(cache_path)  # atomic
+
+    t0 = time.time()
+    for i, ph in enumerate(todo):
         embs = []
         for vi, vsuffix in enumerate(views):
             img = sd(ph + vsuffix, num_inference_steps=25).images[0]
@@ -114,6 +140,13 @@ def clip_image_vectors(phrases, gen_model, n_views, device="cuda", save_views=No
                 e = _feat(clip.get_image_features(**inp))[0].cpu().numpy().astype(np.float32)
             embs.append(_unit(e))
         out[ph] = _unit(np.mean(embs, axis=0))
+        if (i + 1) % flush_every == 0:
+            _flush()
+            rate = (i + 1) / max(time.time() - t0, 1e-6)
+            eta_h = (len(todo) - i - 1) / max(rate * 3600, 1e-9)
+            print(f"[clip] {i+1}/{len(todo)} phrases | {rate*3600:,.0f}/h | "
+                  f"ETA {eta_h:.1f}h | cached", flush=True)
+    _flush()
     return out
 
 
@@ -169,6 +202,10 @@ def main():
     p.add_argument("--no-visual-filter", action="store_true",
                    help="keep non-depictable senses (surname/album/film/...); "
                         "by default they're dropped so SD doesn't waste generations")
+    p.add_argument("--cache", default=None,
+                   help="RESUMABLE V-vector cache (clip-image). Flushes every 25 "
+                        "phrases; re-run to resume after a crash/Ctrl-C. USE for "
+                        "long overnight runs.")
     p.add_argument("--out", default="results/vsp_clip.json")
     args = p.parse_args()
 
@@ -233,7 +270,7 @@ def main():
     device = "cuda" if args.v_source == "clip-image" else "cpu"
     if args.v_source == "clip-image":
         vecs = clip_image_vectors(phrases, args.gen_model, args.n_views, device,
-                                  save_views=args.save_views)
+                                  save_views=args.save_views, cache_path=args.cache)
     else:
         vecs = clip_text_vectors(phrases, device)
 
