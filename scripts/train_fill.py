@@ -102,27 +102,43 @@ class FillModel(nn.Module):
 def chamfer_set_loss(pred, target_means, target_attrs, n_target):
     """pred: model output dict (single example, [max_g, *]).
     target_means [M,3], target_attrs dict of [M,*], n_target=M.
-    Bidirectional nearest-neighbour match on positions, attribute MSE on the
-    pred->target direction, BCE on the active mask (first M slots active)."""
+
+    Truly bidirectional (symmetric) Chamfer:
+      - BACKWARD (coverage): each target is pulled onto its nearest pred slot.
+      - FORWARD (anti-collapse): each pred slot is pulled onto its nearest
+        target, weighted by how "active" the slot wants to be. Without this
+        term most of the 512 slots get no geometry gradient and collapse to a
+        few averaged points (the "blobs" failure). This is the key fix.
+    Attributes are matched on the coverage direction; BCE trains the active mask.
+    """
     max_g = pred["means"].shape[0]
     pm = pred["means"]                                  # [max_g,3]
-    # pairwise sq dist pred x target
     d = torch.cdist(pm, target_means)                   # [max_g, M]
-    # pred -> nearest target
-    nn_t = d.argmin(1)                                  # [max_g]
-    # target -> nearest pred (coverage)
-    nn_p = d.argmin(0)                                  # [M]
-    # active mask: slots that are the nearest pred for some target should fire
+
+    # backward / coverage: target -> nearest pred slot
+    nn_p = d.argmin(0)                                  # [M] pred slot per target
+    # forward: pred slot -> nearest target (distance kept, not just index)
+    fwd_min, _ = d.min(1)                               # [max_g] euclidean dist
+
+    # active mask: slots that cover some target should fire
     active_tgt = torch.zeros(max_g, device=pm.device)
     active_tgt[nn_p] = 1.0
     loss_active = F.binary_cross_entropy_with_logits(pred["active"], active_tgt)
-    # geometry: target-coverage direction (each target pulled from its nearest pred)
-    idx = nn_p                                          # pred slot per target
-    loss_pos = F.mse_loss(pm[idx], target_means)
+
+    # geometry — coverage (backward)
+    loss_cov = F.mse_loss(pm[nn_p], target_means)
+    # geometry — forward, weighted by (detached) activeness so inactive slots
+    # aren't forced onto the shape once the mask has settled.
+    w = torch.sigmoid(pred["active"]).detach()          # [max_g]
+    loss_fwd = (w * fwd_min.pow(2)).sum() / (w.sum() + 1e-6)
+
+    # attributes on the coverage match
+    idx = nn_p
     loss_scale = F.mse_loss(pred["scales_log"][idx], target_attrs["scales_log"])
     loss_color = F.mse_loss(pred["colors"][idx], target_attrs["colors"])
     loss_opac = F.mse_loss(pred["opacities"][idx], target_attrs["opacities"])
-    return loss_pos + 0.5 * loss_scale + 0.5 * loss_color + 0.2 * loss_opac + loss_active
+    return (loss_cov + loss_fwd + 0.5 * loss_scale + 0.5 * loss_color
+            + 0.2 * loss_opac + loss_active)
 
 
 # ── data ───────────────────────────────────────────────────────────────
