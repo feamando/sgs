@@ -1,0 +1,214 @@
+{
+  "results": [
+    {
+      "word": "bank",
+      "sense_a": "river-bank",
+      "sense_b": "institution",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3161,
+      "sep_s": 0.0,
+      "sep_p": 0.5259,
+      "separation_gain": 0.5259
+    },
+    {
+      "word": "plane",
+      "sense_a": "aircraft",
+      "sense_b": "flat-surface",
+      "s_only_sim": 1.0,
+      "sep_v": 0.4111,
+      "sep_s": 0.0,
+      "sep_p": 0.0346,
+      "separation_gain": 0.4111
+    },
+    {
+      "word": "bat",
+      "sense_a": "animal",
+      "sense_b": "club",
+      "s_only_sim": 1.0,
+      "sep_v": 0.2617,
+      "sep_s": 0.0,
+      "sep_p": 0.1044,
+      "separation_gain": 0.2617
+    },
+    {
+      "word": "spring",
+      "sense_a": "water-source",
+      "sense_b": "coil",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3048,
+      "sep_s": 0.0,
+      "sep_p": 0.2317,
+      "separation_gain": 0.3048
+    },
+    {
+      "word": "crane",
+      "sense_a": "bird",
+      "sense_b": "machine",
+      "s_only_sim": 1.0,
+      "sep_v": 0.444,
+      "sep_s": 0.0,
+      "sep_p": 0.1809,
+      "separation_gain": 0.444
+    },
+    {
+      "word": "mouse",
+      "sense_a": "animal",
+      "sense_b": "device",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3893,
+      "sep_s": -0.0,
+      "sep_p": 0.2376,
+      "separation_gain": 0.3893
+    },
+    {
+      "word": "rock",
+      "sense_a": "stone",
+      "sense_b": "music",
+      "s_only_sim": 1.0,
+      "sep_v": 0.4006,
+      "sep_s": 0.0,
+      "sep_p": 0.0552,
+      "separation_gain": 0.4006
+    },
+    {
+      "word": "palm",
+      "sense_a": "tree",
+      "sense_b": "hand",
+      "s_only_sim": 1.0,
+      "sep_v": 0.2556,
+      "sep_s": 0.0,
+      "sep_p": 0.0576,
+      "separation_gain": 0.2556
+    },
+    {
+      "word": "table",
+      "sense_a": "furniture",
+      "sense_b": "data-grid",
+      "s_only_sim": 1.0,
+      "sep_v": 0.435,
+      "sep_s": 0.0,
+      "sep_p": 0.1109,
+      "separation_gain": 0.435
+    },
+    {
+      "word": "tank",
+      "sense_a": "vehicle",
+      "sense_b": "container",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3592,
+      "sep_s": 0.0,
+      "sep_p": 0.3649,
+      "separation_gain": 0.3649
+    },
+    {
+      "word": "seal",
+      "sense_a": "animal",
+      "sense_b": "stamp",
+      "s_only_sim": 1.0,
+      "sep_v": 0.4237,
+      "sep_s": 0.0,
+      "sep_p": 0.0335,
+      "separation_gain": 0.4237
+    },
+    {
+      "word": "bow",
+      "sense_a": "weapon",
+      "sense_b": "ribbon",
+      "s_only_sim": 1.0,
+      "sep_v": 0.2761,
+      "sep_s": 0.0,
+      "sep_p": 0.1615,
+      "separation_gain": 0.2761
+    },
+    {
+      "word": "nail",
+      "sense_a": "fastener",
+      "sense_b": "finger-nail",
+      "s_only_sim": 1.0,
+      "sep_v": 0.2421,
+      "sep_s": 0.0,
+      "sep_p": 0.2663,
+      "separation_gain": 0.2663
+    },
+    {
+      "word": "trunk",
+      "sense_a": "tree",
+      "sense_b": "car-storage",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3764,
+      "sep_s": 0.0,
+      "sep_p": 0.059,
+      "separation_gain": 0.3764
+    },
+    {
+      "word": "scale",
+      "sense_a": "fish-scale",
+      "sense_b": "weighing",
+      "s_only_sim": 1.0,
+      "sep_v": 0.2774,
+      "sep_s": 0.0,
+      "sep_p": 0.0593,
+      "separation_gain": 0.2774
+    },
+    {
+      "word": "key",
+      "sense_a": "lock-key",
+      "sense_b": "musical",
+      "s_only_sim": 1.0,
+      "sep_v": 0.271,
+      "sep_s": 0.0,
+      "sep_p": 0.0287,
+      "separation_gain": 0.271
+    },
+    {
+      "word": "board",
+      "sense_a": "plank",
+      "sense_b": "committee",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3897,
+      "sep_s": 0.0,
+      "sep_p": 0.2098,
+      "separation_gain": 0.3897
+    },
+    {
+      "word": "pitcher",
+      "sense_a": "container",
+      "sense_b": "player",
+      "s_only_sim": 1.0,
+      "sep_v": 0.5501,
+      "sep_s": -0.0,
+      "sep_p": 0.0922,
+      "separation_gain": 0.5501
+    },
+    {
+      "word": "well",
+      "sense_a": "water-shaft",
+      "sense_b": "adverb",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3938,
+      "sep_s": 0.0,
+      "sep_p": 0.026,
+      "separation_gain": 0.3938
+    },
+    {
+      "word": "iron",
+      "sense_a": "metal",
+      "sense_b": "appliance",
+      "s_only_sim": 1.0,
+      "sep_v": 0.3226,
+      "sep_s": 0.0,
+      "sep_p": 0.0703,
+      "separation_gain": 0.3226
+    }
+  ],
+  "mean_s_only": 0.9999999761581421,
+  "aggregate": "max",
+  "gate_blocks": [
+    "v",
+    "s",
+    "p"
+  ],
+  "gate_threshold": 0.3,
+  "separation_gain": 0.3670032829046249,
+  "pass": true
+}
