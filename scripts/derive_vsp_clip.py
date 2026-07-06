@@ -83,21 +83,32 @@ def clip_text_vectors(phrases, device="cpu"):
     return out
 
 
-def clip_image_vectors(phrases, gen_model, n_views, device="cuda"):
+def clip_image_vectors(phrases, gen_model, n_views, device="cuda", save_views=None):
     """Real path (box): SD-generate n_views per phrase, CLIP image-encode, mean.
-    Open-vocabulary V grounded in generated appearance, not text or a synset."""
+    Open-vocabulary V grounded in generated appearance, not text or a synset.
+
+    save_views: if set, write every generated image to that dir so the SD output
+    can be eyeballed before trusting the embeddings (garbage views -> garbage V).
+    """
     import torch
+    import re
     from diffusers import StableDiffusionPipeline
     from transformers import CLIPModel, CLIPProcessor
     sd = StableDiffusionPipeline.from_pretrained(gen_model, torch_dtype=torch.float16).to(device)
     clip = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device).eval()
     proc = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     views = ["", " side view", " front view", " 3/4 view"][:n_views]
+    if save_views:
+        Path(save_views).mkdir(parents=True, exist_ok=True)
+        print(f"[clip] saving generated views to {save_views}/")
     out = {}
     for ph in phrases:
         embs = []
-        for vsuffix in views:
+        for vi, vsuffix in enumerate(views):
             img = sd(ph + vsuffix, num_inference_steps=25).images[0]
+            if save_views:
+                slug = re.sub(r"[^a-z0-9]+", "_", ph.lower()).strip("_")
+                img.save(Path(save_views) / f"{slug}__view{vi}.png")
             with torch.no_grad():
                 inp = proc(images=img, return_tensors="pt").to(device)
                 e = _feat(clip.get_image_features(**inp))[0].cpu().numpy().astype(np.float32)
@@ -147,6 +158,9 @@ def main():
                    help="cosine >= thr => same sense (merge); the discovery knob")
     p.add_argument("--material-map", default="scripts/assets/vsp_grounded_map.json",
                    help="reuse the curated material per sense for P (V is the experiment)")
+    p.add_argument("--save-views", default=None,
+                   help="dir to dump generated SD images (clip-image only) so you "
+                        "can eyeball view quality before trusting the embeddings")
     p.add_argument("--out", default="results/vsp_clip.json")
     args = p.parse_args()
 
@@ -164,7 +178,8 @@ def main():
     print(f"[clip] V source: {args.v_source}, {len(phrases)} sense phrases, dedup_thr={args.dedup_thr}")
     device = "cuda" if args.v_source == "clip-image" else "cpu"
     if args.v_source == "clip-image":
-        vecs = clip_image_vectors(phrases, args.gen_model, args.n_views, device)
+        vecs = clip_image_vectors(phrases, args.gen_model, args.n_views, device,
+                                  save_views=args.save_views)
     else:
         vecs = clip_text_vectors(phrases, device)
 
