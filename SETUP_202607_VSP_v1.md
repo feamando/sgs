@@ -191,7 +191,7 @@ diagnose whether it's the embedding wiring or frozen-V starving the model.
 | Phase | What | Status / kill-if |
 |-------|------|------------------|
 | 0 | grounding gate (V+S+P separate senses) | **PASS 2026-07-06, 0.37** (auto V + derived P) |
-| 0.2 | Wikipedia corpus + disambiguation senses | **prepare_wikipedia_senses.py BUILT** (selftest: Crane->bird/machine/surname). COCO tried+rejected (low polysemy). |
+| 0.2 | Wikipedia corpus + disambiguation senses | **DONE (sample): 300k articles -> 7,678 polysemous words** at ~4k art/s. Full dump default now (~25-30 min). COCO tried+rejected (low polysemy). |
 | 0.3 | native V from Wikimedia lead images | wire derive_vsp_clip.py to embed image_refs (SD fallback already works); KILL if disambiguation sense yield too low |
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |

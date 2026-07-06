@@ -106,9 +106,9 @@ def main():
     p = argparse.ArgumentParser(description="Wikipedia disambiguation -> VSP senses")
     p.add_argument("--hf-cache", default="data/wikipedia/hf")
     p.add_argument("--revision", default="20231101.en")
-    p.add_argument("--max-articles", type=int, default=300000,
-                   help="scan cap (default 300k ~= all disambiguation pages appear "
-                        "early-ish; set 0 for the FULL ~6.4M dump, slow)")
+    p.add_argument("--max-articles", type=int, default=0,
+                   help="scan cap; 0 = FULL ~6.4M dump (~25-30 min at ~4k art/s). "
+                        "Set e.g. 300000 for a quick sample.")
     p.add_argument("--log-every", type=int, default=20000,
                    help="print progress every N articles scanned")
     p.add_argument("--out", default="data/vsps/senses_wiki.json")
