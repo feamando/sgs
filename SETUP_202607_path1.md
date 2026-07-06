@@ -210,9 +210,39 @@ builder for (Stage B + novel-part data -- the actual grammar-ceiling lift).
 
 ## Sequencing
 
-| Phase | What | Depends on |
-|-------|------|------------|
-| 1 | Hertz demo run (interpreter sanity) | Hertz 1.2 checkpoint |
-| 2 | Hertz decomposer training | Phase 1 + Gemma data |
-| 3 | Hertz learned fill | Phase 2 + render-supervision harness |
-| (par) | Product hotswap + Satz | any working interpreter/decomposer/fill |
+| Phase | What | Depends on | Status (2026-07-06) |
+|-------|------|------------|---------------------|
+| 1 | Hertz demo run (interpreter sanity) | Hertz 1.2 checkpoint | ✅ DONE — coherent (base completion model; prompt with sentence starts) |
+| 2 | Hertz decomposer training | Phase 1 + Gemma data | ✅ DONE — valid castle trees; PARITY with Planck (task saturated, no scaling win) |
+| 3 | Hertz learned fill | Phase 2 + render-supervision harness | ⚠️ BUILT, does NOT pass gate — see below |
+| (par) | Product hotswap + Satz | any working interpreter/decomposer/fill | ✅ grammar fill works; Satz v0.2 has model selector |
+
+## Outcome (2026-07-06): path1 walked end-to-end
+
+**Production fill = grammar.** It's correct, deterministic, shippable. Use it for
+the demo (`infer_decomposer.py` without `--fill-checkpoint`).
+
+**Learned fill does NOT pass the §3 gate — it's CAPACITY-limited, not recipe-limited.**
+Findings, in order:
+- Stage A Chamfer collapsed all stones to ~6 blobs (loss only supervised one
+  direction; fixed to bidirectional).
+- Bidirectional Chamfer got the LAYOUT right (13 clusters in the castle
+  footprint) but each part stayed a fuzzy sphere (slot pileup).
+- Hungarian one-to-one match (DETR-style, `--match hungarian`, the correct fix)
+  still rendered blobs. Loss plateaued at ~epoch 15 and was flat for 135 more
+  epochs (30ep→0.36 Chamfer vs 150ep→0.41 Hungarian — NOT comparable, different
+  losses). Flat curve + still-blobs ⇒ the d_model=128 / 3-layer / 512-slot
+  FillModel can't emit 271-504 structured stones from a part-token+pose. More
+  epochs won't help.
+
+**Open items if learned fill is ever revisited (own project, not a quick shot):**
+1. Bump FillModel capacity (d_model 128→256, more decoder layers) + add a cosine
+   LR schedule (train_fill.py has none; explains the late-epoch wobble).
+2. Implement the Stage B SDS render term (`train_fill.py:~203`) — needed to BEAT
+   grammar, not just match it.
+3. Add Gemma novel parts to `path1_fill.json` (currently 12 grammar kinds only,
+   so "lighthouse" can't render regardless of model).
+
+**Broader lesson:** scaling the BASE (Planck→Hertz) and swapping to learned fill
+both gave no win on castles because castle decomposition is a saturated,
+low-entropy task. The real lever is a better REPRESENTATION → see path2 (VSP).
