@@ -90,14 +90,30 @@ def main():
     print(f"  Avg length: {sum(len(s) for s in samples) / len(samples):.0f} tokens")
 
     # Load model
-    print(f"\nLoading Planck: {args.checkpoint}")
+    print(f"\nLoading base checkpoint: {args.checkpoint}")
     from src.sgs_lm import SGSLanguageModel, migrate_state_dict
+    from scripts.generate import infer_arch
 
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
     state = migrate_state_dict(state)
 
-    model = SGSLanguageModel(vocab_size=vocab_size)
+    # Build the model with the checkpoint's OWN architecture, not defaults.
+    # Planck (d_s=128, d_f=1000) and Hertz (d_s=256, d_f=3700) differ; using
+    # defaults silently loaded Planck's shape and crashed on Hertz weights.
+    arch = infer_arch(state)
+    print(f"  Arch (from checkpoint): vocab={arch['vocab_size']} d_s={arch['d_s']} "
+          f"d_f={arch['d_f']} n_heads={arch['n_heads']} n_passes={arch['n_passes']} "
+          f"ctx={arch['max_len']} ffn_mult={arch['ffn_mult']}")
+    if arch["vocab_size"] != vocab_size:
+        print(f"  WARNING: tokenizer vocab ({vocab_size}) != checkpoint vocab "
+              f"({arch['vocab_size']}). Check --tokenizer matches this base "
+              f"(Hertz -> data/hertz12_data/tokenizer.model).")
+
+    model = SGSLanguageModel(
+        vocab_size=arch["vocab_size"], d_s=arch["d_s"], d_f=arch["d_f"],
+        n_passes=arch["n_passes"], n_heads=arch["n_heads"],
+        max_len=arch["max_len"], ffn_mult=arch["ffn_mult"])
     model.load_state_dict(state)
     model.to(device)
     print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")
