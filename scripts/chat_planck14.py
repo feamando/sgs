@@ -56,12 +56,14 @@ def main():
     # Load model
     print(f"Loading Planck: {args.checkpoint}")
     from src.sgs_lm import SGSLanguageModel, migrate_state_dict
+    from scripts.generate import infer_arch
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
     state = migrate_state_dict(state)
-    vocab_size = state["tok_mu.weight"].shape[0]
+    arch = infer_arch(state)  # build with checkpoint's own arch (Planck vs Hertz)
+    vocab_size = arch["vocab_size"]
 
-    model = SGSLanguageModel(vocab_size=vocab_size)
+    model = SGSLanguageModel(**arch)
     model.load_state_dict(state)
     model.to(device).eval()
     print(f"  Params: {sum(p.numel() for p in model.parameters()):,}")

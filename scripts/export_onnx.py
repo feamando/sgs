@@ -15,7 +15,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.sgs_lm import SGSLanguageModel
+from src.sgs_lm import SGSLanguageModel, migrate_state_dict
+from scripts.generate import infer_arch
 
 
 def parse_args():
@@ -26,13 +27,14 @@ def parse_args():
     p.add_argument("--opset", type=int, default=17)
     p.add_argument("--verify", action="store_true", help="Verify ONNX output matches PyTorch")
 
-    # Architecture (must match checkpoint)
-    p.add_argument("--d-s", type=int, default=128)
-    p.add_argument("--d-f", type=int, default=1000)
-    p.add_argument("--n-passes", type=int, default=3)
-    p.add_argument("--n-heads", type=int, default=4)
-    p.add_argument("--context-len", type=int, default=512)
-    p.add_argument("--ffn-mult", type=int, default=4)
+    # Architecture. Default None => inferred from the checkpoint (works for both
+    # Planck 128/1000 and Hertz 256/3700). Pass a flag only to force an override.
+    p.add_argument("--d-s", type=int, default=None)
+    p.add_argument("--d-f", type=int, default=None)
+    p.add_argument("--n-passes", type=int, default=None)
+    p.add_argument("--n-heads", type=int, default=None)
+    p.add_argument("--context-len", type=int, default=None)
+    p.add_argument("--ffn-mult", type=int, default=None)
     return p.parse_args()
 
 
@@ -43,17 +45,19 @@ def main():
     print(f"Loading checkpoint: {args.checkpoint}")
     ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     state = ckpt["model"] if "model" in ckpt else ckpt
-    vocab_size = state["tok_mu.weight"].shape[0]
+    state = migrate_state_dict(state)
 
-    model = SGSLanguageModel(
-        vocab_size=vocab_size,
-        d_s=args.d_s,
-        d_f=args.d_f,
-        n_passes=args.n_passes,
-        n_heads=args.n_heads,
-        max_len=args.context_len,
-        ffn_mult=args.ffn_mult,
-    )
+    # Infer arch from the checkpoint; let explicit CLI flags override.
+    arch = infer_arch(state)
+    if args.d_s is not None: arch["d_s"] = args.d_s
+    if args.d_f is not None: arch["d_f"] = args.d_f
+    if args.n_passes is not None: arch["n_passes"] = args.n_passes
+    if args.n_heads is not None: arch["n_heads"] = args.n_heads
+    if args.context_len is not None: arch["max_len"] = args.context_len
+    if args.ffn_mult is not None: arch["ffn_mult"] = args.ffn_mult
+    vocab_size = arch["vocab_size"]
+
+    model = SGSLanguageModel(**arch)
     model.load_state_dict(state)
     model.eval()
     print(f"  Loaded {model.count_parameters()/1e6:.1f}M params")

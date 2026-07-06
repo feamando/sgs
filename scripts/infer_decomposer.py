@@ -5,16 +5,20 @@ Takes a text prompt, feeds it to the fine-tuned decomposer, parses
 the output as a composition tree JSON, and serves it via the scene
 viewer.
 
-Usage:
+Usage (Hertz-based decomposer, path1):
     python scripts/infer_decomposer.py `
-      --checkpoint checkpoints/planck_decomposer/best.pt `
-      --tokenizer data/wikipedia/tokenizer.model `
+      --checkpoint checkpoints/hertz_decomposer/best.pt `
+      --tokenizer data/hertz12_data/tokenizer.model `
       --prompt "a castle on a hill"
 
     python scripts/infer_decomposer.py `
-      --checkpoint checkpoints/planck_decomposer/best.pt `
-      --tokenizer data/wikipedia/tokenizer.model `
+      --checkpoint checkpoints/hertz_decomposer/best.pt `
+      --tokenizer data/hertz12_data/tokenizer.model `
       --serve --port 8003
+
+TOKENIZER: must match the BASE the decomposer was fine-tuned from.
+Hertz -> data/hertz12_data/tokenizer.model; Planck -> data/wikipedia/tokenizer.model.
+Arch is auto-inferred from the checkpoint (infer_arch), so no --d-s/--d-f flags.
 """
 
 import argparse
@@ -75,12 +79,17 @@ class Decomposer:
         self.device = device
 
         from src.sgs_lm import SGSLanguageModel, migrate_state_dict
+        from scripts.generate import infer_arch
         ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
         state = ckpt["model"] if "model" in ckpt else ckpt
         state = migrate_state_dict(state)
-        vocab_size = state["tok_mu.weight"].shape[0]
 
-        self.model = SGSLanguageModel(vocab_size=vocab_size)
+        # Build with the checkpoint's OWN arch, not defaults. Planck (d_s=128,
+        # d_f=1000) and a Hertz-based decomposer (d_s=256, d_f=3700) differ;
+        # defaults silently assumed Planck and crashed on Hertz weights.
+        arch = infer_arch(state)
+        vocab_size = arch["vocab_size"]
+        self.model = SGSLanguageModel(**arch)
         self.model.load_state_dict(state)
         self.model.to(device).eval()
         self.vocab_size = vocab_size

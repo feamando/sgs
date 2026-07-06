@@ -142,12 +142,12 @@ python scripts/build_stage3_dataset.py --params output/layout_opt.params.json `
 python scripts/train_decomposer.py `
   --data data/decomposition_trees/path1_train.json `
   --checkpoint checkpoints/hertz12/best.pt `
-  --tokenizer data/wikipedia/tokenizer.model `
+  --tokenizer data/hertz12_data/tokenizer.model `
   --save-dir checkpoints/hertz_decomposer --epochs 40
 
 # 3. judge with snapping OFF (the 1.7 gate, now at Hertz scale)
 python scripts/infer_decomposer.py --checkpoint checkpoints/hertz_decomposer/best.pt `
-  --tokenizer data/wikipedia/tokenizer.model --serve --port 8003 --no-snap
+  --tokenizer data/hertz12_data/tokenizer.model --serve --port 8003 --no-snap
 ```
 
 GATE: Hertz decomposer emits coherent trees (snap off) across MORE scene types
