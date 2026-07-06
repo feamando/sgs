@@ -20,16 +20,21 @@ DISCIPLINE: this is a high-uncertainty bet. Gate each step like Raum 1.7 Stage 1
 
 ## 0. General setup
 
-Reuse the main `.venv` (torch 2.6 / py3.12). Seed assets for V and P already
-exist in the tree:
+The V source is now CLIP-image (§1a decision, 2026-06-23), NOT ShapeNet blobs.
+So the real Phase 1 dependency is SD + CLIP in `.venv-sds`, and `data/blobs_shapenet`
+is NO LONGER required (it only fed the rejected synset-grounded regime,
+`ground_vsp.py`). A `shapenet blobs: false` is fine, ignore it for Phase 1.
 
 ```powershell
 cd sgs
-.venv\Scripts\Activate.ps1
-# V (visual): Objaverse/ShapeNet blob libraries
-python -c "import os; print('shapenet blobs:', os.path.exists('data/blobs_shapenet'))"
-# P (physical): Physical Gaussians P6 material work (hardness R^2=0.54)
+# Phase 1 (CLIP-image gate) runs in .venv-sds (needs diffusers + CLIP):
+.venv-sds\Scripts\Activate.ps1
+python -c "import diffusers, transformers; print('diffusers', diffusers.__version__, '| transformers', transformers.__version__)"
+python -c "from transformers import CLIPModel; print('CLIP import ok')"
+# P (physical): Physical Gaussians P6 material work (hardness R^2=0.54) -- text assets, always present
 ls docs/papers/physical_gaussians*.md
+# (legacy, NOT needed for the chosen CLIP-image path -- only ground_vsp.py used it)
+python -c "import os; print('shapenet blobs (legacy, optional):', os.path.exists('data/blobs_shapenet'))"
 ```
 
 ## 1. VSP gating experiment (the reachability probe -- DO THIS FIRST)
