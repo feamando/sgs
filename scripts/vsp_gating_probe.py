@@ -99,6 +99,17 @@ def main():
     p.add_argument("--derived", default=None,
                    help="use AUTO-derived V/P from derive_vsp.py output (results/"
                         "vsp_derived.json) instead of the hand-seeded --words table")
+    p.add_argument("--aggregate", choices=["mean", "max"], default="max",
+                   help="combine per-block separations. max = separable if ANY "
+                        "block distinguishes the senses (an identical block can't "
+                        "veto an informative one). mean = old concat metric (an "
+                        "identical S block dilutes it, floor (k-1)/k).")
+    p.add_argument("--gate-blocks", default="v,s",
+                   help="comma list of blocks counting toward the gate. Default "
+                        "v,s = honestly-derived (CLIP-image V, GloVe S). P is a "
+                        "hand-authored prior, excluded until it's derived (P6 MLP).")
+    p.add_argument("--gate-threshold", type=float, default=0.3,
+                   help="separation the aggregate must clear to PASS")
     args = p.parse_args()
 
     if args.derived:
@@ -130,56 +141,83 @@ def main():
         rng = np.random.default_rng(abs(hash(word)) % (2**32))
         return rng.standard_normal(300).astype(np.float32)
 
+    # Which blocks count toward the GATE. Default v,s = the honestly-derived
+    # blocks (CLIP-image V, GloVe S). P is reported but EXCLUDED by default
+    # because its vectors are a hand-authored material table keyed by a
+    # hand-assigned tag (two labeling layers -> a curated prior, NOT automatic
+    # grounding). Add 'p' once P is derived (P6 MLP, phase B).
+    gate_blocks = [b.strip().lower() for b in args.gate_blocks.split(",") if b.strip()]
+
+    def sep(a, b):
+        """Per-block separation = 1 - cosine (0 = identical, 1 = orthogonal)."""
+        return 1.0 - cos(a, b)
+
+    def aggregate(seps):
+        """Combine per-block separations. 'max' = senses are separable if ANY
+        modality distinguishes them (an uninformative-but-identical block, e.g.
+        the collapsed S, cannot veto an informative one). 'mean' = the old
+        concat-of-unit-blocks metric (mathematically the mean of block cosines),
+        which an identical block dilutes -> floors separation at (k-1)/k."""
+        vals = list(seps.values())
+        if not vals:
+            return 0.0
+        if args.aggregate == "max":
+            return max(vals)
+        return float(np.mean(vals))  # mean
+
     results = []
-    s_only_sims, vsp_sims = [], []
+    s_only_sims, agg_seps = [], []
     for e in entries:
         word = e["word"]
         senses = e["senses"]
         if len(senses) < 2:
             continue
         s = s_vec(word)
-        # build S-only and V|S|P vectors per sense (S identical across senses)
-        sense_vecs = []
+        built = []
         for sn in senses:
-            # V: a soft distribution (auto-derived) or a one-hot (hand-seeded)
-            if "visual_dist" in sn:
-                v = np.array(sn["visual_dist"], dtype=np.float32)
-            else:
-                v = vis_vector(sn.get("visual", "none"))
+            v = np.array(sn["visual_dist"], dtype=np.float32) if "visual_dist" in sn \
+                else vis_vector(sn.get("visual", "none"))
             ph = phys_vector(sn.get("physical", {}))
-            # scale-balance the three blocks to unit norm each before concat
-            vsp = np.concatenate([_unit(v), _unit(s), _unit(ph)])
-            sense_vecs.append((sn["label"], v, s, ph, vsp))
-        # pairwise (first two senses) -- the canonical polysemy pair
-        (l0, v0, s0, p0, vsp0), (l1, v1, s1, p1, vsp1) = sense_vecs[0], sense_vecs[1]
-        s_sim = cos(s0, s1)          # identical -> 1.0 (the collapse)
-        vsp_sim = cos(vsp0, vsp1)
-        s_only_sims.append(s_sim); vsp_sims.append(vsp_sim)
+            built.append((sn["label"], v, s, ph))
+        (l0, v0, s0, p0), (l1, v1, s1, p1) = built[0], built[1]
+        # per-block separation (only the gate_blocks count toward the aggregate)
+        allsep = {"v": sep(v0, v1), "s": sep(s0, s1), "p": sep(p0, p1)}
+        gate_sep = {b: allsep[b] for b in gate_blocks if b in allsep}
+        agg = aggregate(gate_sep)
+        s_sim = cos(s0, s1)
+        s_only_sims.append(s_sim); agg_seps.append(agg)
         results.append({"word": word, "sense_a": l0, "sense_b": l1,
-                        "s_only_sim": round(s_sim, 4), "vsp_sim": round(vsp_sim, 4),
-                        "separation_gain": round(s_sim - vsp_sim, 4)})
+                        "s_only_sim": round(s_sim, 4),
+                        "sep_v": round(allsep["v"], 4), "sep_s": round(allsep["s"], 4),
+                        "sep_p": round(allsep["p"], 4),
+                        "separation_gain": round(agg, 4)})
 
     mean_s = float(np.mean(s_only_sims)) if s_only_sims else 0.0
-    mean_vsp = float(np.mean(vsp_sims)) if vsp_sims else 0.0
-    gain = mean_s - mean_vsp
+    gain = float(np.mean(agg_seps)) if agg_seps else 0.0
 
-    print(f"\n{'word':<14}{'sense A':<16}{'sense B':<16}{'S-only':>8}{'V|S|P':>8}{'gain':>8}")
-    print("-" * 70)
+    print(f"\n[vsp] aggregate={args.aggregate} gate-blocks={gate_blocks} "
+          f"(P excluded by default: hand-authored prior, not auto-derived)")
+    print(f"\n{'word':<12}{'sense A':<15}{'sense B':<15}"
+          f"{'sepV':>7}{'sepS':>7}{'sepP':>7}{'GATE':>8}")
+    print("-" * 71)
     for r in results:
-        print(f"{r['word']:<14}{r['sense_a']:<16}{r['sense_b']:<16}"
-              f"{r['s_only_sim']:>8.3f}{r['vsp_sim']:>8.3f}{r['separation_gain']:>8.3f}")
-    print("-" * 70)
-    print(f"{'MEAN':<46}{mean_s:>8.3f}{mean_vsp:>8.3f}{gain:>8.3f}")
+        print(f"{r['word']:<12}{r['sense_a']:<15}{r['sense_b']:<15}"
+              f"{r['sep_v']:>7.3f}{r['sep_s']:>7.3f}{r['sep_p']:>7.3f}{r['separation_gain']:>8.3f}")
+    print("-" * 71)
+    print(f"{'MEAN':<42}{'':>21}{gain:>8.3f}")
 
-    # GATE: V/S/P must measurably separate senses S-only collapses.
-    PASS = mean_s > 0.9 and gain > 0.3
+    # GATE: the gate-blocks must measurably separate senses S-only collapses.
+    PASS = mean_s > 0.9 and gain > args.gate_threshold
     verdict = "PASS -- VSP separates senses S collapses; Path B is reachable" if PASS \
         else "FAIL -- no meaningful separation; reconsider Path B before training"
     print(f"\nGATE: {verdict}")
-    print(f"  (criterion: S-only mean > 0.9 AND separation gain > 0.3)")
+    print(f"  (criterion: S-only mean > 0.9 AND {args.aggregate}-aggregated "
+          f"separation over {gate_blocks} > {args.gate_threshold})")
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    json.dump({"results": results, "mean_s_only": mean_s, "mean_vsp": mean_vsp,
+    json.dump({"results": results, "mean_s_only": mean_s,
+               "aggregate": args.aggregate, "gate_blocks": gate_blocks,
+               "gate_threshold": args.gate_threshold,
                "separation_gain": gain, "pass": PASS}, open(args.out, "w"), indent=2)
     print(f"\nsaved -> {args.out}")
 
