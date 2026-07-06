@@ -172,23 +172,32 @@ reconstruct in 100Ks of splats."
 python scripts/build_fill_dataset.py --out data/fill/path1_fill.json   # TO BUILD
 ```
 
-### 3.2 Train the fill model, render-score supervised
+### 3.2 Train the fill model
 
-The supervision signal is the differentiable render / SDS path from
-`sds_refine.py` (NOT template Chamfer matching -- Raum 0.6 proved Chamfer-to-scan
-distorts clean geometry). Train so parts LOOK right under render, not just match
-a template.
+**Stage A (works today, main `.venv`, no SDS):** Chamfer set-matching against the
+grammar's own clouds. Proves the model can REPRODUCE the grammar fill. Runs in
+the main `.venv` (torch 2.6), CPU-trainable on the 720-example dataset.
 
 ```powershell
-.venv-sds\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 python scripts/train_fill.py --data data/fill/path1_fill.json `
-  --render-supervision sds --out checkpoints/fill_model   # TO BUILD
+  --epochs 30 --out checkpoints/fill_model
 ```
 
+**Stage B (NOT implemented yet):** add an SDS render-score term (from
+`sds_refine.py`) so parts LOOK right under a diffusion prior, not just match the
+template (NOT template Chamfer-to-scan -- Raum 0.6 proved that distorts clean
+geometry). This is where the learned fill can BEAT the grammar. The render term
+is still a TODO at `train_fill.py:~203`; `--render-supervision sds` currently
+WARNS and falls back to Stage A (so don't bother with `.venv-sds` until the term
+is implemented). Two blockers before Stage B is worth running:
+  1. implement the SDS render loss at `train_fill.py:~203` (needs `.venv-sds`).
+  2. the fill dataset only has the 12 GRAMMAR parts -- no novel parts. A "lighthouse"
+     still won't render until Gemma-generated parts are added to `path1_fill.json`.
+
 GATE: the learned fill renders a known part (tower) at least as well as the
-grammar fill, AND can render a part the grammar never had a builder for. That
-second half is the point: it lifts the grammar ceiling (the decomposer was only
-ever as expressive as `expand_part`).
+grammar fill (Stage A target), AND can render a part the grammar never had a
+builder for (Stage B + novel-part data -- the actual grammar-ceiling lift).
 
 ## What needs to be built (honest gap list)
 

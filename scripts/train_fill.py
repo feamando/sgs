@@ -185,9 +185,16 @@ def train(args, device):
     render_sup = args.render_supervision == "sds"
     guide = None
     if render_sup:
-        from scripts.sds_refine import SDSGuidance
-        guide = SDSGuidance("a stone castle part", device, guidance_scale=40.0)
-        print("[fill] SDS render supervision ON (Stage B)")
+        # Stage B is NOT implemented: the render term below (line ~203) is still
+        # a TODO, so loading SDSGuidance would pull in diffusers/gsplat (needs
+        # .venv-sds) and then contribute nothing to the loss. Don't pay that
+        # cost for a no-op. Warn and train Stage A (Chamfer) — identical result.
+        print("[fill] WARNING: --render-supervision sds requested, but the Stage B "
+              "render loss is not implemented yet (train_fill.py:~203). Training "
+              "Stage A (Chamfer set-matching) instead. This runs in the main .venv "
+              "(no diffusers/SDS needed). Implement the render term before Stage B "
+              "can beat the grammar.")
+        render_sup = False
 
     import random
     rng = random.Random(args.seed)
@@ -200,7 +207,9 @@ def train(args, device):
             out = model(pid, ex["pose"].unsqueeze(0))
             single = {k: v[0] for k, v in out.items()}
             loss = chamfer_set_loss(single, ex["means"], ex["attrs"], ex["n"])
-            # Stage B render term would be added here against `guide` (4090).
+            # TODO Stage B: add an SDS render-score term here (against `guide`)
+            # so parts LOOK right, not just match the grammar template. Until
+            # then --render-supervision sds is a no-op (see the warning above).
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             opt.step()
