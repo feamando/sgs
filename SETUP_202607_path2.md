@@ -101,12 +101,14 @@ python scripts/vsp_gating_probe.py --derived results/vsp_clip.json `
 | text-derived (GloVe) | 0.13 | FAIL -- text collapses on colliding words |
 | synset one-hot | 0.41 | PASS, but separation is near-TAUTOLOGICAL (different id -> orthogonal) |
 | CLIP-text | 0.18 | FAIL -- CLIP's TEXT encoder still sees the shared word |
+| **CLIP-image (2026-07-06)** | **0.355** | **PASS** -- auto-derived V, max-agg over V,S, P excluded (see §1a result) |
 
 Every TEXT-based V fails; the synset one-hot passes only by construction. The
 CLIP-text dedup even MERGED the senses that matter (crane/machine into bird at
-sim 1.0). Conclusion: the unfaked test is **CLIP-IMAGE** -- embed GENERATED
-VIEWS of each sense, where a bird photo and a construction-crane photo are
-visually unrelated so they cannot collide.
+sim 1.0). The unfaked test is **CLIP-IMAGE** -- embed GENERATED VIEWS of each
+sense, where a bird photo and a construction-crane photo are visually unrelated
+so they cannot collide. That test now PASSES (0.355) once the sense phrases,
+the aggregation metric, and the P tautology are fixed -- see §1a.
 
 ## 1a. Image-grounded V (the chosen direction -- needs the box)
 
@@ -128,22 +130,57 @@ real knobs: Gemma may miss a rare sense (coverage = model recall); the threshold
 trades splitting one sense vs merging two.
 
 ```powershell
-# on the box (.venv-sds + transformers/CLIP): real image-grounded V
+# on the box (.venv-sds + transformers/CLIP): real image-grounded V.
+# --save-views dumps every SD image so view quality can be eyeballed first.
 python scripts/derive_vsp_clip.py --senses scripts/assets/vsp_sense_terms.json `
   --v-source clip-image --gen-model runwayml/stable-diffusion-v1-5 `
-  --n-views 4 --dedup-thr 0.85 --out results/vsp_clip_image.json
+  --n-views 4 --dedup-thr 0.85 --save-views results/vsp_views `
+  --out results/vsp_clip_image.json
+# score with max-aggregation over the honestly-derived blocks (V,S); P excluded
 python scripts/vsp_gating_probe.py --derived results/vsp_clip_image.json `
-  --glove data/glove.6B.300d.txt --out results/vsp_gating_clip_image.json
+  --glove data/glove.6B.300d.txt --aggregate max --gate-blocks v,s `
+  --out results/vsp_gating_clip_image.json
 ```
 
-GROUNDED GATE (the real one): CLIP-IMAGE V separates the colliding senses AND
-the synset one-hot tail is removed (so the gain is from geometry/appearance, not
-from orthogonal ids). Train Planck 2.0 ONLY if THIS passes. Tune --dedup-thr so
-crane-bird and crane-machine stay distinct while same-sense views merge.
+**GROUNDED GATE RESULT (2026-07-06): PASS, 0.355 (max-agg over V,S).** The
+CLIP-image gate went through three fixes before this honest number:
+- **Sense-phrase bug**: `vsp_sense_terms.json` used the bare colliding word for
+  both senses (crane->"crane", plane->"plane"), so SD drew its dominant prior
+  (a machine, an airplane) for BOTH and dedup merged them to 0 senses. Rewrote
+  every phrase to be concrete + unambiguous ("a crane bird with long legs" vs
+  "a yellow construction crane machine"). crane/plane/pitcher now survive; their
+  V vectors separate at cos 0.53 / 0.52 / 0.43.
+- **Metric bug**: concat-of-unit-blocks cosine == MEAN of block cosines, so the
+  identical (collapsed) S block mathematically floored separation at (k-1)/k and
+  diluted the informative V. Switched to `--aggregate max` (separable if ANY
+  block distinguishes the senses). This is the honest metric AND it matches the
+  goal: disambiguation succeeds if any modality carries the signal (grey fur
+  ball vs grey boulder -> V collapses, P/S separate).
+- **P tautology**: P vectors are a hand-authored material table (MATERIAL_TABLE)
+  keyed by a hand-assigned material tag (vsp_grounded_map.json). Two labeling
+  layers = a curated PRIOR, not automatic grounding (same class as synset).
+  So `--gate-blocks v,s` EXCLUDES P from the gate. Result rests on CLIP-image V
+  (auto-derived); S is 0 on these identical-surface probe words (the collapse).
 
-Open caveat to watch: generated-view QUALITY and consistency drive V quality.
-Garbage/blended views -> garbage V. Inspect a few SD generations per sense
-before trusting the embeddings.
+Per-word max-agg separation ranges 0.24 (nail) to 0.55 (pitcher), all 20 clear.
+Train Planck 2.0 gate is PASSED on honestly-derived V. Caveat kept: generated-
+view QUALITY drives V; --save-views + eyeball before trusting (garbage views ->
+garbage V).
+
+## 1b. Derive P honestly (phase B -- makes P count toward the gate)
+
+(A) above passes on V alone with P excluded because P is hand-authored. To let
+the full V/S/P bundle count -- and to make the "encode everything into ONE
+vector, automatically" thesis real -- P must be DERIVED, not looked up:
+- Replace the MATERIAL_TABLE lookup + hand material tag with the **P6 material
+  MLP** (predict the 8 physical properties from the sense's V/S vector, the
+  measured-P6 path in validate_p6_correlation.py / the Physical Gaussians work).
+- Then re-run the gate with `--gate-blocks v,s,p`; P now contributes a derived
+  signal (crane feather-vs-steel, seal leather-vs-rubber already show real
+  material contrast, iron correctly does NOT separate two metals).
+- GATE (phase B): max-agg over V,S,P with a DERIVED P still clears the bar, and
+  the "material vs None" words separate by a real abstract-vs-concrete signal,
+  not by an empty P vector. TO BUILD: `scripts/derive_p6_from_vector.py`.
 
 ## 2. VSPS tokenization experiment (TOKENIZATION IMPROVEMENTS)
 
@@ -256,7 +293,8 @@ STILL TO BUILD:
 | Phase | What | Status / kill-if |
 |-------|------|---------|
 | 0 | gating probe, 4 regimes | DONE 2026-06-23: text fails, synset tautological, CLIP-image is the real test |
-| 1 | CLIP-image grounded gate (box) | KILL if generated-view V doesn't separate colliding senses with the one-hot tail removed |
+| 1 (A) | CLIP-image grounded gate (box) | **PASS 2026-07-06, 0.355** (max-agg V,S; auto-derived CLIP-image V; P excluded as hand-authored) |
+| 1 (B) | derive P honestly (P6 MLP) | so V,S,P bundle counts toward the gate, not just V. TO BUILD derive_p6_from_vector.py (§1b) |
 | 2 | VSPS vocab design | grounding coverage too thin / blowup explodes |
 | 3 | VSPS run on TinyStories | tokenizer doesn't round-trip / disambiguate |
 | 4 | Planck 2.0 training | no disambiguation win vs baseline at matched compute |
