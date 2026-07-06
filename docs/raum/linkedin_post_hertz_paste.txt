@@ -1,0 +1,16 @@
+We trained a 0.64B language model from scratch on a new architecture. It writes fluent English.
+
+Most language models are transformers. Hertz is not. It's built on Semantic Gaussian Splatting (SGS), an architecture that borrows from 3D graphics: instead of attention over tokens, each token is a Gaussian in a semantic space, and meaning is composed by alpha-compositing (the same rendering math used to draw splats on screen).
+
+The details:
+- 0.64B parameters, trained on ~9.7B tokens (FineWeb-Edu + Wikipedia)
+- One epoch, single RTX 4090, about 5 days
+- Final validation perplexity 24.1
+
+What it is: a base completion model. Give it "The history of Rome began" and it continues coherently. It is not instruction-tuned, so it completes text rather than answering questions, and at this size its world knowledge is thin. It won't out-answer a frontier model, and it isn't meant to.
+
+What it shows: the architecture works at scale. SGS was a theorem and a set of small experiments. Hertz is the evidence that alpha-compositing can carry a real language model, not just a toy.
+
+I run this as a nights-and-weekends research project. The interesting part isn't the size, it's that a rendering primitive turns out to be a viable substrate for language. Next: whether a richer representation (visual + semantic + physical) beats plain text tokens per parameter.
+
+Repo and write-up in the comments.
