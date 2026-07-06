@@ -1,0 +1,1196 @@
+{
+  "vis_categories": [
+    "water",
+    "building",
+    "aircraft",
+    "flat_surface",
+    "animal",
+    "tool",
+    "plant",
+    "vehicle",
+    "furniture",
+    "terrain"
+  ],
+  "entries": [
+    {
+      "word": "bank",
+      "senses": [
+        {
+          "label": "river-bank",
+          "term": "riverbank",
+          "visual_category": "water",
+          "visual_dist": [
+            0.4058,
+            0.0758,
+            0.0391,
+            0.054,
+            0.0582,
+            0.0264,
+            0.099,
+            0.0458,
+            0.0469,
+            0.1489
+          ],
+          "physical": {
+            "hardness": 0.329,
+            "elasticity": 0.1346,
+            "friction": 0.6883,
+            "density": 0.5209,
+            "brittleness": 0.3754,
+            "thermal_conductivity": 0.1157,
+            "transparency": 0.0179,
+            "deformability": 0.2079
+          }
+        },
+        {
+          "label": "institution",
+          "term": "bank",
+          "visual_category": "building",
+          "visual_dist": [
+            0.113,
+            0.3763,
+            0.0474,
+            0.0923,
+            0.0322,
+            0.0372,
+            0.0379,
+            0.1371,
+            0.0599,
+            0.0668
+          ],
+          "physical": {
+            "hardness": 0.5492,
+            "elasticity": 0.1821,
+            "friction": 0.6089,
+            "density": 0.8212,
+            "brittleness": 0.4797,
+            "thermal_conductivity": 0.4033,
+            "transparency": 0.1438,
+            "deformability": 0.3232
+          }
+        }
+      ]
+    },
+    {
+      "word": "plane",
+      "senses": [
+        {
+          "label": "aircraft",
+          "term": "airplane",
+          "visual_category": "aircraft",
+          "visual_dist": [
+            0.0022,
+            0.0031,
+            0.9483,
+            0.0143,
+            0.0023,
+            0.0016,
+            0.0017,
+            0.0222,
+            0.0023,
+            0.0019
+          ],
+          "physical": {
+            "hardness": 0.0523,
+            "elasticity": 0.56,
+            "friction": 0.3091,
+            "density": 0.1324,
+            "brittleness": 0.0541,
+            "thermal_conductivity": 0.1118,
+            "transparency": 0.1527,
+            "deformability": 0.8646
+          }
+        },
+        {
+          "label": "flat-surface",
+          "term": "plane",
+          "visual_category": "aircraft",
+          "visual_dist": [
+            0.0068,
+            0.0054,
+            0.899,
+            0.0511,
+            0.0028,
+            0.0018,
+            0.0025,
+            0.0212,
+            0.0025,
+            0.0069
+          ],
+          "physical": {
+            "hardness": 0.0661,
+            "elasticity": 0.4854,
+            "friction": 0.388,
+            "density": 0.1218,
+            "brittleness": 0.0862,
+            "thermal_conductivity": 0.0711,
+            "transparency": 0.1489,
+            "deformability": 0.7944
+          }
+        }
+      ]
+    },
+    {
+      "word": "bat",
+      "senses": [
+        {
+          "label": "animal",
+          "term": "bat",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.06,
+            0.0506,
+            0.0792,
+            0.0931,
+            0.2054,
+            0.0837,
+            0.2026,
+            0.0752,
+            0.0732,
+            0.0771
+          ],
+          "physical": {
+            "hardness": 0.1049,
+            "elasticity": 0.6418,
+            "friction": 0.5532,
+            "density": 0.2334,
+            "brittleness": 0.0471,
+            "thermal_conductivity": 0.1513,
+            "transparency": 0.0219,
+            "deformability": 0.8408
+          }
+        },
+        {
+          "label": "club",
+          "term": "baseball",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0871,
+            0.1311,
+            0.0303,
+            0.0848,
+            0.1303,
+            0.0927,
+            0.0883,
+            0.0832,
+            0.1504,
+            0.1217
+          ],
+          "physical": {
+            "hardness": 0.4721,
+            "elasticity": 0.2782,
+            "friction": 0.1938,
+            "density": 0.7701,
+            "brittleness": 0.1961,
+            "thermal_conductivity": 0.7541,
+            "transparency": 0.157,
+            "deformability": 0.3696
+          }
+        }
+      ]
+    },
+    {
+      "word": "spring",
+      "senses": [
+        {
+          "label": "water-source",
+          "term": "spring",
+          "visual_category": "water",
+          "visual_dist": [
+            0.2411,
+            0.0834,
+            0.0283,
+            0.054,
+            0.0801,
+            0.0399,
+            0.2349,
+            0.0525,
+            0.0426,
+            0.1431
+          ],
+          "physical": {
+            "hardness": 0.0454,
+            "elasticity": 0.6647,
+            "friction": 0.2469,
+            "density": 0.1446,
+            "brittleness": 0.0403,
+            "thermal_conductivity": 0.1255,
+            "transparency": 0.2878,
+            "deformability": 0.9195
+          }
+        },
+        {
+          "label": "coil",
+          "term": "coil",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.0563,
+            0.0509,
+            0.0516,
+            0.1211,
+            0.0559,
+            0.2219,
+            0.1639,
+            0.15,
+            0.0477,
+            0.0806
+          ],
+          "physical": {
+            "hardness": 0.2708,
+            "elasticity": 0.4539,
+            "friction": 0.543,
+            "density": 0.2493,
+            "brittleness": 0.0616,
+            "thermal_conductivity": 0.3285,
+            "transparency": 0.0252,
+            "deformability": 0.6715
+          }
+        }
+      ]
+    },
+    {
+      "word": "crane",
+      "senses": [
+        {
+          "label": "bird",
+          "term": "crane",
+          "visual_category": "aircraft",
+          "visual_dist": [
+            0.0953,
+            0.1614,
+            0.171,
+            0.0476,
+            0.144,
+            0.0615,
+            0.0671,
+            0.1262,
+            0.0553,
+            0.0707
+          ],
+          "physical": {
+            "hardness": 0.8057,
+            "elasticity": 0.2596,
+            "friction": 0.4452,
+            "density": 0.629,
+            "brittleness": 0.468,
+            "thermal_conductivity": 0.3432,
+            "transparency": 0.1707,
+            "deformability": 0.1065
+          }
+        },
+        {
+          "label": "machine",
+          "term": "crane",
+          "visual_category": "aircraft",
+          "visual_dist": [
+            0.0953,
+            0.1614,
+            0.171,
+            0.0476,
+            0.144,
+            0.0615,
+            0.0671,
+            0.1262,
+            0.0553,
+            0.0707
+          ],
+          "physical": {
+            "hardness": 0.8057,
+            "elasticity": 0.2596,
+            "friction": 0.4452,
+            "density": 0.629,
+            "brittleness": 0.468,
+            "thermal_conductivity": 0.3432,
+            "transparency": 0.1707,
+            "deformability": 0.1065
+          }
+        }
+      ]
+    },
+    {
+      "word": "mouse",
+      "senses": [
+        {
+          "label": "animal",
+          "term": "mouse",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.0657,
+            0.0549,
+            0.0352,
+            0.0408,
+            0.4009,
+            0.1293,
+            0.0855,
+            0.0588,
+            0.0714,
+            0.0574
+          ],
+          "physical": {
+            "hardness": 0.0961,
+            "elasticity": 0.3682,
+            "friction": 0.3334,
+            "density": 0.1887,
+            "brittleness": 0.0484,
+            "thermal_conductivity": 0.0792,
+            "transparency": 0.0861,
+            "deformability": 0.7781
+          }
+        },
+        {
+          "label": "device",
+          "term": "keyboard",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.0455,
+            0.0509,
+            0.0469,
+            0.0905,
+            0.0683,
+            0.2587,
+            0.0614,
+            0.0964,
+            0.2066,
+            0.0749
+          ],
+          "physical": {
+            "hardness": 0.2529,
+            "elasticity": 0.3059,
+            "friction": 0.5,
+            "density": 0.3913,
+            "brittleness": 0.2367,
+            "thermal_conductivity": 0.0618,
+            "transparency": 0.0751,
+            "deformability": 0.2867
+          }
+        }
+      ]
+    },
+    {
+      "word": "rock",
+      "senses": [
+        {
+          "label": "stone",
+          "term": "rock",
+          "visual_category": "terrain",
+          "visual_dist": [
+            0.0768,
+            0.065,
+            0.019,
+            0.0387,
+            0.0417,
+            0.0208,
+            0.0308,
+            0.036,
+            0.0204,
+            0.6508
+          ],
+          "physical": {
+            "hardness": 0.6398,
+            "elasticity": 0.1279,
+            "friction": 0.6889,
+            "density": 0.6543,
+            "brittleness": 0.3607,
+            "thermal_conductivity": 0.2281,
+            "transparency": 0.0225,
+            "deformability": 0.2164
+          }
+        },
+        {
+          "label": "music",
+          "term": "music",
+          "visual_category": "terrain",
+          "visual_dist": [
+            0.0788,
+            0.1249,
+            0.034,
+            0.0825,
+            0.0774,
+            0.0767,
+            0.0803,
+            0.103,
+            0.1264,
+            0.2161
+          ],
+          "physical": {
+            "hardness": 0.3093,
+            "elasticity": 0.1525,
+            "friction": 0.5205,
+            "density": 0.5042,
+            "brittleness": 0.3292,
+            "thermal_conductivity": 0.0914,
+            "transparency": 0.0607,
+            "deformability": 0.3604
+          }
+        }
+      ]
+    },
+    {
+      "word": "palm",
+      "senses": [
+        {
+          "label": "tree",
+          "term": "palm",
+          "visual_category": "plant",
+          "visual_dist": [
+            0.1356,
+            0.0742,
+            0.0394,
+            0.0623,
+            0.0828,
+            0.0474,
+            0.2934,
+            0.0674,
+            0.133,
+            0.0645
+          ],
+          "physical": {
+            "hardness": 0.1155,
+            "elasticity": 0.6663,
+            "friction": 0.5323,
+            "density": 0.263,
+            "brittleness": 0.0729,
+            "thermal_conductivity": 0.1072,
+            "transparency": 0.0546,
+            "deformability": 0.8545
+          }
+        },
+        {
+          "label": "hand",
+          "term": "hand",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0358,
+            0.0632,
+            0.0459,
+            0.1069,
+            0.0767,
+            0.1694,
+            0.0542,
+            0.1802,
+            0.2152,
+            0.0524
+          ],
+          "physical": {
+            "hardness": 0.1101,
+            "elasticity": 0.2964,
+            "friction": 0.6159,
+            "density": 0.2898,
+            "brittleness": 0.0811,
+            "thermal_conductivity": 0.0574,
+            "transparency": 0.0282,
+            "deformability": 0.7275
+          }
+        }
+      ]
+    },
+    {
+      "word": "table",
+      "senses": [
+        {
+          "label": "furniture",
+          "term": "table",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0242,
+            0.0303,
+            0.0061,
+            0.0266,
+            0.0201,
+            0.0189,
+            0.0228,
+            0.0156,
+            0.8129,
+            0.0226
+          ],
+          "physical": {
+            "hardness": 0.4128,
+            "elasticity": 0.0971,
+            "friction": 0.2753,
+            "density": 0.574,
+            "brittleness": 0.5481,
+            "thermal_conductivity": 0.3699,
+            "transparency": 0.0811,
+            "deformability": 0.1499
+          }
+        },
+        {
+          "label": "data-grid",
+          "term": "spreadsheet",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.0279,
+            0.0861,
+            0.0445,
+            0.0772,
+            0.0635,
+            0.2503,
+            0.0899,
+            0.12,
+            0.1976,
+            0.0428
+          ],
+          "physical": {
+            "hardness": 0.3082,
+            "elasticity": 0.2757,
+            "friction": 0.745,
+            "density": 0.35,
+            "brittleness": 0.2654,
+            "thermal_conductivity": 0.0811,
+            "transparency": 0.0204,
+            "deformability": 0.2773
+          }
+        }
+      ]
+    },
+    {
+      "word": "tank",
+      "senses": [
+        {
+          "label": "vehicle",
+          "term": "tank",
+          "visual_category": "vehicle",
+          "visual_dist": [
+            0.089,
+            0.0901,
+            0.202,
+            0.0656,
+            0.0403,
+            0.0274,
+            0.0256,
+            0.3796,
+            0.0236,
+            0.0569
+          ],
+          "physical": {
+            "hardness": 0.393,
+            "elasticity": 0.4683,
+            "friction": 0.3003,
+            "density": 0.631,
+            "brittleness": 0.2004,
+            "thermal_conductivity": 0.2187,
+            "transparency": 0.1025,
+            "deformability": 0.6161
+          }
+        },
+        {
+          "label": "container",
+          "term": "container",
+          "visual_category": "vehicle",
+          "visual_dist": [
+            0.1253,
+            0.0614,
+            0.0806,
+            0.1466,
+            0.049,
+            0.0559,
+            0.1563,
+            0.2093,
+            0.09,
+            0.0255
+          ],
+          "physical": {
+            "hardness": 0.5393,
+            "elasticity": 0.1782,
+            "friction": 0.3019,
+            "density": 0.4406,
+            "brittleness": 0.6536,
+            "thermal_conductivity": 0.321,
+            "transparency": 0.5493,
+            "deformability": 0.1557
+          }
+        }
+      ]
+    },
+    {
+      "word": "seal",
+      "senses": [
+        {
+          "label": "animal",
+          "term": "seal",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.1215,
+            0.1023,
+            0.0468,
+            0.1156,
+            0.2791,
+            0.099,
+            0.091,
+            0.0502,
+            0.0464,
+            0.048
+          ],
+          "physical": {
+            "hardness": 0.3649,
+            "elasticity": 0.2367,
+            "friction": 0.6227,
+            "density": 0.4769,
+            "brittleness": 0.1964,
+            "thermal_conductivity": 0.074,
+            "transparency": 0.0245,
+            "deformability": 0.3225
+          }
+        },
+        {
+          "label": "stamp",
+          "term": "stamp",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.0359,
+            0.0872,
+            0.049,
+            0.133,
+            0.1977,
+            0.1105,
+            0.1418,
+            0.1035,
+            0.0922,
+            0.0493
+          ],
+          "physical": {
+            "hardness": 0.3457,
+            "elasticity": 0.2895,
+            "friction": 0.6785,
+            "density": 0.2919,
+            "brittleness": 0.166,
+            "thermal_conductivity": 0.08,
+            "transparency": 0.0351,
+            "deformability": 0.4774
+          }
+        }
+      ]
+    },
+    {
+      "word": "bow",
+      "senses": [
+        {
+          "label": "weapon",
+          "term": "archery",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0801,
+            0.0644,
+            0.0981,
+            0.0646,
+            0.1154,
+            0.1558,
+            0.0708,
+            0.0884,
+            0.1595,
+            0.1028
+          ],
+          "physical": {
+            "hardness": 0.534,
+            "elasticity": 0.4877,
+            "friction": 0.4565,
+            "density": 0.7758,
+            "brittleness": 0.1189,
+            "thermal_conductivity": 0.3619,
+            "transparency": 0.0519,
+            "deformability": 0.2838
+          }
+        },
+        {
+          "label": "ribbon",
+          "term": "ribbon",
+          "visual_category": "plant",
+          "visual_dist": [
+            0.1008,
+            0.0572,
+            0.0359,
+            0.0974,
+            0.0774,
+            0.1058,
+            0.3058,
+            0.0396,
+            0.1287,
+            0.0515
+          ],
+          "physical": {
+            "hardness": 0.3312,
+            "elasticity": 0.1047,
+            "friction": 0.2693,
+            "density": 0.2182,
+            "brittleness": 0.3664,
+            "thermal_conductivity": 0.1135,
+            "transparency": 0.0914,
+            "deformability": 0.2551
+          }
+        }
+      ]
+    },
+    {
+      "word": "nail",
+      "senses": [
+        {
+          "label": "fastener",
+          "term": "screw",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.0357,
+            0.0387,
+            0.0837,
+            0.1175,
+            0.0248,
+            0.3483,
+            0.1069,
+            0.147,
+            0.0606,
+            0.0368
+          ],
+          "physical": {
+            "hardness": 0.5288,
+            "elasticity": 0.4286,
+            "friction": 0.3816,
+            "density": 0.2393,
+            "brittleness": 0.3058,
+            "thermal_conductivity": 0.0818,
+            "transparency": 0.0931,
+            "deformability": 0.3088
+          }
+        },
+        {
+          "label": "finger-nail",
+          "term": "fingernail",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.0451,
+            0.021,
+            0.0605,
+            0.1188,
+            0.1091,
+            0.2274,
+            0.1463,
+            0.0686,
+            0.1574,
+            0.0458
+          ],
+          "physical": {
+            "hardness": 0.5478,
+            "elasticity": 0.1488,
+            "friction": 0.2747,
+            "density": 0.2882,
+            "brittleness": 0.7084,
+            "thermal_conductivity": 0.0593,
+            "transparency": 0.3222,
+            "deformability": 0.0932
+          }
+        }
+      ]
+    },
+    {
+      "word": "trunk",
+      "senses": [
+        {
+          "label": "tree",
+          "term": "trunk",
+          "visual_category": "plant",
+          "visual_dist": [
+            0.0775,
+            0.0607,
+            0.044,
+            0.0623,
+            0.0355,
+            0.0548,
+            0.2905,
+            0.2395,
+            0.0915,
+            0.0437
+          ],
+          "physical": {
+            "hardness": 0.2889,
+            "elasticity": 0.2146,
+            "friction": 0.69,
+            "density": 0.213,
+            "brittleness": 0.3193,
+            "thermal_conductivity": 0.0575,
+            "transparency": 0.0183,
+            "deformability": 0.2653
+          }
+        },
+        {
+          "label": "car-storage",
+          "term": "luggage",
+          "visual_category": "vehicle",
+          "visual_dist": [
+            0.0213,
+            0.0266,
+            0.2681,
+            0.1059,
+            0.0392,
+            0.0554,
+            0.0234,
+            0.3099,
+            0.1287,
+            0.0214
+          ],
+          "physical": {
+            "hardness": 0.2025,
+            "elasticity": 0.2345,
+            "friction": 0.4443,
+            "density": 0.2352,
+            "brittleness": 0.1172,
+            "thermal_conductivity": 0.076,
+            "transparency": 0.0237,
+            "deformability": 0.5198
+          }
+        }
+      ]
+    },
+    {
+      "word": "scale",
+      "senses": [
+        {
+          "label": "fish-scale",
+          "term": "fish",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.15,
+            0.0097,
+            0.008,
+            0.017,
+            0.7409,
+            0.0051,
+            0.0362,
+            0.0097,
+            0.0104,
+            0.013
+          ],
+          "physical": {
+            "hardness": 0.1433,
+            "elasticity": 0.6267,
+            "friction": 0.2159,
+            "density": 0.4329,
+            "brittleness": 0.0535,
+            "thermal_conductivity": 0.1333,
+            "transparency": 0.0957,
+            "deformability": 0.6989
+          }
+        },
+        {
+          "label": "weighing",
+          "term": "weighing",
+          "visual_category": "vehicle",
+          "visual_dist": [
+            0.0493,
+            0.1186,
+            0.0831,
+            0.1253,
+            0.1243,
+            0.1207,
+            0.0694,
+            0.1576,
+            0.069,
+            0.0825
+          ],
+          "physical": {
+            "hardness": 0.4276,
+            "elasticity": 0.3101,
+            "friction": 0.5241,
+            "density": 0.7137,
+            "brittleness": 0.0959,
+            "thermal_conductivity": 0.571,
+            "transparency": 0.0132,
+            "deformability": 0.4135
+          }
+        }
+      ]
+    },
+    {
+      "word": "key",
+      "senses": [
+        {
+          "label": "lock-key",
+          "term": "lock",
+          "visual_category": "tool",
+          "visual_dist": [
+            0.1134,
+            0.1254,
+            0.0516,
+            0.0606,
+            0.0622,
+            0.2855,
+            0.0398,
+            0.12,
+            0.0739,
+            0.0677
+          ],
+          "physical": {
+            "hardness": 0.4382,
+            "elasticity": 0.3165,
+            "friction": 0.6514,
+            "density": 0.5565,
+            "brittleness": 0.1451,
+            "thermal_conductivity": 0.176,
+            "transparency": 0.0265,
+            "deformability": 0.4118
+          }
+        },
+        {
+          "label": "musical",
+          "term": "piano",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0693,
+            0.1115,
+            0.0471,
+            0.0748,
+            0.0742,
+            0.0863,
+            0.0855,
+            0.0924,
+            0.2687,
+            0.0902
+          ],
+          "physical": {
+            "hardness": 0.5204,
+            "elasticity": 0.0769,
+            "friction": 0.3897,
+            "density": 0.6581,
+            "brittleness": 0.6432,
+            "thermal_conductivity": 0.2357,
+            "transparency": 0.1225,
+            "deformability": 0.0734
+          }
+        }
+      ]
+    },
+    {
+      "word": "board",
+      "senses": [
+        {
+          "label": "plank",
+          "term": "plank",
+          "visual_category": "building",
+          "visual_dist": [
+            0.079,
+            0.2064,
+            0.0421,
+            0.0614,
+            0.0641,
+            0.1273,
+            0.0921,
+            0.0772,
+            0.1391,
+            0.1112
+          ],
+          "physical": {
+            "hardness": 0.3596,
+            "elasticity": 0.1857,
+            "friction": 0.7098,
+            "density": 0.3428,
+            "brittleness": 0.3331,
+            "thermal_conductivity": 0.0961,
+            "transparency": 0.0073,
+            "deformability": 0.227
+          }
+        },
+        {
+          "label": "committee",
+          "term": "committee",
+          "visual_category": "building",
+          "visual_dist": [
+            0.1158,
+            0.2237,
+            0.0323,
+            0.1693,
+            0.0573,
+            0.0551,
+            0.0317,
+            0.04,
+            0.2125,
+            0.0622
+          ],
+          "physical": {
+            "hardness": 0.2127,
+            "elasticity": 0.2845,
+            "friction": 0.2855,
+            "density": 0.6599,
+            "brittleness": 0.2307,
+            "thermal_conductivity": 0.2743,
+            "transparency": 0.2711,
+            "deformability": 0.5669
+          }
+        }
+      ]
+    },
+    {
+      "word": "pitcher",
+      "senses": [
+        {
+          "label": "container",
+          "term": "jug",
+          "visual_category": "water",
+          "visual_dist": [
+            0.2334,
+            0.0393,
+            0.0419,
+            0.0497,
+            0.1103,
+            0.1423,
+            0.11,
+            0.0792,
+            0.1236,
+            0.0704
+          ],
+          "physical": {
+            "hardness": 0.1785,
+            "elasticity": 0.1947,
+            "friction": 0.4529,
+            "density": 0.2782,
+            "brittleness": 0.1777,
+            "thermal_conductivity": 0.1262,
+            "transparency": 0.0792,
+            "deformability": 0.459
+          }
+        },
+        {
+          "label": "player",
+          "term": "pitcher",
+          "visual_category": "plant",
+          "visual_dist": [
+            0.1127,
+            0.0759,
+            0.065,
+            0.0728,
+            0.1438,
+            0.1031,
+            0.1952,
+            0.0592,
+            0.0624,
+            0.1098
+          ],
+          "physical": {
+            "hardness": 0.1008,
+            "elasticity": 0.4912,
+            "friction": 0.4554,
+            "density": 0.3451,
+            "brittleness": 0.1025,
+            "thermal_conductivity": 0.2344,
+            "transparency": 0.1062,
+            "deformability": 0.7577
+          }
+        }
+      ]
+    },
+    {
+      "word": "well",
+      "senses": [
+        {
+          "label": "water-shaft",
+          "term": "well",
+          "visual_category": "building",
+          "visual_dist": [
+            0.1357,
+            0.1913,
+            0.0427,
+            0.0935,
+            0.1186,
+            0.0343,
+            0.0487,
+            0.1087,
+            0.0685,
+            0.1578
+          ],
+          "physical": {
+            "hardness": 0.147,
+            "elasticity": 0.39,
+            "friction": 0.2766,
+            "density": 0.7121,
+            "brittleness": 0.094,
+            "thermal_conductivity": 0.2357,
+            "transparency": 0.166,
+            "deformability": 0.8244
+          }
+        },
+        {
+          "label": "adverb",
+          "term": "good",
+          "visual_category": "animal",
+          "visual_dist": [
+            0.0989,
+            0.1321,
+            0.0385,
+            0.1158,
+            0.1606,
+            0.056,
+            0.0601,
+            0.104,
+            0.094,
+            0.14
+          ],
+          "physical": {
+            "hardness": 0.0871,
+            "elasticity": 0.4505,
+            "friction": 0.3418,
+            "density": 0.4702,
+            "brittleness": 0.0507,
+            "thermal_conductivity": 0.183,
+            "transparency": 0.0715,
+            "deformability": 0.8158
+          }
+        }
+      ]
+    },
+    {
+      "word": "iron",
+      "senses": [
+        {
+          "label": "metal",
+          "term": "iron",
+          "visual_category": "building",
+          "visual_dist": [
+            0.1293,
+            0.1685,
+            0.0395,
+            0.079,
+            0.0702,
+            0.1355,
+            0.0966,
+            0.0844,
+            0.0981,
+            0.099
+          ],
+          "physical": {
+            "hardness": 0.8468,
+            "elasticity": 0.2482,
+            "friction": 0.5508,
+            "density": 0.8813,
+            "brittleness": 0.2493,
+            "thermal_conductivity": 0.8002,
+            "transparency": 0.0179,
+            "deformability": 0.1486
+          }
+        },
+        {
+          "label": "appliance",
+          "term": "ironing",
+          "visual_category": "furniture",
+          "visual_dist": [
+            0.0537,
+            0.0474,
+            0.0496,
+            0.1794,
+            0.0388,
+            0.2005,
+            0.0372,
+            0.0453,
+            0.3191,
+            0.0289
+          ],
+          "physical": {
+            "hardness": 0.2858,
+            "elasticity": 0.3513,
+            "friction": 0.5481,
+            "density": 0.2701,
+            "brittleness": 0.1617,
+            "thermal_conductivity": 0.065,
+            "transparency": 0.0177,
+            "deformability": 0.3771
+          }
+        }
+      ]
+    }
+  ]
+}
