@@ -178,9 +178,23 @@ vector, automatically" thesis real -- P must be DERIVED, not looked up:
 - Then re-run the gate with `--gate-blocks v,s,p`; P now contributes a derived
   signal (crane feather-vs-steel, seal leather-vs-rubber already show real
   material contrast, iron correctly does NOT separate two metals).
-- GATE (phase B): max-agg over V,S,P with a DERIVED P still clears the bar, and
-  the "material vs None" words separate by a real abstract-vs-concrete signal,
-  not by an empty P vector. TO BUILD: `scripts/derive_p6_from_vector.py`.
+**PHASE B RESULT (2026-07-06): BUILT + PASS, 0.367.** `derive_p6_from_vector.py`
+trains the P6 MLP on MATERIAL_TABLE, then predicts P for each sense from the
+GloVe of its descriptive phrase (no material tag read; drops it; writes
+p_source=p6_mlp_derived). Re-gate `--gate-blocks v,s,p` on derived P = **0.367,
+PASS**. The important part: derived-P contrasts are now MODEST (crane 0.18, rock
+0.06, iron 0.07) vs the old hand-P tautology (rock/table 1.0 by material-vs-None).
+So the pass is carried by auto-derived CLIP-image V, with derived-P a small
+honest bonus -- a STRONGER claim than hand-P's inflated 0.55, because nothing is
+hand-labeled. V and P now BOTH come from a model applied to the sense phrase.
+
+```powershell
+python scripts/derive_p6_from_vector.py --in results/vsp_clip_image.json `
+  --glove data/glove.6B.300d.txt --out results/vsp_clip_image_pderiv.json
+python scripts/vsp_gating_probe.py --derived results/vsp_clip_image_pderiv.json `
+  --glove data/glove.6B.300d.txt --aggregate max --gate-blocks v,s,p `
+  --out results/vsp_gating_clip_image_pderiv.json
+```
 
 ## 2. VSPS tokenization experiment (TOKENIZATION IMPROVEMENTS)
 
@@ -294,7 +308,7 @@ STILL TO BUILD:
 |-------|------|---------|
 | 0 | gating probe, 4 regimes | DONE 2026-06-23: text fails, synset tautological, CLIP-image is the real test |
 | 1 (A) | CLIP-image grounded gate (box) | **PASS 2026-07-06, 0.355** (max-agg V,S; auto-derived CLIP-image V; P excluded as hand-authored) |
-| 1 (B) | derive P honestly (P6 MLP) | so V,S,P bundle counts toward the gate, not just V. TO BUILD derive_p6_from_vector.py (§1b) |
+| 1 (B) | derive P honestly (P6 MLP) | **DONE 2026-07-06, PASS 0.367** (derive_p6_from_vector.py; V+derived-P, all auto, nothing hand-labeled) |
 | 2 | VSPS vocab design | grounding coverage too thin / blowup explodes |
 | 3 | VSPS run on TinyStories | tokenizer doesn't round-trip / disambiguate |
 | 4 | Planck 2.0 training | no disambiguation win vs baseline at matched compute |

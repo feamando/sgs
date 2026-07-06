@@ -1,0 +1,21 @@
+Language models inherit a quiet bug from their tokenizer: "crane" the bird and "crane" the machine get the same token. Same for "bank", "bat", "plane", "seal". The word collapses two meanings into one, and the model has to untangle them from scratch, every time, from context.
+
+I've been testing a different representation for a small language model I'm building (SGS, Semantic Gaussian Splatting). The idea: don't represent a word as one text vector. Bundle three things into one vector:
+
+- S, the semantic/text embedding (what it already is)
+- V, a visual grounding: generate an image of the sense, embed that
+- P, a physical grounding: predict material properties (hard/soft, dense/light) for the sense
+
+The test was simple and had a clear kill condition: can this bundle separate senses that text alone merges? If not, drop the idea.
+
+Text alone: separation 0.13. It fails, exactly as expected, because the colliding word is the very signal that collapses.
+
+Add automatic visual + physical grounding (generate an image per sense, embed it; predict its material from a small model): separation 0.37, across 20 polysemous words. The senses pull apart. Nothing is hand-labeled, both V and P come from a model applied to the sense, the same way you'd have to do it at scale.
+
+Two honest caveats. This is a 20-word probe, not a trained model yet. And the separation is carried mostly by the visual signal, the physical part adds a small, real bonus. But the kill condition is cleared, so the next step (a tokenizer that mints one token per sense, then a small model trained on it) is worth building.
+
+Why I care about the "one vector" framing: if disambiguation lives in the representation, the model doesn't spend capacity learning it. That's the bet, smaller models, multimodal understanding built in rather than bolted on.
+
+Getting here took three wrong turns worth naming: the first image prompts were ambiguous (both "cranes" rendered as machines), the similarity metric was quietly diluting the signal, and an earlier "physical" grounding was secretly hand-labeled. Each looked like a failure until it wasn't. Research is mostly finding the bug in your own test.
+
+Code and the full write-up in the comments.

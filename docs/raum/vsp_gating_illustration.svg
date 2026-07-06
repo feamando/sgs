@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="675" fill="#0d1117"/>
+
+  <!-- title -->
+  <text x="60" y="70" fill="#f5f1e8" font-size="34" font-weight="700">One word, two meanings, one vector</text>
+  <text x="60" y="108" fill="#8a8598" font-size="19">Can a representation tell "crane" (the bird) from "crane" (the machine) without being told?</text>
+
+  <!-- LEFT: text-only collapses -->
+  <text x="60" y="185" fill="#ff6b6b" font-size="21" font-weight="700">Text embedding (S)</text>
+  <text x="60" y="212" fill="#8a8598" font-size="15">the word is identical, so the vectors collapse</text>
+
+  <!-- two overlapping dots -->
+  <circle cx="230" cy="330" r="46" fill="#ff6b6b" fill-opacity="0.55"/>
+  <circle cx="250" cy="322" r="46" fill="#ff6b6b" fill-opacity="0.55"/>
+  <text x="240" y="410" fill="#f5f1e8" font-size="16" text-anchor="middle">"crane" ≈ "crane"</text>
+  <text x="240" y="434" fill="#8a8598" font-size="14" text-anchor="middle">similarity 1.00 — merged</text>
+
+  <!-- divider -->
+  <line x1="600" y1="150" x2="600" y2="590" stroke="#1f1f2a" stroke-width="2"/>
+
+  <!-- RIGHT: visual grounding separates -->
+  <text x="650" y="185" fill="#ffb347" font-size="21" font-weight="700">+ Visual grounding (V)</text>
+  <text x="650" y="212" fill="#8a8598" font-size="15">generate an image of each sense, embed it — they can't collide</text>
+
+  <!-- bird dot -->
+  <circle cx="760" cy="300" r="46" fill="#ffb347" fill-opacity="0.75"/>
+  <text x="760" y="306" fill="#0d1117" font-size="30" text-anchor="middle">🕊</text>
+  <text x="760" y="380" fill="#f5f1e8" font-size="16" text-anchor="middle">crane (bird)</text>
+
+  <!-- machine dot, far away -->
+  <circle cx="1010" cy="440" r="46" fill="#57c7a3" fill-opacity="0.85"/>
+  <text x="1010" y="450" fill="#0d1117" font-size="28" text-anchor="middle">🏗</text>
+  <text x="1010" y="520" fill="#f5f1e8" font-size="16" text-anchor="middle">crane (machine)</text>
+
+  <!-- separation arrow -->
+  <line x1="806" y1="322" x2="964" y2="418" stroke="#8a8598" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="885" y="360" fill="#57c7a3" font-size="15" font-weight="700" transform="rotate(31 885 360)">separated</text>
+
+  <!-- bottom result strip -->
+  <rect x="60" y="600" width="1080" height="52" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="80" y="632" fill="#8a8598" font-size="16">Result: text-only separation</text>
+  <text x="330" y="632" fill="#ff6b6b" font-size="16" font-weight="700">0.13 (fails)</text>
+  <text x="470" y="632" fill="#8a8598" font-size="16">→ auto visual + physical grounding</text>
+  <text x="820" y="632" fill="#57c7a3" font-size="16" font-weight="700">0.37 (separates)</text>
+  <text x="1000" y="632" fill="#8a8598" font-size="13">20 polysemous words</text>
+</svg>
