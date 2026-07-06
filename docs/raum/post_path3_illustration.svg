@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="675" fill="#0d1117"/>
+  <text x="60" y="68" fill="#f5f1e8" font-size="33" font-weight="700">A token per meaning, not per word</text>
+  <text x="60" y="104" fill="#8a8598" font-size="19">The tokenizer decides the sense at encode time — the step normal tokenizers skip.</text>
+
+  <!-- SentencePiece side -->
+  <text x="60" y="170" fill="#ff6b6b" font-size="19" font-weight="700">Standard tokenizer</text>
+  <text x="130" y="250" fill="#f5f1e8" font-size="18">"the crane flew"</text>
+  <text x="130" y="300" fill="#f5f1e8" font-size="18">"the crane lifted steel"</text>
+  <path d="M360 244 L470 270" stroke="#8a8598" stroke-width="2"/>
+  <path d="M420 294 L470 278" stroke="#8a8598" stroke-width="2"/>
+  <rect x="470" y="256" width="150" height="44" rx="8" fill="#ff6b6b" fill-opacity="0.6"/>
+  <text x="545" y="284" fill="#f5f1e8" font-size="17" text-anchor="middle">[crane]</text>
+  <text x="470" y="330" fill="#ff6b6b" font-size="14">one token — meanings merged</text>
+
+  <!-- divider -->
+  <line x1="60" y1="370" x2="1140" y2="370" stroke="#1f1f2a" stroke-width="2"/>
+
+  <!-- VSPS side -->
+  <text x="60" y="420" fill="#57c7a3" font-size="19" font-weight="700">VSPS tokenizer (sense-tagging)</text>
+  <text x="120" y="490" fill="#f5f1e8" font-size="18">"the crane flew"</text>
+  <path d="M330 484 L470 500" stroke="#57c7a3" stroke-width="2"/>
+  <rect x="470" y="478" width="200" height="44" rx="8" fill="#57c7a3" fill-opacity="0.85"/>
+  <text x="570" y="506" fill="#0d1117" font-size="16" text-anchor="middle" font-weight="700">[crane · bird]</text>
+  <text x="690" y="506" fill="#8a8598" font-size="14">🕊 V=bird  P=light</text>
+
+  <text x="120" y="560" fill="#f5f1e8" font-size="18">"the crane lifted steel"</text>
+  <path d="M370 554 L470 560" stroke="#57c7a3" stroke-width="2"/>
+  <rect x="470" y="540" width="200" height="44" rx="8" fill="#57c7a3" fill-opacity="0.85"/>
+  <text x="570" y="568" fill="#0d1117" font-size="16" text-anchor="middle" font-weight="700">[crane · machine]</text>
+  <text x="690" y="568" fill="#8a8598" font-size="14">🏗 V=machine  P=steel</text>
+
+  <!-- result strip -->
+  <rect x="60" y="612" width="1080" height="44" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="80" y="640" fill="#8a8598" font-size="15">Context picks the sense at encode time. On minimal pairs:</text>
+  <text x="640" y="640" fill="#57c7a3" font-size="15" font-weight="700">5 / 5 sense-correct</text>
+  <text x="850" y="640" fill="#8a8598" font-size="14">crane · bank · plane</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="675" fill="#0d1117"/>
+  <text x="60" y="68" fill="#f5f1e8" font-size="33" font-weight="700">A negative result worth keeping</text>
+  <text x="60" y="104" fill="#8a8598" font-size="19">We made the model 6x bigger. The output didn't change. Here's why that's useful to know.</text>
+
+  <!-- Left: bigger base, same result -->
+  <text x="60" y="170" fill="#8a8598" font-size="15" font-weight="700">SCALE THE BASE MODEL</text>
+  <rect x="60" y="190" width="200" height="70" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="160" y="223" fill="#f5f1e8" font-size="16" text-anchor="middle">Planck · 100M</text>
+  <text x="160" y="246" fill="#57c7a3" font-size="14" text-anchor="middle">valid castle ✓</text>
+  <text x="285" y="232" fill="#8a8598" font-size="26">→</text>
+  <rect x="320" y="190" width="200" height="70" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="420" y="223" fill="#f5f1e8" font-size="16" text-anchor="middle">Hertz · 640M</text>
+  <text x="420" y="246" fill="#ffb347" font-size="14" text-anchor="middle">same castle =</text>
+  <text x="560" y="232" fill="#8a8598" font-size="15">no uplift:</text>
+  <text x="560" y="252" fill="#8a8598" font-size="15">the task was already solved</text>
+
+  <!-- Right: learned fill blobs -->
+  <text x="60" y="330" fill="#8a8598" font-size="15" font-weight="700">REPLACE HAND-RULES WITH A LEARNED GENERATOR</text>
+  <!-- grammar castle: neat blocks -->
+  <g>
+    <rect x="90" y="380" width="24" height="60" fill="#57c7a3"/>
+    <rect x="120" y="360" width="24" height="80" fill="#57c7a3"/>
+    <rect x="150" y="380" width="24" height="60" fill="#57c7a3"/>
+    <text x="132" y="470" fill="#57c7a3" font-size="14" text-anchor="middle">grammar: crisp ✓</text>
+  </g>
+  <text x="250" y="415" fill="#8a8598" font-size="26">→</text>
+  <!-- learned fill: fuzzy blobs -->
+  <g fill="#ff6b6b" fill-opacity="0.5">
+    <circle cx="330" cy="400" r="20"/><circle cx="360" cy="415" r="24"/>
+    <circle cx="345" cy="385" r="16"/><circle cx="375" cy="395" r="18"/>
+    <circle cx="355" cy="430" r="15"/>
+  </g>
+  <text x="352" y="470" fill="#ff6b6b" font-size="14" text-anchor="middle">learned: blobs ✗</text>
+  <text x="470" y="405" fill="#8a8598" font-size="15">tiny generator can't emit</text>
+  <text x="470" y="425" fill="#8a8598" font-size="15">structured geometry (loss flat by ep 15)</text>
+
+  <!-- takeaway -->
+  <rect x="60" y="520" width="1080" height="110" rx="10" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="82" y="555" fill="#ffb347" font-size="18" font-weight="700">The lesson</text>
+  <text x="82" y="585" fill="#f5f1e8" font-size="17">A fixed, low-entropy task (build a castle) is already saturated at 100M. A bigger model</text>
+  <text x="82" y="610" fill="#f5f1e8" font-size="17">and a fancier generator both add nothing. The lever isn't size — it's the representation.</text>
+</svg>

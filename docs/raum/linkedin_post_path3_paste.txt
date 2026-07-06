@@ -1,0 +1,18 @@
+A tokenizer that decides what a word means before the model reads it.
+
+Standard tokenizers split text by frequency. "crane" is one token whether you meant the bird or the machine. The model untangles the two later, from context, using its own capacity to do a job the tokenizer skipped.
+
+I built a different tokenizer for the small language model I'm working on. It does word-sense disambiguation at encode time:
+
+- The vocabulary has one token per SENSE, not per word. "crane-bird" and "crane-machine" are two distinct tokens, each carrying a visual and a physical grounding vector (from the earlier experiment, previous post).
+- When it encodes a sentence, it looks at the surrounding words and picks which sense-token fits. "the crane flew over the lake" gets the bird token. "the crane lifted the steel beam" gets the machine token.
+
+On minimal pairs it gets the sense right: crane (fly vs lift), bank (river vs money), plane (sky vs tool), all 5/5 correct in my test set. A standard tokenizer scores 0 on this by construction, it has one token for each.
+
+Two-tier design: concrete nouns get grounded sense-tokens (visual + physical). Function words and abstractions ("the", "however", "justice") stay text-only, no visual or physical vector. That's correct, not a gap, there's no picture of "however".
+
+Why bother: if the token already encodes which meaning, the model doesn't spend parameters learning to disambiguate. That's the bet behind this whole line of work, push understanding into the representation so a smaller model can carry it.
+
+Honest scope: this is validated on minimal pairs with a 20-word vocabulary and a lightweight context matcher, not a production tagger yet. Next step is running it over a full corpus and training a model on the result, the real test is whether the trained model beats a standard-tokenizer baseline at the same size. That's the number that matters, and it's the next thing to build.
+
+Code and write-up in the comments.

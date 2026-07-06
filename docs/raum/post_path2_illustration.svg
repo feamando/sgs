@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="675" fill="#0d1117"/>
+  <text x="60" y="68" fill="#f5f1e8" font-size="33" font-weight="700">How do you ground a word without cheating?</text>
+  <text x="60" y="104" fill="#8a8598" font-size="19">Five ways to build the V (visual) part of a VSP vector. Only one is honest AND works.</text>
+
+  <!-- bars: separation gain per regime -->
+  <!-- axis -->
+  <line x1="330" y1="160" x2="330" y2="520" stroke="#1f1f2a" stroke-width="2"/>
+  <line x1="330" y1="520" x2="1120" y2="520" stroke="#1f1f2a" stroke-width="2"/>
+  <!-- pass threshold -->
+  <line x1="330" y1="360" x2="915" y2="360" stroke="#57c7a3" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="336" y="352" fill="#57c7a3" font-size="13">pass bar (0.30)</text>
+
+  <!-- helper: y=520 base, scale 320px = 0.6 gain -->
+  <!-- hand-seeded 0.48 -->
+  <rect x="360" y="264" width="90" height="256" fill="#8a8598" fill-opacity="0.5"/>
+  <text x="405" y="248" fill="#8a8598" font-size="15" text-anchor="middle">0.48</text>
+  <text x="405" y="545" fill="#8a8598" font-size="13" text-anchor="middle">hand</text>
+  <text x="405" y="562" fill="#8a8598" font-size="13" text-anchor="middle">labels</text>
+  <text x="405" y="582" fill="#ff6b6b" font-size="12" text-anchor="middle">cheats</text>
+
+  <!-- text-derived 0.13 FAIL -->
+  <rect x="470" y="450" width="90" height="70" fill="#ff6b6b" fill-opacity="0.6"/>
+  <text x="515" y="434" fill="#8a8598" font-size="15" text-anchor="middle">0.13</text>
+  <text x="515" y="545" fill="#8a8598" font-size="13" text-anchor="middle">text</text>
+  <text x="515" y="562" fill="#ff6b6b" font-size="12" text-anchor="middle">fails</text>
+
+  <!-- synset 0.41 -->
+  <rect x="580" y="301" width="90" height="219" fill="#8a8598" fill-opacity="0.5"/>
+  <text x="625" y="285" fill="#8a8598" font-size="15" text-anchor="middle">0.41</text>
+  <text x="625" y="545" fill="#8a8598" font-size="13" text-anchor="middle">synset</text>
+  <text x="625" y="562" fill="#8a8598" font-size="13" text-anchor="middle">id</text>
+  <text x="625" y="582" fill="#ff6b6b" font-size="12" text-anchor="middle">tautology</text>
+
+  <!-- clip-text 0.18 FAIL -->
+  <rect x="690" y="424" width="90" height="96" fill="#ff6b6b" fill-opacity="0.6"/>
+  <text x="735" y="408" fill="#8a8598" font-size="15" text-anchor="middle">0.18</text>
+  <text x="735" y="545" fill="#8a8598" font-size="13" text-anchor="middle">CLIP</text>
+  <text x="735" y="562" fill="#8a8598" font-size="13" text-anchor="middle">text</text>
+  <text x="735" y="582" fill="#ff6b6b" font-size="12" text-anchor="middle">fails</text>
+
+  <!-- clip-image 0.37 PASS -->
+  <rect x="800" y="323" width="90" height="197" fill="#57c7a3" fill-opacity="0.9"/>
+  <text x="845" y="307" fill="#f5f1e8" font-size="16" font-weight="700" text-anchor="middle">0.37</text>
+  <text x="845" y="545" fill="#f5f1e8" font-size="13" text-anchor="middle" font-weight="700">image</text>
+  <text x="845" y="562" fill="#f5f1e8" font-size="13" text-anchor="middle" font-weight="700">grounded</text>
+  <text x="845" y="582" fill="#57c7a3" font-size="12" text-anchor="middle">honest + passes</text>
+
+  <text x="330" y="150" fill="#8a8598" font-size="14">separation of collapsed word-senses (higher = better)</text>
+
+  <!-- right note -->
+  <rect x="940" y="180" width="220" height="330" rx="10" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="960" y="212" fill="#ffb347" font-size="16" font-weight="700">The honest one</text>
+  <text x="960" y="244" fill="#f5f1e8" font-size="14">Generate an image of</text>
+  <text x="960" y="264" fill="#f5f1e8" font-size="14">each sense, embed it.</text>
+  <text x="960" y="296" fill="#f5f1e8" font-size="14">A bird photo and a</text>
+  <text x="960" y="316" fill="#f5f1e8" font-size="14">crane-machine photo</text>
+  <text x="960" y="336" fill="#f5f1e8" font-size="14">simply can't collide.</text>
+  <text x="960" y="374" fill="#8a8598" font-size="13">Every text-based route</text>
+  <text x="960" y="393" fill="#8a8598" font-size="13">fails (the colliding word</text>
+  <text x="960" y="412" fill="#8a8598" font-size="13">is the signal that</text>
+  <text x="960" y="431" fill="#8a8598" font-size="13">collapses). Hand labels</text>
+  <text x="960" y="450" fill="#8a8598" font-size="13">and synset ids pass only</text>
+  <text x="960" y="469" fill="#8a8598" font-size="13">by grading themselves.</text>
+</svg>

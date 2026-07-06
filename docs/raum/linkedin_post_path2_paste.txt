@@ -1,0 +1,25 @@
+Every language model inherits a bug from its tokenizer: "crane" the bird and "crane" the machine become the same token. The word carries two meanings; the token carries one. The model has to re-separate them from context, every time, from scratch.
+
+I've been testing whether you can fix this in the representation itself, before the model. The idea: encode a word-sense as one vector that bundles three things:
+
+- S, the text/semantic embedding (what tokenizers already have)
+- V, a visual grounding
+- P, a physical grounding (material properties: hard/soft, dense/light)
+
+The test had a hard kill condition: can this bundle separate senses that text alone merges? If not, drop it.
+
+The interesting part was how many ways there are to build V, and how many of them cheat:
+
+- Hand-labelled V: separates well (0.48), but I wrote the labels, so it's grading itself.
+- Text-derived V: fails (0.13). The colliding word is the very signal that collapses. Circular.
+- Synset-id V: separates (0.41), but only because different ids are orthogonal by construction. Tautology.
+- CLIP text-embedding V: fails (0.18). CLIP's text encoder still sees the shared word.
+- Generated-image V: separates (0.37), and doesn't cheat.
+
+That last one is the answer. Generate an actual image of each sense, embed the image. A photo of a crane-bird and a photo of a construction crane are visually unrelated, so they cannot collide the way text does. Nothing is hand-labelled, the visual and physical parts both come from a model applied to the sense.
+
+Three wrong turns got me here, and each looked like failure first: my image prompts were ambiguous (both "cranes" rendered as machines), my similarity metric was quietly diluting the signal by averaging in a block that was identical across senses, and an earlier "physical" grounding turned out to be secretly hand-labelled too. Research is mostly finding the bug in your own test.
+
+Honest scope: this is a 20-word probe, not a trained model. The separation is carried mostly by the visual signal; physical adds a small real bonus. But the kill condition is cleared on honestly-derived grounding, so the tokenizer built on it is worth making (next post).
+
+Code and write-up in the comments.

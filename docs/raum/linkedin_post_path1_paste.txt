@@ -1,0 +1,20 @@
+A negative result I'm keeping, because it pointed at the right question.
+
+I have a working pipeline that turns a text prompt into a 3D scene: describe "a castle on a hill", get a structured tree of parts, fill each part with 3D gaussians, render. It works at a small model size (~100M parameters).
+
+The obvious next move was to scale it. So I tried two upgrades:
+
+1. Swap the 100M base model for a 640M one (6x bigger).
+2. Replace the hand-written rules that fill in geometry with a learned generator.
+
+Neither helped.
+
+The bigger model produced the same castle as the small one. Not a worse castle, the same one. And the learned fill, after fixing its training loss twice and running it to convergence, produced fuzzy blobs where the hand-written rules produced crisp towers. The training loss went flat after 15 epochs and stayed flat for 135 more. That's a model at its capacity ceiling, not a model that needs more time.
+
+Here's why this is useful rather than discouraging: building a castle is a narrow, low-entropy task. There are ~14 part types and a fixed grammar. A 100M model already has more than enough capacity to nail it. So scaling the model or the generator can't help, there's no headroom left to use.
+
+The lesson generalizes: when a task is saturated, more parameters buy you nothing. The lever isn't model size. It's the representation, what a token actually encodes before the model ever sees it.
+
+That reframing is what sent me down the path that did work (next post).
+
+Full write-up and code in the comments.
