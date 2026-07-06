@@ -37,31 +37,54 @@ def build_wordfreq(captions):
     return c
 
 
-def load_coco(split, max_images, dataset_id="HuggingFaceM4/COCO"):
-    """COCO captions via HF datasets. Returns list of {image_id, caption, image_ref}.
+def _extract_captions(ex):
+    """Pull caption string(s) from a row across the common COCO schemas."""
+    for key in ("sentences", "captions", "caption", "sentences_raw", "text"):
+        if key in ex and ex[key] is not None:
+            v = ex[key]
+            if isinstance(v, str):
+                return [v]
+            if isinstance(v, dict):
+                r = v.get("raw") or v.get("caption") or v.get("text")
+                return r if isinstance(r, list) else ([r] if r else [])
+            if isinstance(v, list):
+                out = []
+                for c in v:
+                    out.append(c["raw"] if isinstance(c, dict) and "raw" in c
+                               else (c if isinstance(c, str) else str(c)))
+                return out
+    return []
 
-    NOTE (verify on box): the COCO-on-HF id/schema varies by mirror
-    (HuggingFaceM4/COCO, nlphuji/coco_captions, yerevann/coco-karpathy, ...).
-    If load fails, set --dataset-id to a mirror you can access and adjust the
-    field names below. The field-probing (imgid/cocoid, sentences/captions) tries
-    the common schemas."""
+
+def load_coco(split, max_images, dataset_id="yerevann/coco-karpathy"):
+    """COCO captions via HF datasets (PARQUET mirrors only).
+
+    NOTE: script-based mirrors (HuggingFaceM4/COCO ships COCO.py) FAIL on modern
+    datasets ("Dataset scripts are no longer supported"). Use a parquet dataset.
+    Known-good parquet ids to try with --dataset-id:
+      yerevann/coco-karpathy   (default; 'sentences'/'filename', karpathy split)
+      nlphuji/coco_captions
+      sayakpaul/coco-30-val-2014
+    Field-probing handles the common schemas; adjust if your mirror differs."""
     from datasets import load_dataset
     ds = load_dataset(dataset_id, split=split, streaming=True)
     rows, seen = [], set()
-    for ex in ds:
-        img_id = ex.get("imgid") or ex.get("cocoid") or ex.get("image_id")
-        caps = ex.get("sentences") or ex.get("captions") or []
-        if isinstance(caps, dict):
-            caps = caps.get("raw") or caps.get("caption") or []
-        if isinstance(caps, str):
-            caps = [caps]
-        for cap in caps:
-            text = cap["raw"] if isinstance(cap, dict) else cap
-            rows.append({"image_id": img_id, "caption": text,
-                         "image_ref": ex.get("url") or ex.get("filepath") or img_id})
+    for i, ex in enumerate(ds):
+        img_id = (ex.get("imgid") or ex.get("cocoid") or ex.get("image_id")
+                  or ex.get("filename") or i)
+        for text in _extract_captions(ex):
+            if text:
+                rows.append({"image_id": img_id, "caption": text,
+                             "image_ref": ex.get("url") or ex.get("filepath")
+                             or ex.get("filename") or img_id})
         seen.add(img_id)
         if max_images and len(seen) >= max_images:
             break
+    if not rows:
+        raise SystemExit(
+            f"[coco] loaded 0 captions from '{dataset_id}'. The schema likely "
+            f"differs; inspect one row (print(next(iter(ds)))) and extend "
+            f"_extract_captions, or try another --dataset-id (see load_coco note).")
     return rows
 
 
@@ -85,8 +108,9 @@ def main():
     p = argparse.ArgumentParser(description="Prepare COCO caption corpus for VSP")
     p.add_argument("--split", default="train")
     p.add_argument("--max-images", type=int, default=40000)
-    p.add_argument("--dataset-id", default="HuggingFaceM4/COCO",
-                   help="HF dataset id for COCO captions (mirror-dependent; see load_coco note)")
+    p.add_argument("--dataset-id", default="yerevann/coco-karpathy",
+                   help="HF PARQUET dataset id for COCO captions (script-based "
+                        "mirrors like HuggingFaceM4/COCO FAIL; see load_coco note)")
     p.add_argument("--out", default="data/coco_vsp")
     p.add_argument("--selftest", action="store_true")
     args = p.parse_args()

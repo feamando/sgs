@@ -81,9 +81,12 @@ Sources (HF datasets, same loader family as tinystories.py):
 Start with COCO; add VG regions if sense coverage is thin.
 
 ```powershell
-# TO BUILD: scripts/prepare_coco_vsp.py -- pull COCO caption+image pairs via HF
+# prepare_coco_vsp.py BUILT. Use a PARQUET mirror (script-based HuggingFaceM4/COCO
+# fails on modern datasets: "Dataset scripts are no longer supported").
 python scripts/prepare_coco_vsp.py --split train --max-images 40000 `
-  --out data/coco_vsp   # writes captions.jsonl + image refs (or cached CLIP V)
+  --dataset-id yerevann/coco-karpathy `
+  --out data/coco_vsp   # writes captions.jsonl + wordfreq.json + image refs
+# fallbacks if the schema differs: nlphuji/coco_captions, sayakpaul/coco-30-val-2014
 ```
 
 ## 0.3 Building V and P at corpus scale (the Gemma pipeline)
