@@ -113,6 +113,9 @@ def main():
                    help="print progress every N articles scanned")
     p.add_argument("--out", default="data/vsps/senses_wiki.json")
     p.add_argument("--wordfreq-out", default="data/wiki_vsp/wordfreq.json")
+    p.add_argument("--corpus-out", default=None,
+                   help="write domain-article TEXT here (one article/line) as the "
+                        "Planck 2.0 training corpus. e.g. data/wiki_vsp/corpus.txt")
     p.add_argument("--with-images", action="store_true",
                    help="fetch each sense-article's Wikimedia lead image for native V "
                         "(serial REST calls; SLOW, off by default; SD fallback works)")
@@ -128,8 +131,15 @@ def main():
                       cache_dir=args.hf_cache, split="train", streaming=True)
 
     entries, wf = [], Counter()
-    n_seen, n_disambig = 0, 0
+    n_seen, n_disambig, n_corpus = 0, 0, 0
     cap = args.max_articles  # None = full dump (~6.4M, slow); default is a cap
+    # TRAINING CORPUS: write domain-relevant article TEXT (one article per line)
+    # so tokenize_vsps.py has real text, not just wordfreq. This is what Planck
+    # 2.0 trains on.
+    corpus_f = None
+    if args.corpus_out:
+        Path(args.corpus_out).parent.mkdir(parents=True, exist_ok=True)
+        corpus_f = open(args.corpus_out, "w", encoding="utf-8")
     import time
     t0 = time.time()
     for ex in ds:
@@ -144,13 +154,21 @@ def main():
             head = (text or "")[:600].lower()
             if any(h in head for h in DOMAIN_HINTS):
                 wf.update(w for w in WORD_RE.findall(head) if len(w) > 2)
+                if corpus_f is not None and text:
+                    # one article per line, newlines flattened to spaces
+                    corpus_f.write(" ".join(text.split()) + "\n")
+                    n_corpus += 1
         if n_seen % args.log_every == 0:
             rate = n_seen / max(time.time() - t0, 1e-6)
             print(f"[wiki] {n_seen:,} scanned | {n_disambig:,} disambig | "
-                  f"{len(entries):,} polysemous words | {rate:,.0f} art/s", flush=True)
+                  f"{len(entries):,} polysemous | {n_corpus:,} corpus articles | "
+                  f"{rate:,.0f} art/s", flush=True)
         if cap and n_seen >= cap:
             print(f"[wiki] hit --max-articles cap ({cap:,}); stopping scan.", flush=True)
             break
+    if corpus_f is not None:
+        corpus_f.close()
+        print(f"[wiki] corpus text: {n_corpus:,} domain articles -> {args.corpus_out}")
 
     if args.with_images:
         print(f"[wiki] fetching lead images for {len(entries)} words "

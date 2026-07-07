@@ -127,9 +127,12 @@ def selftest(glove):
 
 def main():
     p = argparse.ArgumentParser(description="Sense-tagging VSPS tokenizer")
-    p.add_argument("--corpus", help="dir of .txt / .json lines, or a single file")
+    p.add_argument("--corpus", help="dir of *.txt (one article/line) or a single file")
     p.add_argument("--vocab", default="data/vsps/vocab.json")
     p.add_argument("--glove", default="data/glove.6B.300d.txt")
+    p.add_argument("--corpus-vocab", default=None,
+                   help="{word: freq} json; load GloVe over it too so CONTEXT words "
+                        "drive WSD (else disambiguation is blind to most context)")
     p.add_argument("--out", default="data/tinystories_vsps")
     p.add_argument("--window", type=int, default=6)
     p.add_argument("--max-lines", type=int, default=None)
@@ -148,18 +151,33 @@ def main():
     for t in vj["tokens"]:
         need.add(t["surface"])
         need.update(WORD_RE.findall((t.get("term") or "").lower()))
-    # also need corpus words for context centroids -> load a broad GloVe slice
-    glove = load_glove(Path(args.glove), need)  # corpus words hit at runtime too
-    print(f"[vsps] GloVe: {len(glove)} vectors preloaded (term+surface vocab)")
-    print("[vsps] NOTE: context words outside this set won't contribute to WSD; "
-          "for full corpus WSD, load GloVe over the corpus vocab (box).")
+    # WSD needs GloVe for the CONTEXT words too, or disambiguation is blind.
+    # Load over vocab words UNION the corpus wordfreq (--corpus-vocab).
+    if args.corpus_vocab and Path(args.corpus_vocab).exists():
+        cv = json.load(open(args.corpus_vocab))
+        need |= set(cv if isinstance(cv, list) else cv.keys())
+        print(f"[vsps] +{len(need)} words incl corpus vocab for full-context WSD")
+    else:
+        print("[vsps] WARNING: no --corpus-vocab; context words outside the "
+              "term/surface set won't contribute to WSD. Pass --corpus-vocab "
+              "data/wiki_vsp/wordfreq.json for full disambiguation.")
+    glove = load_glove(Path(args.glove), need)
+    print(f"[vsps] GloVe: {len(glove)} vectors preloaded")
 
     tok = VSPSTokenizer(args.vocab, glove)
 
-    # gather corpus lines
+    # gather corpus lines. ONLY *.txt (one article/line from prepare_wikipedia_senses
+    # --corpus-out). Do NOT glob *.json -- that once grabbed wordfreq.json and
+    # tokenized the dict itself (99.5% <unk>).
     cpath = Path(args.corpus)
-    files = sorted(cpath.glob("*.txt")) + sorted(cpath.glob("*.json")) \
-        if cpath.is_dir() else [cpath]
+    if cpath.is_dir():
+        files = sorted(cpath.glob("*.txt"))
+        if not files:
+            raise SystemExit(
+                f"[vsps] no *.txt in {cpath}. Write a corpus first: "
+                f"prepare_wikipedia_senses.py --corpus-out {cpath}/corpus.txt")
+    else:
+        files = [cpath]
     from collections import Counter
     how_counts = Counter()
     out_ids = []
