@@ -212,27 +212,38 @@ def main():
         files = [cpath]
     from collections import Counter
     how_counts = Counter()
-    out_ids = []
-    n_lines = 0
-    for f in files:
-        for line in open(f, encoding="utf-8"):
-            line = line.strip()
-            if not line:
-                continue
-            ids, tags = tok.encode(line, window=args.window)
-            out_ids.append(ids)
-            how_counts.update(tags)
-            n_lines += 1
+    # STREAM token-ids to a uint32 .bin (memmappable, ~4 bytes/token). A JSON of
+    # 2.1B tokens is ~15GB on disk and ~60GB RAM to json.load -- unusable. uint32
+    # because the VSPS vocab (~88k) exceeds uint16's 65535 ceiling.
+    n_vocab = len(vj["tokens"])
+    dtype = np.uint32 if n_vocab > 65535 else np.uint16
+    Path(args.out).mkdir(parents=True, exist_ok=True)
+    bin_path = Path(args.out) / "tokens.bin"
+    n_lines, n_tokens = 0, 0
+    with open(bin_path, "wb") as bf:
+        for f in files:
+            for line in open(f, encoding="utf-8"):
+                line = line.strip()
+                if not line:
+                    continue
+                ids, tags = tok.encode(line, window=args.window)
+                np.asarray(ids, dtype=dtype).tofile(bf)
+                how_counts.update(tags)
+                n_tokens += len(ids)
+                n_lines += 1
+                if n_lines % 100000 == 0:
+                    print(f"[vsps] {n_lines:,} lines | {n_tokens:,} tokens", flush=True)
+                if args.max_lines and n_lines >= args.max_lines:
+                    break
             if args.max_lines and n_lines >= args.max_lines:
                 break
-        if args.max_lines and n_lines >= args.max_lines:
-            break
 
-    Path(args.out).mkdir(parents=True, exist_ok=True)
-    json.dump({"token_ids": out_ids}, open(Path(args.out) / "tokens.json", "w"))
-    print(f"[vsps] tokenized {n_lines} lines, {sum(len(x) for x in out_ids)} tokens")
+    meta = {"n_tokens": n_tokens, "n_lines": n_lines, "dtype": np.dtype(dtype).name,
+            "n_vocab": n_vocab, "tags": dict(how_counts)}
+    json.dump(meta, open(Path(args.out) / "tokens_meta.json", "w"), indent=2)
+    print(f"[vsps] tokenized {n_lines:,} lines, {n_tokens:,} tokens ({dtype.__name__})")
     print(f"[vsps] tag breakdown: {dict(how_counts)}")
-    print(f"[vsps] saved -> {args.out}/tokens.json")
+    print(f"[vsps] saved -> {bin_path} + tokens_meta.json")
 
 
 if __name__ == "__main__":
