@@ -108,8 +108,30 @@ def build_abstract(corpus_vocab, grounded_words, glove, top_n):
     return tokens
 
 
-def assemble_vocab(grounded, abstract):
-    """Specials first (stable ids), then grounded, then abstract."""
+def build_subword(sp_model_path, glove):
+    """Third tier: SentencePiece pieces, the FALLBACK for words that are neither
+    a grounded sense nor a frequent abstract word. Guarantees ~0% <unk> (subwords
+    cover any string) so VSPS is a FAIR comparison vs a SentencePiece baseline.
+    A piece's surface is its SP token string; S = GloVe if the piece is a real
+    word, else zero; no V/P."""
+    if not sp_model_path or not Path(sp_model_path).exists():
+        return []
+    import sentencepiece as spm
+    sp = spm.SentencePieceProcessor(model_file=str(sp_model_path))
+    zeroV, zeroP = [0.0] * V_DIM, [0.0] * P_DIM
+    toks = []
+    for pid in range(sp.get_piece_size()):
+        piece = sp.id_to_piece(pid)
+        clean = piece.lstrip("▁").lower()  # SP marks word-starts with U+2581
+        s_vec = _unit(glove[clean]) if clean in glove else np.zeros(S_DIM, np.float32)
+        toks.append({"surface": piece, "sense": None, "term": None, "tier": "subword",
+                     "sp_id": pid, "V": zeroV, "S": _round(s_vec), "P": zeroP,
+                     "has_v": False, "has_p": False})
+    return toks
+
+
+def assemble_vocab(grounded, abstract, subword=None):
+    """Specials first (stable ids), then grounded, abstract, subword-fallback."""
     vocab = []
     zeroV, zeroS, zeroP = [0.0] * V_DIM, [0.0] * S_DIM, [0.0] * P_DIM
     for sp in SPECIALS:
@@ -117,6 +139,7 @@ def assemble_vocab(grounded, abstract):
                       "V": zeroV, "S": zeroS, "P": zeroP, "has_v": False, "has_p": False})
     vocab.extend(grounded)
     vocab.extend(abstract)
+    vocab.extend(subword or [])
     for i, t in enumerate(vocab):
         t["id"] = i
     return vocab
@@ -131,7 +154,7 @@ def coverage_report(vocab):
     return {
         "total_tokens": len(vocab),
         "specials": tiers["special"], "grounded": tiers["grounded"],
-        "abstract": tiers["abstract"],
+        "abstract": tiers["abstract"], "subword": tiers["subword"],
         "grounded_words": len(words),
         "polysemous_words": len(multi),          # words that got >=2 sense tokens
         "grounded_blowup_x": round(blowup, 3),   # sense tokens per grounded word
@@ -176,6 +199,10 @@ def main():
     p.add_argument("--corpus-vocab", default=None,
                    help="{word: freq} json (or word list) for the abstract tier")
     p.add_argument("--abstract-top-n", type=int, default=8000)
+    p.add_argument("--subword-model", default=None,
+                   help="SentencePiece .model for the FALLBACK tier (guarantees "
+                        "~0%% unk, fair vs a SP baseline). e.g. "
+                        "data/hertz12_data/tokenizer.model")
     p.add_argument("--out", default="data/vsps/vocab.json")
     p.add_argument("--selftest", action="store_true")
     args = p.parse_args()
@@ -197,7 +224,10 @@ def main():
 
     grounded, gw = build_grounded(args.senses, glove)
     abstract = build_abstract(corpus_vocab, gw, glove, args.abstract_top_n)
-    vocab = assemble_vocab(grounded, abstract)
+    subword = build_subword(args.subword_model, glove)
+    if subword:
+        print(f"[vsps] subword fallback: {len(subword)} SP pieces from {args.subword_model}")
+    vocab = assemble_vocab(grounded, abstract, subword)
     rep = coverage_report(vocab)
 
     print("[vsps] coverage:")

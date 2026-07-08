@@ -51,7 +51,7 @@ def centroid(words, glove):
 
 
 class VSPSTokenizer:
-    def __init__(self, vocab_path, glove):
+    def __init__(self, vocab_path, glove, subword_model=None):
         vj = json.load(open(vocab_path))
         self.tokens = vj["tokens"]
         self.glove = glove
@@ -60,6 +60,7 @@ class VSPSTokenizer:
         self.by_surface = {}
         self.abstract_id = {}
         self.sense_term_vec = {}   # token id -> unit GloVe centroid of its term
+        self.sp_piece_to_id = {}   # SP piece id -> vocab id (subword fallback)
         for t in self.tokens:
             if t["tier"] == "grounded":
                 self.by_surface.setdefault(t["surface"], []).append(t)
@@ -67,9 +68,27 @@ class VSPSTokenizer:
                 self.sense_term_vec[t["id"]] = tv
             elif t["tier"] == "abstract":
                 self.abstract_id[t["surface"]] = t["id"]
+            elif t["tier"] == "subword" and "sp_id" in t:
+                self.sp_piece_to_id[t["sp_id"]] = t["id"]
+        # SentencePiece for the FALLBACK: unknown words split into subword pieces
+        # (~0% unk, fair vs a SP baseline) instead of collapsing to <unk>.
+        self.sp = None
+        if subword_model and self.sp_piece_to_id:
+            import sentencepiece as spm
+            self.sp = spm.SentencePieceProcessor(model_file=str(subword_model))
+
+    def _subword_ids(self, surface):
+        """Split an unknown word into subword vocab-ids. Falls to <unk> only if
+        SP is absent or a piece isn't in the vocab (shouldn't happen)."""
+        if self.sp is None:
+            return [self.unk], "unk"
+        ids = [self.sp_piece_to_id.get(pid, self.unk)
+               for pid in self.sp.encode(surface, out_type=int)]
+        return (ids or [self.unk]), "subword"
 
     def disambiguate(self, surface, context_words):
-        """Return the token id for `surface` given surrounding context words."""
+        """Return (token_id, tag) for `surface`. Kept for the WSD selftest;
+        grounded/abstract only (subword fallback handled in encode)."""
         senses = self.by_surface.get(surface)
         if senses:
             if len(senses) == 1:
@@ -94,9 +113,15 @@ class VSPSTokenizer:
         words = WORD_RE.findall(text.lower())
         ids, tags = [], []
         for i, w in enumerate(words):
-            ctx = words[max(0, i - window):i] + words[i + 1:i + 1 + window]
-            tid, how = self.disambiguate(w, ctx)
-            ids.append(tid); tags.append(how)
+            senses = self.by_surface.get(w)
+            if senses or w in self.abstract_id:
+                ctx = words[max(0, i - window):i] + words[i + 1:i + 1 + window]
+                tid, how = self.disambiguate(w, ctx)
+                ids.append(tid); tags.append(how)
+            else:
+                # unknown word -> subword pieces (or <unk> if no SP)
+                sw_ids, how = self._subword_ids(w)
+                ids.extend(sw_ids); tags.extend([how] * len(sw_ids))
         return ids, tags
 
 
@@ -133,6 +158,10 @@ def main():
     p.add_argument("--corpus-vocab", default=None,
                    help="{word: freq} json; load GloVe over it too so CONTEXT words "
                         "drive WSD (else disambiguation is blind to most context)")
+    p.add_argument("--subword-model", default=None,
+                   help="SentencePiece .model for the fallback tier; MUST match the "
+                        "one build_vsps_vocab used. Unknown words -> subword pieces "
+                        "(~0%% unk). e.g. data/hertz12_data/tokenizer.model")
     p.add_argument("--out", default="data/tinystories_vsps")
     p.add_argument("--window", type=int, default=6)
     p.add_argument("--max-lines", type=int, default=None)
@@ -164,7 +193,10 @@ def main():
     glove = load_glove(Path(args.glove), need)
     print(f"[vsps] GloVe: {len(glove)} vectors preloaded")
 
-    tok = VSPSTokenizer(args.vocab, glove)
+    tok = VSPSTokenizer(args.vocab, glove, subword_model=args.subword_model)
+    if args.subword_model and not tok.sp:
+        print("[vsps] WARNING: --subword-model given but vocab has no subword tier; "
+              "rebuild vocab with build_vsps_vocab.py --subword-model. Unks -> <unk>.")
 
     # gather corpus lines. ONLY *.txt (one article/line from prepare_wikipedia_senses
     # --corpus-out). Do NOT glob *.json -- that once grabbed wordfreq.json and
