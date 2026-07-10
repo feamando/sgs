@@ -207,10 +207,12 @@ at matched params/tokens. That delta is the paper. If no delta → the bundle
 didn't help the MODEL (distinct from "the representation separates", already
 proven); diagnose embedding wiring vs frozen-V starving the model.
 
-CAVEAT (honest): the seed set is only 8 pairs -- selftest accuracy swings on a
-random model, so 8 is TOO FEW for a trustworthy delta. Before trusting the gate,
-expand disambig_pairs.json to >=50 pairs (ideally 100+), and report the VSP-minus-
-baseline delta, not either absolute number. A 2-3 point delta on 8 pairs is noise.
+PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
+two styles: cloze (the sense word IS the right answer, e.g. "sat on the grassy
+river ___" -> bank) and continuation (word in context, predict a sense-matched
+next word). Report the VSP-minus-baseline DELTA, not either absolute number.
+Random-model variance dropped from the 8-pair 0.38-0.88 swing to ~0.6 at 105
+pairs, still add more if the delta is within a few points.
 
 ## Sequencing (gate-and-kill)
 
