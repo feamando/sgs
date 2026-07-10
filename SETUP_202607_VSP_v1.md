@@ -150,41 +150,67 @@ python scripts/tokenize_vsps.py --corpus data/wiki_vsp `
 GATE: VSPS round-trips Wikipedia text, and polysemous words get SENSE-CORRECT
 tokens (the disambiguation the thesis promises) where SentencePiece merged them.
 
-## 3. Planck 2.0 training (TO BUILD: scripts/train_planck2.py)
+## 3. Planck 2.0 training (train_planck2.py — BUILT + smoke-passed)
 
-Adapt `train_planck11.py` / the SGSLanguageModel scaffold so each token embedding
-IS the V/S/P bundle, not S alone.
+Token embeddings (tok_mu[d_s], tok_features[d_f]) are INITIALIZED from a
+projection of the cached [V|S|P] bundle -- the grounded warm start (meaning
+injected before training). Details:
 
-1. **Embedding = concat(V, S, P)** (or a learned projection of it), initialized
-   from the cached bundles. V frozen (CLIP-image; don't backprop into generated
-   appearance early). S/P fine-tunable.
-2. **Frozen-V warm start** (mirrors Raum freezing the Planck encoder): learn to
-   USE the grounded representation before it can corrupt it; unfreeze later.
-3. **Plain AdamW, stdout logging** ([[project_sgs_accel_shelved]],
-   [[feedback_sgs_wandb_default]] — accel shelved, wandb is paid).
-4. **Hard opt-step budget + resume that doesn't restart the epoch**
-   ([[project_hertz_resume_epoch_restart]] — reuse train_hertz.py's fix; don't
-   rely on loader exhaustion as the stop).
-5. **Arch loads via infer_arch** if resuming from any SGS checkpoint
-   ([[project_sgs_path1_outcome]] — Planck/Hertz shapes differ; never hardcode).
+1. **Bundle init**: `init_from_bundles` seeds tok_mu + tok_features from a
+   projection of concat(V,S,P). `--random-init` skips it = the matched-compute
+   SentencePiece-style BASELINE (the control the gate compares against).
+2. **Frozen warm start** = ZERO the seeded tables' grads for `--freeze-vp-steps`
+   opt-steps (NOT requires_grad+add_param_group, which desyncs SequentialLR). All
+   params stay in the optimizer from step 0.
+3. **Plain AdamW, stdout** ([[project_sgs_accel_shelved]], [[feedback_sgs_wandb_default]]).
+4. **Hard opt-step budget** (`--opt-steps`), the [[project_hertz_resume_epoch_restart]]
+   lesson: the loop stops at the budget, not on loader exhaustion.
+5. **Data = memmapped tokens.bin** (uint32; vocab >65535 so NOT uint16). Never
+   json.load the 2.1B-token stream (~60GB RAM).
+
+REALITY (validated 2026-07-10): vocab = **82,867 tokens** (15.7k grounded senses
++ 40k abstract + 32k subword), so the model is **~215M params** (embedding +
+lm_head dominate; the "~100M" target was pre-vocab-sizing -- the transformer core
+is small, the vocab tables are big). Smoke test (200 steps) PASSED: loss
+9.38->7.44, freeze->unfreeze fires clean at the boundary, checkpoints save.
+~1.04 step/s on the 4090 -> 40k steps ~= 10.7h (~1.2 epochs over 2.14B tokens).
+
+The experiment needs BOTH runs (matched compute) or there's no claim:
 
 ```powershell
-python scripts/train_planck2.py --data data/wiki_vsps `
-  --vocab data/vsps/vocab.json --d-f 1000 --freeze-vp `
-  --save-dir checkpoints/planck2 --tokens 1B   # TO BUILD; mirror train_planck11.py
+# TREATMENT: VSP bundle init (overnight 1)
+python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+  --opt-steps 40000 --freeze-vp-steps 2000 --save-dir checkpoints/planck2_vsp
+# BASELINE: random init, everything else identical (overnight 2)
+python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+  --opt-steps 40000 --random-init --save-dir checkpoints/planck2_baseline
 ```
 
-## 4. The gate that proves the win (TO BUILD: disambiguation benchmark)
+## 4. The gate that proves the win (eval_disambiguation.py — BUILT)
 
-**Val loss will NOT show the win.** Build a polysemy benchmark: sense-correct
-next-token / retrieval on minimal pairs ("the crane flew" vs "the crane lifted",
-"sat on the river bank" vs "money in the bank").
+**Val loss will NOT show the win.** The benchmark scores sense-correct next-token
+prediction on minimal pairs: same polysemous word, two sense-contexts, each with
+a sense-appropriate vs -inappropriate continuation. Score = fraction where
+logP(right|ctx) > logP(wrong|ctx). Chance = 0.5. Tokenizer-AGNOSTIC (VSP vocab
+or a SentencePiece baseline via --sp-baseline), so it's a FAIR cross-model gate.
+Pairs in scripts/assets/disambig_pairs.json.
 
-GATE (the publishable result): Planck 2.0 beats a SentencePiece-baseline Planck
-on the disambiguation benchmark **at matched params and tokens**. That delta is
-the paper. If no delta at matched compute → the bundle didn't help the model
-(distinct from "the representation separates", which is already proven); stop and
-diagnose whether it's the embedding wiring or frozen-V starving the model.
+```powershell
+python scripts/eval_disambiguation.py --checkpoint checkpoints/planck2_vsp/final.pt `
+  --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt `
+  --subword-model data/hertz12_data/tokenizer.model
+# run again on checkpoints/planck2_baseline/final.pt for the control
+```
+
+GATE (the publishable result): Planck 2.0 (VSP) beats the --random-init baseline
+at matched params/tokens. That delta is the paper. If no delta → the bundle
+didn't help the MODEL (distinct from "the representation separates", already
+proven); diagnose embedding wiring vs frozen-V starving the model.
+
+CAVEAT (honest): the seed set is only 8 pairs -- selftest accuracy swings on a
+random model, so 8 is TOO FEW for a trustworthy delta. Before trusting the gate,
+expand disambig_pairs.json to >=50 pairs (ideally 100+), and report the VSP-minus-
+baseline delta, not either absolute number. A 2-3 point delta on 8 pairs is noise.
 
 ## Sequencing (gate-and-kill)
 
@@ -195,8 +221,8 @@ diagnose whether it's the embedding wiring or frozen-V starving the model.
 | 0.3 | native V from Wikimedia lead images | wire derive_vsp_clip.py to embed image_refs (SD fallback already works); KILL if disambiguation sense yield too low |
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
-| 3 | Planck 2.0 training | TO BUILD train_planck2.py. plain AdamW, frozen-V warm start, hard step budget |
-| 4 | disambiguation benchmark | TO BUILD. KILL claim if no win vs SentencePiece baseline at matched compute |
+| 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
+| 4 | disambiguation benchmark | **eval_disambiguation.py BUILT** (tokenizer-agnostic, minimal pairs). EXPAND pairs to >=50 before trusting. KILL claim if no VSP-vs-baseline delta. |
 
 ## Papers this feeds
 

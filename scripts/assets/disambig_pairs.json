@@ -1,0 +1,50 @@
+[
+  {
+    "word": "crane",
+    "context": "the crane flew over the calm",
+    "right": "lake",
+    "wrong": "crane"
+  },
+  {
+    "word": "crane",
+    "context": "the construction crane lifted the heavy steel",
+    "right": "beam",
+    "wrong": "feather"
+  },
+  {
+    "word": "bank",
+    "context": "they sat on the grassy river",
+    "right": "bank",
+    "wrong": "money"
+  },
+  {
+    "word": "bat",
+    "context": "the vampire bat flew out of the dark",
+    "right": "cave",
+    "wrong": "stadium"
+  },
+  {
+    "word": "bat",
+    "context": "he swung the wooden baseball",
+    "right": "bat",
+    "wrong": "wing"
+  },
+  {
+    "word": "seal",
+    "context": "the seal swam in the cold ocean",
+    "right": "water",
+    "wrong": "envelope"
+  },
+  {
+    "word": "spring",
+    "context": "the metal coil spring compressed under",
+    "right": "pressure",
+    "wrong": "flowers"
+  },
+  {
+    "word": "mouse",
+    "context": "she clicked the computer",
+    "right": "mouse",
+    "wrong": "cheese"
+  }
+]
