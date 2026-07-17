@@ -1,0 +1,78 @@
+{
+  "checkpoint": "checkpoints/planck2_vsp/final.pt",
+  "accuracy": 0.75,
+  "rows": [
+    {
+      "word": "crane",
+      "context": "the crane flew over the calm",
+      "right": "lake",
+      "wrong": "crane",
+      "logp_right": -9.995,
+      "logp_wrong": -6.962,
+      "ok": false
+    },
+    {
+      "word": "crane",
+      "context": "the construction crane lifted the heavy steel",
+      "right": "beam",
+      "wrong": "feather",
+      "logp_right": -7.649,
+      "logp_wrong": -11.087,
+      "ok": true
+    },
+    {
+      "word": "bank",
+      "context": "they sat on the grassy river",
+      "right": "bank",
+      "wrong": "money",
+      "logp_right": -4.302,
+      "logp_wrong": -12.519,
+      "ok": true
+    },
+    {
+      "word": "bat",
+      "context": "the vampire bat flew out of the dark",
+      "right": "cave",
+      "wrong": "stadium",
+      "logp_right": -8.488,
+      "logp_wrong": -11.055,
+      "ok": true
+    },
+    {
+      "word": "bat",
+      "context": "he swung the wooden baseball",
+      "right": "bat",
+      "wrong": "wing",
+      "logp_right": -3.363,
+      "logp_wrong": -9.807,
+      "ok": true
+    },
+    {
+      "word": "seal",
+      "context": "the seal swam in the cold ocean",
+      "right": "water",
+      "wrong": "envelope",
+      "logp_right": -12.456,
+      "logp_wrong": -13.002,
+      "ok": true
+    },
+    {
+      "word": "spring",
+      "context": "the metal coil spring compressed under",
+      "right": "pressure",
+      "wrong": "flowers",
+      "logp_right": -4.12,
+      "logp_wrong": -12.4,
+      "ok": true
+    },
+    {
+      "word": "mouse",
+      "context": "she clicked the computer",
+      "right": "mouse",
+      "wrong": "cheese",
+      "logp_right": -13.273,
+      "logp_wrong": -11.72,
+      "ok": false
+    }
+  ]
+}
