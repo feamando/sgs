@@ -100,6 +100,13 @@ def init_from_bundles(model, V, S, P, device):
     the [V|S|P] bundle -- the grounded warm start (meaning injected before
     training). The projection is a throwaway seeding transform (not kept).
 
+    RESCALE to native std: the raw nn.Linear projection lands at ~2x the model's
+    native embedding std, so the model wastes early steps fighting an oversized
+    embedding norm (diagnosed 2026-07-17: full-compute VSP lost -3.8pts, models
+    ended 0.964-correlated -> warm start washed out; the 2x scale was pure
+    friction). We preserve the bundle GEOMETRY (the projection) but match the
+    native SCALE, so only the grounded structure differs from random init.
+
     Freezing is handled in the train loop by ZEROING these two tables' grads
     (NOT requires_grad toggling + add_param_group, which desyncs the LR
     scheduler). So all params stay in the optimizer from step 0."""
@@ -108,10 +115,18 @@ def init_from_bundles(model, V, S, P, device):
     d_f = model.tok_features.embedding_dim
     bundle = torch.tensor(np.concatenate([V, S, P], axis=1), device=device)  # [n, dV+dS+dP]
     with torch.no_grad():
+        # native std of each table BEFORE we overwrite it -- the target scale
+        mu_std = model.tok_mu.weight.std().item()
+        feat_std = model.tok_features.weight.std().item()
         proj_mu = torch.nn.Linear(dV + dS + dP, d_s).to(device)
         proj_feat = torch.nn.Linear(dV + dS + dP, d_f).to(device)
-        model.tok_mu.weight.copy_(proj_mu(bundle))
-        model.tok_features.weight.copy_(proj_feat(bundle))
+        seed_mu = proj_mu(bundle)
+        seed_feat = proj_feat(bundle)
+        # rescale seeded tables to native std (mean-center, then match std)
+        seed_mu = (seed_mu - seed_mu.mean()) * (mu_std / (seed_mu.std() + 1e-8))
+        seed_feat = (seed_feat - seed_feat.mean()) * (feat_std / (seed_feat.std() + 1e-8))
+        model.tok_mu.weight.copy_(seed_mu)
+        model.tok_features.weight.copy_(seed_feat)
 
 
 def selftest():
@@ -153,7 +168,13 @@ def parse_args():
     p.add_argument("--warmup-steps", type=int, default=500)
     p.add_argument("--opt-steps", type=int, default=40000, help="hard budget")
     p.add_argument("--freeze-vp-steps", type=int, default=2000,
-                   help="keep the bundle-seeded embeddings frozen for N opt-steps")
+                   help="keep the bundle-seeded embeddings frozen for N opt-steps. "
+                        "At low compute set this >= --opt-steps (or use "
+                        "--freeze-vp-forever) so the run TESTS the warm start "
+                        "instead of overwriting it (full-compute washed it out).")
+    p.add_argument("--freeze-vp-forever", action="store_true",
+                   help="never unfreeze the bundle-seeded embeddings -- the "
+                        "cleanest test of whether the grounded init alone helps")
     p.add_argument("--random-init", action="store_true",
                    help="SKIP the VSP bundle init (random embeddings) -- the "
                         "matched-compute BASELINE for the disambiguation gate")
@@ -223,7 +244,7 @@ def main():
             micro += 1
             if micro % args.grad_accum == 0:
                 # grounded warm start: kill the seeded tables' grads while frozen
-                if opt_step < args.freeze_vp_steps:
+                if args.freeze_vp_forever or opt_step < args.freeze_vp_steps:
                     for w in frozen_tables:
                         if w.grad is not None:
                             w.grad.zero_()

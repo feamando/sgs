@@ -212,6 +212,51 @@ at matched params/tokens. That delta is the paper. If no delta → the bundle
 didn't help the MODEL (distinct from "the representation separates", already
 proven); diagnose embedding wiring vs frozen-V starving the model.
 
+### RESULT — full-compute run (2026-07-17): VSP did NOT win, −3.8 pts
+
+| Model | 105-pair acc | correct |
+|-------|--------------|---------|
+| Baseline (SentencePiece, random init) | **0.829** | 87/105 |
+| VSP (Planck 2.0, bundle init) | **0.790** | 83/105 |
+| **Delta (VSP − baseline)** | **−0.038** | not significant (McNemar p≈0.22, 6 discordant) |
+
+Paired contingency: 82 both-correct, 1 VSP-only win, 5 VSP-only regressions
+(club/seal/bat/mouse — all on the RARER sense), 17 neither.
+
+**Diagnosis (the §4 fork, resolved): warm start WASHED OUT, not frozen-V starvation.**
+- Decisive signal: the two models ended **0.964 output-correlated** (mean |Δlogp|
+  0.86). 40k steps / ~2B tokens overwrote the grounded init; both converged to
+  the same function. `--freeze-vp-steps 2000` protected the seed for only 5% of
+  training, so V was NOT starved — it had 38k steps and still washed out.
+- Why slightly NEGATIVE not neutral: two friction sources the baseline lacks —
+  (a) seeded embeddings landed at **2.0× native std** (raw nn.Linear, unscaled);
+  (b) the 820→128 throwaway projection preserved bundle geometry at only corr
+  0.848, then was discarded. ~15% of grounded structure scrambled at t=0 for no
+  payoff.
+- **Key insight:** the VSP efficiency bet is a LOW-compute / LOW-data claim (warm
+  start lets a small model skip learning disambiguation from scratch). 40k/2B is
+  the one regime where a warm start CANNOT matter — the model learns it anyway.
+  This run tested the thesis where it was designed to fail.
+
+**FIXES APPLIED (train_planck2.py, 2026-07-17):**
+1. `init_from_bundles` now rescales seeded tables to native std (2.0× → 1.00×);
+   bundle geometry preserved, only scale corrected.
+2. `--freeze-vp-forever` added; at low compute set freeze >= opt-steps so the run
+   TESTS the warm start instead of overwriting it.
+
+**NEXT — low-compute gate (the honest test of the thesis):**
+```powershell
+# ~5k steps (~1.3h each on the 4090); freeze the seed the whole run
+python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+  --opt-steps 5000 --freeze-vp-forever --save-dir checkpoints/planck2_vsp_5k
+python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+  --opt-steps 5000 --random-init --save-dir checkpoints/planck2_baseline_5k
+# eval both -> distinct --out, then paste me the two JSONs
+```
+Kill-or-confirm: VSP > baseline at 5k but ties at 40k → thesis INTACT (data-
+efficiency win, not ceiling win). VSP ties/loses even at 5k → embedding-init line
+is dead; pivot to VSP-as-aux-signal (contrastive loss / inference rerank).
+
 PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
 two styles: cloze (the sense word IS the right answer, e.g. "sat on the grassy
 river ___" -> bank) and continuation (word in context, predict a sense-matched
@@ -229,7 +274,7 @@ pairs, still add more if the delta is within a few points.
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
-| 4 | disambiguation benchmark | **eval_disambiguation.py BUILT** (tokenizer-agnostic, minimal pairs). EXPAND pairs to >=50 before trusting. KILL claim if no VSP-vs-baseline delta. |
+| 4 | disambiguation benchmark | **RUN 2026-07-17 (105 pairs): VSP −3.8 pts vs baseline, NOT significant.** Full-compute warm start washed out (models 0.964-corr). Init fixes applied; **low-compute gate is the open test** (see §4 RESULT). |
 
 ## Papers this feeds
 
