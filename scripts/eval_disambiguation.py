@@ -16,10 +16,10 @@ baseline), so it's the FAIR gate: run both checkpoints, compare.
 GATE: Planck 2.0 (VSP) beats the --random-init baseline at matched params/tokens.
 That delta is the publishable result.
 
-Usage:
+Usage (--pairs defaults to the 105-pair asset; --out keeps VSP/baseline separate):
   python scripts/eval_disambiguation.py --checkpoint checkpoints/planck2_vsp/final.pt \
     --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt \
-    --subword-model data/hertz12_data/tokenizer.model --pairs scripts/assets/disambig_pairs.json
+    --subword-model data/hertz12_data/tokenizer.model --out results/disambig_vsp.json
   python scripts/eval_disambiguation.py --selftest
 """
 
@@ -32,9 +32,15 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
 from src.sgs_lm import SGSLanguageModel
+
+# The real gate runs on the 105-pair / 42-word asset. Default to it (resolved
+# from repo root, so it works from any cwd) rather than the 8-pair inline set,
+# so forgetting --pairs never silently downgrades the benchmark to 8 pairs.
+DEFAULT_PAIRS_FILE = REPO_ROOT / "scripts" / "assets" / "disambig_pairs.json"
 
 
 def load_model(ckpt_path, n_tokens, device):
@@ -103,7 +109,9 @@ def sp_tokenizer(sp_model):
     return (lambda text: sp.encode(text, out_type=int)), sp.get_piece_size()
 
 
-DEFAULT_PAIRS = [
+# Tiny inline set for --selftest ONLY (no file I/O). NOT the benchmark; the real
+# gate uses DEFAULT_PAIRS_FILE (105 pairs). Do not run the gate on this.
+SELFTEST_PAIRS = [
     {"word": "crane", "context": "the crane flew over the calm", "right": "lake", "wrong": "crane"},
     {"word": "crane", "context": "the construction crane lifted the heavy steel", "right": "beam", "wrong": "feather"},
     {"word": "bank", "context": "they sat on the grassy river", "right": "bank", "wrong": "money"},
@@ -123,8 +131,8 @@ def selftest():
     model = SGSLanguageModel(vocab_size=n, d_s=16, d_f=32, n_passes=2, n_heads=2, max_len=64)
     model.eval()
     tok = lambda text: [abs(hash(w)) % n for w in text.split()]
-    acc, rows = score_pairs(model, tok, DEFAULT_PAIRS, "cpu")
-    ok = 0.0 <= acc <= 1.0 and len(rows) == len(DEFAULT_PAIRS)
+    acc, rows = score_pairs(model, tok, SELFTEST_PAIRS, "cpu")
+    ok = 0.0 <= acc <= 1.0 and len(rows) == len(SELFTEST_PAIRS)
     print(f"[selftest] random-model acc {acc:.2f} (~chance 0.5), {len(rows)} pairs "
           f"| {'PASS' if ok else 'FAIL'}")
     return ok
@@ -138,7 +146,9 @@ def main():
     p.add_argument("--subword-model", default="data/hertz12_data/tokenizer.model")
     p.add_argument("--sp-baseline", default=None,
                    help="score a plain-SentencePiece checkpoint instead of VSP vocab")
-    p.add_argument("--pairs", default=None, help="json list of {word,context,right,wrong}")
+    p.add_argument("--pairs", default=None,
+                   help=f"json list of {{word,context,right,wrong}} "
+                        f"(default: {DEFAULT_PAIRS_FILE.relative_to(REPO_ROOT)}, 105 pairs)")
     p.add_argument("--out", default="results/disambig_eval.json")
     p.add_argument("--selftest", action="store_true")
     args = p.parse_args()
@@ -149,7 +159,21 @@ def main():
         raise SystemExit("--checkpoint required unless --selftest")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pairs = json.load(open(args.pairs)) if args.pairs else DEFAULT_PAIRS
+
+    pairs_path = Path(args.pairs) if args.pairs else DEFAULT_PAIRS_FILE
+    if not pairs_path.exists():
+        raise SystemExit(
+            f"[eval] pairs file not found: {pairs_path}\n"
+            f"       The gate needs the 105-pair asset. Pass --pairs or restore "
+            f"{DEFAULT_PAIRS_FILE.relative_to(REPO_ROOT)}.")
+    pairs = json.load(open(pairs_path))
+    # Guard against silently running the gate on a stub set. The real benchmark
+    # is 105 pairs; anything under ~50 is not statistically meaningful.
+    if len(pairs) < 50:
+        raise SystemExit(
+            f"[eval] {pairs_path} has only {len(pairs)} pairs (<50). The gate is "
+            f"not meaningful below ~50; pass --pairs a full set to override.")
+    print(f"[eval] {len(pairs)} pairs <- {pairs_path}")
 
     if args.sp_baseline:
         tok, n_tokens = sp_tokenizer(args.sp_baseline)

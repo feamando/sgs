@@ -196,10 +196,15 @@ or a SentencePiece baseline via --sp-baseline), so it's a FAIR cross-model gate.
 Pairs in scripts/assets/disambig_pairs.json.
 
 ```powershell
+# --pairs defaults to scripts/assets/disambig_pairs.json (105 pairs); --out MUST
+# differ per run or the second clobbers the first (both default to disambig_eval.json).
 python scripts/eval_disambiguation.py --checkpoint checkpoints/planck2_vsp/final.pt `
   --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt `
-  --subword-model data/hertz12_data/tokenizer.model
-# run again on checkpoints/planck2_baseline/final.pt for the control
+  --subword-model data/hertz12_data/tokenizer.model --out results/disambig_vsp.json
+# control: same command on the --random-init baseline checkpoint
+python scripts/eval_disambiguation.py --checkpoint checkpoints/planck2_baseline/final.pt `
+  --vocab data/vsps/vocab.json --glove data/glove.6B.300d.txt `
+  --subword-model data/hertz12_data/tokenizer.model --out results/disambig_baseline.json
 ```
 
 GATE (the publishable result): Planck 2.0 (VSP) beats the --random-init baseline
