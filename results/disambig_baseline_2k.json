@@ -1,0 +1,951 @@
+{
+  "checkpoint": "checkpoints/planck2_baseline_2k/final.pt",
+  "accuracy": 0.638095238095238,
+  "rows": [
+    {
+      "word": "crane",
+      "context": "the graceful crane flew over the calm",
+      "right": "lake",
+      "wrong": "warehouse",
+      "logp_right": -8.855,
+      "logp_wrong": -16.508,
+      "ok": true
+    },
+    {
+      "word": "crane",
+      "context": "the tall construction crane lifted the heavy steel",
+      "right": "beam",
+      "wrong": "feather",
+      "logp_right": -8.833,
+      "logp_wrong": -11.479,
+      "ok": true
+    },
+    {
+      "word": "crane",
+      "context": "the crane waded through the marsh hunting for",
+      "right": "fish",
+      "wrong": "concrete",
+      "logp_right": -10.533,
+      "logp_wrong": -10.132,
+      "ok": false
+    },
+    {
+      "word": "crane",
+      "context": "the operator sat in the cab of the crane above the building",
+      "right": "site",
+      "wrong": "nest",
+      "logp_right": -7.652,
+      "logp_wrong": -14.166,
+      "ok": true
+    },
+    {
+      "word": "bank",
+      "context": "they sat on the grassy river",
+      "right": "bank",
+      "wrong": "vault",
+      "logp_right": -7.689,
+      "logp_wrong": -12.99,
+      "ok": true
+    },
+    {
+      "word": "bank",
+      "context": "she deposited her paycheck at the local",
+      "right": "bank",
+      "wrong": "shore",
+      "logp_right": -6.966,
+      "logp_wrong": -8.818,
+      "ok": true
+    },
+    {
+      "word": "bank",
+      "context": "the fisherman cast his line from the muddy",
+      "right": "bank",
+      "wrong": "teller",
+      "logp_right": -8.269,
+      "logp_wrong": -11.814,
+      "ok": true
+    },
+    {
+      "word": "bank",
+      "context": "the robbers broke into the vault of the",
+      "right": "bank",
+      "wrong": "river",
+      "logp_right": -8.027,
+      "logp_wrong": -6.633,
+      "ok": false
+    },
+    {
+      "word": "bat",
+      "context": "the vampire bat flew out of the dark",
+      "right": "cave",
+      "wrong": "stadium",
+      "logp_right": -9.029,
+      "logp_wrong": -10.704,
+      "ok": true
+    },
+    {
+      "word": "bat",
+      "context": "he gripped the wooden baseball",
+      "right": "bat",
+      "wrong": "wing",
+      "logp_right": -9.919,
+      "logp_wrong": -11.568,
+      "ok": true
+    },
+    {
+      "word": "bat",
+      "context": "the nocturnal bat used echolocation to catch a",
+      "right": "moth",
+      "wrong": "pitch",
+      "logp_right": -8.58,
+      "logp_wrong": -8.378,
+      "ok": false
+    },
+    {
+      "word": "bat",
+      "context": "she swung the aluminum bat and hit a home",
+      "right": "run",
+      "wrong": "roost",
+      "logp_right": -4.564,
+      "logp_wrong": -13.402,
+      "ok": true
+    },
+    {
+      "word": "seal",
+      "context": "the seal swam gracefully in the cold ocean",
+      "right": "water",
+      "wrong": "envelope",
+      "logp_right": -10.324,
+      "logp_wrong": -11.4,
+      "ok": true
+    },
+    {
+      "word": "seal",
+      "context": "he pressed the wax seal onto the sealed",
+      "right": "letter",
+      "wrong": "iceberg",
+      "logp_right": -14.488,
+      "logp_wrong": -12.072,
+      "ok": false
+    },
+    {
+      "word": "seal",
+      "context": "the seal barked and clapped its",
+      "right": "flippers",
+      "wrong": "stamp",
+      "logp_right": -5.984,
+      "logp_wrong": -11.607,
+      "ok": true
+    },
+    {
+      "word": "spring",
+      "context": "the metal coil spring compressed under the heavy",
+      "right": "load",
+      "wrong": "blossom",
+      "logp_right": -9.086,
+      "logp_wrong": -12.66,
+      "ok": true
+    },
+    {
+      "word": "spring",
+      "context": "fresh water bubbled up from the mountain",
+      "right": "spring",
+      "wrong": "mattress",
+      "logp_right": -7.504,
+      "logp_wrong": -13.849,
+      "ok": true
+    },
+    {
+      "word": "spring",
+      "context": "in early spring the trees began to",
+      "right": "bloom",
+      "wrong": "compress",
+      "logp_right": -19.059,
+      "logp_wrong": -11.288,
+      "ok": false
+    },
+    {
+      "word": "spring",
+      "context": "the mechanic replaced the rusted suspension",
+      "right": "spring",
+      "wrong": "season",
+      "logp_right": -9.411,
+      "logp_wrong": -10.673,
+      "ok": true
+    },
+    {
+      "word": "mouse",
+      "context": "she clicked the wireless computer",
+      "right": "mouse",
+      "wrong": "cheese",
+      "logp_right": -12.9,
+      "logp_wrong": -12.379,
+      "ok": false
+    },
+    {
+      "word": "mouse",
+      "context": "the tiny mouse scurried across the kitchen looking for",
+      "right": "crumbs",
+      "wrong": "cursor",
+      "logp_right": -7.959,
+      "logp_wrong": -9.42,
+      "ok": true
+    },
+    {
+      "word": "mouse",
+      "context": "he moved the mouse to drag the icon across the",
+      "right": "screen",
+      "wrong": "burrow",
+      "logp_right": -9.719,
+      "logp_wrong": -12.234,
+      "ok": true
+    },
+    {
+      "word": "plane",
+      "context": "the passenger plane climbed above the",
+      "right": "clouds",
+      "wrong": "workbench",
+      "logp_right": -9.548,
+      "logp_wrong": -7.011,
+      "ok": false
+    },
+    {
+      "word": "plane",
+      "context": "the carpenter smoothed the board with a hand",
+      "right": "plane",
+      "wrong": "runway",
+      "logp_right": -8.883,
+      "logp_wrong": -16.735,
+      "ok": true
+    },
+    {
+      "word": "plane",
+      "context": "the pilot landed the plane safely on the",
+      "right": "runway",
+      "wrong": "lumber",
+      "logp_right": -15.205,
+      "logp_wrong": -11.13,
+      "ok": false
+    },
+    {
+      "word": "pitcher",
+      "context": "she poured lemonade from the ceramic",
+      "right": "pitcher",
+      "wrong": "mound",
+      "logp_right": -12.573,
+      "logp_wrong": -9.276,
+      "ok": false
+    },
+    {
+      "word": "pitcher",
+      "context": "the baseball pitcher threw a fast",
+      "right": "ball",
+      "wrong": "juice",
+      "logp_right": -5.357,
+      "logp_wrong": -10.852,
+      "ok": true
+    },
+    {
+      "word": "pitcher",
+      "context": "he filled the glass pitcher with cold",
+      "right": "water",
+      "wrong": "innings",
+      "logp_right": -12.074,
+      "logp_wrong": -11.891,
+      "ok": false
+    },
+    {
+      "word": "palm",
+      "context": "the tall palm swayed on the tropical",
+      "right": "beach",
+      "wrong": "wrist",
+      "logp_right": -9.908,
+      "logp_wrong": -10.889,
+      "ok": true
+    },
+    {
+      "word": "palm",
+      "context": "she read the lines on his open",
+      "right": "palm",
+      "wrong": "frond",
+      "logp_right": -10.042,
+      "logp_wrong": -8.097,
+      "ok": false
+    },
+    {
+      "word": "palm",
+      "context": "coconuts fell from the palm",
+      "right": "tree",
+      "wrong": "hand",
+      "logp_right": -8.914,
+      "logp_wrong": -11.345,
+      "ok": true
+    },
+    {
+      "word": "rock",
+      "context": "the climber gripped the sheer granite",
+      "right": "rock",
+      "wrong": "guitar",
+      "logp_right": -6.323,
+      "logp_wrong": -9.268,
+      "ok": true
+    },
+    {
+      "word": "rock",
+      "context": "the band played loud electric rock",
+      "right": "music",
+      "wrong": "boulder",
+      "logp_right": -4.574,
+      "logp_wrong": -11.671,
+      "ok": true
+    },
+    {
+      "word": "rock",
+      "context": "the heavy rock tumbled down the steep",
+      "right": "slope",
+      "wrong": "concert",
+      "logp_right": -6.738,
+      "logp_wrong": -11.492,
+      "ok": true
+    },
+    {
+      "word": "table",
+      "context": "they ate dinner around the wooden dining",
+      "right": "table",
+      "wrong": "spreadsheet",
+      "logp_right": -13.984,
+      "logp_wrong": -8.935,
+      "ok": false
+    },
+    {
+      "word": "table",
+      "context": "the data was arranged in rows in the",
+      "right": "table",
+      "wrong": "chair",
+      "logp_right": -9.641,
+      "logp_wrong": -9.693,
+      "ok": true
+    },
+    {
+      "word": "table",
+      "context": "she set plates and forks on the kitchen",
+      "right": "table",
+      "wrong": "database",
+      "logp_right": -12.688,
+      "logp_wrong": -10.633,
+      "ok": false
+    },
+    {
+      "word": "tank",
+      "context": "the army tank rolled across the muddy battle",
+      "right": "field",
+      "wrong": "aquarium",
+      "logp_right": -9.386,
+      "logp_wrong": -13.452,
+      "ok": true
+    },
+    {
+      "word": "tank",
+      "context": "the tropical fish swam in the glass",
+      "right": "tank",
+      "wrong": "turret",
+      "logp_right": -8.992,
+      "logp_wrong": -11.835,
+      "ok": true
+    },
+    {
+      "word": "tank",
+      "context": "they stored the fuel in a large steel",
+      "right": "tank",
+      "wrong": "cannon",
+      "logp_right": -6.156,
+      "logp_wrong": -13.979,
+      "ok": true
+    },
+    {
+      "word": "bow",
+      "context": "the archer drew back the wooden bow and released the",
+      "right": "arrow",
+      "wrong": "ribbon",
+      "logp_right": -11.272,
+      "logp_wrong": -10.508,
+      "ok": false
+    },
+    {
+      "word": "bow",
+      "context": "she tied a pretty ribbon bow on the wrapped",
+      "right": "gift",
+      "wrong": "quiver",
+      "logp_right": -10.553,
+      "logp_wrong": -8.629,
+      "ok": false
+    },
+    {
+      "word": "bow",
+      "context": "the violinist drew the bow across the",
+      "right": "strings",
+      "wrong": "target",
+      "logp_right": -9.877,
+      "logp_wrong": -9.299,
+      "ok": false
+    },
+    {
+      "word": "nail",
+      "context": "he hammered the metal nail into the wooden",
+      "right": "plank",
+      "wrong": "cuticle",
+      "logp_right": -10.453,
+      "logp_wrong": -9.204,
+      "ok": false
+    },
+    {
+      "word": "nail",
+      "context": "she painted her finger nail a bright",
+      "right": "red",
+      "wrong": "hammer",
+      "logp_right": -7.758,
+      "logp_wrong": -8.1,
+      "ok": true
+    },
+    {
+      "word": "trunk",
+      "context": "the squirrel climbed the thick tree",
+      "right": "trunk",
+      "wrong": "suitcase",
+      "logp_right": -13.725,
+      "logp_wrong": -13.454,
+      "ok": false
+    },
+    {
+      "word": "trunk",
+      "context": "he loaded the luggage into the car",
+      "right": "trunk",
+      "wrong": "branches",
+      "logp_right": -16.927,
+      "logp_wrong": -10.152,
+      "ok": false
+    },
+    {
+      "word": "trunk",
+      "context": "the elephant sprayed water with its long",
+      "right": "trunk",
+      "wrong": "bumper",
+      "logp_right": -12.519,
+      "logp_wrong": -12.146,
+      "ok": false
+    },
+    {
+      "word": "scale",
+      "context": "the fish was covered in shiny silver",
+      "right": "scales",
+      "wrong": "weights",
+      "logp_right": -8.05,
+      "logp_wrong": -10.055,
+      "ok": true
+    },
+    {
+      "word": "scale",
+      "context": "she weighed the flour on the kitchen",
+      "right": "scale",
+      "wrong": "fins",
+      "logp_right": -8.67,
+      "logp_wrong": -12.348,
+      "ok": true
+    },
+    {
+      "word": "key",
+      "context": "he turned the metal key in the door",
+      "right": "lock",
+      "wrong": "piano",
+      "logp_right": -10.582,
+      "logp_wrong": -10.159,
+      "ok": false
+    },
+    {
+      "word": "key",
+      "context": "the pianist pressed the ivory",
+      "right": "key",
+      "wrong": "keyhole",
+      "logp_right": -9.19,
+      "logp_wrong": -13.248,
+      "ok": true
+    },
+    {
+      "word": "key",
+      "context": "she couldn't unlock the door without the right",
+      "right": "key",
+      "wrong": "melody",
+      "logp_right": -8.741,
+      "logp_wrong": -9.998,
+      "ok": true
+    },
+    {
+      "word": "board",
+      "context": "the carpenter sawed the long wooden",
+      "right": "board",
+      "wrong": "committee",
+      "logp_right": -9.367,
+      "logp_wrong": -9.023,
+      "ok": false
+    },
+    {
+      "word": "board",
+      "context": "the company's decision was approved by the",
+      "right": "board",
+      "wrong": "plank",
+      "logp_right": -6.529,
+      "logp_wrong": -12.273,
+      "ok": true
+    },
+    {
+      "word": "board",
+      "context": "the directors held a board",
+      "right": "meeting",
+      "wrong": "sawdust",
+      "logp_right": -7.687,
+      "logp_wrong": -9.196,
+      "ok": true
+    },
+    {
+      "word": "well",
+      "context": "the villagers drew water from the stone",
+      "right": "well",
+      "wrong": "poorly",
+      "logp_right": -13.601,
+      "logp_wrong": -12.245,
+      "ok": false
+    },
+    {
+      "word": "well",
+      "context": "she performed the difficult task very",
+      "right": "well",
+      "wrong": "bucket",
+      "logp_right": -9.624,
+      "logp_wrong": -11.977,
+      "ok": true
+    },
+    {
+      "word": "iron",
+      "context": "the blacksmith forged the bar of raw",
+      "right": "iron",
+      "wrong": "wrinkles",
+      "logp_right": -12.608,
+      "logp_wrong": -7.505,
+      "ok": false
+    },
+    {
+      "word": "iron",
+      "context": "she pressed the wrinkled shirt with a hot",
+      "right": "iron",
+      "wrong": "ore",
+      "logp_right": -11.513,
+      "logp_wrong": -10.101,
+      "ok": false
+    },
+    {
+      "word": "chest",
+      "context": "the pirate buried the treasure",
+      "right": "chest",
+      "wrong": "lungs",
+      "logp_right": -10.447,
+      "logp_wrong": -13.068,
+      "ok": true
+    },
+    {
+      "word": "chest",
+      "context": "the doctor listened to the heartbeat in his",
+      "right": "chest",
+      "wrong": "drawer",
+      "logp_right": -7.957,
+      "logp_wrong": -7.57,
+      "ok": false
+    },
+    {
+      "word": "bark",
+      "context": "the rough bark peeled off the old oak",
+      "right": "tree",
+      "wrong": "puppy",
+      "logp_right": -7.659,
+      "logp_wrong": -12.564,
+      "ok": true
+    },
+    {
+      "word": "bark",
+      "context": "the guard dog began to loudly",
+      "right": "bark",
+      "wrong": "timber",
+      "logp_right": -18.463,
+      "logp_wrong": -13.441,
+      "ok": false
+    },
+    {
+      "word": "pupil",
+      "context": "the eager pupil raised his hand in the",
+      "right": "classroom",
+      "wrong": "retina",
+      "logp_right": -10.162,
+      "logp_wrong": -12.356,
+      "ok": true
+    },
+    {
+      "word": "pupil",
+      "context": "the doctor shone a light and the pupil of her eye",
+      "right": "dilated",
+      "wrong": "studied",
+      "logp_right": -9.349,
+      "logp_wrong": -9.881,
+      "ok": true
+    },
+    {
+      "word": "organ",
+      "context": "the church organ filled the hall with booming",
+      "right": "music",
+      "wrong": "tissue",
+      "logp_right": -6.28,
+      "logp_wrong": -10.845,
+      "ok": true
+    },
+    {
+      "word": "organ",
+      "context": "the surgeon carefully transplanted the vital",
+      "right": "organ",
+      "wrong": "pipes",
+      "logp_right": -10.893,
+      "logp_wrong": -9.073,
+      "ok": false
+    },
+    {
+      "word": "spade",
+      "context": "he dug the garden bed with a sharp",
+      "right": "spade",
+      "wrong": "hearts",
+      "logp_right": -11.293,
+      "logp_wrong": -11.409,
+      "ok": true
+    },
+    {
+      "word": "spade",
+      "context": "she played the ace of",
+      "right": "spades",
+      "wrong": "shovels",
+      "logp_right": -11.507,
+      "logp_wrong": -6.233,
+      "ok": false
+    },
+    {
+      "word": "club",
+      "context": "the golfer swung the metal",
+      "right": "club",
+      "wrong": "cards",
+      "logp_right": -12.536,
+      "logp_wrong": -9.067,
+      "ok": false
+    },
+    {
+      "word": "club",
+      "context": "they danced all night at the crowded night",
+      "right": "club",
+      "wrong": "swing",
+      "logp_right": -12.268,
+      "logp_wrong": -9.483,
+      "ok": false
+    },
+    {
+      "word": "club",
+      "context": "he was dealt the seven of",
+      "right": "clubs",
+      "wrong": "putters",
+      "logp_right": -9.476,
+      "logp_wrong": -15.215,
+      "ok": true
+    },
+    {
+      "word": "ruler",
+      "context": "she measured the line with a plastic",
+      "right": "ruler",
+      "wrong": "kingdom",
+      "logp_right": -11.706,
+      "logp_wrong": -11.186,
+      "ok": false
+    },
+    {
+      "word": "ruler",
+      "context": "the ancient kingdom obeyed its powerful",
+      "right": "ruler",
+      "wrong": "centimeters",
+      "logp_right": -6.535,
+      "logp_wrong": -13.301,
+      "ok": true
+    },
+    {
+      "word": "current",
+      "context": "the strong ocean current pulled the swimmer out to",
+      "right": "sea",
+      "wrong": "voltage",
+      "logp_right": -7.889,
+      "logp_wrong": -12.865,
+      "ok": true
+    },
+    {
+      "word": "current",
+      "context": "the electric current flowed through the copper",
+      "right": "wire",
+      "wrong": "tide",
+      "logp_right": -10.817,
+      "logp_wrong": -15.243,
+      "ok": true
+    },
+    {
+      "word": "pitch",
+      "context": "the footballers ran across the muddy football",
+      "right": "pitch",
+      "wrong": "melody",
+      "logp_right": -7.99,
+      "logp_wrong": -12.785,
+      "ok": true
+    },
+    {
+      "word": "pitch",
+      "context": "the opera singer hit a remarkably high",
+      "right": "pitch",
+      "wrong": "field",
+      "logp_right": -8.238,
+      "logp_wrong": -8.629,
+      "ok": true
+    },
+    {
+      "word": "cabinet",
+      "context": "she stored the plates in the kitchen",
+      "right": "cabinet",
+      "wrong": "ministers",
+      "logp_right": -12.027,
+      "logp_wrong": -13.349,
+      "ok": true
+    },
+    {
+      "word": "cabinet",
+      "context": "the prime minister met with his senior",
+      "right": "cabinet",
+      "wrong": "cupboard",
+      "logp_right": -5.909,
+      "logp_wrong": -10.168,
+      "ok": true
+    },
+    {
+      "word": "mint",
+      "context": "the coins were freshly struck at the royal",
+      "right": "mint",
+      "wrong": "leaf",
+      "logp_right": -8.323,
+      "logp_wrong": -8.623,
+      "ok": true
+    },
+    {
+      "word": "mint",
+      "context": "she chewed a fresh sprig of",
+      "right": "mint",
+      "wrong": "coins",
+      "logp_right": -11.328,
+      "logp_wrong": -10.749,
+      "ok": false
+    },
+    {
+      "word": "cell",
+      "context": "the biologist studied the living",
+      "right": "cell",
+      "wrong": "prisoner",
+      "logp_right": -9.203,
+      "logp_wrong": -12.378,
+      "ok": true
+    },
+    {
+      "word": "cell",
+      "context": "the prisoner paced inside his locked",
+      "right": "cell",
+      "wrong": "membrane",
+      "logp_right": -10.089,
+      "logp_wrong": -14.41,
+      "ok": true
+    },
+    {
+      "word": "bolt",
+      "context": "he tightened the metal",
+      "right": "bolt",
+      "wrong": "lightning",
+      "logp_right": -18.574,
+      "logp_wrong": -10.157,
+      "ok": false
+    },
+    {
+      "word": "bolt",
+      "context": "a bright bolt of lightning lit the",
+      "right": "sky",
+      "wrong": "wrench",
+      "logp_right": -7.166,
+      "logp_wrong": -11.776,
+      "ok": true
+    },
+    {
+      "word": "jam",
+      "context": "she spread strawberry jam on her",
+      "right": "toast",
+      "wrong": "highway",
+      "logp_right": -12.436,
+      "logp_wrong": -11.214,
+      "ok": false
+    },
+    {
+      "word": "jam",
+      "context": "the cars were stuck in a huge traffic",
+      "right": "jam",
+      "wrong": "bread",
+      "logp_right": -11.327,
+      "logp_wrong": -13.095,
+      "ok": true
+    },
+    {
+      "word": "star",
+      "context": "the bright star twinkled in the night",
+      "right": "sky",
+      "wrong": "movie",
+      "logp_right": -7.735,
+      "logp_wrong": -8.352,
+      "ok": true
+    },
+    {
+      "word": "star",
+      "context": "the film premiere featured a famous movie",
+      "right": "star",
+      "wrong": "galaxy",
+      "logp_right": -14.787,
+      "logp_wrong": -11.172,
+      "ok": false
+    },
+    {
+      "word": "note",
+      "context": "she scribbled a quick reminder",
+      "right": "note",
+      "wrong": "octave",
+      "logp_right": -10.406,
+      "logp_wrong": -13.803,
+      "ok": true
+    },
+    {
+      "word": "note",
+      "context": "the pianist held the single high",
+      "right": "note",
+      "wrong": "memo",
+      "logp_right": -9.752,
+      "logp_wrong": -12.836,
+      "ok": true
+    },
+    {
+      "word": "wave",
+      "context": "the surfer rode the towering ocean",
+      "right": "wave",
+      "wrong": "greeting",
+      "logp_right": -8.005,
+      "logp_wrong": -12.84,
+      "ok": true
+    },
+    {
+      "word": "wave",
+      "context": "she gave a friendly goodbye",
+      "right": "wave",
+      "wrong": "tide",
+      "logp_right": -11.845,
+      "logp_wrong": -17.253,
+      "ok": true
+    },
+    {
+      "word": "match",
+      "context": "he struck the wooden",
+      "right": "match",
+      "wrong": "tournament",
+      "logp_right": -9.748,
+      "logp_wrong": -12.328,
+      "ok": true
+    },
+    {
+      "word": "match",
+      "context": "the tennis players finished a long five set",
+      "right": "match",
+      "wrong": "flame",
+      "logp_right": -9.497,
+      "logp_wrong": -14.418,
+      "ok": true
+    },
+    {
+      "word": "court",
+      "context": "the lawyer argued the case before the",
+      "right": "court",
+      "wrong": "net",
+      "logp_right": -4.949,
+      "logp_wrong": -11.669,
+      "ok": true
+    },
+    {
+      "word": "court",
+      "context": "the players warmed up on the tennis",
+      "right": "court",
+      "wrong": "judge",
+      "logp_right": -4.662,
+      "logp_wrong": -9.436,
+      "ok": true
+    },
+    {
+      "word": "bridge",
+      "context": "the cars drove across the long suspension",
+      "right": "bridge",
+      "wrong": "cards",
+      "logp_right": -6.724,
+      "logp_wrong": -9.964,
+      "ok": true
+    },
+    {
+      "word": "bridge",
+      "context": "the dentist fitted a dental",
+      "right": "bridge",
+      "wrong": "river",
+      "logp_right": -9.213,
+      "logp_wrong": -8.836,
+      "ok": false
+    },
+    {
+      "word": "fan",
+      "context": "on the hot day she switched on the electric",
+      "right": "fan",
+      "wrong": "supporter",
+      "logp_right": -8.592,
+      "logp_wrong": -11.369,
+      "ok": true
+    },
+    {
+      "word": "fan",
+      "context": "the loyal football",
+      "right": "fan",
+      "wrong": "blade",
+      "logp_right": -9.971,
+      "logp_wrong": -15.302,
+      "ok": true
+    },
+    {
+      "word": "date",
+      "context": "she picked a sweet dried",
+      "right": "date",
+      "wrong": "appointment",
+      "logp_right": -10.299,
+      "logp_wrong": -15.036,
+      "ok": true
+    },
+    {
+      "word": "date",
+      "context": "they went to dinner on their first romantic",
+      "right": "date",
+      "wrong": "palm",
+      "logp_right": -10.612,
+      "logp_wrong": -10.127,
+      "ok": false
+    }
+  ]
+}
