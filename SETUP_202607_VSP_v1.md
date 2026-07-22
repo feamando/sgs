@@ -245,43 +245,44 @@ Paired contingency: 82 both-correct, 1 VSP-only win, 5 VSP-only regressions
    TESTS the warm start instead of overwriting it.
 
 **NEXT — low-compute gate (the honest test of the thesis):**
-### RESULT 2 — efficiency curve (2026-07-22): MONOTONIC, thesis SUPPORTED
+### RESULT 2 — efficiency curve (2026-07-22): trend APPEARED, then FAILED to reproduce
 
-Ran the low-compute gate at two more points (2k, 5k) vs the 40k full run, same
-105-pair benchmark, --freeze-vp-forever for the VSP arm:
+Single-seed run looked monotonic (below, seed 0). But the 2k point did NOT
+reproduce under a second seed, so the magnitude claim is DEAD and only a weak
+directional trend survives. Do not cite +5.7.
 
-| opt-steps | VSP acc | baseline acc | delta | McNemar p | model corr |
-|-----------|---------|--------------|-------|-----------|------------|
-| 2k  | 0.695 | 0.638 | **+5.7 pts** | 0.18 | 0.943 |
-| 5k  | 0.733 | 0.724 | **+1.0 pt**  | 1.00 | 0.940 |
-| 40k | 0.790 | 0.829 | **−3.8 pts** | 0.22 | 0.964 |
+| opt-steps | VSP acc | baseline acc | delta (seed 0) | McNemar p |
+|-----------|---------|--------------|----------------|-----------|
+| 2k  | 0.695 | 0.638 | +5.7 pts | 0.18 |
+| 5k  | 0.733 | 0.724 | +1.0 pt  | 1.00 |
+| 40k | 0.790 | 0.829 | −3.8 pts | 0.22 |
 
-**Delta is strictly monotonic in compute: +5.7 → +1.0 → −3.8 (full swing 9.5pts).**
-As training shrinks, grounding's advantage grows — exactly the washout mechanism
-predicted in RESULT 1. This is the paper figure: **VSP is a compute/data-
-efficiency lever, not a ceiling-raiser.** At 2k the contingency also favors VSP
-(10 VSP-only wins vs 4 baseline-only).
+**REPRODUCTION FAILED (2k, seed 1): delta −1.0 pt (0.657 vs 0.667), p=1.00.**
+Two-seed 2k: deltas +5.7 / −1.0, mean **+2.4**. Pooled 210 trials: VSP-only 15 vs
+base-only 10, **McNemar p≈0.42**. The seed-to-seed swing (6.7pts) is LARGER than
+the effect — the +5.7 was substantially a lucky draw.
 
-HONEST CAVEATS: no single point is significant (2k best at p=0.18). The RESULT is
-the monotonic trend across 3 points + the mechanism, not any one delta. n=3.
-Absolute acc is low at 2k (both models undertrained) — it's a real gap between
-two weak models.
+WHAT SURVIVES: only a directional hint that low-compute deltas are less negative
+than the −3.8 full-compute loss (consistent with washout). That is a weak
+hypothesis, NOT a result and NOT a paper figure. Cannot claim VSP beats baseline
+at any single compute point.
 
-**HARDENING (in flight): reseed the 2k point.** `--seed` flag added
-(train_planck2.py) — seeds model init, the bundle projection, AND the data
-shuffle (all three were previously fixed at 0, so a naive rerun was bit-identical
-and proved nothing). If +5–6pts reproduces under a different seed, the
-significance concern largely dissolves.
+**NEXT — multi-seed to settle or kill (chosen 2026-07-22):** ~5 seeds each at 2k
+and 40k (skip 5k). Compare MEAN deltas with error bars. 2k-mean reliably > 40k-mean
+across seeds → efficiency effect real, defensible figure. Bands overlap →
+embedding-init is neutral; pivot to VSP-as-aux-signal (contrastive loss /
+inference rerank). n=1-per-point can never settle this given the ±6pt variance.
 ```powershell
-python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
-  --opt-steps 2000 --freeze-vp-forever --seed 1 --save-dir checkpoints/planck2_vsp_2k_s1
-python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
-  --opt-steps 2000 --random-init --seed 1 --save-dir checkpoints/planck2_baseline_2k_s1
-# eval both -> results/disambig_{vsp,baseline}_2k_s1.json
+# repeat for seed in 2..5 at BOTH 2k and 40k; eval each to results/disambig_{vsp,baseline}_{2k,40k}_s{N}.json
+foreach ($s in 2,3,4,5) {
+  python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+    --opt-steps 2000 --freeze-vp-forever --seed $s --save-dir checkpoints/planck2_vsp_2k_s$s
+  python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
+    --opt-steps 2000 --random-init --seed $s --save-dir checkpoints/planck2_baseline_2k_s$s
+  # (and the same two at --opt-steps 40000 for the 40k anchor)
+}
 ```
-OPEN CONFOUND: confirm all curve points trained on >= commit 65d4247 (rescaled
-init). If 5k/40k predate it they carry the old 2.0x scale friction and the curve
-mixes code paths (would only UNDERSTATE the low-compute deltas, but note it).
+(seed 0 + seed 1 already done at 2k; 40k has only seed 0 so far.)
 
 PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
 two styles: cloze (the sense word IS the right answer, e.g. "sat on the grassy
@@ -300,7 +301,7 @@ pairs, still add more if the delta is within a few points.
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
-| 4 | disambiguation benchmark | **RUN 2026-07-17/22 (105 pairs): efficiency curve MONOTONIC** — VSP−baseline = +5.7(2k)/+1.0(5k)/−3.8(40k). Thesis SUPPORTED (efficiency lever, not ceiling). No single point significant; reseed-2k hardening in flight (see §4 RESULT 2). |
+| 4 | disambiguation benchmark | **RUN 2026-07-17/22 (105 pairs): INCONCLUSIVE.** Single-seed curve looked monotonic (+5.7/+1.0/−3.8) but 2k reseed FAILED (−1.0; 2-seed mean +2.4, pooled p≈0.42). Magnitude claim dead; only weak directional hint. Multi-seed 2k+40k to settle/kill (see §4 RESULT 2). |
 
 ## Papers this feeds
 
