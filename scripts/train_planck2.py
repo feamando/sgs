@@ -184,6 +184,9 @@ def parse_args():
     p.add_argument("--save-interval", type=int, default=2000)
     p.add_argument("--log-interval", type=int, default=50)
     p.add_argument("--num-workers", type=int, default=0)
+    p.add_argument("--seed", type=int, default=0,
+                   help="RNG seed for model init, the bundle-projection, and the "
+                        "data shuffle. Vary it to test whether a result reproduces.")
     p.add_argument("--selftest", action="store_true")
     return p.parse_args()
 
@@ -193,8 +196,14 @@ def main():
     if args.selftest:
         sys.exit(0 if selftest() else 1)
 
+    # Seed BEFORE any model/projection init so a reseed is a genuine independent
+    # draw (the throwaway projection in init_from_bundles is random too, so it
+    # must be inside the seeded region). Without this a "reseed" is bit-identical.
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
+    print(f"Device: {device}  |  seed {args.seed}")
 
     n_tokens, V, S, P = load_vocab_bundles(args.vocab)
     print(f"[p2] vocab: {n_tokens:,} tokens (V{V.shape[1]}/S{S.shape[1]}/P{P.shape[1]})")
