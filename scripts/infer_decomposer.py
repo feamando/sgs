@@ -1054,6 +1054,18 @@ main { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
            under-recalls (decomposers, incl. Gemma few-shot, emit a monolithic
            "castle" leaf that has no renderable part). Same Raum 1.7 lesson. -->
       <textarea id="prompt" placeholder="a stone castle on a green hill">a stone castle on a green hill</textarea>
+      <!-- §7 emission mode. Named = castle-grammar skeleton (14 parts; non-castle
+           prompts render only the ground). Parametric = Gemma emits shape
+           primitives, so ANY object renders. Gemma-only; the SGS backends ignore
+           it and use the named path. -->
+      <div id="mode-row" style="margin-top:8px;display:flex;gap:14px;align-items:center;font-size:12px">
+        <label style="display:flex;gap:5px;align-items:center;cursor:pointer">
+          <input type="radio" name="mode" value="named" checked> Named grammar (castle)
+        </label>
+        <label style="display:flex;gap:5px;align-items:center;cursor:pointer">
+          <input type="radio" name="mode" value="parametric"> Parametric (any object)
+        </label>
+      </div>
     </div>
 
     <div id="image-pane" style="display:none">
@@ -1330,7 +1342,8 @@ btn.addEventListener('click', async () => {
           splats: +ctl.splats.value, density: +ctl.density.value,
           flatten: +ctl.flatten.value, weathering: +ctl.weathering.value,
           snap: document.getElementById('snap').checked,
-          fill_method: document.getElementById('fill-method').value})});
+          fill_method: document.getElementById('fill-method').value,
+          mode: document.querySelector('input[name="mode"]:checked').value})});
       data = await r.json();
     }
     if (data.error) {
@@ -1657,6 +1670,12 @@ def main():
             # grammar vs learned fill live. (Interpreter/decomposer are heavy
             # model loads -> selected at launch via --checkpoint, not per-request.)
             fill_method: str = "grammar"
+            # §7 emission mode: "named" = the castle-grammar skeleton path
+            # (validate_skeleton -> 14 named parts; anything else is dropped,
+            # which is why non-castle prompts rendered only the ground). "parametric"
+            # = Gemma emits shape+size primitives (box/cylinder/cone/...), gated by
+            # validate_parametric instead, so ANY object renders. Gemma-only.
+            mode: str = "named"
 
         def _finalize(tree, tree_dict, *, fidelity, refine_mode, fill_method,
                       splats, density, flatten, weathering):
@@ -1768,10 +1787,21 @@ def main():
                     return JSONResponse({"error": "empty prompt"})
 
                 active = manager.get()
-                tree_dict = active.generate_tree(
-                    prompt, max_new=args.max_new,
-                    temperature=args.temperature, top_k=args.top_k,
-                )
+                # §7 parametric mode: Gemma emits shape primitives, gated by
+                # validate_parametric (not the 14-name grammar). Guarded like
+                # /decompose_image -- only GemmaMMDecomposer has this method; the
+                # SGS backends (Hertz/Planck) fall back to the named skeleton path.
+                parametric = req.mode == "parametric" and hasattr(active, "generate_parametric")
+                if parametric:
+                    tree_dict = active.generate_parametric(
+                        prompt=prompt, max_new=args.max_new,
+                        temperature=args.temperature,
+                    )
+                else:
+                    tree_dict = active.generate_tree(
+                        prompt, max_new=args.max_new,
+                        temperature=args.temperature, top_k=args.top_k,
+                    )
 
                 if tree_dict is None:
                     # dump the raw model output so the exact malformation is
@@ -1802,15 +1832,20 @@ def main():
                     pass
 
                 # Raum 1.6: grammar-validated decoding -- drop unrenderable leaves.
-                # per-request snap overrides the server default when provided
-                use_snap = (not args.no_snap) if req.snap is None else req.snap
-                tree_dict, vreport = validate_tree(tree_dict, snap=use_snap)
-                if vreport["dropped"]:
-                    print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
-                          f"{vreport['dropped'][:8]}", file=sys.stderr)
-                if vreport.get("snapped"):
-                    print(f"  validate: snapped {vreport['snapped']} castle parts to "
-                          f"canonical layout", file=sys.stderr)
+                # per-request snap overrides the server default when provided.
+                # SKIP for parametric: validate_parametric already gated the tree
+                # AND filled gaussians; validate_tree gates by NAME (shape names
+                # like "cylinder"/"wedge" aren't all in its keyword list), so it
+                # would drop the very primitives we just built.
+                if not parametric:
+                    use_snap = (not args.no_snap) if req.snap is None else req.snap
+                    tree_dict, vreport = validate_tree(tree_dict, snap=use_snap)
+                    if vreport["dropped"]:
+                        print(f"  validate: dropped {len(vreport['dropped'])} unknown leaves: "
+                              f"{vreport['dropped'][:8]}", file=sys.stderr)
+                    if vreport.get("snapped"):
+                        print(f"  validate: snapped {vreport['snapped']} castle parts to "
+                              f"canonical layout", file=sys.stderr)
 
                 try:
                     tree = CompositionNode.from_dict(tree_dict)
