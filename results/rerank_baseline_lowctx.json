@@ -1,0 +1,4693 @@
+{
+  "checkpoint": "checkpoints/planck2_baseline/final.pt",
+  "accuracy_by_lambda": {
+    "0.0": 0.5807692307692308,
+    "0.25": 0.5846153846153846,
+    "0.5": 0.5769230769230769,
+    "1.0": 0.573076923076923,
+    "2.0": 0.5615384615384615,
+    "4.0": 0.5846153846153846
+  },
+  "rows": [
+    {
+      "word": "bank",
+      "context": "walked along the bank",
+      "right": "river",
+      "wrong": "cash",
+      "logp_right": -5.869,
+      "logp_wrong": -10.554,
+      "cons_right": 0.337,
+      "cons_wrong": 0.849,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "money in the bank",
+      "right": "cash",
+      "wrong": "river",
+      "logp_right": -9.158,
+      "logp_wrong": -8.093,
+      "cons_right": 0.849,
+      "cons_wrong": 0.337,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "the bank was muddy",
+      "right": "river",
+      "wrong": "loan",
+      "logp_right": -5.494,
+      "logp_wrong": -10.327,
+      "cons_right": 0.303,
+      "cons_wrong": 0.222,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "went to the bank",
+      "right": "cash",
+      "wrong": "river",
+      "logp_right": -11.055,
+      "logp_wrong": -7.396,
+      "cons_right": 0.849,
+      "cons_wrong": 0.337,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bank",
+      "context": "grass on the bank",
+      "right": "river",
+      "wrong": "vault",
+      "logp_right": -4.541,
+      "logp_wrong": -7.568,
+      "cons_right": 0.337,
+      "cons_wrong": 0.109,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "the bank was closed",
+      "right": "cash",
+      "wrong": "river",
+      "logp_right": -14.013,
+      "logp_wrong": -12.09,
+      "cons_right": 0.97,
+      "cons_wrong": 0.303,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "the far bank",
+      "right": "river",
+      "wrong": "cash",
+      "logp_right": -5.96,
+      "logp_wrong": -10.43,
+      "cons_right": 0.337,
+      "cons_wrong": 0.849,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "heard a loud bark",
+      "right": "dog",
+      "wrong": "tree",
+      "logp_right": -7.83,
+      "logp_wrong": -7.729,
+      "cons_right": 0.892,
+      "cons_wrong": 0.945,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bark",
+      "context": "the bark was rough",
+      "right": "tree",
+      "wrong": "dog",
+      "logp_right": -10.579,
+      "logp_wrong": -10.636,
+      "cons_right": 0.981,
+      "cons_wrong": 0.982,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "a sudden bark outside",
+      "right": "dog",
+      "wrong": "trunk",
+      "logp_right": -9.862,
+      "logp_wrong": -11.938,
+      "cons_right": 0.971,
+      "cons_wrong": 0.941,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "peeled the bark off",
+      "right": "tree",
+      "wrong": "puppy",
+      "logp_right": -7.588,
+      "logp_wrong": -14.295,
+      "cons_right": 0.986,
+      "cons_wrong": 0.144,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "its bark was sharp",
+      "right": "dog",
+      "wrong": "wood",
+      "logp_right": -11.722,
+      "logp_wrong": -11.481,
+      "cons_right": 0.988,
+      "cons_wrong": 0.988,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bark",
+      "context": "gray bark on it",
+      "right": "tree",
+      "wrong": "puppy",
+      "logp_right": -9.775,
+      "logp_wrong": -12.432,
+      "cons_right": 0.979,
+      "cons_wrong": 0.199,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "a distant bark",
+      "right": "dog",
+      "wrong": "tree",
+      "logp_right": -8.968,
+      "logp_wrong": -6.596,
+      "cons_right": 0.892,
+      "cons_wrong": 0.945,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bat",
+      "context": "a bat flew by",
+      "right": "cave",
+      "wrong": "ball",
+      "logp_right": -9.191,
+      "logp_wrong": -8.295,
+      "cons_right": 0.174,
+      "cons_wrong": 0.517,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bat",
+      "context": "swung the bat hard",
+      "right": "ball",
+      "wrong": "cave",
+      "logp_right": -4.531,
+      "logp_wrong": -9.321,
+      "cons_right": 0.27,
+      "cons_wrong": 0.193,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "the bat hung there",
+      "right": "cave",
+      "wrong": "ball",
+      "logp_right": -10.981,
+      "logp_wrong": -10.659,
+      "cons_right": 0.193,
+      "cons_wrong": 0.27,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bat",
+      "context": "grabbed a wooden bat",
+      "right": "ball",
+      "wrong": "wings",
+      "logp_right": -5.948,
+      "logp_wrong": -9.355,
+      "cons_right": 0.212,
+      "cons_wrong": 0.268,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "a bat at night",
+      "right": "cave",
+      "wrong": "pitch",
+      "logp_right": -10.484,
+      "logp_wrong": -11.003,
+      "cons_right": 0.155,
+      "cons_wrong": 0.337,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bat",
+      "context": "held the bat up",
+      "right": "ball",
+      "wrong": "wings",
+      "logp_right": -10.986,
+      "logp_wrong": -12.124,
+      "cons_right": 0.3,
+      "cons_wrong": 0.192,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "an old bat",
+      "right": "cave",
+      "wrong": "ball",
+      "logp_right": -7.28,
+      "logp_wrong": -7.664,
+      "cons_right": 0.27,
+      "cons_wrong": 0.439,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "board",
+      "context": "a long wooden board",
+      "right": "nail",
+      "wrong": "meeting",
+      "logp_right": -11.216,
+      "logp_wrong": -6.334,
+      "cons_right": 0.87,
+      "cons_wrong": 0.35,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "board",
+      "context": "the board voted yes",
+      "right": "meeting",
+      "wrong": "nail",
+      "logp_right": -8.777,
+      "logp_wrong": -15.029,
+      "cons_right": 0.485,
+      "cons_wrong": 0.964,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "board",
+      "context": "nailed the board down",
+      "right": "nail",
+      "wrong": "vote",
+      "logp_right": -15.167,
+      "logp_wrong": -9.007,
+      "cons_right": 0.964,
+      "cons_wrong": 0.415,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "board",
+      "context": "the board met today",
+      "right": "vote",
+      "wrong": "plank",
+      "logp_right": -10.147,
+      "logp_wrong": -15.217,
+      "cons_right": 0.428,
+      "cons_wrong": -0.033,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "board",
+      "context": "a warped old board",
+      "right": "plank",
+      "wrong": "vote",
+      "logp_right": -11.712,
+      "logp_wrong": -9.474,
+      "cons_right": 0.056,
+      "cons_wrong": 0.338,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "board",
+      "context": "joined the board",
+      "right": "vote",
+      "wrong": "plank",
+      "logp_right": -11.556,
+      "logp_wrong": -14.82,
+      "cons_right": 0.415,
+      "cons_wrong": 0.06,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "board",
+      "context": "the school board",
+      "right": "vote",
+      "wrong": "plank",
+      "logp_right": -9.354,
+      "logp_wrong": -15.005,
+      "cons_right": 0.361,
+      "cons_wrong": 0.028,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "saw a sudden bolt",
+      "right": "sky",
+      "wrong": "nut",
+      "logp_right": -14.485,
+      "logp_wrong": -9.355,
+      "cons_right": 0.867,
+      "cons_wrong": 0.212,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "tightened the bolt",
+      "right": "nut",
+      "wrong": "sky",
+      "logp_right": -8.778,
+      "logp_wrong": -13.841,
+      "cons_right": 0.265,
+      "cons_wrong": 0.864,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "a bolt struck",
+      "right": "sky",
+      "wrong": "screw",
+      "logp_right": -12.458,
+      "logp_wrong": -10.295,
+      "cons_right": 0.882,
+      "cons_wrong": 0.875,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "the bolt was loose",
+      "right": "nut",
+      "wrong": "thunder",
+      "logp_right": -7.895,
+      "logp_wrong": -10.824,
+      "cons_right": 0.191,
+      "cons_wrong": 0.943,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "a bright bolt above",
+      "right": "sky",
+      "wrong": "screw",
+      "logp_right": -13.579,
+      "logp_wrong": -10.814,
+      "cons_right": 0.882,
+      "cons_wrong": 0.875,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "turned the metal bolt",
+      "right": "nut",
+      "wrong": "thunder",
+      "logp_right": -8.347,
+      "logp_wrong": -13.153,
+      "cons_right": 0.265,
+      "cons_wrong": 0.923,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "a jagged bolt",
+      "right": "sky",
+      "wrong": "screw",
+      "logp_right": -13.611,
+      "logp_wrong": -9.203,
+      "cons_right": 0.882,
+      "cons_wrong": 0.875,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bow",
+      "context": "drew back the bow",
+      "right": "arrow",
+      "wrong": "ribbon",
+      "logp_right": -7.595,
+      "logp_wrong": -14.343,
+      "cons_right": 0.964,
+      "cons_wrong": 0.942,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "tied a pretty bow",
+      "right": "ribbon",
+      "wrong": "arrow",
+      "logp_right": -13.239,
+      "logp_wrong": -9.357,
+      "cons_right": 0.791,
+      "cons_wrong": 0.884,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bow",
+      "context": "aimed with the bow",
+      "right": "arrow",
+      "wrong": "gift",
+      "logp_right": -7.309,
+      "logp_wrong": -14.478,
+      "cons_right": 0.94,
+      "cons_wrong": 0.271,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "a red silk bow",
+      "right": "ribbon",
+      "wrong": "arrow",
+      "logp_right": -9.897,
+      "logp_wrong": -7.98,
+      "cons_right": 0.778,
+      "cons_wrong": 0.793,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bow",
+      "context": "shot the bow",
+      "right": "arrow",
+      "wrong": "gift",
+      "logp_right": -7.862,
+      "logp_wrong": -13.802,
+      "cons_right": 0.915,
+      "cons_wrong": 0.228,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "a bow in her hair",
+      "right": "ribbon",
+      "wrong": "arrow",
+      "logp_right": -10.74,
+      "logp_wrong": -11.464,
+      "cons_right": 0.899,
+      "cons_wrong": 0.912,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "the hunter bow",
+      "right": "arrow",
+      "wrong": "ribbon",
+      "logp_right": -6.366,
+      "logp_wrong": -13.441,
+      "cons_right": 0.964,
+      "cons_wrong": 0.942,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "crossed the old bridge",
+      "right": "river",
+      "wrong": "cards",
+      "logp_right": -5.495,
+      "logp_wrong": -14.356,
+      "cons_right": 0.337,
+      "cons_wrong": 0.214,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "played a bridge hand",
+      "right": "cards",
+      "wrong": "river",
+      "logp_right": -10.621,
+      "logp_wrong": -8.129,
+      "cons_right": 0.382,
+      "cons_wrong": 0.133,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "the bridge over water",
+      "right": "river",
+      "wrong": "cards",
+      "logp_right": -6.433,
+      "logp_wrong": -11.554,
+      "cons_right": 0.452,
+      "cons_wrong": 0.212,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "a game of bridge",
+      "right": "cards",
+      "wrong": "river",
+      "logp_right": -10.657,
+      "logp_wrong": -9.328,
+      "cons_right": 0.351,
+      "cons_wrong": 0.144,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "walked across the bridge",
+      "right": "river",
+      "wrong": "trump",
+      "logp_right": -6.711,
+      "logp_wrong": -11.234,
+      "cons_right": 0.443,
+      "cons_wrong": 0.026,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "good at bridge",
+      "right": "cards",
+      "wrong": "river",
+      "logp_right": -13.707,
+      "logp_wrong": -6.545,
+      "cons_right": 0.261,
+      "cons_wrong": 0.16,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "under the bridge",
+      "right": "river",
+      "wrong": "cards",
+      "logp_right": -6.484,
+      "logp_wrong": -13.059,
+      "cons_right": 0.31,
+      "cons_wrong": 0.222,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "opened the kitchen cabinet",
+      "right": "drawer",
+      "wrong": "minister",
+      "logp_right": -5.94,
+      "logp_wrong": -7.007,
+      "cons_right": 0.249,
+      "cons_wrong": 0.527,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "the cabinet resigned",
+      "right": "minister",
+      "wrong": "drawer",
+      "logp_right": -7.476,
+      "logp_wrong": -8.04,
+      "cons_right": 0.527,
+      "cons_wrong": 0.249,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "a wooden cabinet",
+      "right": "drawer",
+      "wrong": "minister",
+      "logp_right": -4.587,
+      "logp_wrong": -11.968,
+      "cons_right": 0.126,
+      "cons_wrong": 0.44,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "the government cabinet",
+      "right": "minister",
+      "wrong": "shelf",
+      "logp_right": -4.272,
+      "logp_wrong": -14.027,
+      "cons_right": 0.527,
+      "cons_wrong": 0.962,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "dishes in the cabinet",
+      "right": "shelf",
+      "wrong": "minister",
+      "logp_right": -13.576,
+      "logp_wrong": -7.518,
+      "cons_right": 0.962,
+      "cons_wrong": 0.527,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "the cabinet met",
+      "right": "minister",
+      "wrong": "shelf",
+      "logp_right": -8.272,
+      "logp_wrong": -17.181,
+      "cons_right": 0.581,
+      "cons_wrong": 0.973,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "a glass cabinet",
+      "right": "shelf",
+      "wrong": "minister",
+      "logp_right": -11.638,
+      "logp_wrong": -11.996,
+      "cons_right": 0.98,
+      "cons_wrong": 0.618,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "locked in a cell",
+      "right": "prison",
+      "wrong": "blood",
+      "logp_right": -8.109,
+      "logp_wrong": -10.344,
+      "cons_right": 0.38,
+      "cons_wrong": 0.321,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "a single living cell",
+      "right": "blood",
+      "wrong": "prison",
+      "logp_right": -10.736,
+      "logp_wrong": -10.31,
+      "cons_right": 0.272,
+      "cons_wrong": 0.269,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "cell",
+      "context": "the prisoner cell",
+      "right": "prison",
+      "wrong": "blood",
+      "logp_right": -7.817,
+      "logp_wrong": -10.372,
+      "cons_right": 0.267,
+      "cons_wrong": 0.293,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "the cell divided",
+      "right": "blood",
+      "wrong": "prison",
+      "logp_right": -10.21,
+      "logp_wrong": -13.182,
+      "cons_right": 0.268,
+      "cons_wrong": 0.231,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "alone in his cell",
+      "right": "prison",
+      "wrong": "tissue",
+      "logp_right": -8.747,
+      "logp_wrong": -9.664,
+      "cons_right": 0.404,
+      "cons_wrong": 0.311,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "a cell under the microscope",
+      "right": "tissue",
+      "wrong": "prison",
+      "logp_right": -9.805,
+      "logp_wrong": -13.415,
+      "cons_right": 0.132,
+      "cons_wrong": 0.331,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "chest",
+      "context": "a pain in his chest",
+      "right": "lungs",
+      "wrong": "treasure",
+      "logp_right": -10.114,
+      "logp_wrong": -20.088,
+      "cons_right": 0.332,
+      "cons_wrong": 0.735,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "chest",
+      "context": "opened the old chest",
+      "right": "treasure",
+      "wrong": "lungs",
+      "logp_right": -18.634,
+      "logp_wrong": -8.816,
+      "cons_right": 0.965,
+      "cons_wrong": 0.093,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "chest",
+      "context": "his broad chest",
+      "right": "lungs",
+      "wrong": "treasure",
+      "logp_right": -9.874,
+      "logp_wrong": -18.407,
+      "cons_right": -0.02,
+      "cons_wrong": 0.946,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "chest",
+      "context": "a wooden chest",
+      "right": "treasure",
+      "wrong": "lungs",
+      "logp_right": -18.046,
+      "logp_wrong": -10.7,
+      "cons_right": 0.946,
+      "cons_wrong": 0.088,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "chest",
+      "context": "held to her chest",
+      "right": "heart",
+      "wrong": "gold",
+      "logp_right": -8.955,
+      "logp_wrong": -10.271,
+      "cons_right": 0.168,
+      "cons_wrong": 0.982,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "chest",
+      "context": "a locked chest",
+      "right": "gold",
+      "wrong": "heart",
+      "logp_right": -11.098,
+      "logp_wrong": -9.055,
+      "cons_right": 0.198,
+      "cons_wrong": 0.377,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "club",
+      "context": "swung the heavy club",
+      "right": "weapon",
+      "wrong": "members",
+      "logp_right": -12.563,
+      "logp_wrong": -6.521,
+      "cons_right": 0.931,
+      "cons_wrong": 0.484,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "club",
+      "context": "joined the local club",
+      "right": "members",
+      "wrong": "weapon",
+      "logp_right": -9.857,
+      "logp_wrong": -16.104,
+      "cons_right": 0.539,
+      "cons_wrong": 0.921,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "club",
+      "context": "hit with a club",
+      "right": "weapon",
+      "wrong": "members",
+      "logp_right": -11.455,
+      "logp_wrong": -7.58,
+      "cons_right": 0.94,
+      "cons_wrong": 0.448,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "club",
+      "context": "a members only club",
+      "right": "members",
+      "wrong": "weapon",
+      "logp_right": -4.846,
+      "logp_wrong": -11.783,
+      "cons_right": 0.335,
+      "cons_wrong": 0.954,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "club",
+      "context": "raised the club",
+      "right": "weapon",
+      "wrong": "meeting",
+      "logp_right": -15.213,
+      "logp_wrong": -9.429,
+      "cons_right": 0.931,
+      "cons_wrong": 0.434,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "club",
+      "context": "the chess club",
+      "right": "meeting",
+      "wrong": "weapon",
+      "logp_right": -10.371,
+      "logp_wrong": -15.078,
+      "cons_right": 0.377,
+      "cons_wrong": 0.903,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "stood before the court",
+      "right": "judge",
+      "wrong": "tennis",
+      "logp_right": -6.415,
+      "logp_wrong": -13.464,
+      "cons_right": 0.939,
+      "cons_wrong": 0.862,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "stepped onto the court",
+      "right": "tennis",
+      "wrong": "judge",
+      "logp_right": -13.323,
+      "logp_wrong": -6.793,
+      "cons_right": 0.862,
+      "cons_wrong": 0.939,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "court",
+      "context": "the court ruled",
+      "right": "judge",
+      "wrong": "tennis",
+      "logp_right": -9.822,
+      "logp_wrong": -14.18,
+      "cons_right": 0.939,
+      "cons_wrong": 0.862,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "played on the court",
+      "right": "tennis",
+      "wrong": "judge",
+      "logp_right": -11.048,
+      "logp_wrong": -7.915,
+      "cons_right": 0.862,
+      "cons_wrong": 0.939,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "court",
+      "context": "appeared in court",
+      "right": "judge",
+      "wrong": "racket",
+      "logp_right": -7.005,
+      "logp_wrong": -14.755,
+      "cons_right": 0.641,
+      "cons_wrong": 0.092,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "the clay court",
+      "right": "racket",
+      "wrong": "judge",
+      "logp_right": -12.713,
+      "logp_wrong": -6.086,
+      "cons_right": 0.164,
+      "cons_wrong": 0.908,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "crane",
+      "context": "a crane by the water",
+      "right": "bird",
+      "wrong": "machine",
+      "logp_right": -8.879,
+      "logp_wrong": -9.194,
+      "cons_right": 0.379,
+      "cons_wrong": 0.991,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "crane",
+      "context": "the crane lifted it",
+      "right": "machine",
+      "wrong": "bird",
+      "logp_right": -13.316,
+      "logp_wrong": -9.988,
+      "cons_right": 0.981,
+      "cons_wrong": 0.37,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "crane",
+      "context": "a tall white crane",
+      "right": "bird",
+      "wrong": "machine",
+      "logp_right": -9.494,
+      "logp_wrong": -10.664,
+      "cons_right": 0.293,
+      "cons_wrong": 0.946,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "crane",
+      "context": "the crane on site",
+      "right": "machine",
+      "wrong": "feathers",
+      "logp_right": -14.337,
+      "logp_wrong": -13.736,
+      "cons_right": 0.959,
+      "cons_wrong": 0.167,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "crane",
+      "context": "a crane in flight",
+      "right": "bird",
+      "wrong": "steel",
+      "logp_right": -7.28,
+      "logp_wrong": -14.901,
+      "cons_right": 0.293,
+      "cons_wrong": 0.83,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "crane",
+      "context": "operated the crane",
+      "right": "machine",
+      "wrong": "feathers",
+      "logp_right": -9.966,
+      "logp_wrong": -15.081,
+      "cons_right": 0.978,
+      "cons_wrong": 0.167,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "a strong current pulled",
+      "right": "river",
+      "wrong": "wire",
+      "logp_right": -11.111,
+      "logp_wrong": -11.609,
+      "cons_right": 0.156,
+      "cons_wrong": 0.737,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "current",
+      "context": "the electric current",
+      "right": "wire",
+      "wrong": "river",
+      "logp_right": -9.286,
+      "logp_wrong": -7.076,
+      "cons_right": 0.855,
+      "cons_wrong": 0.278,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "swept by the current",
+      "right": "river",
+      "wrong": "wire",
+      "logp_right": -5.165,
+      "logp_wrong": -9.551,
+      "cons_right": 0.278,
+      "cons_wrong": 0.855,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "a jolt of current",
+      "right": "wire",
+      "wrong": "tide",
+      "logp_right": -11.061,
+      "logp_wrong": -15.074,
+      "cons_right": 0.737,
+      "cons_wrong": 0.962,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "the ocean current",
+      "right": "tide",
+      "wrong": "wire",
+      "logp_right": -15.226,
+      "logp_wrong": -13.568,
+      "cons_right": 0.929,
+      "cons_wrong": 0.855,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "current",
+      "context": "cut the current off",
+      "right": "wire",
+      "wrong": "tide",
+      "logp_right": -9.282,
+      "logp_wrong": -16.138,
+      "cons_right": 0.775,
+      "cons_wrong": 0.925,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "ate a sweet date",
+      "right": "fruit",
+      "wrong": "calendar",
+      "logp_right": -7.506,
+      "logp_wrong": -16.471,
+      "cons_right": 0.402,
+      "cons_wrong": 0.885,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "pick a good date",
+      "right": "calendar",
+      "wrong": "fruit",
+      "logp_right": -17.465,
+      "logp_wrong": -12.568,
+      "cons_right": 0.855,
+      "cons_wrong": 0.318,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "date",
+      "context": "a dried date",
+      "right": "fruit",
+      "wrong": "calendar",
+      "logp_right": -8.729,
+      "logp_wrong": -15.729,
+      "cons_right": 0.172,
+      "cons_wrong": 0.916,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "set the date",
+      "right": "calendar",
+      "wrong": "fruit",
+      "logp_right": -16.307,
+      "logp_wrong": -13.353,
+      "cons_right": 0.967,
+      "cons_wrong": 0.206,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "chewed on a date",
+      "right": "fruit",
+      "wrong": "month",
+      "logp_right": -10.759,
+      "logp_wrong": -10.546,
+      "cons_right": 0.172,
+      "cons_wrong": 0.418,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "date",
+      "context": "the wedding date",
+      "right": "month",
+      "wrong": "fruit",
+      "logp_right": -12.491,
+      "logp_wrong": -12.439,
+      "cons_right": 0.562,
+      "cons_wrong": 0.205,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "fan",
+      "context": "turned on the fan",
+      "right": "cool",
+      "wrong": "idol",
+      "logp_right": -12.158,
+      "logp_wrong": -12.11,
+      "cons_right": 0.245,
+      "cons_wrong": 0.901,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "fan",
+      "context": "a huge fan of",
+      "right": "idol",
+      "wrong": "cool",
+      "logp_right": -10.458,
+      "logp_wrong": -10.28,
+      "cons_right": 0.25,
+      "cons_wrong": 0.276,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "fan",
+      "context": "the ceiling fan",
+      "right": "cool",
+      "wrong": "idol",
+      "logp_right": -11.069,
+      "logp_wrong": -12.189,
+      "cons_right": 0.245,
+      "cons_wrong": 0.901,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "fan",
+      "context": "a devoted fan",
+      "right": "idol",
+      "wrong": "breeze",
+      "logp_right": -10.44,
+      "logp_wrong": -12.72,
+      "cons_right": 0.257,
+      "cons_wrong": 0.042,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "fan",
+      "context": "the fan spun",
+      "right": "breeze",
+      "wrong": "idol",
+      "logp_right": -12.278,
+      "logp_wrong": -12.866,
+      "cons_right": 0.099,
+      "cons_wrong": 0.901,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "fan",
+      "context": "an excited fan",
+      "right": "idol",
+      "wrong": "breeze",
+      "logp_right": -11.675,
+      "logp_wrong": -11.393,
+      "cons_right": 0.244,
+      "cons_wrong": 0.158,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "iron",
+      "context": "a bar of iron",
+      "right": "metal",
+      "wrong": "laundry",
+      "logp_right": -8.441,
+      "logp_wrong": -14.265,
+      "cons_right": 0.53,
+      "cons_wrong": 0.179,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "iron",
+      "context": "iron the shirt",
+      "right": "laundry",
+      "wrong": "metal",
+      "logp_right": -12.692,
+      "logp_wrong": -9.454,
+      "cons_right": 0.121,
+      "cons_wrong": 0.541,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "iron",
+      "context": "heavy cast iron",
+      "right": "metal",
+      "wrong": "laundry",
+      "logp_right": -7.076,
+      "logp_wrong": -12.715,
+      "cons_right": 0.549,
+      "cons_wrong": 0.114,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "iron",
+      "context": "the hot iron",
+      "right": "laundry",
+      "wrong": "ore",
+      "logp_right": -13.669,
+      "logp_wrong": -4.233,
+      "cons_right": 0.121,
+      "cons_wrong": 0.396,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "iron",
+      "context": "rusty old iron",
+      "right": "ore",
+      "wrong": "laundry",
+      "logp_right": -6.041,
+      "logp_wrong": -12.478,
+      "cons_right": 0.567,
+      "cons_wrong": 0.119,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "iron",
+      "context": "used the iron",
+      "right": "laundry",
+      "wrong": "ore",
+      "logp_right": -13.949,
+      "logp_wrong": -2.244,
+      "cons_right": 0.121,
+      "cons_wrong": 0.396,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "jam",
+      "context": "spread the jam",
+      "right": "toast",
+      "wrong": "traffic",
+      "logp_right": -13.466,
+      "logp_wrong": -10.922,
+      "cons_right": 0.164,
+      "cons_wrong": 0.325,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "jam",
+      "context": "stuck in a jam",
+      "right": "traffic",
+      "wrong": "toast",
+      "logp_right": -9.633,
+      "logp_wrong": -13.646,
+      "cons_right": 0.348,
+      "cons_wrong": 0.237,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "jam",
+      "context": "strawberry jam",
+      "right": "toast",
+      "wrong": "traffic",
+      "logp_right": -11.025,
+      "logp_wrong": -10.285,
+      "cons_right": 0.262,
+      "cons_wrong": 0.049,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "jam",
+      "context": "a paper jam",
+      "right": "stuck",
+      "wrong": "toast",
+      "logp_right": -9.123,
+      "logp_wrong": -12.083,
+      "cons_right": 0.35,
+      "cons_wrong": 0.254,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "jam",
+      "context": "a jar of jam",
+      "right": "toast",
+      "wrong": "traffic",
+      "logp_right": -11.199,
+      "logp_wrong": -10.98,
+      "cons_right": 0.23,
+      "cons_wrong": -0.002,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "jam",
+      "context": "caught in a jam",
+      "right": "stuck",
+      "wrong": "toast",
+      "logp_right": -9.825,
+      "logp_wrong": -14.422,
+      "cons_right": 0.414,
+      "cons_wrong": 0.133,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "turned the key",
+      "right": "lock",
+      "wrong": "piano",
+      "logp_right": -10.759,
+      "logp_wrong": -11.963,
+      "cons_right": 0.623,
+      "cons_wrong": 0.135,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "pressed a key",
+      "right": "piano",
+      "wrong": "lock",
+      "logp_right": -11.529,
+      "logp_wrong": -9.762,
+      "cons_right": 0.142,
+      "cons_wrong": 0.274,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "key",
+      "context": "lost my house key",
+      "right": "lock",
+      "wrong": "piano",
+      "logp_right": -11.492,
+      "logp_wrong": -10.978,
+      "cons_right": 0.255,
+      "cons_wrong": 0.177,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "key",
+      "context": "a black key",
+      "right": "piano",
+      "wrong": "door",
+      "logp_right": -10.751,
+      "logp_wrong": -7.897,
+      "cons_right": 0.183,
+      "cons_wrong": 0.366,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "key",
+      "context": "the key in the door",
+      "right": "lock",
+      "wrong": "piano",
+      "logp_right": -8.709,
+      "logp_wrong": -9.77,
+      "cons_right": 0.623,
+      "cons_wrong": 0.135,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "struck the key",
+      "right": "piano",
+      "wrong": "door",
+      "logp_right": -12.682,
+      "logp_wrong": -8.191,
+      "cons_right": 0.135,
+      "cons_wrong": 0.376,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "match",
+      "context": "lit a match",
+      "right": "flame",
+      "wrong": "score",
+      "logp_right": -11.092,
+      "logp_wrong": -15.324,
+      "cons_right": 0.427,
+      "cons_wrong": 0.354,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "match",
+      "context": "won the match",
+      "right": "score",
+      "wrong": "flame",
+      "logp_right": -16.493,
+      "logp_wrong": -14.974,
+      "cons_right": 0.936,
+      "cons_wrong": 0.712,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "match",
+      "context": "struck a match",
+      "right": "flame",
+      "wrong": "score",
+      "logp_right": -12.895,
+      "logp_wrong": -15.935,
+      "cons_right": 0.116,
+      "cons_wrong": 0.476,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "match",
+      "context": "the final match",
+      "right": "score",
+      "wrong": "flame",
+      "logp_right": -15.274,
+      "logp_wrong": -14.157,
+      "cons_right": 0.936,
+      "cons_wrong": 0.712,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "match",
+      "context": "a burnt match",
+      "right": "flame",
+      "wrong": "team",
+      "logp_right": -12.887,
+      "logp_wrong": -12.278,
+      "cons_right": 0.244,
+      "cons_wrong": 0.321,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "match",
+      "context": "a close match",
+      "right": "team",
+      "wrong": "flame",
+      "logp_right": -12.063,
+      "logp_wrong": -12.781,
+      "cons_right": 0.447,
+      "cons_wrong": 0.076,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "a sprig of mint",
+      "right": "leaf",
+      "wrong": "coin",
+      "logp_right": -6.406,
+      "logp_wrong": -4.664,
+      "cons_right": 0.221,
+      "cons_wrong": 0.317,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "mint",
+      "context": "coins from the mint",
+      "right": "coin",
+      "wrong": "leaf",
+      "logp_right": -7.417,
+      "logp_wrong": -9.031,
+      "cons_right": 0.116,
+      "cons_wrong": 0.179,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "fresh mint tea",
+      "right": "leaf",
+      "wrong": "coin",
+      "logp_right": -4.408,
+      "logp_wrong": -9.26,
+      "cons_right": 0.354,
+      "cons_wrong": 0.162,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "the royal mint",
+      "right": "coin",
+      "wrong": "leaf",
+      "logp_right": -7.559,
+      "logp_wrong": -9.662,
+      "cons_right": 0.187,
+      "cons_wrong": 0.145,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "chopped some mint",
+      "right": "leaf",
+      "wrong": "money",
+      "logp_right": -6.368,
+      "logp_wrong": -7.044,
+      "cons_right": 0.428,
+      "cons_wrong": 0.33,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "the mint printed",
+      "right": "money",
+      "wrong": "leaf",
+      "logp_right": -7.083,
+      "logp_wrong": -10.116,
+      "cons_right": 0.423,
+      "cons_wrong": 0.163,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "a tiny mouse ran",
+      "right": "cheese",
+      "wrong": "click",
+      "logp_right": -12.604,
+      "logp_wrong": -15.486,
+      "cons_right": 0.908,
+      "cons_wrong": 0.766,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "clicked the mouse",
+      "right": "click",
+      "wrong": "cheese",
+      "logp_right": -11.884,
+      "logp_wrong": -11.508,
+      "cons_right": 0.902,
+      "cons_wrong": 0.846,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "the mouse squeaked",
+      "right": "cheese",
+      "wrong": "click",
+      "logp_right": -8.437,
+      "logp_wrong": -14.42,
+      "cons_right": 0.846,
+      "cons_wrong": 0.902,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "moved the mouse",
+      "right": "click",
+      "wrong": "tail",
+      "logp_right": -14.161,
+      "logp_wrong": -7.748,
+      "cons_right": 0.902,
+      "cons_wrong": 0.284,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "a grey mouse",
+      "right": "tail",
+      "wrong": "click",
+      "logp_right": -7.097,
+      "logp_wrong": -12.667,
+      "cons_right": 0.261,
+      "cons_wrong": 0.717,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "the wireless mouse",
+      "right": "click",
+      "wrong": "tail",
+      "logp_right": -12.721,
+      "logp_wrong": -9.306,
+      "cons_right": 0.902,
+      "cons_wrong": 0.284,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "nail",
+      "context": "painted her nail",
+      "right": "finger",
+      "wrong": "hammer",
+      "logp_right": -8.521,
+      "logp_wrong": -11.207,
+      "cons_right": 0.829,
+      "cons_wrong": 0.439,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "nail",
+      "context": "hammered the nail",
+      "right": "hammer",
+      "wrong": "finger",
+      "logp_right": -10.273,
+      "logp_wrong": -9.104,
+      "cons_right": 0.401,
+      "cons_wrong": 0.85,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "nail",
+      "context": "a broken nail",
+      "right": "finger",
+      "wrong": "hammer",
+      "logp_right": -10.163,
+      "logp_wrong": -9.247,
+      "cons_right": 0.804,
+      "cons_wrong": 0.439,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "nail",
+      "context": "a rusty nail",
+      "right": "hammer",
+      "wrong": "finger",
+      "logp_right": -9.034,
+      "logp_wrong": -11.55,
+      "cons_right": 0.439,
+      "cons_wrong": 0.804,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "nail",
+      "context": "bit her nail",
+      "right": "finger",
+      "wrong": "wood",
+      "logp_right": -7.261,
+      "logp_wrong": -12.48,
+      "cons_right": 0.955,
+      "cons_wrong": 0.977,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "nail",
+      "context": "drove the nail",
+      "right": "wood",
+      "wrong": "finger",
+      "logp_right": -14.489,
+      "logp_wrong": -11.751,
+      "cons_right": 0.909,
+      "cons_wrong": 0.832,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "note",
+      "context": "played a high note",
+      "right": "music",
+      "wrong": "letter",
+      "logp_right": -9.982,
+      "logp_wrong": -13.023,
+      "cons_right": 0.313,
+      "cons_wrong": 0.931,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "note",
+      "context": "left a note",
+      "right": "letter",
+      "wrong": "music",
+      "logp_right": -13.577,
+      "logp_wrong": -10.16,
+      "cons_right": 0.961,
+      "cons_wrong": 0.273,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "note",
+      "context": "hit the note",
+      "right": "music",
+      "wrong": "letter",
+      "logp_right": -8.597,
+      "logp_wrong": -11.471,
+      "cons_right": 0.339,
+      "cons_wrong": 0.913,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "note",
+      "context": "a quick note",
+      "right": "letter",
+      "wrong": "pitch",
+      "logp_right": -13.825,
+      "logp_wrong": -7.995,
+      "cons_right": 0.972,
+      "cons_wrong": 0.275,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "note",
+      "context": "a low note",
+      "right": "pitch",
+      "wrong": "letter",
+      "logp_right": -7.585,
+      "logp_wrong": -13.134,
+      "cons_right": 0.275,
+      "cons_wrong": 0.972,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "note",
+      "context": "read the note",
+      "right": "letter",
+      "wrong": "pitch",
+      "logp_right": -8.842,
+      "logp_wrong": -9.374,
+      "cons_right": 0.926,
+      "cons_wrong": 0.317,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "a vital organ",
+      "right": "body",
+      "wrong": "church",
+      "logp_right": -7.932,
+      "logp_wrong": -9.489,
+      "cons_right": 0.3,
+      "cons_wrong": 0.265,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "played the organ",
+      "right": "church",
+      "wrong": "body",
+      "logp_right": -9.431,
+      "logp_wrong": -11.62,
+      "cons_right": 0.445,
+      "cons_wrong": 0.454,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "a failing organ",
+      "right": "body",
+      "wrong": "church",
+      "logp_right": -8.465,
+      "logp_wrong": -10.956,
+      "cons_right": 0.301,
+      "cons_wrong": 0.339,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "the church organ",
+      "right": "church",
+      "wrong": "liver",
+      "logp_right": -7.004,
+      "logp_wrong": -13.394,
+      "cons_right": 0.445,
+      "cons_wrong": 0.938,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "an internal organ",
+      "right": "liver",
+      "wrong": "church",
+      "logp_right": -10.536,
+      "logp_wrong": -11.259,
+      "cons_right": 0.872,
+      "cons_wrong": 0.339,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "the organ music",
+      "right": "church",
+      "wrong": "liver",
+      "logp_right": -9.165,
+      "logp_wrong": -14.816,
+      "cons_right": 0.445,
+      "cons_wrong": 0.882,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "lines on her palm",
+      "right": "hand",
+      "wrong": "tree",
+      "logp_right": -12.961,
+      "logp_wrong": -5.937,
+      "cons_right": 0.518,
+      "cons_wrong": 0.375,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "palm",
+      "context": "a tall palm",
+      "right": "tree",
+      "wrong": "hand",
+      "logp_right": -5.483,
+      "logp_wrong": -12.004,
+      "cons_right": 0.507,
+      "cons_wrong": 0.341,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "held in his palm",
+      "right": "hand",
+      "wrong": "tree",
+      "logp_right": -12.339,
+      "logp_wrong": -7.121,
+      "cons_right": 0.96,
+      "cons_wrong": 0.889,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "palm",
+      "context": "a palm on the beach",
+      "right": "tree",
+      "wrong": "hand",
+      "logp_right": -11.181,
+      "logp_wrong": -10.604,
+      "cons_right": 0.981,
+      "cons_wrong": 0.879,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "palm",
+      "context": "pressed the palm",
+      "right": "hand",
+      "wrong": "coconut",
+      "logp_right": -11.553,
+      "logp_wrong": -11.111,
+      "cons_right": 0.844,
+      "cons_wrong": 0.062,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "the swaying palm",
+      "right": "coconut",
+      "wrong": "hand",
+      "logp_right": -11.705,
+      "logp_wrong": -12.382,
+      "cons_right": 0.062,
+      "cons_wrong": 0.844,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "threw a fast pitch",
+      "right": "throw",
+      "wrong": "tar",
+      "logp_right": -8.033,
+      "logp_wrong": -15.258,
+      "cons_right": 0.985,
+      "cons_wrong": 0.916,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "black as pitch",
+      "right": "tar",
+      "wrong": "throw",
+      "logp_right": -13.963,
+      "logp_wrong": -11.671,
+      "cons_right": 0.161,
+      "cons_wrong": 0.407,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "a wild pitch",
+      "right": "throw",
+      "wrong": "tar",
+      "logp_right": -10.479,
+      "logp_wrong": -14.185,
+      "cons_right": 0.419,
+      "cons_wrong": 0.038,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "sticky pitch",
+      "right": "tar",
+      "wrong": "throw",
+      "logp_right": -13.476,
+      "logp_wrong": -10.133,
+      "cons_right": 0.228,
+      "cons_wrong": 0.397,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "the next pitch",
+      "right": "throw",
+      "wrong": "sticky",
+      "logp_right": -10.431,
+      "logp_wrong": -13.809,
+      "cons_right": 0.857,
+      "cons_wrong": 0.127,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "coated in pitch",
+      "right": "sticky",
+      "wrong": "throw",
+      "logp_right": -10.943,
+      "logp_wrong": -10.964,
+      "cons_right": 0.354,
+      "cons_wrong": 0.402,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "the pitcher threw",
+      "right": "baseball",
+      "wrong": "water",
+      "logp_right": -11.58,
+      "logp_wrong": -14.691,
+      "cons_right": 0.823,
+      "cons_wrong": 0.664,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "a pitcher of water",
+      "right": "water",
+      "wrong": "baseball",
+      "logp_right": -13.988,
+      "logp_wrong": -8.029,
+      "cons_right": 1.0,
+      "cons_wrong": 0.785,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "the star pitcher",
+      "right": "baseball",
+      "wrong": "water",
+      "logp_right": -10.713,
+      "logp_wrong": -15.013,
+      "cons_right": 0.933,
+      "cons_wrong": 0.732,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "filled the pitcher",
+      "right": "water",
+      "wrong": "baseball",
+      "logp_right": -15.72,
+      "logp_wrong": -12.451,
+      "cons_right": 0.664,
+      "cons_wrong": 0.823,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "the pitcher wound up",
+      "right": "baseball",
+      "wrong": "juice",
+      "logp_right": -10.368,
+      "logp_wrong": -14.903,
+      "cons_right": 0.823,
+      "cons_wrong": 0.715,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "poured from the pitcher",
+      "right": "juice",
+      "wrong": "baseball",
+      "logp_right": -12.021,
+      "logp_wrong": -11.686,
+      "cons_right": 0.861,
+      "cons_wrong": 0.869,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "plane",
+      "context": "boarded the plane",
+      "right": "flight",
+      "wrong": "surface",
+      "logp_right": -7.188,
+      "logp_wrong": -10.907,
+      "cons_right": 0.277,
+      "cons_wrong": 0.937,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "a flat plane",
+      "right": "surface",
+      "wrong": "flight",
+      "logp_right": -6.956,
+      "logp_wrong": -8.293,
+      "cons_right": 0.927,
+      "cons_wrong": 0.172,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "the plane landed",
+      "right": "flight",
+      "wrong": "surface",
+      "logp_right": -10.375,
+      "logp_wrong": -8.907,
+      "cons_right": 0.277,
+      "cons_wrong": 0.937,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "plane",
+      "context": "a level plane",
+      "right": "surface",
+      "wrong": "flight",
+      "logp_right": -8.914,
+      "logp_wrong": -6.957,
+      "cons_right": 0.903,
+      "cons_wrong": 0.25,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "the plane took off",
+      "right": "flight",
+      "wrong": "geometry",
+      "logp_right": -9.086,
+      "logp_wrong": -13.564,
+      "cons_right": 0.355,
+      "cons_wrong": 0.062,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "a smooth plane",
+      "right": "geometry",
+      "wrong": "flight",
+      "logp_right": -8.623,
+      "logp_wrong": -8.091,
+      "cons_right": 0.293,
+      "cons_wrong": 0.541,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "her dilated pupil",
+      "right": "eye",
+      "wrong": "student",
+      "logp_right": -11.96,
+      "logp_wrong": -10.658,
+      "cons_right": 0.28,
+      "cons_wrong": 0.384,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "a bright pupil",
+      "right": "student",
+      "wrong": "eye",
+      "logp_right": -11.321,
+      "logp_wrong": -11.587,
+      "cons_right": 0.402,
+      "cons_wrong": 0.405,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "the dark pupil",
+      "right": "eye",
+      "wrong": "student",
+      "logp_right": -10.598,
+      "logp_wrong": -11.133,
+      "cons_right": 0.959,
+      "cons_wrong": 0.979,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "a diligent pupil",
+      "right": "student",
+      "wrong": "eye",
+      "logp_right": -10.41,
+      "logp_wrong": -12.856,
+      "cons_right": 0.09,
+      "cons_wrong": 0.215,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "the pupil widened",
+      "right": "eye",
+      "wrong": "teacher",
+      "logp_right": -13.424,
+      "logp_wrong": -8.439,
+      "cons_right": 0.97,
+      "cons_wrong": 0.216,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "the school pupil",
+      "right": "teacher",
+      "wrong": "eye",
+      "logp_right": -1.592,
+      "logp_wrong": -13.044,
+      "cons_right": 0.503,
+      "cons_wrong": 0.978,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "rock",
+      "context": "threw a rock",
+      "right": "stone",
+      "wrong": "music",
+      "logp_right": -8.296,
+      "logp_wrong": -5.233,
+      "cons_right": 0.477,
+      "cons_wrong": 0.37,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "rock",
+      "context": "loud rock music",
+      "right": "music",
+      "wrong": "stone",
+      "logp_right": -6.146,
+      "logp_wrong": -12.301,
+      "cons_right": 0.816,
+      "cons_wrong": 0.295,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "rock",
+      "context": "a heavy rock",
+      "right": "stone",
+      "wrong": "music",
+      "logp_right": -9.399,
+      "logp_wrong": -4.731,
+      "cons_right": 0.408,
+      "cons_wrong": 0.491,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "rock",
+      "context": "a rock band",
+      "right": "music",
+      "wrong": "stone",
+      "logp_right": -8.851,
+      "logp_wrong": -10.03,
+      "cons_right": 0.557,
+      "cons_wrong": 0.885,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "rock",
+      "context": "a jagged rock",
+      "right": "stone",
+      "wrong": "guitar",
+      "logp_right": -8.883,
+      "logp_wrong": -6.521,
+      "cons_right": 0.436,
+      "cons_wrong": 0.405,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "rock",
+      "context": "the rock concert",
+      "right": "guitar",
+      "wrong": "stone",
+      "logp_right": -9.755,
+      "logp_wrong": -10.712,
+      "cons_right": 0.308,
+      "cons_wrong": 0.933,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "measured with a ruler",
+      "right": "inches",
+      "wrong": "king",
+      "logp_right": -10.864,
+      "logp_wrong": -8.015,
+      "cons_right": 0.147,
+      "cons_wrong": 0.928,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "a cruel ruler",
+      "right": "king",
+      "wrong": "inches",
+      "logp_right": -6.974,
+      "logp_wrong": -14.21,
+      "cons_right": 0.393,
+      "cons_wrong": -0.027,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "a plastic ruler",
+      "right": "inches",
+      "wrong": "king",
+      "logp_right": -11.927,
+      "logp_wrong": -7.006,
+      "cons_right": 0.186,
+      "cons_wrong": 0.376,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "the ancient ruler",
+      "right": "king",
+      "wrong": "inches",
+      "logp_right": -7.57,
+      "logp_wrong": -14.549,
+      "cons_right": 0.921,
+      "cons_wrong": 0.13,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "grabbed the ruler",
+      "right": "inches",
+      "wrong": "throne",
+      "logp_right": -14.303,
+      "logp_wrong": -8.778,
+      "cons_right": 0.142,
+      "cons_wrong": 0.858,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "the wise ruler",
+      "right": "throne",
+      "wrong": "inches",
+      "logp_right": -10.569,
+      "logp_wrong": -14.395,
+      "cons_right": 0.858,
+      "cons_wrong": 0.142,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "a fish scale",
+      "right": "fish",
+      "wrong": "weight",
+      "logp_right": -5.749,
+      "logp_wrong": -15.41,
+      "cons_right": 1.0,
+      "cons_wrong": 0.974,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "stepped on the scale",
+      "right": "weight",
+      "wrong": "fish",
+      "logp_right": -17.673,
+      "logp_wrong": -15.29,
+      "cons_right": 0.818,
+      "cons_wrong": 0.79,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "scale",
+      "context": "a shiny scale",
+      "right": "fish",
+      "wrong": "weight",
+      "logp_right": -8.743,
+      "logp_wrong": -15.068,
+      "cons_right": 0.194,
+      "cons_wrong": 0.247,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "the kitchen scale",
+      "right": "weight",
+      "wrong": "fish",
+      "logp_right": -16.565,
+      "logp_wrong": -11.224,
+      "cons_right": 0.818,
+      "cons_wrong": 0.79,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "scale",
+      "context": "scraped off a scale",
+      "right": "fish",
+      "wrong": "pounds",
+      "logp_right": -10.763,
+      "logp_wrong": -12.547,
+      "cons_right": 0.253,
+      "cons_wrong": 0.27,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "read the scale",
+      "right": "pounds",
+      "wrong": "fish",
+      "logp_right": -13.531,
+      "logp_wrong": -13.45,
+      "cons_right": 0.164,
+      "cons_wrong": 0.928,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "seal",
+      "context": "a seal on the ice",
+      "right": "ocean",
+      "wrong": "stamp",
+      "logp_right": -7.968,
+      "logp_wrong": -11.0,
+      "cons_right": 0.321,
+      "cons_wrong": 0.239,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "broke the wax seal",
+      "right": "stamp",
+      "wrong": "ocean",
+      "logp_right": -9.888,
+      "logp_wrong": -11.092,
+      "cons_right": 0.239,
+      "cons_wrong": 0.321,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "the barking seal",
+      "right": "ocean",
+      "wrong": "stamp",
+      "logp_right": -10.524,
+      "logp_wrong": -10.037,
+      "cons_right": 0.321,
+      "cons_wrong": 0.239,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "seal",
+      "context": "the royal seal",
+      "right": "stamp",
+      "wrong": "ocean",
+      "logp_right": -10.981,
+      "logp_wrong": -11.64,
+      "cons_right": 0.254,
+      "cons_wrong": 0.308,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "a playful seal",
+      "right": "ocean",
+      "wrong": "wax",
+      "logp_right": -11.079,
+      "logp_wrong": -10.896,
+      "cons_right": 0.143,
+      "cons_wrong": 0.247,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "seal",
+      "context": "stamped the seal",
+      "right": "wax",
+      "wrong": "ocean",
+      "logp_right": -11.088,
+      "logp_wrong": -12.549,
+      "cons_right": 0.073,
+      "cons_wrong": 0.321,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "the ace of spades",
+      "right": "card",
+      "wrong": "dig",
+      "logp_right": -8.154,
+      "logp_wrong": -13.122,
+      "cons_right": 0.842,
+      "cons_wrong": 0.12,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "dug with a spade",
+      "right": "dig",
+      "wrong": "card",
+      "logp_right": -8.669,
+      "logp_wrong": -11.126,
+      "cons_right": 0.056,
+      "cons_wrong": 0.917,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spade",
+      "context": "played a spade",
+      "right": "card",
+      "wrong": "dig",
+      "logp_right": -9.583,
+      "logp_wrong": -12.508,
+      "cons_right": 0.184,
+      "cons_wrong": 0.151,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "a rusty spade",
+      "right": "dig",
+      "wrong": "card",
+      "logp_right": -10.96,
+      "logp_wrong": -9.84,
+      "cons_right": 0.169,
+      "cons_wrong": 0.025,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spade",
+      "context": "the queen of spades",
+      "right": "card",
+      "wrong": "garden",
+      "logp_right": -9.833,
+      "logp_wrong": -10.137,
+      "cons_right": 0.842,
+      "cons_wrong": 0.268,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "leaned on the spade",
+      "right": "garden",
+      "wrong": "card",
+      "logp_right": -10.862,
+      "logp_wrong": -9.928,
+      "cons_right": 0.268,
+      "cons_wrong": 0.954,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spring",
+      "context": "early in spring",
+      "right": "season",
+      "wrong": "metal",
+      "logp_right": -8.35,
+      "logp_wrong": -11.83,
+      "cons_right": 0.507,
+      "cons_wrong": 0.22,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "a coiled spring",
+      "right": "metal",
+      "wrong": "season",
+      "logp_right": -9.25,
+      "logp_wrong": -9.279,
+      "cons_right": 0.206,
+      "cons_wrong": 0.312,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spring",
+      "context": "bloomed in spring",
+      "right": "season",
+      "wrong": "metal",
+      "logp_right": -8.504,
+      "logp_wrong": -11.798,
+      "cons_right": 0.424,
+      "cons_wrong": 0.092,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "the mattress spring",
+      "right": "metal",
+      "wrong": "season",
+      "logp_right": -10.187,
+      "logp_wrong": -6.437,
+      "cons_right": 0.234,
+      "cons_wrong": 0.785,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spring",
+      "context": "a warm spring",
+      "right": "season",
+      "wrong": "coil",
+      "logp_right": -6.722,
+      "logp_wrong": -11.4,
+      "cons_right": 0.474,
+      "cons_wrong": 0.204,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "the spring snapped",
+      "right": "coil",
+      "wrong": "season",
+      "logp_right": -11.853,
+      "logp_wrong": -9.681,
+      "cons_right": 0.028,
+      "cons_wrong": 0.785,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "star",
+      "context": "a bright star",
+      "right": "sky",
+      "wrong": "famous",
+      "logp_right": -11.275,
+      "logp_wrong": -10.41,
+      "cons_right": 0.99,
+      "cons_wrong": 0.37,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "a movie star",
+      "right": "famous",
+      "wrong": "sky",
+      "logp_right": -9.702,
+      "logp_wrong": -12.074,
+      "cons_right": 0.443,
+      "cons_wrong": 0.991,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "a distant star",
+      "right": "sky",
+      "wrong": "famous",
+      "logp_right": -11.192,
+      "logp_wrong": -10.772,
+      "cons_right": 0.99,
+      "cons_wrong": 0.37,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "the pop star",
+      "right": "famous",
+      "wrong": "sky",
+      "logp_right": -10.642,
+      "logp_wrong": -11.646,
+      "cons_right": 0.448,
+      "cons_wrong": 0.934,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "star",
+      "context": "the north star",
+      "right": "sky",
+      "wrong": "actor",
+      "logp_right": -10.086,
+      "logp_wrong": -8.415,
+      "cons_right": 0.915,
+      "cons_wrong": 0.339,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "a rising star",
+      "right": "actor",
+      "wrong": "sky",
+      "logp_right": -8.003,
+      "logp_wrong": -11.13,
+      "cons_right": 0.406,
+      "cons_wrong": 0.964,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "sat at the table",
+      "right": "chair",
+      "wrong": "data",
+      "logp_right": -8.882,
+      "logp_wrong": -11.602,
+      "cons_right": 0.945,
+      "cons_wrong": 0.306,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "a data table",
+      "right": "data",
+      "wrong": "chair",
+      "logp_right": -4.063,
+      "logp_wrong": -10.73,
+      "cons_right": 0.188,
+      "cons_wrong": 0.967,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "the wooden table",
+      "right": "chair",
+      "wrong": "data",
+      "logp_right": -8.083,
+      "logp_wrong": -12.659,
+      "cons_right": 0.952,
+      "cons_wrong": 0.25,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "in the table below",
+      "right": "data",
+      "wrong": "chair",
+      "logp_right": -9.356,
+      "logp_wrong": -11.737,
+      "cons_right": 0.37,
+      "cons_wrong": 0.886,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "set the table",
+      "right": "chair",
+      "wrong": "rows",
+      "logp_right": -9.869,
+      "logp_wrong": -11.329,
+      "cons_right": 0.97,
+      "cons_wrong": 0.282,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "the table of results",
+      "right": "rows",
+      "wrong": "chair",
+      "logp_right": -11.999,
+      "logp_wrong": -10.539,
+      "cons_right": 0.279,
+      "cons_wrong": 0.98,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "tank",
+      "context": "the tank rolled",
+      "right": "army",
+      "wrong": "water",
+      "logp_right": -11.46,
+      "logp_wrong": -13.742,
+      "cons_right": 0.371,
+      "cons_wrong": 0.664,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "a water tank",
+      "right": "water",
+      "wrong": "army",
+      "logp_right": -11.812,
+      "logp_wrong": -8.685,
+      "cons_right": 1.0,
+      "cons_wrong": 0.154,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "an armored tank",
+      "right": "army",
+      "wrong": "water",
+      "logp_right": -7.478,
+      "logp_wrong": -14.195,
+      "cons_right": 0.455,
+      "cons_wrong": 0.261,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "the fuel tank",
+      "right": "water",
+      "wrong": "army",
+      "logp_right": -11.798,
+      "logp_wrong": -8.787,
+      "cons_right": 0.664,
+      "cons_wrong": 0.371,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "tank",
+      "context": "the tank fired",
+      "right": "army",
+      "wrong": "liquid",
+      "logp_right": -9.883,
+      "logp_wrong": -8.986,
+      "cons_right": 0.371,
+      "cons_wrong": 0.183,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "tank",
+      "context": "filled the tank",
+      "right": "liquid",
+      "wrong": "army",
+      "logp_right": -11.401,
+      "logp_wrong": -8.087,
+      "cons_right": 0.183,
+      "cons_wrong": 0.371,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "the tree trunk",
+      "right": "tree",
+      "wrong": "car",
+      "logp_right": -11.119,
+      "logp_wrong": -9.241,
+      "cons_right": 0.979,
+      "cons_wrong": 0.43,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "loaded the trunk",
+      "right": "car",
+      "wrong": "tree",
+      "logp_right": -5.359,
+      "logp_wrong": -12.497,
+      "cons_right": 0.453,
+      "cons_wrong": 0.977,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "a thick trunk",
+      "right": "tree",
+      "wrong": "car",
+      "logp_right": -10.611,
+      "logp_wrong": -7.007,
+      "cons_right": 0.925,
+      "cons_wrong": 0.336,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "opened the trunk",
+      "right": "car",
+      "wrong": "tree",
+      "logp_right": -7.088,
+      "logp_wrong": -14.247,
+      "cons_right": 0.453,
+      "cons_wrong": 0.977,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "climbed the trunk",
+      "right": "tree",
+      "wrong": "luggage",
+      "logp_right": -11.948,
+      "logp_wrong": -13.809,
+      "cons_right": 0.977,
+      "cons_wrong": 0.291,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "put it in the trunk",
+      "right": "luggage",
+      "wrong": "tree",
+      "logp_right": -12.288,
+      "logp_wrong": -12.688,
+      "cons_right": 0.291,
+      "cons_wrong": 0.977,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "wave",
+      "context": "a big wave",
+      "right": "ocean",
+      "wrong": "hand",
+      "logp_right": -9.27,
+      "logp_wrong": -15.239,
+      "cons_right": 0.17,
+      "cons_wrong": 0.947,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "wave",
+      "context": "gave a wave",
+      "right": "hand",
+      "wrong": "ocean",
+      "logp_right": -17.475,
+      "logp_wrong": -12.733,
+      "cons_right": 0.449,
+      "cons_wrong": 0.29,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "wave",
+      "context": "the crashing wave",
+      "right": "ocean",
+      "wrong": "hand",
+      "logp_right": -10.006,
+      "logp_wrong": -14.977,
+      "cons_right": 0.321,
+      "cons_wrong": 0.844,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "wave",
+      "context": "a friendly wave",
+      "right": "hand",
+      "wrong": "ocean",
+      "logp_right": -16.269,
+      "logp_wrong": -10.888,
+      "cons_right": 0.344,
+      "cons_wrong": 0.302,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "wave",
+      "context": "rode the wave",
+      "right": "ocean",
+      "wrong": "greeting",
+      "logp_right": -12.06,
+      "logp_wrong": -13.493,
+      "cons_right": 0.308,
+      "cons_wrong": 0.112,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "wave",
+      "context": "a quick wave",
+      "right": "greeting",
+      "wrong": "ocean",
+      "logp_right": -11.706,
+      "logp_wrong": -10.7,
+      "cons_right": 0.133,
+      "cons_wrong": 0.236,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "well",
+      "context": "drew from the well",
+      "right": "water",
+      "wrong": "healthy",
+      "logp_right": -15.558,
+      "logp_wrong": -12.592,
+      "cons_right": 0.824,
+      "cons_wrong": 0.316,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "well",
+      "context": "feeling quite well",
+      "right": "healthy",
+      "wrong": "water",
+      "logp_right": -10.804,
+      "logp_wrong": -15.317,
+      "cons_right": 0.403,
+      "cons_wrong": 0.859,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "a deep well",
+      "right": "water",
+      "wrong": "healthy",
+      "logp_right": -12.583,
+      "logp_wrong": -10.798,
+      "cons_right": 0.859,
+      "cons_wrong": 0.403,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "getting well soon",
+      "right": "healthy",
+      "wrong": "water",
+      "logp_right": -11.954,
+      "logp_wrong": -15.255,
+      "cons_right": 0.357,
+      "cons_wrong": 0.898,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "the village well",
+      "right": "water",
+      "wrong": "healthy",
+      "logp_right": -14.532,
+      "logp_wrong": -13.354,
+      "cons_right": 0.84,
+      "cons_wrong": 0.322,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "looking well today",
+      "right": "fine",
+      "wrong": "water",
+      "logp_right": -10.475,
+      "logp_wrong": -15.053,
+      "cons_right": 0.966,
+      "cons_wrong": 0.875,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    }
+  ]
+}
