@@ -1,0 +1,1903 @@
+{
+  "checkpoint": "checkpoints/planck2_baseline/final.pt",
+  "accuracy_by_lambda": {
+    "0.0": 0.8285714285714286,
+    "0.25": 0.819047619047619,
+    "0.5": 0.819047619047619,
+    "1.0": 0.819047619047619,
+    "2.0": 0.8285714285714286,
+    "4.0": 0.8571428571428571
+  },
+  "rows": [
+    {
+      "word": "crane",
+      "context": "the graceful crane flew over the calm",
+      "right": "lake",
+      "wrong": "warehouse",
+      "logp_right": -8.576,
+      "logp_wrong": -16.349,
+      "cons_right": 0.812,
+      "cons_wrong": 0.947,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "crane",
+      "context": "the tall construction crane lifted the heavy steel",
+      "right": "beam",
+      "wrong": "feather",
+      "logp_right": -6.422,
+      "logp_wrong": -12.26,
+      "cons_right": 0.954,
+      "cons_wrong": 0.754,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "crane",
+      "context": "the crane waded through the marsh hunting for",
+      "right": "fish",
+      "wrong": "concrete",
+      "logp_right": -7.158,
+      "logp_wrong": -12.652,
+      "cons_right": 0.864,
+      "cons_wrong": 0.284,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "crane",
+      "context": "the operator sat in the cab of the crane above the building",
+      "right": "site",
+      "wrong": "nest",
+      "logp_right": -7.548,
+      "logp_wrong": -13.216,
+      "cons_right": 0.414,
+      "cons_wrong": 0.931,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "they sat on the grassy river",
+      "right": "bank",
+      "wrong": "vault",
+      "logp_right": -4.414,
+      "logp_wrong": -12.679,
+      "cons_right": 0.361,
+      "cons_wrong": 0.109,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "she deposited her paycheck at the local",
+      "right": "bank",
+      "wrong": "shore",
+      "logp_right": -3.955,
+      "logp_wrong": -10.585,
+      "cons_right": 0.376,
+      "cons_wrong": 0.947,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "the fisherman cast his line from the muddy",
+      "right": "bank",
+      "wrong": "teller",
+      "logp_right": -7.143,
+      "logp_wrong": -16.129,
+      "cons_right": 0.329,
+      "cons_wrong": 0.037,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bank",
+      "context": "the robbers broke into the vault of the",
+      "right": "bank",
+      "wrong": "river",
+      "logp_right": -4.709,
+      "logp_wrong": -6.063,
+      "cons_right": 0.361,
+      "cons_wrong": 0.337,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "the vampire bat flew out of the dark",
+      "right": "cave",
+      "wrong": "stadium",
+      "logp_right": -6.523,
+      "logp_wrong": -10.226,
+      "cons_right": 0.256,
+      "cons_wrong": 0.984,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "he gripped the wooden baseball",
+      "right": "bat",
+      "wrong": "wing",
+      "logp_right": -3.201,
+      "logp_wrong": -8.977,
+      "cons_right": 0.353,
+      "cons_wrong": 0.981,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "the nocturnal bat used echolocation to catch a",
+      "right": "moth",
+      "wrong": "pitch",
+      "logp_right": -8.021,
+      "logp_wrong": -9.638,
+      "cons_right": 0.058,
+      "cons_wrong": 0.379,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bat",
+      "context": "she swung the aluminum bat and hit a home",
+      "right": "run",
+      "wrong": "roost",
+      "logp_right": -0.164,
+      "logp_wrong": -13.418,
+      "cons_right": 0.703,
+      "cons_wrong": -0.012,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "the seal swam gracefully in the cold ocean",
+      "right": "water",
+      "wrong": "envelope",
+      "logp_right": -12.034,
+      "logp_wrong": -13.937,
+      "cons_right": 0.664,
+      "cons_wrong": 0.168,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "he pressed the wax seal onto the sealed",
+      "right": "letter",
+      "wrong": "iceberg",
+      "logp_right": -15.298,
+      "logp_wrong": -12.467,
+      "cons_right": 0.957,
+      "cons_wrong": 0.009,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "seal",
+      "context": "the seal barked and clapped its",
+      "right": "flippers",
+      "wrong": "stamp",
+      "logp_right": -4.215,
+      "logp_wrong": -9.619,
+      "cons_right": -0.261,
+      "cons_wrong": 0.239,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "the metal coil spring compressed under the heavy",
+      "right": "load",
+      "wrong": "blossom",
+      "logp_right": -3.182,
+      "logp_wrong": -12.695,
+      "cons_right": 0.164,
+      "cons_wrong": 0.709,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "fresh water bubbled up from the mountain",
+      "right": "spring",
+      "wrong": "mattress",
+      "logp_right": -8.104,
+      "logp_wrong": -14.161,
+      "cons_right": 0.414,
+      "cons_wrong": 0.027,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spring",
+      "context": "in early spring the trees began to",
+      "right": "bloom",
+      "wrong": "compress",
+      "logp_right": -20.433,
+      "logp_wrong": -11.642,
+      "cons_right": 0.746,
+      "cons_wrong": -0.057,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "spring",
+      "context": "the mechanic replaced the rusted suspension",
+      "right": "spring",
+      "wrong": "season",
+      "logp_right": -8.405,
+      "logp_wrong": -11.92,
+      "cons_right": 0.351,
+      "cons_wrong": 0.951,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "she clicked the wireless computer",
+      "right": "mouse",
+      "wrong": "cheese",
+      "logp_right": -11.857,
+      "logp_wrong": -13.041,
+      "cons_right": 0.825,
+      "cons_wrong": 0.693,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "the tiny mouse scurried across the kitchen looking for",
+      "right": "crumbs",
+      "wrong": "cursor",
+      "logp_right": -4.383,
+      "logp_wrong": -5.984,
+      "cons_right": 0.0,
+      "cons_wrong": -0.185,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mouse",
+      "context": "he moved the mouse to drag the icon across the",
+      "right": "screen",
+      "wrong": "burrow",
+      "logp_right": -6.817,
+      "logp_wrong": -10.816,
+      "cons_right": 0.929,
+      "cons_wrong": 0.001,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "the passenger plane climbed above the",
+      "right": "clouds",
+      "wrong": "workbench",
+      "logp_right": -4.788,
+      "logp_wrong": -4.833,
+      "cons_right": 0.18,
+      "cons_wrong": 0.375,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "plane",
+      "context": "the carpenter smoothed the board with a hand",
+      "right": "plane",
+      "wrong": "runway",
+      "logp_right": -10.808,
+      "logp_wrong": -18.789,
+      "cons_right": 0.356,
+      "cons_wrong": 0.706,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "plane",
+      "context": "the pilot landed the plane safely on the",
+      "right": "runway",
+      "wrong": "lumber",
+      "logp_right": -15.84,
+      "logp_wrong": -14.512,
+      "cons_right": 0.63,
+      "cons_wrong": 0.022,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "she poured lemonade from the ceramic",
+      "right": "pitcher",
+      "wrong": "mound",
+      "logp_right": -10.721,
+      "logp_wrong": -9.433,
+      "cons_right": 0.148,
+      "cons_wrong": 0.144,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "the baseball pitcher threw a fast",
+      "right": "ball",
+      "wrong": "juice",
+      "logp_right": -3.745,
+      "logp_wrong": -13.729,
+      "cons_right": 0.451,
+      "cons_wrong": 0.906,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitcher",
+      "context": "he filled the glass pitcher with cold",
+      "right": "water",
+      "wrong": "innings",
+      "logp_right": -8.803,
+      "logp_wrong": -9.407,
+      "cons_right": 0.742,
+      "cons_wrong": 0.147,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "the tall palm swayed on the tropical",
+      "right": "beach",
+      "wrong": "wrist",
+      "logp_right": -10.318,
+      "logp_wrong": -10.868,
+      "cons_right": 0.866,
+      "cons_wrong": 0.114,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "she read the lines on his open",
+      "right": "palm",
+      "wrong": "frond",
+      "logp_right": -9.469,
+      "logp_wrong": -7.69,
+      "cons_right": 0.237,
+      "cons_wrong": -0.274,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "palm",
+      "context": "coconuts fell from the palm",
+      "right": "tree",
+      "wrong": "hand",
+      "logp_right": -6.638,
+      "logp_wrong": -11.996,
+      "cons_right": 0.966,
+      "cons_wrong": 0.964,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "rock",
+      "context": "the climber gripped the sheer granite",
+      "right": "rock",
+      "wrong": "guitar",
+      "logp_right": -3.111,
+      "logp_wrong": -10.339,
+      "cons_right": 0.384,
+      "cons_wrong": 0.155,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "rock",
+      "context": "the band played loud electric rock",
+      "right": "music",
+      "wrong": "boulder",
+      "logp_right": -3.205,
+      "logp_wrong": -11.081,
+      "cons_right": 0.525,
+      "cons_wrong": 0.108,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "rock",
+      "context": "the heavy rock tumbled down the steep",
+      "right": "slope",
+      "wrong": "concert",
+      "logp_right": -2.609,
+      "logp_wrong": -11.119,
+      "cons_right": 0.407,
+      "cons_wrong": 0.966,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "they ate dinner around the wooden dining",
+      "right": "table",
+      "wrong": "spreadsheet",
+      "logp_right": -10.143,
+      "logp_wrong": -6.265,
+      "cons_right": 0.843,
+      "cons_wrong": 0.467,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "table",
+      "context": "the data was arranged in rows in the",
+      "right": "table",
+      "wrong": "chair",
+      "logp_right": -5.957,
+      "logp_wrong": -8.718,
+      "cons_right": 0.841,
+      "cons_wrong": 0.935,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "table",
+      "context": "she set plates and forks on the kitchen",
+      "right": "table",
+      "wrong": "database",
+      "logp_right": -9.28,
+      "logp_wrong": -11.196,
+      "cons_right": 0.922,
+      "cons_wrong": 0.204,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "the army tank rolled across the muddy battle",
+      "right": "field",
+      "wrong": "aquarium",
+      "logp_right": -5.915,
+      "logp_wrong": -14.306,
+      "cons_right": 0.833,
+      "cons_wrong": 0.906,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "the tropical fish swam in the glass",
+      "right": "tank",
+      "wrong": "turret",
+      "logp_right": -8.655,
+      "logp_wrong": -12.799,
+      "cons_right": 0.293,
+      "cons_wrong": 0.875,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "tank",
+      "context": "they stored the fuel in a large steel",
+      "right": "tank",
+      "wrong": "cannon",
+      "logp_right": -3.226,
+      "logp_wrong": -12.849,
+      "cons_right": 0.312,
+      "cons_wrong": 0.931,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "the archer drew back the wooden bow and released the",
+      "right": "arrow",
+      "wrong": "ribbon",
+      "logp_right": -5.848,
+      "logp_wrong": -11.181,
+      "cons_right": 0.961,
+      "cons_wrong": 0.932,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bow",
+      "context": "she tied a pretty ribbon bow on the wrapped",
+      "right": "gift",
+      "wrong": "quiver",
+      "logp_right": -10.485,
+      "logp_wrong": -6.341,
+      "cons_right": 0.357,
+      "cons_wrong": -0.167,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bow",
+      "context": "the violinist drew the bow across the",
+      "right": "strings",
+      "wrong": "target",
+      "logp_right": -5.68,
+      "logp_wrong": -7.875,
+      "cons_right": 0.188,
+      "cons_wrong": 0.353,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "nail",
+      "context": "he hammered the metal nail into the wooden",
+      "right": "plank",
+      "wrong": "cuticle",
+      "logp_right": -6.864,
+      "logp_wrong": -5.558,
+      "cons_right": 0.196,
+      "cons_wrong": 0.384,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "nail",
+      "context": "she painted her finger nail a bright",
+      "right": "red",
+      "wrong": "hammer",
+      "logp_right": -7.707,
+      "logp_wrong": -9.217,
+      "cons_right": 0.936,
+      "cons_wrong": 0.382,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "the squirrel climbed the thick tree",
+      "right": "trunk",
+      "wrong": "suitcase",
+      "logp_right": -11.391,
+      "logp_wrong": -15.404,
+      "cons_right": 0.968,
+      "cons_wrong": 0.109,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "he loaded the luggage into the car",
+      "right": "trunk",
+      "wrong": "branches",
+      "logp_right": -17.341,
+      "logp_wrong": -11.575,
+      "cons_right": 0.958,
+      "cons_wrong": 0.217,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "trunk",
+      "context": "the elephant sprayed water with its long",
+      "right": "trunk",
+      "wrong": "bumper",
+      "logp_right": -11.787,
+      "logp_wrong": -10.19,
+      "cons_right": 0.862,
+      "cons_wrong": 0.102,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "the fish was covered in shiny silver",
+      "right": "scales",
+      "wrong": "weights",
+      "logp_right": -5.531,
+      "logp_wrong": -10.381,
+      "cons_right": 0.16,
+      "cons_wrong": 0.17,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "scale",
+      "context": "she weighed the flour on the kitchen",
+      "right": "scale",
+      "wrong": "fins",
+      "logp_right": -8.05,
+      "logp_wrong": -12.676,
+      "cons_right": 0.262,
+      "cons_wrong": 0.028,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "he turned the metal key in the door",
+      "right": "lock",
+      "wrong": "piano",
+      "logp_right": -9.034,
+      "logp_wrong": -9.397,
+      "cons_right": 0.623,
+      "cons_wrong": 0.135,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "the pianist pressed the ivory",
+      "right": "key",
+      "wrong": "keyhole",
+      "logp_right": -7.317,
+      "logp_wrong": -12.847,
+      "cons_right": 0.439,
+      "cons_wrong": -0.098,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "key",
+      "context": "she couldn't unlock the door without the right",
+      "right": "key",
+      "wrong": "melody",
+      "logp_right": -8.762,
+      "logp_wrong": -9.518,
+      "cons_right": 0.475,
+      "cons_wrong": 0.989,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "board",
+      "context": "the carpenter sawed the long wooden",
+      "right": "board",
+      "wrong": "committee",
+      "logp_right": -6.474,
+      "logp_wrong": -12.74,
+      "cons_right": 0.955,
+      "cons_wrong": 0.339,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "board",
+      "context": "the company's decision was approved by the",
+      "right": "board",
+      "wrong": "plank",
+      "logp_right": -3.993,
+      "logp_wrong": -14.594,
+      "cons_right": 0.931,
+      "cons_wrong": 0.061,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "board",
+      "context": "the directors held a board",
+      "right": "meeting",
+      "wrong": "sawdust",
+      "logp_right": -0.968,
+      "logp_wrong": -6.361,
+      "cons_right": 0.597,
+      "cons_wrong": 0.245,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "the villagers drew water from the stone",
+      "right": "well",
+      "wrong": "poorly",
+      "logp_right": -14.098,
+      "logp_wrong": -13.123,
+      "cons_right": 0.959,
+      "cons_wrong": 0.205,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "well",
+      "context": "she performed the difficult task very",
+      "right": "well",
+      "wrong": "bucket",
+      "logp_right": -9.99,
+      "logp_wrong": -14.287,
+      "cons_right": 0.967,
+      "cons_wrong": 0.091,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "iron",
+      "context": "the blacksmith forged the bar of raw",
+      "right": "iron",
+      "wrong": "wrinkles",
+      "logp_right": -11.018,
+      "logp_wrong": -4.614,
+      "cons_right": 0.928,
+      "cons_wrong": 0.134,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "iron",
+      "context": "she pressed the wrinkled shirt with a hot",
+      "right": "iron",
+      "wrong": "ore",
+      "logp_right": -14.442,
+      "logp_wrong": -13.029,
+      "cons_right": 0.911,
+      "cons_wrong": 0.078,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "chest",
+      "context": "the pirate buried the treasure",
+      "right": "chest",
+      "wrong": "lungs",
+      "logp_right": -4.292,
+      "logp_wrong": -13.503,
+      "cons_right": 0.23,
+      "cons_wrong": 0.082,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "chest",
+      "context": "the doctor listened to the heartbeat in his",
+      "right": "chest",
+      "wrong": "drawer",
+      "logp_right": -5.58,
+      "logp_wrong": -5.663,
+      "cons_right": 0.17,
+      "cons_wrong": 0.287,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bark",
+      "context": "the rough bark peeled off the old oak",
+      "right": "tree",
+      "wrong": "puppy",
+      "logp_right": -5.391,
+      "logp_wrong": -12.812,
+      "cons_right": 0.984,
+      "cons_wrong": 0.091,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bark",
+      "context": "the guard dog began to loudly",
+      "right": "bark",
+      "wrong": "timber",
+      "logp_right": -18.47,
+      "logp_wrong": -13.784,
+      "cons_right": 0.864,
+      "cons_wrong": 0.963,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "the eager pupil raised his hand in the",
+      "right": "classroom",
+      "wrong": "retina",
+      "logp_right": -7.387,
+      "logp_wrong": -12.494,
+      "cons_right": 0.148,
+      "cons_wrong": 0.008,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pupil",
+      "context": "the doctor shone a light and the pupil of her eye",
+      "right": "dilated",
+      "wrong": "studied",
+      "logp_right": -6.203,
+      "logp_wrong": -9.179,
+      "cons_right": -0.149,
+      "cons_wrong": 0.199,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "the church organ filled the hall with booming",
+      "right": "music",
+      "wrong": "tissue",
+      "logp_right": -4.015,
+      "logp_wrong": -11.191,
+      "cons_right": 0.446,
+      "cons_wrong": 0.216,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "organ",
+      "context": "the surgeon carefully transplanted the vital",
+      "right": "organ",
+      "wrong": "pipes",
+      "logp_right": -6.768,
+      "logp_wrong": -12.049,
+      "cons_right": 0.958,
+      "cons_wrong": 0.144,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "he dug the garden bed with a sharp",
+      "right": "spade",
+      "wrong": "hearts",
+      "logp_right": -9.384,
+      "logp_wrong": -12.591,
+      "cons_right": 0.013,
+      "cons_wrong": 0.203,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "spade",
+      "context": "she played the ace of",
+      "right": "spades",
+      "wrong": "shovels",
+      "logp_right": -0.939,
+      "logp_wrong": -5.157,
+      "cons_right": -0.074,
+      "cons_wrong": -0.241,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "club",
+      "context": "the golfer swung the metal",
+      "right": "club",
+      "wrong": "cards",
+      "logp_right": -9.687,
+      "logp_wrong": -10.194,
+      "cons_right": 0.734,
+      "cons_wrong": 0.214,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "club",
+      "context": "they danced all night at the crowded night",
+      "right": "club",
+      "wrong": "swing",
+      "logp_right": -10.817,
+      "logp_wrong": -10.882,
+      "cons_right": 0.807,
+      "cons_wrong": 0.249,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "club",
+      "context": "he was dealt the seven of",
+      "right": "clubs",
+      "wrong": "putters",
+      "logp_right": -12.096,
+      "logp_wrong": -20.236,
+      "cons_right": 0.211,
+      "cons_wrong": -0.103,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "she measured the line with a plastic",
+      "right": "ruler",
+      "wrong": "kingdom",
+      "logp_right": -10.364,
+      "logp_wrong": -13.457,
+      "cons_right": 0.152,
+      "cons_wrong": 0.322,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "ruler",
+      "context": "the ancient kingdom obeyed its powerful",
+      "right": "ruler",
+      "wrong": "centimeters",
+      "logp_right": -3.655,
+      "logp_wrong": -15.706,
+      "cons_right": 0.276,
+      "cons_wrong": 0.016,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "the strong ocean current pulled the swimmer out to",
+      "right": "sea",
+      "wrong": "voltage",
+      "logp_right": -2.122,
+      "logp_wrong": -16.096,
+      "cons_right": 0.324,
+      "cons_wrong": 0.15,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "current",
+      "context": "the electric current flowed through the copper",
+      "right": "wire",
+      "wrong": "tide",
+      "logp_right": -4.959,
+      "logp_wrong": -14.373,
+      "cons_right": 0.919,
+      "cons_wrong": 0.894,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "the footballers ran across the muddy football",
+      "right": "pitch",
+      "wrong": "melody",
+      "logp_right": -2.474,
+      "logp_wrong": -12.298,
+      "cons_right": 0.322,
+      "cons_wrong": 0.911,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "pitch",
+      "context": "the opera singer hit a remarkably high",
+      "right": "pitch",
+      "wrong": "field",
+      "logp_right": -7.263,
+      "logp_wrong": -11.97,
+      "cons_right": 0.286,
+      "cons_wrong": 0.803,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "she stored the plates in the kitchen",
+      "right": "cabinet",
+      "wrong": "ministers",
+      "logp_right": -6.634,
+      "logp_wrong": -13.184,
+      "cons_right": 0.945,
+      "cons_wrong": 0.287,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cabinet",
+      "context": "the prime minister met with his senior",
+      "right": "cabinet",
+      "wrong": "cupboard",
+      "logp_right": -2.059,
+      "logp_wrong": -7.947,
+      "cons_right": 0.967,
+      "cons_wrong": 0.41,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "the coins were freshly struck at the royal",
+      "right": "mint",
+      "wrong": "leaf",
+      "logp_right": -0.96,
+      "logp_wrong": -13.075,
+      "cons_right": 0.207,
+      "cons_wrong": 0.159,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "mint",
+      "context": "she chewed a fresh sprig of",
+      "right": "mint",
+      "wrong": "coins",
+      "logp_right": -9.351,
+      "logp_wrong": -8.185,
+      "cons_right": 0.138,
+      "cons_wrong": 0.036,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "cell",
+      "context": "the biologist studied the living",
+      "right": "cell",
+      "wrong": "prisoner",
+      "logp_right": -4.081,
+      "logp_wrong": -12.9,
+      "cons_right": 0.299,
+      "cons_wrong": 0.28,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "cell",
+      "context": "the prisoner paced inside his locked",
+      "right": "cell",
+      "wrong": "membrane",
+      "logp_right": -3.023,
+      "logp_wrong": -10.886,
+      "cons_right": 0.26,
+      "cons_wrong": 0.099,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "he tightened the metal",
+      "right": "bolt",
+      "wrong": "lightning",
+      "logp_right": -19.038,
+      "logp_wrong": -13.282,
+      "cons_right": 0.933,
+      "cons_wrong": 0.18,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "bolt",
+      "context": "a bright bolt of lightning lit the",
+      "right": "sky",
+      "wrong": "wrench",
+      "logp_right": -8.127,
+      "logp_wrong": -11.168,
+      "cons_right": 0.872,
+      "cons_wrong": 0.185,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "jam",
+      "context": "she spread strawberry jam on her",
+      "right": "toast",
+      "wrong": "highway",
+      "logp_right": -11.248,
+      "logp_wrong": -10.444,
+      "cons_right": 0.304,
+      "cons_wrong": 0.117,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": false,
+        "2.0": false,
+        "4.0": false
+      }
+    },
+    {
+      "word": "jam",
+      "context": "the cars were stuck in a huge traffic",
+      "right": "jam",
+      "wrong": "bread",
+      "logp_right": -2.055,
+      "logp_wrong": -12.48,
+      "cons_right": 0.084,
+      "cons_wrong": 0.194,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "the bright star twinkled in the night",
+      "right": "sky",
+      "wrong": "movie",
+      "logp_right": -3.544,
+      "logp_wrong": -9.703,
+      "cons_right": 0.938,
+      "cons_wrong": 0.958,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "star",
+      "context": "the film premiere featured a famous movie",
+      "right": "star",
+      "wrong": "galaxy",
+      "logp_right": -13.092,
+      "logp_wrong": -12.629,
+      "cons_right": 0.981,
+      "cons_wrong": 0.195,
+      "by_lambda": {
+        "0.0": false,
+        "0.25": false,
+        "0.5": false,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "note",
+      "context": "she scribbled a quick reminder",
+      "right": "note",
+      "wrong": "octave",
+      "logp_right": -12.509,
+      "logp_wrong": -15.92,
+      "cons_right": 0.272,
+      "cons_wrong": -0.094,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "note",
+      "context": "the pianist held the single high",
+      "right": "note",
+      "wrong": "memo",
+      "logp_right": -3.276,
+      "logp_wrong": -14.268,
+      "cons_right": 0.953,
+      "cons_wrong": 0.096,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "wave",
+      "context": "the surfer rode the towering ocean",
+      "right": "wave",
+      "wrong": "greeting",
+      "logp_right": -4.683,
+      "logp_wrong": -12.475,
+      "cons_right": 0.373,
+      "cons_wrong": 0.1,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "wave",
+      "context": "she gave a friendly goodbye",
+      "right": "wave",
+      "wrong": "tide",
+      "logp_right": -12.242,
+      "logp_wrong": -17.119,
+      "cons_right": 0.242,
+      "cons_wrong": 0.106,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "match",
+      "context": "he struck the wooden",
+      "right": "match",
+      "wrong": "tournament",
+      "logp_right": -10.431,
+      "logp_wrong": -13.139,
+      "cons_right": 0.267,
+      "cons_wrong": 0.98,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": false
+      }
+    },
+    {
+      "word": "match",
+      "context": "the tennis players finished a long five set",
+      "right": "match",
+      "wrong": "flame",
+      "logp_right": -3.357,
+      "logp_wrong": -15.096,
+      "cons_right": 0.505,
+      "cons_wrong": 0.819,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "the lawyer argued the case before the",
+      "right": "court",
+      "wrong": "net",
+      "logp_right": -2.46,
+      "logp_wrong": -15.445,
+      "cons_right": 0.42,
+      "cons_wrong": 0.783,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "court",
+      "context": "the players warmed up on the tennis",
+      "right": "court",
+      "wrong": "judge",
+      "logp_right": -2.514,
+      "logp_wrong": -13.507,
+      "cons_right": 0.487,
+      "cons_wrong": 0.928,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "the cars drove across the long suspension",
+      "right": "bridge",
+      "wrong": "cards",
+      "logp_right": -3.127,
+      "logp_wrong": -11.693,
+      "cons_right": 0.438,
+      "cons_wrong": 0.255,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "bridge",
+      "context": "the dentist fitted a dental",
+      "right": "bridge",
+      "wrong": "river",
+      "logp_right": -9.292,
+      "logp_wrong": -13.153,
+      "cons_right": 0.294,
+      "cons_wrong": 0.337,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "fan",
+      "context": "on the hot day she switched on the electric",
+      "right": "fan",
+      "wrong": "supporter",
+      "logp_right": -10.231,
+      "logp_wrong": -14.56,
+      "cons_right": 0.174,
+      "cons_wrong": 0.15,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "fan",
+      "context": "the loyal football",
+      "right": "fan",
+      "wrong": "blade",
+      "logp_right": -5.291,
+      "logp_wrong": -16.804,
+      "cons_right": 0.324,
+      "cons_wrong": 0.921,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "she picked a sweet dried",
+      "right": "date",
+      "wrong": "appointment",
+      "logp_right": -10.06,
+      "logp_wrong": -12.037,
+      "cons_right": 0.912,
+      "cons_wrong": -0.005,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    },
+    {
+      "word": "date",
+      "context": "they went to dinner on their first romantic",
+      "right": "date",
+      "wrong": "palm",
+      "logp_right": -4.6,
+      "logp_wrong": -11.916,
+      "cons_right": 0.945,
+      "cons_wrong": 0.136,
+      "by_lambda": {
+        "0.0": true,
+        "0.25": true,
+        "0.5": true,
+        "1.0": true,
+        "2.0": true,
+        "4.0": true
+      }
+    }
+  ]
+}
