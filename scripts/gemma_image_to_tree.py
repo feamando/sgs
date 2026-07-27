@@ -60,15 +60,21 @@ def load_gemma_mm(model_path):
     from transformers import AutoProcessor
     try:
         from transformers import AutoModelForImageTextToText as _MM
+        _cls = "AutoModelForImageTextToText"
     except ImportError:
         # older/newer builds: fall back to the generic multimodal causal class
         from transformers import AutoModelForCausalLM as _MM
-    print(f"[gemma-img] loading {model_path} (multimodal) ...")
+        _cls = "AutoModelForCausalLM (FALLBACK)"
+    print(f"[gemma-img] loading {model_path} via {_cls} ...")
     processor = AutoProcessor.from_pretrained(model_path)
     model = _MM.from_pretrained(
         model_path, dtype=torch.bfloat16,
         device_map="auto" if torch.cuda.is_available() else None)
     model.eval()
+    # A text-only processor => the image is silently ignored (degenerate output,
+    # e.g. only "ground"). Warn loudly so we don't mistake that for a real result.
+    if not hasattr(processor, "image_processor") and type(processor).__name__ == "AutoProcessor":
+        print("[gemma-img] WARNING: processor has no image_processor; image may be ignored.")
     return processor, model, torch
 
 
@@ -85,23 +91,29 @@ def image_to_tree(processor, model, torch, image_path, max_new=1024, temperature
     inputs = processor.apply_chat_template(
         msgs, add_generation_prompt=True, tokenize=True,
         return_tensors="pt", return_dict=True).to(model.device)
+    # DIAGNOSTIC: pixel_values present => the image actually reached the model.
+    # Absent => the image was dropped (text-only path) and any "result" is bogus.
+    saw_image = any(k in inputs for k in ("pixel_values", "image_patches", "pixel_attention_mask"))
+    print(f"[gemma-img] image reached model: {saw_image} "
+          f"(input keys: {sorted(inputs.keys())})")
     input_len = inputs["input_ids"].shape[1]
     with torch.no_grad():
         gen = model.generate(**inputs, max_new_tokens=max_new,
                              do_sample=temperature > 0,
                              temperature=max(temperature, 1e-4))
     text = processor.decode(gen[0][input_len:], skip_special_tokens=True)
+    print(f"[gemma-img] raw output ({len(text)} chars):\n{text[:600]}\n---")
     raw = parse_tree(text)
     if raw is None:
-        return None, text
+        return None, text, saw_image
     clean, _ = validate_skeleton(raw)
     if clean is None:
-        return None, text
+        return None, text, saw_image
     # fill so it renders in Raum (same contract as the text decomposer)
     from scripts.infer_decomposer import fill_gaussians, shift_above_ground
     fill_gaussians(clean, None)
     shift_above_ground(clean)
-    return clean, text
+    return clean, text, saw_image
 
 
 def main():
@@ -116,25 +128,41 @@ def main():
     args = p.parse_args()
 
     processor, model, torch = load_gemma_mm(args.model)
-    tree, raw = image_to_tree(processor, model, torch, args.image,
-                              max_new=args.max_new, temperature=args.temperature)
+    tree, raw, saw_image = image_to_tree(processor, model, torch, args.image,
+                                         max_new=args.max_new, temperature=args.temperature)
+
+    # A tree with no structure (only ground/hill) is a DEGENERATE pass -- the
+    # model didn't reconstruct anything. Treat it as a fail for the gate.
+    GROUND = {"ground", "hill", "cliff"}
+    structural = [c for c in (tree or {}).get("children", [])
+                  if c.get("name", "").lower().split("_")[0] not in GROUND]
+    degenerate = tree is not None and not structural
 
     print("\n[gemma-img] GATE (multimodal) =====================")
-    if tree is None:
-        print(f"  FAIL: no valid in-vocab tree from the image.")
+    print(f"  image reached model : {saw_image}")
+    if tree is None or degenerate:
+        why = ("no valid in-vocab tree" if tree is None
+               else "DEGENERATE: only ground/hill, no structure reconstructed")
+        print(f"  FAIL: {why}.")
+        if not saw_image:
+            print("  >> image was NOT ingested (no pixel_values). This is a LOAD/PROCESSOR")
+            print("     problem (likely the AutoModelForCausalLM text-only fallback), NOT a")
+            print("     model-capability verdict. Fix the load class before killing the spike.")
         print(f"  raw output (first 400 chars):\n{raw[:400]}")
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-        json.dump({"image": args.image, "parsed": False, "raw": raw[:2000]},
-                  open(args.out, "w"), indent=2)
+        json.dump({"image": args.image, "parsed": tree is not None,
+                   "degenerate": degenerate, "saw_image": saw_image,
+                   "tree": tree, "raw": raw[:2000]}, open(args.out, "w"), indent=2)
         print(f"  saved -> {args.out}")
-        print("  KILL: multimodal image->tree does not work with this build/prompt.")
+        print("  KILL only if saw_image=True; else fix the loader and re-run.")
         sys.exit(1)
 
     leaves = tree.get("children", [])
     names = [c.get("name") for c in leaves]
-    print(f"  PASS: valid tree, {len(leaves)} parts: {names}")
+    print(f"  PASS: valid tree, {len(leaves)} parts ({len(structural)} structural): {names}")
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    json.dump({"image": args.image, "parsed": True, "tree": tree}, open(args.out, "w"), indent=2)
+    json.dump({"image": args.image, "parsed": True, "saw_image": saw_image,
+               "tree": tree, "raw": raw[:2000]}, open(args.out, "w"), indent=2)
     print(f"  saved -> {args.out}")
     if args.dump_tree:
         Path(args.dump_tree).parent.mkdir(parents=True, exist_ok=True)
