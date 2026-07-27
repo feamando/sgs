@@ -325,10 +325,31 @@ gives Raum that Planck/Hertz CANNOT is a different INPUT:
 
 This grounds meaning in images at INFERENCE (distinct from VSP-for-LM, which
 baked grounding into a token table and just died negative,
-[[project_sgs_vsp_gate]]). Worth a spike, NOT built here. Logged as a direction:
-`generate_trees_gemma.py` already uses `apply_chat_template`, so an image turn is
-a small extension (Gemma processor accepts image content). Gate it like everything
-else: can Gemma emit a valid tree from a reference image?
+[[project_sgs_vsp_gate]]). **BUILT as a gate-and-kill spike (§5).**
+
+### The "ship on wave" test — the real bottleneck is the GRAMMAR VOCABULARY (2026-07-27)
+
+Prompt "ship on wave" rendered as 2 trees + scattered rocks. This is NOT a JSON,
+training, or model-size problem — Gemma's JSON is 100% valid. The fill grammar's
+ENTIRE vocabulary is castle-only:
+
+```
+EXPANDABLE_PARTS = (gatehouse, arrow_slit, slit, tower, wall, keep, woods,
+                    tree, gate, door, window, arch, cliff, rock)
+```
+
+No ship/wave/boat/hull/sail/water. The system prompt CONSTRAINS Gemma to these
+names, `validate_skeleton` DROPS out-of-vocab leaves, and fill can only draw
+these — so Gemma grabbed the nearest allowed parts (trees, rocks) and scattered
+them. This is path1's **"fill richness caps usable data richness"** law verbatim:
+the decomposer can only compose from parts the fill can render. Consequences:
+- Expanding the grammar (hand-add ship/hull/sail/water primitives to
+  `castle_grammar.py` + `fill_gaussians` + the prompt allowlist) helps EVERY
+  backend equally — it does NOT showcase Gemma. Hertz would fail "ship on wave"
+  the same way, jailed by the same 13 parts.
+- So the lever that actually differentiates a big pretrained/multimodal base is
+  NOT more text prompts — it's a different INPUT (image, §5) or, later, learned
+  geometry generation (path1 FillModel, capacity-limited/blobs so far).
 
 ## 4. Register Gemma in the model selector (EDIT: satz/app.py + static/app.js)
 
@@ -364,6 +385,34 @@ GATE 3: switching the selector to "Gemma 4 E4B" in the running app produces a va
 tree/scene on the next Generate, and switching back to Hertz/Planck still works
 (no runtime desync, caches hold).
 
+## 5. Multimodal spike — IMAGE -> scene tree (BUILT 2026-07-27: scripts/gemma_image_to_tree.py)
+
+The real reason to use Gemma. Planck/Hertz are text-only and structurally CANNOT
+take an image; Gemma 4 E4B is Any-to-Any. Feed a reference photo/sketch of a
+building, emit the SAME structure-only scene tree the text decomposer produces,
+filled so it renders in Raum ("build THIS"). Reuses the text spike's contract
+exactly (EXPANDABLE_PARTS constraint + parse_tree + validate_skeleton + fill);
+only the INPUT changes — `AutoProcessor` + an image content block instead of
+text-only. This grounds meaning in an image at INFERENCE, distinct from VSP-for-LM
+(baked into a token table, died negative, [[project_sgs_vsp_gate]]).
+
+```powershell
+python scripts/gemma_image_to_tree.py --model models/gemma-4-e4b-it `
+  --image path/to/castle_photo.jpg `
+  --out results/gemma_image_tree.json --dump-tree output/gemma_img_scene.json
+# render the reconstruction (model-free):
+python scripts/infer_decomposer.py --scene-file output/gemma_img_scene.json --no-snap --serve --port 8003
+```
+
+GATE 5 (spike, gate-and-kill): the SOLE question is "can Gemma emit a valid,
+in-vocab scene tree from an image?". PASS -> worth wiring an image-upload input
+into the Raum decomposer UI (the genuine new capability). FAIL -> the multimodal
+path is dead for this build; say so and stop. NO UI work until this passes.
+CAVEAT: Gemma 4 multimodal loads via `AutoProcessor` + `AutoModelForImageTextToText`
+(transformers >= 4.50); the script falls back to `AutoModelForCausalLM` if that
+class name differs for the installed build — the load block is the one thing to
+adjust if it errors, the message schema is standard.
+
 ## Sequencing (gate-and-kill)
 
 | Phase | What | Status / kill-if |
@@ -372,8 +421,12 @@ tree/scene on the next Generate, and switching back to Hertz/Planck still works
 | 0.a | decomposer dataset (build_stage3_dataset.py) | **DONE 2026-07-22:** path1_train.json, 160 castle + 400 mix = 560 records. |
 | 0 (§1) | few-shot Gemma decomposer (scripts/gemma_decomposer.py) | **PASS 2026-07-27: 100% valid / 97.9% vocab**, 20 prompts, zero training. Terse-prompt recall soft-spot (fixed via UI default prompt). |
 | 1 (§2) | LoRA fine-tune (train_decomposer_gemma.py) | **SKIPPED** — Gate 0 passed, no training needed. Fallback if the recall soft-spot resists few-shot exemplars. |
-| 2 (§3) | HF backend in infer_decomposer.py --serve | **DONE 2026-07-27:** --backend hf + --adapter; GemmaDecomposer signature-compatible; parse-failure debug guarded by backend; UI default prompt enriched. Live render vs Hertz decomposer = next RUN on the box. |
+| 2 (§3) | HF backend in infer_decomposer.py --serve | **DONE 2026-07-27:** --backend hf + --adapter; GemmaDecomposer signature-compatible; parse-failure debug guarded by backend; UI default prompt enriched. |
+| 2.a | fix: GemmaDecomposer must FILL gaussians (render was empty) | **DONE 2026-07-27:** extracted fill_gaussians/shift_above_ground to module level; GemmaDecomposer._fill runs them (was returning a bare skeleton -> empty cloud -> "Mean of empty slice"). Verified ~994 gaussians. |
+| 2.b (Gate 2) | tree-diff harness (compare_decomposers.py) | **BUILT 2026-07-27:** name-Jaccard + pose delta on breadth prompts (render can't show model diff; both saturate on castles). RUN pending on the box (needs hertz_decomposer ckpt). |
+| — | render parity check | Castle Gemma == Hertz is EXPECTED (render is grammar; saturated task). "ship on wave" fails for ALL backends (grammar vocab is castle-only, not a model issue). |
 | 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
+| 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **BUILT 2026-07-27, NOT RUN.** The real Gemma differentiator. Gate: valid in-vocab tree from an image? PASS -> wire image-upload UI; FAIL -> kill. |
 
 ## Papers / product this feeds
 
@@ -389,7 +442,14 @@ tree/scene on the next Generate, and switching back to Hertz/Planck still works
 
 This does NOT prove Gemma is a better SGS model, only a better (or cheaper)
 DECOMPOSER on the castle task. The task is low-entropy and saturated (path1), so a
-Gemma win is expected and modest, its value is a strong, zero-training baseline in
-the hotswap and a sanity floor for the custom bases, not a new capability. The real
-levers stay representation (VSP) and fill. Keep fill = grammar for shippable renders;
-Gemma changes only the tree emitter.
+text-only Gemma win is expected and modest — its value there is a zero-training
+baseline in the hotswap and a sanity floor, NOT a new capability. Two hard limits
+surfaced 2026-07-27:
+1. **The render is grammar, not the model** — same part list renders identically
+   across backends, so the castle can't visually distinguish Gemma from Hertz.
+2. **The grammar vocabulary caps everything** — "ship on wave" fails for ALL
+   backends (13 castle-only parts). Grammar expansion helps every backend equally.
+The genuine NEW capability, and the real reason to use Gemma, is MULTIMODAL input
+(§5, image -> tree) — something Planck/Hertz cannot do at all. Keep fill = grammar
+for shippable renders; Gemma-text changes only the tree emitter, Gemma-image
+changes the INPUT.
