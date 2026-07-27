@@ -875,41 +875,79 @@ VIEWER_HTML = """<!doctype html>
 <html><head><meta charset="utf-8"/><title>Raum 1.3: Recursive Decomposition</title>
 <style>
 * { box-sizing: border-box; margin: 0; }
-body { background: #0a0a0f; color: #f5f1e8; font-family: Inter, sans-serif;
+body { background: #0a0a0f; color: #f5f1e8; font-family: Inter, system-ui, sans-serif;
   display: grid; grid-template-rows: auto 1fr; height: 100vh; overflow: hidden; }
 header { padding: 12px 20px; border-bottom: 1px solid #1f1f2a;
   display: flex; align-items: center; justify-content: space-between; }
-header h1 { font-size: 15px; font-weight: 700; }
-header .status { font-size: 11px; color: #8a8598; font-family: monospace; }
-main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
+header h1 { font-size: 15px; font-weight: 700; letter-spacing: .2px; }
+header .status { font-size: 11px; color: #8a8598; font-family: ui-monospace, monospace; }
+main { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
 .sidebar { padding: 16px; border-right: 1px solid #1f1f2a; overflow-y: auto; }
-.sidebar label { font-size: 11px; color: #8a8598; display: block; margin-bottom: 6px; }
-.sidebar textarea { width: 100%; height: 60px; background: #12121a; border: 1px solid #1f1f2a;
-  color: #f5f1e8; border-radius: 6px; padding: 8px; font-size: 13px; resize: vertical; font-family: inherit; }
-.sidebar textarea:focus { border-color: #ffb347; outline: none; }
-.sidebar button { width: 100%; margin-top: 10px; padding: 10px; font-size: 13px; font-weight: 600;
-  background: #ffb347; color: #0a0a0f; border: none; border-radius: 6px; cursor: pointer; }
-.sidebar button:hover { filter: brightness(1.1); }
-.sidebar button:disabled { background: #3a3a48; color: #8a8598; cursor: wait; }
+.sidebar label { font-size: 11px; color: #8a8598; display: block; margin: 12px 0 6px;
+  text-transform: uppercase; letter-spacing: .4px; }
+.sidebar label:first-child { margin-top: 0; }
+.field, .sidebar select, .sidebar textarea { width: 100%; background: #12121a;
+  border: 1px solid #1f1f2a; color: #f5f1e8; border-radius: 8px; padding: 8px;
+  font-size: 13px; font-family: inherit; }
+.sidebar textarea { height: 60px; resize: vertical; }
+.field:focus, .sidebar select:focus, .sidebar textarea:focus { border-color: #ffb347; outline: none; }
+.hint { font-size: 10.5px; color: #6f6a7d; margin-top: 6px; line-height: 1.4; }
+.tabs { display: flex; gap: 4px; margin-top: 14px; background: #12121a; padding: 3px;
+  border-radius: 8px; border: 1px solid #1f1f2a; }
+.tab { flex: 1; padding: 7px; font-size: 12px; font-weight: 600; background: transparent;
+  color: #8a8598; border: none; border-radius: 6px; cursor: pointer; }
+.tab.active { background: #ffb347; color: #0a0a0f; }
+.tab:disabled { color: #3a3a48; cursor: not-allowed; }
+.dropzone { border: 1.5px dashed #2f2f3d; border-radius: 8px; padding: 22px 12px;
+  text-align: center; font-size: 12px; color: #8a8598; cursor: pointer; transition: .15s;
+  background: #101018; }
+.dropzone:hover, .dropzone.over { border-color: #ffb347; color: #f5f1e8; background: #16161f; }
+.dropzone img { max-width: 100%; max-height: 160px; border-radius: 6px; display: block; margin: 0 auto; }
+.sidebar button.primary { width: 100%; margin-top: 14px; padding: 11px; font-size: 13px;
+  font-weight: 700; background: #ffb347; color: #0a0a0f; border: none; border-radius: 8px; cursor: pointer; }
+.sidebar button.primary:hover { filter: brightness(1.08); }
+.sidebar button.primary:disabled { background: #3a3a48; color: #8a8598; cursor: wait; }
 .tree-output { margin-top: 16px; padding-top: 12px; border-top: 1px solid #1f1f2a; }
-.tree-output pre { font-size: 10px; color: #8a8598; white-space: pre-wrap; max-height: 300px; overflow-y: auto;
-  background: #12121a; padding: 8px; border-radius: 6px; }
-.tree-output .stats { font-size: 11px; color: #ffb347; margin-bottom: 8px; }
+.tree-output pre { font-size: 10px; color: #8a8598; white-space: pre-wrap; max-height: 260px; overflow-y: auto;
+  background: #12121a; padding: 8px; border-radius: 8px; }
+.tree-output .stats { font-size: 11px; color: #ffb347; margin-bottom: 8px; font-family: ui-monospace, monospace; }
 #viewer { position: relative; }
 #info { position: absolute; top: 10px; right: 10px; font-size: 11px; color: #8a8598;
-  background: rgba(18,18,26,0.9); padding: 8px 12px; border-radius: 6px; }
+  background: rgba(18,18,26,0.9); padding: 8px 12px; border-radius: 8px; font-family: ui-monospace, monospace; }
 </style></head><body>
 <header>
-  <h1>Raum 1.4 / High-Fidelity Scene Generation</h1>
+  <h1>Raum <span style="color:#ffb347">/</span> Text &amp; Image to 3D</h1>
   <span class="status" id="status">ready</span>
 </header>
 <main>
   <div class="sidebar">
-    <label>Scene prompt</label>
-    <!-- Concrete phrasing that names sub-parts: the terse "a castle on a hill"
-         under-recalls (decomposers, incl. Gemma few-shot, emit a monolithic
-         "castle" leaf that has no renderable part). Same Raum 1.7 lesson. -->
-    <textarea id="prompt" placeholder="a stone castle on a green hill">a stone castle on a green hill</textarea>
+    <label>Decomposer model</label>
+    <select id="model" class="field"></select>
+    <div id="model-note" class="hint"></div>
+
+    <div class="tabs" id="input-tabs">
+      <button class="tab active" data-mode="text">Text</button>
+      <button class="tab" data-mode="image" id="tab-image" disabled>Image</button>
+    </div>
+
+    <div id="text-pane">
+      <label>Scene prompt</label>
+      <!-- Concrete phrasing that names sub-parts: the terse "a castle on a hill"
+           under-recalls (decomposers, incl. Gemma few-shot, emit a monolithic
+           "castle" leaf that has no renderable part). Same Raum 1.7 lesson. -->
+      <textarea id="prompt" placeholder="a stone castle on a green hill">a stone castle on a green hill</textarea>
+    </div>
+
+    <div id="image-pane" style="display:none">
+      <label>Reference image</label>
+      <div id="drop" class="dropzone">
+        <span id="drop-text">Drop a building photo, or click to choose</span>
+        <img id="preview" style="display:none"/>
+        <input type="file" id="file" accept="image/*" style="display:none"/>
+      </div>
+      <div class="hint">Gemma reconstructs the structure it sees as a Raum scene tree, something the text-only SGS models cannot do.</div>
+    </div>
+
     <label style="margin-top:10px">Fidelity</label>
     <select id="fidelity" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
       <option value="low">Low (skeleton, ~60 splats, instant)</option>
@@ -941,8 +979,8 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
       <option value="grammar" selected>Grammar (hand-built expand_part)</option>
       <option value="learned">Learned (trained FillModel, needs --fill-checkpoint)</option>
     </select>
-    <button id="generate">Decompose + Render</button>
-    <button id="export-btn" style="margin-top:6px;background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
+    <button id="generate" class="primary">Decompose + Render</button>
+    <button id="export-btn" class="primary" style="background:#1f1f2a;color:#ffb347;border:1px solid #ffb347" disabled>Export .ply</button>
     <a id="splat-link" href="/splat" target="_blank" style="display:block;margin-top:6px;text-align:center;padding:6px;background:#1f1f2a;color:#7fd1ff;border:1px solid #7fd1ff;border-radius:6px;font-size:12px;text-decoration:none">Open Gaussian-splat view (0.7)</a>
     <div class="tree-output" id="tree-panel">
       <div class="stats" id="stats"></div>
@@ -1042,6 +1080,17 @@ const refineModeEl = document.getElementById('refine-mode');
 const statusEl = document.getElementById('status');
 const statsEl = document.getElementById('stats');
 const treeEl = document.getElementById('tree-text');
+const modelEl = document.getElementById('model');
+const modelNoteEl = document.getElementById('model-note');
+const tabImage = document.getElementById('tab-image');
+const fileEl = document.getElementById('file');
+const dropEl = document.getElementById('drop');
+const dropText = document.getElementById('drop-text');
+const previewEl = document.getElementById('preview');
+
+let inputMode = 'text';      // 'text' | 'image'
+let pickedFile = null;
+let modelsById = {};
 
 // Splat appearance controls (0.7): live label update
 const ctlIds = ['splats','density','flatten','weathering'];
@@ -1052,42 +1101,132 @@ ctlIds.forEach(id => {
   ctl[id].addEventListener('input', () => { lbl.textContent = ctl[id].value; });
 });
 
-btn.addEventListener('click', async () => {
-  const prompt = promptEl.value.trim();
-  if (!prompt) return;
+// ---- model selector ----
+async function loadModels() {
+  try {
+    const r = await fetch('/models');
+    const d = await r.json();
+    if (!d.models || !d.models.length) { modelEl.parentElement.style.display = 'none'; return; }
+    modelEl.innerHTML = '';
+    d.models.forEach(m => {
+      modelsById[m.name] = m;
+      const o = document.createElement('option');
+      o.value = m.name;
+      o.textContent = m.label + (m.available ? '' : ' (unavailable)');
+      o.disabled = !m.available;
+      if (m.active) o.selected = true;
+      modelEl.appendChild(o);
+    });
+    updateModelCaps(d.active);
+  } catch(e) { modelEl.parentElement.style.display = 'none'; }
+}
+function updateModelCaps(name) {
+  const m = modelsById[name] || {};
+  const canImage = !!m.image;
+  tabImage.disabled = !canImage;
+  modelNoteEl.textContent = canImage
+    ? 'Multimodal: accepts a text prompt OR a reference image.'
+    : 'Text-only decomposer.';
+  if (!canImage && inputMode === 'image') setMode('text');
+}
+modelEl.addEventListener('change', async () => {
+  const name = modelEl.value;
+  statusEl.textContent = 'loading ' + name + '...';
   btn.disabled = true;
-  exportBtn.disabled = true;
+  try {
+    const r = await fetch('/switch', {method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({name})});
+    const d = await r.json();
+    if (d.error) { statusEl.textContent = 'switch error: ' + d.error; return; }
+    updateModelCaps(name);
+    statusEl.textContent = 'ready (' + name + ')';
+  } catch(e) { statusEl.textContent = 'switch error: ' + e.message; }
+  finally { btn.disabled = false; }
+});
+
+// ---- input-mode tabs ----
+function setMode(mode) {
+  inputMode = mode;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.getElementById('text-pane').style.display = mode === 'text' ? '' : 'none';
+  document.getElementById('image-pane').style.display = mode === 'image' ? '' : 'none';
+}
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => { if (!t.disabled) setMode(t.dataset.mode); });
+});
+
+// ---- image drop zone ----
+function showPreview(file) {
+  pickedFile = file;
+  const url = URL.createObjectURL(file);
+  previewEl.src = url; previewEl.style.display = 'block'; dropText.style.display = 'none';
+}
+dropEl.addEventListener('click', () => fileEl.click());
+fileEl.addEventListener('change', () => { if (fileEl.files[0]) showPreview(fileEl.files[0]); });
+['dragover','dragenter'].forEach(ev => dropEl.addEventListener(ev, e => {
+  e.preventDefault(); dropEl.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => dropEl.addEventListener(ev, e => {
+  e.preventDefault(); dropEl.classList.remove('over'); }));
+dropEl.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) showPreview(f);
+});
+
+function applyResult(data) {
+  renderSplats(data.splats);
+  let stats = `${data.n_gaussians} gaussians`;
+  if (data.pipeline) stats += ` | ${data.pipeline}`;
+  else stats += ` | depth ${data.depth} | ${data.n_children} top-level parts`;
+  statsEl.textContent = stats;
+  treeEl.textContent = JSON.stringify(data.tree, null, 2);
+}
+
+btn.addEventListener('click', async () => {
   const fidelity = fidelityEl.value;
   const refineMode = refineModeEl.value;
-  statusEl.textContent = fidelity === 'high' ? 'generating (high fidelity, ~10s)...' : 'decomposing...';
+  btn.disabled = true; exportBtn.disabled = true;
   try {
-    const r = await fetch('/decompose', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({prompt, fidelity, refine_mode: refineMode,
-        splats: +ctl.splats.value, density: +ctl.density.value,
-        flatten: +ctl.flatten.value, weathering: +ctl.weathering.value,
-        snap: document.getElementById('snap').checked,
-        fill_method: document.getElementById('fill-method').value}),
-    });
-    const data = await r.json();
+    let data;
+    if (inputMode === 'image') {
+      if (!pickedFile) { statusEl.textContent = 'choose an image first'; return; }
+      statusEl.textContent = 'reading image (~10s)...';
+      const fd = new FormData();
+      fd.append('image', pickedFile);
+      fd.append('fidelity', fidelity);
+      fd.append('refine_mode', refineMode);
+      fd.append('fill_method', document.getElementById('fill-method').value);
+      fd.append('splats', ctl.splats.value);
+      fd.append('density', ctl.density.value);
+      fd.append('flatten', ctl.flatten.value);
+      fd.append('weathering', ctl.weathering.value);
+      const r = await fetch('/decompose_image', {method:'POST', body: fd});
+      data = await r.json();
+    } else {
+      const prompt = promptEl.value.trim();
+      if (!prompt) { statusEl.textContent = 'enter a prompt'; return; }
+      statusEl.textContent = fidelity === 'high' ? 'generating (high fidelity, ~10s)...' : 'decomposing...';
+      const r = await fetch('/decompose', {method:'POST', headers:{'content-type':'application/json'},
+        body: JSON.stringify({prompt, fidelity, refine_mode: refineMode,
+          splats: +ctl.splats.value, density: +ctl.density.value,
+          flatten: +ctl.flatten.value, weathering: +ctl.weathering.value,
+          snap: document.getElementById('snap').checked,
+          fill_method: document.getElementById('fill-method').value})});
+      data = await r.json();
+    }
     if (data.error) {
       statusEl.textContent = 'error: ' + data.error;
       treeEl.textContent = data.raw_output || '';
       return;
     }
-    renderSplats(data.splats);
-    let stats = `${data.n_gaussians} gaussians`;
-    if (data.pipeline) stats += ` | ${data.pipeline}`;
-    else stats += ` | depth ${data.depth} | ${data.n_children} top-level parts`;
-    statsEl.textContent = stats;
-    treeEl.textContent = JSON.stringify(data.tree, null, 2);
+    applyResult(data);
     statusEl.textContent = 'ready';
     exportBtn.disabled = false;
   } catch(e) {
     statusEl.textContent = 'error: ' + e.message;
   } finally { btn.disabled = false; }
 });
+
+loadModels();
 
 exportBtn.addEventListener('click', async () => {
   statusEl.textContent = 'exporting .ply...';
@@ -1114,6 +1253,98 @@ def _load_scene_tree(path):
     """Raum 0.5: load a pre-built composition tree from JSON (no model)."""
     with open(path) as f:
         return CompositionNode.from_dict(json.load(f))
+
+
+# ── Raum decomposer model registry + selector ──────────────────────────────
+# The UI selector picks the DECOMPOSER (the model that emits the scene tree).
+# Fill + render are downstream and backend-agnostic. Gemma is multimodal
+# (image->tree, a capability the SGS models cannot do). Paths are the box's
+# conventions; missing checkpoints are reported as unavailable, not crashed.
+DECOMPOSER_REGISTRY = {
+    "gemma": {
+        "label": "Gemma 4 E4B (multimodal - text + image)",
+        "backend": "hf-mm", "path": "models/gemma-4-e4b-it", "image": True,
+    },
+    "hertz": {
+        "label": "Hertz 1.2 decomposer (0.64B)",
+        "backend": "sgs", "checkpoint": "checkpoints/hertz_decomposer/best.pt",
+        "tokenizer": "data/hertz12_data/tokenizer.model", "image": False,
+    },
+    "planck": {
+        "label": "Planck 1.3 decomposer (~100M)",
+        "backend": "sgs", "checkpoint": "checkpoints/planck_decomposer_stage3/best.pt",
+        "tokenizer": "data/wikipedia/tokenizer.model", "image": False,
+    },
+}
+
+
+class DecomposerManager:
+    """Lazy-loads + hotswaps decomposer models for the served Raum UI. Evicts the
+    previously loaded model on switch (an 8B Gemma + a Hertz decomposer will not
+    co-reside on a 24GB 4090), so only ONE model is resident at a time."""
+
+    def __init__(self, device, registry, initial_name, initial_obj=None):
+        self.device = device
+        self.registry = registry
+        self.active_name = initial_name
+        self._obj = initial_obj  # already-built model for the initial selection
+
+    def _available(self, spec):
+        if spec["backend"] == "hf-mm":
+            return Path(spec["path"]).exists()
+        return Path(spec["checkpoint"]).exists() and Path(spec["tokenizer"]).exists()
+
+    def models_info(self):
+        out = []
+        for name, spec in self.registry.items():
+            out.append({
+                "name": name, "label": spec["label"], "image": spec["image"],
+                "available": self._available(spec),
+                "active": name == self.active_name,
+                "loaded": name == self.active_name and self._obj is not None,
+            })
+        return out
+
+    def _build(self, name):
+        spec = self.registry[name]
+        if not self._available(spec):
+            raise FileNotFoundError(f"model '{name}' checkpoint not found on this box")
+        if spec["backend"] == "hf-mm":
+            from scripts.gemma_decomposer import GemmaMMDecomposer
+            obj = GemmaMMDecomposer(
+                spec["path"], exemplars_path="data/decomposition_trees/path1_train.json",
+                n_shot=3)
+        else:
+            obj = Decomposer(spec["checkpoint"], spec["tokenizer"], self.device)
+        obj.scan_library = None
+        return obj
+
+    def get(self):
+        """The active decomposer, loaded on first use."""
+        if self._obj is None:
+            print(f"[manager] loading '{self.active_name}' ...")
+            self._obj = self._build(self.active_name)
+        return self._obj
+
+    def switch(self, name):
+        if name not in self.registry:
+            raise KeyError(name)
+        if name == self.active_name and self._obj is not None:
+            return self._obj
+        # evict current (free VRAM) before loading the next
+        if self._obj is not None:
+            self._obj = None
+            try:
+                import torch as _t
+                if _t.cuda.is_available():
+                    _t.cuda.empty_cache()
+            except Exception:
+                pass
+        self.active_name = name
+        return self.get()
+
+    def supports_image(self):
+        return bool(self.registry.get(self.active_name, {}).get("image"))
 
 
 def main():
@@ -1240,13 +1471,30 @@ def main():
 
     elif args.serve:
         # Web UI mode
-        from fastapi import FastAPI
+        from fastapi import FastAPI, UploadFile, File, Form
         from fastapi.responses import HTMLResponse, JSONResponse, Response
         from pydantic import BaseModel
         import tempfile
 
         app = FastAPI()
         last_tensors = {}  # store for export
+
+        # Raum model selector: manage Planck/Hertz/Gemma decomposers behind one
+        # UI dropdown. Seed with whatever --backend/--checkpoint built at launch
+        # (so the CLI still works), mapped to the matching registry entry.
+        if not scene_mode:
+            _initial = "gemma" if args.backend == "hf" else None
+            if _initial is None:
+                # match the launched SGS checkpoint to a registry name if possible
+                for _n, _s in DECOMPOSER_REGISTRY.items():
+                    if _s["backend"] == "sgs" and _s.get("checkpoint") == args.checkpoint:
+                        _initial = _n
+                        break
+                _initial = _initial or "hertz"
+            manager = DecomposerManager(device, DECOMPOSER_REGISTRY, _initial,
+                                        initial_obj=decomposer)
+        else:
+            manager = None
 
         # Path A: load the trained FillModel once at launch (if provided) so the
         # UI's learned-fill toggle has a model to call. CUDA + a trained
@@ -1285,6 +1533,93 @@ def main():
             # model loads -> selected at launch via --checkpoint, not per-request.)
             fill_method: str = "grammar"
 
+        def _finalize(tree, tree_dict, *, fidelity, refine_mode, fill_method,
+                      splats, density, flatten, weathering):
+            """Shared render tail: tree -> fidelity -> fill -> appearance ->
+            response dict. Used by BOTH /decompose (text) and /decompose_image,
+            so image and text scenes render through the identical pipeline.
+            Returns (response_dict, error_str). On error, response_dict is None."""
+            nonlocal last_tensors
+            pipeline_info = None
+            if fidelity == "high":
+                try:
+                    tensors, info = apply_high_fidelity(
+                        tree, refine_mode=refine_mode,
+                        templates_dir=args.templates, prebuilt=True)
+                    pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
+                except Exception as e:
+                    import traceback; traceback.print_exc()
+                    return None, f"high-fidelity pipeline error: {type(e).__name__}: {e}"
+            else:
+                tensors = tree_to_tensors(tree)
+
+            if fill_method == "learned":
+                if getattr(app.state, "fill_model", None) is None:
+                    pipeline_info = (pipeline_info or "") + " [learned-fill requested but no --fill-checkpoint; using grammar]"
+                else:
+                    try:
+                        tensors = fill_tree_with_model(tree, app.state.fill_model, device)
+                        pipeline_info = (pipeline_info or "") + " [learned fill]"
+                    except Exception as e:
+                        import traceback; traceback.print_exc()
+                        pipeline_info = (pipeline_info or "") + f" [learned-fill error: {type(e).__name__}; grammar fallback]"
+
+            if flatten > 0 or splats > 0 or density != 1.0 or weathering > 0:
+                try:
+                    from scripts.densify_flatten import densify_flatten_arrays
+                    import numpy as _np
+                    pos = tensors["means"].cpu().numpy().astype(float)
+                    sl = tensors["scales_log"].cpu().numpy().astype(float)
+                    op = tensors["opacities"].cpu().numpy().astype(float)
+                    rt = tensors["rotations"].cpu().numpy().astype(float)
+                    cl = tensors["colors"].cpu().numpy().astype(float)
+                    n_in = pos.shape[0]
+                    dens = max(1, round(splats / max(n_in, 1))) if splats > 0 else 1
+                    pos, sl, op, rt, cl = densify_flatten_arrays(
+                        pos, sl, op, rt, cl, densify=dens, flatten=flatten,
+                        density=density, weathering=weathering,
+                        rng=_np.random.default_rng(0))
+                    tensors = {
+                        "means": torch.tensor(pos, dtype=torch.float32),
+                        "scales_log": torch.tensor(sl, dtype=torch.float32),
+                        "opacities": torch.tensor(op, dtype=torch.float32),
+                        "rotations": torch.tensor(rt, dtype=torch.float32),
+                        "colors": torch.tensor(cl, dtype=torch.float32),
+                    }
+                    pipeline_info = (f"{n_in} -> {pos.shape[0]} splats "
+                                     f"(x{dens}, density={density}, flat={flatten}, weather={weathering})")
+                except Exception as e:
+                    import traceback; traceback.print_exc()
+                    return None, f"splat-appearance pass: {type(e).__name__}: {e}"
+
+            last_tensors = tensors
+            n = tensors["means"].shape[0]
+            max_json_splats = 100000
+            if n > max_json_splats:
+                idx = torch.randperm(n)[:max_json_splats]
+                sel = lambda k: tensors[k][idx]
+                n_out = max_json_splats
+            else:
+                sel = lambda k: tensors[k]
+                n_out = n
+            response = {
+                "tree": tree_dict,
+                "splats": {
+                    "means": sel("means").tolist(),
+                    "scales": sel("scales_log").tolist(),
+                    "rotations": sel("rotations").tolist(),
+                    "opacities": torch.sigmoid(sel("opacities")).tolist(),
+                    "colors": sel("colors").tolist(),
+                    "n_splats": n_out,
+                },
+                "n_gaussians": n,
+                "depth": tree.depth,
+                "n_children": len(tree.children),
+            }
+            if pipeline_info:
+                response["pipeline"] = pipeline_info
+            return response, None
+
         @app.get("/", response_class=HTMLResponse)
         def index():
             # default the snap checkbox from the server --no-snap flag
@@ -1307,7 +1642,8 @@ def main():
                 if not prompt:
                     return JSONResponse({"error": "empty prompt"})
 
-                tree_dict = decomposer.generate_tree(
+                active = manager.get()
+                tree_dict = active.generate_tree(
                     prompt, max_new=args.max_new,
                     temperature=args.temperature, top_k=args.top_k,
                 )
@@ -1318,7 +1654,7 @@ def main():
                     try:
                         Path("data/scenes").mkdir(parents=True, exist_ok=True)
                         dbg = Path("data/scenes/last_parse_failure.txt")
-                        dbg.write_text(decomposer.last_raw or "", encoding="utf-8")
+                        dbg.write_text(getattr(active, "last_raw", "") or "", encoding="utf-8")
                         print(f"  parse FAILED; raw dumped to {dbg}", file=sys.stderr)
                     except Exception:
                         pass
@@ -1358,116 +1694,82 @@ def main():
 
             fidelity = req.fidelity if req.fidelity else args.fidelity
             refine_mode = req.refine_mode if req.refine_mode else args.refine_mode
+            response, err = _finalize(
+                tree, tree_dict, fidelity=fidelity, refine_mode=refine_mode,
+                fill_method=req.fill_method, splats=req.splats, density=req.density,
+                flatten=req.flatten, weathering=req.weathering)
+            if err:
+                return JSONResponse({"error": err})
+            return JSONResponse(response)
 
-            pipeline_info = None
-            if fidelity == "high":
-                try:
-                    # Both paths arrive here with an ALREADY-ATOMIC, filled tree:
-                    # scene-file loads the grammar scene; the model path ran
-                    # generate_tree -> _fill_gaussians which expanded the shallow
-                    # skeleton into atomic compounds. So always prebuilt -- never
-                    # re-subdivide atomic stones (that inflates ~2.5K parts into
-                    # ~160K redundant blobs and blows up the pipeline).
-                    tensors, info = apply_high_fidelity(
-                        tree, refine_mode=refine_mode,
-                        templates_dir=args.templates,
-                        prebuilt=True,
-                    )
-                    pipeline_info = f"sub:{info['n_subdivided']} -> dense:{info['n_densified']} -> refine:{info['n_refined']}"
-                except Exception as e:
-                    import traceback
-                    print("\n=== high-fidelity pipeline error ===", file=sys.stderr)
-                    traceback.print_exc()
-                    print("=====================================\n", file=sys.stderr)
-                    return JSONResponse({"error": f"high-fidelity pipeline error: {type(e).__name__}: {e}"})
-            else:
-                tensors = tree_to_tensors(tree)
+        @app.get("/models")
+        def models():
+            if manager is None:
+                return JSONResponse({"models": [], "active": None})
+            return JSONResponse({"models": manager.models_info(),
+                                 "active": manager.active_name})
 
-            # Path A hotswap: replace grammar-filled parts with the learned
-            # FillModel's Gaussians when requested AND a checkpoint is loaded.
-            # Falls back to the grammar fill (already in `tensors`) otherwise, so
-            # the toggle degrades gracefully if no --fill-checkpoint was given.
-            if req.fill_method == "learned":
-                if getattr(app.state, "fill_model", None) is None:
-                    pipeline_info = (pipeline_info or "") + " [learned-fill requested but no --fill-checkpoint; using grammar]"
-                else:
-                    try:
-                        tensors = fill_tree_with_model(tree, app.state.fill_model, device)
-                        pipeline_info = (pipeline_info or "") + " [learned fill]"
-                    except Exception as e:
-                        import traceback; traceback.print_exc()
-                        pipeline_info = (pipeline_info or "") + f" [learned-fill error: {type(e).__name__}; grammar fallback]"
+        class SwitchRequest(BaseModel):
+            name: str
 
-            # Raum 0.7 splat-appearance pass: densify + flatten-to-surface +
-            # weathering, driven by the UI sliders. Operates on the flat tensor
-            # cloud; uniform global knobs only (no per-part tuning).
-            if req.flatten > 0 or req.splats > 0 or req.density != 1.0 or req.weathering > 0:
-                try:
-                    from scripts.densify_flatten import densify_flatten_arrays
-                    import numpy as _np
-                    pos = tensors["means"].cpu().numpy().astype(float)
-                    sl = tensors["scales_log"].cpu().numpy().astype(float)
-                    op = tensors["opacities"].cpu().numpy().astype(float)
-                    rt = tensors["rotations"].cpu().numpy().astype(float)
-                    cl = tensors["colors"].cpu().numpy().astype(float)
-                    n_in = pos.shape[0]
-                    dens = max(1, round(req.splats / max(n_in, 1))) if req.splats > 0 else 1
-                    pos, sl, op, rt, cl = densify_flatten_arrays(
-                        pos, sl, op, rt, cl, densify=dens, flatten=req.flatten,
-                        density=req.density, weathering=req.weathering,
-                        rng=_np.random.default_rng(0))
-                    tensors = {
-                        "means": torch.tensor(pos, dtype=torch.float32),
-                        "scales_log": torch.tensor(sl, dtype=torch.float32),
-                        "opacities": torch.tensor(op, dtype=torch.float32),
-                        "rotations": torch.tensor(rt, dtype=torch.float32),
-                        "colors": torch.tensor(cl, dtype=torch.float32),
-                    }
-                    pipeline_info = (f"{n_in} -> {pos.shape[0]} splats "
-                                     f"(x{dens}, density={req.density}, "
-                                     f"flat={req.flatten}, weather={req.weathering})")
-                except Exception as e:
-                    import traceback; traceback.print_exc()
-                    return JSONResponse({"error": f"splat-appearance pass: {type(e).__name__}: {e}"})
+        @app.post("/switch")
+        def switch_model(req: SwitchRequest):
+            if manager is None:
+                return JSONResponse({"error": "no model manager (fixed-scene mode)"}, status_code=400)
+            try:
+                manager.switch(req.name)
+            except FileNotFoundError as e:
+                return JSONResponse({"error": str(e)}, status_code=404)
+            except KeyError:
+                return JSONResponse({"error": f"unknown model '{req.name}'"}, status_code=404)
+            except Exception as e:
+                return JSONResponse({"error": f"{type(e).__name__}: {e}"}, status_code=500)
+            return JSONResponse({"active": manager.active_name,
+                                 "image": manager.supports_image()})
 
-            last_tensors = tensors
-            n = tensors["means"].shape[0]
-
-            # Subsample for JSON transfer if too many points
-            max_json_splats = 100000
-            if n > max_json_splats:
-                idx = torch.randperm(n)[:max_json_splats]
-                means_out = tensors["means"][idx].tolist()
-                colors_out = tensors["colors"][idx].tolist()
-                scales_out = tensors["scales_log"][idx].tolist()
-                rots_out = tensors["rotations"][idx].tolist()
-                opacities_out = torch.sigmoid(tensors["opacities"][idx]).tolist()
-                n_out = max_json_splats
-            else:
-                means_out = tensors["means"].tolist()
-                colors_out = tensors["colors"].tolist()
-                scales_out = tensors["scales_log"].tolist()
-                rots_out = tensors["rotations"].tolist()
-                opacities_out = torch.sigmoid(tensors["opacities"]).tolist()
-                n_out = n
-
-            response = {
-                "tree": tree_dict,
-                "splats": {
-                    "means": means_out,
-                    "scales": scales_out,
-                    "rotations": rots_out,
-                    "opacities": opacities_out,
-                    "colors": colors_out,
-                    "n_splats": n_out,
-                },
-                "n_gaussians": n,
-                "depth": tree.depth,
-                "n_children": len(tree.children),
-            }
-            if pipeline_info:
-                response["pipeline"] = pipeline_info
-
+        @app.post("/decompose_image")
+        async def decompose_image(
+            image: UploadFile = File(...),
+            fidelity: str = Form("high"),
+            refine_mode: str = Form("none"),
+            fill_method: str = Form("grammar"),
+            splats: int = Form(30000),
+            density: float = Form(1.0),
+            flatten: float = Form(0.4),
+            weathering: float = Form(0.3),
+        ):
+            nonlocal last_tensors
+            if manager is None:
+                return JSONResponse({"error": "image input unavailable in fixed-scene mode"}, status_code=400)
+            active = manager.get()
+            if not hasattr(active, "generate_tree_from_image"):
+                return JSONResponse(
+                    {"error": f"active model '{manager.active_name}' has no image input; "
+                              f"select a multimodal model (Gemma)."}, status_code=400)
+            # persist the upload to a temp file (the processor reads a path/URL)
+            suffix = Path(image.filename or "upload.jpg").suffix or ".jpg"
+            tmp = tempfile.mktemp(suffix=suffix)
+            Path(tmp).write_bytes(await image.read())
+            try:
+                tree_dict = active.generate_tree_from_image(
+                    tmp, max_new=args.max_new, temperature=args.temperature)
+            finally:
+                Path(tmp).unlink(missing_ok=True)
+            if tree_dict is None:
+                return JSONResponse({"error": "no valid in-vocab tree from the image",
+                                     "raw_output": (getattr(active, "last_raw", "") or "")[:1500]})
+            # image tree is already validated in-vocab + filled by the decomposer;
+            # go straight to the shared render tail (no snap/validate_tree needed).
+            try:
+                tree = CompositionNode.from_dict(tree_dict)
+            except Exception as e:
+                return JSONResponse({"error": f"tree parse error: {e}"})
+            response, err = _finalize(
+                tree, tree_dict, fidelity=fidelity, refine_mode=refine_mode,
+                fill_method=fill_method, splats=splats, density=density,
+                flatten=flatten, weathering=weathering)
+            if err:
+                return JSONResponse({"error": err})
             return JSONResponse(response)
 
         @app.get("/export_ply")

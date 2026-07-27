@@ -50,6 +50,20 @@ Rules:
 
 USER_TMPL = "DECOMPOSE: {prompt}"
 
+# Image variant: same schema/vocab, but the scene comes from the IMAGE. Used by
+# GemmaMMDecomposer.generate_tree_from_image (gate PASSED 2026-07-27, Neuschwanstein).
+IMAGE_SYSTEM_PROMPT = """You are a 3D scene-layout engine. Look at the image and output a JSON tree that places NAMED PARTS in space to reconstruct the structure shown. You do NOT draw geometry; a separate renderer expands each part.
+
+Rules:
+1. Root is {"name": "scene", "children": [...]}.
+2. Each child has: "name", "position" [x,y,z], "scale" (float). NO "gaussians", NO nested children.
+3. You may ONLY use these part names (suffix with _0,_1,... for repeats, or _n/_s/_e/_w for sides):
+   %s
+4. Ground goes first: use "hill" or "ground" or "cliff" at y=-0.1.
+5. Place parts on top of the ground (y around 0.4-0.7), scene fits in a [-2,2] cube.
+6. Reconstruct the building/scene in the image from these parts as best you can (match tower count, walls, gate placement to what you see).
+7. Output ONLY the JSON. No prose, no markdown fences.""" % (", ".join(EXPANDABLE_PARTS),)
+
 
 def _n_leaves(tree):
     if not isinstance(tree, dict):
@@ -201,6 +215,121 @@ class GemmaDecomposer:
         clean, _ = validate_skeleton(raw)
         return {"prompt": prompt, "parsed": clean is not None, "tree": clean,
                 "n_leaves": n_leaves, "n_unknown": n_unknown}
+
+
+class GemmaMMDecomposer:
+    """Unified MULTIMODAL Gemma decomposer for the Raum app: ONE model load
+    serves BOTH text (generate_tree) and image (generate_tree_from_image).
+
+    Why one class: Gemma 4 E4B is ~8B (~16GB bf16); a 4090 (24GB) cannot hold two
+    copies, so the text-only GemmaDecomposer and the image path must share a
+    single AutoModelForImageTextToText load. This is the class the served Raum app
+    uses; standalone GemmaDecomposer stays for the Gate-0 text CLI.
+
+    Interface-compatible with the SGS Decomposer: generate_tree(prompt, ...) plus
+    .last_raw / .scan_library / .vocab_size, so infer_decomposer.py's render path
+    is backend-agnostic. Adds generate_tree_from_image(path) for the multimodal
+    input Planck/Hertz cannot do (gate PASSED 2026-07-27).
+    """
+
+    def __init__(self, model_path, exemplars_path=None, n_shot=3,
+                 max_new=1024, temperature=0.1):
+        import torch
+        from transformers import AutoProcessor
+        try:
+            from transformers import AutoModelForImageTextToText as _MM
+            self.model_class = "AutoModelForImageTextToText"
+        except ImportError:
+            from transformers import AutoModelForCausalLM as _MM
+            self.model_class = "AutoModelForCausalLM (FALLBACK, image may be ignored)"
+
+        self.torch = torch
+        self.max_new = max_new
+        self.temperature = temperature
+        self.exemplars = load_exemplars(exemplars_path, n_shot)
+        self.last_raw = ""
+        self.scan_library = None
+        self.vocab_size = None
+        self.supports_image = True
+
+        print(f"[gemma-mm] loading {model_path} via {self.model_class} ...")
+        self.processor = AutoProcessor.from_pretrained(model_path)
+        self.model = _MM.from_pretrained(
+            model_path, dtype=torch.bfloat16,
+            device_map="auto" if torch.cuda.is_available() else None)
+        self.model.eval()
+        print(f"[gemma-mm] ready ({len(self.exemplars)} few-shot exemplars)")
+
+    # ---- text turn (system + exemplars + user prompt) ----
+    def _text_messages(self, prompt):
+        msgs = [{"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT}]}]
+        for ex in self.exemplars:
+            tree_json = json.dumps(ex["tree"], separators=(",", ":"))
+            msgs.append({"role": "user", "content": [
+                {"type": "text", "text": USER_TMPL.format(prompt=ex["prompt"])}]})
+            msgs.append({"role": "assistant", "content": [{"type": "text", "text": tree_json}]})
+        msgs.append({"role": "user", "content": [
+            {"type": "text", "text": USER_TMPL.format(prompt=prompt)}]})
+        return msgs
+
+    # ---- image turn (system + text exemplars + image) ----
+    def _image_messages(self, image_path):
+        msgs = [{"role": "system", "content": [{"type": "text", "text": IMAGE_SYSTEM_PROMPT}]}]
+        for ex in self.exemplars:
+            tree_json = json.dumps(ex["tree"], separators=(",", ":"))
+            msgs.append({"role": "user", "content": [
+                {"type": "text", "text": USER_TMPL.format(prompt=ex["prompt"])}]})
+            msgs.append({"role": "assistant", "content": [{"type": "text", "text": tree_json}]})
+        msgs.append({"role": "user", "content": [
+            {"type": "image", "url": image_path},
+            {"type": "text", "text": "Reconstruct the building in this image as a Raum scene tree."}]})
+        return msgs
+
+    def _run(self, messages, max_new=None, temperature=None):
+        max_new = self.max_new if max_new is None else max_new
+        temperature = self.temperature if temperature is None else temperature
+        inputs = self.processor.apply_chat_template(
+            messages, add_generation_prompt=True, tokenize=True,
+            return_tensors="pt", return_dict=True).to(self.model.device)
+        input_len = inputs["input_ids"].shape[1]
+        with self.torch.no_grad():
+            gen = self.model.generate(**inputs, max_new_tokens=max_new,
+                                      do_sample=temperature > 0,
+                                      temperature=max(temperature, 1e-4))
+        text = self.processor.decode(gen[0][input_len:], skip_special_tokens=True)
+        self.last_raw = text
+        return text
+
+    def _parse_fill(self, text):
+        tree = parse_tree(text)
+        if tree is None:
+            return None
+        clean, _ = validate_skeleton(tree)
+        if clean is None:
+            return None
+        from scripts.infer_decomposer import fill_gaussians, shift_above_ground
+        fill_gaussians(clean, getattr(self, "scan_library", None))
+        shift_above_ground(clean)
+        return clean
+
+    def generate_tree(self, prompt: str, max_new: int = None,
+                      temperature: float = None, top_k: int = None,
+                      retries: int = 3) -> dict | None:
+        """Text prompt -> filled tree. Signature matches the SGS Decomposer."""
+        tree = self._parse_fill(self._run(self._text_messages(prompt), max_new, temperature))
+        if tree is not None:
+            return tree
+        t = self.temperature if temperature is None else temperature
+        for _ in range(max(0, retries - 1)):
+            tree = self._parse_fill(self._run(self._text_messages(prompt), max_new, max(t, 0.4)))
+            if tree is not None:
+                return tree
+        return None
+
+    def generate_tree_from_image(self, image_path: str, max_new: int = None,
+                                 temperature: float = None) -> dict | None:
+        """Reference image -> filled tree. The capability Planck/Hertz cannot do."""
+        return self._parse_fill(self._run(self._image_messages(image_path), max_new, temperature))
 
 
 def main():
