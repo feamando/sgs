@@ -8,7 +8,7 @@
   <rect x="70" y="88" width="300" height="150" rx="8" fill="#12121a" stroke="#7a9a5a" stroke-width="1.5"/>
   <text x="90" y="116" fill="#7a9a5a" font-size="12" font-weight="700">STANDS</text>
   <text x="90" y="146" fill="#f5f1e8" font-size="12">The representation separates</text>
-  <text x="90" y="164" fill="#f5f1e8" font-size="12">senses (0.37 vs 0.13 for text).</text>
+  <text x="90" y="164" fill="#f5f1e8" font-size="12">senses (0.37 vs 0.00 for text).</text>
   <text x="90" y="194" fill="#8a8598" font-size="11">A picture of a bird and of a crane</text>
   <text x="90" y="210" fill="#8a8598" font-size="11">machine really are far apart. That</text>
   <text x="90" y="226" fill="#8a8598" font-size="11">is a genuine finding on its own.</text>
