@@ -1,0 +1,1196 @@
+{
+  "summary": {
+    "model": "models/gemma-4-e4b-it",
+    "n_shot": 3,
+    "n_prompts": 20,
+    "json_valid_rate": 1.0,
+    "part_vocab_rate": 0.9787,
+    "n_valid": 20,
+    "total_leaves": 94,
+    "total_unknown": 2
+  },
+  "results": [
+    {
+      "prompt": "a castle on a hill",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "hill",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.3,
+              0.55,
+              0.2
+            ]
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 1
+    },
+    {
+      "prompt": "a fortress with four towers",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              -0.7,
+              0.5,
+              -0.7
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_1",
+            "position": [
+              0.7,
+              0.5,
+              -0.7
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_2",
+            "position": [
+              0.7,
+              0.5,
+              0.7
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_3",
+            "position": [
+              -0.7,
+              0.5,
+              0.7
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.3,
+              -0.7
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0.3,
+              0.7
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_2",
+            "position": [
+              0.7,
+              0.3,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          },
+          {
+            "name": "wall_3",
+            "position": [
+              -0.7,
+              0.3,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          }
+        ]
+      },
+      "n_leaves": 9,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a watchtower on a cliff",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "cliff",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 1.2
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a walled keep",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "keep",
+            "position": [
+              0,
+              0.4,
+              0
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              -1.5,
+              0.3,
+              0.5
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              1.5,
+              0.3,
+              0.5
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_2",
+            "position": [
+              0,
+              0.3,
+              -1.5
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_3",
+            "position": [
+              0,
+              0.3,
+              1.5
+            ],
+            "scale": 1.0
+          }
+        ]
+      },
+      "n_leaves": 6,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a gatehouse guarding a wall",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.4,
+              0.5
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0.4,
+              0.0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "gatehouse",
+            "position": [
+              0,
+              0.5,
+              0.0
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "gate",
+            "position": [
+              0,
+              0.45,
+              0.0
+            ],
+            "scale": 0.5
+          }
+        ]
+      },
+      "n_leaves": 4,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a lighthouse on rocky cliffs",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "cliff",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              0,
+              0.7,
+              0
+            ],
+            "scale": 1.2
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a small fort on a hill",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "hill",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.3,
+              0.55,
+              0.2
+            ]
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 1
+    },
+    {
+      "prompt": "a tower and a gate",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "tower_0",
+            "position": [
+              -1.0,
+              0.4,
+              0.0
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "gate",
+            "position": [
+              0.0,
+              0.4,
+              0.0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              -0.5,
+              0.4,
+              0.0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0.5,
+              0.4,
+              0.0
+            ],
+            "scale": 1.0
+          }
+        ]
+      },
+      "n_leaves": 4,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a ruined castle on a hill",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "hill",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.3,
+              0.55,
+              0.2
+            ]
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              -0.498,
+              0,
+              -0.498
+            ],
+            "scale": 0.836,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_1",
+            "position": [
+              0.498,
+              0,
+              -0.498
+            ],
+            "scale": 0.836,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_2",
+            "position": [
+              0.498,
+              0,
+              0.498
+            ],
+            "scale": 0.836,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_3",
+            "position": [
+              -0.498,
+              0,
+              0.498
+            ],
+            "scale": 0.836,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0,
+              -0.498
+            ],
+            "scale": 1.0,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0,
+              0.498
+            ],
+            "scale": 1.0,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "wall_2",
+            "position": [
+              0.498,
+              0,
+              0
+            ],
+            "scale": 1.0,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ],
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "wall_3",
+            "position": [
+              -0.498,
+              0,
+              0
+            ],
+            "scale": 1.0,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ],
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "keep",
+            "position": [
+              0,
+              0.2,
+              0
+            ],
+            "scale": 0.767,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          }
+        ]
+      },
+      "n_leaves": 10,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a keep surrounded by walls",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "keep",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              -0.5,
+              0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_2",
+            "position": [
+              0.5,
+              0,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          },
+          {
+            "name": "wall_3",
+            "position": [
+              -0.5,
+              0,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          }
+        ]
+      },
+      "n_leaves": 5,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a tower with a window",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "tower",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "window_0",
+            "position": [
+              0.5,
+              0.6,
+              0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "window_1",
+            "position": [
+              -0.5,
+              0.6,
+              -0.5
+            ],
+            "scale": 0.2
+          }
+        ]
+      },
+      "n_leaves": 3,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a long wall with arrow slits",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.4,
+              0
+            ],
+            "scale": 5.0
+          },
+          {
+            "name": "arrow_slit_0",
+            "position": [
+              -1.5,
+              0.5,
+              0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "arrow_slit_1",
+            "position": [
+              0,
+              0.5,
+              0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "arrow_slit_2",
+            "position": [
+              1.5,
+              0.5,
+              0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "arrow_slit_3",
+            "position": [
+              -1.5,
+              0.5,
+              -0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "arrow_slit_4",
+            "position": [
+              0,
+              0.5,
+              -0.5
+            ],
+            "scale": 0.2
+          },
+          {
+            "name": "arrow_slit_5",
+            "position": [
+              1.5,
+              0.5,
+              -0.5
+            ],
+            "scale": 0.2
+          }
+        ]
+      },
+      "n_leaves": 8,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a stone arch over a path",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "arch",
+            "position": [
+              0,
+              0.4,
+              0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.2,
+              1.0
+            ],
+            "scale": 0.5
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0.2,
+              -1.0
+            ],
+            "scale": 0.5
+          }
+        ]
+      },
+      "n_leaves": 4,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a hilltop fortress with trees",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "hill",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.3,
+              0.55,
+              0.2
+            ]
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              -0.5,
+              0.5,
+              0.5
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_1",
+            "position": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_2",
+            "position": [
+              0.5,
+              0.5,
+              -0.5
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "tower_3",
+            "position": [
+              -0.5,
+              0.5,
+              -0.5
+            ],
+            "scale": 0.8
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.4,
+              0.5
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              0,
+              0.4,
+              0.5
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0,
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "name": "wall_2",
+            "position": [
+              0.5,
+              0.4,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          },
+          {
+            "name": "wall_3",
+            "position": [
+              -0.5,
+              0.4,
+              0
+            ],
+            "scale": 1.5,
+            "rotation": [
+              0.7071,
+              0,
+              0.7071,
+              0
+            ]
+          },
+          {
+            "name": "keep",
+            "position": [
+              0,
+              0.6,
+              0
+            ],
+            "scale": 0.7
+          },
+          {
+            "name": "tree_0",
+            "position": [
+              -1.0,
+              0,
+              1.0
+            ],
+            "scale": 1.2
+          },
+          {
+            "name": "tree_1",
+            "position": [
+              1.0,
+              0,
+              1.0
+            ],
+            "scale": 1.2
+          },
+          {
+            "name": "tree_2",
+            "position": [
+              -1.0,
+              0,
+              -1.0
+            ],
+            "scale": 1.2
+          },
+          {
+            "name": "tree_3",
+            "position": [
+              1.0,
+              0,
+              -1.0
+            ],
+            "scale": 1.2
+          }
+        ]
+      },
+      "n_leaves": 14,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a castle gate with two towers",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              -1.0,
+              0.4,
+              0
+            ],
+            "scale": 0.7
+          },
+          {
+            "name": "tower_1",
+            "position": [
+              1.0,
+              0.4,
+              0
+            ],
+            "scale": 0.7
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "scale": 2.0
+          },
+          {
+            "name": "gate",
+            "position": [
+              0,
+              0.3,
+              0
+            ],
+            "scale": 1.0
+          }
+        ]
+      },
+      "n_leaves": 5,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a single tall tower",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              0,
+              0.4,
+              0
+            ],
+            "scale": 1.5
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a cliff with a tower on top",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "cliff",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              0,
+              0.7,
+              0
+            ],
+            "scale": 0.8
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a fortified gatehouse",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "gatehouse",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_0",
+            "position": [
+              -2.5,
+              0.5,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall_1",
+            "position": [
+              2.5,
+              0.5,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "door",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 0.5
+          }
+        ]
+      },
+      "n_leaves": 5,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a wall with a door",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "ground",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.0
+          },
+          {
+            "name": "wall",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 1.5
+          },
+          {
+            "name": "door",
+            "position": [
+              0,
+              0.5,
+              0
+            ],
+            "scale": 0.4
+          }
+        ]
+      },
+      "n_leaves": 3,
+      "n_unknown": 0
+    },
+    {
+      "prompt": "a rocky hill with a tower",
+      "parsed": true,
+      "tree": {
+        "name": "scene",
+        "children": [
+          {
+            "name": "cliff",
+            "position": [
+              0,
+              -0.1,
+              0
+            ],
+            "scale": 1.5,
+            "color": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          },
+          {
+            "name": "tower_0",
+            "position": [
+              0,
+              0.7,
+              0
+            ],
+            "scale": 0.8
+          }
+        ]
+      },
+      "n_leaves": 2,
+      "n_unknown": 0
+    }
+  ]
+}

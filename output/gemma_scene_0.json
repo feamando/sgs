@@ -1,0 +1,19 @@
+{
+  "name": "scene",
+  "children": [
+    {
+      "name": "hill",
+      "position": [
+        0,
+        -0.1,
+        0
+      ],
+      "scale": 1.0,
+      "color": [
+        0.3,
+        0.55,
+        0.2
+      ]
+    }
+  ]
+}
