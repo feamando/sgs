@@ -99,7 +99,7 @@ class GemmaDecomposer:
     """Few-shot Gemma 4 decomposer. Same interface as the SGS Decomposer."""
 
     def __init__(self, model_path, exemplars_path=None, n_shot=3,
-                 max_new=1024, temperature=0.1):
+                 max_new=1024, temperature=0.1, adapter=None):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -107,12 +107,23 @@ class GemmaDecomposer:
         self.max_new = max_new
         self.temperature = temperature
         self.exemplars = load_exemplars(exemplars_path, n_shot)
+        # Interface parity with the SGS Decomposer (infer_decomposer.py): the
+        # serve/fill path reads these. Gemma has no SentencePiece / SGS model,
+        # so vocab_size + scan_library are None and the parse-failure debug path
+        # (which pokes .sp/.model) is guarded by backend in infer_decomposer.py.
+        self.last_raw = ""
+        self.scan_library = None
+        self.vocab_size = None
 
         print(f"[gemma-decomp] loading {model_path} ...")
         self.tok = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path, dtype=torch.bfloat16,
             device_map="auto" if torch.cuda.is_available() else None)
+        if adapter:
+            from peft import PeftModel
+            print(f"[gemma-decomp] loading LoRA adapter {adapter} ...")
+            self.model = PeftModel.from_pretrained(self.model, adapter)
         self.model.eval()
         print(f"[gemma-decomp] ready ({len(self.exemplars)} few-shot exemplars)")
 
@@ -125,26 +136,47 @@ class GemmaDecomposer:
         msgs.append({"role": "user", "content": USER_TMPL.format(prompt=prompt)})
         return msgs
 
-    def _raw_generate(self, prompt):
+    def _raw_generate(self, prompt, max_new=None, temperature=None):
+        max_new = self.max_new if max_new is None else max_new
+        temperature = self.temperature if temperature is None else temperature
         inputs = self.tok.apply_chat_template(
             self._messages(prompt), add_generation_prompt=True,
             return_tensors="pt", return_dict=True).to(self.model.device)
         input_len = inputs["input_ids"].shape[1]
         with self.torch.no_grad():
             gen = self.model.generate(
-                **inputs, max_new_tokens=self.max_new,
-                do_sample=self.temperature > 0,
-                temperature=max(self.temperature, 1e-4))
-        return self.tok.decode(gen[0][input_len:], skip_special_tokens=True)
+                **inputs, max_new_tokens=max_new,
+                do_sample=temperature > 0,
+                temperature=max(temperature, 1e-4))
+        text = self.tok.decode(gen[0][input_len:], skip_special_tokens=True)
+        self.last_raw = text
+        return text
 
-    def generate_tree(self, prompt: str) -> dict | None:
-        """Prompt -> validated shallow skeleton dict (or None if unparseable)."""
-        text = self._raw_generate(prompt)
+    def generate_tree(self, prompt: str, max_new: int = None,
+                      temperature: float = None, top_k: int = None,
+                      retries: int = 3) -> dict | None:
+        """Prompt -> validated shallow skeleton dict (or None if unparseable).
+
+        Signature-compatible with the SGS Decomposer.generate_tree so the
+        infer_decomposer.py serve handler calls it unchanged. top_k is accepted
+        for parity but unused (HF generate uses temperature sampling here).
+        Attempt 0 is near-greedy (most reliable for JSON); retries re-sample.
+        """
+        text = self._raw_generate(prompt, max_new=max_new, temperature=temperature)
         tree = parse_tree(text)
-        if tree is None:
-            return None
-        clean, _dropped = validate_skeleton(tree)
-        return clean
+        if tree is not None:
+            clean, _ = validate_skeleton(tree)
+            if clean is not None:
+                return clean
+        for _ in range(max(0, retries - 1)):
+            t = self.temperature if temperature is None else temperature
+            text = self._raw_generate(prompt, max_new=max_new, temperature=max(t, 0.4))
+            tree = parse_tree(text)
+            if tree is not None:
+                clean, _ = validate_skeleton(tree)
+                if clean is not None:
+                    return clean
+        return None
 
     def generate_tree_verbose(self, prompt: str) -> dict:
         """Same, but returns metrics for the Gate-0 measurement."""

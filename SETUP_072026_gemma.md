@@ -165,9 +165,37 @@ python scripts/infer_decomposer.py --scene-file output/gemma_scene_0.json --no-s
   --serve --port 8003
 ```
 
-## 2. Gate 1 — LoRA fine-tune Gemma on the decomposer dataset (TO BUILD: scripts/train_decomposer_gemma.py)
+### GATE 0 RESULT — PASS (run 2026-07-27 on the 4090)
 
-Only if Gate 0 was PARTIAL. Fine-tune Gemma on the SAME `path1_train.json` the
+`results/gemma_decomp_fewshot.json`, 20 eval prompts, 3-shot, temp 0.1:
+- **JSON-valid rate: 100%** (20/20). Gemma never broke the schema.
+- **part-vocab rate: 97.9%** (92/94 leaves renderable).
+- Rich prompts decompose well: "fortress with four towers" -> 9 parts,
+  "ruined castle on a hill" -> 10, "hilltop fortress with trees" -> 14, all 0-unknown.
+
+DECISION: PASS clears the bar -> **skip §2 LoRA**, wire the HF backend (§3).
+
+ONE recall soft-spot (NOT a format/capacity failure): the 2 dropped leaves are both
+on TERSE prompts that name only the whole object -- "a castle on a hill" emitted
+`[hill, "castle"]` and "a small fort on a hill" emitted a monolithic `"fort"`; both
+non-renderable, dropped -> only a hill renders. This is the **Raum 1.7 lesson**
+verbatim ([[project_sgs_raum_17]]): terse default prompts under-recall; concrete
+sub-part phrasing emits everything. FIX (decided): enrich the decomposer UI default
+prompt to "a stone castle on a green hill" (the phrasing that worked for Hertz),
+done in §3. Left as an open item: optionally add a castle->towers+walls+keep
+few-shot exemplar so "castle"/"fort" never emit monolithic regardless of phrasing.
+
+## 2. Gate 1 — LoRA fine-tune Gemma on the decomposer dataset (SKIPPED: Gate 0 passed)
+
+**SKIPPED 2026-07-27** — Gate 0 passed at 100% valid / 97.9% vocab with zero
+training, so per the gate-and-kill rule this phase is not built. Kept below as the
+recorded fallback: if the terse-prompt recall soft-spot proves to need more than a
+UI prompt change (i.e. the monolithic-"castle" emission shows up on real usage), the
+cheap fix is a castle-decomposition few-shot exemplar; LoRA (this section) is the
+heavier fallback if few-shot exemplars can't lock it. `train_decomposer_gemma.py`
+is TO BUILD only if that happens. The `--adapter` path is already wired in §3.
+
+Fine-tune Gemma on the SAME `path1_train.json` the
 Hertz/Planck decomposers used, so the comparison is apples-to-apples.
 
 `scripts/train_decomposer_gemma.py` (mirrors `train_decomposer.py`'s CLI where it
@@ -202,18 +230,36 @@ numbers AND the trees render coherent castles under `diagnose_emission.py`. If L
 does not beat few-shot, ship the few-shot decomposer (simpler, no checkpoint) and
 note it.
 
-## 3. Wire Gemma into the Raum decomposer app (EDIT: scripts/infer_decomposer.py)
+## 3. Wire Gemma into the Raum decomposer app (DONE 2026-07-27: scripts/infer_decomposer.py)
 
-Add an HF backend to the serving path so Gemma is selectable exactly like the SGS
-bases. The downstream fill + render pipeline is unchanged (it consumes a tree dict).
+HF backend added to the serving path so Gemma is a launch-time-selectable decomposer
+exactly like the SGS bases (this is Raum's decomposer-selector: interpreter/decomposer
+are heavy loads chosen at launch via `--checkpoint`, only FILL hotswaps per-request).
+The downstream fill + render pipeline is unchanged (it consumes a tree dict).
 
-- Add `--backend {sgs,hf}` (default `sgs`) and let `--checkpoint` accept a Gemma
-  folder path when `--backend hf`. When `hf`, construct `GemmaDecomposer` (few-shot,
-  or with `--adapter checkpoints/gemma_decomposer` for the LoRA variant) INSTEAD of
-  the `SGSLanguageModel`-based `Decomposer`.
-- Both classes expose `generate_tree(prompt) -> dict`, so the FastAPI `/generate`
-  handler, `_fill_gaussians`, `snap_layout`, and every appearance control work
-  as-is. This is the whole point of the backend abstraction.
+DONE:
+- `--backend {sgs,hf}` (default `sgs`) added; with `--backend hf`, `--checkpoint`
+  is the Gemma model folder and `--adapter` optionally loads a LoRA dir. When `hf`,
+  `main()` constructs `GemmaDecomposer` instead of the `SGSLanguageModel`-based
+  `Decomposer`.
+- `GemmaDecomposer.generate_tree(prompt, max_new, temperature, top_k, retries)` is
+  signature-compatible with the SGS `Decomposer.generate_tree`, and exposes
+  `.last_raw` / `.scan_library` / `.vocab_size` so the FastAPI `/generate` handler,
+  `_fill_gaussians`, `snap_layout`, and appearance controls work unchanged.
+- The two parse-failure debug blocks (which poke `.sp`/`.model`, SGS-only) are
+  guarded by `backend`; the HF branch dumps `.last_raw` instead.
+- Recall fix (Gate 0 soft-spot): the decomposer UI default prompt is enriched to
+  "a stone castle on a green hill" (was terse "a castle on a hill"), so terse
+  under-recall doesn't hit the default scene. Applies to ALL backends.
+
+```powershell
+# few-shot Gemma decomposer served in the Raum decomposer UI (port 8003)
+python scripts/infer_decomposer.py --backend hf --checkpoint models/gemma-4-e4b-it `
+  --serve --port 8003 --no-snap
+# LoRA variant (only if §2 ever gets built)
+python scripts/infer_decomposer.py --backend hf --checkpoint models/gemma-4-e4b-it `
+  --adapter checkpoints/gemma_decomposer --serve --port 8003 --no-snap
+```
 
 ```powershell
 # few-shot Gemma decomposer, served in Raum's decomposer UI (port 8003)
@@ -269,10 +315,10 @@ tree/scene on the next Generate, and switching back to Hertz/Planck still works
 |-------|------|------------------|
 | 0.1 | env: transformers>=4.50 + peft in main .venv | prereq |
 | 0.a | decomposer dataset (build_stage3_dataset.py) | **DONE 2026-07-22:** path1_train.json, 160 castle + 400 mix = 560 records. |
-| 0 | few-shot Gemma decomposer (scripts/gemma_decomposer.py) | **BUILT 2026-07-22** (helpers smoke-tested; torch/transformers path runs on the box). RUN pending. KILL if Gemma can't hold the JSON schema even few-shot. PASS (>=~0.9 valid + coherent) -> skip §2. |
-| 1 | LoRA fine-tune (train_decomposer_gemma.py) | **TO BUILD, only if §0 PARTIAL.** KILL claim if LoRA does not beat few-shot; then ship few-shot. |
-| 2 | HF backend in infer_decomposer.py --serve | **TO BUILD.** Parity-or-better vs Hertz decomposer, snap OFF. |
-| 3 | register in satz/app.py MODELS + selector | **TO BUILD.** Hotswap works both directions. |
+| 0 (§1) | few-shot Gemma decomposer (scripts/gemma_decomposer.py) | **PASS 2026-07-27: 100% valid / 97.9% vocab**, 20 prompts, zero training. Terse-prompt recall soft-spot (fixed via UI default prompt). |
+| 1 (§2) | LoRA fine-tune (train_decomposer_gemma.py) | **SKIPPED** — Gate 0 passed, no training needed. Fallback if the recall soft-spot resists few-shot exemplars. |
+| 2 (§3) | HF backend in infer_decomposer.py --serve | **DONE 2026-07-27:** --backend hf + --adapter; GemmaDecomposer signature-compatible; parse-failure debug guarded by backend; UI default prompt enriched. Live render vs Hertz decomposer = next RUN on the box. |
+| 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
 
 ## Papers / product this feeds
 

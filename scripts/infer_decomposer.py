@@ -36,8 +36,15 @@ from src.raum.decomposition import CompositionNode, tree_to_tensors, print_tree,
 
 def parse_args():
     p = argparse.ArgumentParser(description="Raum 1.3/1.4 inference: prompt -> tree -> render")
-    p.add_argument("--checkpoint", help="Fine-tuned decomposer checkpoint (not needed with --scene-file)")
-    p.add_argument("--tokenizer", help="SentencePiece model (not needed with --scene-file)")
+    p.add_argument("--checkpoint", help="Fine-tuned decomposer checkpoint (not needed with --scene-file). "
+                   "With --backend hf, this is the Gemma model folder, e.g. models/gemma-4-e4b-it")
+    p.add_argument("--tokenizer", help="SentencePiece model (SGS backend only; HF backend brings its own)")
+    p.add_argument("--backend", choices=["sgs", "hf"], default="sgs",
+                   help="sgs = fine-tuned SGSLanguageModel (Planck/Hertz); "
+                        "hf = HuggingFace base (Gemma 4) via scripts/gemma_decomposer.py")
+    p.add_argument("--adapter", default=None,
+                   help="HF backend: optional LoRA adapter dir (train_decomposer_gemma.py). "
+                        "Omit for the zero-training few-shot decomposer.")
     p.add_argument("--scene-file", type=str, default=None,
                    help="Raum 0.5: render a fixed pre-built scene tree (JSON) with no model in the loop")
     p.add_argument("--prompt", type=str, default=None, help="Single prompt to decompose")
@@ -885,7 +892,10 @@ main { display: grid; grid-template-columns: 320px 1fr; overflow: hidden; }
 <main>
   <div class="sidebar">
     <label>Scene prompt</label>
-    <textarea id="prompt" placeholder="a castle on a hill">a castle on a hill</textarea>
+    <!-- Concrete phrasing that names sub-parts: the terse "a castle on a hill"
+         under-recalls (decomposers, incl. Gemma few-shot, emit a monolithic
+         "castle" leaf that has no renderable part). Same Raum 1.7 lesson. -->
+    <textarea id="prompt" placeholder="a stone castle on a green hill">a stone castle on a green hill</textarea>
     <label style="margin-top:10px">Fidelity</label>
     <select id="fidelity" style="width:100%;padding:6px;background:#12121a;border:1px solid #1f1f2a;color:#f5f1e8;border-radius:6px;font-size:12px">
       <option value="low">Low (skeleton, ~60 splats, instant)</option>
@@ -1104,11 +1114,23 @@ def main():
     if scene_mode:
         print(f"Fixed-scene mode (no model): {args.scene_file}")
     else:
-        if not args.checkpoint or not args.tokenizer:
-            raise SystemExit("--checkpoint and --tokenizer are required unless --scene-file is given")
-        print(f"Loading decomposer: {args.checkpoint}")
-        decomposer = Decomposer(args.checkpoint, args.tokenizer, device)
-        print(f"  Vocab: {decomposer.vocab_size}, ready.")
+        if args.backend == "hf":
+            if not args.checkpoint:
+                raise SystemExit("--checkpoint (the Gemma model folder) is required for --backend hf")
+            print(f"Loading HF decomposer (Gemma): {args.checkpoint}"
+                  + (f" + adapter {args.adapter}" if args.adapter else " (few-shot, no training)"))
+            from scripts.gemma_decomposer import GemmaDecomposer
+            decomposer = GemmaDecomposer(
+                args.checkpoint, exemplars_path="data/decomposition_trees/path1_train.json",
+                n_shot=3, max_new=args.max_new, temperature=args.temperature,
+                adapter=args.adapter)
+            print("  Gemma decomposer ready.")
+        else:
+            if not args.checkpoint or not args.tokenizer:
+                raise SystemExit("--checkpoint and --tokenizer are required unless --scene-file is given")
+            print(f"Loading decomposer: {args.checkpoint}")
+            decomposer = Decomposer(args.checkpoint, args.tokenizer, device)
+            print(f"  Vocab: {decomposer.vocab_size}, ready.")
         # Raum 0.6 §5.2: optionally load the real-scan library for part fill.
         decomposer.scan_library = None
         if args.use_scans:
@@ -1149,26 +1171,31 @@ def main():
         )
         if tree_dict is None:
             # Debug: show what was generated
-            input_text = f"DECOMPOSE: {args.prompt}\nTREE: "
-            input_ids = decomposer.sp.encode(input_text, out_type=int)
-            ids_t = torch.tensor([input_ids], dtype=torch.long, device=device)
-            generated = []
-            with torch.no_grad():
-                for _ in range(500):
-                    if ids_t.shape[1] > 512:
-                        ids_t = ids_t[:, -512:]
-                    logits = decomposer.model(ids_t)
-                    next_logits = logits[0, -1, :] / args.temperature
-                    topk_vals, topk_idx = next_logits.topk(args.top_k)
-                    mask_t = torch.full_like(next_logits, float("-inf"))
-                    mask_t.scatter_(0, topk_idx, topk_vals)
-                    probs = torch.softmax(mask_t, dim=-1)
-                    next_id = torch.multinomial(probs, 1).item()
-                    if next_id == decomposer.sp.eos_id():
-                        break
-                    generated.append(next_id)
-                    ids_t = torch.cat([ids_t, torch.tensor([[next_id]], device=device)], dim=1)
-            raw = decomposer.sp.decode(generated)
+            if args.backend == "hf":
+                # HF backend has no SentencePiece token loop; last_raw holds the
+                # exact decoded output that failed to parse.
+                raw = getattr(decomposer, "last_raw", "") or ""
+            else:
+                input_text = f"DECOMPOSE: {args.prompt}\nTREE: "
+                input_ids = decomposer.sp.encode(input_text, out_type=int)
+                ids_t = torch.tensor([input_ids], dtype=torch.long, device=device)
+                generated = []
+                with torch.no_grad():
+                    for _ in range(500):
+                        if ids_t.shape[1] > 512:
+                            ids_t = ids_t[:, -512:]
+                        logits = decomposer.model(ids_t)
+                        next_logits = logits[0, -1, :] / args.temperature
+                        topk_vals, topk_idx = next_logits.topk(args.top_k)
+                        mask_t = torch.full_like(next_logits, float("-inf"))
+                        mask_t.scatter_(0, topk_idx, topk_vals)
+                        probs = torch.softmax(mask_t, dim=-1)
+                        next_id = torch.multinomial(probs, 1).item()
+                        if next_id == decomposer.sp.eos_id():
+                            break
+                        generated.append(next_id)
+                        ids_t = torch.cat([ids_t, torch.tensor([[next_id]], device=device)], dim=1)
+                raw = decomposer.sp.decode(generated)
             print(f"ERROR: failed to generate valid JSON tree")
             print(f"\nRaw output (first 500 chars):")
             print(raw[:500])
