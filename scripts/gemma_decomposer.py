@@ -167,7 +167,7 @@ class GemmaDecomposer:
         if tree is not None:
             clean, _ = validate_skeleton(tree)
             if clean is not None:
-                return clean
+                return self._fill(clean)
         for _ in range(max(0, retries - 1)):
             t = self.temperature if temperature is None else temperature
             text = self._raw_generate(prompt, max_new=max_new, temperature=max(t, 0.4))
@@ -175,8 +175,19 @@ class GemmaDecomposer:
             if tree is not None:
                 clean, _ = validate_skeleton(tree)
                 if clean is not None:
-                    return clean
+                    return self._fill(clean)
         return None
+
+    def _fill(self, tree: dict) -> dict:
+        """Turn the validated shallow skeleton into a renderable gaussian-bearing
+        tree, EXACTLY as the SGS Decomposer does (fill_gaussians + shift_above_
+        ground). Without this the tree reaches tree_to_tensors with 0 gaussians
+        -> empty cloud -> 'Mean of empty slice' and nothing renders. Imported
+        lazily to avoid a circular import (infer_decomposer imports this module)."""
+        from scripts.infer_decomposer import fill_gaussians, shift_above_ground
+        fill_gaussians(tree, getattr(self, "scan_library", None))
+        shift_above_ground(tree)
+        return tree
 
     def generate_tree_verbose(self, prompt: str) -> dict:
         """Same, but returns metrics for the Gate-0 measurement."""
@@ -240,9 +251,14 @@ def main():
     if args.dump_tree:
         first = next((r["tree"] for r in results if r["parsed"] and r["tree"]), None)
         if first is not None:
+            # Fill before dumping so infer_decomposer.py --scene-file renders it
+            # (scene-file loads the tree as-is; a bare skeleton renders empty).
+            from scripts.infer_decomposer import fill_gaussians, shift_above_ground
+            fill_gaussians(first, None)
+            shift_above_ground(first)
             Path(args.dump_tree).parent.mkdir(parents=True, exist_ok=True)
             json.dump(first, open(args.dump_tree, "w"), indent=2)
-            print(f"[gemma-decomp] first valid tree -> {args.dump_tree}")
+            print(f"[gemma-decomp] first valid tree (filled) -> {args.dump_tree}")
 
     print("\n[gemma-decomp] GATE 0 ==================================")
     print(f"  JSON-valid rate : {valid_rate:.1%}  ({n_valid}/{n})")

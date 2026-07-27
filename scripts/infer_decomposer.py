@@ -77,6 +77,214 @@ def parse_args():
     return p.parse_args()
 
 
+def fill_gaussians(node: dict, scan_library=None):
+    """Recursively fill leaf nodes with procedural Gaussians based on name.
+
+    Module-level so EVERY backend (SGS Decomposer, GemmaDecomposer) turns a
+    shallow skeleton into a renderable, gaussian-bearing tree the same way.
+    Contract: any generate_tree() must return a tree that has already been
+    through this + shift_above_ground, or tree_to_tensors yields an empty cloud
+    (the "Mean of empty slice" warning) and nothing renders.
+    """
+    import math, random
+
+    if "children" in node and node["children"]:
+        for child in node["children"]:
+            fill_gaussians(child, scan_library)
+        return
+
+    # Raum 0.6 §5.2: route a PART leaf to a real scanned splat first (real
+    # proportions). Falls through to the procedural builder if no scan
+    # library is loaded or the category has no scan.
+    if (scan_library
+            and ("gaussians" not in node or not node.get("gaussians"))):
+        try:
+            from scripts.scan_routing import route_part_to_scan
+            scan_node = route_part_to_scan(
+                node.get("name", ""), scan_library, color=node.get("color"))
+        except Exception:
+            scan_node = None
+        if scan_node is not None:
+            node["gaussians"] = scan_node.to_dict().get("gaussians", [])
+            return
+
+    # Raum 1.5: expand a shallow grammar PART leaf (tower/wall/keep/tree/
+    # gate) into its atomic compound, so a model that emits a shallow
+    # skeleton renders identically to the 0.5 grammar. Falls through to the
+    # generic per-name fill below for non-part leaves.
+    if "gaussians" not in node or not node.get("gaussians"):
+        try:
+            from scripts.castle_grammar import expand_part
+            part = expand_part(node.get("name", ""), color=node.get("color"))
+        except Exception:
+            part = None
+        if part is not None:
+            pd = part.to_dict()
+            # Lift the expanded compound's sub-parts directly under this
+            # node (avoid a redundant tower_NE -> tower_NE nesting).
+            if pd.get("children"):
+                node["children"] = pd["children"]
+            else:
+                node["gaussians"] = pd.get("gaussians", [])
+            for child in node.get("children", []):
+                fill_gaussians(child, scan_library)
+            return
+
+    if "gaussians" not in node or not node.get("gaussians"):
+        # Leaf node without gaussians: generate procedurally
+        name = node.get("name", "").lower()
+        color = node.get("color", [0.6, 0.6, 0.6])
+
+        # Pick primitive type from name.
+        n = 60
+        gaussians = []
+
+        # Suffix-aware routing for grammar compound names (Raum 0.5/1.5).
+        # The semantic part is the trailing token: tower_NE_roof -> "roof",
+        # keep_body -> "body" (prefix "keep"). This must run BEFORE the
+        # substring chain, or "tower"/"keep" in the prefix would wrongly
+        # win (e.g. tower_NE_roof matching "tower" -> cylinder).
+        toks = name.replace("-", "_").split("_")
+        suffix = toks[-1] if toks else name
+        prefix = toks[0] if toks else name
+        grammar_shape = None
+        if suffix in ("roof", "canopy", "cap", "cone"):
+            grammar_shape = "cone"
+        elif suffix in ("trunk",):
+            grammar_shape = "cylinder"
+        elif suffix in ("crenellation", "battlement", "merlon", "face",
+                        "arch", "brick", "stone"):
+            grammar_shape = "box"
+        elif suffix == "body":
+            # tower bodies are round; keep / building bodies are boxes
+            grammar_shape = "cylinder" if prefix in ("tower", "turret", "spire") else "box"
+
+        if grammar_shape == "cone":
+            for i in range(n):
+                t = i/n
+                theta = 2*math.pi*(i*7)/n
+                r = 0.3*(1-t)
+                gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
+                                  "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
+            node["gaussians"] = gaussians
+            return
+        elif grammar_shape == "cylinder":
+            for i in range(n):
+                theta = 2*math.pi*i/n
+                y = (i/n) * 1.0 - 0.5
+                gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
+                                  "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+            node["gaussians"] = gaussians
+            return
+        elif grammar_shape == "box":
+            side = max(3, round(n ** (1.0/3.0)))
+            for ix in range(side):
+                for iy in range(side):
+                    for iz in range(side):
+                        x = (ix/(side-1) - 0.5) * 0.8
+                        y = (iy/(side-1) - 0.5) * 0.8
+                        z = (iz/(side-1) - 0.5) * 0.8
+                        gaussians.append({"position": [x, y, z],
+                                          "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+            node["gaussians"] = gaussians
+            return
+
+        if any(w in name for w in ["ground", "floor", "plane", "field", "road",
+                                   "water", "sand", "snow",
+                                   # open spaces read as a flat slab
+                                   "courtyard", "yard", "plaza", "terrace",
+                                   "patio", "square", "base", "foundation",
+                                   "platform"]):
+            # Flat plane
+            side = int(math.sqrt(n))
+            for i in range(side):
+                for j in range(side):
+                    x = (i/side - 0.5) * 2.0
+                    z = (j/side - 0.5) * 2.0
+                    gaussians.append({"position": [x, random.uniform(-0.02, 0.02), z],
+                                      "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
+        elif any(w in name for w in ["hill", "mound", "knoll", "dune", "mountain",
+                                     "dome", "rise"]):
+            # Dome / mound: a wide, DENSE filled disc of small splats that
+            # reads as solid raised ground wider than the castle footprint
+            # (ring +/-0.7 * castle_scale ~0.86). Sample a grid over the
+            # disc and lift each point to the dome surface -> no gaps, no
+            # giant balls. Small per-splat scale so they tile, not blob.
+            hill_r = 2.0
+            hill_h = 0.85
+            step = 0.07           # grid spacing -> dense coverage
+            x = -hill_r
+            while x <= hill_r:
+                z = -hill_r
+                while z <= hill_r:
+                    rr = math.hypot(x, z)
+                    if rr <= hill_r:
+                        y = hill_h * math.cos(min(rr / hill_r, 1.0) * math.pi / 2) - 0.1
+                        gaussians.append({"position": [x, y, z],
+                                          "scale": [-3.2, -3.2, -3.2], "opacity": 2.0,
+                                          "color": [min(1.0, max(0.0, c + random.uniform(-0.04, 0.04))) for c in color]})
+                    z += step
+                x += step
+        elif any(w in name for w in ["tower", "trunk", "pole", "post", "column",
+                                     "pillar", "mast", "chimney", "turret",
+                                     "spire", "keep", "minaret"]):
+            # Cylinder
+            for i in range(n):
+                theta = 2*math.pi*i/n
+                y = (i/n) * 1.0 - 0.5
+                gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
+                                  "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+        elif any(w in name for w in ["roof", "cone", "top", "canopy", "cap"]):
+            # Cone
+            for i in range(n):
+                t = i/n
+                theta = 2*math.pi*(i*7)/n
+                r = 0.3*(1-t)
+                gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
+                                  "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
+        elif any(w in name for w in ["wall", "fence", "gate", "door", "box",
+                                     "body", "hull", "block", "brick",
+                                     # building bodies are solid boxes
+                                     "building", "wing", "hall", "house",
+                                     "palace", "castle", "manor", "mansion",
+                                     "structure", "room", "hut", "cabin",
+                                     "barn", "shed", "fort", "annex", "main"]):
+            # Solid box (filled grid, not a shell, so it reads as mass)
+            side = max(3, round(n ** (1.0/3.0)))
+            for ix in range(side):
+                for iy in range(side):
+                    for iz in range(side):
+                        x = (ix/(side-1) - 0.5) * 0.8
+                        y = (iy/(side-1) - 0.5) * 0.8
+                        z = (iz/(side-1) - 0.5) * 0.8
+                        gaussians.append({"position": [x, y, z],
+                                          "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+        else:
+            # Default: sphere
+            golden = (1+math.sqrt(5))/2
+            for i in range(n):
+                theta = 2*math.pi*i/golden
+                phi = math.acos(1-2*(i+0.5)/n)
+                r = 0.3
+                gaussians.append({"position": [r*math.sin(phi)*math.cos(theta), r*math.sin(phi)*math.sin(theta), r*math.cos(phi)],
+                                  "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
+
+        node["gaussians"] = gaussians
+
+
+def shift_above_ground(tree: dict):
+    """Shift the entire scene so all Gaussians sit above Y=0."""
+    from src.raum.decomposition import CompositionNode, tree_to_tensors
+    node = CompositionNode.from_dict(tree)
+    tensors = tree_to_tensors(node)
+    if tensors["means"].shape[0] == 0:
+        return
+    min_y = tensors["means"][:, 1].min().item()
+    if min_y < 0:
+        pos = tree.get("position", [0, 0, 0])
+        tree["position"] = [pos[0], pos[1] - min_y + 0.1, pos[2]]
+
+
 class Decomposer:
     """Wraps the fine-tuned Planck model for tree generation."""
 
@@ -205,204 +413,10 @@ class Decomposer:
         return tree
 
     def _shift_above_ground(self, tree: dict):
-        """Shift the entire scene so all Gaussians sit above Y=0."""
-        from src.raum.decomposition import CompositionNode, tree_to_tensors
-        node = CompositionNode.from_dict(tree)
-        tensors = tree_to_tensors(node)
-        if tensors["means"].shape[0] == 0:
-            return
-        min_y = tensors["means"][:, 1].min().item()
-        if min_y < 0:
-            # Shift root position up
-            pos = tree.get("position", [0, 0, 0])
-            tree["position"] = [pos[0], pos[1] - min_y + 0.1, pos[2]]
+        shift_above_ground(tree)
 
     def _fill_gaussians(self, node: dict):
-        """Recursively fill leaf nodes with procedural Gaussians based on name."""
-        import math, random
-
-        if "children" in node and node["children"]:
-            for child in node["children"]:
-                self._fill_gaussians(child)
-            return
-
-        # Raum 0.6 §5.2: route a PART leaf to a real scanned splat first (real
-        # proportions). Falls through to the procedural builder if no scan
-        # library is loaded or the category has no scan.
-        if (getattr(self, "scan_library", None)
-                and ("gaussians" not in node or not node.get("gaussians"))):
-            try:
-                from scripts.scan_routing import route_part_to_scan
-                scan_node = route_part_to_scan(
-                    node.get("name", ""), self.scan_library, color=node.get("color"))
-            except Exception:
-                scan_node = None
-            if scan_node is not None:
-                node["gaussians"] = scan_node.to_dict().get("gaussians", [])
-                return
-
-        # Raum 1.5: expand a shallow grammar PART leaf (tower/wall/keep/tree/
-        # gate) into its atomic compound, so a model that emits a shallow
-        # skeleton renders identically to the 0.5 grammar. Falls through to the
-        # generic per-name fill below for non-part leaves.
-        if "gaussians" not in node or not node.get("gaussians"):
-            try:
-                from scripts.castle_grammar import expand_part
-                part = expand_part(node.get("name", ""), color=node.get("color"))
-            except Exception:
-                part = None
-            if part is not None:
-                pd = part.to_dict()
-                # Lift the expanded compound's sub-parts directly under this
-                # node (avoid a redundant tower_NE -> tower_NE nesting).
-                if pd.get("children"):
-                    node["children"] = pd["children"]
-                else:
-                    node["gaussians"] = pd.get("gaussians", [])
-                for child in node.get("children", []):
-                    self._fill_gaussians(child)
-                return
-
-        if "gaussians" not in node or not node.get("gaussians"):
-            # Leaf node without gaussians: generate procedurally
-            name = node.get("name", "").lower()
-            color = node.get("color", [0.6, 0.6, 0.6])
-
-            # Pick primitive type from name.
-            n = 60
-            gaussians = []
-
-            # Suffix-aware routing for grammar compound names (Raum 0.5/1.5).
-            # The semantic part is the trailing token: tower_NE_roof -> "roof",
-            # keep_body -> "body" (prefix "keep"). This must run BEFORE the
-            # substring chain, or "tower"/"keep" in the prefix would wrongly
-            # win (e.g. tower_NE_roof matching "tower" -> cylinder).
-            toks = name.replace("-", "_").split("_")
-            suffix = toks[-1] if toks else name
-            prefix = toks[0] if toks else name
-            grammar_shape = None
-            if suffix in ("roof", "canopy", "cap", "cone"):
-                grammar_shape = "cone"
-            elif suffix in ("trunk",):
-                grammar_shape = "cylinder"
-            elif suffix in ("crenellation", "battlement", "merlon", "face",
-                            "arch", "brick", "stone"):
-                grammar_shape = "box"
-            elif suffix == "body":
-                # tower bodies are round; keep / building bodies are boxes
-                grammar_shape = "cylinder" if prefix in ("tower", "turret", "spire") else "box"
-
-            if grammar_shape == "cone":
-                for i in range(n):
-                    t = i/n
-                    theta = 2*math.pi*(i*7)/n
-                    r = 0.3*(1-t)
-                    gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
-                                      "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
-                node["gaussians"] = gaussians
-                return
-            elif grammar_shape == "cylinder":
-                for i in range(n):
-                    theta = 2*math.pi*i/n
-                    y = (i/n) * 1.0 - 0.5
-                    gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
-                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
-                node["gaussians"] = gaussians
-                return
-            elif grammar_shape == "box":
-                side = max(3, round(n ** (1.0/3.0)))
-                for ix in range(side):
-                    for iy in range(side):
-                        for iz in range(side):
-                            x = (ix/(side-1) - 0.5) * 0.8
-                            y = (iy/(side-1) - 0.5) * 0.8
-                            z = (iz/(side-1) - 0.5) * 0.8
-                            gaussians.append({"position": [x, y, z],
-                                              "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
-                node["gaussians"] = gaussians
-                return
-
-            if any(w in name for w in ["ground", "floor", "plane", "field", "road",
-                                       "water", "sand", "snow",
-                                       # open spaces read as a flat slab
-                                       "courtyard", "yard", "plaza", "terrace",
-                                       "patio", "square", "base", "foundation",
-                                       "platform"]):
-                # Flat plane
-                side = int(math.sqrt(n))
-                for i in range(side):
-                    for j in range(side):
-                        x = (i/side - 0.5) * 2.0
-                        z = (j/side - 0.5) * 2.0
-                        gaussians.append({"position": [x, random.uniform(-0.02, 0.02), z],
-                                          "scale": [-2.5, -2.5, -2.5], "opacity": 2.0, "color": color})
-            elif any(w in name for w in ["hill", "mound", "knoll", "dune", "mountain",
-                                         "dome", "rise"]):
-                # Dome / mound: a wide, DENSE filled disc of small splats that
-                # reads as solid raised ground wider than the castle footprint
-                # (ring +/-0.7 * castle_scale ~0.86). Sample a grid over the
-                # disc and lift each point to the dome surface -> no gaps, no
-                # giant balls. Small per-splat scale so they tile, not blob.
-                hill_r = 2.0
-                hill_h = 0.85
-                step = 0.07           # grid spacing -> dense coverage
-                x = -hill_r
-                while x <= hill_r:
-                    z = -hill_r
-                    while z <= hill_r:
-                        rr = math.hypot(x, z)
-                        if rr <= hill_r:
-                            y = hill_h * math.cos(min(rr / hill_r, 1.0) * math.pi / 2) - 0.1
-                            gaussians.append({"position": [x, y, z],
-                                              "scale": [-3.2, -3.2, -3.2], "opacity": 2.0,
-                                              "color": [min(1.0, max(0.0, c + random.uniform(-0.04, 0.04))) for c in color]})
-                        z += step
-                    x += step
-            elif any(w in name for w in ["tower", "trunk", "pole", "post", "column",
-                                         "pillar", "mast", "chimney", "turret",
-                                         "spire", "keep", "minaret"]):
-                # Cylinder
-                for i in range(n):
-                    theta = 2*math.pi*i/n
-                    y = (i/n) * 1.0 - 0.5
-                    gaussians.append({"position": [0.25*math.cos(theta), y, 0.25*math.sin(theta)],
-                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
-            elif any(w in name for w in ["roof", "cone", "top", "canopy", "cap"]):
-                # Cone
-                for i in range(n):
-                    t = i/n
-                    theta = 2*math.pi*(i*7)/n
-                    r = 0.3*(1-t)
-                    gaussians.append({"position": [r*math.cos(theta), t*0.5, r*math.sin(theta)],
-                                      "scale": [-3.2, -3.2, -3.2], "opacity": 2.0, "color": color})
-            elif any(w in name for w in ["wall", "fence", "gate", "door", "box",
-                                         "body", "hull", "block", "brick",
-                                         # building bodies are solid boxes
-                                         "building", "wing", "hall", "house",
-                                         "palace", "castle", "manor", "mansion",
-                                         "structure", "room", "hut", "cabin",
-                                         "barn", "shed", "fort", "annex", "main"]):
-                # Solid box (filled grid, not a shell, so it reads as mass)
-                side = max(3, round(n ** (1.0/3.0)))
-                for ix in range(side):
-                    for iy in range(side):
-                        for iz in range(side):
-                            x = (ix/(side-1) - 0.5) * 0.8
-                            y = (iy/(side-1) - 0.5) * 0.8
-                            z = (iz/(side-1) - 0.5) * 0.8
-                            gaussians.append({"position": [x, y, z],
-                                              "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
-            else:
-                # Default: sphere
-                golden = (1+math.sqrt(5))/2
-                for i in range(n):
-                    theta = 2*math.pi*i/golden
-                    phi = math.acos(1-2*(i+0.5)/n)
-                    r = 0.3
-                    gaussians.append({"position": [r*math.sin(phi)*math.cos(theta), r*math.sin(phi)*math.sin(theta), r*math.cos(phi)],
-                                      "scale": [-3.0, -3.0, -3.0], "opacity": 2.0, "color": color})
-
-            node["gaussians"] = gaussians
+        fill_gaussians(node, getattr(self, "scan_library", None))
 
     @staticmethod
     def _sanitize_json(s: str) -> str:
