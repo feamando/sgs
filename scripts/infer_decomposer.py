@@ -1012,9 +1012,11 @@ main { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
 </header>
 <main>
   <div class="sidebar">
-    <label>Decomposer model</label>
-    <select id="model" class="field"></select>
-    <div id="model-note" class="hint"></div>
+    <div id="model-row">
+      <label>Decomposer model</label>
+      <select id="model" class="field"></select>
+      <div id="model-note" class="hint"></div>
+    </div>
 
     <div class="tabs" id="input-tabs">
       <button class="tab active" data-mode="text">Text</button>
@@ -1193,11 +1195,13 @@ ctlIds.forEach(id => {
 });
 
 // ---- model selector ----
+// Hide only the model-row (NOT the whole sidebar) if the selector is unusable.
+const modelRow = document.getElementById('model-row');
 async function loadModels() {
   try {
     const r = await fetch('/models');
     const d = await r.json();
-    if (!d.models || !d.models.length) { modelEl.parentElement.style.display = 'none'; return; }
+    if (!d.models || !d.models.length) { modelRow.style.display = 'none'; return; }
     modelEl.innerHTML = '';
     d.models.forEach(m => {
       modelsById[m.name] = m;
@@ -1209,7 +1213,7 @@ async function loadModels() {
       modelEl.appendChild(o);
     });
     updateModelCaps(d.active);
-  } catch(e) { modelEl.parentElement.style.display = 'none'; }
+  } catch(e) { modelRow.style.display = 'none'; }
 }
 function updateModelCaps(name) {
   const m = modelsById[name] || {};
