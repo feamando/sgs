@@ -267,22 +267,32 @@ than the −3.8 full-compute loss (consistent with washout). That is a weak
 hypothesis, NOT a result and NOT a paper figure. Cannot claim VSP beats baseline
 at any single compute point.
 
-**NEXT — multi-seed to settle or kill (chosen 2026-07-22):** ~5 seeds each at 2k
-and 40k (skip 5k). Compare MEAN deltas with error bars. 2k-mean reliably > 40k-mean
-across seeds → efficiency effect real, defensible figure. Bands overlap →
-embedding-init is neutral; pivot to VSP-as-aux-signal (contrastive loss /
-inference rerank). n=1-per-point can never settle this given the ±6pt variance.
-```powershell
-# repeat for seed in 2..5 at BOTH 2k and 40k; eval each to results/disambig_{vsp,baseline}_{2k,40k}_s{N}.json
-foreach ($s in 2,3,4,5) {
-  python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
-    --opt-steps 2000 --freeze-vp-forever --seed $s --save-dir checkpoints/planck2_vsp_2k_s$s
-  python scripts/train_planck2.py --tokens data/wiki_vsps --vocab data/vsps/vocab.json `
-    --opt-steps 2000 --random-init --seed $s --save-dir checkpoints/planck2_baseline_2k_s$s
-  # (and the same two at --opt-steps 40000 for the 40k anchor)
-}
-```
-(seed 0 + seed 1 already done at 2k; 40k has only seed 0 so far.)
+### RESULT 3 — 6-seed 2k (2026-07-27): EMBEDDING-INIT KILLED, effect is noise
+
+Ran seeds 0-5 at 2k (--freeze-vp-forever vs --random-init), aggregated with
+scripts/aggregate_disambig_seeds.py:
+
+| regime | seeds | mean Δ | std | 95% CI | t | per-seed deltas |
+|--------|-------|--------|-----|--------|---|-----------------|
+| 2k | 6 | **+0.016** | 0.027 | **[−0.013, +0.045]** | 1.42 | +5.7 −1.0 +3.8 0.0 +1.9 −1.0 |
+
+**The 95% CI includes zero (t=1.42, not significant).** The +5.7 was just the max
+of six draws; two seeds are negative. Combined with 40k = −3.8, there is NO
+compute regime where VSP-as-embedding reliably beats the baseline.
+
+**VERDICT: the embedding-init delivery mechanism is DEAD.** The VSP representation
+is real (grounding gate 0.37 stands), but initializing token embeddings from the
+V/S/P bundle does not help a trained model — LM gradients wash the warm start out
+(40k) and the residual low-compute benefit is indistinguishable from seed noise
+(2k). Skipped the 5-seed 40k round: the 2k mean already can't clear "2k > 40k"
+since its CI includes 0, so 40k reseeds (~50 GPU-h) would only sharpen a −3.8 we
+already trust and cannot change the verdict.
+
+**PIVOT → VSP-as-auxiliary-signal** (grounding never forced through the optimizer
+as init): (a) contrastive aux-loss — a projection head pulls same-sense tokens
+together alongside the LM objective; (b) inference-time rerank — keep the baseline
+LM, use the bundle to rerank next-token candidates by sense-consistency (cheapest,
+no retraining). See the pivot scope note (below / SETUP_202607_VSP_v2 when built).
 
 PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
 two styles: cloze (the sense word IS the right answer, e.g. "sat on the grassy
@@ -301,7 +311,7 @@ pairs, still add more if the delta is within a few points.
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
-| 4 | disambiguation benchmark | **RUN 2026-07-17/22 (105 pairs): INCONCLUSIVE.** Single-seed curve looked monotonic (+5.7/+1.0/−3.8) but 2k reseed FAILED (−1.0; 2-seed mean +2.4, pooled p≈0.42). Magnitude claim dead; only weak directional hint. Multi-seed 2k+40k to settle/kill (see §4 RESULT 2). |
+| 4 | disambiguation benchmark | **DONE 2026-07-27 (105 pairs, 6 seeds): embedding-init KILLED.** 2k mean Δ +1.6pts, 95% CI [−1.3,+4.5] (includes 0); 40k −3.8. No regime wins. Rep separates (0.37) but embedding delivery fails → PIVOT to VSP-as-aux-signal (see §4 RESULT 3). |
 
 ## Papers this feeds
 
