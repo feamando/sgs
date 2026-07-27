@@ -515,15 +515,29 @@ python scripts/infer_decomposer.py --scene-file output/parametric/00_*.json --no
 ```
 
 GATE 7 (kill-or-confirm): do NON-castle prompts render as RECOGNIZABLE objects?
-The script reports valid-rate + primitive count + **shape diversity** (a ship
-that's all boxes is WEAK; hull+mast+sail using box+cylinder+plane is the win) —
-but ok-rate is necessary, not sufficient. Eyeball the dumps. PASS → this is the
-unlock; image→parametric-blockout (a specific building from a photo, not generic
-parts) is the phase-2 compounding win, then conversational editing. FAIL →
-parametric spatial composition is incoherent (the honest risk: LLMs are shaky at
-precise 3D coords); fall back to vocab-expansion. Verified offline only so far:
-a hand-authored parametric ship validates + fills to 597 gaussians with sizes
-respected; the open question is whether GEMMA emits coherent parametric trees.
+
+**PASSED 2026-07-27: 11/12 ok, mean 5 primitives, coherent shape mixes.** Gemma
+composes geometry sensibly when given primitives instead of a part menu:
+- ship → box + cylinder + plane (hull + mast + sail)
+- lighthouse → 7 prims, box + cone + cylinder (tower + lantern + cap)
+- house → box + wedge (walls + pitched roof); gazebo → box + cylinder + dome;
+  church/rocket/barn/water-tower all 2-3 distinct shapes, sensible.
+- only WEAK: pagoda (all boxes, no wedge roofs) — structurally ok, not diverse.
+
+So Gemma-as-blockout-artist WORKS: given ~6 primitives it composes any object
+coherently, removing both the vocabulary and geometry ceilings. This is the lever.
+(Eyeball output/parametric/*.json via --scene-file for the visual confirmation;
+ok-rate is necessary not sufficient.) NEXT: §8 image→parametric-blockout (a
+SPECIFIC building from a photo via generate_parametric(image_path=), not generic
+named parts), then conversational editing.
+
+CAUTION carried into §8: the named-part IMAGE path emits noisy raw scales; with
+snap OFF and no validate_tree on that path, one wild scale spiked a cylinder into
+a needle (fixed 2026-07-27 by clamp_tree_transforms: caps node scale<=2.5 +
+position in-box, snap-independent, applied on /decompose_image; that path now also
+dumps data/scenes/last_image_tree.json). Parametric bakes size into local coords
+(node scale=1), so it's not exposed to that failure mode — another reason
+parametric is the better foundation for image input.
 
 ## Sequencing (gate-and-kill)
 
@@ -540,7 +554,8 @@ respected; the open question is whether GEMMA emits coherent parametric trees.
 | 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
 | 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **PASS 2026-07-27** (Neuschwanstein photo, 3-shot): valid 10-part tree, cliff+4 towers+wall+trees, faithful to the image (chose cliff over hill, trees at forested perimeter). The genuine new capability Planck/Hertz cannot do. |
 | 6 (§6) | Raum app: model selector + image input + UI pass | **DONE 2026-07-27:** GemmaMMDecomposer (one load, text+image) + DecomposerManager (lazy, evict-on-switch) + /models,/switch,/decompose_image + UI (selector, Text/Image tabs, dropzone). RUN pending on the box (Gate 6). Needs python-multipart. |
-| 7 (§7) | PARAMETRIC primitives (Gemma emits geometry) | **BUILT 2026-07-27:** _rasterize_primitive + shape branch in fill_gaussians (name grammar still the fallback); PARAMETRIC_SYSTEM_PROMPT + validate_parametric + generate_parametric; gemma_parametric_gate.py + 12 non-castle prompts. Verified offline (ship -> 597 gaussians, sizes respected). RUN Gate 7 on the box = kill-or-confirm the whole lever. KILL -> vocab-expansion instead. |
+| 7 (§7) | PARAMETRIC primitives (Gemma emits geometry) | **PASS 2026-07-27: Gate 7 = 11/12 ok, mean 5 prims, coherent shape mixes** (ship=box+cylinder+plane, lighthouse=box+cone+cylinder, ...). Gemma-as-blockout-artist works; the lever is confirmed. _rasterize_primitive + shape branch (name grammar still fallback) + PARAMETRIC prompt/validate/generate + gemma_parametric_gate.py. |
+| — | fix: clamp node scale/position (image "spike") | **DONE 2026-07-27:** clamp_tree_transforms caps scale<=2.5 + position in-box (snap-independent) on /decompose_image; that path skipped validate_tree so a wild raw scale spiked a needle. Also dumps last_image_tree.json. |
 | 8 (future) | image -> parametric blockout, then editing | The phase-2 compounding win IF §7 passes: a SPECIFIC building from a photo (not generic parts) via generate_parametric(image_path=...); then conversational edits. Not built. |
 
 ## Papers / product this feeds
