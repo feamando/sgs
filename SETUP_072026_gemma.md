@@ -275,6 +275,61 @@ better vs the Hertz decomposer on the same prompt, snap OFF (learned/emitted
 geometry, not grammar constants). Compare side by side against
 `checkpoints/hertz_decomposer/best.pt`.
 
+### CRITICAL: the render is grammar, NOT the model (2026-07-27)
+
+First Gate 2 render (Gemma, "a stone castle with four towers on a green hill",
+43,388 splats) looked **identical to Hertz**. That is EXPECTED and not a bug:
+
+- The model (Gemma OR Hertz) emits ONLY a structure-only tree: part NAMES +
+  positions + scales. Every splat you see is produced downstream by
+  `fill_gaussians` / `expand_part` (hand-written deterministic grammar). A part
+  named "tower_0" renders the same cylinder no matter which model named it.
+- So two backends that emit the same part LIST render pixel-identical. The
+  renderer is downstream of the model and structurally cannot show the model
+  difference.
+- On a castle the part lists CONVERGE: castle decomposition is a saturated
+  ~14-part task ([[project_sgs_path1_outcome]] — the Hertz decomposer was
+  already PARITY with Planck for this reason). Gemma matching too is the
+  predicted floor, not evidence it isn't running.
+
+Proof Gemma IS running (not a silent fallback): console loads 2076 weight shards
+(~8B) + "ready (N few-shot exemplars)"; snap is OFF so the poses are the model's
+raw output; a parse failure returns an error, not a castle.
+
+To SEE the model difference you must (a) diff the emitted TREES not the render,
+and (b) leave the saturated task. Use the Gate-2 harness:
+
+```powershell
+# diff Gemma vs the Hertz decomposer on breadth prompts (off the castle distribution)
+python scripts/compare_decomposers.py --gemma models/gemma-4-e4b-it `
+  --hertz checkpoints/hertz_decomposer/best.pt `
+  --hertz-tokenizer data/hertz12_data/tokenizer.model `
+  --prompts scripts/assets/breadth_prompts.txt --out results/decomposer_compare.json
+```
+
+Reports per-prompt name-Jaccard + pose delta (gaussians stripped, so it's pure
+model output). LOW Jaccard / HIGH pose delta on breadth prompts (lighthouse,
+pagoda, windmill, bridge) = Gemma genuinely decomposes differently; that
+divergence is the payoff of a big pretrained base. Identical on castles = the
+expected saturated floor.
+
+### Bigger lever, unbuilt: MULTIMODAL input (the real reason to use Gemma)
+
+Gemma 4 E4B is Any-to-Any multimodal (text+image+audio in). Using it as a
+text-only JSON emitter throttles it to the exact narrow channel Hertz already
+saturates — so of course it looks like Hertz. The capability a multimodal base
+gives Raum that Planck/Hertz CANNOT is a different INPUT:
+- **image -> scene tree**: hand Gemma a photo/sketch of a building, emit the
+  decomposition tree ("build THIS in Raum").
+- **image-grounded prompts**: "make it look like this" + text.
+
+This grounds meaning in images at INFERENCE (distinct from VSP-for-LM, which
+baked grounding into a token table and just died negative,
+[[project_sgs_vsp_gate]]). Worth a spike, NOT built here. Logged as a direction:
+`generate_trees_gemma.py` already uses `apply_chat_template`, so an image turn is
+a small extension (Gemma processor accepts image content). Gate it like everything
+else: can Gemma emit a valid tree from a reference image?
+
 ## 4. Register Gemma in the model selector (EDIT: satz/app.py + static/app.js)
 
 Add Gemma to the `MODELS` registry so the selector lists it next to Planck and
