@@ -289,10 +289,41 @@ since its CI includes 0, so 40k reseeds (~50 GPU-h) would only sharpen a −3.8 
 already trust and cannot change the verdict.
 
 **PIVOT → VSP-as-auxiliary-signal** (grounding never forced through the optimizer
-as init): (a) contrastive aux-loss — a projection head pulls same-sense tokens
-together alongside the LM objective; (b) inference-time rerank — keep the baseline
-LM, use the bundle to rerank next-token candidates by sense-consistency (cheapest,
-no retraining). See the pivot scope note (below / SETUP_202607_VSP_v2 when built).
+as init): (a) contrastive aux-loss; (b) inference-time rerank (cheapest, tried
+first). Scripts: scripts/rerank_disambiguation.py.
+
+### RESULT 4 — rerank probe + low-context salvage (2026-07-27): LINE CLOSED
+
+Rerank on the standard 105 (score = logP + λ·max-block-cosine consistency):
+best λ=4 gave +2.9pts but **p≈0.55** (7 gains/4 losses); pure-consistency ceiling
+0.657. Margin-slice: the whole benefit sat in low-LM-confidence pairs (+8.3 at
+λ=4) and was 0 where the LM was confident — correct SHAPE but underpowered (~11
+discordant pairs).
+
+Salvage A — built a 260-pair LOW-CONTEXT benchmark
+(scripts/assets/disambig_pairs_lowctx.json, 3-5 word contexts, weak sense cue) so
+the LM is uncertain by construction and grounding has room to help. The test was
+VALID (base acc dropped 0.829→**0.581**, the model IS unsure here) and the signal
+DIED:
+- accuracy flat across λ (0.562–0.585 vs 0.581 base)
+- **honest held-out λ (pick on half, report other half): mean delta −0.004**
+- pure-consistency favors-right **54.1%** (barely above 0.5; was 66% on easy set)
+- no λ significant anywhere; low-margin subset (n=51) point estimates mostly
+  NEGATIVE, p≥0.77.
+
+WHY THE +8.3 EVAPORATED: on the easy set the "low-margin" pairs still carried
+residual text cue (base 0.69, consistency-favors-right 67%); grounding rode along
+with that text signal. Strip context to where the LM is truly lost (base 0.45-0.58)
+and the bundle is lost too (54%). The +8.3 was the last disguise of the same noise
+as the +5.7 and +2.9.
+
+**VERDICT: VSP-for-LM is CLOSED (negative).** Two delivery mechanisms
+(embedding-init, inference-rerank) × three benchmarks. The grounding as derived
+(CLIP-image V + GloVe S + P6 P, mean-pooled) does NOT carry sense information a
+trained LM can use: redundant with text where text suffices, near-chance where it
+doesn't. The 0.37 separation gate STANDS as its own finding (curated probes) but
+does not transfer to helping a language model. Writeup: docs/papers/
+vsp_negative_result.md. GPU work parked.
 
 PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
 two styles: cloze (the sense word IS the right answer, e.g. "sat on the grassy
@@ -311,7 +342,7 @@ pairs, still add more if the delta is within a few points.
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
-| 4 | disambiguation benchmark | **DONE 2026-07-27 (105 pairs, 6 seeds): embedding-init KILLED.** 2k mean Δ +1.6pts, 95% CI [−1.3,+4.5] (includes 0); 40k −3.8. No regime wins. Rep separates (0.37) but embedding delivery fails → PIVOT to VSP-as-aux-signal (see §4 RESULT 3). |
+| 4 | disambiguation benchmark | **CLOSED 2026-07-27 (negative).** embedding-init KILLED (6-seed 2k CI incl 0, 40k −3.8); rerank + 260-pair low-context salvage KILLED (held-out delta −0.004, pure-consistency 54% where LM unsure). Grounding redundant-with/subsumed-by text for a trained LM. 0.37 gate stands alone. Writeup: docs/papers/vsp_negative_result.md (see §4 RESULT 3+4). |
 
 ## Papers this feeds
 
