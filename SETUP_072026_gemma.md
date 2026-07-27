@@ -476,6 +476,55 @@ ones; (b) switching to Gemma enables the Image tab; (c) dropping a castle photo 
 Decompose renders a reconstruction; (d) switching back to Hertz/Planck still text-
 decomposes (no VRAM leak/desync across switches).
 
+## 7. PARAMETRIC primitives — Gemma emits GEOMETRY, not names (BUILT 2026-07-27)
+
+The core lever from the "use Gemma as a more powerful model" analysis. Every
+prior finding pointed at the same ceiling: **the bottleneck is the FILL, not the
+model or the layout task.** Today Gemma only names one of 14 grammar parts, and
+the SHAPE of each is hand-authored (`expand_part`) — so a bigger model gives
+nothing (castle==Hertz), and anything outside the vocab ("ship") is dropped.
+path1's law: "fill richness caps usable data richness."
+
+Fix: stop giving Gemma a 14-word menu. Give it ~6 **parametric primitives** and
+let it COMPOSE any object with explicit dimensions — Gemma as a blockout artist.
+
+- **`_rasterize_primitive`** (infer_decomposer.py): box / cylinder / cone /
+  sphere / dome / wedge / plane from `shape + size[x,y,z] + color + taper`.
+  Deterministic (NO learning — unlike path1's capacity-limited FillModel that
+  blobbed; the intelligence is in Gemma's composition, the rasterization is
+  trivial). `fill_gaussians` gets a `shape` branch; **no `shape` → falls through
+  to the name grammar**, so Planck/Hertz/named-Gemma are unchanged (backward
+  compatible, strictly more general).
+- **`PARAMETRIC_SYSTEM_PROMPT` + `validate_parametric` + `generate_parametric`**
+  (gemma_decomposer.py): Gemma emits `{shape,position,size,color,taper}` per
+  primitive. `size` is baked into the primitive's local coords, so node `scale`
+  is forced to 1.0 (else double-apply); each node gets a `name` (= shape) so
+  `CompositionNode.from_dict` works. Works from a text prompt OR an image.
+- **Removes both ceilings at once:** vocabulary (any object, not 14 parts) and
+  geometry (Gemma designs the shape, not a hand grammar). A ship = tapered box
+  hull + cylinder mast + plane sail; a pagoda = stacked tapered boxes + wedge
+  roofs; a lighthouse = tapered cylinder + box lantern + cone cap.
+
+```powershell
+# Phase-1 gate: 12 NON-castle objects (the whole point is breadth)
+python scripts/gemma_parametric_gate.py --model models/gemma-4-e4b-it `
+  --prompts scripts/assets/parametric_prompts.txt `
+  --out results/gemma_parametric.json --dump-dir output/parametric
+# eyeball one (the gate is coherence, not just valid JSON):
+python scripts/infer_decomposer.py --scene-file output/parametric/00_*.json --no-snap --serve --port 8003
+```
+
+GATE 7 (kill-or-confirm): do NON-castle prompts render as RECOGNIZABLE objects?
+The script reports valid-rate + primitive count + **shape diversity** (a ship
+that's all boxes is WEAK; hull+mast+sail using box+cylinder+plane is the win) —
+but ok-rate is necessary, not sufficient. Eyeball the dumps. PASS → this is the
+unlock; image→parametric-blockout (a specific building from a photo, not generic
+parts) is the phase-2 compounding win, then conversational editing. FAIL →
+parametric spatial composition is incoherent (the honest risk: LLMs are shaky at
+precise 3D coords); fall back to vocab-expansion. Verified offline only so far:
+a hand-authored parametric ship validates + fills to 597 gaussians with sizes
+respected; the open question is whether GEMMA emits coherent parametric trees.
+
 ## Sequencing (gate-and-kill)
 
 | Phase | What | Status / kill-if |
@@ -491,6 +540,8 @@ decomposes (no VRAM leak/desync across switches).
 | 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
 | 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **PASS 2026-07-27** (Neuschwanstein photo, 3-shot): valid 10-part tree, cliff+4 towers+wall+trees, faithful to the image (chose cliff over hill, trees at forested perimeter). The genuine new capability Planck/Hertz cannot do. |
 | 6 (§6) | Raum app: model selector + image input + UI pass | **DONE 2026-07-27:** GemmaMMDecomposer (one load, text+image) + DecomposerManager (lazy, evict-on-switch) + /models,/switch,/decompose_image + UI (selector, Text/Image tabs, dropzone). RUN pending on the box (Gate 6). Needs python-multipart. |
+| 7 (§7) | PARAMETRIC primitives (Gemma emits geometry) | **BUILT 2026-07-27:** _rasterize_primitive + shape branch in fill_gaussians (name grammar still the fallback); PARAMETRIC_SYSTEM_PROMPT + validate_parametric + generate_parametric; gemma_parametric_gate.py + 12 non-castle prompts. Verified offline (ship -> 597 gaussians, sizes respected). RUN Gate 7 on the box = kill-or-confirm the whole lever. KILL -> vocab-expansion instead. |
+| 8 (future) | image -> parametric blockout, then editing | The phase-2 compounding win IF §7 passes: a SPECIFIC building from a photo (not generic parts) via generate_parametric(image_path=...); then conversational edits. Not built. |
 
 ## Papers / product this feeds
 
