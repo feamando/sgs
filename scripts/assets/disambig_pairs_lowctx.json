@@ -1,0 +1,1562 @@
+[
+  {
+    "word": "bank",
+    "context": "walked along the bank",
+    "right": "river",
+    "wrong": "cash"
+  },
+  {
+    "word": "bank",
+    "context": "money in the bank",
+    "right": "cash",
+    "wrong": "river"
+  },
+  {
+    "word": "bank",
+    "context": "the bank was muddy",
+    "right": "river",
+    "wrong": "loan"
+  },
+  {
+    "word": "bank",
+    "context": "went to the bank",
+    "right": "cash",
+    "wrong": "river"
+  },
+  {
+    "word": "bank",
+    "context": "grass on the bank",
+    "right": "river",
+    "wrong": "vault"
+  },
+  {
+    "word": "bank",
+    "context": "the bank was closed",
+    "right": "cash",
+    "wrong": "river"
+  },
+  {
+    "word": "bank",
+    "context": "the far bank",
+    "right": "river",
+    "wrong": "cash"
+  },
+  {
+    "word": "bark",
+    "context": "heard a loud bark",
+    "right": "dog",
+    "wrong": "tree"
+  },
+  {
+    "word": "bark",
+    "context": "the bark was rough",
+    "right": "tree",
+    "wrong": "dog"
+  },
+  {
+    "word": "bark",
+    "context": "a sudden bark outside",
+    "right": "dog",
+    "wrong": "trunk"
+  },
+  {
+    "word": "bark",
+    "context": "peeled the bark off",
+    "right": "tree",
+    "wrong": "puppy"
+  },
+  {
+    "word": "bark",
+    "context": "its bark was sharp",
+    "right": "dog",
+    "wrong": "wood"
+  },
+  {
+    "word": "bark",
+    "context": "gray bark on it",
+    "right": "tree",
+    "wrong": "puppy"
+  },
+  {
+    "word": "bark",
+    "context": "a distant bark",
+    "right": "dog",
+    "wrong": "tree"
+  },
+  {
+    "word": "bat",
+    "context": "a bat flew by",
+    "right": "cave",
+    "wrong": "ball"
+  },
+  {
+    "word": "bat",
+    "context": "swung the bat hard",
+    "right": "ball",
+    "wrong": "cave"
+  },
+  {
+    "word": "bat",
+    "context": "the bat hung there",
+    "right": "cave",
+    "wrong": "ball"
+  },
+  {
+    "word": "bat",
+    "context": "grabbed a wooden bat",
+    "right": "ball",
+    "wrong": "wings"
+  },
+  {
+    "word": "bat",
+    "context": "a bat at night",
+    "right": "cave",
+    "wrong": "pitch"
+  },
+  {
+    "word": "bat",
+    "context": "held the bat up",
+    "right": "ball",
+    "wrong": "wings"
+  },
+  {
+    "word": "bat",
+    "context": "an old bat",
+    "right": "cave",
+    "wrong": "ball"
+  },
+  {
+    "word": "board",
+    "context": "a long wooden board",
+    "right": "nail",
+    "wrong": "meeting"
+  },
+  {
+    "word": "board",
+    "context": "the board voted yes",
+    "right": "meeting",
+    "wrong": "nail"
+  },
+  {
+    "word": "board",
+    "context": "nailed the board down",
+    "right": "nail",
+    "wrong": "vote"
+  },
+  {
+    "word": "board",
+    "context": "the board met today",
+    "right": "vote",
+    "wrong": "plank"
+  },
+  {
+    "word": "board",
+    "context": "a warped old board",
+    "right": "plank",
+    "wrong": "vote"
+  },
+  {
+    "word": "board",
+    "context": "joined the board",
+    "right": "vote",
+    "wrong": "plank"
+  },
+  {
+    "word": "board",
+    "context": "the school board",
+    "right": "vote",
+    "wrong": "plank"
+  },
+  {
+    "word": "bolt",
+    "context": "saw a sudden bolt",
+    "right": "sky",
+    "wrong": "nut"
+  },
+  {
+    "word": "bolt",
+    "context": "tightened the bolt",
+    "right": "nut",
+    "wrong": "sky"
+  },
+  {
+    "word": "bolt",
+    "context": "a bolt struck",
+    "right": "sky",
+    "wrong": "screw"
+  },
+  {
+    "word": "bolt",
+    "context": "the bolt was loose",
+    "right": "nut",
+    "wrong": "thunder"
+  },
+  {
+    "word": "bolt",
+    "context": "a bright bolt above",
+    "right": "sky",
+    "wrong": "screw"
+  },
+  {
+    "word": "bolt",
+    "context": "turned the metal bolt",
+    "right": "nut",
+    "wrong": "thunder"
+  },
+  {
+    "word": "bolt",
+    "context": "a jagged bolt",
+    "right": "sky",
+    "wrong": "screw"
+  },
+  {
+    "word": "bow",
+    "context": "drew back the bow",
+    "right": "arrow",
+    "wrong": "ribbon"
+  },
+  {
+    "word": "bow",
+    "context": "tied a pretty bow",
+    "right": "ribbon",
+    "wrong": "arrow"
+  },
+  {
+    "word": "bow",
+    "context": "aimed with the bow",
+    "right": "arrow",
+    "wrong": "gift"
+  },
+  {
+    "word": "bow",
+    "context": "a red silk bow",
+    "right": "ribbon",
+    "wrong": "arrow"
+  },
+  {
+    "word": "bow",
+    "context": "shot the bow",
+    "right": "arrow",
+    "wrong": "gift"
+  },
+  {
+    "word": "bow",
+    "context": "a bow in her hair",
+    "right": "ribbon",
+    "wrong": "arrow"
+  },
+  {
+    "word": "bow",
+    "context": "the hunter bow",
+    "right": "arrow",
+    "wrong": "ribbon"
+  },
+  {
+    "word": "bridge",
+    "context": "crossed the old bridge",
+    "right": "river",
+    "wrong": "cards"
+  },
+  {
+    "word": "bridge",
+    "context": "played a bridge hand",
+    "right": "cards",
+    "wrong": "river"
+  },
+  {
+    "word": "bridge",
+    "context": "the bridge over water",
+    "right": "river",
+    "wrong": "cards"
+  },
+  {
+    "word": "bridge",
+    "context": "a game of bridge",
+    "right": "cards",
+    "wrong": "river"
+  },
+  {
+    "word": "bridge",
+    "context": "walked across the bridge",
+    "right": "river",
+    "wrong": "trump"
+  },
+  {
+    "word": "bridge",
+    "context": "good at bridge",
+    "right": "cards",
+    "wrong": "river"
+  },
+  {
+    "word": "bridge",
+    "context": "under the bridge",
+    "right": "river",
+    "wrong": "cards"
+  },
+  {
+    "word": "cabinet",
+    "context": "opened the kitchen cabinet",
+    "right": "drawer",
+    "wrong": "minister"
+  },
+  {
+    "word": "cabinet",
+    "context": "the cabinet resigned",
+    "right": "minister",
+    "wrong": "drawer"
+  },
+  {
+    "word": "cabinet",
+    "context": "a wooden cabinet",
+    "right": "drawer",
+    "wrong": "minister"
+  },
+  {
+    "word": "cabinet",
+    "context": "the government cabinet",
+    "right": "minister",
+    "wrong": "shelf"
+  },
+  {
+    "word": "cabinet",
+    "context": "dishes in the cabinet",
+    "right": "shelf",
+    "wrong": "minister"
+  },
+  {
+    "word": "cabinet",
+    "context": "the cabinet met",
+    "right": "minister",
+    "wrong": "shelf"
+  },
+  {
+    "word": "cabinet",
+    "context": "a glass cabinet",
+    "right": "shelf",
+    "wrong": "minister"
+  },
+  {
+    "word": "cell",
+    "context": "locked in a cell",
+    "right": "prison",
+    "wrong": "blood"
+  },
+  {
+    "word": "cell",
+    "context": "a single living cell",
+    "right": "blood",
+    "wrong": "prison"
+  },
+  {
+    "word": "cell",
+    "context": "the prisoner cell",
+    "right": "prison",
+    "wrong": "blood"
+  },
+  {
+    "word": "cell",
+    "context": "the cell divided",
+    "right": "blood",
+    "wrong": "prison"
+  },
+  {
+    "word": "cell",
+    "context": "alone in his cell",
+    "right": "prison",
+    "wrong": "tissue"
+  },
+  {
+    "word": "cell",
+    "context": "a cell under the microscope",
+    "right": "tissue",
+    "wrong": "prison"
+  },
+  {
+    "word": "chest",
+    "context": "a pain in his chest",
+    "right": "lungs",
+    "wrong": "treasure"
+  },
+  {
+    "word": "chest",
+    "context": "opened the old chest",
+    "right": "treasure",
+    "wrong": "lungs"
+  },
+  {
+    "word": "chest",
+    "context": "his broad chest",
+    "right": "lungs",
+    "wrong": "treasure"
+  },
+  {
+    "word": "chest",
+    "context": "a wooden chest",
+    "right": "treasure",
+    "wrong": "lungs"
+  },
+  {
+    "word": "chest",
+    "context": "held to her chest",
+    "right": "heart",
+    "wrong": "gold"
+  },
+  {
+    "word": "chest",
+    "context": "a locked chest",
+    "right": "gold",
+    "wrong": "heart"
+  },
+  {
+    "word": "club",
+    "context": "swung the heavy club",
+    "right": "weapon",
+    "wrong": "members"
+  },
+  {
+    "word": "club",
+    "context": "joined the local club",
+    "right": "members",
+    "wrong": "weapon"
+  },
+  {
+    "word": "club",
+    "context": "hit with a club",
+    "right": "weapon",
+    "wrong": "members"
+  },
+  {
+    "word": "club",
+    "context": "a members only club",
+    "right": "members",
+    "wrong": "weapon"
+  },
+  {
+    "word": "club",
+    "context": "raised the club",
+    "right": "weapon",
+    "wrong": "meeting"
+  },
+  {
+    "word": "club",
+    "context": "the chess club",
+    "right": "meeting",
+    "wrong": "weapon"
+  },
+  {
+    "word": "court",
+    "context": "stood before the court",
+    "right": "judge",
+    "wrong": "tennis"
+  },
+  {
+    "word": "court",
+    "context": "stepped onto the court",
+    "right": "tennis",
+    "wrong": "judge"
+  },
+  {
+    "word": "court",
+    "context": "the court ruled",
+    "right": "judge",
+    "wrong": "tennis"
+  },
+  {
+    "word": "court",
+    "context": "played on the court",
+    "right": "tennis",
+    "wrong": "judge"
+  },
+  {
+    "word": "court",
+    "context": "appeared in court",
+    "right": "judge",
+    "wrong": "racket"
+  },
+  {
+    "word": "court",
+    "context": "the clay court",
+    "right": "racket",
+    "wrong": "judge"
+  },
+  {
+    "word": "crane",
+    "context": "a crane by the water",
+    "right": "bird",
+    "wrong": "machine"
+  },
+  {
+    "word": "crane",
+    "context": "the crane lifted it",
+    "right": "machine",
+    "wrong": "bird"
+  },
+  {
+    "word": "crane",
+    "context": "a tall white crane",
+    "right": "bird",
+    "wrong": "machine"
+  },
+  {
+    "word": "crane",
+    "context": "the crane on site",
+    "right": "machine",
+    "wrong": "feathers"
+  },
+  {
+    "word": "crane",
+    "context": "a crane in flight",
+    "right": "bird",
+    "wrong": "steel"
+  },
+  {
+    "word": "crane",
+    "context": "operated the crane",
+    "right": "machine",
+    "wrong": "feathers"
+  },
+  {
+    "word": "current",
+    "context": "a strong current pulled",
+    "right": "river",
+    "wrong": "wire"
+  },
+  {
+    "word": "current",
+    "context": "the electric current",
+    "right": "wire",
+    "wrong": "river"
+  },
+  {
+    "word": "current",
+    "context": "swept by the current",
+    "right": "river",
+    "wrong": "wire"
+  },
+  {
+    "word": "current",
+    "context": "a jolt of current",
+    "right": "wire",
+    "wrong": "tide"
+  },
+  {
+    "word": "current",
+    "context": "the ocean current",
+    "right": "tide",
+    "wrong": "wire"
+  },
+  {
+    "word": "current",
+    "context": "cut the current off",
+    "right": "wire",
+    "wrong": "tide"
+  },
+  {
+    "word": "date",
+    "context": "ate a sweet date",
+    "right": "fruit",
+    "wrong": "calendar"
+  },
+  {
+    "word": "date",
+    "context": "pick a good date",
+    "right": "calendar",
+    "wrong": "fruit"
+  },
+  {
+    "word": "date",
+    "context": "a dried date",
+    "right": "fruit",
+    "wrong": "calendar"
+  },
+  {
+    "word": "date",
+    "context": "set the date",
+    "right": "calendar",
+    "wrong": "fruit"
+  },
+  {
+    "word": "date",
+    "context": "chewed on a date",
+    "right": "fruit",
+    "wrong": "month"
+  },
+  {
+    "word": "date",
+    "context": "the wedding date",
+    "right": "month",
+    "wrong": "fruit"
+  },
+  {
+    "word": "fan",
+    "context": "turned on the fan",
+    "right": "cool",
+    "wrong": "idol"
+  },
+  {
+    "word": "fan",
+    "context": "a huge fan of",
+    "right": "idol",
+    "wrong": "cool"
+  },
+  {
+    "word": "fan",
+    "context": "the ceiling fan",
+    "right": "cool",
+    "wrong": "idol"
+  },
+  {
+    "word": "fan",
+    "context": "a devoted fan",
+    "right": "idol",
+    "wrong": "breeze"
+  },
+  {
+    "word": "fan",
+    "context": "the fan spun",
+    "right": "breeze",
+    "wrong": "idol"
+  },
+  {
+    "word": "fan",
+    "context": "an excited fan",
+    "right": "idol",
+    "wrong": "breeze"
+  },
+  {
+    "word": "iron",
+    "context": "a bar of iron",
+    "right": "metal",
+    "wrong": "laundry"
+  },
+  {
+    "word": "iron",
+    "context": "iron the shirt",
+    "right": "laundry",
+    "wrong": "metal"
+  },
+  {
+    "word": "iron",
+    "context": "heavy cast iron",
+    "right": "metal",
+    "wrong": "laundry"
+  },
+  {
+    "word": "iron",
+    "context": "the hot iron",
+    "right": "laundry",
+    "wrong": "ore"
+  },
+  {
+    "word": "iron",
+    "context": "rusty old iron",
+    "right": "ore",
+    "wrong": "laundry"
+  },
+  {
+    "word": "iron",
+    "context": "used the iron",
+    "right": "laundry",
+    "wrong": "ore"
+  },
+  {
+    "word": "jam",
+    "context": "spread the jam",
+    "right": "toast",
+    "wrong": "traffic"
+  },
+  {
+    "word": "jam",
+    "context": "stuck in a jam",
+    "right": "traffic",
+    "wrong": "toast"
+  },
+  {
+    "word": "jam",
+    "context": "strawberry jam",
+    "right": "toast",
+    "wrong": "traffic"
+  },
+  {
+    "word": "jam",
+    "context": "a paper jam",
+    "right": "stuck",
+    "wrong": "toast"
+  },
+  {
+    "word": "jam",
+    "context": "a jar of jam",
+    "right": "toast",
+    "wrong": "traffic"
+  },
+  {
+    "word": "jam",
+    "context": "caught in a jam",
+    "right": "stuck",
+    "wrong": "toast"
+  },
+  {
+    "word": "key",
+    "context": "turned the key",
+    "right": "lock",
+    "wrong": "piano"
+  },
+  {
+    "word": "key",
+    "context": "pressed a key",
+    "right": "piano",
+    "wrong": "lock"
+  },
+  {
+    "word": "key",
+    "context": "lost my house key",
+    "right": "lock",
+    "wrong": "piano"
+  },
+  {
+    "word": "key",
+    "context": "a black key",
+    "right": "piano",
+    "wrong": "door"
+  },
+  {
+    "word": "key",
+    "context": "the key in the door",
+    "right": "lock",
+    "wrong": "piano"
+  },
+  {
+    "word": "key",
+    "context": "struck the key",
+    "right": "piano",
+    "wrong": "door"
+  },
+  {
+    "word": "match",
+    "context": "lit a match",
+    "right": "flame",
+    "wrong": "score"
+  },
+  {
+    "word": "match",
+    "context": "won the match",
+    "right": "score",
+    "wrong": "flame"
+  },
+  {
+    "word": "match",
+    "context": "struck a match",
+    "right": "flame",
+    "wrong": "score"
+  },
+  {
+    "word": "match",
+    "context": "the final match",
+    "right": "score",
+    "wrong": "flame"
+  },
+  {
+    "word": "match",
+    "context": "a burnt match",
+    "right": "flame",
+    "wrong": "team"
+  },
+  {
+    "word": "match",
+    "context": "a close match",
+    "right": "team",
+    "wrong": "flame"
+  },
+  {
+    "word": "mint",
+    "context": "a sprig of mint",
+    "right": "leaf",
+    "wrong": "coin"
+  },
+  {
+    "word": "mint",
+    "context": "coins from the mint",
+    "right": "coin",
+    "wrong": "leaf"
+  },
+  {
+    "word": "mint",
+    "context": "fresh mint tea",
+    "right": "leaf",
+    "wrong": "coin"
+  },
+  {
+    "word": "mint",
+    "context": "the royal mint",
+    "right": "coin",
+    "wrong": "leaf"
+  },
+  {
+    "word": "mint",
+    "context": "chopped some mint",
+    "right": "leaf",
+    "wrong": "money"
+  },
+  {
+    "word": "mint",
+    "context": "the mint printed",
+    "right": "money",
+    "wrong": "leaf"
+  },
+  {
+    "word": "mouse",
+    "context": "a tiny mouse ran",
+    "right": "cheese",
+    "wrong": "click"
+  },
+  {
+    "word": "mouse",
+    "context": "clicked the mouse",
+    "right": "click",
+    "wrong": "cheese"
+  },
+  {
+    "word": "mouse",
+    "context": "the mouse squeaked",
+    "right": "cheese",
+    "wrong": "click"
+  },
+  {
+    "word": "mouse",
+    "context": "moved the mouse",
+    "right": "click",
+    "wrong": "tail"
+  },
+  {
+    "word": "mouse",
+    "context": "a grey mouse",
+    "right": "tail",
+    "wrong": "click"
+  },
+  {
+    "word": "mouse",
+    "context": "the wireless mouse",
+    "right": "click",
+    "wrong": "tail"
+  },
+  {
+    "word": "nail",
+    "context": "painted her nail",
+    "right": "finger",
+    "wrong": "hammer"
+  },
+  {
+    "word": "nail",
+    "context": "hammered the nail",
+    "right": "hammer",
+    "wrong": "finger"
+  },
+  {
+    "word": "nail",
+    "context": "a broken nail",
+    "right": "finger",
+    "wrong": "hammer"
+  },
+  {
+    "word": "nail",
+    "context": "a rusty nail",
+    "right": "hammer",
+    "wrong": "finger"
+  },
+  {
+    "word": "nail",
+    "context": "bit her nail",
+    "right": "finger",
+    "wrong": "wood"
+  },
+  {
+    "word": "nail",
+    "context": "drove the nail",
+    "right": "wood",
+    "wrong": "finger"
+  },
+  {
+    "word": "note",
+    "context": "played a high note",
+    "right": "music",
+    "wrong": "letter"
+  },
+  {
+    "word": "note",
+    "context": "left a note",
+    "right": "letter",
+    "wrong": "music"
+  },
+  {
+    "word": "note",
+    "context": "hit the note",
+    "right": "music",
+    "wrong": "letter"
+  },
+  {
+    "word": "note",
+    "context": "a quick note",
+    "right": "letter",
+    "wrong": "pitch"
+  },
+  {
+    "word": "note",
+    "context": "a low note",
+    "right": "pitch",
+    "wrong": "letter"
+  },
+  {
+    "word": "note",
+    "context": "read the note",
+    "right": "letter",
+    "wrong": "pitch"
+  },
+  {
+    "word": "organ",
+    "context": "a vital organ",
+    "right": "body",
+    "wrong": "church"
+  },
+  {
+    "word": "organ",
+    "context": "played the organ",
+    "right": "church",
+    "wrong": "body"
+  },
+  {
+    "word": "organ",
+    "context": "a failing organ",
+    "right": "body",
+    "wrong": "church"
+  },
+  {
+    "word": "organ",
+    "context": "the church organ",
+    "right": "church",
+    "wrong": "liver"
+  },
+  {
+    "word": "organ",
+    "context": "an internal organ",
+    "right": "liver",
+    "wrong": "church"
+  },
+  {
+    "word": "organ",
+    "context": "the organ music",
+    "right": "church",
+    "wrong": "liver"
+  },
+  {
+    "word": "palm",
+    "context": "lines on her palm",
+    "right": "hand",
+    "wrong": "tree"
+  },
+  {
+    "word": "palm",
+    "context": "a tall palm",
+    "right": "tree",
+    "wrong": "hand"
+  },
+  {
+    "word": "palm",
+    "context": "held in his palm",
+    "right": "hand",
+    "wrong": "tree"
+  },
+  {
+    "word": "palm",
+    "context": "a palm on the beach",
+    "right": "tree",
+    "wrong": "hand"
+  },
+  {
+    "word": "palm",
+    "context": "pressed the palm",
+    "right": "hand",
+    "wrong": "coconut"
+  },
+  {
+    "word": "palm",
+    "context": "the swaying palm",
+    "right": "coconut",
+    "wrong": "hand"
+  },
+  {
+    "word": "pitch",
+    "context": "threw a fast pitch",
+    "right": "throw",
+    "wrong": "tar"
+  },
+  {
+    "word": "pitch",
+    "context": "black as pitch",
+    "right": "tar",
+    "wrong": "throw"
+  },
+  {
+    "word": "pitch",
+    "context": "a wild pitch",
+    "right": "throw",
+    "wrong": "tar"
+  },
+  {
+    "word": "pitch",
+    "context": "sticky pitch",
+    "right": "tar",
+    "wrong": "throw"
+  },
+  {
+    "word": "pitch",
+    "context": "the next pitch",
+    "right": "throw",
+    "wrong": "sticky"
+  },
+  {
+    "word": "pitch",
+    "context": "coated in pitch",
+    "right": "sticky",
+    "wrong": "throw"
+  },
+  {
+    "word": "pitcher",
+    "context": "the pitcher threw",
+    "right": "baseball",
+    "wrong": "water"
+  },
+  {
+    "word": "pitcher",
+    "context": "a pitcher of water",
+    "right": "water",
+    "wrong": "baseball"
+  },
+  {
+    "word": "pitcher",
+    "context": "the star pitcher",
+    "right": "baseball",
+    "wrong": "water"
+  },
+  {
+    "word": "pitcher",
+    "context": "filled the pitcher",
+    "right": "water",
+    "wrong": "baseball"
+  },
+  {
+    "word": "pitcher",
+    "context": "the pitcher wound up",
+    "right": "baseball",
+    "wrong": "juice"
+  },
+  {
+    "word": "pitcher",
+    "context": "poured from the pitcher",
+    "right": "juice",
+    "wrong": "baseball"
+  },
+  {
+    "word": "plane",
+    "context": "boarded the plane",
+    "right": "flight",
+    "wrong": "surface"
+  },
+  {
+    "word": "plane",
+    "context": "a flat plane",
+    "right": "surface",
+    "wrong": "flight"
+  },
+  {
+    "word": "plane",
+    "context": "the plane landed",
+    "right": "flight",
+    "wrong": "surface"
+  },
+  {
+    "word": "plane",
+    "context": "a level plane",
+    "right": "surface",
+    "wrong": "flight"
+  },
+  {
+    "word": "plane",
+    "context": "the plane took off",
+    "right": "flight",
+    "wrong": "geometry"
+  },
+  {
+    "word": "plane",
+    "context": "a smooth plane",
+    "right": "geometry",
+    "wrong": "flight"
+  },
+  {
+    "word": "pupil",
+    "context": "her dilated pupil",
+    "right": "eye",
+    "wrong": "student"
+  },
+  {
+    "word": "pupil",
+    "context": "a bright pupil",
+    "right": "student",
+    "wrong": "eye"
+  },
+  {
+    "word": "pupil",
+    "context": "the dark pupil",
+    "right": "eye",
+    "wrong": "student"
+  },
+  {
+    "word": "pupil",
+    "context": "a diligent pupil",
+    "right": "student",
+    "wrong": "eye"
+  },
+  {
+    "word": "pupil",
+    "context": "the pupil widened",
+    "right": "eye",
+    "wrong": "teacher"
+  },
+  {
+    "word": "pupil",
+    "context": "the school pupil",
+    "right": "teacher",
+    "wrong": "eye"
+  },
+  {
+    "word": "rock",
+    "context": "threw a rock",
+    "right": "stone",
+    "wrong": "music"
+  },
+  {
+    "word": "rock",
+    "context": "loud rock music",
+    "right": "music",
+    "wrong": "stone"
+  },
+  {
+    "word": "rock",
+    "context": "a heavy rock",
+    "right": "stone",
+    "wrong": "music"
+  },
+  {
+    "word": "rock",
+    "context": "a rock band",
+    "right": "music",
+    "wrong": "stone"
+  },
+  {
+    "word": "rock",
+    "context": "a jagged rock",
+    "right": "stone",
+    "wrong": "guitar"
+  },
+  {
+    "word": "rock",
+    "context": "the rock concert",
+    "right": "guitar",
+    "wrong": "stone"
+  },
+  {
+    "word": "ruler",
+    "context": "measured with a ruler",
+    "right": "inches",
+    "wrong": "king"
+  },
+  {
+    "word": "ruler",
+    "context": "a cruel ruler",
+    "right": "king",
+    "wrong": "inches"
+  },
+  {
+    "word": "ruler",
+    "context": "a plastic ruler",
+    "right": "inches",
+    "wrong": "king"
+  },
+  {
+    "word": "ruler",
+    "context": "the ancient ruler",
+    "right": "king",
+    "wrong": "inches"
+  },
+  {
+    "word": "ruler",
+    "context": "grabbed the ruler",
+    "right": "inches",
+    "wrong": "throne"
+  },
+  {
+    "word": "ruler",
+    "context": "the wise ruler",
+    "right": "throne",
+    "wrong": "inches"
+  },
+  {
+    "word": "scale",
+    "context": "a fish scale",
+    "right": "fish",
+    "wrong": "weight"
+  },
+  {
+    "word": "scale",
+    "context": "stepped on the scale",
+    "right": "weight",
+    "wrong": "fish"
+  },
+  {
+    "word": "scale",
+    "context": "a shiny scale",
+    "right": "fish",
+    "wrong": "weight"
+  },
+  {
+    "word": "scale",
+    "context": "the kitchen scale",
+    "right": "weight",
+    "wrong": "fish"
+  },
+  {
+    "word": "scale",
+    "context": "scraped off a scale",
+    "right": "fish",
+    "wrong": "pounds"
+  },
+  {
+    "word": "scale",
+    "context": "read the scale",
+    "right": "pounds",
+    "wrong": "fish"
+  },
+  {
+    "word": "seal",
+    "context": "a seal on the ice",
+    "right": "ocean",
+    "wrong": "stamp"
+  },
+  {
+    "word": "seal",
+    "context": "broke the wax seal",
+    "right": "stamp",
+    "wrong": "ocean"
+  },
+  {
+    "word": "seal",
+    "context": "the barking seal",
+    "right": "ocean",
+    "wrong": "stamp"
+  },
+  {
+    "word": "seal",
+    "context": "the royal seal",
+    "right": "stamp",
+    "wrong": "ocean"
+  },
+  {
+    "word": "seal",
+    "context": "a playful seal",
+    "right": "ocean",
+    "wrong": "wax"
+  },
+  {
+    "word": "seal",
+    "context": "stamped the seal",
+    "right": "wax",
+    "wrong": "ocean"
+  },
+  {
+    "word": "spade",
+    "context": "the ace of spades",
+    "right": "card",
+    "wrong": "dig"
+  },
+  {
+    "word": "spade",
+    "context": "dug with a spade",
+    "right": "dig",
+    "wrong": "card"
+  },
+  {
+    "word": "spade",
+    "context": "played a spade",
+    "right": "card",
+    "wrong": "dig"
+  },
+  {
+    "word": "spade",
+    "context": "a rusty spade",
+    "right": "dig",
+    "wrong": "card"
+  },
+  {
+    "word": "spade",
+    "context": "the queen of spades",
+    "right": "card",
+    "wrong": "garden"
+  },
+  {
+    "word": "spade",
+    "context": "leaned on the spade",
+    "right": "garden",
+    "wrong": "card"
+  },
+  {
+    "word": "spring",
+    "context": "early in spring",
+    "right": "season",
+    "wrong": "metal"
+  },
+  {
+    "word": "spring",
+    "context": "a coiled spring",
+    "right": "metal",
+    "wrong": "season"
+  },
+  {
+    "word": "spring",
+    "context": "bloomed in spring",
+    "right": "season",
+    "wrong": "metal"
+  },
+  {
+    "word": "spring",
+    "context": "the mattress spring",
+    "right": "metal",
+    "wrong": "season"
+  },
+  {
+    "word": "spring",
+    "context": "a warm spring",
+    "right": "season",
+    "wrong": "coil"
+  },
+  {
+    "word": "spring",
+    "context": "the spring snapped",
+    "right": "coil",
+    "wrong": "season"
+  },
+  {
+    "word": "star",
+    "context": "a bright star",
+    "right": "sky",
+    "wrong": "famous"
+  },
+  {
+    "word": "star",
+    "context": "a movie star",
+    "right": "famous",
+    "wrong": "sky"
+  },
+  {
+    "word": "star",
+    "context": "a distant star",
+    "right": "sky",
+    "wrong": "famous"
+  },
+  {
+    "word": "star",
+    "context": "the pop star",
+    "right": "famous",
+    "wrong": "sky"
+  },
+  {
+    "word": "star",
+    "context": "the north star",
+    "right": "sky",
+    "wrong": "actor"
+  },
+  {
+    "word": "star",
+    "context": "a rising star",
+    "right": "actor",
+    "wrong": "sky"
+  },
+  {
+    "word": "table",
+    "context": "sat at the table",
+    "right": "chair",
+    "wrong": "data"
+  },
+  {
+    "word": "table",
+    "context": "a data table",
+    "right": "data",
+    "wrong": "chair"
+  },
+  {
+    "word": "table",
+    "context": "the wooden table",
+    "right": "chair",
+    "wrong": "data"
+  },
+  {
+    "word": "table",
+    "context": "in the table below",
+    "right": "data",
+    "wrong": "chair"
+  },
+  {
+    "word": "table",
+    "context": "set the table",
+    "right": "chair",
+    "wrong": "rows"
+  },
+  {
+    "word": "table",
+    "context": "the table of results",
+    "right": "rows",
+    "wrong": "chair"
+  },
+  {
+    "word": "tank",
+    "context": "the tank rolled",
+    "right": "army",
+    "wrong": "water"
+  },
+  {
+    "word": "tank",
+    "context": "a water tank",
+    "right": "water",
+    "wrong": "army"
+  },
+  {
+    "word": "tank",
+    "context": "an armored tank",
+    "right": "army",
+    "wrong": "water"
+  },
+  {
+    "word": "tank",
+    "context": "the fuel tank",
+    "right": "water",
+    "wrong": "army"
+  },
+  {
+    "word": "tank",
+    "context": "the tank fired",
+    "right": "army",
+    "wrong": "liquid"
+  },
+  {
+    "word": "tank",
+    "context": "filled the tank",
+    "right": "liquid",
+    "wrong": "army"
+  },
+  {
+    "word": "trunk",
+    "context": "the tree trunk",
+    "right": "tree",
+    "wrong": "car"
+  },
+  {
+    "word": "trunk",
+    "context": "loaded the trunk",
+    "right": "car",
+    "wrong": "tree"
+  },
+  {
+    "word": "trunk",
+    "context": "a thick trunk",
+    "right": "tree",
+    "wrong": "car"
+  },
+  {
+    "word": "trunk",
+    "context": "opened the trunk",
+    "right": "car",
+    "wrong": "tree"
+  },
+  {
+    "word": "trunk",
+    "context": "climbed the trunk",
+    "right": "tree",
+    "wrong": "luggage"
+  },
+  {
+    "word": "trunk",
+    "context": "put it in the trunk",
+    "right": "luggage",
+    "wrong": "tree"
+  },
+  {
+    "word": "wave",
+    "context": "a big wave",
+    "right": "ocean",
+    "wrong": "hand"
+  },
+  {
+    "word": "wave",
+    "context": "gave a wave",
+    "right": "hand",
+    "wrong": "ocean"
+  },
+  {
+    "word": "wave",
+    "context": "the crashing wave",
+    "right": "ocean",
+    "wrong": "hand"
+  },
+  {
+    "word": "wave",
+    "context": "a friendly wave",
+    "right": "hand",
+    "wrong": "ocean"
+  },
+  {
+    "word": "wave",
+    "context": "rode the wave",
+    "right": "ocean",
+    "wrong": "greeting"
+  },
+  {
+    "word": "wave",
+    "context": "a quick wave",
+    "right": "greeting",
+    "wrong": "ocean"
+  },
+  {
+    "word": "well",
+    "context": "drew from the well",
+    "right": "water",
+    "wrong": "healthy"
+  },
+  {
+    "word": "well",
+    "context": "feeling quite well",
+    "right": "healthy",
+    "wrong": "water"
+  },
+  {
+    "word": "well",
+    "context": "a deep well",
+    "right": "water",
+    "wrong": "healthy"
+  },
+  {
+    "word": "well",
+    "context": "getting well soon",
+    "right": "healthy",
+    "wrong": "water"
+  },
+  {
+    "word": "well",
+    "context": "the village well",
+    "right": "water",
+    "wrong": "healthy"
+  },
+  {
+    "word": "well",
+    "context": "looking well today",
+    "right": "fine",
+    "wrong": "water"
+  }
+]
