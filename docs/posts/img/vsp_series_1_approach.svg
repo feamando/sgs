@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="520" fill="#0a0a0f"/>
+
+  <text x="400" y="36" text-anchor="middle" fill="#f5f1e8" font-size="19" font-weight="700">One token, three groundings</text>
+  <text x="400" y="59" text-anchor="middle" fill="#8a8598" font-size="12">A tokenizer gives both senses of "crane" the same vector. We bundle in what it looks like and is made of.</text>
+
+  <!-- LEFT: the collapse -->
+  <text x="180" y="104" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="700">TODAY: one token, two meanings</text>
+  <rect x="96" y="120" width="168" height="40" rx="6" fill="#1f1f2a" stroke="#3a3a4a"/>
+  <text x="180" y="145" text-anchor="middle" fill="#f5f1e8" font-size="14" font-weight="700">"crane" token</text>
+
+  <text x="120" y="205" text-anchor="middle" fill="#D9534F" font-size="26">&#128038;</text>
+  <text x="120" y="230" text-anchor="middle" fill="#8a8598" font-size="10">the bird</text>
+  <text x="240" y="205" text-anchor="middle" fill="#D9534F" font-size="26">&#127959;</text>
+  <text x="240" y="230" text-anchor="middle" fill="#8a8598" font-size="10">the machine</text>
+  <line x1="160" y1="162" x2="128" y2="185" stroke="#D9534F" stroke-width="1.5"/>
+  <line x1="200" y1="162" x2="232" y2="185" stroke="#D9534F" stroke-width="1.5"/>
+  <text x="180" y="262" text-anchor="middle" fill="#D9534F" font-size="10" font-weight="700">collapsed onto one vector</text>
+
+  <!-- divider -->
+  <line x1="400" y1="90" x2="400" y2="470" stroke="#1f1f2a" stroke-width="1.5"/>
+
+  <!-- RIGHT: the bundle -->
+  <text x="600" y="104" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="700">VSP: bundle three signals per SENSE</text>
+
+  <!-- S V P blocks -->
+  <rect x="470" y="122" width="260" height="34" rx="5" fill="#4a7ab0"/>
+  <text x="485" y="144" fill="#f5f1e8" font-size="12" font-weight="700">S</text>
+  <text x="600" y="144" text-anchor="middle" fill="#f5f1e8" font-size="11">semantic / text embedding</text>
+
+  <rect x="470" y="162" width="260" height="34" rx="5" fill="#E69500"/>
+  <text x="485" y="184" fill="#f5f1e8" font-size="12" font-weight="700">V</text>
+  <text x="600" y="184" text-anchor="middle" fill="#f5f1e8" font-size="11">visual: image of the sense, embedded</text>
+
+  <rect x="470" y="202" width="260" height="34" rx="5" fill="#7a9a5a"/>
+  <text x="485" y="224" fill="#f5f1e8" font-size="12" font-weight="700">P</text>
+  <text x="600" y="224" text-anchor="middle" fill="#f5f1e8" font-size="11">physical: predicted material props</text>
+
+  <text x="600" y="262" text-anchor="middle" fill="#8a8598" font-size="11">= one grounded vector, per sense</text>
+
+  <!-- BOTTOM: separation result -->
+  <rect x="96" y="300" width="634" height="150" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="413" y="330" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">Does the bundle pull the two senses apart? (higher = better)</text>
+
+  <!-- text bar -->
+  <rect x="200" y="392" width="120" height="30" rx="4" fill="#D9534F"/>
+  <text x="260" y="384" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.13</text>
+  <text x="260" y="440" text-anchor="middle" fill="#8a8598" font-size="11">text alone</text>
+
+  <!-- VSP bar -->
+  <rect x="470" y="352" width="120" height="70" rx="4" fill="#7a9a5a"/>
+  <text x="530" y="344" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">0.37</text>
+  <text x="530" y="440" text-anchor="middle" fill="#f5f1e8" font-size="11" font-weight="700">V + S + P bundle</text>
+
+  <text x="400" y="486" text-anchor="middle" fill="#8a8598" font-size="11">The senses separate. Post 2: does that actually help a language model?</text>
+</svg>

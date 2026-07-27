@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="520" fill="#0a0a0f"/>
+
+  <text x="400" y="36" text-anchor="middle" fill="#f5f1e8" font-size="19" font-weight="700">Three promising results. All three were noise.</text>
+  <text x="400" y="59" text-anchor="middle" fill="#8a8598" font-size="12">We tried two ways to feed the grounding into a trained model. Each looked like a win, then didn't survive a fair test.</text>
+
+  <!-- Column headers -->
+  <text x="200" y="98" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="700">WHAT WE FIRST SAW</text>
+  <text x="600" y="98" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="700">AFTER A HONEST TEST</text>
+  <line x1="400" y1="82" x2="400" y2="454" stroke="#1f1f2a" stroke-width="1.5"/>
+
+  <!-- Row 1: embedding init -->
+  <text x="70" y="150" fill="#f5f1e8" font-size="12" font-weight="700">1. Init embeddings</text>
+  <text x="70" y="167" fill="#8a8598" font-size="10">from the bundle</text>
+  <rect x="210" y="128" width="150" height="30" rx="4" fill="#E69500"/>
+  <text x="285" y="148" text-anchor="middle" fill="#0a0a0f" font-size="12" font-weight="700">+5.7 pts</text>
+  <text x="285" y="176" text-anchor="middle" fill="#8a8598" font-size="10">(one lucky seed)</text>
+  <rect x="440" y="128" width="150" height="30" rx="4" fill="#D9534F"/>
+  <text x="515" y="148" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">+1.6 pts</text>
+  <text x="650" y="140" fill="#8a8598" font-size="10">6-seed mean;</text>
+  <text x="650" y="154" fill="#8a8598" font-size="10">CI crosses 0</text>
+
+  <!-- Row 2: rerank -->
+  <text x="70" y="230" fill="#f5f1e8" font-size="12" font-weight="700">2. Rerank at</text>
+  <text x="70" y="247" fill="#8a8598" font-size="10">inference time</text>
+  <rect x="210" y="208" width="150" height="30" rx="4" fill="#E69500"/>
+  <text x="285" y="228" text-anchor="middle" fill="#0a0a0f" font-size="12" font-weight="700">+2.9 pts</text>
+  <text x="285" y="256" text-anchor="middle" fill="#8a8598" font-size="10">(tuned on test set)</text>
+  <rect x="440" y="208" width="150" height="30" rx="4" fill="#D9534F"/>
+  <text x="515" y="228" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">p &#8776; 0.55</text>
+  <text x="650" y="228" fill="#8a8598" font-size="10">not significant</text>
+
+  <!-- Row 3: low-context salvage -->
+  <text x="70" y="310" fill="#f5f1e8" font-size="12" font-weight="700">3. Rerank, but</text>
+  <text x="70" y="327" fill="#8a8598" font-size="10">only where the</text>
+  <text x="70" y="341" fill="#8a8598" font-size="10">model is unsure</text>
+  <rect x="210" y="292" width="150" height="30" rx="4" fill="#E69500"/>
+  <text x="285" y="312" text-anchor="middle" fill="#0a0a0f" font-size="12" font-weight="700">+8.3 pts</text>
+  <text x="285" y="340" text-anchor="middle" fill="#8a8598" font-size="10">(11 pairs only)</text>
+  <rect x="440" y="292" width="150" height="30" rx="4" fill="#D9534F"/>
+  <text x="515" y="312" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">&#8722;0.004</text>
+  <text x="650" y="305" fill="#8a8598" font-size="10">held-out &#955;,</text>
+  <text x="650" y="319" fill="#8a8598" font-size="10">260 hard pairs</text>
+
+  <!-- bottom insight -->
+  <rect x="70" y="372" width="660" height="86" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="400" y="400" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">The signal was real, but redundant.</text>
+  <text x="400" y="424" text-anchor="middle" fill="#8a8598" font-size="11">Where text context was enough, grounding just echoed it. Where text ran out (the model truly lost),</text>
+  <text x="400" y="442" text-anchor="middle" fill="#8a8598" font-size="11">the grounding was lost too: 54% correct, barely above a coin flip.</text>
+
+  <text x="400" y="486" text-anchor="middle" fill="#8a8598" font-size="11">What caught all three: reproduce across seeds, and never tune on your test set.</text>
+</svg>

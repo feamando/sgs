@@ -1,0 +1,333 @@
+\documentclass[twoside,11pt]{article}
+
+% ── JMLR style (jmlr2e.sty must be in the same directory / Overleaf project).
+%    jmlr2e already loads: amssymb, natbib, graphicx, hyperref, epsfig, and
+%    defines the theorem/lemma/corollary/definition/proof/example environments.
+%    Do NOT re-load those or re-declare \newtheorem (it errors). ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{jmlr2e}
+
+% ── Additional packages (loaded AFTER jmlr2e) ──
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+% ── JMLR running headers (volume/year/pages auto-filled by editor on accept) ──
+\usepackage{lastpage}
+\jmlrheading{1}{2026}{1-\pageref{LastPage}}{7/26}{}{00-0000}{Nikita Gorshkov}
+\ShortHeadings{Grounded Token Bundles Do Not Help a Language Model}{Gorshkov}
+\firstpageno{1}
+
+\begin{document}
+
+\title{Grounded Token Bundles Separate Word Senses\\
+but Do Not Help a Language Model:\\
+A Negative Result}
+
+\author{\name Nikita Gorshkov \email ngorshkov@proton.me \\
+       \addr Senefelderstr.\ 29a\\
+       10437 Berlin, Germany}
+
+\editor{}
+
+\maketitle
+
+% ════════════════════════════════════════════════════════════
+\begin{abstract}%
+We test whether a grounded token representation, one that bundles a word sense's visual (V), semantic (S), and physical (P) features into a single vector, improves word-sense disambiguation in a small autoregressive language model. A representation-level probe passes cleanly: on curated polysemous words the V+S+P bundle separates senses that a text embedding collapses (separation $0.37$ versus $0.13$ for the text embedding, where $0.5$ would be the reference for a symmetric random split of the aggregated cosine metric defined in Section~\ref{sec:probe}). We then evaluate whether that separation transfers to a trained model through two independent delivery mechanisms, embedding initialization and inference-time reranking, across three disambiguation benchmarks. It does not. Embedding initialization is washed out by language-model gradients (a $-3.8$ point change at full compute; a six-seed mean of $+1.6$ points with a $95\%$ confidence interval of $[-1.3, +4.5]$ at low compute). Inference-time reranking yields no significant improvement ($p \approx 0.55$), and a benchmark built specifically to be low-context, so that text is insufficient and grounding has room to help, drives base accuracy from $0.83$ down to $0.58$ yet leaves a held-out reranking gain of $-0.004$. The grounding signal is redundant with text where text suffices and near-chance where it does not. We report the full evidence chain, diagnose why three separately promising effects ($+5.7$, $+2.9$, $+8.3$ points) were all artifacts, and argue that the transferable contribution is methodological: seed reproduction and held-out hyperparameter selection converted a string of apparent wins into a single trustworthy negative.
+\end{abstract}
+
+\begin{keywords}
+  word-sense disambiguation, grounded representations, multimodal embeddings, language models, negative results, reproducibility
+\end{keywords}
+
+% ════════════════════════════════════════════════════════════
+\section{Introduction}
+
+Subword and word-level tokenizers map every occurrence of a written form to a single embedding row. Polysemy is therefore collapsed at the input: ``crane'' the bird and ``crane'' the machine share one vector, and an autoregressive language model must re-resolve the intended sense from context at every occurrence~\citep{vaswani2017}. A natural hypothesis is that this resolution burden could be reduced if the sense were made explicit in the token representation itself.
+
+We investigate a specific instantiation of this idea, which we call the \emph{VSP bundle}. For each word \emph{sense} (not each surface form) we concatenate three signals into one vector: a semantic block $S$ (a standard text embedding), a visual block $V$ (an image generated for that sense and then embedded by a vision encoder), and a physical block $P$ (predicted material properties such as hardness and density). The hypothesis is that disambiguation, if it lives in the representation, need not consume model capacity, promising smaller models with grounded understanding built in rather than learned from co-occurrence statistics alone.
+
+This paper reports a negative result. We separate the hypothesis into two empirically distinct claims and find that only the first holds:
+
+\begin{enumerate}
+\item \textbf{Representation claim (holds).} The VSP bundle separates senses that a text embedding merges. This is a property of the representation, measured on curated probes.
+\item \textbf{Transfer claim (fails).} That separation, when delivered into a trained language model, improves next-token disambiguation. We test two delivery mechanisms and three benchmarks and find no statistically significant improvement.
+\end{enumerate}
+
+The gap between these two claims is the substance of the paper. A representation can carry information that a downstream model cannot exploit, either because the model already recovers that information by other means, or because the delivery mechanism destroys it. We provide evidence that both apply here: language-model gradients overwrite the grounding when it is used as an initialization, and where the grounding is not overwritten (inference-time reranking) the information it carries is redundant with what the model already extracts from textual context.
+
+We regard the methodological findings as the more durable contribution. Over the course of the study, three separate configurations produced effect sizes that would ordinarily be reported as positive results ($+5.7$, $+2.9$, and $+8.3$ percentage points). Each was an artifact of a hyperparameter or random seed selected on the same data used to measure the effect. Two standard disciplines, reproduction across random seeds and held-out hyperparameter selection, reduced all three to zero. We document these explicitly (Section~\ref{sec:method}) because the negative result is credible only to the extent that these checks were applied \emph{before} the positive-looking numbers were believed.
+
+% ════════════════════════════════════════════════════════════
+\section{Related Work}
+
+\paragraph{Word-sense disambiguation and sense representations.}
+Word-sense disambiguation (WSD) is a long-standing task in computational linguistics~\citep{navigli2009}. Classical sense inventories such as WordNet~\citep{miller1995} provided the discrete labels against which supervised systems were trained. Distributional word embeddings~\citep{mikolov2013,pennington2014} assign a single vector per surface form and therefore conflate senses by construction; this motivated a line of \emph{sense embeddings} that allocate multiple vectors per word~\citep{reisinger2010,huang2012,neelakantan2014}. Contextual encoders such as ELMo~\citep{peters2018} and BERT~\citep{devlin2019} sidestep the one-vector-per-word limitation by producing token representations that depend on context, and they set strong WSD baselines. Our work differs in intent: rather than making the representation contextual, we ask whether an \emph{a priori} sense-grounded, static bundle can help an autoregressive model that would otherwise learn disambiguation from context.
+
+\paragraph{Grounded and multimodal representations.}
+Visual grounding of language has been pursued both to improve representations and to study meaning acquisition~\citep{bruni2014,kiela2014}. Vision-language contrastive models, notably CLIP~\citep{radford2021}, produce a shared image-text embedding space and are a natural source of a visual block for a word sense. Text-to-image diffusion models~\citep{rombach2022} allow generation of a sense-specific image when no labeled image is available. The physical grounding we use, predicting material properties from a lexical vector, follows work relating language to physical and perceptual attributes~\citep{lynott2020}. Prior multimodal work generally reports that visual grounding \emph{helps} on similarity and relatedness benchmarks; our contribution is to show a concrete task and delivery setting in which auto-derived grounding, though it demonstrably separates senses, fails to help a trained language model.
+
+\paragraph{Negative results and reproducibility.}
+The machine-learning literature has documented how easily apparent improvements arise from hyperparameters tuned on test data, insufficient random-seed replication, and selective reporting~\citep{henderson2018,dodge2019,gundersen2018}. Our methodological section is a small case study in these effects: three positive-looking configurations, each dissolved by a standard check. We report it in that tradition.
+
+\paragraph{Position of this work.}
+To our knowledge, no prior work reports that an auto-derived visual-plus-physical sense bundle (i) cleanly separates senses at the representation level yet (ii) fails to transfer through either embedding initialization or inference-time reranking to a trained autoregressive language model. The negative, with its diagnosis, is the contribution.
+
+% ════════════════════════════════════════════════════════════
+\section{The VSP Bundle and the Separation Probe}
+\label{sec:probe}
+
+\paragraph{Construction.}
+For a target polysemous word we enumerate its senses and, for each sense, construct a bundle vector $b = [V \,\|\, S \,\|\, P]$:
+\begin{itemize}
+\item $S \in \mathbb{R}^{300}$: a GloVe~\citep{pennington2014} embedding of the sense phrase.
+\item $V \in \mathbb{R}^{512}$: an image is generated for the sense with a text-to-image diffusion model~\citep{rombach2022} and embedded with a CLIP ViT-B/32 image encoder~\citep{radford2021}; multiple views are averaged.
+\item $P \in \mathbb{R}^{8}$: a small trained regressor predicts eight material properties from the sense phrase's lexical vector.
+\end{itemize}
+All three blocks are derived automatically from the sense phrase; no block is hand-labeled.
+
+\paragraph{Separation metric.}
+For a set of polysemous probe words, each with two senses, we measure how far the two senses' bundles are pushed apart relative to same-sense variation, aggregating across the $V$, $S$, $P$ blocks by a max rule (senses are considered separable if \emph{any} block distinguishes them). We report this aggregate on a $[0,1]$ scale.
+
+\paragraph{Result.}
+On a curated set of $20$ polysemous words the text block alone yields separation $0.13$: it fails, as expected, because the colliding surface form is precisely the signal that collapses the senses. The full V+S+P bundle yields $0.37$, carried predominantly by the visual block. This clears the pre-registered kill condition for the representation claim. We stress that this is a property of curated probes and is \emph{not} evidence that a trained model benefits; establishing the latter is the purpose of the remainder of the paper.
+
+% ════════════════════════════════════════════════════════════
+\section{Experimental Setup}
+
+\paragraph{Model.}
+We train a small autoregressive language model (the SGS language model, $\sim$$215$M parameters, dominated by the embedding and output tables over a large sense-augmented vocabulary). Baselines and treatments share identical architecture, parameter count, and token budget; they differ only in the intervention under test.
+
+\paragraph{Disambiguation benchmark.}
+The primary benchmark is a set of $105$ minimal pairs across $42$ polysemous words. Each item is a tuple \texttt{(word, context, right, wrong)} where \texttt{context} places the word in a sense, and \texttt{right}/\texttt{wrong} are a sense-appropriate and a sense-inappropriate continuation. The score is the fraction of items for which the model assigns higher continuation log-probability to \texttt{right} than to \texttt{wrong}; chance is $0.5$. The metric is tokenizer-agnostic, so the same benchmark scores both the grounded model and a plain-subword baseline, making it a fair cross-model gate. Two item styles are included: cloze (the sense word itself is the answer) and continuation (predict a sense-matched next word).
+
+\paragraph{Low-context benchmark.}
+For the salvage experiment (Section~\ref{sec:rerank}) we additionally author $260$ pairs over the same $42$ words that are \emph{low-context by construction}: each context is three to five words with only a weak sense cue, so that the base model is genuinely uncertain and grounding has maximal room to help. The set is validated to contain no duplicates, no overlap with the $105$-pair set, and both senses of every word.
+
+% ════════════════════════════════════════════════════════════
+\section{Delivery Mechanism 1: Embedding Initialization}
+\label{sec:init}
+
+We initialize the model's token embedding tables from a linear projection of each token's VSP bundle, then train; the control is an identical model with random initialization at matched compute.
+
+\paragraph{Full compute.}
+At $40{,}000$ optimizer steps ($\sim$$2$B tokens) the grounded model scores $0.790$ against the baseline's $0.829$, a change of $-3.8$ points (Table~\ref{tab:init}). The two trained models' next-token log-probabilities are correlated at $0.964$: training drove both to nearly the same function, overwriting the grounded initialization. A warm start helps only where the model would otherwise struggle to learn the distinction; at full compute it does not struggle, so the initialization is at best neutral and here mildly harmful (traced to an initialization-scale mismatch, subsequently corrected).
+
+\paragraph{Low compute and the reproduction failure.}
+A single-seed sweep suggested a monotone efficiency curve: $+5.7$ points at $2$k steps, $+1.0$ at $5$k, $-3.8$ at $40$k, consistent with the washout account. This did not reproduce. A second seed at $2$k gave $-1.0$ points. Six seeds at $2$k gave a mean of $+1.6$ points with sample standard deviation $2.7$ and a $95\%$ confidence interval of $[-1.3, +4.5]$ ($t = 1.42$); the per-seed values were $+5.7, -1.0, +3.8, 0.0, +1.9, -1.0$. The initial $+5.7$ was the maximum of six draws, and two of the six draws were negative. The seed-to-seed spread exceeds the effect. No compute regime shows a reliable win.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Regime & Grounded acc.\ & Baseline acc.\ & $\Delta$ & Note \\
+\midrule
+$40$k steps (single seed) & $0.790$ & $0.829$ & $-3.8$ & models $0.964$-correlated \\
+$2$k steps (single seed)  & $0.695$ & $0.638$ & $+5.7$ & one lucky seed \\
+$2$k steps (6-seed mean)  & \multicolumn{2}{c}{---} & $+1.6$ & $95\%$ CI $[-1.3, +4.5]$ \\
+\bottomrule
+\end{tabular}
+\caption{Embedding initialization. The apparent low-compute gain does not survive seed replication; the six-seed confidence interval includes zero.}
+\label{tab:init}
+\end{table}
+
+% ════════════════════════════════════════════════════════════
+\section{Delivery Mechanism 2: Inference-Time Reranking}
+\label{sec:rerank}
+
+Because gradients overwrite the initialization, we next deliver the grounding at inference, leaving the trained baseline untouched. We rerank continuation candidates by sense-consistency:
+\begin{equation}
+\mathrm{score}(c \mid x) = \log P(c \mid x) + \lambda \cdot \mathrm{consistency}(c, x),
+\end{equation}
+where $\mathrm{consistency}(c,x)$ is the maximum over the $V, S, P$ blocks of the cosine similarity between the context's grounded-token bundle and the candidate's bundle. The candidate set is exactly $\{\texttt{right}, \texttt{wrong}\}$, so there is no top-$k$ truncation, which makes this the cleanest possible test of whether the signal survives. At $\lambda = 0$ the score reduces to the baseline, a built-in sanity check that reproduced the baseline accuracy exactly.
+
+\paragraph{Standard benchmark.}
+The best $\lambda$ produced $+2.9$ points, but with $7$ gains against $4$ losses among $11$ discordant pairs, this is not significant ($p \approx 0.55$ by an exact McNemar test). The pure-consistency ceiling (letting $\lambda \to \infty$, ignoring the language model) is $0.657$: the bundle alone disambiguates above chance but well below the trained model's $0.829$. Slicing by base-model confidence, the entire reranking benefit concentrated in the low-confidence pairs ($+8.3$ points) and was exactly zero where the model was already confident, the correct qualitative shape for a real effect, but resting on approximately $11$ discordant pairs.
+
+\paragraph{The salvage and its failure.}
+The correctly shaped $+8.3$ motivated the low-context benchmark, designed so that text is insufficient and the base model is uncertain. The design succeeded as a manipulation: base accuracy fell from $0.829$ to $0.581$. But the grounding produced no gain. Accuracy was flat across $\lambda$ ($0.562$ to $0.585$ versus $0.581$ at $\lambda=0$). Selecting $\lambda$ honestly, on one half of the data and reporting on the other, gave a mean delta of $-0.004$. Pure-consistency favored the correct sense in only $54.1\%$ of pairs (versus $66\%$ on the easier set and $50\%$ at chance). Nothing was significant at any $\lambda$; on the low-margin subset the point estimates were mostly negative (Table~\ref{tab:rerank}).
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Setting & Best reported $\Delta$ & Honest $\Delta$ & Significance \\
+\midrule
+Standard $105$, all pairs        & $+2.9$ & --- & $p \approx 0.55$ \\
+Standard $105$, low-confidence slice & $+8.3$ & --- & $\sim$$11$ discordant pairs \\
+Low-context $260$, best $\lambda$    & $+2.4$ & --- & n.s.\ at all $\lambda$ \\
+Low-context $260$, held-out $\lambda$ & --- & $-0.004$ & --- \\
+\bottomrule
+\end{tabular}
+\caption{Inference-time reranking. Effects reported at the best test-set $\lambda$ look positive; the held-out estimate on the benchmark built to favor grounding is essentially zero.}
+\label{tab:rerank}
+\end{table}
+
+\paragraph{Why the $+8.3$ evaporated.}
+On the easier benchmark the low-confidence pairs still carried residual textual cues (base accuracy $0.69$ on that slice; consistency favored the right sense $67\%$ of the time), and the grounding rode along with that residual text signal. On the low-context benchmark, where the model is genuinely lost (base accuracy $0.45$--$0.58$), the bundle's own signal collapses to $54\%$. The grounding was echoing language where language already worked, not supplying sense where language failed.
+
+% ════════════════════════════════════════════════════════════
+\section{Discussion}
+
+\paragraph{What is closed.}
+Across two delivery mechanisms and three benchmarks, the VSP grounding as derived here (CLIP-image $V$, GloVe $S$, predicted-material $P$, concatenated and mean-pooled) does not carry sense information that a trained autoregressive language model can use for next-token disambiguation. It is redundant with text where text suffices, and near-chance where text does not. This is a bounded claim about a specific representation and two specific delivery mechanisms, not a refutation of grounding in general.
+
+\paragraph{What still stands.}
+The representation-level separation ($0.37$ versus $0.13$) is a genuine property of the bundle on curated probes. It simply does not transfer to the language-model task under the deliveries we tested.
+
+\paragraph{What is untested.}
+Several variants could behave differently and are outside the scope of this negative: a different visual source (for example, real photographs rather than generated images); a non-mean-pooled bundle; integration through a contrastive objective \emph{during} training, where the grounding shapes the representation continuously rather than being overwritten as an initialization; and tasks in which text is genuinely insufficient rather than merely sparse.
+
+% ════════════════════════════════════════════════════════════
+\section{Methodological Note}
+\label{sec:method}
+
+Three configurations produced effect sizes that, reported in isolation, would read as positive results: $+5.7$ points (embedding initialization, $2$k steps), $+2.9$ points (reranking, standard benchmark), and $+8.3$ points (reranking, low-confidence slice). Each was an artifact of a quantity selected on the same data used to measure it, a random seed in the first case and a hyperparameter $\lambda$ in the latter two. Two standard disciplines removed all three:
+\begin{enumerate}
+\item \textbf{Reproduction across seeds.} The $+5.7$ collapsed to a six-seed mean of $+1.6$ with a confidence interval spanning zero. Reporting the mean and spread, rather than the best draw, is what exposed it.
+\item \textbf{Held-out hyperparameter selection.} The reranking $\lambda$ tuned on the test set implied gains of $+2.9$ to $+8.3$; chosen on held-out data it implied $-0.004$. Selecting and reporting on the same data manufactures effects.
+\end{enumerate}
+The negative result is trustworthy only because these checks were applied before, not after, the positive-looking numbers were believed. We regard this as the paper's most transferable content.
+
+% ════════════════════════════════════════════════════════════
+\section{Conclusion}
+
+A grounded token bundle that visibly separates word senses at the representation level ($0.37$ versus $0.13$ for text) does not improve word-sense disambiguation in a trained autoregressive language model, whether delivered by embedding initialization or by inference-time reranking, and does not do so even on a benchmark constructed specifically to be low-context. The grounding is redundant with textual context where that context is sufficient and near-chance where it is not. We report the result as a bounded negative with an explicit diagnosis, and we document the seed-replication and held-out-selection procedures that distinguished a durable negative from three fragile positives.
+
+% ════════════════════════════════════════════════════════════
+\acks{The author received no specific funding for this work and declares no
+competing interests. Code and all result files are available in the SGS
+repository~\citep{sgs-repo}.}
+
+% ════════════════════════════════════════════════════════════
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[Bruni et al.(2014)]{bruni2014}
+E.~Bruni, N.-K.~Tran, and M.~Baroni.
+\newblock Multimodal distributional semantics.
+\newblock \emph{Journal of Artificial Intelligence Research}, 49:1--47, 2014.
+
+\bibitem[Devlin et al.(2019)]{devlin2019}
+J.~Devlin, M.-W.~Chang, K.~Lee, and K.~Toutanova.
+\newblock {BERT}: Pre-training of deep bidirectional transformers for language understanding.
+\newblock In \emph{NAACL-HLT}, 2019.
+
+\bibitem[Dodge et al.(2019)]{dodge2019}
+J.~Dodge, S.~Gururangan, D.~Card, R.~Schwartz, and N.A.~Smith.
+\newblock Show your work: Improved reporting of experimental results.
+\newblock In \emph{EMNLP}, 2019.
+
+\bibitem[Gundersen and Kjensmo(2018)]{gundersen2018}
+O.E.~Gundersen and S.~Kjensmo.
+\newblock State of the art: Reproducibility in artificial intelligence.
+\newblock In \emph{AAAI}, 2018.
+
+\bibitem[Henderson et al.(2018)]{henderson2018}
+P.~Henderson, R.~Islam, P.~Bachman, J.~Pineau, D.~Precup, and D.~Meger.
+\newblock Deep reinforcement learning that matters.
+\newblock In \emph{AAAI}, 2018.
+
+\bibitem[Huang et al.(2012)]{huang2012}
+E.H.~Huang, R.~Socher, C.D.~Manning, and A.Y.~Ng.
+\newblock Improving word representations via global context and multiple word prototypes.
+\newblock In \emph{ACL}, 2012.
+
+\bibitem[Kiela and Bottou(2014)]{kiela2014}
+D.~Kiela and L.~Bottou.
+\newblock Learning image embeddings using convolutional neural networks for improved multi-modal semantics.
+\newblock In \emph{EMNLP}, 2014.
+
+\bibitem[Lynott et al.(2020)]{lynott2020}
+D.~Lynott, L.~Connell, M.~Brysbaert, J.~Brand, and J.~Carney.
+\newblock The Lancaster Sensorimotor Norms: multidimensional measures of perceptual and action strength for 40,000 English words.
+\newblock \emph{Behavior Research Methods}, 52:1271--1291, 2020.
+
+\bibitem[Mikolov et al.(2013)]{mikolov2013}
+T.~Mikolov, I.~Sutskever, K.~Chen, G.~Corrado, and J.~Dean.
+\newblock Distributed representations of words and phrases and their compositionality.
+\newblock In \emph{NeurIPS}, 2013.
+
+\bibitem[Miller(1995)]{miller1995}
+G.A.~Miller.
+\newblock {WordNet}: A lexical database for {E}nglish.
+\newblock \emph{Communications of the ACM}, 38(11):39--41, 1995.
+
+\bibitem[Navigli(2009)]{navigli2009}
+R.~Navigli.
+\newblock Word sense disambiguation: A survey.
+\newblock \emph{ACM Computing Surveys}, 41(2):1--69, 2009.
+
+\bibitem[Neelakantan et al.(2014)]{neelakantan2014}
+A.~Neelakantan, J.~Shankar, A.~Passos, and A.~McCallum.
+\newblock Efficient non-parametric estimation of multiple embeddings per word in vector space.
+\newblock In \emph{EMNLP}, 2014.
+
+\bibitem[Pennington et al.(2014)]{pennington2014}
+J.~Pennington, R.~Socher, and C.D.~Manning.
+\newblock {GloVe}: Global vectors for word representation.
+\newblock In \emph{EMNLP}, 2014.
+
+\bibitem[Peters et al.(2018)]{peters2018}
+M.E.~Peters, M.~Neumann, M.~Iyyer, M.~Gardner, C.~Clark, K.~Lee, and L.~Zettlemoyer.
+\newblock Deep contextualized word representations.
+\newblock In \emph{NAACL-HLT}, 2018.
+
+\bibitem[Radford et al.(2021)]{radford2021}
+A.~Radford, J.W.~Kim, C.~Hallacy, A.~Ramesh, G.~Goh, S.~Agarwal, et~al.
+\newblock Learning transferable visual models from natural language supervision.
+\newblock In \emph{ICML}, 2021.
+
+\bibitem[Reisinger and Mooney(2010)]{reisinger2010}
+J.~Reisinger and R.J.~Mooney.
+\newblock Multi-prototype vector-space models of word meaning.
+\newblock In \emph{NAACL-HLT}, 2010.
+
+\bibitem[Rombach et al.(2022)]{rombach2022}
+R.~Rombach, A.~Blattmann, D.~Lorenz, P.~Esser, and B.~Ommer.
+\newblock High-resolution image synthesis with latent diffusion models.
+\newblock In \emph{CVPR}, 2022.
+
+\bibitem[Vaswani et al.(2017)]{vaswani2017}
+A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.N.~Gomez, L.~Kaiser, and I.~Polosukhin.
+\newblock Attention is all you need.
+\newblock In \emph{NeurIPS}, 2017.
+
+\bibitem[SGS(2026)]{sgs-repo}
+Semantic {G}aussian {S}platting (SGS).
+\newblock Source code and result files.
+\newblock \url{https://github.com/feamando/sgs}, 2026.
+
+\end{thebibliography}
+
+% ════════════════════════════════════════════════════════════
+\appendix
+
+\section{Benchmark Construction Details}
+\label{app:bench}
+
+The standard benchmark contains $105$ pairs over $42$ polysemous words in two styles (cloze and continuation), validated for the absence of \texttt{right}$=$\texttt{wrong} items and for coverage of both senses of each word. The low-context benchmark contains $260$ pairs over the same $42$ words, authored with three- to five-word contexts and a single weak sense cue, validated for schema correctness, zero internal duplicates, zero overlap with the standard set, coverage of both senses per word, and absence of punctuation that the tokenizer path does not handle. Both files are released in the repository.
+
+\section{Reproducibility Summary}
+\label{app:repro}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Item & Value \\
+\midrule
+Model & SGS LM, $\sim$$215$M params, matched across arms \\
+Full-compute budget & $40{,}000$ optimizer steps ($\sim$$2$B tokens) \\
+Low-compute budgets & $2$k, $5$k steps \\
+Seeds (initialization, $2$k) & $6$ (seeds $0$--$5$) \\
+Primary benchmark & $105$ minimal pairs, $42$ words \\
+Low-context benchmark & $260$ pairs, $42$ words \\
+Significance test & exact McNemar on discordant pairs \\
+Hyperparameter selection & held-out ($50/50$ split) for $\lambda$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="Inter, -apple-system, sans-serif">
+  <rect width="800" height="520" fill="#0a0a0f"/>
+
+  <text x="400" y="36" text-anchor="middle" fill="#f5f1e8" font-size="19" font-weight="700">What a clean negative buys you</text>
+  <text x="400" y="59" text-anchor="middle" fill="#8a8598" font-size="12">The claim is bounded, not abandoned. Here is exactly what we learned and where the door is still open.</text>
+
+  <!-- STANDS -->
+  <rect x="70" y="88" width="300" height="150" rx="8" fill="#12121a" stroke="#7a9a5a" stroke-width="1.5"/>
+  <text x="90" y="116" fill="#7a9a5a" font-size="12" font-weight="700">STANDS</text>
+  <text x="90" y="146" fill="#f5f1e8" font-size="12">The representation separates</text>
+  <text x="90" y="164" fill="#f5f1e8" font-size="12">senses (0.37 vs 0.13 for text).</text>
+  <text x="90" y="194" fill="#8a8598" font-size="11">A picture of a bird and of a crane</text>
+  <text x="90" y="210" fill="#8a8598" font-size="11">machine really are far apart. That</text>
+  <text x="90" y="226" fill="#8a8598" font-size="11">is a genuine finding on its own.</text>
+
+  <!-- CLOSED -->
+  <rect x="430" y="88" width="300" height="150" rx="8" fill="#12121a" stroke="#D9534F" stroke-width="1.5"/>
+  <text x="450" y="116" fill="#D9534F" font-size="12" font-weight="700">CLOSED</text>
+  <text x="450" y="146" fill="#f5f1e8" font-size="12">Baking it into a token, by init</text>
+  <text x="450" y="164" fill="#f5f1e8" font-size="12">or rerank, does not help an LM.</text>
+  <text x="450" y="194" fill="#8a8598" font-size="11">2 mechanisms, 3 benchmarks, no</text>
+  <text x="450" y="210" fill="#8a8598" font-size="11">significant win. Text already carries</text>
+  <text x="450" y="226" fill="#8a8598" font-size="11">the sense the grounding was adding.</text>
+
+  <!-- STILL OPEN -->
+  <text x="400" y="278" text-anchor="middle" fill="#8a8598" font-size="11" font-weight="700">STILL OPEN (not tested here)</text>
+
+  <rect x="70" y="294" width="205" height="96" rx="8" fill="#1f1f2a" stroke="#3a3a4a"/>
+  <text x="172" y="322" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">A different visual</text>
+  <text x="172" y="340" text-anchor="middle" fill="#f5f1e8" font-size="12">source</text>
+  <text x="172" y="366" text-anchor="middle" fill="#8a8598" font-size="10">real photos, not</text>
+  <text x="172" y="380" text-anchor="middle" fill="#8a8598" font-size="10">generated images</text>
+
+  <rect x="297" y="294" width="206" height="96" rx="8" fill="#1f1f2a" stroke="#3a3a4a"/>
+  <text x="400" y="322" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">Trained-in, not</text>
+  <text x="400" y="340" text-anchor="middle" fill="#f5f1e8" font-size="12">bolted-on</text>
+  <text x="400" y="366" text-anchor="middle" fill="#8a8598" font-size="10">a contrastive loss</text>
+  <text x="400" y="380" text-anchor="middle" fill="#8a8598" font-size="10">during training</text>
+
+  <rect x="525" y="294" width="205" height="96" rx="8" fill="#1f1f2a" stroke="#3a3a4a"/>
+  <text x="627" y="322" text-anchor="middle" fill="#f5f1e8" font-size="12" font-weight="700">A task where text</text>
+  <text x="627" y="340" text-anchor="middle" fill="#f5f1e8" font-size="12">truly is not enough</text>
+  <text x="627" y="366" text-anchor="middle" fill="#8a8598" font-size="10">grounding pays off only</text>
+  <text x="627" y="380" text-anchor="middle" fill="#8a8598" font-size="10">where language cannot</text>
+
+  <!-- method line -->
+  <rect x="70" y="410" width="660" height="72" rx="8" fill="#12121a" stroke="#1f1f2a"/>
+  <text x="400" y="438" text-anchor="middle" fill="#f5f1e8" font-size="13" font-weight="700">The real lesson is method, not VSP.</text>
+  <text x="400" y="462" text-anchor="middle" fill="#8a8598" font-size="11">Three effects looked publishable. Seed reproduction and held-out tuning killed all three before we believed them.</text>
+</svg>
