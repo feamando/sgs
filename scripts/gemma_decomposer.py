@@ -65,6 +65,23 @@ Rules:
 7. Output ONLY the JSON. No prose, no markdown fences.""" % (", ".join(EXPANDABLE_PARTS),)
 
 
+# PARAMETRIC prompt (Phase 1, SETUP §7): Gemma composes ANY object from a few
+# primitives with explicit dimensions, instead of naming a fixed grammar part.
+# This removes both the vocabulary ceiling (14 castle parts) and the geometry
+# ceiling (hand-authored shape per name). Gemma acts as a blockout artist.
+PARAMETRIC_SYSTEM_PROMPT = """You are a 3D blockout artist. Given a description, output a JSON tree that reconstructs the object as a composition of PARAMETRIC PRIMITIVES placed in space. A renderer rasterizes each primitive from its dimensions -- you supply the shapes, sizes, positions and colors.
+
+Rules:
+1. Root is {"name": "scene", "children": [...]}.
+2. Each child is one primitive: {"shape", "position":[x,y,z], "size":[w,h,d], "color":[r,g,b]}, optional "taper" (0..1, shrinks the top).
+3. "shape" is ONE of: box, cylinder, cone, sphere, dome, wedge, plane. NO other shapes, NO nested children, NO "gaussians".
+4. size is the FULL extent in world units on each axis. position is the CENTER of the primitive. Do NOT also set "scale".
+5. Scene fits in a [-2,2] cube. Ground/water = a wide flat box or plane at y=-0.1. Build upward (y up).
+6. Compose faithfully: a ship = tapered box hull + cylinder mast + plane sail; a lighthouse = tapered cylinder tower + box lantern room + cone cap; a pagoda = stacked tapered boxes with wedge roofs. Match counts and proportions.
+7. Colors are realistic RGB in 0..1.
+8. Output ONLY the JSON. No prose, no markdown fences."""
+
+
 def _n_leaves(tree):
     if not isinstance(tree, dict):
         return 0
@@ -84,6 +101,45 @@ def _n_unknown_leaves(tree):
         if not ok:
             bad += 1
     return bad
+
+
+_PARAM_SHAPES = {"box", "cylinder", "cone", "sphere", "dome", "wedge", "plane",
+                 "tube", "column", "pole", "pillar", "mast", "spire", "pyramid",
+                 "steeple", "ball", "orb", "slab", "cube", "prism", "gable"}
+
+
+def validate_parametric(tree):
+    """Validate a PARAMETRIC tree (shape+size+color primitives). Keeps only
+    children with a known shape; drops others. Returns (clean_tree, n_dropped).
+    Distinct from validate_skeleton (which gates on named grammar parts)."""
+    if not isinstance(tree, dict) or tree.get("name") != "scene":
+        return None, 0
+    kids = tree.get("children", [])
+    if not isinstance(kids, list) or not kids:
+        return None, 0
+    clean, dropped = [], 0
+    for c in kids:
+        if not isinstance(c, dict) or "shape" not in c:
+            dropped += 1
+            continue
+        if str(c["shape"]).lower() not in _PARAM_SHAPES:
+            dropped += 1
+            continue
+        c.setdefault("position", [0, 0, 0])
+        c.setdefault("size", [0.3, 0.3, 0.3])
+        c.setdefault("color", [0.6, 0.6, 0.6])
+        # CompositionNode.from_dict (used by fill/shift/tree_to_tensors) requires
+        # a "name"; parametric nodes only carry "shape", so derive one. Keep scale
+        # at 1.0 -- size is already baked into the primitive's local coords, so a
+        # node scale != 1 would double-apply.
+        c.setdefault("name", str(c["shape"]).lower())
+        c["scale"] = 1.0
+        c.pop("children", None)
+        c.pop("gaussians", None)
+        clean.append(c)
+    if not clean:
+        return None, dropped
+    return {"name": "scene", "children": clean}, dropped
 
 
 def load_exemplars(path, n_shot):
@@ -330,6 +386,47 @@ class GemmaMMDecomposer:
                                  temperature: float = None) -> dict | None:
         """Reference image -> filled tree. The capability Planck/Hertz cannot do."""
         return self._parse_fill(self._run(self._image_messages(image_path), max_new, temperature))
+
+    # ---- PARAMETRIC (Phase 1): Gemma composes geometry from primitives ----
+    def _parametric_messages(self, prompt, image_path=None):
+        msgs = [{"role": "system", "content": [{"type": "text", "text": PARAMETRIC_SYSTEM_PROMPT}]}]
+        user = []
+        if image_path:
+            user.append({"type": "image", "url": image_path})
+            user.append({"type": "text", "text": "Reconstruct the object in this image as parametric primitives."})
+        else:
+            user.append({"type": "text", "text": f"Object: {prompt}"})
+        msgs.append({"role": "user", "content": user})
+        return msgs
+
+    def _parse_fill_parametric(self, text):
+        tree = parse_tree(text)
+        if tree is None:
+            return None
+        clean, _ = validate_parametric(tree)
+        if clean is None:
+            return None
+        from scripts.infer_decomposer import fill_gaussians, shift_above_ground
+        fill_gaussians(clean, None)   # scans don't apply to parametric primitives
+        shift_above_ground(clean)
+        return clean
+
+    def generate_parametric(self, prompt: str = None, image_path: str = None,
+                            max_new: int = None, temperature: float = None,
+                            retries: int = 3) -> dict | None:
+        """Prompt OR image -> filled tree of parametric primitives (box/cylinder/
+        cone/... with explicit sizes). The geometry lever: any object, not just
+        the 14 grammar parts."""
+        msgs = self._parametric_messages(prompt, image_path)
+        tree = self._parse_fill_parametric(self._run(msgs, max_new, temperature))
+        if tree is not None:
+            return tree
+        t = self.temperature if temperature is None else temperature
+        for _ in range(max(0, retries - 1)):
+            tree = self._parse_fill_parametric(self._run(msgs, max_new, max(t, 0.4)))
+            if tree is not None:
+                return tree
+        return None
 
 
 def main():

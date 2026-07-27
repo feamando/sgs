@@ -77,6 +77,87 @@ def parse_args():
     return p.parse_args()
 
 
+def _rasterize_primitive(shape, size, color, taper=0.0):
+    """Fill a PARAMETRIC primitive with Gaussians in local coords (centered at
+    origin, y up). size = full extents [x,y,z]; taper 0..1 shrinks the top.
+
+    This is the geometry lever: instead of Gemma naming a fixed grammar part
+    (tower/wall/keep) whose SHAPE is hand-authored, Gemma emits shape+size+color
+    and composes ANY object (ship, pagoda, lighthouse) from ~6 primitives. The
+    rasterization is deterministic (no learning -- unlike the capacity-limited
+    path1 FillModel); the intelligence is in Gemma's composition, not here.
+    """
+    import math
+    sx, sy, sz = (list(size or []) + [0.3, 0.3, 0.3])[:3]
+    sx, sy, sz = abs(sx) or 0.05, abs(sy) or 0.05, abs(sz) or 0.05
+    g = []
+
+    def add(x, y, z):
+        g.append({"position": [x, y, z], "scale": [-3.0, -3.0, -3.0],
+                  "opacity": 2.0, "color": color})
+
+    shape = (shape or "box").lower()
+    if shape in ("cylinder", "tube", "column", "pole", "pillar", "mast"):
+        rx, h, rz = sx / 2, sy, sz / 2
+        rings = max(4, min(28, round(h / 0.07)))
+        per = max(8, min(36, round(max(rx, rz) / 0.025)))
+        for i in range(rings):
+            t = i / max(rings - 1, 1)
+            f = 1 - taper * t
+            for j in range(per):
+                th = 2 * math.pi * j / per
+                add(rx * f * math.cos(th), (t - 0.5) * h, rz * f * math.sin(th))
+    elif shape in ("cone", "spire", "pyramid", "steeple"):
+        rx, h, rz = sx / 2, sy, sz / 2
+        rings = max(5, min(28, round(h / 0.05)))
+        for i in range(rings):
+            t = i / max(rings - 1, 1)
+            r = 1 - t
+            per = max(3, round(18 * r) + 3)
+            for j in range(per):
+                th = 2 * math.pi * j / per
+                add(rx * r * math.cos(th), (t - 0.5) * h, rz * r * math.sin(th))
+    elif shape in ("sphere", "dome", "ball", "orb"):
+        rx, ry, rz = sx / 2, sy / 2, sz / 2
+        dome = shape == "dome"
+        N = max(50, min(260, round((rx + ry + rz) / 0.018)))
+        gr = (1 + 5 ** 0.5) / 2
+        for i in range(N):
+            th = 2 * math.pi * i / gr
+            ph = math.acos(1 - 2 * (i + 0.5) / N)
+            y = math.cos(ph)
+            if dome and y < 0:
+                continue
+            add(rx * math.sin(ph) * math.cos(th), ry * y, rz * math.sin(ph) * math.sin(th))
+    elif shape in ("wedge", "gable", "prism"):
+        # gable roof: ridge along x at the top, footprint tapering in z upward
+        nx = max(2, min(16, round(sx / 0.1)))
+        ny = max(2, min(14, round(sy / 0.08)))
+        for ix in range(nx):
+            for iy in range(ny):
+                t = iy / (ny - 1)
+                halfz = (sz / 2) * (1 - t)
+                nz = max(1, round(2 * halfz / 0.1) + 1)
+                for iz in range(nz):
+                    z = (iz / (nz - 1) - 0.5) * 2 * halfz if nz > 1 else 0.0
+                    add((ix / (nx - 1) - 0.5) * sx, (t - 0.5) * sy, z)
+    else:  # box / slab / plane / cube / default
+        nx = max(2, min(14, round(sx / 0.11)))
+        ny = max(1, min(14, round(sy / 0.11)))
+        nz = max(2, min(14, round(sz / 0.11)))
+        for ix in range(nx):
+            for iy in range(ny):
+                for iz in range(nz):
+                    x = (ix / (nx - 1) - 0.5) * sx if nx > 1 else 0.0
+                    y = (iy / (ny - 1) - 0.5) * sy if ny > 1 else 0.0
+                    z = (iz / (nz - 1) - 0.5) * sz if nz > 1 else 0.0
+                    if taper > 0 and sy > 0:
+                        f = 1 - taper * ((y + sy / 2) / sy)
+                        x, z = x * f, z * f
+                    add(x, y, z)
+    return g
+
+
 def fill_gaussians(node: dict, scan_library=None):
     """Recursively fill leaf nodes with procedural Gaussians based on name.
 
@@ -91,6 +172,16 @@ def fill_gaussians(node: dict, scan_library=None):
     if "children" in node and node["children"]:
         for child in node["children"]:
             fill_gaussians(child, scan_library)
+        return
+
+    # PARAMETRIC primitive: a node with an explicit "shape" is rasterized from
+    # its size/color/taper -- Gemma composes geometry from primitives instead of
+    # naming a fixed grammar part. Backward compatible: no "shape" -> fall
+    # through to the name-based grammar below (Planck/Hertz/named-Gemma).
+    if node.get("shape") and not node.get("gaussians"):
+        node["gaussians"] = _rasterize_primitive(
+            node["shape"], node.get("size", [0.3, 0.3, 0.3]),
+            node.get("color", [0.6, 0.6, 0.6]), float(node.get("taper", 0.0) or 0.0))
         return
 
     # Raum 0.6 §5.2: route a PART leaf to a real scanned splat first (real
