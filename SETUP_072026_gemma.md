@@ -404,10 +404,33 @@ python scripts/gemma_image_to_tree.py --model models/gemma-4-e4b-it `
 python scripts/infer_decomposer.py --scene-file output/gemma_img_scene.json --no-snap --serve --port 8003
 ```
 
+### GATE 5 RESULT — PASS (run 2026-07-27, Neuschwanstein photo, 3-shot)
+
+Two throwaway runs first, both invalid tests (recorded so we don't repeat them):
+1. zero-shot on `docs/pitch/img/castle.png` -> only `ground scale=10`. That PNG is
+   a SPLAT-VIEWER screenshot (sparse dots on black), not a castle, and zero-shot
+   was an unfair bar (the text path needed 3 exemplars). Fixed both.
+2. `image reached model: True` confirmed via `pixel_values` in the inputs +
+   `AutoModelForImageTextToText` (not the text-only fallback) -> the plumbing is
+   real, so a bad result would be a capability verdict, not a load bug.
+
+PASS on a REAL photo (`test_castle.jpg`, Neuschwanstein) with `--n-shot 3`:
+Gemma emitted a valid 10-part tree (9 structural): **cliff + 4 towers + wall + 4
+trees**. Faithful to THIS scene, not exemplar-parroted: it chose `cliff` (the
+castle is on a rocky crag) over the exemplars' `hill`, and placed trees at the
+perimeter (the forested slopes) — both read from the image, neither in the
+castle few-shot exemplars. This is image grounding, not template recall.
+
+Diagnostics that make the result trustworthy (all in gemma_image_to_tree.py):
+report loaded model class, assert `pixel_values` reached the model, persist raw
+output, and treat a ground/hill-only tree as a FAIL (degenerate). Don't KILL
+unless `saw_image=True`.
+
 GATE 5 (spike, gate-and-kill): the SOLE question is "can Gemma emit a valid,
-in-vocab scene tree from an image?". PASS -> worth wiring an image-upload input
-into the Raum decomposer UI (the genuine new capability). FAIL -> the multimodal
-path is dead for this build; say so and stop. NO UI work until this passes.
+in-vocab scene tree from an image?". **PASSED** -> worth wiring an image-upload
+input into the Raum decomposer UI (the genuine new capability). FAIL -> the
+multimodal path is dead for this build; say so and stop. NO UI work until this
+passes.
 CAVEAT: Gemma 4 multimodal loads via `AutoProcessor` + `AutoModelForImageTextToText`
 (transformers >= 4.50); the script falls back to `AutoModelForCausalLM` if that
 class name differs for the installed build — the load block is the one thing to
@@ -426,7 +449,7 @@ adjust if it errors, the message schema is standard.
 | 2.b (Gate 2) | tree-diff harness (compare_decomposers.py) | **BUILT 2026-07-27:** name-Jaccard + pose delta on breadth prompts (render can't show model diff; both saturate on castles). RUN pending on the box (needs hertz_decomposer ckpt). |
 | — | render parity check | Castle Gemma == Hertz is EXPECTED (render is grammar; saturated task). "ship on wave" fails for ALL backends (grammar vocab is castle-only, not a model issue). |
 | 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
-| 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **BUILT 2026-07-27, NOT RUN.** The real Gemma differentiator. Gate: valid in-vocab tree from an image? PASS -> wire image-upload UI; FAIL -> kill. |
+| 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **PASS 2026-07-27** (Neuschwanstein photo, 3-shot): valid 10-part tree, cliff+4 towers+wall+trees, faithful to the image (chose cliff over hill, trees at forested perimeter). The genuine new capability Planck/Hertz cannot do. NEXT: wire image-upload input into the Raum decomposer UI. |
 
 ## Papers / product this feeds
 
@@ -450,6 +473,8 @@ surfaced 2026-07-27:
 2. **The grammar vocabulary caps everything** — "ship on wave" fails for ALL
    backends (13 castle-only parts). Grammar expansion helps every backend equally.
 The genuine NEW capability, and the real reason to use Gemma, is MULTIMODAL input
-(§5, image -> tree) — something Planck/Hertz cannot do at all. Keep fill = grammar
-for shippable renders; Gemma-text changes only the tree emitter, Gemma-image
-changes the INPUT.
+(§5, image -> tree) — something Planck/Hertz cannot do at all. **This PASSED
+2026-07-27**: a real castle photo -> a faithful in-vocab scene tree, image-grounded
+(cliff terrain + perimeter trees read from the photo). That is the result worth
+building on. Keep fill = grammar for shippable renders; Gemma-text changes only
+the tree emitter (parity baseline), Gemma-image changes the INPUT (new capability).
