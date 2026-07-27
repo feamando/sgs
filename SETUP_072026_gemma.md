@@ -86,7 +86,7 @@ python -c "import torch, transformers, peft; print(torch.__version__, transforme
 | Asset | Path | Source |
 |-------|------|--------|
 | Gemma 4 weights | `models/gemma-4-e4b-it` | HF `google/gemma-4-E4B-it`, downloaded local |
-| Decomposer dataset | `data/decomposition_trees/path1_train.json` | `build_stage3_dataset.py` (already built) |
+| Decomposer dataset | `data/decomposition_trees/path1_train.json` | `build_stage3_dataset.py` (BUILT 2026-07-22: 160 castle + 400 mix = 560 records) |
 | Eval prompts | `scripts/assets/gemma_scene_prompts.txt` | existing starter list |
 | Grammar parts vocab | `src/raum/castle_grammar.py EXPANDABLE_PARTS` | existing |
 
@@ -98,30 +98,41 @@ python scripts/build_stage3_dataset.py --params output/layout_opt.params.json `
   --variants 8 --repeat 16 --out data/decomposition_trees/path1_train.json
 ```
 
-## 1. Gate 0 — few-shot Gemma decomposer, ZERO training (TO BUILD: scripts/gemma_decomposer.py)
+## 1. Gate 0 — few-shot Gemma decomposer, ZERO training (BUILT: scripts/gemma_decomposer.py)
 
 The cheapest possible decomposer: prompt the instruction-tuned base with a few
-`prompt -> tree` exemplars and parse the JSON it returns. Reuse the load + chat-
-template + generate path from `generate_trees_gemma.py` (proven), plus a strict
-JSON extractor (balance the first top-level object, same early-stop logic as
-`infer_decomposer.py generate_tree`, lines ~168-181).
+`prompt -> tree` exemplars and parse the JSON it returns. Reuses the load + chat-
+template + generate path from `generate_trees_gemma.py` (proven), and imports that
+module's `parse_tree` + `validate_skeleton` directly, so few-shot output stays
+format-consistent with the data generator (same JSON extractor, same part-vocab
+drop rule).
 
-`scripts/gemma_decomposer.py` defines `class GemmaDecomposer` with the SAME public
-method the SGS `Decomposer` exposes:
+`scripts/gemma_decomposer.py` (BUILT 2026-07-22, pure-python helpers smoke-tested)
+defines `class GemmaDecomposer` with the SAME public method the SGS `Decomposer`
+exposes:
 
 ```python
 class GemmaDecomposer:
-    def __init__(self, model_path, max_new=1024, temperature=0.1, n_shot=3): ...
-    def generate_tree(self, prompt: str) -> dict:   # returns a CompositionNode dict
+    def __init__(self, model_path, exemplars_path=None, n_shot=3,
+                 max_new=1024, temperature=0.1): ...
+    def generate_tree(self, prompt: str) -> dict | None:  # CompositionNode dict, or None if unparseable
         # apply_chat_template([system + n_shot exemplars + user prompt]) -> generate
-        # -> extract first balanced {...} -> json.loads -> validate against schema
+        # -> parse_tree (first balanced {...}) -> validate_skeleton -> dict
+    def generate_tree_verbose(self, prompt: str) -> dict:  # + parsed/n_leaves/n_unknown for the gate
 ```
 
 - System prompt states the schema and constrains part names to
-  `EXPANDABLE_PARTS` (so `_fill_gaussians` can render every leaf).
-- `n_shot` exemplars drawn from `path1_train.json` (a castle, a non-castle, one with
-  nested children). This is retrieval-free, fixed exemplars.
+  `EXPANDABLE_PARTS` (so `_fill_gaussians` can render every leaf). Reuses the
+  data generator's rules verbatim.
+- `n_shot` exemplars auto-drawn from `path1_train.json` via `load_exemplars`
+  (castle-first spread: one castle, one non-castle, then fill). Retrieval-free,
+  fixed exemplars.
 - Near-greedy (`temperature 0.1`) like the SGS decomposer, JSON wants determinism.
+- Loss of `diagnose_emission.py`: it needs a checkpoint (it GENERATES trees from a
+  model), so it can't read a trees file. The recall/structure counts it would give
+  are computed INLINE here (`n_leaves`, `n_unknown` per prompt); `--dump-tree`
+  writes the first valid tree for a model-free `infer_decomposer.py --scene-file`
+  render.
 
 ```powershell
 python scripts/gemma_decomposer.py --model models/gemma-4-e4b-it `
@@ -257,7 +268,8 @@ tree/scene on the next Generate, and switching back to Hertz/Planck still works
 | Phase | What | Status / kill-if |
 |-------|------|------------------|
 | 0.1 | env: transformers>=4.50 + peft in main .venv | prereq |
-| 0 | few-shot Gemma decomposer (scripts/gemma_decomposer.py) | **TO BUILD.** KILL if Gemma can't hold the JSON schema even few-shot. PASS (>=~0.9 valid + coherent) -> skip §2. |
+| 0.a | decomposer dataset (build_stage3_dataset.py) | **DONE 2026-07-22:** path1_train.json, 160 castle + 400 mix = 560 records. |
+| 0 | few-shot Gemma decomposer (scripts/gemma_decomposer.py) | **BUILT 2026-07-22** (helpers smoke-tested; torch/transformers path runs on the box). RUN pending. KILL if Gemma can't hold the JSON schema even few-shot. PASS (>=~0.9 valid + coherent) -> skip §2. |
 | 1 | LoRA fine-tune (train_decomposer_gemma.py) | **TO BUILD, only if §0 PARTIAL.** KILL claim if LoRA does not beat few-shot; then ship few-shot. |
 | 2 | HF backend in infer_decomposer.py --serve | **TO BUILD.** Parity-or-better vs Hertz decomposer, snap OFF. |
 | 3 | register in satz/app.py MODELS + selector | **TO BUILD.** Hotswap works both directions. |
