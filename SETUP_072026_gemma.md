@@ -436,6 +436,46 @@ CAVEAT: Gemma 4 multimodal loads via `AutoProcessor` + `AutoModelForImageTextToT
 class name differs for the installed build — the load block is the one thing to
 adjust if it errors, the message schema is standard.
 
+## 6. Wire it into the Raum app: model selector + image input + UI pass (DONE 2026-07-27)
+
+The passed capabilities are now live in `infer_decomposer.py --serve`.
+
+- **`GemmaMMDecomposer`** (gemma_decomposer.py): ONE multimodal Gemma load serving
+  BOTH `generate_tree` (text) and `generate_tree_from_image` (image). Rationale:
+  Gemma 4 E4B is ~8B (~16GB bf16); a 24GB 4090 cannot hold two copies, so text +
+  image MUST share one load. Interface-compatible with the SGS `Decomposer`
+  (`.generate_tree` + `.last_raw`/`.scan_library`/`.vocab_size`).
+- **`DecomposerManager`** (infer_decomposer.py): registry of Planck / Hertz / Gemma
+  decomposers, lazy-loaded, **evict-on-switch** (only one model resident at a time
+  — VRAM). Endpoints: `GET /models` (list + availability + active), `POST /switch`
+  (hotswap, frees the old model + `cuda.empty_cache`). Availability is checked
+  against on-box checkpoint paths; missing ones show "(unavailable)", not a crash.
+- **`POST /decompose_image`**: multipart image upload -> `generate_tree_from_image`
+  -> shared `_finalize` render tail (extracted so text + image render through the
+  IDENTICAL fidelity/fill/appearance pipeline). Image trees are already in-vocab +
+  filled by the decomposer, so they skip snap/validate_tree.
+- **UI pass**: model-selector dropdown, Text/Image input tabs (Image enabled only
+  when the active model reports `image:true`), drag-and-drop image dropzone with
+  preview, restyled sidebar (uppercase labels, rounded fields, monospace stats).
+
+```powershell
+# boot the app on Gemma (multimodal: text + image both available)
+python scripts/infer_decomposer.py --backend hf --checkpoint models/gemma-4-e4b-it `
+  --serve --port 8003 --no-snap
+# switch models live in the UI dropdown; drop a building photo in the Image tab.
+```
+
+DEP: `/decompose_image` uses FastAPI `Form`/`File` -> needs `python-multipart`
+(`pip install python-multipart`) in the .venv. Registry checkpoint paths:
+`checkpoints/hertz_decomposer/best.pt` (+ data/hertz12_data/tokenizer.model),
+`checkpoints/planck_decomposer_stage3/best.pt` (+ data/wikipedia/tokenizer.model),
+`models/gemma-4-e4b-it`. Adjust in `DECOMPOSER_REGISTRY` if the box differs.
+
+GATE 6: in the running app, (a) the selector lists all three, greying unavailable
+ones; (b) switching to Gemma enables the Image tab; (c) dropping a castle photo +
+Decompose renders a reconstruction; (d) switching back to Hertz/Planck still text-
+decomposes (no VRAM leak/desync across switches).
+
 ## Sequencing (gate-and-kill)
 
 | Phase | What | Status / kill-if |
@@ -449,7 +489,8 @@ adjust if it errors, the message schema is standard.
 | 2.b (Gate 2) | tree-diff harness (compare_decomposers.py) | **BUILT 2026-07-27:** name-Jaccard + pose delta on breadth prompts (render can't show model diff; both saturate on castles). RUN pending on the box (needs hertz_decomposer ckpt). |
 | — | render parity check | Castle Gemma == Hertz is EXPECTED (render is grammar; saturated task). "ship on wave" fails for ALL backends (grammar vocab is castle-only, not a model issue). |
 | 3 (§4) | register in satz/app.py MODELS + selector | **TO BUILD** (optional): Satz chat selector. Raum's decomposer selector is already covered by §3's --backend. |
-| 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **PASS 2026-07-27** (Neuschwanstein photo, 3-shot): valid 10-part tree, cliff+4 towers+wall+trees, faithful to the image (chose cliff over hill, trees at forested perimeter). The genuine new capability Planck/Hertz cannot do. NEXT: wire image-upload input into the Raum decomposer UI. |
+| 5 (§5) | MULTIMODAL image->tree spike (gemma_image_to_tree.py) | **PASS 2026-07-27** (Neuschwanstein photo, 3-shot): valid 10-part tree, cliff+4 towers+wall+trees, faithful to the image (chose cliff over hill, trees at forested perimeter). The genuine new capability Planck/Hertz cannot do. |
+| 6 (§6) | Raum app: model selector + image input + UI pass | **DONE 2026-07-27:** GemmaMMDecomposer (one load, text+image) + DecomposerManager (lazy, evict-on-switch) + /models,/switch,/decompose_image + UI (selector, Text/Image tabs, dropzone). RUN pending on the box (Gate 6). Needs python-multipart. |
 
 ## Papers / product this feeds
 
