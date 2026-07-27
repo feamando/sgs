@@ -95,10 +95,19 @@ class TokenStream(torch.utils.data.Dataset):
 
 # ── VSP bundle init ───────────────────────────────────────────────────────
 
-def init_from_bundles(model, V, S, P, device):
+def init_from_bundles(model, V, S, P, device, shuffle=False):
     """Initialize tok_mu (d_s) and tok_features (d_f) from a linear projection of
     the [V|S|P] bundle -- the grounded warm start (meaning injected before
     training). The projection is a throwaway seeding transform (not kept).
+
+    shuffle=True is the SCRAMBLED-BUNDLE CONTROL (paper reviewer #9): permute the
+    bundle ROWS across the vocabulary before projecting, so each token gets some
+    real bundle but NOT its own. This destroys the sense<->token correspondence
+    while preserving the exact marginal statistics, dimensionality, projection,
+    and native-std rescaling of the grounded init. If grounded and scrambled
+    converge to the same accuracy, the failure is the SIGNAL being useless, not a
+    bad init pipeline -- which is the control that turns "washout" from asserted
+    into measured.
 
     RESCALE to native std: the raw nn.Linear projection lands at ~2x the model's
     native embedding std, so the model wastes early steps fighting an oversized
@@ -113,7 +122,13 @@ def init_from_bundles(model, V, S, P, device):
     dV, dS, dP = V.shape[1], S.shape[1], P.shape[1]
     d_s = model.tok_mu.embedding_dim
     d_f = model.tok_features.embedding_dim
-    bundle = torch.tensor(np.concatenate([V, S, P], axis=1), device=device)  # [n, dV+dS+dP]
+    bundle_np = np.concatenate([V, S, P], axis=1)  # [n, dV+dS+dP]
+    if shuffle:
+        # permute rows: token i gets a random OTHER token's bundle. np.random is
+        # already seeded in main() so the permutation is reproducible per --seed.
+        perm = np.random.permutation(bundle_np.shape[0])
+        bundle_np = bundle_np[perm]
+    bundle = torch.tensor(bundle_np, device=device)
     with torch.no_grad():
         # native std of each table BEFORE we overwrite it -- the target scale
         mu_std = model.tok_mu.weight.std().item()
@@ -178,6 +193,10 @@ def parse_args():
     p.add_argument("--random-init", action="store_true",
                    help="SKIP the VSP bundle init (random embeddings) -- the "
                         "matched-compute BASELINE for the disambiguation gate")
+    p.add_argument("--shuffle-bundles", action="store_true",
+                   help="SCRAMBLED-BUNDLE CONTROL: init from bundles permuted "
+                        "across the vocab (real stats, wrong token). Same accuracy "
+                        "as grounded => the signal is useless, not the pipeline.")
     p.add_argument("--grad-clip", type=float, default=1.0)
     p.add_argument("--mixed-precision", default="bf16", choices=["bf16", "fp16", "fp32"])
     p.add_argument("--save-dir", default="checkpoints/planck2")
@@ -220,11 +239,12 @@ def main():
         n_heads=args.n_heads, max_len=args.context_len, ffn_mult=args.ffn_mult).to(device)
     print(f"[p2] params: {model.count_parameters()/1e6:.1f}M")
 
-    if not args.random_init:
-        init_from_bundles(model, V, S, P, device)
-        print(f"[p2] VSP bundle init ON (freeze-vp {args.freeze_vp_steps} steps)")
-    else:
+    if args.random_init:
         print("[p2] RANDOM init (baseline mode)")
+    else:
+        init_from_bundles(model, V, S, P, device, shuffle=args.shuffle_bundles)
+        mode = "SCRAMBLED-bundle control" if args.shuffle_bundles else "VSP bundle init"
+        print(f"[p2] {mode} ON (freeze-vp {args.freeze_vp_steps} steps)")
 
     amp = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}[args.mixed_precision]
     # ALL params in the optimizer from step 0 (never add/remove groups mid-run --

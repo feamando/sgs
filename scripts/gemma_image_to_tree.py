@@ -78,16 +78,24 @@ def load_gemma_mm(model_path):
     return processor, model, torch
 
 
-def image_to_tree(processor, model, torch, image_path, max_new=1024, temperature=0.1):
+def image_to_tree(processor, model, torch, image_path, max_new=1024,
+                  temperature=0.1, exemplars=None):
     """One image -> validated + filled scene tree (or None). Same output contract
-    as GemmaDecomposer.generate_tree so it drops into the Raum render path."""
-    msgs = [
-        {"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT}]},
-        {"role": "user", "content": [
-            {"type": "image", "url": image_path},
-            {"type": "text", "text": "Reconstruct this as a Raum scene tree."},
-        ]},
-    ]
+    as GemmaDecomposer.generate_tree so it drops into the Raum render path.
+
+    exemplars: optional list of {"prompt","tree"} text pairs shown BEFORE the
+    image turn, so the image path gets the same few-shot grounding the text
+    decomposer needed to pass (zero-shot was an unfair bar)."""
+    msgs = [{"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT}]}]
+    for ex in (exemplars or []):
+        tree_json = json.dumps(ex["tree"], separators=(",", ":"))
+        msgs.append({"role": "user", "content": [
+            {"type": "text", "text": f"DECOMPOSE: {ex['prompt']}"}]})
+        msgs.append({"role": "assistant", "content": [{"type": "text", "text": tree_json}]})
+    msgs.append({"role": "user", "content": [
+        {"type": "image", "url": image_path},
+        {"type": "text", "text": "Reconstruct the building in this image as a Raum scene tree."},
+    ]})
     inputs = processor.apply_chat_template(
         msgs, add_generation_prompt=True, tokenize=True,
         return_tensors="pt", return_dict=True).to(model.device)
@@ -125,11 +133,20 @@ def main():
                    help="write the filled tree for infer_decomposer.py --scene-file")
     p.add_argument("--max-new", type=int, default=1024)
     p.add_argument("--temperature", type=float, default=0.1)
+    p.add_argument("--exemplars", default="data/decomposition_trees/path1_train.json",
+                   help="text prompt->tree pairs for few-shot grounding (match the text path)")
+    p.add_argument("--n-shot", type=int, default=3,
+                   help="few-shot exemplars before the image turn (0 = zero-shot)")
     args = p.parse_args()
+
+    from scripts.gemma_decomposer import load_exemplars
+    exemplars = load_exemplars(args.exemplars, args.n_shot)
+    print(f"[gemma-img] {len(exemplars)} few-shot text exemplars before the image turn")
 
     processor, model, torch = load_gemma_mm(args.model)
     tree, raw, saw_image = image_to_tree(processor, model, torch, args.image,
-                                         max_new=args.max_new, temperature=args.temperature)
+                                         max_new=args.max_new, temperature=args.temperature,
+                                         exemplars=exemplars)
 
     # A tree with no structure (only ground/hill) is a DEGENERATE pass -- the
     # model didn't reconstruct anything. Treat it as a fail for the gate.
