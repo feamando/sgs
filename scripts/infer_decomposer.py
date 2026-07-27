@@ -363,6 +363,31 @@ def fill_gaussians(node: dict, scan_library=None):
         node["gaussians"] = gaussians
 
 
+def clamp_tree_transforms(node: dict, max_scale=2.5, bound=2.5, report=None):
+    """Clamp per-node scale + position to sane ranges. The model (esp. on the
+    noisier image path, and with snap OFF) sometimes emits a huge scale or an
+    out-of-box position -> a single part balloons into a needle/spike through
+    the scene. This is a guardrail independent of snap_layout (which only
+    applies to castle parts). Recurses; edits in place. report: optional dict
+    to record what was clamped."""
+    if not isinstance(node, dict):
+        return
+    sc = node.get("scale")
+    if isinstance(sc, (int, float)) and sc > max_scale:
+        if report is not None:
+            report.setdefault("clamped_scale", []).append((node.get("name", "?"), sc))
+        node["scale"] = max_scale
+    pos = node.get("position")
+    if isinstance(pos, list) and len(pos) == 3:
+        clamped = [max(-bound, min(bound, float(p))) if isinstance(p, (int, float)) else 0.0
+                   for p in pos]
+        if clamped != pos and report is not None:
+            report.setdefault("clamped_pos", []).append(node.get("name", "?"))
+        node["position"] = clamped
+    for c in node.get("children", []) or []:
+        clamp_tree_transforms(c, max_scale, bound, report)
+
+
 def shift_above_ground(tree: dict):
     """Shift the entire scene so all Gaussians sit above Y=0."""
     from src.raum.decomposition import CompositionNode, tree_to_tensors
@@ -1858,8 +1883,20 @@ def main():
             if tree_dict is None:
                 return JSONResponse({"error": "no valid in-vocab tree from the image",
                                      "raw_output": (getattr(active, "last_raw", "") or "")[:1500]})
-            # image tree is already validated in-vocab + filled by the decomposer;
-            # go straight to the shared render tail (no snap/validate_tree needed).
+            # image tree is already validated in-vocab + filled by the decomposer,
+            # but the raw model scale/position can be wild (the "spike through the
+            # floor" bug) -- clamp before rendering (guardrail independent of snap).
+            creport = {}
+            clamp_tree_transforms(tree_dict, report=creport)
+            if creport:
+                print(f"  image clamp: {creport}", file=sys.stderr)
+            # dump the emitted tree so image renders are debuggable (like /decompose)
+            try:
+                Path("data/scenes").mkdir(parents=True, exist_ok=True)
+                Path("data/scenes/last_image_tree.json").write_text(
+                    json.dumps(tree_dict, indent=2), encoding="utf-8")
+            except Exception:
+                pass
             try:
                 tree = CompositionNode.from_dict(tree_dict)
             except Exception as e:
