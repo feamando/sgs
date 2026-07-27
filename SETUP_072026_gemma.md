@@ -125,13 +125,16 @@ class GemmaDecomposer:
 
 ```powershell
 python scripts/gemma_decomposer.py --model models/gemma-4-e4b-it `
-  --eval scripts/assets/gemma_scene_prompts.txt --out results/gemma_decomp_fewshot.json
+  --eval scripts/assets/gemma_scene_prompts.txt --out results/gemma_decomp_fewshot.json `
+  --dump-tree output/gemma_scene_0.json
 ```
 
-GATE 0 (measured, not eyeballed): on the eval prompt set, report
-(a) **JSON-valid rate** (parses + matches schema), and
-(b) **part-vocab rate** (every leaf name in `EXPANDABLE_PARTS`, so it renders), and
-(c) a coherence spot-check via the diagnose path (below).
+GATE 0 (measured, not eyeballed): the script reports, over the eval prompt set,
+(a) **JSON-valid rate** (parses + matches the shallow-skeleton schema), and
+(b) **part-vocab rate** (fraction of emitted leaves whose name is in
+`EXPANDABLE_PARTS`, so the fill stage can render them), plus per-prompt leaf +
+unknown-leaf counts (the RECALL/STRUCTURE signal `diagnose_emission.py` gives, but
+computed inline from the emitted trees, no model reload).
 - **PASS (>= ~0.9 valid AND renders coherent castles):** skip §2 entirely, go
   straight to §3 wiring. A strong base with no training beating our tuned decomposer
   is the headline result.
@@ -140,11 +143,15 @@ GATE 0 (measured, not eyeballed): on the eval prompt set, report
 - **FAIL (can't hold the schema even few-shot):** kill. Gemma is the wrong tool for
   this output; record and stop.
 
-Coherence check reuses the existing tooling (counts RAW emitted parts, the path1
-lesson: instrument the output, not the picture, see [[project_sgs_raum_17]]):
+Visual coherence spot-check (path1 lesson: instrument the output, not just eyeball
+a render, see [[project_sgs_raum_17]]). `diagnose_emission.py` needs a checkpoint +
+tokenizer (it GENERATES trees from a model) so it does NOT read a pre-made trees
+file; the recall/structure counts are already in the summary above. To eyeball one
+scene, `--dump-tree` writes the first valid tree, then render it model-free:
 
 ```powershell
-python scripts/diagnose_emission.py --trees results/gemma_decomp_fewshot.json
+python scripts/infer_decomposer.py --scene-file output/gemma_scene_0.json --no-snap `
+  --serve --port 8003
 ```
 
 ## 2. Gate 1 — LoRA fine-tune Gemma on the decomposer dataset (TO BUILD: scripts/train_decomposer_gemma.py)
