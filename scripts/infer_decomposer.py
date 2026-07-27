@@ -1356,8 +1356,13 @@ def main():
     # grammar's output, fed straight into fill -> densify -> refine -> render.
     scene_mode = args.scene_file is not None
     decomposer = None
-    if scene_mode:
-        print(f"Fixed-scene mode (no model): {args.scene_file}")
+    # In --serve mode the DecomposerManager owns model construction (lazy, and it
+    # builds the MULTIMODAL GemmaMMDecomposer for Gemma so the image endpoint
+    # works). Building here too would load the wrong (text-only) class AND
+    # double-load. So only eager-build for the non-serve CLI paths.
+    if scene_mode or args.serve:
+        if scene_mode:
+            print(f"Fixed-scene mode (no model): {args.scene_file}")
     else:
         if args.backend == "hf":
             if not args.checkpoint:
