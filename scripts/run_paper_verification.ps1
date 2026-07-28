@@ -56,11 +56,13 @@ function Log([string]$msg) {
 }
 
 # Invoke a native command and hard-fail on non-zero exit (mimics `set -e`).
+# NOTE: parameter must NOT be named $Args — that is a PowerShell automatic
+# variable, so a param of that name never binds and the splat expands empty.
 function Invoke-Checked {
-    param([string]$Exe, [string[]]$Args)
-    & $Exe @Args
+    param([string]$Exe, [string[]]$CmdArgs)
+    & $Exe @CmdArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "command failed (exit $LASTEXITCODE): $Exe $($Args -join ' ')"
+        throw "command failed (exit $LASTEXITCODE): $Exe $($CmdArgs -join ' ')"
     }
 }
 
