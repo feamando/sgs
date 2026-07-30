@@ -1,0 +1,40 @@
+==================================================================
+PAPER VERIFICATION SUMMARY
+==================================================================
+
+Inventory (arm/regime -> seeds present):
+  vsp       2k  : [0, 1, 2, 3, 4, 5]
+  vsp       40k : [0, 1, 2]
+  baseline  2k  : [0, 1, 2, 3, 4, 5]
+  baseline  40k : [0, 1, 2]
+  scrambled 2k  : [0]
+  scrambled 40k : [0]
+
+------------------------------------------------------------------
+C2  40k reproduction of the -3.8  (grounded - baseline, rescaled init)
+------------------------------------------------------------------
+    seed 0: -0.038
+    seed 1: -0.029
+    seed 2: -0.038
+    => mean -0.035  95% CI [-0.049, -0.021]  (n=3, sd 0.005)
+    VERDICT: bounded: CI excludes a meaningful positive
+
+------------------------------------------------------------------
+C1  Scrambled-bundle control  (grounded - scrambled)
+    If ~0, the grounding SIGNAL is useless, not the init pipeline.
+------------------------------------------------------------------
+    2k seed 0: +0.105
+    => 2k: +0.105 (n=1, no CI)
+    40k seed 0: +0.029
+    => 40k: +0.029 (n=1, no CI)
+
+------------------------------------------------------------------
+C3  Low-context reranking (held-out lambda)  [unchanged from paper]
+------------------------------------------------------------------
+    base(l=0) 0.581, best 0.585, best-minus-base +0.004
+
+==================================================================
+PAPER NUMBER CHECK (paste-ready)
+==================================================================
+  40k s0: grounded 0.790 vs baseline 0.829 = -0.038  (paper's single-seed -3.8)
+  2k 6-seed grounded-baseline: mean +0.016  95% CI [-0.013, +0.045]  (n=6, sd 0.027)
