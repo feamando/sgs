@@ -1,0 +1,17 @@
+A few weeks ago I posted a negative result: a "grounded" word representation (text + a generated image + predicted physical properties) separated word senses that text alone merges, but when I trained the actual model, the grounding didn't help. A reviewer of the write-up would ask two obvious questions before believing that. I ran both. The negative held, and it got sharper.
+
+Question 1: is the -3.8 point loss at full training real, or an artifact of one unlucky run? I retrained at full compute across three seeds, fixing an init-scaling bug I'd found in the post-mortem. It reproduced cleanly: -3.5 points, 95% CI [-4.9, -2.1]. Not a fluke, not the bug. Grounding reliably fails to help at full scale, and slightly hurts.
+
+Question 2: is the grounding actually a real signal, or was I feeding the model garbage and calling it a warm start? This is the one I most wanted to answer. I built a scrambled control: take the exact same grounded vectors and permute them across words, so each token gets a real bundle belonging to some other word. Same norms, same statistics, meaning destroyed. If the true grounding carries nothing, it should tie the scramble.
+
+It doesn't. At low compute the true bundle beats the scramble by +10.5 points (p = 0.007). The signal is real and the pipeline is sound.
+
+Then look at what happens with more training (chart). At 2k steps: grounded > scrambled, clearly. At 40k steps: the gap shrinks to +2.9 and stops being significant, and a plain random start is now ahead of both. The ordering inverts. An initialization that measurably matters early stops mattering once the model has seen enough tokens to learn the distinction from context on its own.
+
+So the finding isn't "the grounding is empty." It's the more interesting version: the grounding is a genuine signal that a trained language model doesn't keep. Baking meaning into the embedding buys you a head start that training then erases. Where the model is uncertain, the grounding turns out to be redundant with text where text works and near-chance where it doesn't.
+
+What I keep relearning: a control you're afraid to run is usually the one worth running. The scramble could have quietly killed the whole story (if grounded had tied it, my "real signal" claim was dead). Instead it did the opposite and told me exactly which claim survives and which doesn't.
+
+The VSP-into-the-embedding line is closed. Grounding during training, rather than as a starting point it can overwrite, is the next thing to test.
+
+Full write-up and code in the comments.

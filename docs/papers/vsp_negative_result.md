@@ -75,12 +75,13 @@ bundle belonging to a different word): same norm and covariance, no
 token-correspondence. If the grounding is genuine, the true bundle should beat the
 scrambled one. **At 2k it does, significantly: 0.695 vs 0.590, +10.5pts, McNemar
 p=0.007** (13 gains, 2 losses of 15 discordant). So the signal is real and the
-pipeline is sound. **At 40k the gap decays to +2.9pts (n.s., p=0.51), and random
-init (0.800) beats both grounded (0.762) and scrambled (0.762).** The ordering
-inverts with compute (2k: grounded > scramble; 40k: random > grounded ~ scramble),
-which is direct washout evidence, stronger than the 0.964 correlation: an init
-that measurably matters early stops mattering once the model can learn the
-distinction from text.
+pipeline is sound. **At 40k the gap decays to +2.9pts (n.s., p=0.51): grounded
+0.790 vs scrambled 0.762, with random init (0.829) now above both.** The true
+bundle's edge over the scrambled one shrinks from significant (+10.5) at 2k to
+non-significant (+2.9) at 40k, and by full compute a plain random start beats
+either structured init, which is direct washout evidence, stronger than the 0.964
+correlation: an init that measurably matters early stops mattering once the model
+can learn the distinction from text.
 
 ## 4. Delivery mechanism 2: inference-time reranking
 
