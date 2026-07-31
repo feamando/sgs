@@ -151,7 +151,7 @@ Alpha-compositing can additionally produce weight vectors with exact zeros and w
 
 This theorem establishes that the rendering equation from computer graphics is provably at least as expressive as the attention mechanism in transformers for computing weighted aggregations. Any computation a transformer performs through attention weights can be exactly replicated by alpha-compositing, plus alpha-compositing offers additional capabilities (exact sparsity, sub-unity sums) that softmax structurally cannot provide.
 
-This is relevant to architectures that replace transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting, as explored in the Semantic Gaussian Splatting (SGS) code repository~\citep{sgs-repo}. The theorem proves this replacement does not lose expressiveness.
+This is relevant to architectures that replace transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting, as explored in the Semantic Gaussian Splatting (SGS) code repository at \url{https://github.com/feamando/sgs}. The theorem proves this replacement does not lose expressiveness.
 
 \subsection{Implications for Computer Graphics}
 
@@ -177,50 +177,45 @@ competing interests.}
 \bibliographystyle{plainnat}
 \begin{thebibliography}{Katharopoulos et~al.(2020)}
 
-\bibitem[Vaswani et~al.(2017)]{vaswani2017}
-A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.N.~Gomez, L.~Kaiser, and I.~Polosukhin.
-\newblock Attention is all you need.
-\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017.
+\bibitem[Katharopoulos et~al.(2020)]{katharopoulos2020}
+A.~Katharopoulos, A.~Vyas, N.~Pappas, and F.~Fleuret.
+\newblock Transformers are {RNN}s: Fast autoregressive transformers with linear attention.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
 
 \bibitem[Kerbl et~al.(2023)]{kerbl2023}
 B.~Kerbl, G.~Kopanas, T.~Leimk{\"u}hler, and G.~Drettakis.
 \newblock 3{D} {G}aussian splatting for real-time radiance field rendering.
 \newblock \emph{ACM Transactions on Graphics}, 42(4):1--14, 2023.
 
-\bibitem[Porter and Duff(1984)]{porter1984}
-T.~Porter and T.~Duff.
-\newblock Compositing digital images.
-\newblock \emph{ACM SIGGRAPH Computer Graphics}, 18(3):253--259, 1984.
-
 \bibitem[Max(1995)]{max1995}
 N.~Max.
 \newblock Optical models for direct volume rendering.
 \newblock \emph{IEEE Transactions on Visualization and Computer Graphics}, 1(2):99--108, 1995.
-
-\bibitem[Mildenhall et~al.(2020)]{mildenhall2020}
-B.~Mildenhall, P.P.~Srinivasan, M.~Tancik, J.T.~Barron, R.~Ramamoorthi, and R.~Ng.
-\newblock {NeRF}: Representing scenes as neural radiance fields for view synthesis.
-\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2020.
-
-\bibitem[Katharopoulos et~al.(2020)]{katharopoulos2020}
-A.~Katharopoulos, A.~Vyas, N.~Pappas, and F.~Fleuret.
-\newblock Transformers are {RNN}s: Fast autoregressive transformers with linear attention.
-\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
-
-\bibitem[Ramsauer et~al.(2021)]{ramsauer2021}
-H.~Ramsauer, B.~Sch{\"a}fl, J.~Lehner, P.~Seidl, M.~Widrich, L.~Gruber, M.~Holzleitner, T.~Adler, D.P.~Kreil, M.K.~Kopp, G.~Klambauer, J.~Brandstetter, and S.~Hochreiter.
-\newblock Hopfield networks is all you need.
-\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2021.
 
 \bibitem[de~Moura and Ullrich(2021)]{demoura2021}
 L.~de~Moura and S.~Ullrich.
 \newblock The {L}ean 4 theorem prover and programming language.
 \newblock In \emph{Automated Deduction (CADE 28)}, pages 625--635. Springer, 2021.
 
-\bibitem[SGS(2026)]{sgs-repo}
-Semantic {G}aussian {S}platting (SGS).
-\newblock Source code repository.
-\newblock \url{https://github.com/feamando/sgs}, 2026.
+\bibitem[Mildenhall et~al.(2020)]{mildenhall2020}
+B.~Mildenhall, P.P.~Srinivasan, M.~Tancik, J.T.~Barron, R.~Ramamoorthi, and R.~Ng.
+\newblock {NeRF}: Representing scenes as neural radiance fields for view synthesis.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2020.
+
+\bibitem[Porter and Duff(1984)]{porter1984}
+T.~Porter and T.~Duff.
+\newblock Compositing digital images.
+\newblock \emph{ACM SIGGRAPH Computer Graphics}, 18(3):253--259, 1984.
+
+\bibitem[Ramsauer et~al.(2021)]{ramsauer2021}
+H.~Ramsauer, B.~Sch{\"a}fl, J.~Lehner, P.~Seidl, M.~Widrich, L.~Gruber, M.~Holzleitner, T.~Adler, D.P.~Kreil, M.K.~Kopp, G.~Klambauer, J.~Brandstetter, and S.~Hochreiter.
+\newblock Hopfield networks is all you need.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2021.
+
+\bibitem[Vaswani et~al.(2017)]{vaswani2017}
+A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.N.~Gomez, L.~Kaiser, and I.~Polosukhin.
+\newblock Attention is all you need.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017.
 
 \end{thebibliography}
 
