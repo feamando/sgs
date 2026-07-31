@@ -1,0 +1,118 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+% Cover letter for JMLR submission of the VSP negative-result paper.
+% Modeled on jmlr_cover_letter.tex (softmax paper). Keep the two consistent.
+% Before submission: confirm the suggested Action Editors and Reviewers against
+% the current JMLR Action Editor list (names below are lane-appropriate but the
+% live roster changes).
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\noindent Nikita Gorshkov\\
+Senefelderstr.\ 29a, 10437 Berlin, Germany\\
+\texttt{ngorshkov@proton.me}\\[1em]
+\noindent\today\\[1em]
+
+\noindent To the Editors of the \emph{Journal of Machine Learning Research},\\
+
+I am submitting the manuscript \emph{Grounded Token Bundles Separate Word Senses
+but Do Not Help a Language Model: A Negative Result} for consideration for
+publication in JMLR.
+
+\paragraph{Summary.}
+The paper tests whether a grounded token representation, one bundling a word
+sense's visual (V), semantic (S), and physical (P) features into a single vector,
+improves word-sense disambiguation in a small autoregressive language model. It
+separates the hypothesis into two claims. The representation claim holds: on
+curated polysemous words the V+S+P bundle attains a sense-separation of $0.37$
+(max-aggregated $1-\cos$) where the text block alone attains $0.00$ by
+construction, and a scrambled-bundle control confirms the signal is genuine (a
+true bundle initializes a model $+10.5$ points better than a permuted one at low
+compute, $p = 0.007$). The transfer claim fails: across two delivery mechanisms
+of the same bundle (embedding initialization and inference-time reranking) and
+three benchmarks, the grounding produces no improvement a trained model retains.
+The full-compute initialization deficit reproduces across three seeds ($-3.5$
+points, $95\%$ CI $[-4.9, -2.1]$), and by full compute a plain random start
+outperforms the grounded one. The paper's most transferable contribution is
+methodological: seed reproduction and held-out hyperparameter selection converted
+three separately promising effects ($+5.7$, $+2.9$, $+8.3$ points) into a single
+bounded negative. We report the result as a bound, not a proof of absence, and are
+explicit about the underpowered individual tests.
+
+\paragraph{Fit for JMLR.}
+JMLR explicitly welcomes negative and reproducibility-focused results of clear
+methodological value. This submission is such a case: a clean negative with an
+explicit diagnosis, honest power analysis, adversarial controls, and released
+code and result files for every reported number.
+
+\section*{1.~Overlapping or prior publications}
+\begin{itemize}[leftmargin=1.4em]
+  \item This manuscript has \textbf{not} been published in, or simultaneously
+    submitted to, any other journal or conference.
+  \item No preprint of this manuscript has been posted (no arXiv or other
+    preprint server). This is the first public release of the work.
+  \item The author has separately submitted an unrelated theoretical manuscript
+    to JMLR (on the expressiveness of alpha-compositing versus softmax attention).
+    The two share no results, figures, or text; both arise from the same code
+    repository, which is cited.
+\end{itemize}
+
+\section*{2.~Co-author awareness and consent}
+Single-author submission (Nikita Gorshkov). No co-authors to notify.
+
+\section*{3.~Conflicts of interest}
+The author declares \textbf{no conflicts of interest} with the suggested action
+editors or reviewers (no family/close-friend, advisor/advisee, or collaboration
+within the past three years), and \textbf{no funding and no competing interests}
+for the prior 36 months.
+
+\section*{4.~Suggested Action Editors}
+Drawn from the current JMLR Action Editor list. The paper's lanes are empirical
+NLP (word-sense disambiguation), multimodal/grounded representation learning, and
+reproducibility of negative results; the suggestions below are chosen for those
+lanes. \emph{Please confirm against the live AE roster, which changes over time.}
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Ivan Titov} --- natural language processing and representation
+    learning; fit for the WSD and sense-representation core.
+  \item \textbf{Trevor Cohn} --- statistical NLP and language modeling; fit for
+    the language-model transfer evaluation.
+  \item \textbf{Kevin Gimpel} --- NLP, representation learning, embeddings; fit
+    for the sense-embedding and disambiguation framing.
+\end{enumerate}
+
+\section*{5.~Suggested Reviewers}
+The author has no collaboration with any of these. Affiliations are given for
+identification; contact addresses can be confirmed on request.
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Roberto Navigli} --- Sapienza University of Rome; author of the
+    canonical word-sense-disambiguation survey and long-running WSD research.
+  \item \textbf{Douwe Kiela} --- Stanford University / Contextual AI; multimodal
+    and grounded representation learning.
+  \item \textbf{Elia Bruni} --- multimodal distributional semantics
+    (``Multimodal Distributional Semantics''); fit for the grounding claim.
+  \item \textbf{Jesse Dodge} --- Allen Institute for AI; reproducibility and
+    honest reporting of experimental results (cited in the paper). (optional)
+\end{enumerate}
+
+\section*{6.~Keywords}
+word-sense disambiguation; grounded representations; multimodal embeddings;
+language models; negative results; reproducibility.
+
+\bigskip
+\noindent Thank you for considering this submission.
+
+\bigskip
+\noindent Sincerely,\\[0.5em]
+Nikita Gorshkov (corresponding author)\\
+Senefelderstr.\ 29a, 10437 Berlin, Germany\\
+\texttt{ngorshkov@proton.me}
+
+\end{document}
