@@ -71,14 +71,14 @@ We establish a strict inclusion between two fundamental weighted aggregation sch
 Modern AI and computer graphics each use a weighted aggregation scheme to combine information from multiple sources into a single output. Despite being developed independently for different purposes, these two schemes turn out to be mathematically related, in a way that, to our knowledge, has not been formally established before.
 
 \paragraph{Scheme A: Softmax Attention (Transformers).}
-Every large language model uses the transformer architecture~\cite{vaswani2017}. At its core, a transformer computes outputs as weighted sums:
+Every large language model uses the transformer architecture~\citep{vaswani2017}. At its core, a transformer computes outputs as weighted sums:
 \begin{equation}
 \text{output} = \sum_i w_i \cdot v_i, \quad w_i = \frac{\exp(s_i)}{\sum_j \exp(s_j)}
 \end{equation}
 Properties of softmax weights: (i) always strictly positive, $w_i > 0$ for all $i$; (ii) always sum to exactly 1, $\sum_i w_i = 1$; (iii) every element contributes at least something.
 
 \paragraph{Scheme B: Alpha-Compositing (Volume Rendering).}
-3D Gaussian Splatting~\cite{kerbl2023} and earlier volume rendering techniques~\cite{porter1984,max1995} compute outputs as:
+3D Gaussian Splatting~\citep{kerbl2023} and earlier volume rendering techniques~\citep{porter1984,max1995,mildenhall2020} compute outputs as:
 \begin{equation}
 \text{output} = \sum_i w_i \cdot v_i, \quad w_i = a_i \cdot T_i, \quad T_i = \prod_{j < i}(1 - a_j)
 \end{equation}
@@ -90,7 +90,7 @@ Both schemes produce a weighted sum of values. Both are differentiable and used 
 
 \subsection{Related Work}
 
-Linear attention approximations~\cite{katharopoulos2020} have explored connections between attention and kernel methods. Ramsauer et al.~\cite{ramsauer2021} related attention to Hopfield networks. To our knowledge, no prior work has formally proven the strict set-theoretic inclusion between softmax weight vectors and alpha-compositing weight vectors, nor provided the constructive telescoping mapping.
+Linear attention approximations~\citep{katharopoulos2020} have explored connections between attention and kernel methods. \citet{ramsauer2021} related attention to Hopfield networks. To our knowledge, no prior work has formally proven the strict set-theoretic inclusion between softmax weight vectors and alpha-compositing weight vectors, nor provided the constructive telescoping mapping.
 
 % ════════════════════════════════════════════════════════════
 \section{Main Results}
@@ -148,7 +148,7 @@ Alpha-compositing can additionally produce weight vectors with exact zeros and w
 
 This theorem establishes that the rendering equation from computer graphics is provably at least as expressive as the attention mechanism in transformers for computing weighted aggregations. Any computation a transformer performs through attention weights can be exactly replicated by alpha-compositing, plus alpha-compositing offers additional capabilities (exact sparsity, sub-unity sums) that softmax structurally cannot provide.
 
-This is relevant to architectures that replace transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting, as explored in the Semantic Gaussian Splatting (SGS) code repository~\cite{sgs-repo}. The theorem proves this replacement does not lose expressiveness.
+This is relevant to architectures that replace transformer attention with the alpha-compositing rendering equation from 3D Gaussian Splatting, as explored in the Semantic Gaussian Splatting (SGS) code repository~\citep{sgs-repo}. The theorem proves this replacement does not lose expressiveness.
 
 \subsection{Implications for Computer Graphics}
 
@@ -163,7 +163,7 @@ The standard alpha-compositing pipeline used in rendering is strictly more power
 % ════════════════════════════════════════════════════════════
 \section{Conclusion}
 
-We have proven that the set of weight vectors achievable by softmax attention is a strict subset of those achievable by alpha-compositing. The proof is constructive: given any softmax weights, the telescoping tail-sum formula $a_i = w_i / \sum_{j \geq i} w_j$ produces alpha-compositing parameters that exactly recover those weights. The result is machine-verified in Lean~4 with zero unproven assertions. This formally grounds architectures that replace attention with volume-rendering equations, confirming no expressiveness is lost.
+We have proven that the set of weight vectors achievable by softmax attention is a strict subset of those achievable by alpha-compositing. The proof is constructive: given any softmax weights, the telescoping tail-sum formula $a_i = w_i / \sum_{j \geq i} w_j$ produces alpha-compositing parameters that exactly recover those weights. The result is machine-verified in Lean~4~\citep{demoura2021} with zero unproven assertions. This formally grounds architectures that replace attention with volume-rendering equations, confirming no expressiveness is lost.
 
 % ════════════════════════════════════════════════════════════
 % JMLR requires a funding + competing-interests disclosure.
@@ -172,52 +172,52 @@ competing interests.}
 
 % ════════════════════════════════════════════════════════════
 \bibliographystyle{plainnat}
-\begin{thebibliography}{9}
+\begin{thebibliography}{Katharopoulos et~al.(2020)}
 
-\bibitem{vaswani2017}
+\bibitem[Vaswani et~al.(2017)]{vaswani2017}
 A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.N.~Gomez, L.~Kaiser, and I.~Polosukhin.
 \newblock Attention is all you need.
-\newblock In \emph{NeurIPS}, 2017.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017.
 
-\bibitem{kerbl2023}
+\bibitem[Kerbl et~al.(2023)]{kerbl2023}
 B.~Kerbl, G.~Kopanas, T.~Leimk{\"u}hler, and G.~Drettakis.
 \newblock 3{D} {G}aussian splatting for real-time radiance field rendering.
-\newblock \emph{ACM Trans.\ Graph.\ (SIGGRAPH)}, 42(4), 2023.
+\newblock \emph{ACM Transactions on Graphics}, 42(4):1--14, 2023.
 
-\bibitem{porter1984}
+\bibitem[Porter and Duff(1984)]{porter1984}
 T.~Porter and T.~Duff.
 \newblock Compositing digital images.
 \newblock \emph{ACM SIGGRAPH Computer Graphics}, 18(3):253--259, 1984.
 
-\bibitem{max1995}
+\bibitem[Max(1995)]{max1995}
 N.~Max.
 \newblock Optical models for direct volume rendering.
-\newblock \emph{IEEE TVCG}, 1(2):99--108, 1995.
+\newblock \emph{IEEE Transactions on Visualization and Computer Graphics}, 1(2):99--108, 1995.
 
-\bibitem{mildenhall2020}
+\bibitem[Mildenhall et~al.(2020)]{mildenhall2020}
 B.~Mildenhall, P.P.~Srinivasan, M.~Tancik, J.T.~Barron, R.~Ramamoorthi, and R.~Ng.
 \newblock {NeRF}: Representing scenes as neural radiance fields for view synthesis.
-\newblock In \emph{ECCV}, 2020.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2020.
 
-\bibitem{katharopoulos2020}
+\bibitem[Katharopoulos et~al.(2020)]{katharopoulos2020}
 A.~Katharopoulos, A.~Vyas, N.~Pappas, and F.~Fleuret.
 \newblock Transformers are {RNN}s: Fast autoregressive transformers with linear attention.
-\newblock In \emph{ICML}, 2020.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
 
-\bibitem{ramsauer2021}
-H.~Ramsauer, B.~Schafl, J.~Lehner, P.~Seidl, M.~Widrich, et~al.
+\bibitem[Ramsauer et~al.(2021)]{ramsauer2021}
+H.~Ramsauer, B.~Sch{\"a}fl, J.~Lehner, P.~Seidl, M.~Widrich, L.~Gruber, M.~Holzleitner, T.~Adler, D.P.~Kreil, M.K.~Kopp, G.~Klambauer, J.~Brandstetter, and S.~Hochreiter.
 \newblock Hopfield networks is all you need.
-\newblock In \emph{ICLR}, 2021.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2021.
 
-\bibitem{demoura2021}
+\bibitem[de~Moura and Ullrich(2021)]{demoura2021}
 L.~de~Moura and S.~Ullrich.
 \newblock The {L}ean 4 theorem prover and programming language.
-\newblock In \emph{CADE}, 2021.
+\newblock In \emph{Automated Deduction (CADE 28)}, pages 625--635. Springer, 2021.
 
-\bibitem{sgs-repo}
+\bibitem[SGS(2026)]{sgs-repo}
 Semantic {G}aussian {S}platting (SGS).
 \newblock Source code repository.
-\newblock \url{https://github.com/feamando/sgs}.
+\newblock \url{https://github.com/feamando/sgs}, 2026.
 
 \end{thebibliography}
 
