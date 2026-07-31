@@ -6,10 +6,14 @@ We test whether a grounded token representation, bundling a word sense's visual
 (V), semantic (S), and physical (P) features into one vector, improves word-sense
 disambiguation in a small language model. A representation-level probe passes: on
 curated polysemous words the V+S+P bundle separates senses that a text embedding
-collapses (separation 0.37, chance-level for text alone). But across two
-independent delivery mechanisms (embedding initialization and inference-time
-reranking) and three benchmarks, the grounding produces no statistically
-significant improvement in a trained model. The signal is redundant with text
+collapses (separation 0.37 for V+S+P versus 0.00 for text alone). But across two
+delivery mechanisms of the same bundle (embedding initialization and
+inference-time reranking) and three benchmarks, the grounding produces no
+improvement a trained model retains: the full-compute initialization deficit
+reproduces across three seeds (-3.5pts, CI [-4.9, -2.1]), and a scrambled-bundle
+control shows the signal is genuine (beating a permuted bundle by +10.5pts at low
+compute) yet washed out by training (losing to a random init at full compute). The
+signal is redundant with text
 where text is sufficient, and collapses to near-chance where text is
 insufficient, the exact regime where grounding was supposed to help. We report
 the full chain, the diagnosis, and the methodological point that turned a string
@@ -30,13 +34,14 @@ models and multimodal understanding built in rather than bolted on.
 ## 2. The representation separates senses (the probe passes)
 
 On 20 polysemous words, entirely auto-derived (no hand labels), the bundle
-separates senses with a max-block aggregate separation of **0.37**. Text-derived
-variants fail (0.13), as expected, since colliding words share spelling; the
-separation is carried by the visual block (a picture of a bird and of a
-construction crane are visually unrelated). This result stands on its own and is
-not contradicted by anything below. Separation is a property of the
-representation on curated probes; it is not evidence that a trained model
-benefits.
+separates senses with a max-block aggregate separation of **0.37** (a max over
+V, S, P blocks of the `1 - cos` between the two senses). The text (S) block alone
+scores **0.00**: both senses of a surface form receive an identical text embedding
+by construction, so text cannot separate them at all. The 0.37 is carried almost
+entirely by the visual block (a picture of a bird and of a construction crane are
+visually unrelated). This result stands on its own and is not contradicted by
+anything below. Separation is a property of the representation on curated probes;
+it is not evidence that a trained model benefits.
 
 ## 3. Delivery mechanism 1: embedding initialization
 
@@ -47,11 +52,14 @@ disambiguation benchmark; score = fraction where logP(right context) >
 logP(wrong context); chance 0.5).
 
 **Full compute (40k steps, ~2B tokens): VSP 0.790 vs baseline 0.829, delta
--3.8pts.** The two trained models ended 0.964 output-correlated: training
-overwrote the grounded initialization; both converged to the same function. A
-warm start only helps if the model would otherwise struggle to learn the
-distinction, at full scale it does not struggle, so the init is at best neutral
-(here slightly negative, from a projection-scale mismatch since fixed).
+-3.8pts at the original seed.** To rule out the projection-scale mismatch in that
+run, we retrained two more seeds under corrected init scaling: all three
+reproduce, **mean -3.5pts, 95% CI [-4.9, -2.1]** (per-seed -3.8/-2.9/-3.8). The
+deficit is not a scaling artifact. On a single seed the paired difference is not
+significant (6 discordant pairs, McNemar p=0.22), so the honest reading is that
+grounding does not help at full compute and if anything slightly hurts. The two
+trained models ended 0.964 output-correlated, consistent with the init being
+washed out; the scrambled control below is the stronger washout evidence.
 
 **Low compute (a plausible regime for a warm start to matter).** A single-seed
 sweep looked monotonic and encouraging, +5.7pts at 2k steps, +1.0 at 5k, -3.8 at
@@ -60,6 +68,19 @@ sweep looked monotonic and encouraging, +5.7pts at 2k steps, +1.0 at 5k, -3.8 at
 significant): +5.7, -1.0, +3.8, 0.0, +1.9, -1.0. The +5.7 was the maximum of six
 draws; two seeds were negative. The seed-to-seed swing exceeded the effect. No
 compute regime shows a reliable win. Embedding initialization is dead.
+
+**Scrambled-bundle control (is the signal real, or is the pipeline broken?).** We
+reinitialize from the same bundles permuted across tokens (each token gets a real
+bundle belonging to a different word): same norm and covariance, no
+token-correspondence. If the grounding is genuine, the true bundle should beat the
+scrambled one. **At 2k it does, significantly: 0.695 vs 0.590, +10.5pts, McNemar
+p=0.007** (13 gains, 2 losses of 15 discordant). So the signal is real and the
+pipeline is sound. **At 40k the gap decays to +2.9pts (n.s., p=0.51), and random
+init (0.800) beats both grounded (0.762) and scrambled (0.762).** The ordering
+inverts with compute (2k: grounded > scramble; 40k: random > grounded ~ scramble),
+which is direct washout evidence, stronger than the 0.964 correlation: an init
+that measurably matters early stops mattering once the model can learn the
+distinction from text.
 
 ## 4. Delivery mechanism 2: inference-time reranking
 
@@ -72,7 +93,7 @@ sense-consistency:
 
 where consistency is the max over the V, S, P blocks of the cosine between the
 context's grounded-token bundle and the candidate's. The candidate set is exactly
-{right, wrong}, so there is no top-k truncation, the cleanest test of whether the
+{right, wrong}, so there is no top-k truncation, and the test isolates whether the
 signal survives. lambda = 0 recovers the pure baseline (a built-in sanity check
 that reproduced the baseline accuracy exactly).
 
@@ -114,10 +135,14 @@ was echoing text where text already could.
 
 Across two delivery mechanisms and three benchmarks, the VSP grounding as derived
 here (CLIP-image V, GloVe S, P6-predicted P, mean-pooled) does not carry sense
-information a trained language model can use. It is **redundant with text where
-text suffices, and near-chance where text does not.** The representation-level
-separation (0.37) is real but does not transfer to helping a model. The
-VSP-for-language-models line is closed.
+information a trained language model can **retain and use**. The full-compute
+deficit reproduces across three seeds (-3.5pts, CI [-4.9, -2.1]), and the
+scrambled control shows the signal is real (true bundle beats permuted by +10.5pts
+at 2k, p=0.007) but is washed out by training: by 40k it loses even to a random
+init. Where the trained model is uncertain, the grounding is **redundant with text
+where text suffices, and near-chance where text does not.** The
+representation-level separation (0.37 vs 0.00 for text) is real but does not
+transfer to helping a model. The VSP-for-language-models line is closed.
 
 This does not refute grounding in general. It bounds a specific claim: bundling
 these particular auto-derived V/S/P features into the token representation, by
