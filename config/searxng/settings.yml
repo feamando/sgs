@@ -1,0 +1,18 @@
+# Local SearXNG for Planck 3.0 (started by: .\scripts\planck3.ps1 searxng).
+# Bound to localhost only. The JSON API is what src/planck3/web.py calls.
+use_default_settings: true
+
+general:
+  instance_name: "planck3-local"
+
+server:
+  # Local-only instance; change this if you ever expose the port.
+  secret_key: "planck3-local-only-not-exposed"
+  limiter: false
+  image_proxy: false
+
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json

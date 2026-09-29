@@ -19,6 +19,10 @@ sentencepiece>=0.1.99
 librosa>=0.10
 soundfile>=0.12
 
+# Planck 3.0 web retrieval (src/planck3)
+trafilatura>=1.8
+requests>=2.31
+
 # Logging
 wandb>=0.15
 

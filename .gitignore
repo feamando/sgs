@@ -17,3 +17,10 @@ glove.6B.zip
 runs/satz_conversations*.jsonl
 satz_conversations*.jsonl
 /models/gemma-4-e4b-it
+
+# Planck 3.0: keep summaries/cards in git, not bulky or regenerable run artefacts
+results/planck3/**/trajectories.jsonl
+results/planck3/**/web_log.jsonl
+results/planck3/**/*.sqlite
+results/planck3/**/head.pt
+config/searxng/uwsgi.ini
