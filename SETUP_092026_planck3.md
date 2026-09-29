@@ -1,6 +1,6 @@
 # Planck 3.0: a "System One" SGS model for web retrieval (PoC plan)
 
-Nikita Gorshkov · 2026-09-29 · Status: planned (open) · Swimlane 1 (Planck) · Roadmap id `1-planck-3-0` · Consumer surface: Satz
+Nikita Gorshkov · 2026-09-29 · Status: in progress (G0 + G1 pipelines built, awaiting first 4090 run) · Swimlane 1 (Planck) · Roadmap id `1-planck-3-0` · Consumer surface: Satz
 
 **TL;DR.** Planck 3.0 keeps knowledge out of the weights. The model is a small (~100M), frozen-size **policy**. It never writes free text. It emits **typed decisions** from a closed action vocabulary (search, open result k, follow link k, extract span k, answer, abstain), each with a **calibrated probability**. Deterministic tools do the heavy lifting: search, fetch, main-content extraction, answer rendering. Everything it extracts goes into a local, growing **knowledge store**: typed facts plus SGS blobs, with source, timestamp and a per-domain trust prior. That store is what "improves with use". Loop: `query → store lookup → (miss) search → pick result → extract → verify → store → answer card with citations`. This is the Jev idea (typed, probabilistic, fast decisions) plus the Muse idea (a personal agent with memory), built SGS-native, local and read-only. The PoC is gated. **G0** proves the tool harness with a teacher policy, before any Planck training. **G1** distills on offline Wikiracing, where labels are free. **G2** covers three consumer task families. **G3** proves the store compounds. **G4** is the SGS research claim: does an alpha-compositing pointer beat a softmax pointer at candidate selection?
 
@@ -104,7 +104,7 @@ user query
 | Gate | What | Pass | Kill / fallback |
 |---|---|---|---|
 | **G0 Harness + teacher ceiling** | Tools + store + typed actions with **Gemma/Haiku as the policy**, no Planck | Teacher ≥60% task success on the consumer set; cached replay deterministic | Teacher <40% → the action space/tools are wrong; fix them before training anything |
-| **G1 Wikiracing distill** | Planck 3.0 policy on held-out Wikipedia start/target pairs | Success ≥80% of BFS-oracle-guided rate within 2× optimal steps; <100ms/decision on CPU | Fail on 100M → rerun with Hertz 1.2 (640M) encoder as capacity ablation |
+| **G1 Wikiracing distill** | Planck 3.0 policy on held-out Wikipedia start/target pairs (held-out targets) | Rollout success (within 2× optimal steps) ≥0.8× the Gemma teacher's; beats head:hash control; <100ms/decision warm on CPU | Fail on 100M → rerun with Hertz 1.2 (640M) encoder as capacity ablation |
 | **G2 Consumer end-to-end** | Three task families on cached benchmark | ≥70% of teacher success; **wrong-answer rate on answered items <5%** (abstain instead); ECE <0.05 | Large gap on extraction only → move extraction to deterministic schema parsers (JSON-LD/microdata first), keep the model for choosing |
 | **G3 Store compounding** | Replay a second batch of related queries against the warm store | Web calls/task −40% at equal accuracy; domain prior raises OPEN precision@1 | No gain → store/lookup design problem, not the model |
 | **G4 SGS pointer (research)** | Render pointer vs softmax pointer on OPEN/EXTRACT, incl. duplicate-heavy lists | Significant gain, **≥3 seeds, held-out, BH-corrected** | Parity → ship softmax; the negative result is still a paper footnote to the theorem |
@@ -125,14 +125,41 @@ Discipline carried from the VSP work: reseed before believing any delta, pick λ
 | Calibration + eval harness (success, ECE, abstain precision, latency) | New; reuse `aggregate_disambig_seeds.py` for multi-seed stats | M |
 | Consumer UI (chat + answer cards + watch list) | Reuse Satz 0.1 plan + Raum FastAPI/`DecomposerManager` hotswap | M |
 
-## 9. Run instructions (fill in as each gate is built)
+## 9. Run instructions (Windows 4090 box, `C:\Users\feama\sgs`)
 
-- **Box:** RTX 4090 Windows (`C:\Users\feama\sgs`) for training. Any laptop CPU for inference/latency tests.
-- **Env:** main `.venv` + `trafilatura`, `httpx`, `searxng` (Docker, local JSON API). Tooling pre-check: verify Py 3.11/3.12 compat before pinning.
-- **G0:** `python scripts/planck3_harness.py --policy gemma --tasks scripts/assets/planck3_tasks.json --cache-dir data/planck3_cache` (TO BUILD)
-- **G1:** `python scripts/build_wikirace.py` → `python scripts/train_planck3.py --task wikirace --encoder planck13 --seed 0` (TO BUILD)
-- **G2-G4:** TBD after G1.
-- PowerShell on the box: use backtick continuations, not `^`. No `--wandb` by default.
+**One command does everything** (idempotent: re-run after any interruption and it resumes):
+
+```powershell
+cd C:\Users\feama\sgs
+git pull
+powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
+```
+
+`all` = `setup → smoke → searxng → g0 → g1 → report → commit+push results` (`-NoPush` to keep results local). It needs nothing beyond what the box already has: `.venv` (created if missing), `checkpoints/planck13/best.pt` + `data/wikipedia/tokenizer.model` (for head:planck), `models/gemma-4-e4b-it` (teacher). Missing pieces degrade gracefully and `setup` prints what to fetch. Docker Desktop is optional: without it, search falls back to the Wikipedia API.
+
+**Individual stages:**
+
+| Command | What it does | Output |
+|---|---|---|
+| `.\scripts\planck3.ps1 setup` | pip-installs trafilatura/requests/scipy/pytest into `.venv`; checks torch CUDA, checkpoints, Gemma, Docker | console table |
+| `.\scripts\planck3.ps1 smoke` | 19 offline tests (fake web, synthetic Wikipedia dump), ~5s | pytest |
+| `.\scripts\planck3.ps1 ask "Who founded SpaceX?" -Type entity` | one question → answer card, with the decision trace (`-Policy heuristic` to skip loading Gemma) | console; facts land in `results/planck3/personal_store.sqlite` |
+| `.\scripts\planck3.ps1 searxng` | starts the `planck3-searxng` container on `127.0.0.1:8888` (config: `config/searxng/settings.yml`) | Docker |
+| `.\scripts\planck3.ps1 g0` | G0: 41-task seed benchmark with the Gemma teacher, then the heuristic baseline | `results/planck3/g0_<policy>/{summary.json, cards.md, results.jsonl, trajectories.jsonl}` |
+| `.\scripts\planck3.ps1 g1` | G1: Simple English dump (356 MB) → link graph → BFS tasks → hash + Planck embeddings → heads → eval vs random/lexical/Gemma | `data/planck3/wikirace/`, `results/planck3/g1_head_*_s0/`, `results/planck3/g1_eval_s0/summary.json` |
+| `.\scripts\planck3.ps1 g1 -Seed 1` | an extra seed (reseed before believing any head:planck vs head:hash delta) | `..._s1/` |
+| `.\scripts\planck3.ps1 report` | one line per summary | console |
+| `.\scripts\planck3.ps1 py <args>` | raw pass-through to `scripts/planck3.py` (e.g. `py wikirace eval --limit 50`) | |
+
+**Where things live:** code `src/planck3/`, CLI `scripts/planck3.py`, runner `scripts/planck3.ps1`, tasks `scripts/assets/planck3_tasks.json`, tests `tests/test_planck3.py`. Page/search cache `data/planck3_cache/` makes every G0 re-run replayable (`--net replay`). Trajectories, stores and head weights stay local (gitignored); summaries, cards and results are committed.
+
+**Gate notes from the first build (2026-09-29, Mac, Wikipedia search):**
+- **G0 heuristic floor = 51.2%** success (41 tasks), answered 100%, wrong-when-answered 48.8%, ECE 0.285. It never abstains, so it is a floor, not a candidate.
+- **`gold_reachable` = 78%:** the right value was among the candidates shown on some opened page in 78% of tasks. That is the toolset's ceiling, above the 60% G0 pass bar, so G0 tests the teacher's *choosing*. When a teacher fails a task whose gold was unreachable, the fix is the tools.
+- **Overfitting guard:** the candidate generator got three generic fixes from the first failures (in-page IDF weighting, unit matching, possessive stripping). No further tuning against these 41 tasks. Fresh consumer tasks (page-grounded, snapshot-dated gold) are the next benchmark.
+- **G1 gate clarified (pre-registered before any G1 run):** the original "80% of BFS-oracle-guided rate" was ill-defined, because the oracle is 100% by construction. It now reads: **head:planck rollout success ≥ 0.8× the Gemma teacher's, with warm per-decision latency < 100ms on CPU.** Two more rules: head:planck must beat **head:hash** (same head on hashed bag-of-words features) or Planck is adding nothing. Cold CPU latency (encoding every candidate title from scratch) is reported but not gated.
+- **G2-G4:** after G1.
+- PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
 
