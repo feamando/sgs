@@ -35,6 +35,8 @@ class Harness:
         st = {"phase": "start", "results": [], "spans": [], "store": [], "held": None,
               "verified": None, "opened": set(), "history": []}
         calls0 = self.web.calls["search"] + self.web.calls["fetch"]
+        search0 = self.web.calls["search"]
+        usage0 = dict(getattr(self.policy, "usage", {}))
         steps, ms, invalid, trajectory = 0, [], 0, []
         outcome = {"answered": False, "value": None, "p": 0.0, "source_url": None,
                    "context": None, "verified": None, "reason": "step_cap", "from_store": False}
@@ -69,8 +71,11 @@ class Harness:
                                 source_url=outcome["source_url"], domain=domain_of(outcome["source_url"] or ""),
                                 context=outcome["context"], p=outcome["p"], verified=bool(outcome["verified"]),
                                 entity=entity, attribute=attribute, ttl_days=ttl_days, task_id=task_id)
+        usage = getattr(self.policy, "usage", {})
         outcome.update(steps=steps, decision_ms=ms, invalid=invalid, trajectory=trajectory,
-                       web_calls=self.web.calls["search"] + self.web.calls["fetch"] - calls0)
+                       web_calls=self.web.calls["search"] + self.web.calls["fetch"] - calls0,
+                       search_calls=self.web.calls["search"] - search0,
+                       usage={k: usage.get(k, 0) - usage0.get(k, 0) for k in usage})
         return outcome
 
     def _observation(self, question, answer_type, st) -> dict:

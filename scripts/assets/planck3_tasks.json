@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "created": "2026-09-29",
-  "note": "G0 seed benchmark: STABLE facts only (gold does not drift). Fresh consumer facts (prices, hours) need snapshot-dated gold and come with page-grounded task generation (next step). Eiffel Tower accepts 330 (post-2022 antenna) and 324 (widely cited). Everest accepts 8849/8848 (8848.86 is within the 0.5% number tolerance anyway).",
+  "note": "v2 (2026-09-29): + chat family (multi-turn; answer type inferred, follow-ups rewritten, both scored). G0 seed benchmark: STABLE facts only (gold does not drift). Fresh consumer facts (prices, hours) need snapshot-dated gold and come with page-grounded task generation (next step). Eiffel Tower accepts 330 (post-2022 antenna) and 324 (widely cited). Everest accepts 8849/8848 (8848.86 is within the 0.5% number tolerance anyway).",
   "tasks": [
     {"id": "f01", "family": "fact", "question": "What year was IKEA founded?", "answer_type": "year", "gold": ["1943"], "entity": "IKEA", "attribute": "founded"},
     {"id": "f02", "family": "fact", "question": "What year was LEGO founded?", "answer_type": "year", "gold": ["1932"], "entity": "LEGO", "attribute": "founded"},
@@ -58,7 +58,28 @@
     {"id": "c04", "family": "compare", "question": "Compare the release years of the PlayStation 5, Xbox Series X and Nintendo Switch",
      "items": ["PlayStation 5", "Xbox Series X", "Nintendo Switch"],
      "attributes": [{"name": "released", "template": "In what year was the {item} released?", "answer_type": "year"}],
-     "gold": {"PlayStation 5": {"released": ["2020"]}, "Xbox Series X": {"released": ["2020"]}, "Nintendo Switch": {"released": ["2017"]}}}
+     "gold": {"PlayStation 5": {"released": ["2020"]}, "Xbox Series X": {"released": ["2020"]}, "Nintendo Switch": {"released": ["2017"]}}},
+
+    {"id": "ch01", "family": "chat", "turns": [
+      {"user": "When was IKEA founded?", "answer_type": "year", "rewrite": "NEW", "gold": ["1943"]},
+      {"user": "And H&M?", "answer_type": "year", "rewrite": "SWAP_ENTITY", "gold": ["1947"]},
+      {"user": "What about Zara?", "answer_type": "year", "rewrite": "SWAP_ENTITY", "gold": ["1975"]}]},
+    {"id": "ch02", "family": "chat", "turns": [
+      {"user": "Who founded SpaceX?", "answer_type": "entity", "rewrite": "NEW", "gold": ["Elon Musk"]},
+      {"user": "When was it founded?", "answer_type": "year", "rewrite": "PRONOUN", "gold": ["2002"]}]},
+    {"id": "ch03", "family": "chat", "turns": [
+      {"user": "How tall is the Burj Khalifa in metres?", "answer_type": "number", "rewrite": "NEW", "gold": ["828"]},
+      {"user": "and Tokyo Skytree?", "answer_type": "number", "rewrite": "SWAP_ENTITY", "gold": ["634"]}]},
+    {"id": "ch04", "family": "chat", "turns": [
+      {"user": "What is the capital of Australia?", "answer_type": "entity", "rewrite": "NEW", "gold": ["Canberra"]},
+      {"user": "And Canada?", "answer_type": "entity", "rewrite": "SWAP_ENTITY", "gold": ["Ottawa"]},
+      {"user": "What about Brazil?", "answer_type": "entity", "rewrite": "SWAP_ENTITY", "gold": ["Brasília"]}]},
+    {"id": "ch05", "family": "chat", "turns": [
+      {"user": "Who directed Spirited Away?", "answer_type": "entity", "rewrite": "NEW", "gold": ["Hayao Miyazaki"]},
+      {"user": "When was it released?", "answer_type": "year", "rewrite": "PRONOUN", "gold": ["2001"]}]},
+    {"id": "ch06", "family": "chat", "turns": [
+      {"user": "Where is Nintendo headquartered?", "answer_type": "entity", "rewrite": "NEW", "gold": ["Kyoto"]},
+      {"user": "When was it founded?", "answer_type": "year", "rewrite": "PRONOUN", "gold": ["1889"]}]}
   ],
   "watch_examples": [
     {"question": "What is the price of Bitcoin in US dollars?", "answer_type": "number", "entity": "Bitcoin", "attribute": "price", "condition": {"op": "change"}}

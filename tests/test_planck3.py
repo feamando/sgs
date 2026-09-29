@@ -139,6 +139,7 @@ class ScriptedLLM(LLMPolicy):
     name = "scripted"
 
     def __init__(self, replies):
+        super().__init__()
         self.replies = list(replies)
         self.prompts = []
 
@@ -260,3 +261,67 @@ def test_planck_encoder_on_tiny_checkpoint(tmp_path):
     # right-padding must not change a sequence's embedding (causal model + masked mean)
     alone = enc.encode(["Dog"], batch_size=1)
     assert np.allclose(alone[0].astype(np.float32), E[1].astype(np.float32), atol=2e-2)
+
+
+# ── chat surface ─────────────────────────────────────────────────────────
+def test_store_fuzzy_lookup_never_swaps_subject(store):
+    store.add_fact(question="What is the capital of Canada?", value="Ottawa", answer_type="entity",
+                   source_url="u", domain="d", context="c", p=0.9)
+    assert store.lookup("What is the capital of Canada?")          # same question hits
+    assert store.lookup("what is the capital of canada")           # case/punctuation don't matter
+    assert store.lookup("What is the capital of Brazil?") == []    # different subject never hits
+
+
+@pytest.mark.parametrize("q,t", [
+    ("When was IKEA founded?", "year"), ("In what year did the Berlin Wall fall?", "year"),
+    ("How tall is the Burj Khalifa?", "number"), ("What is the atomic number of gold?", "number"),
+    ("Who founded SpaceX?", "entity"), ("Where is Nintendo headquartered?", "entity"),
+    ("What is the capital of Canada?", "entity"), ("On what date did Apollo 11 land?", "date"),
+])
+def test_infer_answer_type(q, t):
+    from src.planck3.chat import infer_answer_type
+    assert infer_answer_type(q) == t
+
+
+def test_followups():
+    from src.planck3.chat import Turn, main_entity, resolve_followup
+    assert main_entity("When was IKEA founded?") == "IKEA"
+    assert main_entity("How tall is the Burj Khalifa in metres?") == "Burj Khalifa"
+    prev = Turn("When was IKEA founded?", "When was IKEA founded?", "year", "IKEA", "NEW")
+    assert resolve_followup("And H&M?", prev)[:2] == ("When was H&M founded?", "SWAP_ENTITY")
+    assert resolve_followup("what about Zara", prev)[:2] == ("When was Zara founded?", "SWAP_ENTITY")
+    prev = Turn("Who founded SpaceX?", "Who founded SpaceX?", "entity", "SpaceX", "NEW")
+    assert resolve_followup("When was it founded?", prev)[:2] == ("When was SpaceX founded?", "PRONOUN")
+    assert resolve_followup("Who painted the Mona Lisa?", prev)[1] == "NEW"
+
+
+def test_chat_session_and_server(tmp_path):
+    import json as _json
+    import threading
+    import urllib.request
+    from src.planck3.chat import ChatSession, chat_answer
+    from src.planck3.serve import make_server
+    st = Store(tmp_path / "chat.sqlite")
+    sess = ChatSession(Harness(HeuristicPolicy(), FakeWeb(), st))
+    t = sess.ask("When was IKEA founded?")
+    assert t.answer_type == "year" and t.result["value"] == "1943"
+    assert "**1943**" in chat_answer(t) and "Source:" in chat_answer(t)
+    srv = make_server(lambda: Harness(HeuristicPolicy(), FakeWeb(), st), port=0)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{srv.server_address[1]}"
+    assert b"Planck 3.0" in urllib.request.urlopen(url + "/").read()
+    req = urllib.request.Request(url + "/api/chat", data=_json.dumps({"message": "When was IKEA founded?",
+                                                                      "session": "s"}).encode())
+    r = _json.loads(urllib.request.urlopen(req).read())
+    assert "1943" in r["reply"] and r["answer_type"] == "year"
+    srv.shutdown()
+    st.close()
+
+
+def test_cost_model():
+    from src.planck3.cost import load_prices, task_cost
+    prices = load_prices()
+    llm = task_cost(prices, "llm", {"input_tokens": 1_000_000, "output_tokens": 0}, 1, "searxng", [])
+    assert llm["llm_usd"] == prices["llm_per_mtok"][prices["llm_equivalent"]]["input"]
+    local = task_cost(prices, "local", {}, 2, "searxng", [1.0, 2.0])
+    assert local["llm_usd"] == 0 and local["total_usd"] < 1e-6

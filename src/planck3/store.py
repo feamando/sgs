@@ -17,7 +17,7 @@ import time
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from .util import norm_text
+from .util import content_words, norm_text
 
 DAY = 86400.0
 
@@ -59,7 +59,8 @@ class Store:
     def __init__(self, path: str | Path, clock=time.time):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = sqlite3.connect(str(self.path))
+        # the chat server serializes turns behind a lock, so cross-thread use is safe
+        self.db = sqlite3.connect(str(self.path), check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(_SCHEMA)
         self.clock = clock
@@ -94,10 +95,19 @@ class Store:
                 (norm_text(entity), norm_text(attribute))).fetchall()
             scored = [(1.0, r) for r in rows]
         else:
+            # Fuzzy path: the SAME content words (order/stopwords may differ). A near-identical
+            # string with a different subject ("capital of Canada" vs "capital of Brazil")
+            # must never hit; that is a confidently wrong answer served from memory.
             qn = norm_text(question)
+            qset = set(content_words(question))
             rows = self.db.execute("SELECT * FROM facts ORDER BY retrieved_at DESC LIMIT 5000").fetchall()
-            scored = [(SequenceMatcher(None, qn, r["question_norm"]).ratio(), r) for r in rows]
-            scored = [(s, r) for s, r in scored if s >= min_ratio]
+            scored = []
+            for r in rows:
+                if set(content_words(r["question"])) != qset:
+                    continue
+                sim = SequenceMatcher(None, qn, r["question_norm"]).ratio()
+                if sim >= min_ratio:
+                    scored.append((sim, r))
         out = []
         for sim, r in sorted(scored, key=lambda x: (-x[0], -x[1]["p"])):
             if answer_type and r["answer_type"] != answer_type:

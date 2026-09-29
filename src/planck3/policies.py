@@ -33,6 +33,11 @@ def _sig(x: float) -> float:
 
 class Policy:
     name = "base"
+    kind = "local"          # local (CPU rules / small model) | llm (priced per token)
+    model_id = None
+
+    def __init__(self):
+        self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
 
     def decide(self, obs: dict) -> Decision:
         raise NotImplementedError
@@ -42,6 +47,7 @@ class HeuristicPolicy(Policy):
     name = "heuristic"
 
     def __init__(self, answer_threshold: float = 0.6):
+        super().__init__()
         self.tau = answer_threshold
 
     @staticmethod
@@ -168,6 +174,8 @@ def parse_decision(text: str) -> Decision:
 
 
 class LLMPolicy(Policy):
+    kind = "llm"
+
     def _complete(self, system: str, user: str) -> str:
         raise NotImplementedError
 
@@ -179,6 +187,7 @@ class GemmaPolicy(LLMPolicy):
     name = "gemma"
 
     def __init__(self, model_path: str = "models/gemma-4-e4b-it", max_new: int = 48):
+        super().__init__()
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         self.torch = torch
@@ -197,6 +206,9 @@ class GemmaPolicy(LLMPolicy):
         n = inputs["input_ids"].shape[1]
         with self.torch.no_grad():
             out = self.model.generate(**inputs, max_new_tokens=self.max_new, do_sample=False)
+        self.usage["calls"] += 1
+        self.usage["input_tokens"] += int(n)
+        self.usage["output_tokens"] += int(out.shape[1] - n)
         return self.tok.decode(out[0][n:], skip_special_tokens=True)
 
 
@@ -205,6 +217,7 @@ class BedrockPolicy(LLMPolicy):
 
     def __init__(self, model_id: str = "us.anthropic.claude-haiku-4-5-20251001-v1:0",
                  region: str = "us-east-1", profile: str | None = None):
+        super().__init__()
         import os
         import boto3
         session = boto3.Session(profile_name=profile or os.environ.get("AWS_PROFILE") or None)
@@ -217,7 +230,12 @@ class BedrockPolicy(LLMPolicy):
                            "messages": [{"role": "user", "content": user}]})
         r = self.client.invoke_model(modelId=self.model_id, body=body,
                                      contentType="application/json", accept="application/json")
-        return json.loads(r["body"].read())["content"][0]["text"]
+        out = json.loads(r["body"].read())
+        u = out.get("usage", {})
+        self.usage["calls"] += 1
+        self.usage["input_tokens"] += int(u.get("input_tokens", 0))
+        self.usage["output_tokens"] += int(u.get("output_tokens", 0))
+        return out["content"][0]["text"]
 
 
 def make_policy(name: str, **kw) -> Policy:

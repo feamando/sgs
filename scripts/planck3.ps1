@@ -10,6 +10,8 @@
      setup     check/install deps into .venv, list what is missing (checkpoints, Gemma)
      smoke     offline unit + end-to-end tests (no network, no GPU), ~30s
      searxng   start the local SearXNG search container (Docker Desktop)
+     chat      terminal chat with follow-ups ("and H&M?", "when was it founded?")
+     serve     local web chat at http://127.0.0.1:8010 (open it in a browser)
      ask       one question -> answer card:   .\scripts\planck3.ps1 ask "Who founded SpaceX?" -Type entity
      g0        G0 teacher ceiling: seed benchmark with the Gemma teacher (-Policy heuristic|gemma|bedrock)
      g1        G1 Wikiracing: build graph -> tasks -> embed -> train heads -> eval (+ Gemma teacher)
@@ -80,7 +82,8 @@ function Get-Python {
 }
 $PY = Get-Python
 
-function P3 { param([string[]]$A) Invoke-Checked $PY (@("scripts/planck3.py") + $A) }
+# $Rest may be $null; drop empty elements so python never sees a stray "" argument
+function P3 { param([string[]]$A) Invoke-Checked $PY (@("scripts/planck3.py") + @($A | Where-Object { $_ })) }
 
 function Test-Docker { return [bool](Get-Command docker -ErrorAction SilentlyContinue) }
 function Test-Searx { return (Invoke-Quiet $PY @("scripts/planck3.py", "search-check")).Code -eq 0 }
@@ -192,6 +195,12 @@ switch ($Command.ToLower()) {
         if (-not $Question) { throw 'usage: .\scripts\planck3.ps1 ask "your question" -Type year|number|date|entity|text' }
         $p = if ($Policy -eq "gemma" -and -not (Test-Path $GEMMA)) { "heuristic" } else { $Policy }
         P3 (@("ask", $Question, "--type", $Type, "--policy", $p, "--gemma-path", $GEMMA, "-v") + $Rest)
+    }
+    { $_ -in @("chat", "serve") } {
+        Do-Searxng
+        $p = if ($Policy -eq "gemma" -and -not (Test-Path $GEMMA)) { "heuristic" } else { $Policy }
+        if ($Command -eq "serve") { Log "open http://127.0.0.1:8010 in a browser (Ctrl+C to stop)" }
+        P3 (@($Command.ToLower(), "--policy", $p, "--gemma-path", $GEMMA) + $Rest)
     }
     "g0"      { Do-Searxng; Do-G0 }
     "g1"      { Do-G1 }
