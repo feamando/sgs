@@ -156,6 +156,8 @@ Discipline carried from the VSP work: reseed before believing any delta, pick λ
 
 ## 9. Run instructions (Windows 4090 box, `C:\Users\feama\sgs`)
 
+**Step-by-step guide for the box: `SETUP_planck_20260901.md`** (doctor -Deep → all -Quick -NoPush → all → serve; troubleshooting table; how to read the verdicts).
+
 **One command does everything** (idempotent: re-run after any interruption and it resumes):
 
 ```powershell
@@ -164,14 +166,17 @@ git pull
 powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 ```
 
-`all` = `setup → smoke → searxng → g0 → g1 → report → commit+push results` (`-NoPush` to keep results local). It needs nothing beyond what the box already has: `.venv` (created if missing), `checkpoints/planck13/best.pt` + `data/wikipedia/tokenizer.model` (for head:planck), `models/gemma-4-e4b-it` (teacher). Missing pieces degrade gracefully and `setup` prints what to fetch. Docker Desktop is optional: without it, search falls back to the Wikipedia API.
+`all` = `setup → smoke → doctor -Deep → searxng → g0 → g1 → report → commit+push results` (`-NoPush` to keep results local). It logs to `results/planck3/logs/` and pushes summaries, `REPORT.md`, logs and compressed trajectories, so results can be read from any machine. It needs nothing beyond what the box already has: `.venv` (created if missing), `checkpoints/planck13/best.pt` + `data/wikipedia/tokenizer.model` (for head:planck), `models/gemma-4-e4b-it` (teacher). Missing pieces degrade gracefully and `setup` prints what to fetch. Docker Desktop is optional: without it, search falls back to the Wikipedia API.
 
 **Individual stages:**
 
 | Command | What it does | Output |
 |---|---|---|
-| `.\scripts\planck3.ps1 setup` | pip-installs trafilatura/requests/scipy/pytest into `.venv`; checks torch CUDA, checkpoints, Gemma, Docker | console table |
-| `.\scripts\planck3.ps1 smoke` | 32 offline tests (fake web, synthetic Wikipedia dump, tiny Planck checkpoint, chat server), ~5s | pytest |
+| `.\scripts\planck3.ps1 doctor -Deep` | preflight: packages, CUDA/VRAM, disk, git, network, Planck ckpt vs tokenizer vocab, **Gemma emits valid typed decisions**, measured Planck embed speed, **ETA per stage** | console; `results/planck3/doctor.json` |
+| `.\scripts\planck3.ps1 all -Quick -NoPush` | shakedown of every stage at small size into `*_quick` outputs (does not block the full run) | `results/planck3/*_quick/`, `REPORT.md` |
+| `.\scripts\planck3.ps1 setup` | pip-installs trafilatura/requests/scipy/pytest/sentencepiece into `.venv` | pip |
+| `.\scripts\planck3.ps1 schedule -At 08:00` | daily `digest -Explore` via Task Scheduler (`unschedule` removes it) | `results/planck3/digest.md` |
+| `.\scripts\planck3.ps1 smoke` | 39 offline tests (fake web, synthetic Wikipedia dump, tiny Planck checkpoint, chat server), ~5s | pytest |
 | `.\scripts\planck3.ps1 serve` | **local web chat** at http://127.0.0.1:8010: follow-ups, cited answers, decision trace per reply (`-Policy heuristic` for instant start) | browser |
 | `.\scripts\planck3.ps1 chat` | the same in the terminal (`more` shows the evidence behind the last answer) | console |
 | `.\scripts\planck3.ps1 digest` | **"For you"** from your local knowledge graph: interests, adjacent entities, stale facts, trusted sources only (`-Explore` also reads adjacent entities from trusted sources) | console; also the "For you" button in `serve` |
