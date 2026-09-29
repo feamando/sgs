@@ -2,22 +2,34 @@
 
 Nikita Gorshkov · 2026-09-29 · Status: in progress (G0 + G1 pipelines built, awaiting first 4090 run) · Swimlane 1 (Planck) · Roadmap id `1-planck-3-0` · Consumer surface: Satz
 
-**TL;DR.** The bet is not that search is broken (it works, and has for decades). It is that users are moving from search boxes to **chat**, and that a chat answer can be delivered **far more cheaply** than an LLM-with-search product. Planck 3.0 keeps knowledge out of the weights. The model is a small (~100M), frozen-size **policy**. It never writes free text. It emits **typed decisions** from a closed action vocabulary (search, open result k, follow link k, extract span k, answer, abstain), each with a **calibrated probability**. Deterministic tools do the heavy lifting: search, fetch, main-content extraction, answer rendering. Everything it extracts goes into a local, growing **knowledge store**: typed facts plus SGS blobs, with source, timestamp and a per-domain trust prior. That store is what "improves with use". Loop: `query → store lookup → (miss) search → pick result → extract → verify → store → answer card with citations`. This is the Jev idea (typed, probabilistic, fast decisions) plus the Muse idea (a personal agent with memory), built SGS-native, local and read-only. The PoC is gated. **G0** proves the tool harness with a teacher policy, before any Planck training. **G1** distills on offline Wikiracing, where labels are free. **G2** covers three consumer task families. **G3** proves the store compounds. **G4** is the SGS research claim: does an alpha-compositing pointer beat a softmax pointer at candidate selection?
+**TL;DR.** Brain-style retrieval for the open web: a **direct answer plus retrieval in depth**, delivered in chat, **far cheaper than base Claude/ChatGPT**. It comes from a local knowledge graph that becomes **more relevant to its user with every question**: what they searched and what is adjacent to it, from the sources they trust, instead of ads. Search works and is the tool underneath, not the rival. Planck 3.0 keeps knowledge out of the weights. The model is a small (~100M), frozen-size **policy**. It never writes free text. It emits **typed decisions** from a closed action vocabulary (search, open result k, follow link k, extract span k, answer, abstain), each with a **calibrated probability**. Deterministic tools do the heavy lifting: search, fetch, main-content extraction, answer rendering. Everything it extracts goes into a local, growing **knowledge store**: typed facts plus SGS blobs, with source, timestamp and a per-domain trust prior. That store is what "improves with use". Loop: `query → store lookup → (miss) search → pick result → extract → verify → store → answer card with citations`. This is the Jev idea (typed, probabilistic, fast decisions) plus the Muse idea (a personal agent with memory), built SGS-native, local and read-only. The PoC is gated. **G0** proves the tool harness with a teacher policy, before any Planck training. **G1** distills on offline Wikiracing, where labels are free. **G2** covers three consumer task families. **G3** proves the store compounds. **G4** is the SGS research claim: does an alpha-compositing pointer beat a softmax pointer at candidate selection?
 
 ## 0. Why (objective, set 2026-09-29)
 
-- **Customer:** behaviour is shifting from semantic/keyword search to chat. A chat turn gives a **direct answer** instead of ten links, carries **follow-ups** ("and H&M?", "when was it founded?"), and cites its evidence. Search is the tool underneath, not the rival.
-- **Commercial:** LLM chat with search pays for a frontier model to read pages on every turn. Planck 3.0 moves the reading into deterministic tools and the choosing into a ~100M local policy, so the marginal cost per answer is search calls plus CPU milliseconds. Target: **≥100× cheaper per correct answer** than an LLM chat on the same tools, at comparable quality.
+**Product in one line:** Brain-style retrieval for the open web. A direct answer plus retrieval in depth, from a local knowledge graph that grows with use and is faster, cheaper and more generic than asking base Claude/ChatGPT.
 
-**What "better than search" means (measured, every G0/G2 run):**
+- **Customer:** behaviour is shifting from search boxes to **chat**. A chat turn gives:
+  - a **direct answer** instead of ten links;
+  - **follow-ups** that carry context ("and H&M?", "when was it founded?");
+  - **retrieval in depth** behind the answer: ranked evidence passages, the sources read, further reading, and related facts already in memory. That is Brain's `query_knowledge` shape (ranked hits, then drill-down), applied to the web.
+- **Commercial:** the rival is **base Claude/ChatGPT**, not search. Those pay a frontier model per turn, answer from weights with a cutoff, and rarely show their evidence. Planck 3.0 moves the reading into deterministic tools and the choosing into a ~100M local policy. The marginal cost per answer is search calls plus CPU milliseconds. Target: **≥100× cheaper per correct answer at comparable quality, with evidence attached.**
+- **It gets more relevant with use, instead of ads.** The local knowledge graph keeps every passage read, the entity co-mention graph, what the user asks about (recency-weighted) and which sources they trust (earned or thumbs-up). So it can keep retrieving what they searched and what is adjacent to it, **from the sources they trust**, as a private "For you" digest. An ad-funded feed ranks what someone paid to show. This one ranks by the user's own interests and trust. Nothing leaves the machine except search queries and page fetches.
 
-| Comparator | What it is | Metric |
-|---|---|---|
-| **Search only** | The user reads the top-3 result snippets | `serp_answer_rate_at3`: is the gold value visible in them? (generous to search) |
-| **LLM chat** | Teacher (Gemma, or Haiku) driving the same tools, tokens priced at Haiku API rates | success, `usd_per_correct` |
-| **Planck 3.0** | The distilled local policy | success, `usd_per_correct`, ms/decision |
+**Comparators (measured on every G0/G2 run):**
 
-Planck 3.0 is "better than search" when its **direct-answer success ≥ the search-only snippet rate**, and "cheap" when its **cost per correct answer ≤ 1% of the LLM-chat comparator**. The LLM comparator only sees compact candidate lists, so real LLM chat products (which read whole pages) cost more: the ratio we report is conservative. Prices live in `config/planck3_prices.json` (Haiku 4.5 $1/$5 per MTok, Anthropic list price).
+| Comparator | What it is | Role | Metric |
+|---|---|---|---|
+| **Base chat** | Gemma (or Haiku) answering from its weights, no tools, raw conversation for chat turns (`g0 --closed-book`) | **the rival** | success, `usd_per_correct` |
+| **LLM chat on our tools** | the same LLM as the policy over our search/extract tools, tokens priced at Haiku API rates | teacher and cost ceiling | success, `usd_per_correct` |
+| **Search only** | the user reads the top-3 result snippets | quality floor, not the rival | `serp_answer_rate_at3` |
+| **Planck 3.0** | the distilled local policy | the product | success, `depth_evidence_recall`, `usd_per_correct`, ms/decision |
+
+Planck 3.0 is good enough when:
+- it **matches base chat on quality**: direct-answer success ≥0.9× closed-book, with a higher expected margin on fresh facts where base chat hits its cutoff;
+- it **beats it on evidence**: `depth_evidence_recall`, the share of answers whose depth pack contains the correct value;
+- it costs **≤1% per correct answer**.
+
+Search-only is the floor it must clear. Both LLM comparators are priced at Haiku 4.5 API list rates ($1/$5 per MTok, `config/planck3_prices.json`). Real chat products use bigger models and read whole pages, so the reported ratio is conservative.
 
 ## 1. Source notes (cleaned from voice memo, 2026-09-29)
 
@@ -71,6 +83,7 @@ Planck 3.0 is "better than search" when its **direct-answer success ≥ the sear
 2. **Compare table.** `N items × M attributes`, e.g. "3 robot vacuums under €300: price, battery, rating". Built by composing fact-card extractions, so no new capability is needed.
 3. **Watch.** A stored fact-card query re-runs on a schedule and notifies when the value changes or crosses a threshold ("tell me when X drops below €Y"). This is the Muse-style background agent, still read-only.
 4. **Chat.** Multi-turn conversations: the answer type is inferred from the question and follow-ups are rewritten into standalone questions (`SWAP_ENTITY`: "and H&M?"; `PRONOUN`: "when was it founded?"). Both are deterministic rules now and small classification decisions for the Planck head later. Surfaces: terminal `chat` and a local web chat (`serve`, stdlib only).
+5. **For you (digest).** From the local graph only: the user's recency-weighted interests, fresh evidence about them, **adjacent** entities (co-mention edges), and stale facts due for a refresh, all restricted to **trusted domains**. `digest --explore` is the continuous-retrieval loop. It searches adjacent entities, keeps only trusted-domain results, and reads them into the graph (read-only, runs on a schedule). Thumbs up/down on a source moves its trust (weight 2 vs 1 for implicit signals).
 
 **Actionable output without side effects:** deterministic renderers export a card or table as a checklist, shopping list, `.ics` event, or a **handoff deep link** to the page where the user completes the action. Muse does the action itself. We hand off.
 
@@ -121,8 +134,8 @@ user query
 |---|---|---|---|
 | **G0 Harness + teacher ceiling** | Tools + store + typed actions with **Gemma/Haiku as the policy**, no Planck | Teacher ≥60% task success on the consumer set; cached replay deterministic | Teacher <40% → the action space/tools are wrong; fix them before training anything |
 | **G1 Wikiracing distill** | Planck 3.0 policy on held-out Wikipedia start/target pairs (held-out targets) | Rollout success (within 2× optimal steps) ≥0.8× the Gemma teacher's; beats head:hash control; <100ms/decision warm on CPU | Fail on 100M → rerun with Hertz 1.2 (640M) encoder as capacity ablation |
-| **G2 Consumer end-to-end** | Four task families on cached benchmark (fact, compare, watch, chat) | ≥0.7× the LLM-chat teacher's success **and** ≥ the search-only snippet rate; **cost per correct answer ≤1% of the teacher's**; wrong-answer rate on answered items <5% (abstain instead); ECE <0.05 | Large gap on extraction only → move extraction to deterministic schema parsers (JSON-LD/microdata first), keep the model for choosing |
-| **G3 Store compounding** | Replay a second batch of related queries against the warm store | Web calls/task −40% at equal accuracy; domain prior raises OPEN precision@1 | No gain → store/lookup design problem, not the model |
+| **G2 Consumer end-to-end** | Task families on cached benchmark (fact, compare, watch, chat) | ≥0.9× **base chat (closed-book)** success and ≥ the search-only snippet rate; `depth_evidence_recall` ≥0.8; **cost per correct answer ≤1% of base chat's**; wrong-answer rate on answered items <5% (abstain instead); ECE <0.05 | Large gap on extraction only → move extraction to deterministic schema parsers (JSON-LD/microdata first), keep the model for choosing |
+| **G3 Graph compounding + relevance** | Replay a second batch of related queries against the warm graph; a week of real use with thumbs up/down | Web calls/task −40% at equal accuracy; domain prior raises OPEN precision@1; repeat questions answered from memory **with their evidence** at 0 web calls; digest thumbs-up rate rises week over week | No gain → graph/lookup design problem, not the model |
 | **G4 SGS pointer (research)** | Render pointer vs softmax pointer on OPEN/EXTRACT, incl. duplicate-heavy lists | Significant gain, **≥3 seeds, held-out, BH-corrected** | Parity → ship softmax; the negative result is still a paper footnote to the theorem |
 
 Discipline carried from the VSP work: reseed before believing any delta, pick λ/τ on held-out data only, and pre-register the thresholds above.
@@ -160,10 +173,12 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 | `.\scripts\planck3.ps1 setup` | pip-installs trafilatura/requests/scipy/pytest into `.venv`; checks torch CUDA, checkpoints, Gemma, Docker | console table |
 | `.\scripts\planck3.ps1 smoke` | 32 offline tests (fake web, synthetic Wikipedia dump, tiny Planck checkpoint, chat server), ~5s | pytest |
 | `.\scripts\planck3.ps1 serve` | **local web chat** at http://127.0.0.1:8010: follow-ups, cited answers, decision trace per reply (`-Policy heuristic` for instant start) | browser |
-| `.\scripts\planck3.ps1 chat` | the same in the terminal | console |
+| `.\scripts\planck3.ps1 chat` | the same in the terminal (`more` shows the evidence behind the last answer) | console |
+| `.\scripts\planck3.ps1 digest` | **"For you"** from your local knowledge graph: interests, adjacent entities, stale facts, trusted sources only (`-Explore` also reads adjacent entities from trusted sources) | console; also the "For you" button in `serve` |
+| `.\scripts\planck3.ps1 py feedback source en.wikipedia.org up` | thumbs up/down a source (or `entity`); also "trust more/less" under each passage in `serve` | store |
 | `.\scripts\planck3.ps1 ask "Who founded SpaceX?" -Type entity` | one question → answer card, with the decision trace (`-Policy heuristic` to skip loading Gemma) | console; facts land in `results/planck3/personal_store.sqlite` |
 | `.\scripts\planck3.ps1 searxng` | starts the `planck3-searxng` container on `127.0.0.1:8888` (config: `config/searxng/settings.yml`) | Docker |
-| `.\scripts\planck3.ps1 g0` | G0: 47-task seed benchmark (37 fact, 4 compare, 6 chat) with the Gemma teacher, then the heuristic baseline; reports success, search-only snippet rate, cost per correct answer | `results/planck3/g0_<policy>/{summary.json, cards.md, results.jsonl, trajectories.jsonl}` |
+| `.\scripts\planck3.ps1 g0` | G0: 47-task seed benchmark (37 fact, 4 compare, 6 chat): Gemma teacher on our tools, then **Gemma closed-book (the base-chat rival)**, then the heuristic floor; reports success, depth evidence recall, search-only rate, cost per correct answer | `results/planck3/g0_gemma/`, `g0_gemma_closedbook/`, `g0_heuristic/` | `results/planck3/g0_<policy>/{summary.json, cards.md, results.jsonl, trajectories.jsonl}` |
 | `.\scripts\planck3.ps1 g1` | G1: Simple English dump (356 MB) → link graph → BFS tasks → hash + Planck embeddings → heads → eval vs random/lexical/Gemma | `data/planck3/wikirace/`, `results/planck3/g1_head_*_s0/`, `results/planck3/g1_eval_s0/summary.json` |
 | `.\scripts\planck3.ps1 g1 -Seed 1` | an extra seed (reseed before believing any head:planck vs head:hash delta) | `..._s1/` |
 | `.\scripts\planck3.ps1 report` | one line per summary | console |
@@ -178,6 +193,9 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 - **G1 gate clarified (pre-registered before any G1 run):** the original "80% of BFS-oracle-guided rate" was ill-defined, because the oracle is 100% by construction. It now reads: **head:planck rollout success ≥ 0.8× the Gemma teacher's, with warm per-decision latency < 100ms on CPU.** Two more rules: head:planck must beat **head:hash** (same head on hashed bag-of-words features) or Planck is adding nothing. Cold CPU latency (encoding every candidate title from scratch) is reported but not gated.
 - **Objective reframed (2026-09-29, before any teacher run):** chat instead of search, cheaply (section 0). Two new G0 metrics: `serp_answer_rate_at3` (search-only comparator) and `cost` (usd per task / per correct answer, teacher tokens priced at Haiku rates). A chat family was added (tasks v2, 47 tasks).
 - **Mac re-run on v2 (heuristic, Wikipedia search):** success 48.9% vs **search-only snippet rate 55.3%**. On these stable facts, plain search already surfaces the answer more often than the no-model floor extracts it, which is exactly the framing: search works, and the product has to turn it into a direct chat answer. Chat mechanics: answer-type inference **6/6**, follow-up rewrite **6/6** conversations; every chat miss is the heuristic's value choice. The store answered repeat questions with **0 web calls** (ch03, ch04 reused facts from earlier tasks). Heuristic cost ≈ $0.
+- **Rival clarified (2026-09-29):** cost is vs **base Claude/ChatGPT**, and the product is **direct answer + retrieval in depth** ("Brain for the web"). Added the closed-book base-chat comparator (`g0 --closed-book`) and the depth pack on every answer: ranked passages across everything read + snippets, mirror dedup, sources, related memory, no LLM and no extra fetches. Added `depth_evidence_recall`.
+- **Graph grows with use (2026-09-29):** the store now keeps passages, a co-mention entity graph, the interest log and user feedback. `digest` / "For you" serves interests + adjacent entities from trusted sources only; `--explore` is the continuous-retrieval loop.
+- **Mac v3 (heuristic, Wikipedia search, 47 tasks):** direct answer 48.9% · search-only 55.3% · **depth evidence recall 78.7%**. The evidence pack holds the right value far more often than the one-line answer is right, so the depth layer already carries value before any model is trained. One benchmark pass grew the graph to **258 passages / 477 entities**. A repeat question in the web chat came back from memory with 6 evidence passages and 0 web calls.
 - **G2-G4:** after G1.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
