@@ -197,7 +197,9 @@ class Graph:
 
 # ── tasks ────────────────────────────────────────────────────────────────
 def make_tasks(d: Path, n_targets: int, starts_per_target: int, offpath_per_target: int,
-               seed: int, min_dist: int = 2, max_dist: int = 6, min_indeg: int = 5):
+               seed: int, min_dist: int = 2, max_dist: int = 6, min_indeg: int = 5, td: Path | None = None):
+    td = Path(td or d)  # tasks dir: the graph is shared, task sets (full / quick) are not
+    td.mkdir(parents=True, exist_ok=True)
     from scipy.sparse.csgraph import shortest_path
     g = Graph(d)
     rng = random.Random(seed)
@@ -249,13 +251,13 @@ def make_tasks(d: Path, n_targets: int, starts_per_target: int, offpath_per_targ
                 steps[split].append({"target": tgt, "node": int(u), "dist": int(dv[u]), "gold": gold})
         print(f"  targets {min(bstart + B, len(targets))}/{len(targets)} ({time.time() - t0:.0f}s)", flush=True)
     for s in pairs:
-        with open(d / f"pairs_{s}.jsonl", "w", encoding="utf-8") as f:
+        with open(td / f"pairs_{s}.jsonl", "w", encoding="utf-8") as f:
             f.writelines(json.dumps(x) + "\n" for x in pairs[s])
-        with open(d / f"steps_{s}.jsonl", "w", encoding="utf-8") as f:
+        with open(td / f"steps_{s}.jsonl", "w", encoding="utf-8") as f:
             f.writelines(json.dumps(x) + "\n" for x in steps[s])
     info = {s: {"pairs": len(pairs[s]), "steps": len(steps[s])} for s in pairs}
     info.update({"n_targets": len(targets), "seed": seed})
-    write_json(d / "tasks_info.json", info)
+    write_json(td / "tasks_info.json", info)
     print(f"[wikirace] tasks: {info}")
 
 
@@ -302,7 +304,7 @@ def _batches(g, steps, E, max_cands, rng, device, train=True):
                gm.to(device), cm.to(device), cand_lists, gold_sets)
 
 
-def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, seed: int,
+def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, seed: int, td: Path | None = None,
           max_cands: int = 256, hidden: int = 128, dropout: float = 0.3, weight_decay: float = 0.05,
           patience: int = 2):
     import torch
@@ -312,8 +314,9 @@ def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, see
     device = "cuda" if torch.cuda.is_available() else "cpu"
     g = Graph(d)
     E = torch.from_numpy(np.load(d / f"emb_{encoder_name}.npy").astype(np.float32)).to(device)
-    tr = [s for s in read_jsonl(d / "steps_train.jsonl") if s["gold"]]
-    va = [s for s in read_jsonl(d / "steps_val.jsonl") if s["gold"]]
+    td = Path(td or d)
+    tr = [s for s in read_jsonl(td / "steps_train.jsonl") if s["gold"]]
+    va = [s for s in read_jsonl(td / "steps_val.jsonl") if s["gold"]]
     head = PointerHead(E.shape[1], hidden=hidden, dropout=dropout).to(device)
     opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=weight_decay)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -460,11 +463,13 @@ def rollout(g, policy, start, target, max_steps):
 
 
 def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path: str,
-             teacher_limit: int, heads: dict[str, Path], latency_ckpt: str | None, latency_tok: str | None):
+             teacher_limit: int, heads: dict[str, Path], latency_ckpt: str | None, latency_tok: str | None,
+             td: Path | None = None):
     from .metrics import ece
     g = Graph(d)
-    pairs = read_jsonl(d / "pairs_test.jsonl")[: limit or None]
-    test_steps = read_jsonl(d / "steps_test.jsonl")
+    td = Path(td or d)
+    pairs = read_jsonl(td / "pairs_test.jsonl")[: limit or None]
+    test_steps = read_jsonl(td / "steps_test.jsonl")
     embs = {p.stem.replace("emb_", ""): np.load(p) for p in d.glob("emb_*.npy")}
     results = {}
     for name in policies:
@@ -515,7 +520,7 @@ def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path
         results["latency_cpu_cold"] = cold_latency(g, pairs, latency_ckpt, latency_tok)
     verdict = g1_verdict(results)
     summary = {"results": results, "gate": verdict, "graph": read_json(d / "graph_info.json"),
-               "tasks": read_json(d / "tasks_info.json")}
+               "tasks": read_json(td / "tasks_info.json")}
     write_json(out_dir / "summary.json", summary)
     print(f"\n  GATE G1: {verdict['verdict']}\n  {verdict.get('note', '')}\n  -> {out_dir / 'summary.json'}")
 
@@ -560,7 +565,8 @@ def g1_verdict(res: dict) -> dict:
 def add_cli(sub):
     p = sub.add_parser("wikirace", help="G1 offline Wikiracing pipeline")
     p.add_argument("stage", choices=["build", "tasks", "embed", "train", "eval"])
-    p.add_argument("--dir", default=str(WR_DIR))
+    p.add_argument("--dir", default=str(WR_DIR), help="graph + embeddings (shared by every task set)")
+    p.add_argument("--tag", default="", help="task-set tag, e.g. _quick: tasks in <dir>/tasks<tag>, results suffixed")
     p.add_argument("--lang", default="simple")
     p.add_argument("--dump", default=None)
     p.add_argument("--max-pages", type=int, default=0, help="debug: stop parsing after N articles")
@@ -581,8 +587,13 @@ def add_cli(sub):
     p.set_defaults(fn=_cli)
 
 
+def tasks_dir(d: Path, tag: str) -> Path:
+    return d if not tag else d / f"tasks{tag}"
+
+
 def _cli(args):
     d = Path(args.dir)
+    td = tasks_dir(d, args.tag)
     results = REPO_ROOT / "results" / "planck3"
     if args.stage == "build":
         dump = Path(args.dump) if args.dump else d / f"{args.lang}wiki-latest-pages-articles.xml.bz2"
@@ -590,14 +601,15 @@ def _cli(args):
             download(DUMP_URL.format(lang=args.lang), dump)
         build_graph(dump, d, args.max_pages)
     elif args.stage == "tasks":
-        make_tasks(d, args.targets, args.starts, args.offpath, args.seed)
+        make_tasks(d, args.targets, args.starts, args.offpath, args.seed, td=td)
     elif args.stage == "embed":
         embed(d, args.encoder, checkpoint=args.checkpoint, tokenizer=args.tokenizer)
     elif args.stage == "train":
-        train(d, args.encoder, results / f"g1_head_{args.encoder}_s{args.seed}", args.epochs, args.lr, args.seed)
+        train(d, args.encoder, results / f"g1_head_{args.encoder}_s{args.seed}{args.tag}", args.epochs, args.lr,
+              args.seed, td=td)
     elif args.stage == "eval":
-        heads = {e: results / f"g1_head_{e}_s{args.seed}" / "head.pt" for e in ("hash", "planck")}
+        heads = {e: results / f"g1_head_{e}_s{args.seed}{args.tag}" / "head.pt" for e in ("hash", "planck")}
         heads = {e: p for e, p in heads.items() if p.exists()}
         lat = None if args.no_latency or not Path(args.checkpoint).exists() else args.checkpoint
-        evaluate(d, args.policies.split(","), results / f"g1_eval_s{args.seed}", args.limit,
-                 args.gemma_path, args.teacher_limit, heads, lat, args.tokenizer)
+        evaluate(d, args.policies.split(","), results / f"g1_eval_s{args.seed}{args.tag}", args.limit,
+                 args.gemma_path, args.teacher_limit, heads, lat, args.tokenizer, td=td)

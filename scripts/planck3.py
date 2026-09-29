@@ -14,7 +14,8 @@ Commands:
     watch add|list|run                background watch tasks (read-only)
     search-check                      is SearXNG up? (auto falls back to Wikipedia search)
     wikirace build|embed|train|eval   G1 pipeline (see src/planck3/wikirace.py)
-    report                            print every G0/G1 summary under results/planck3/
+    doctor [--deep]                   preflight + ETA per stage; --deep loads Gemma/Planck and measures them
+    report                            every G0/G1 result in one table -> results/planck3/REPORT.md
 
 Plan: SETUP_092026_planck3.md
 """
@@ -147,7 +148,11 @@ def cmd_digest(args):
         print(f"[planck3] explored {len(added)} adjacent sources from trusted domains")
         for a in added:
             print(f"  + {a['entity']} (via {a['via']}): {a['passages']} passages  {a['url']}")
-    print(render_digest(build_digest(store, min_trust=args.min_trust)))
+    text = render_digest(build_digest(store, min_trust=args.min_trust))
+    print(text)
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    with open(RESULTS / "digest.md", "w", encoding="utf-8") as f:  # the scheduled task has no console
+        f.write(text + "\n")
 
 
 def cmd_feedback(args):
@@ -167,6 +172,8 @@ def cmd_g0(args):
     tasks = spec["tasks"][: args.limit] if args.limit else spec["tasks"]
     if args.family:
         tasks = [t for t in tasks if t["family"] in args.family.split(",")]
+    if args.sample:
+        tasks = _stratified(tasks, args.sample)
     suffix = "_closedbook" if args.closed_book else ""
     run = args.out or str(RESULTS / f"g0_{args.policy}{suffix}_{datetime.now():%Y%m%d_%H%M}")
     run = Path(run)
@@ -215,7 +222,31 @@ def cmd_g0(args):
     with open(run / "cards.md", "w", encoding="utf-8") as f:
         f.write(f"# G0 answer cards ({args.policy})\n\n" + "\n".join(cards))
     _print_summary("G0", summ)
+    _gzip(ctx["traj"])
     print(f"\n  run dir: {run}")
+
+
+def _stratified(tasks, n):
+    """Round-robin over families so a small sample still exercises fact, compare and chat."""
+    by = {}
+    for t in tasks:
+        by.setdefault(t["family"], []).append(t)
+    out, i = [], 0
+    while len(out) < n and any(i < len(v) for v in by.values()):
+        for fam in sorted(by):
+            if i < len(by[fam]) and len(out) < n:
+                out.append(by[fam][i])
+        i += 1
+    return out
+
+
+def _gzip(path):
+    """Compressed copy of the trajectories for git (the teacher data for G2 distillation)."""
+    import gzip
+    import shutil
+    if Path(path).exists():
+        with open(path, "rb") as src, gzip.open(str(path) + ".gz", "wb") as dst:
+            shutil.copyfileobj(src, dst)
 
 
 def _run_closed_book(args, tasks, run):
@@ -459,12 +490,74 @@ def cmd_search_check(args):
     sys.exit(0 if ok else 1)
 
 
+def cmd_doctor(args):
+    from src.planck3.doctor import run
+    sys.exit(run(args.deep, args.checkpoint, args.tokenizer, args.gemma_path, args.searxng_url))
+
+
 def cmd_report(args):
-    for summ in sorted(RESULTS.glob("*/summary.json")):
-        s = read_json(summ)
-        gate = s.get("gate", {}).get("verdict", "")
-        succ = s.get("success", s.get("rollout_success"))
-        print(f"{summ.parent.name:<40} success={succ if succ is None else round(succ, 3)}  {gate}")
+    """One table for every run under results/planck3/, written to REPORT.md (committed by the runner)."""
+    lines = [f"# Planck 3.0 results ({datetime.now():%Y-%m-%d %H:%M})", ""]
+    g0 = sorted(RESULTS.glob("g0_*/summary.json"))
+    if g0:
+        lines += ["## G0 (seed benchmark)", "",
+                  "| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | $/correct | LLM tok/task | verdict |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|"]
+        rows = {}
+        for p in g0:
+            s = read_json(p)
+            rows[p.parent.name] = s
+            c = s.get("cost") or {}
+            f = lambda k: "" if s.get(k) is None else f"{s[k]:.3f}"  # noqa: E731
+            per_ok = "" if not c.get("usd_per_correct") else f"{c['usd_per_correct']:.6f}"
+            lines.append(f"| {p.parent.name} | {s.get('n')} | {f('success')} | {f('answered_rate')} | "
+                         f"{f('wrong_when_answered')} | {f('ece')} | {f('depth_evidence_recall')} | "
+                         f"{f('serp_answer_rate_at3')} | {per_ok} | {c.get('llm_tokens_per_task', 0):.0f} | "
+                         f"{s.get('gate', {}).get('verdict', '')} |")
+        lines += ["", *_vs_rival(rows), ""]
+    g1 = sorted(RESULTS.glob("g1_eval_*/summary.json"))
+    for p in g1:
+        s = read_json(p)
+        lines += [f"## G1 Wikiracing ({p.parent.name})", "",
+                  "| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |",
+                  "|---|---|---|---|---|---|---|"]
+        for name, r in s["results"].items():
+            if "rollout_success" not in r:
+                continue
+            g = lambda k: "" if r.get(k) is None else f"{r[k]:.3f}"  # noqa: E731
+            lines.append(f"| {name} | {r['n_pairs']} | {g('rollout_success')} | {g('mean_steps_over_optimal')} | "
+                         f"{g('step_top1')} | {g('step_ece')} | {g('median_decision_ms')} |")
+        cold = s["results"].get("latency_cpu_cold")
+        if cold:
+            lines.append(f"\nCold CPU latency (encode target + all candidate titles): median {cold['median_ms']:.0f} ms, "
+                         f"p90 {cold['p90_ms']:.0f} ms, {cold['mean_candidates']:.0f} candidates on average")
+        lines += ["", f"**Verdict:** {s['gate']['verdict']}. {s['gate'].get('note', '')}", ""]
+    if not g0 and not g1:
+        lines.append("No runs yet.")
+    text = "\n".join(lines)
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    with open(RESULTS / "REPORT.md", "w", encoding="utf-8") as f:
+        f.write(text + "\n")
+    print(text)
+
+
+def _vs_rival(rows):
+    """Headline: the product (tool-using run) against the base-chat rival (closed-book)."""
+    out = []
+    for name, s in rows.items():
+        if "_closedbook" in name or s.get("mode") == "closed_book":
+            continue
+        rival = next((r for n, r in rows.items() if n.startswith(name.split("_quick")[0] + "_closedbook")
+                      and (("_quick" in n) == ("_quick" in name))), None)
+        if not rival:
+            continue
+        a, b = s.get("cost") or {}, rival.get("cost") or {}
+        ratio = (b["usd_per_correct"] / a["usd_per_correct"]) if a.get("usd_per_correct") and b.get("usd_per_correct") else None
+        out.append(f"**{name} vs base chat:** success {s['success']:.3f} vs {rival['success']:.3f} "
+                   f"({s['success'] / max(rival['success'], 1e-9):.2f}x); depth evidence {s.get('depth_evidence_recall', 0):.3f} "
+                   f"vs none (base chat shows no sources); cost per correct "
+                   + (f"{ratio:.1f}x cheaper" if ratio else "n/a (a teacher run is priced as an LLM; the Planck policy run is the cheap one)"))
+    return out
 
 
 def main():
@@ -511,6 +604,7 @@ def main():
     p.add_argument("--out", default=None)
     p.add_argument("--store", default=None, help="reuse a store across runs (G3); default = fresh per run")
     p.add_argument("--family", default=None, help="comma list: fact,compare,chat")
+    p.add_argument("--sample", type=int, default=0, help="stratified subset of N tasks across families (quick runs)")
     p.add_argument("--closed-book", action="store_true",
                    help="base-chat comparator: the LLM answers from its weights, no tools/sources")
     p.add_argument("--prices", default=str(REPO_ROOT / "config" / "planck3_prices.json"))
@@ -533,6 +627,14 @@ def main():
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--cache-dir", default=str(CACHE))
     p.set_defaults(fn=cmd_search_check)
+
+    p = sub.add_parser("doctor", help="preflight: environment, models, network, ETA per stage")
+    p.add_argument("--deep", action="store_true", help="load Gemma + Planck and measure them (~2 min)")
+    p.add_argument("--checkpoint", default="checkpoints/planck13/best.pt")
+    p.add_argument("--tokenizer", default="data/wikipedia/tokenizer.model")
+    p.add_argument("--gemma-path", default="models/gemma-4-e4b-it")
+    p.add_argument("--searxng-url", default="http://localhost:8888")
+    p.set_defaults(fn=cmd_doctor)
 
     p = sub.add_parser("report")
     p.set_defaults(fn=cmd_report)

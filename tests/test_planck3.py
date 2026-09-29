@@ -401,3 +401,35 @@ def test_closed_book_comparator(tmp_path, monkeypatch):
     s = _json.loads((tmp_path / "run" / "summary.json").read_text(encoding="utf-8"))
     assert s["mode"] == "closed_book" and s["n"] == 2 and abs(s["success"] - 0.5) < 1e-9
     assert "User: When was IKEA founded?" in fake.prompts[-1]   # chat turns carry the conversation
+
+
+# ── doctor ───────────────────────────────────────────────────────────────
+def test_doctor_catches_tokenizer_mismatch_and_measures(tmp_path):
+    import sentencepiece as spm
+    import torch
+    from src.planck3.doctor import FAIL, OK, Doctor
+    from src.sgs_lm import SGSLanguageModel
+    corpus = tmp_path / "c.txt"
+    corpus.write_text("\n".join(["the quick brown fox jumps over the lazy dog", "ikea was founded in sweden"] * 40),
+                      encoding="utf-8")
+    spm.SentencePieceTrainer.train(input=str(corpus), model_prefix=str(tmp_path / "tok"), vocab_size=50,
+                                   model_type="unigram", hard_vocab_limit=False)
+    n = spm.SentencePieceProcessor(model_file=str(tmp_path / "tok.model")).get_piece_size()
+    for vocab, expect in ((n, OK), (n + 7, FAIL)):
+        m = SGSLanguageModel(vocab_size=vocab, d_s=8, d_f=16, n_passes=2, n_heads=2, max_len=32)
+        torch.save({"model": m.state_dict()}, tmp_path / "m.pt")
+        d = Doctor()
+        d.planck(str(tmp_path / "m.pt"), str(tmp_path / "tok.model"), deep=(expect == OK))
+        row = next(r for r in d.rows if r["check"] == "planck ckpt vs tokenizer")
+        assert row["status"] == expect
+    assert d.measured == {} and "planck_embed_s_per_text" not in d.measured  # FAIL case did not measure
+    assert any(stage.startswith("g1 planck embed") for stage, _ in d.eta())
+
+
+def test_doctor_probe_observations_are_valid_decision_points():
+    from src.planck3.actions import validate
+    from src.planck3.doctor import _probe_observations
+    pol = HeuristicPolicy()
+    for obs in _probe_observations():
+        d = pol.decide(obs)
+        validate(d, obs["phase"], {k: len(v) for k, v in obs["lists"].items()})
