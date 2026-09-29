@@ -12,7 +12,8 @@
      searxng   start the local SearXNG search container (Docker Desktop)
      chat      terminal chat with follow-ups ("and H&M?", "when was it founded?")
      serve     local web chat at http://127.0.0.1:8010 (open it in a browser)
-     ask       one question -> answer card:   .\scripts\planck3.ps1 ask "Who founded SpaceX?" -Type entity
+     ask       one question -> answer card:   .\scripts\planck3.ps1 ask "Who founded SpaceX?"
+     digest    "for you" from your local knowledge graph (-Explore reads adjacent entities from trusted sources)
      g0        G0 teacher ceiling: seed benchmark with the Gemma teacher (-Policy heuristic|gemma|bedrock)
      g1        G1 Wikiracing: build graph -> tasks -> embed -> train heads -> eval (+ Gemma teacher)
      report    print every G0/G1 summary
@@ -29,11 +30,12 @@
 param(
     [Parameter(Position = 0)][string]$Command = "help",
     [Parameter(Position = 1)][string]$Question = "",
-    [string]$Type = "entity",
+    [string]$Type = "auto",
     [string]$Policy = "gemma",
     [int]$Seed = 0,
     [int]$Limit = 0,
     [switch]$NoPush,
+    [switch]$Explore,
     [Parameter(ValueFromRemainingArguments = $true)][string[]]$Rest
 )
 
@@ -139,6 +141,10 @@ function Do-G0 {
     $a = @("g0", "--policy", $Policy, "--out", $out, "--gemma-path", $GEMMA)
     if ($Limit -gt 0) { $a += @("--limit", "$Limit") }
     P3 $a
+    if ($Policy -ne "heuristic" -and -not (Test-Path "$RES/g0_${Policy}_closedbook/summary.json")) {
+        Log "G0 base-chat comparator: $Policy closed-book (no tools, no sources)"
+        P3 @("g0", "--policy", $Policy, "--closed-book", "--out", "$RES/g0_${Policy}_closedbook", "--gemma-path", $GEMMA)
+    }
     if ($Policy -ne "heuristic" -and -not (Test-Path "$RES/g0_heuristic/summary.json")) {
         Log "G0 heuristic baseline (for comparison)"
         P3 @("g0", "--policy", "heuristic", "--out", "$RES/g0_heuristic")
@@ -205,6 +211,10 @@ switch ($Command.ToLower()) {
     "g0"      { Do-Searxng; Do-G0 }
     "g1"      { Do-G1 }
     "report"  { P3 @("report") }
+    "digest"  {
+        $a = @("digest"); if ($Explore) { Do-Searxng; $a += "--explore" }
+        P3 ($a + $Rest)
+    }
     "py"      { P3 @((@($Question) + $Rest) | Where-Object { $_ }) }
     "all"     {
         Do-Setup

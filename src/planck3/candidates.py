@@ -172,3 +172,100 @@ def span_candidates(question: str, text: str, answer_type: str, url: str = "",
     for a, b in zip(cands, cands[1:] + [None]):  # lead over the runner-up
         a["margin"] = round(a["score"] - (b["score"] if b else 0.0), 4)
     return cands[:limit]
+
+
+# ── depth: ranked evidence passages (Brain-style retrieval, over the web) ──
+def main_entity(question: str) -> str | None:
+    """Longest capitalized span that is not the sentence-initial wh-word (the question's subject)."""
+    toks = re.findall(r"[\w&'’.-]+", question)
+    spans, cur = [], []
+    for i, t in enumerate(toks):
+        t = t.strip(".")
+        ok = t[:1].isupper() and not (i == 0 and t.lower() in STOPWORDS) and t.lower() != "i"
+        if ok or (cur and t.lower() in ("of", "the", "de", "&") and i + 1 < len(toks) and toks[i + 1][:1].isupper()):
+            cur.append(t)
+        elif cur:
+            spans.append(" ".join(cur))
+            cur = []
+    if cur:
+        spans.append(" ".join(cur))
+    return max(spans, key=len) if spans else None
+
+
+def rank_passages(question: str, docs: list[dict], k: int = 6, per_source: int = 2,
+                  min_score: float = 0.25) -> list[dict]:
+    """
+    docs: [{url, domain, title, trust, text}] -> top-k passages [{text, url, domain, title, trust, score}].
+    A passage = a relevant sentence plus its next sentence for context. Only content words
+    count (stopword-only overlap is the noise Brain's keyword tier shows), weighted by
+    IDF across ALL docs, so a word every page repeats earns nothing. Near-duplicate
+    passages (mirrors, syndicated copies) are kept once, from the most trusted source.
+    """
+    q_words = [w for w in content_words(question) if w not in _QFORM]
+    if not q_words:
+        return []
+    per_doc = []
+    for d in docs:
+        sents = split_sentences(d.get("text", ""))
+        per_doc.append((d, sents, [set(norm_text(x).split()) for x in sents]))
+    all_sets = [ws for _, _, sets in per_doc for ws in sets]
+    n = max(len(all_sets), 1)
+    idf = {w: math.log(1 + n / (1 + sum(1 for ws in all_sets if w in ws))) for w in q_words}
+    total = sum(idf.values()) or 1.0
+    cands = []
+    for d, sents, sets in per_doc:
+        for i, (sent, ws) in enumerate(zip(sents, sets)):
+            if len(sent) < 25:
+                continue
+            sc = sum(idf[w] for w in q_words if w in ws) / total
+            if sc < min_score:
+                continue
+            text = sent if i + 1 >= len(sents) else f"{sent} {sents[i + 1]}"
+            cands.append({"text": text[:420], "url": d["url"], "domain": d.get("domain", ""),
+                          "title": d.get("title", ""), "trust": d.get("trust", 0.5),
+                          "score": round(sc + 0.1 * d.get("trust", 0.5), 4)})
+    cands.sort(key=lambda c: -c["score"])
+    out, seen, used = [], [], {}
+    for c in cands:
+        sig = set(norm_text(c["text"]).split())
+        if any(len(sig & s) / max(len(sig | s), 1) > 0.6 for s in seen):
+            continue  # near-duplicate of a passage we already kept
+        if used.get(c["url"], 0) >= per_source:
+            continue
+        out.append(c)
+        seen.append(sig)
+        used[c["url"]] = used.get(c["url"], 0) + 1
+        if len(out) >= k:
+            break
+    return out
+
+
+_NOT_NODES = set("""january february march april may june july august september october november december
+monday tuesday wednesday thursday friday saturday sunday""".split())
+# nationality/language adjectives ("Swedish", "American", "Japanese") describe, they are not places to go
+_ADJ_SUFFIX = ("ish", "ese", "ian", "ean", "ican", "ic", "an")
+
+
+def _is_node(n: str) -> bool:
+    words = n.split()
+    if len(n) < 3 or n in STOPWORDS or any(w in _NOT_NODES for w in words):
+        return False
+    if len(words) == 1 and n.endswith(_ADJ_SUFFIX) and not n.endswith(("stan", "land")):
+        return False
+    return " of " not in f" {n} "  # "CEO of H&M", "Duke of X": roles/phrases, not nodes
+
+
+def passage_entities(text: str, exclude: str | None = None, limit: int = 8) -> list[str]:
+    """Named things a passage mentions (graph nodes). Drops the subject itself and junk spans."""
+    ex = norm_text(exclude or "")
+    out, seen = [], set()
+    for sent in split_sentences(text):
+        for ent, off in _entities(sent):
+            n = norm_text(ent)
+            if n == ex or n in seen or not _is_node(n) or (off == 0 and len(n.split()) == 1):
+                continue  # sentence-initial single capitalized words are mostly not names
+            seen.add(n)
+            out.append(ent)
+            if len(out) >= limit:
+                return out
+    return out

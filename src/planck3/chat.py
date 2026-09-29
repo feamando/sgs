@@ -12,8 +12,8 @@ SWAP_ENTITY vs PRONOUN follow-up), which is exactly a System One decision.
 import re
 from dataclasses import dataclass, field
 
+from .candidates import main_entity  # noqa: F401  (re-exported for callers/tests)
 from .harness import Harness
-from .util import STOPWORDS
 from .web import domain_of
 
 _FOLLOW_LEAD = re.compile(r"^\s*(?:and|what about|how about|and what about|and for|same for|also)\b[\s,]*", re.I)
@@ -36,23 +36,6 @@ def infer_answer_type(question: str) -> str:
        re.search(r"\b(capital|headquarter|headquarters|founder|author|director|ceo|inventor)\b", q):
         return "entity"
     return "text"
-
-
-def main_entity(question: str) -> str | None:
-    """Longest capitalized span that is not the sentence-initial wh-word (the question's subject)."""
-    toks = re.findall(r"[\w&'’.-]+", question)
-    spans, cur = [], []
-    for i, t in enumerate(toks):
-        t = t.strip(".")
-        ok = t[:1].isupper() and not (i == 0 and t.lower() in STOPWORDS) and t.lower() not in ("i",)
-        if ok or (cur and t.lower() in ("of", "the", "de", "&") and i + 1 < len(toks) and toks[i + 1][:1].isupper()):
-            cur.append(t)
-        elif cur:
-            spans.append(" ".join(cur))
-            cur = []
-    if cur:
-        spans.append(" ".join(cur))
-    return max(spans, key=len) if spans else None
 
 
 @dataclass
@@ -101,6 +84,34 @@ def chat_answer(turn: Turn) -> str:
     return (f"{hedge}**{r['value']}**{mem}.\n"
             f"> {ctx[:220]}\n"
             f"Source: {src}{extra} · confidence {conf:.0%}")
+
+
+def depth_summary(turn: Turn) -> str:
+    d = turn.result.get("depth") or {}
+    n_src = len({p["url"] for p in d.get("passages", [])})
+    return (f"In depth: {len(d.get('passages', []))} passages from {n_src} sources, "
+            f"{len(d.get('related', []))} related facts in memory")
+
+
+def render_depth(turn: Turn, max_passages: int = 6) -> str:
+    """The retrieval layer behind the answer: evidence, sources, memory."""
+    d = turn.result.get("depth") or {}
+    lines = ["Evidence:"]
+    for i, p in enumerate(d.get("passages", [])[:max_passages], 1):
+        lines.append(f"  {i}. \"{p['text'][:300]}\"\n     ({p['domain']}, trust {p['trust']:.2f}) {p['url']}")
+    if d.get("related"):
+        lines.append("Also in memory:")
+        for f in d["related"]:
+            lines.append(f"  - {f['question']} {f['value']}")
+    read = [s for s in d.get("sources", []) if s["read"]]
+    unread = [s for s in d.get("sources", []) if not s["read"]]
+    if read:
+        lines.append("Read: " + ", ".join(s["domain"] for s in read))
+    if unread:
+        lines.append("Further reading:")
+        for s in unread[:5]:
+            lines.append(f"  - {s['title'][:80]}  {s['url']}")
+    return "\n".join(lines)
 
 
 class ChatSession:

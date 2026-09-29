@@ -1,9 +1,11 @@
 """
 Local chat UI for Planck 3.0: stdlib http.server only (no new deps on the box).
 
-    GET  /           the chat page
-    POST /api/chat   {"message": "...", "session": "id"} -> turn JSON
-    POST /api/reset  {"session": "id"}
+    GET  /             the chat page
+    GET  /api/digest   "for you" from the local knowledge graph
+    POST /api/chat     {"message": "...", "session": "id"} -> turn JSON (answer + depth)
+    POST /api/feedback {"kind": "source"|"entity", "target": "...", "value": 1|-1}
+    POST /api/reset    {"session": "id"}
 """
 
 import json
@@ -27,6 +29,9 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>Planck 3.0 cha
  .b blockquote{margin:6px 0;padding-left:10px;border-left:3px solid var(--line);color:var(--mut)}
  .meta{color:var(--mut);font-size:12px;margin-top:6px}
  details{font-size:12px;color:var(--mut);margin-top:4px}
+ details.depth{font-size:13px;color:var(--fg)} details.depth summary{color:var(--acc);cursor:pointer}
+ .ev{margin:6px 0;padding:6px 8px;border-left:3px solid var(--line)} .ev small{color:var(--mut)}
+ .ev a,.src a{color:var(--acc);text-decoration:none} .src{font-size:12px;color:var(--mut);margin-top:6px}
  form{display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg);padding:12px 0}
  input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit}
  button{padding:10px 14px;border-radius:10px;border:0;background:var(--acc);color:#fff;font:inherit;cursor:pointer}
@@ -35,7 +40,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>Planck 3.0 cha
 <h1>Planck 3.0 <span>· typed decisions, cited answers, local memory</span></h1>
 <div id="log"></div>
 <form id="f"><input id="q" autocomplete="off" placeholder="Ask, then follow up: 'and H&amp;M?', 'when was it founded?'" autofocus>
-<button>Ask</button><button type="button" class="g" id="r">New chat</button></form>
+<button>Ask</button><button type="button" class="g" id="fy">For you</button><button type="button" class="g" id="r">New chat</button></form>
 </main><script>
 const S = Math.random().toString(36).slice(2), log = document.getElementById('log');
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -46,7 +51,24 @@ document.getElementById('f').onsubmit = async e => {
   q.value=''; add('u', esc(m)); const b = add('b', '<span class="meta">thinking…</span>');
   const r = await fetch('/api/chat',{method:'POST',body:JSON.stringify({message:m,session:S})}).then(r=>r.json());
   const trace = r.trace.map(t=>esc(t)).join(' → ');
-  b.innerHTML = md(r.reply) + `<div class="meta">asked: “${esc(r.question)}” · ${r.answer_type} · ${r.rewrite} · ${r.steps} decisions · ${r.web_calls} web calls · ${r.ms} ms</div><details><summary>decision trace</summary>${trace}</details>`;
+  const d = r.depth, ev = d.passages.map((p,i)=>`<div class="ev">${esc(p.text)}<br><small>${esc(p.domain)} · trust ${p.trust.toFixed(2)} · <a href="${esc(p.url)}" target="_blank" rel="noopener">open</a> · <a href="#" onclick="return fb('${esc(p.domain)}',1,this)">trust more</a> · <a href="#" onclick="return fb('${esc(p.domain)}',-1,this)">trust less</a></small></div>`).join('');
+  const rel = d.related.length ? '<div class="src"><b>Also in memory:</b> ' + d.related.map(f=>esc(f.question+' '+f.value)).join(' · ') + '</div>' : '';
+  const more = d.sources.filter(s=>!s.read).slice(0,5).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title||s.domain)}</a>`).join(' · ');
+  const depth = `<details class="depth"><summary>In depth: ${d.passages.length} passages from ${new Set(d.passages.map(p=>p.url)).size} sources</summary>${ev}${rel}${more ? '<div class="src"><b>Further reading:</b> '+more+'</div>' : ''}</details>`;
+  b.innerHTML = md(r.reply) + depth + `<div class="meta">asked: “${esc(r.question)}” · ${r.answer_type} · ${r.rewrite} · ${r.steps} decisions · ${r.web_calls} web calls · ${r.ms} ms</div><details><summary>decision trace</summary>${trace}</details>`;
+};
+async function fb(domain, v, el){ await fetch('/api/feedback',{method:'POST',body:JSON.stringify({kind:'source',target:domain,value:v})}); el.textContent = v>0 ? 'trusted ✓' : 'noted ✓'; return false; }
+document.getElementById('fy').onclick = async () => {
+  const d = await fetch('/api/digest').then(r=>r.json()); const g = d.graph;
+  let h = `<b>For you</b> <span class="meta">${g.facts} facts · ${g.passages} passages · ${g.entities} entities · ${g.queries} questions · trusted: ${esc(d.trusted.join(', ')||'none yet')}</span>`;
+  if(!d.interests.length) h += '<br>Nothing yet: ask a few questions first.';
+  for(const s of d.interests){
+    h += `<div class="ev"><b>${esc(s.entity)}</b>` + s.recent.map(p=>`<br>${esc(p.text.slice(0,240))} <small>(${esc(p.domain)})</small>`).join('');
+    if(s.adjacent.length) h += '<br><small>Adjacent: ' + s.adjacent.map(a=>esc(a.entity)).join(' · ') + '</small>';
+    h += '</div>';
+  }
+  if(d.stale.length) h += '<div class="src"><b>Due for a refresh:</b> ' + d.stale.map(f=>esc(f.question)).join(' · ') + '</div>';
+  add('b', h);
 };
 document.getElementById('r').onclick = async () => { await fetch('/api/reset',{method:'POST',body:JSON.stringify({session:S})}); log.innerHTML=''; };
 </script></body></html>"""
@@ -54,6 +76,7 @@ document.getElementById('r').onclick = async () => { await fetch('/api/reset',{m
 
 def make_server(harness_factory, host: str = "127.0.0.1", port: int = 8010):
     sessions: dict[str, ChatSession] = {}
+    store = harness_factory().store  # one shared personal knowledge graph
     lock = threading.Lock()  # one harness/model: serialize turns
 
     class H(BaseHTTPRequestHandler):
@@ -69,6 +92,10 @@ def make_server(harness_factory, host: str = "127.0.0.1", port: int = 8010):
             self.wfile.write(body)
 
         def do_GET(self):
+            if self.path == "/api/digest":
+                from .digest import build_digest
+                with lock:
+                    return self._json(build_digest(store))
             if self.path != "/":
                 return self._json({"error": "not found"}, 404)
             body = PAGE.encode("utf-8")
@@ -82,6 +109,11 @@ def make_server(harness_factory, host: str = "127.0.0.1", port: int = 8010):
             n = int(self.headers.get("Content-Length", 0))
             data = json.loads(self.rfile.read(n) or b"{}")
             sid = str(data.get("session", "default"))
+            if self.path == "/api/feedback":
+                with lock:
+                    store.feedback(str(data.get("kind", "source")), str(data.get("target", "")),
+                                   int(data.get("value", 1)))
+                return self._json({"ok": True})
             if self.path == "/api/reset":
                 sessions.pop(sid, None)
                 return self._json({"ok": True})
@@ -94,7 +126,8 @@ def make_server(harness_factory, host: str = "127.0.0.1", port: int = 8010):
                 t = sess.ask(msg)
                 ms = int((time.perf_counter() - t0) * 1000)
             r = t.result
-            self._json({"reply": chat_answer(t), "question": t.question, "answer_type": t.answer_type,
+            self._json({"reply": chat_answer(t), "depth": r.get("depth", {"passages": [], "sources": [], "related": []}),
+                        "question": t.question, "answer_type": t.answer_type,
                         "rewrite": t.rewrite, "steps": r["steps"], "web_calls": r["web_calls"], "ms": ms,
                         "trace": [s["decision"]["action"] + (f" {s['decision']['k']}" if s["decision"]["k"] is not None else "")
                                   for s in r["trajectory"]]})

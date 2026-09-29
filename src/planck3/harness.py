@@ -21,19 +21,21 @@ MAX_STEPS = 8
 
 
 class Harness:
-    def __init__(self, policy, web, store, max_steps: int = MAX_STEPS, use_store: bool = True):
+    def __init__(self, policy, web, store, max_steps: int = MAX_STEPS, use_store: bool = True,
+                 depth_pages: int = 0):
         self.policy = policy
         self.web = web
         self.store = store
         self.max_steps = max_steps
         self.use_store = use_store
+        self.depth_pages = depth_pages  # extra sources opened AFTER answering, only for the depth pack
 
     # ── one fact question ────────────────────────────────────────────────
     def run_fact(self, question: str, answer_type: str, entity: str | None = None,
                  attribute: str | None = None, ttl_days: float | None = None,
                  task_id: str | None = None, store_answer: bool = True) -> dict:
         st = {"phase": "start", "results": [], "spans": [], "store": [], "held": None,
-              "verified": None, "opened": set(), "history": []}
+              "verified": None, "opened": set(), "history": [], "docs": []}
         calls0 = self.web.calls["search"] + self.web.calls["fetch"]
         search0 = self.web.calls["search"]
         usage0 = dict(getattr(self.policy, "usage", {}))
@@ -71,6 +73,12 @@ class Harness:
                                 source_url=outcome["source_url"], domain=domain_of(outcome["source_url"] or ""),
                                 context=outcome["context"], p=outcome["p"], verified=bool(outcome["verified"]),
                                 entity=entity, attribute=attribute, ttl_days=ttl_days, task_id=task_id)
+        outcome["depth"] = self._depth(question, entity, st)
+        if store_answer:  # the knowledge graph grows with every question asked
+            from .candidates import main_entity
+            subject = entity or main_entity(question)
+            self.store.log_query(question, subject)
+            self.store.add_passages(outcome["depth"]["passages"], subject, question)
         usage = getattr(self.policy, "usage", {})
         outcome.update(steps=steps, decision_ms=ms, invalid=invalid, trajectory=trajectory,
                        web_calls=self.web.calls["search"] + self.web.calls["fetch"] - calls0,
@@ -136,7 +144,7 @@ class Harness:
     def _open(self, k, st, question, answer_type, finish) -> bool:
         r = st["results"][k]
         st["opened"].add(k)
-        spans = self._page_spans(r["url"], question, answer_type)
+        spans = self._page_spans(r, question, answer_type, st)
         if not spans:
             self.store.update_domain(r["domain"], False, weight=0.5)
             if len(st["opened"]) >= len(st["results"]):
@@ -147,13 +155,47 @@ class Harness:
         st["spans"], st["held"], st["verified"], st["phase"] = spans, None, None, "page"
         return False
 
-    def _page_spans(self, url, question, answer_type):
+    def _page_spans(self, result, question, answer_type, st):
+        url = result["url"]
         page = self.web.fetch(url)
         if not page.get("html"):
             return []
         text = extract_main_text(page["html"], url)
+        st["docs"].append({"url": url, "domain": result.get("domain", domain_of(url)),
+                           "title": result.get("title", ""), "trust": result.get("trust", 0.5), "text": text})
         return span_candidates(question, text, answer_type, url=url,
                                extra_lines=extract_jsonld(page["html"]))
+
+    def _depth(self, question, entity, st) -> dict:
+        """
+        Retrieval in depth behind the direct answer (Brain-style, over the web): ranked
+        evidence passages from every page read (+ snippets), the sources consulted, and
+        related facts already in memory. Deterministic; no model, no generation.
+        """
+        from .candidates import main_entity, rank_passages
+        results = st["results"]
+        extra = 0
+        for i, r in sorted(enumerate(results), key=lambda x: -x[1].get("trust", 0.5)):
+            if extra >= self.depth_pages:
+                break
+            if i in st["opened"]:
+                continue
+            st["opened"].add(i)
+            page = self.web.fetch(r["url"])
+            if page.get("html"):
+                st["docs"].append({"url": r["url"], "domain": r["domain"], "title": r.get("title", ""),
+                                   "trust": r.get("trust", 0.5), "text": extract_main_text(page["html"], r["url"])})
+            extra += 1
+        snippet_docs = [{"url": r["url"], "domain": r["domain"], "title": r.get("title", ""),
+                         "trust": r.get("trust", 0.5), "text": r.get("snippet", "")} for r in results]
+        passages = rank_passages(question, st["docs"] + snippet_docs)
+        if not st["docs"]:  # answered from memory: retrieve what was read before, locally, no web
+            passages = self.store.local_passages(question) or passages
+        sources = [{"title": r.get("title", ""), "url": r["url"], "domain": r["domain"],
+                    "trust": r.get("trust", 0.5), "read": i in st["opened"]} for i, r in enumerate(results)]
+        related = self.store.related(entity or main_entity(question), exclude_question=question)
+        return {"passages": passages, "sources": sources, "related": related,
+                "n_pages_read": len(st["docs"])}
 
     def _verify(self, st, question, answer_type) -> bool:
         """Deterministic: open the most query-relevant unopened result, look for the held value."""
@@ -168,7 +210,7 @@ class Harness:
         if best is None:
             return False
         st["opened"].add(best)
-        spans = self._page_spans(st["results"][best]["url"], question, answer_type)
+        spans = self._page_spans(st["results"][best], question, answer_type, st)
         held = st["held"]["value"]
         return any(is_correct(s["value"], [held], answer_type) for s in spans[:10])
 

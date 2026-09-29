@@ -5,7 +5,10 @@ Planck 3.0 command line. On the Windows box, prefer the wrapper:
 
 Commands:
     chat                              terminal chat with follow-ups (answer type inferred)
-    serve                             local web chat at http://127.0.0.1:8010
+    serve                             local web chat at http://127.0.0.1:8010 (answers + depth + "For you")
+    digest [--explore]                "for you" from your local knowledge graph; --explore reads adjacent
+                                      entities from TRUSTED sources only (the continuous-retrieval loop)
+    feedback source en.wikipedia.org up    thumbs up/down a source or entity (moves trust / interest)
     ask "question" --type year        one question -> answer card + decision trace
     g0  --policy gemma                G0: run the seed benchmark, write trajectories + gate verdict
     watch add|list|run                background watch tasks (read-only)
@@ -76,6 +79,9 @@ def cmd_ask(args):
     web = build_web(args)
     store = Store(args.store)
     h = Harness(make_policy(args), web, store)
+    if args.type == "auto":
+        from src.planck3.chat import infer_answer_type
+        args.type = infer_answer_type(args.question)
     res = h.run_fact(args.question, args.type)
     print()
     print(render_card(args.question, res))
@@ -92,13 +98,14 @@ def _chat_harness_factory(args):
     from src.planck3.harness import Harness
     from src.planck3.store import Store
     web, policy, store = build_web(args), make_policy(args), Store(args.store)
-    return lambda: Harness(policy, web, store)
+    return lambda: Harness(policy, web, store, depth_pages=args.depth_pages)
 
 
 def cmd_chat(args):
-    from src.planck3.chat import ChatSession, chat_answer
+    from src.planck3.chat import ChatSession, chat_answer, depth_summary, render_depth
     sess = ChatSession(_chat_harness_factory(args)())
-    print("Planck 3.0 chat. Follow up naturally ('and H&M?', 'when was it founded?'). 'new' resets, 'quit' exits.")
+    print("Planck 3.0 chat. Follow up naturally ('and H&M?', 'when was it founded?'). "
+          "'more' shows the evidence behind the last answer, 'new' resets, 'quit' exits.")
     while True:
         try:
             msg = input("\nyou> ").strip()
@@ -109,12 +116,16 @@ def cmd_chat(args):
         if msg == "new":
             sess.turns.clear()
             continue
+        if msg == "more":
+            print(render_depth(sess.turns[-1]) if sess.turns else "(ask something first)")
+            continue
         if not msg:
             continue
         t = sess.ask(msg)
         print(f"planck> {chat_answer(t)}")
         print(f"        (asked: \"{t.question}\" · {t.answer_type} · {t.rewrite} · "
               f"{t.result['steps']} decisions · {t.result['web_calls']} web calls)")
+        print(f"        {depth_summary(t)}  (type 'more')")
 
 
 def cmd_serve(args):
@@ -125,6 +136,24 @@ def cmd_serve(args):
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
+
+
+def cmd_digest(args):
+    from src.planck3.digest import build_digest, explore, render_digest
+    from src.planck3.store import Store
+    store = Store(args.store)
+    if args.explore:
+        added = explore(store, build_web(args), min_trust=args.min_trust)
+        print(f"[planck3] explored {len(added)} adjacent sources from trusted domains")
+        for a in added:
+            print(f"  + {a['entity']} (via {a['via']}): {a['passages']} passages  {a['url']}")
+    print(render_digest(build_digest(store, min_trust=args.min_trust)))
+
+
+def cmd_feedback(args):
+    from src.planck3.store import Store
+    Store(args.store).feedback(args.kind, args.target, 1 if args.value == "up" else -1)
+    print(f"recorded {args.value} for {args.kind} {args.target}")
 
 
 # ── g0 ───────────────────────────────────────────────────────────────────
@@ -138,9 +167,12 @@ def cmd_g0(args):
     tasks = spec["tasks"][: args.limit] if args.limit else spec["tasks"]
     if args.family:
         tasks = [t for t in tasks if t["family"] in args.family.split(",")]
-    run = args.out or str(RESULTS / f"g0_{args.policy}_{datetime.now():%Y%m%d_%H%M}")
+    suffix = "_closedbook" if args.closed_book else ""
+    run = args.out or str(RESULTS / f"g0_{args.policy}{suffix}_{datetime.now():%Y%m%d_%H%M}")
     run = Path(run)
     run.mkdir(parents=True, exist_ok=True)
+    if args.closed_book:
+        return _run_closed_book(args, tasks, run)
     store_path = Path(args.store) if args.store else run / "store.sqlite"
     if args.store is None and store_path.exists():
         store_path.unlink()  # a run's own store starts empty unless you pass --store (G3)
@@ -172,6 +204,8 @@ def cmd_g0(args):
                  "n_invalid_decisions": sum(r["invalid"] for r in records),
                  "gold_reachable": sum(r["gold_reachable"] for r in records) / max(len(records), 1),
                  "serp_answer_rate_at3": sum(r["serp_visible"] for r in records) / max(len(records), 1),
+                 "depth_evidence_recall": sum(r["evidence_hit"] for r in records) / max(len(records), 1),
+                 "graph": store.graph_stats(),
                  "cost": summarize_cost(records, prices),
                  "web_calls_network": {k: v for k, v in web.calls.items()},
                  "wall_s": round(time.time() - t_start, 1), "store_facts": store.n_facts(),
@@ -184,6 +218,61 @@ def cmd_g0(args):
     print(f"\n  run dir: {run}")
 
 
+def _run_closed_book(args, tasks, run):
+    """Base Claude/ChatGPT comparator: the same LLM, answering from its weights (no tools, no sources)."""
+    from src.planck3.chat import infer_answer_type
+    from src.planck3.cost import load_prices, summarize_cost, task_cost
+    from src.planck3.metrics import is_correct, summarize
+    policy = make_policy(args)
+    if policy.kind != "llm":
+        raise SystemExit("--closed-book needs an LLM policy (gemma or bedrock)")
+    prices = load_prices(args.prices)
+    res_path = run / "results.jsonl"
+    if res_path.exists():
+        res_path.unlink()
+
+    def one(q, at, gold, history=None):
+        u0 = dict(policy.usage)
+        t0 = time.perf_counter()
+        ans = policy.answer_closed_book(q, history)
+        ms = (time.perf_counter() - t0) * 1000
+        usage = {k: policy.usage[k] - u0.get(k, 0) for k in policy.usage}
+        idk = not ans or any(x in ans.lower() for x in ("i don't know", "i do not know", "not sure", "unknown"))
+        return {"q": q, "answer": ans, "answered": not idk, "correct": (not idk) and is_correct(ans, gold, at),
+                "cost": task_cost(prices, "llm", usage, 0, "none", [ms]), "ms": ms}
+
+    records, t_start = [], time.time()
+    for i, task in enumerate(tasks, 1):
+        if task["family"] == "fact":
+            parts = [one(task["question"], task["answer_type"], task["gold"])]
+        elif task["family"] == "compare":
+            parts = [one(a["template"].format(item=it), a["answer_type"], task["gold"][it][a["name"]])
+                     for it in task["items"] for a in task["attributes"]]
+        else:  # chat: the base model gets the raw conversation, exactly like a chat product
+            parts, hist = [], []
+            for t in task["turns"]:
+                r = one(t["user"], t["answer_type"] or infer_answer_type(t["user"]), t["gold"], list(hist))
+                parts.append(r)
+                hist.append((t["user"], r["answer"]))
+        cost = {k: sum(p["cost"][k] for p in parts) for k in parts[0]["cost"]}
+        rec = {"task_id": task["id"], "family": task["family"], "answered": all(p["answered"] for p in parts),
+               "correct": all(p["correct"] for p in parts), "p": 1.0 if all(p["answered"] for p in parts) else 0.0,
+               "steps": len(parts), "web_calls": 0, "decision_ms": [p["ms"] for p in parts], "cost": cost,
+               "answers": [p["answer"] for p in parts]}
+        append_jsonl(res_path, rec)
+        records.append(rec)
+        print(f"[{i:>3}/{len(tasks)}] {'OK ' if rec['correct'] else 'XX '} {task['id']:<4} {' | '.join(rec['answers'])[:60]}")
+    summ = summarize(records)
+    summ.update({"policy": f"{args.policy} (closed-book)", "mode": "closed_book", "tasks": str(args.tasks),
+                 "cost": summarize_cost(records, prices), "wall_s": round(time.time() - t_start, 1),
+                 "note": "base-chat comparator: no tools, no sources, no freshness. 'p' is 1 when it answers "
+                         "(a base chat reply carries no calibrated confidence), so ECE here measures overconfidence."})
+    summ["gate"] = {"verdict": "COMPARATOR", "note": "compare success + cost per correct against the tool-using runs"}
+    write_json(run / "summary.json", summ)
+    _print_summary("G0 closed-book", summ)
+    print(f"\n  run dir: {run}")
+
+
 def _score_fact(ctx, question, answer_type, gold, task_id, entity=None, attribute=None, sub=None):
     """Run one fact question through the harness and attach scoring + cost + baselines."""
     from src.planck3.cost import task_cost
@@ -192,6 +281,7 @@ def _score_fact(ctx, question, answer_type, gold, task_id, entity=None, attribut
     res["correct"] = res["answered"] and is_correct(res["value"], gold, answer_type)
     res["reachable"] = _gold_reachable(res, gold, answer_type)
     res["serp_visible"] = _serp_visible(res, gold, answer_type)
+    res["evidence_hit"] = _evidence_hit(res, gold, answer_type)
     res["cost"] = task_cost(ctx["prices"], ctx["policy"].kind, res["usage"], res["search_calls"],
                             ctx["web"].backend, res["decision_ms"])
     _log_traj(ctx["traj"], task_id, res, res["correct"], sub=sub)
@@ -209,7 +299,9 @@ def _combine(task, family, parts, extra):
            "decision_ms": [m for p in parts for m in p["decision_ms"]],
            "invalid": sum(p["invalid"] for p in parts),
            "gold_reachable": all(p["reachable"] for p in parts),
-           "serp_visible": all(p["serp_visible"] for p in parts), "cost": cost}
+           "serp_visible": all(p["serp_visible"] for p in parts),
+           "evidence_hit": all(p["evidence_hit"] for p in parts),
+           "n_passages": sum(len(p["depth"]["passages"]) for p in parts), "cost": cost}
     rec.update(extra)
     return rec
 
@@ -223,6 +315,7 @@ def _run_fact_task(task, ctx):
            "source_url": r["source_url"], "reason": r["reason"], "from_store": r["from_store"],
            "steps": r["steps"], "web_calls": r["web_calls"], "decision_ms": r["decision_ms"],
            "invalid": r["invalid"], "gold_reachable": r["reachable"], "serp_visible": r["serp_visible"],
+           "evidence_hit": r["evidence_hit"], "n_passages": len(r["depth"]["passages"]),
            "cost": r["cost"]}
     tag = "OK" if r["correct"] else "WRONG" if r["answered"] else "abstain"
     return rec, f"### {task['id']} ({tag})\n\n{render_card(task['question'], r)}\n"
@@ -276,6 +369,16 @@ def _gold_reachable(res, gold, answer_type) -> bool:
     return False
 
 
+def _evidence_hit(res, gold, answer_type) -> bool:
+    """Depth quality: does the evidence pack behind the answer actually contain the gold value?"""
+    from src.planck3.candidates import mentions
+    from src.planck3.metrics import is_correct
+    for p in (res.get("depth") or {}).get("passages", []):
+        if any(is_correct(v, gold, answer_type) for v, _ in mentions(p["text"], answer_type)):
+            return True
+    return False
+
+
 def _serp_visible(res, gold, answer_type, k=3) -> bool:
     """Search-only baseline: could the user read the answer off the top-k result snippets?"""
     from src.planck3.candidates import mentions, split_sentences
@@ -310,7 +413,7 @@ def _print_summary(name, s):
     print(f"\n==== {name} summary ({s.get('policy')}) ====")
     for k in ("n", "success", "answered_rate", "wrong_when_answered", "ece", "mean_steps",
               "mean_web_calls", "mean_decision_ms", "n_invalid_decisions", "gold_reachable",
-              "serp_answer_rate_at3"):
+              "serp_answer_rate_at3", "depth_evidence_recall"):
         v = s.get(k)
         print(f"  {k:<22} {v:.3f}" if isinstance(v, float) else f"  {k:<22} {v}")
     c = s.get("cost") or {}
@@ -371,7 +474,8 @@ def main():
 
     p = sub.add_parser("ask")
     p.add_argument("question")
-    p.add_argument("--type", default="entity", choices=["year", "number", "date", "entity", "text"])
+    p.add_argument("--type", default="auto", choices=["auto", "year", "number", "date", "entity", "text"],
+                   help="answer type; auto = inferred from the question (default)")
     p.add_argument("--store", default=str(RESULTS / "personal_store.sqlite"))
     p.add_argument("-v", "--verbose", action="store_true")
     add_web_args(p)
@@ -382,8 +486,24 @@ def main():
         p.add_argument("--store", default=str(RESULTS / "personal_store.sqlite"))
         p.add_argument("--host", default="127.0.0.1")
         p.add_argument("--port", type=int, default=8010)
+        p.add_argument("--depth-pages", type=int, default=1,
+                       help="extra sources read after answering, for the depth pack (0 = only pages already read)")
         add_web_args(p)
         p.set_defaults(fn=fn)
+
+    p = sub.add_parser("digest", help="'for you' digest from your local knowledge graph")
+    p.add_argument("--store", default=str(RESULTS / "personal_store.sqlite"))
+    p.add_argument("--explore", action="store_true", help="also read adjacent entities from trusted sources (web)")
+    p.add_argument("--min-trust", type=float, default=0.6)
+    add_web_args(p)
+    p.set_defaults(fn=cmd_digest)
+
+    p = sub.add_parser("feedback", help="thumbs up/down a source domain or an entity")
+    p.add_argument("kind", choices=["source", "entity"])
+    p.add_argument("target")
+    p.add_argument("value", choices=["up", "down"])
+    p.add_argument("--store", default=str(RESULTS / "personal_store.sqlite"))
+    p.set_defaults(fn=cmd_feedback)
 
     p = sub.add_parser("g0")
     p.add_argument("--tasks", default=str(TASKS))
@@ -391,6 +511,8 @@ def main():
     p.add_argument("--out", default=None)
     p.add_argument("--store", default=None, help="reuse a store across runs (G3); default = fresh per run")
     p.add_argument("--family", default=None, help="comma list: fact,compare,chat")
+    p.add_argument("--closed-book", action="store_true",
+                   help="base-chat comparator: the LLM answers from its weights, no tools/sources")
     p.add_argument("--prices", default=str(REPO_ROOT / "config" / "planck3_prices.json"))
     add_web_args(p)
     p.set_defaults(fn=cmd_g0)

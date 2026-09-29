@@ -325,3 +325,79 @@ def test_cost_model():
     assert llm["llm_usd"] == prices["llm_per_mtok"][prices["llm_equivalent"]]["input"]
     local = task_cost(prices, "local", {}, 2, "searxng", [1.0, 2.0])
     assert local["llm_usd"] == 0 and local["total_usd"] < 1e-6
+
+
+# ── depth + the growing personal knowledge graph ─────────────────────────
+def test_rank_passages_dedups_mirrors_and_skips_noise():
+    from src.planck3.candidates import rank_passages
+    docs = [{"url": "a", "domain": "a.org", "trust": 0.8,
+             "text": "IKEA was founded in 1943 by Ingvar Kamprad in Sweden. It sells furniture."},
+            {"url": "b", "domain": "mirror.net", "trust": 0.4,
+             "text": "IKEA was founded in 1943 by Ingvar Kamprad in Sweden! It sells furniture."},
+            {"url": "c", "domain": "c.org", "trust": 0.5, "text": "This is a page that is about nothing and it is long."}]
+    ps = rank_passages("When was IKEA founded?", docs)
+    assert ps and ps[0]["url"] == "a"                      # most trusted copy kept
+    assert all(p["url"] != "b" for p in ps)               # its mirror dropped
+    assert all(p["url"] != "c" for p in ps)               # stopword-only overlap is not a hit
+
+
+def test_depth_pack_graph_and_local_recall(store):
+    h = Harness(HeuristicPolicy(), FakeWeb(), store)
+    res = h.run_fact("What year was IKEA founded?", "year", entity="IKEA", attribute="founded")
+    d = res["depth"]
+    assert d["passages"] and d["sources"] and d["n_pages_read"] >= 1
+    assert any("1943" in p["text"] for p in d["passages"])
+    g = store.graph_stats()
+    assert g["passages"] >= 1 and g["queries"] == 1 and g["entities"] >= 1
+    assert "ingvar kamprad" in [e for e, _ in store.adjacent("IKEA")]
+    # the same question later is answered from memory AND its evidence comes back with zero web calls
+    web = FakeWeb()
+    res2 = Harness(HeuristicPolicy(), web, store).run_fact("What year was IKEA founded?", "year",
+                                                           entity="IKEA", attribute="founded")
+    assert res2["from_store"] and res2["depth"]["passages"]
+    assert web.calls["search"] + web.calls["fetch"] == 0
+
+
+def test_digest_and_feedback(store):
+    from src.planck3.digest import build_digest, render_digest, trusted_domains
+    assert "Nothing yet" in render_digest(build_digest(store))
+    Harness(HeuristicPolicy(), FakeWeb(), store).run_fact("What year was IKEA founded?", "year", entity="IKEA")
+    store.feedback("source", "example.org", 1)             # explicit trust beats implicit
+    assert "example.org" in trusted_domains(store)
+    d = build_digest(store)
+    assert d["interests"][0]["entity"] == "ikea"
+    assert any(a["entity"] == "ingvar kamprad" for a in d["interests"][0]["adjacent"])
+    assert "For you" in render_digest(d)
+    store.feedback("source", "spam.biz", -1)
+    assert store.domain_prior("spam.biz") < 0.5
+
+
+def test_graph_nodes_are_names_not_adjectives():
+    from src.planck3.candidates import passage_entities
+    ents = passage_entities("SpaceX is an American company founded in February 2002 by Elon Musk. "
+                            "The CEO of SpaceX lives in Texas.", exclude="SpaceX")
+    assert "Elon Musk" in ents and "Texas" in ents
+    assert not {"American", "February", "CEO of SpaceX"} & set(ents)
+
+
+def test_closed_book_comparator(tmp_path, monkeypatch):
+    """--closed-book scores the base-chat rival with the same rules and cost model."""
+    import importlib.util
+    import json as _json
+    spec = importlib.util.spec_from_file_location("p3cli", Path(__file__).resolve().parent.parent / "scripts" / "planck3.py")
+    cli = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cli)
+    fake = ScriptedLLM(["1943", "IKEA was founded in 1943.", "Probably 1950"])
+    monkeypatch.setattr(cli, "make_policy", lambda args: fake)
+    tasks = tmp_path / "t.json"
+    tasks.write_text(_json.dumps({"tasks": [
+        {"id": "f", "family": "fact", "question": "What year was IKEA founded?", "answer_type": "year", "gold": ["1943"]},
+        {"id": "c", "family": "chat", "turns": [
+            {"user": "When was IKEA founded?", "answer_type": "year", "gold": ["1943"]},
+            {"user": "And H&M?", "answer_type": "year", "gold": ["1947"]}]}]}), encoding="utf-8")
+    sys.argv = ["planck3.py", "g0", "--policy", "gemma", "--closed-book", "--tasks", str(tasks),
+                "--out", str(tmp_path / "run")]
+    cli.main()
+    s = _json.loads((tmp_path / "run" / "summary.json").read_text(encoding="utf-8"))
+    assert s["mode"] == "closed_book" and s["n"] == 2 and abs(s["success"] - 0.5) < 1e-9
+    assert "User: When was IKEA founded?" in fake.prompts[-1]   # chat turns carry the conversation

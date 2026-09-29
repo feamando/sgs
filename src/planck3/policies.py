@@ -173,11 +173,20 @@ def parse_decision(text: str) -> Decision:
     return Decision(action, k=k, p=p, raw=text)
 
 
+CLOSED_BOOK_SYSTEM = ("You are a helpful assistant. Answer the user's question from your own knowledge. "
+                      "Reply with only the answer (a value, date or name), no explanation.")
+
+
 class LLMPolicy(Policy):
     kind = "llm"
 
     def _complete(self, system: str, user: str) -> str:
         raise NotImplementedError
+
+    def answer_closed_book(self, question: str, history: list[tuple[str, str]] | None = None) -> str:
+        """The base-chat comparator: no tools, no retrieval, just the model's weights."""
+        convo = "".join(f"User: {q}\nAssistant: {a}\n" for q, a in (history or []))
+        return self._complete(CLOSED_BOOK_SYSTEM, f"{convo}User: {question}" if convo else question).strip()
 
     def decide(self, obs):
         return parse_decision(self._complete(SYSTEM_PROMPT, render_observation(obs)))
