@@ -72,7 +72,7 @@ All mathematical foundations formally verified in Lean 4 with Mathlib. Zero `sor
 
 The newest research direction. Knowledge blobs are Gaussian distributions representing pre-computed patterns from training data. Two-pass rendering: blobs set a semantic backdrop (Pass 1), word tokens add specifics in the remaining transmittance (Pass 2). This is RAG built into the rendering equation — retrieval and generation unified through the same kernel and compositing math.
 
-[Whitepaper](docs/whitepaper/hierarchical_sgs.md) | [Orthogonal challenge](paper/orthogonal_challenge_hsgs.md) | [Code model stub](docs/whitepaper/sgs_code.md)
+[Whitepaper](docs/whitepaper/hierarchical_sgs.md) | [Orthogonal challenge](papers/hierarchical-sgs/orthogonal_challenge_hsgs.md) | [Code model stub](docs/whitepaper/sgs_code.md)
 
 ## Model Naming
 
@@ -111,8 +111,8 @@ python scripts/train_planck11.py
 
 ## Papers
 
-- [Semantic Gaussian Splatting: Alpha-Compositing as a Composition Mechanism for Language](paper/semantic_gaussian_splatting.md) — Full SGS paper (v3, orthogonally challenged 3x)
-- [On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention](paper/theorem_paper.md) — Standalone theorem paper
+- [Semantic Gaussian Splatting: Alpha-Compositing as a Composition Mechanism for Language](papers/sgs-core/semantic_gaussian_splatting.md) — Full SGS paper (v3, orthogonally challenged 3x)
+- [On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention](papers/alpha-compositing-theorem/theorem_paper.md) — Standalone theorem paper
 - [Hierarchical SGS: Knowledge Splatting](docs/whitepaper/hierarchical_sgs.md) — Built-in RAG via Gaussian blobs
 - [Klang Variant B: Layer-Based Audio Gaussian Splatting](docs/klang/whitepaper_variant_b.md) — Audio synthesis
 

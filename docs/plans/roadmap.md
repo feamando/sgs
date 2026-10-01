@@ -50,7 +50,7 @@
 | | |
 |---|---|
 | **Status** | Draft complete |
-| **File** | `paper/theorem_paper.md` |
+| **File** | `papers/alpha-compositing-theorem/theorem_paper.md` |
 | **What** | Standalone paper: Softmax ⊂ Alpha-Compositing, Lean verified |
 | **Target** | ICML Theory / NeurIPS MathAI / arXiv preprint |
 | **Remaining** | LaTeX formatting, venue selection, submit |
@@ -60,7 +60,7 @@
 | | |
 |---|---|
 | **Status** | v3, orthogonally challenged 3×, all claims battle-tested |
-| **File** | `paper/semantic_gaussian_splatting.md` |
+| **File** | `papers/sgs-core/semantic_gaussian_splatting.md` |
 | **What** | Complete paper: architecture + theorem + all experiments + negative results |
 | **Target** | EMNLP 2026 / NeurIPS 2026 workshop |
 | **Remaining** | LaTeX formatting, incorporate B1/B1-1 results when available |
@@ -273,10 +273,10 @@
 | File | What |
 |---|---|
 | **Papers** | |
-| `paper/theorem_paper.md` | A1: Softmax ⊂ Alpha-Compositing standalone paper |
-| `paper/semantic_gaussian_splatting.md` | A2: Full SGS paper (v3, battle-tested) |
-| `paper/orthogonal_challenge.md` | First challenge on A2 |
-| `paper/orthogonal_challenge_v2.md` | Second challenge on A2 |
+| `papers/alpha-compositing-theorem/theorem_paper.md` | A1: Softmax ⊂ Alpha-Compositing standalone paper |
+| `papers/sgs-core/semantic_gaussian_splatting.md` | A2: Full SGS paper (v3, battle-tested) |
+| `papers/sgs-core/orthogonal_challenge.md` | First challenge on A2 |
+| `papers/sgs-core/orthogonal_challenge_v2.md` | Second challenge on A2 |
 | **Plans** | |
 | `docs/plans/roadmap.md` | This file |
 | `docs/plans/a3_visualizer_plan.md` | Interactive visualizer plan (v2, with ops) |

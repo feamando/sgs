@@ -38,7 +38,7 @@ High-Fidelity Scene (10,000-50,000+ Gaussians)
 
 ## Prerequisites
 
-- Objaverse GS training data (see `docs/papers/gs_scan_datasets.md`)
+- Objaverse GS training data (see `papers/raum/gs_scan_datasets.md`)
 - gsplat library installed
 - Blender (for multi-view rendering of Objaverse objects)
 

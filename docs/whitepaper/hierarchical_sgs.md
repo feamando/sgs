@@ -4,7 +4,7 @@
 **Authors:** Nikita Gorshkov
 **Date:** 2026-04-14
 **Status:** Draft — Pre-Experiment
-**Depends on:** SGS core (paper/semantic_gaussian_splatting.md), Planck 1.0, Hertz 1.0
+**Depends on:** SGS core (papers/sgs-core/semantic_gaussian_splatting.md), Planck 1.0, Hertz 1.0
 
 ---
 

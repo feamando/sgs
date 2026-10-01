@@ -2,7 +2,7 @@
 
 *Status: draft plan. Written 2026-04-27. Depends on Raum 0.0 shipping
 (done). Blocks Hertz 1.2. Source paper:
-`docs/papers/sgs_training_acceleration.md`.*
+`papers/training-acceleration/sgs_training_acceleration.md`.*
 
 Planck 1.2 is the gate between the current baseline (Planck 1.0/1.1 on
 TinyStories, Hertz 1.0 infeasible at wall-clock) and the 1B Hertz 1.2 run.
@@ -199,7 +199,7 @@ Action items:
 | `scripts/train_lm.py` | New CLI flags for all four proposals. Weighted-loss branch. Data source switch to FineWeb-Edu. Per-step logging of `T_mean`, `passes_run`, `sparsity_active`. | ~80 LOC |
 | `scripts/validate_planck12.py` (new) | A/B harness: loads N checkpoints, runs same val set, emits `results/planck_12/ablation.json`. | ~120 LOC |
 | `data/fineweb/` | Verify val split exists. Add README note if `val.bin` needed to be generated. | small |
-| `docs/papers/sgs_training_acceleration.md` | No changes (this is the source). |
+| `papers/training-acceleration/sgs_training_acceleration.md` | No changes (this is the source). |
 
 Backwards compat: every flag defaults to the pre-1.2 behaviour. Running
 `train_lm.py` with no new flags must produce numerically identical

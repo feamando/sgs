@@ -1,0 +1,530 @@
+\documentclass[twoside,11pt]{article}
+
+% ── JMLR style (jmlr2e.sty must be in the same directory / Overleaf project).
+%    jmlr2e already loads: amssymb, natbib, graphicx, hyperref, epsfig, and
+%    defines the theorem/lemma/corollary/definition/proof/example environments.
+%    Do NOT re-load those or re-declare \newtheorem (it errors). ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{jmlr2e}
+
+% ── Additional packages (loaded AFTER jmlr2e) ──
+\usepackage{amsmath}   % align/equation* etc. (jmlr2e provides amssymb only)
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% ── JMLR running headers (volume/year/pages auto-filled by editor on accept) ──
+\usepackage{lastpage}
+\jmlrheading{1}{2026}{1-\pageref{LastPage}}{6/26}{}{00-0000}{Nikita Gorshkov}
+\ShortHeadings{Physical Gaussians}{Gorshkov}
+\firstpageno{1}
+
+% ── Lean listing style ──
+\lstdefinelanguage{Lean}{
+  keywords={theorem,lemma,def,variable,import,open,noncomputable,section,end,by,exact,use,apply,rw,simp,unfold,show,fun,let,have,where,if,then,else,return,do,for,in,intro,convert,constructor,obtain,scoped,set_option},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  morestring=[b]",
+}
+\lstset{
+  language=Lean,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  breaklines=true,
+  frame=single,
+  xleftmargin=1em,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  literate=%
+    {Σ}{{$\Sigma$}}1 {σ}{{$\sigma$}}1 {α}{{$\alpha$}}1 {β}{{$\beta$}}1
+    {ℝ}{{$\mathbb{R}$}}1 {ℕ}{{$\mathbb{N}$}}1 {ℍ}{{$\mathbb{H}$}}1
+    {→}{{$\rightarrow$}}1 {ᵀ}{{$^{\top}$}}1 {⬝}{{$\cdot$}}1 {≠}{{$\neq$}}1
+    {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {∈}{{$\in$}}1 {∘}{{$\circ$}}1
+    {₀}{{$_0$}}1 {₁}{{$_1$}}1 {₂}{{$_2$}}1 {₃}{{$_3$}}1 {ₙ}{{$_n$}}1
+    {ₖ}{{$_k$}}1 {ᵢ}{{$_i$}}1 {⁻}{{$^{-}$}}1 {¹}{{$^{1}$}}1
+    {₊}{{$_+$}}1 {·}{{$\cdot$}}1 {⟨}{{$\langle$}}1 {⟩}{{$\rangle$}}1
+    {≥}{{$\geq$}}1 {≤}{{$\leq$}}1 {⊕}{{$\oplus$}}1 {λ}{{$\lambda$}}1
+    {Φ}{{$\Phi$}}1 {τ}{{$\tau$}}1 {δ}{{$\delta$}}1 {ε}{{$\varepsilon$}}1
+    {ℓ}{{$\ell$}}1 {⌈}{{$\lceil$}}1 {⌉}{{$\rceil$}}1
+}
+
+\begin{document}
+
+\title{Physical Gaussians: Extending the Semantic\\
+Gaussian Splatting Primitive with Material Semantics}
+
+\author{\name Nikita Gorshkov \email ngorshkov@proton.me \\
+       \addr Senefelderstr.\ 29a\\
+       10437 Berlin, Germany}
+
+% Action editor is assigned by JMLR; leave the placeholder until then.
+\editor{}
+
+\maketitle
+
+% ════════════════════════════════════════════════════════════
+\begin{abstract}%
+We propose extending the Semantic Gaussian Splatting (SGS) atomic primitive with a \emph{physical embedding} vector that encodes material properties (hardness, elasticity, friction, density, thermal conductivity, and others). The extended primitive, which we call a \emph{Physical Gaussian}, carries three coupled representations: a semantic embedding (what it means), geometric parameters (where it is, what shape it has), and a physical embedding (how it behaves). Our central claim, the \emph{correlation hypothesis}, is that these three are not independent: Gaussians with similar semantic embeddings and similar covariance structures naturally share physical properties, so the physical embedding can be predicted from the semantic and geometric parameters rather than learned independently for every primitive. This enables a unified representation in which the same scene file that drives rendering also drives physics, audio, and interaction, without separate collision meshes or material assignments. We give a formal specification of the primitive and its operators, and we machine-verify six supporting claims in Lean~4 (covariance positive-definiteness, boundedness of the material-similarity metric, well-definedness of covariance similarity, continuity of the physics-prediction network, densification coherence, and embedding-dimension sufficiency), each compiling with zero \texttt{sorry} under standard axioms. We then report an empirical test of the correlation hypothesis across 77 materials on 8 physical axes, finding it real but scale-limited ($R^2 = 0.54$ on hardness with GloVe embeddings), which motivates a scale-adaptive two-stage architecture for the Raum~2.0 implementation track.
+\end{abstract}
+
+\begin{keywords}
+  Gaussian splatting, 3D scene representation, material properties, physics simulation, semantic embeddings, formal verification (Lean~4)
+\end{keywords}
+
+% ════════════════════════════════════════════════════════════
+\section{Introduction}
+
+\subsection{The Representation Gap}
+
+Current 3D engines maintain parallel, separately-authored representations of the same scene: meshes and textures for rendering, simplified collision meshes and material tags for physics, manual labels for semantics, and surface-type enums for audio. These representations are maintained separately and often diverge. A rock that looks like stone may carry the wrong physics material; a glass window may use a generic ``hard surface'' collider. The semantic meaning (``this is glass'') exists only in a human author's head, not in the data.
+
+\begin{table}[t]
+\centering
+\caption{Parallel representations in current 3D engines.}
+\label{tab:parallel}
+\begin{tabular}{lll}
+\toprule
+Concern & Representation & Format \\
+\midrule
+Rendering & Meshes + textures + shaders & .fbx, .gltf \\
+Physics & Simplified collision meshes + material tags & PhysX shapes \\
+Semantics & Manual labels, gameplay tags & Engine-specific \\
+Audio & Surface type enums & Hardcoded \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What SGS Provides, and What Is Missing}
+
+Semantic Gaussian Splatting~\citep{sgs-repo} represents scenes as collections of Gaussians where each primitive carries a semantic embedding. After recursive decomposition turns ``a castle on a hill'' into a composition tree, every leaf Gaussian inherits semantic context from its ancestors: a given Gaussian is part of a ``wall'' which is part of a ``castle.'' The embedding encodes this full context.
+
+What is missing is the \emph{physical behavior}. When a force strikes the castle wall, nothing happens, because Gaussians carry no physics. To simulate the impact today one would export to a mesh, manually assign physics materials, and run a separate engine, in the process discarding the semantic information that already identifies the material. This paper closes that gap by embedding material semantics directly into the primitive.
+
+\subsection{Contributions}
+
+\begin{itemize}
+\item A formal definition of the \textbf{Physical Gaussian} primitive (Section~\ref{sec:primitive}) and its subsystem \emph{collapse operators}, a single primitive read differently by the rendering, physics, semantic, and audio subsystems.
+\item The \textbf{correlation hypothesis} (Section~\ref{sec:correlation}): physical properties are predictable from semantic and geometric parameters, formalized as a mutual-information bound and reducing the learning problem from per-Gaussian regression to a small prediction network.
+\item \textbf{Six machine-verified claims} in Lean~4 (Section~\ref{sec:guarantees}) establishing internal consistency of the representation: covariance is always SPD, the material-similarity metric is bounded and self-maximal, covariance similarity is well-defined, the prediction network is continuous, densification preserves material coherence, and the chosen embedding width suffices.
+\item An \textbf{empirical evaluation} of the correlation hypothesis on 77 materials and 8 axes (Section~\ref{sec:empirical}), and a resulting \textbf{scale-adaptive two-stage architecture} that holds at current model scale and improves with model size.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════
+\section{The Physical Gaussian Primitive}
+\label{sec:primitive}
+
+\subsection{Definition}
+
+A Physical Gaussian extends the standard SGS primitive with a physical embedding $e_p$ and a label $\ell$:
+\begin{equation}
+G = (p,\, S,\, q,\, \alpha,\, c,\, e_s,\, e_p,\, \ell),
+\end{equation}
+where $p \in \mathbb{R}^3$ is position, $S \in \mathbb{R}^3$ is log-scale (anisotropic, $S_i = \log \sigma_i$), $q \in \mathbb{H}_1$ is a unit quaternion (rotation), $\alpha \in \mathbb{R}$ is the opacity logit (actual opacity $\sigma(\alpha) \in (0,1)$), $c \in \mathbb{R}^3$ is color (RGB or spherical-harmonic DC coefficients), $e_s \in \mathbb{R}^{d_s}$ is the semantic embedding ($d_s = 128\text{--}300$), $e_p \in \mathbb{R}^{d_p}$ is the physical embedding ($d_p = 32\text{--}64$), and $\ell$ is a human-readable label.
+
+The 3D covariance matrix is
+\begin{equation}
+\label{eq:covariance}
+\Sigma = R(q)\,\mathrm{diag}\!\big(\exp(2S)\big)\,R(q)^{\top},
+\end{equation}
+where $R(q): \mathbb{H}_1 \to SO(3)$ is the quaternion-to-rotation map. Theorem~\ref{thm:p1} guarantees $\Sigma$ is symmetric positive definite for \emph{any} $q$ and $S$, so the covariance is always well-defined.
+
+\subsection{Physical Embedding Dimensions}
+
+The physical embedding $e_p$ encodes material properties in a learned continuous space. Unlike discrete material enums, it represents a manifold where nearby points have similar physical behavior, interpolation produces physically plausible intermediates, and a subset of axes are interpretable.
+
+\begin{table}[t]
+\centering
+\caption{Proposed interpretable axes of the physical embedding. Remaining
+dimensions (24--56) are learned and may capture properties we have not named
+(fracture behavior, fluid interaction, aging, acoustic response).}
+\label{tab:axes}
+\begin{tabular}{llll}
+\toprule
+Axis & Range & Low end & High end \\
+\midrule
+Hardness & $[0,1]$ & Soft (cloth, foam) & Hard (diamond, steel) \\
+Elasticity & $[0,1]$ & Inelastic (clay) & Elastic (rubber, spring) \\
+Friction & $[0,1]$ & Smooth (ice, glass) & Rough (sandpaper, bark) \\
+Density & $[0,1]$ & Light (air, foam) & Heavy (lead, gold) \\
+Brittleness & $[0,1]$ & Ductile (copper) & Brittle (glass, ceramic) \\
+Thermal cond. & $[0,1]$ & Insulating (wood) & Conducting (metal) \\
+Transparency & $[0,1]$ & Opaque (stone) & Transparent (glass, water) \\
+Deformability & $[0,1]$ & Rigid (steel) & Deformable (rubber, cloth) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Material Similarity and Regions}
+
+For two Physical Gaussians the \emph{material similarity} aggregates semantic, geometric, opacity, spatial, and covariance terms:
+\begin{equation}
+\label{eq:similarity}
+M(G_i, G_j) = w_s\,\widehat{\cos}(e_s^i, e_s^j)
+  + w_g\,e^{-\|S_i - S_j\|}
+  + w_\alpha\,e^{-|\alpha_i - \alpha_j|}
+  + w_d\,e^{-\|p_i - p_j\|/r}
+  + w_\Sigma\,\Phi(\Sigma_i, \Sigma_j),
+\end{equation}
+where $\widehat{\cos}(a,b) = \tfrac{1}{2}\!\left(\tfrac{\langle a,b\rangle}{\|a\|\|b\|} + 1\right) \in [0,1]$ is the rescaled cosine similarity, $r > 0$ is a spatial scale, the weights $w_\bullet > 0$ sum to $1$, and the covariance similarity is
+\begin{equation}
+\label{eq:covsim}
+\Phi(A, B) = \exp\!\Big(-\tfrac{1}{2}\,\big\|\log \lambda(A) - \log \lambda(B)\big\|\Big),
+\end{equation}
+with $\lambda(\cdot)$ the (positive) eigenvalues of an SPD matrix. Theorem~\ref{thm:p2} shows $M \in [0,1]$ with $M(G,G) = 1$, and Theorem~\ref{thm:p4} shows $\Phi \in (0,1]$ is well-defined and symmetric.
+
+A \emph{material region} is a connected component of the graph $G_M = (V, E)$ with $V$ the scene's Gaussians and $E = \{(i,j) : M(G_i, G_j) > \tau\}$ for a threshold $\tau \in (0,1)$. Material regions emerge from the data without explicit segmentation: they provide automatic material segmentation, soft boundaries, and context-dependent behavior.
+
+\subsection{Collapse Operators}
+
+The same Physical Gaussian is read in different \emph{modes} depending on the subsystem that queries it. We formalize this as a family of projection operators:
+\begin{align}
+\pi_{\text{render}}(G)  &= (p, \Sigma, \sigma(\alpha), c), &
+\pi_{\text{physics}}(G) &= (p, \Sigma, e_p), \\
+\pi_{\text{semantic}}(G) &= (p, e_s, \ell), &
+\pi_{\text{audio}}(G)   &= (p, e_p, e_s, \Sigma).
+\end{align}
+Each operator discards the components irrelevant to its subsystem; each is an idempotent coordinate projection. This is analogous to observables in quantum mechanics: the Gaussian exists in a superposition of roles until a specific subsystem ``measures'' it by reading the relevant parameters.
+
+% ════════════════════════════════════════════════════════════
+\section{The Correlation Hypothesis}
+\label{sec:correlation}
+
+\subsection{Statement}
+
+Physical properties are not independent of semantic and geometric properties; they are highly correlated. Semantically, ``stone'' implies hard, heavy, brittle, rough, and opaque; ``water'' implies soft, dense, smooth, and transparent. Geometrically, small tightly-packed high-opacity Gaussians indicate a solid hard surface, while large dispersed low-opacity Gaussians indicate a soft volume such as smoke or fog.
+
+The practical consequence is that the physical embedding need not be learned from scratch for every Gaussian. Given a trained semantic embedding and the geometric parameters, a small network predicts it:
+\begin{equation}
+\label{eq:fphys}
+e_p = f_{\text{phys}}(e_s, S, \alpha, v(\Sigma)),
+\end{equation}
+where $v(\Sigma) \in \mathbb{R}^6$ is the upper-triangular vectorization of the covariance.
+
+Formally, the hypothesis is a mutual-information lower bound: $I(e_p ; e_s, S, \alpha) \ge I(e_p ; e_s)$, which follows from the data-processing inequality when the geometric features add discriminative signal. This is a \emph{necessary} condition for prediction to be possible; it does not by itself establish that the predicted physics are correct, which is an empirical matter addressed in Section~\ref{sec:empirical}.
+
+\subsection{Inheritance Through the Composition Tree}
+
+Physical embeddings inherit context the same way colors do. A leaf Gaussian inherits its parent node's physical embedding but may override it:
+\begin{verbatim}
+castle_scene
+|-- castle (stone-like: hard, heavy)
+|   |-- tower (inherits castle)
+|   |   |-- base  (stone, full hardness)
+|   |   |-- body  (stone, weathered)
+|   |   `-- flag  (cloth! overrides parent)
+|   `-- gate  (wood + iron, composite)
+`-- hill   (earth, medium hardness)
+\end{verbatim}
+The flag is cloth despite being a child of a stone tower; the gate is wood despite being part of a stone castle. The semantic embedding already distinguishes these, and the physics-prediction network uses that distinction.
+
+% ════════════════════════════════════════════════════════════
+\section{Formal Guarantees}
+\label{sec:guarantees}
+
+The Physical Gaussian primitive and its operators rest on a set of mathematical claims, fully stated in the supplementary specification. Six of these are machine-verified in Lean~4 via the Aristotle prover. Each compiles with \textbf{zero \texttt{sorry}} and uses only the standard axioms (\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}); see Appendix~\ref{app:lean} for two representative proofs and Appendix~\ref{app:verification} for environment details.
+
+\begin{theorem}[Covariance is SPD]
+\label{thm:p1}
+For any unit quaternion $q \in \mathbb{H}_1$ (hence $R(q) \in SO(3)$) and any $S \in \mathbb{R}^3$, the matrix $\Sigma = R(q)\,\mathrm{diag}(\exp(2S))\,R(q)^{\top}$ is symmetric positive definite.
+\end{theorem}
+\begin{proof}[Proof idea]
+$R$ is orthogonal and $D = \mathrm{diag}(\exp(2S))$ has a strictly positive diagonal, so $RDR^{\top}$ is congruent to $D$ and inherits positive-definiteness; symmetry follows from $D^{\top} = D$. Mechanized in Lean~4 (Appendix~\ref{app:lean}).
+\end{proof}
+
+\begin{theorem}[Material similarity is bounded]
+\label{thm:p2}
+With weights $w_\bullet \in [0,1]$ summing to $1$ and the rescaled cosine term $\widehat{\cos} \in [0,1]$, the similarity \eqref{eq:similarity} satisfies $0 \le M(G_i, G_j) \le 1$, and $M(G, G) = 1$.
+\end{theorem}
+
+\begin{theorem}[Covariance similarity is well-defined]
+\label{thm:p4}
+For SPD matrices $A, B$, the function $\Phi$ of \eqref{eq:covsim} satisfies $\Phi(A,B) \in (0,1]$, $\Phi(A,A) = 1$, and $\Phi(A,B) = \Phi(B,A)$.
+\end{theorem}
+
+\begin{theorem}[Prediction continuity]
+\label{thm:p5}
+If $f_{\text{phys}}$ is a feedforward network whose activations are continuous (ReLU, sigmoid, tanh, LayerNorm), then $f_{\text{phys}}$ is continuous; small changes in the semantic embedding produce small changes in predicted physics.
+\end{theorem}
+
+\begin{theorem}[Densification preserves coherence]
+\label{thm:p8}
+When a Gaussian $G$ is cloned or split into children $G_a, G_b$, the children satisfy $M(G_a, G_b) \ge 1 - \big(\sum_k w_k L_k\big)\varepsilon$, where $\varepsilon$ bounds the perturbation and $L_k$ are the Lipschitz constants of the similarity terms. Densification cannot silently move a child out of its material region.
+\end{theorem}
+
+\begin{theorem}[Dimensionality sufficiency]
+\label{thm:p9}
+For $K$ material classes with distinct targets, $d_p \ge \lceil \log_2 K \rceil$ dimensions suffice for lossless class separation and $d_p = O(K)$ suffices for continuous interpolation. At $K = 100$, $d_p = 32$ suffices.
+\end{theorem}
+
+\paragraph{What the proofs establish (and what they do not).}
+The verified claims guarantee the representation is \emph{internally consistent}: the covariance is always a valid SPD matrix (Theorems~\ref{thm:p1},~\ref{thm:p4}), the similarity metric defining material regions is bounded and self-maximal (Theorems~\ref{thm:p2},~\ref{thm:p4}), the prediction network behaves continuously (Theorem~\ref{thm:p5}), densification cannot silently split a material region (Theorem~\ref{thm:p8}), and the chosen embedding width encodes the target classes (Theorem~\ref{thm:p9}). They do \emph{not} establish that predicted physics are \emph{correct}, i.e.\ that the $e_p$ assigned to ``stone'' produces the right rigid-body behavior. That is the content of the correlation hypothesis, which is empirical and is examined next. The two-stage architecture is designed precisely so that the floor (discrete classifier + lookup) holds even where the continuous hypothesis is weak at small scale.
+
+% ════════════════════════════════════════════════════════════
+\section{Empirical Evaluation}
+\label{sec:empirical}
+
+\subsection{Testing the Correlation Hypothesis}
+
+We validated the correlation between semantic embeddings and physical properties across 77 materials with 8 physical axes (Table~\ref{tab:axes}). We regressed physical-property vectors on embeddings of the material name, using a 128-unit MLP.
+
+\begin{table}[t]
+\centering
+\caption{Regression of physical properties on semantic embeddings, 77 materials.}
+\label{tab:r2}
+\begin{tabular}{lcc}
+\toprule
+Embedding source & Overall $R^2$ & Best axis (hardness) \\
+\midrule
+GloVe 300d & 0.24 & \textbf{0.54} \\
+GloVe + geometric proxies & 0.28 & 0.49 \\
+Planck 100M (token features) & $-0.39$ & $-0.32$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation.}
+The correlation exists but is scale-limited. GloVe encodes co-occurrence (``stone'' near ``hard''), giving $R^2 = 0.54$ on the hardness axis. But 300-dimensional word vectors, 77 samples, and a small MLP cannot capture the full physics manifold; the 100M-parameter token features regress worse than the mean. Large language models that have internalized physical world knowledge would be expected to perform substantially better~\citep{xu2025gaussianproperty,zhao2025physsplat}. The limitation is embedding quality and training-data quantity, not the fundamental semantic-physics relationship: classification accuracy into broad material classes is far higher than the regression $R^2$ for the same embeddings.
+
+\subsection{A Scale-Adaptive Two-Stage Architecture}
+
+Based on these findings we adopt a two-stage design that works now and improves with model size.
+
+\textbf{Stage~1 (discrete classifier + lookup, current $\sim$100M scale).}
+Classify $e_s$ into $K = 50\text{--}100$ material classes; each class has a curated $e_p$ lookup vector. Classification accuracy greatly exceeds regression $R^2$ for the same embeddings, so this works immediately with existing embeddings.
+
+\textbf{Stage~2 (continuous refinement, future $1$B+ scale).}
+The lookup provides a strong initialization $e_p^{\text{base}}$; an MLP predicts a per-Gaussian residual from contextual features, trained with differentiable-physics feedback. At frontier scale the lookup becomes unnecessary.
+
+\subsection{Comparison to Existing Approaches}
+
+\begin{table}[t]
+\centering
+\caption{Where material information lives across representations.}
+\label{tab:compare}
+\begin{tabular}{llll}
+\toprule
+Approach & Physics & Semantics & Unified? \\
+\midrule
+Traditional mesh + PhysX & Separate colliders & Manual tags & No \\
+NeRF + physics proxy & Extracted mesh & None & No \\
+3DGS + particle physics & Per-splat mass & None & No \\
+Material Point Method & Grid-based & None & No \\
+\textbf{Physical Gaussians (ours)} & Embedded per-Gaussian & Embedded per-Gaussian & \textbf{Yes} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The closest related work attaches physics to Gaussians but not semantics: PhysGaussian~\citep{xie2024physgaussian} adds physics to 3DGS with materials assigned manually or by segmentation; PAC-NeRF~\citep{li2023pacnerf} is physics-aware but uses implicit representations. Our contribution is that the material is not a label on top of the geometry: it is part of the primitive. The Gaussian \emph{is} the material, not just the shape.
+
+% ════════════════════════════════════════════════════════════
+\section{Applications}
+
+\begin{description}
+\item[Physics-native scenes.] Generate a scene and get physics for free, with no manual material assignment: stone is rigid, water flows, cloth drapes.
+\item[Destruction simulation.] When a force exceeds material strength (from $e_p$ hardness and brittleness), the composition tree fractures: parent--child links break, disconnected subtrees become independent rigid bodies, and fracture follows grain (from $e_p$ anisotropy).
+\item[Sound synthesis.] Impact, resonance, and scraping sounds are functions of $e_p$ (hardness, density, friction), connecting to the Klang audio track.
+\item[Material-aware level of detail.] When reducing detail, merge Gaussians that share physical properties first; adjacent stone and glass Gaussians should not merge even when spatially close.
+\item[Procedural weathering.] Brittleness plus exposure produces cracking; conductivity plus weather cycles produces expansion damage; low hardness plus friction produces smoothing.
+\end{description}
+
+% ════════════════════════════════════════════════════════════
+\section{Conclusion}
+
+The Physical Gaussian extends SGS from a visual representation to a complete scene representation, one where the same atomic primitive drives rendering, physics, audio, semantics, and interaction. The enabler is the correlation between what something means ($e_s$), what it looks like ($S, \alpha, c$), and how it behaves ($e_p$): three projections of one underlying reality, encoded in a single primitive. We have formally verified that the representation is internally consistent and empirically shown that the correlation hypothesis is real but scale-limited, which the two-stage architecture is built to accommodate. If Gaussians are the atomic primitive of visual representation, they should also be the atomic primitive of physical representation.
+
+% ════════════════════════════════════════════════════════════
+\acks{The author received no specific funding for this work and declares no
+competing interests. The Lean~4 proofs were verified using the Aristotle prover
+(harmonic.fun).}
+
+% ════════════════════════════════════════════════════════════
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[Kerbl et~al.(2023)]{kerbl2023}
+B.~Kerbl, G.~Kopanas, T.~Leimk{\"u}hler, and G.~Drettakis.
+\newblock 3{D} {G}aussian splatting for real-time radiance field rendering.
+\newblock \emph{ACM Trans.\ Graph.\ (SIGGRAPH)}, 42(4), 2023.
+
+\bibitem[Max(1995)]{max1995}
+N.~Max.
+\newblock Optical models for direct volume rendering.
+\newblock \emph{IEEE TVCG}, 1(2):99--108, 1995.
+
+\bibitem[Xie et~al.(2024)]{xie2024physgaussian}
+T.~Xie, Z.~Zong, Y.~Qiu, X.~Li, Y.~Feng, Y.~Yang, and C.~Jiang.
+\newblock {PhysGaussian}: Physics-integrated 3{D} {G}aussians for generative dynamics.
+\newblock In \emph{CVPR}, 2024.
+
+\bibitem[Xu et~al.(2025)]{xu2025gaussianproperty}
+X.~Xu et~al.
+\newblock {GaussianProperty}: Integrating physical properties to 3{D} {G}aussians with {LMM}s.
+\newblock In \emph{ICCV}, 2025.
+
+\bibitem[Zhao et~al.(2025)]{zhao2025physsplat}
+H.~Zhao et~al.
+\newblock {PhysSplat}: Efficient physics simulation for 3{D} scenes via {MLLM}-guided {G}aussian splatting.
+\newblock In \emph{ICCV}, 2025.
+
+\bibitem[Li et~al.(2023)]{li2023pacnerf}
+X.~Li et~al.
+\newblock {PAC-NeRF}: Physics augmented continuum neural radiance fields for geometry-agnostic system identification.
+\newblock In \emph{ICLR}, 2023.
+
+\bibitem[Qin et~al.(2024)]{qin2024langsplat}
+M.~Qin et~al.
+\newblock {LangSplat}: 3{D} language {G}aussian splatting.
+\newblock In \emph{CVPR}, 2024.
+
+\bibitem[Bhosale et~al.(2024)]{bhosale2024avgs}
+S.~Bhosale et~al.
+\newblock {AV-GS}: Audio-visual {G}aussian splatting.
+\newblock In \emph{NeurIPS}, 2024.
+
+\bibitem[Gorshkov(2026)]{gorshkov2026alpha}
+N.~Gorshkov.
+\newblock On the expressiveness of alpha-compositing: A strict superset of softmax attention.
+\newblock Preprint, 2026.
+
+\bibitem[de~Moura and Ullrich(2021)]{demoura2021}
+L.~de~Moura and S.~Ullrich.
+\newblock The {L}ean 4 theorem prover and programming language.
+\newblock In \emph{CADE}, 2021.
+
+\bibitem[SGS(2026)]{sgs-repo}
+Semantic {G}aussian {S}platting (SGS).
+\newblock Source code repository.
+\newblock \url{https://github.com/feamando/sgs}.
+
+\end{thebibliography}
+
+% ════════════════════════════════════════════════════════════
+\appendix
+
+\section{Representative Machine-Verified Lean 4 Proofs}
+\label{app:lean}
+
+The following two proofs are representative of the six verified claims. Both compile with zero \texttt{sorry} and depend only on the standard axioms. The full proof set (covariance SPD, material-similarity boundedness, covariance similarity, prediction continuity, densification coherence, dimensionality sufficiency) accompanies the source repository.
+
+\subsection{Theorem~\ref{thm:p1}: Covariance is SPD}
+
+\begin{lstlisting}
+import Mathlib
+
+open scoped BigOperators Real Classical
+
+/-- A diagonal matrix with positive entries is positive definite. -/
+theorem diagonal_pos_def {n : ℕ} (d : Fin n → ℝ) (hd : ∀ i, 0 < d i) :
+    Matrix.PosDef (Matrix.diagonal d) :=
+  Matrix.PosDef.diagonal hd
+
+/-- Congruence by an orthogonal matrix preserves symmetry. -/
+theorem orthogonal_congruence_symmetric {n : ℕ}
+    (R D : Matrix (Fin n) (Fin n) ℝ)
+    (hR : R * R.transpose = 1) (hD : D.IsSymm) :
+    (R * D * R.transpose).IsSymm := by
+  simp_all +decide [Matrix.IsSymm, Matrix.mul_assoc]
+
+-- `congruence_pos_def` (congruence by an invertible matrix preserves
+-- positive-definiteness) is proved separately and used below.
+
+/-- Main theorem: rotation + positive diagonal scale gives an SPD covariance. -/
+theorem physical_gaussian_covariance_spd
+    {R : Matrix (Fin 3) (Fin 3) ℝ} {S : Fin 3 → ℝ}
+    (hR : R * R.transpose = 1) :
+    Matrix.PosDef
+      (R * Matrix.diagonal (fun i => Real.exp (2 * S i)) * R.transpose) := by
+  convert congruence_pos_def R
+    (Matrix.diagonal fun i => Real.exp (2 * S i)) _ _ using 1
+  · exact ⟨fun x y hxy => by simpa using congr_arg (fun z => R⁻¹.mulVec z) hxy,
+           fun x => ⟨R⁻¹.mulVec x, by simp +decide⟩⟩
+  · exact diagonal_pos_def _ fun i => Real.exp_pos _
+\end{lstlisting}
+
+\subsection{Theorem~\ref{thm:p5}: Feedforward Networks are Continuous}
+
+\begin{lstlisting}
+import Mathlib
+open scoped Topology
+
+/-- Compose a list of endomorphisms (head outermost). -/
+def composeList {α : Type*} : List (α → α) → (α → α)
+  | [] => id
+  | f :: fs => f ∘ composeList fs
+
+/-- The composition of finitely many continuous endomorphisms is continuous. -/
+theorem continuous_composeList {α : Type*} [TopologicalSpace α]
+    (fs : List (α → α)) (hfs : ∀ f ∈ fs, Continuous f) :
+    Continuous (composeList fs) := by
+  induction' fs with f fs ih
+  · exact continuous_id
+  · exact Continuous.comp (hfs _ (List.mem_cons_self))
+      (ih fun g hg => hfs _ (List.mem_cons_of_mem _ hg))
+
+/-- A feedforward net of continuous affine maps and activations is continuous. -/
+theorem feedforward_nn_continuous {X : Type*} [TopologicalSpace X] {n : ℕ}
+    (W σ_act : Fin n → (X → X))
+    (hW : ∀ k, Continuous (W k)) (hσ : ∀ k, Continuous (σ_act k)) :
+    Continuous (feedforwardNet W σ_act) := by
+  convert continuous_composeList _ _
+  exact fun f hf => by
+    rw [List.mem_map] at hf
+    obtain ⟨k, _, rfl⟩ := hf
+    exact Continuous.comp (hσ k) (hW k)
+\end{lstlisting}
+
+\section{Notation Reference}
+\label{app:notation}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Symbol & Definition & Domain \\
+\midrule
+$p$ & Position & $\mathbb{R}^3$ \\
+$S$ & Log-scale (anisotropic) & $\mathbb{R}^3$ \\
+$q$ & Rotation quaternion & $\mathbb{H}_1$ \\
+$\alpha$ & Opacity logit & $\mathbb{R}$ \\
+$c$ & Color (RGB / SH DC) & $\mathbb{R}^3$ \\
+$e_s$ & Semantic embedding & $\mathbb{R}^{d_s}$, $d_s = 128\text{--}300$ \\
+$e_p$ & Physical embedding & $\mathbb{R}^{d_p}$, $d_p = 32\text{--}64$ \\
+$\Sigma$ & Covariance & SPD $3\times 3$ \\
+$M(\cdot,\cdot)$ & Material similarity & $[0,1]$ \\
+$\Phi(\cdot,\cdot)$ & Covariance similarity & $(0,1]$ \\
+$f_{\text{phys}}$ & Physics prediction network & MLP \\
+$\pi_X$ & Collapse operator for subsystem $X$ & projection \\
+$\tau$ & Clustering threshold & $(0,1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Verification Details}
+\label{app:verification}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Property & Value \\
+\midrule
+Prover & Aristotle (harmonic.fun) \\
+Language & Lean 4 v4.28.0 \\
+Library & Mathlib (v4.28.0 toolchain) \\
+Verified claims & P1, P2, P4, P5, P8, P9 \\
+\texttt{sorry} count & 0 (all verified claims) \\
+Axioms & propext, Classical.choice, Quot.sound (standard) \\
+Date verified & 2026-05-31 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Claim P6 (the mutual-information form of the correlation hypothesis) is
+treated as empirical (Section~\ref{sec:empirical}) and is not mechanized.
+Claims P3 (material regions partition the vertex set) and P7 (collapse
+operators are idempotent projections) are standard / definitional and are not
+separately mechanized.
+
+\end{document}

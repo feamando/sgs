@@ -322,7 +322,7 @@ as the +5.7 and +2.9.
 (CLIP-image V + GloVe S + P6 P, mean-pooled) does NOT carry sense information a
 trained LM can use: redundant with text where text suffices, near-chance where it
 doesn't. The 0.37 separation gate STANDS as its own finding (curated probes) but
-does not transfer to helping a language model. Writeup: docs/papers/
+does not transfer to helping a language model. Writeup: papers/vsp-negative-result/
 vsp_negative_result.md. GPU work parked.
 
 PAIR SET: disambig_pairs.json now has **105 pairs / 42 polysemous words** (2026-07-10),
@@ -342,7 +342,7 @@ pairs, still add more if the delta is within a few points.
 | 1 | VSPS vocab (two-tier) | **build_vsps_vocab.py BUILT + selftested** (probe: 44 tokens, 2x blowup). Run on Wikipedia senses. |
 | 2 | VSPS tokenize Wikipedia | **tokenize_vsps.py BUILT** (5/5 minimal pairs). Run on Wikipedia; load GloVe over full corpus vocab. |
 | 3 | Planck 2.0 training | **train_planck2.py BUILT + smoke-passed** (215M, loss 9.4->7.4, ~1.04 step/s). Run VSP + --random-init baseline (matched compute). |
-| 4 | disambiguation benchmark | **CLOSED 2026-07-27 (negative).** embedding-init KILLED (6-seed 2k CI incl 0, 40k −3.8); rerank + 260-pair low-context salvage KILLED (held-out delta −0.004, pure-consistency 54% where LM unsure). Grounding redundant-with/subsumed-by text for a trained LM. 0.37 gate stands alone. Writeup: docs/papers/vsp_negative_result.md (see §4 RESULT 3+4). |
+| 4 | disambiguation benchmark | **CLOSED 2026-07-27 (negative).** embedding-init KILLED (6-seed 2k CI incl 0, 40k −3.8); rerank + 260-pair low-context salvage KILLED (held-out delta −0.004, pure-consistency 54% where LM unsure). Grounding redundant-with/subsumed-by text for a trained LM. 0.37 gate stands alone. Writeup: papers/vsp-negative-result/vsp_negative_result.md (see §4 RESULT 3+4). |
 
 ## Papers this feeds
 

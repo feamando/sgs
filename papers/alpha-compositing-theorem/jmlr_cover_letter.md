@@ -121,7 +121,7 @@ ngorshkov@proton.me
 ## Pre-submission checklist (manuscript side — not part of the letter text)
 
 - [x] Manuscript in the **JMLR LaTeX style**. DONE:
-      `paper/softmax_subset_alpha_compositing.tex` now uses
+      `papers/alpha-compositing-theorem/softmax_subset_alpha_compositing.tex` now uses
       `\documentclass[twoside,11pt]{article}` + `\usepackage{jmlr2e}` with the
       official `jmlr2e.sty` (from github.com/JmlrOrg/jmlr-style-file), JMLR
       title/author/`\editor`/abstract/keywords block, `\jmlrheading`,
@@ -129,7 +129,7 @@ ngorshkov@proton.me
       `overleaf_paper.zip` bundles the `.tex` + `jmlr2e.sty` and compiles to PDF
       on Overleaf as-is. (`theorem_paper.md` is the Markdown working copy; the
       `.tex` is the submission artifact. NOT the PMLR `jmlr.cls`.)
-- [x] Cover letter as compilable LaTeX: `paper/jmlr_cover_letter.tex`
+- [x] Cover letter as compilable LaTeX: `papers/alpha-compositing-theorem/jmlr_cover_letter.tex`
       (`overleaf_cover_letter.zip`). Markdown `jmlr_cover_letter.md` is the
       source of record; keep both in sync.
 - [ ] PDF only; archive multiple files as tar/zip; total **< 5 MB**.

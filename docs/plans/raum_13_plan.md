@@ -120,7 +120,7 @@ gates pass.
 
 ## References
 
-- Literature review: `docs/papers/raum_13_literature_review.md`
+- Literature review: `papers/raum/raum_13_literature_review.md`
 - Raum 1.2 failure analysis: `SETUP_202605.md` §4.5
 - Prior art in this repo: Raum 1.0 (template routing), Raum 1.1 (frozen encoder
   bridge), Raum 1.2 (subword collision diagnosis)

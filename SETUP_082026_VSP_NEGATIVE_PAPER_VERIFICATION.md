@@ -4,7 +4,7 @@ Target venue: **JMLR** (same as the alpha-compositing paper). A main-venue
 negative only publishes if it credibly rules out "you did it wrong." A red-team
 sweep (2026-07-27) surfaced the gaps; this doc closes the two that need GPU. The
 editorial fixes (metric mislabel 0.13->0.00, table error, underpowered-null
-reframing, clustering caveat) are already in `paper/vsp_negative_result.tex`
+reframing, clustering caveat) are already in `papers/vsp-negative-result/vsp_negative_result.tex`
 (commit 8bcc32b). What remains is evidence.
 
 ## One command
@@ -82,12 +82,12 @@ Read `results/paper_verification_summary.txt`.
 - **C2 CI now spans 0 or flips positive:** the −3.8 was partly the init-scale
   bug; the full-compute claim weakens to "no reliable effect," update Section 5.
 
-Then hand the numbers back and I fold them into `paper/vsp_negative_result.tex`
+Then hand the numbers back and I fold them into `papers/vsp-negative-result/vsp_negative_result.tex`
 (Table 1, Section 5, Discussion) + regenerate the summary.
 
 ## Provenance
 
 Red-team findings and the editorial fixes: see `SETUP_202607_VSP_v1.md`
-RESULT 1–4 and the Brain memory `project_sgs_vsp_gate`. Paper: `paper/
+RESULT 1–4 and the Brain memory `project_sgs_vsp_gate`. Paper: `papers/vsp-negative-result/
 vsp_negative_result.tex`. Prior verification tooling: `aggregate_disambig_seeds.py`,
 `rerank_disambiguation.py`.

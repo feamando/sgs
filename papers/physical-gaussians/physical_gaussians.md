@@ -480,4 +480,4 @@ Foundations:
 - Gorshkov, N. (2026). On the Expressiveness of Alpha-Compositing: A Strict Superset of Softmax Attention. *Preprint*.
 - de Moura, L., & Ullrich, S. (2021). The Lean 4 Theorem Prover and Programming Language. *CADE*.
 
-*Note: venues/years for several 2024–2026 entries are drawn from the literature review (`docs/papers/physical_gaussians_literature_review.md`) and should be confirmed against the published versions before external submission.*
+*Note: venues/years for several 2024–2026 entries are drawn from the literature review (`papers/physical-gaussians/physical_gaussians_literature_review.md`) and should be confirmed against the published versions before external submission.*

@@ -32,7 +32,7 @@ cd sgs
 python -c "import diffusers, transformers; print('diffusers', diffusers.__version__, '| transformers', transformers.__version__)"
 python -c "from transformers import CLIPModel; print('CLIP import ok')"
 # P (physical): Physical Gaussians P6 material work (hardness R^2=0.54) -- text assets, always present
-ls docs/papers/physical_gaussians*.md
+ls papers/physical-gaussians/physical_gaussians*.md
 # (legacy, NOT needed for the chosen CLIP-image path -- only ground_vsp.py used it)
 python -c "import os; print('shapenet blobs (legacy, optional):', os.path.exists('data/blobs_shapenet'))"
 ```
@@ -319,4 +319,4 @@ STILL TO BUILD:
    ([[project_sgs_jmlr_submission]]), not Path B.
 2. **VSPS Tokenization** -- from phases 2-3.
 3. **VSP-based Models** -- from phase 4, extends the Physical Gaussians paper
-   (docs/papers/physical_gaussians*.md).
+   (papers/physical-gaussians/physical_gaussians*.md).

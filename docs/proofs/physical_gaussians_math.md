@@ -4,7 +4,7 @@
 State all claims that require formal verification. Structure claims for
 Aristotle (Lean 4 formal prover).
 
-**Source:** `docs/papers/physical_gaussians.md`, `docs/papers/physical_gaussians_literature_review.md`
+**Source:** `papers/physical-gaussians/physical_gaussians.md`, `papers/physical-gaussians/physical_gaussians_literature_review.md`
 
 ---
 
