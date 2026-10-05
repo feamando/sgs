@@ -1,0 +1,101 @@
+[planck3 17:41:57] logging to C:\Users\feama\sgs\results\planck3\logs\doctor_20261005_1741.log
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]
+Loading weights:   0%|          | 3/2076 [00:00<01:34, 22.01it/s]
+Loading weights:   3%|ΓûÄ         | 61/2076 [00:00<00:06, 303.26it/s]
+Loading weights:   6%|Γûî         | 122/2076 [00:00<00:04, 426.93it/s]
+Loading weights:  11%|Γûê         | 220/2076 [00:00<00:02, 625.11it/s]
+Loading weights:  15%|ΓûêΓûî        | 318/2076 [00:00<00:02, 719.52it/s]
+Loading weights:  19%|ΓûêΓûë        | 392/2076 [00:00<00:02, 625.59it/s]
+Loading weights:  24%|ΓûêΓûêΓûì       | 499/2076 [00:00<00:02, 735.22it/s]
+Loading weights:  30%|ΓûêΓûêΓûë       | 622/2076 [00:00<00:01, 838.02it/s]
+Loading weights:  34%|ΓûêΓûêΓûêΓûì      | 708/2076 [00:01<00:01, 818.12it/s]
+Loading weights:  38%|ΓûêΓûêΓûêΓûè      | 792/2076 [00:08<00:35, 36.38it/s] 
+Loading weights:  41%|ΓûêΓûêΓûêΓûê      | 850/2076 [00:09<00:29, 41.74it/s]
+Loading weights:  43%|ΓûêΓûêΓûêΓûêΓûÄ     | 893/2076 [00:09<00:24, 47.61it/s]
+Loading weights:  45%|ΓûêΓûêΓûêΓûêΓûì     | 927/2076 [00:10<00:21, 52.99it/s]
+Loading weights:  46%|ΓûêΓûêΓûêΓûêΓûî     | 954/2076 [00:10<00:19, 56.34it/s]
+Loading weights:  47%|ΓûêΓûêΓûêΓûêΓûï     | 976/2076 [00:10<00:18, 60.61it/s]
+Loading weights:  48%|ΓûêΓûêΓûêΓûêΓûè     | 994/2076 [00:10<00:16, 65.05it/s]
+Loading weights:  49%|ΓûêΓûêΓûêΓûêΓûè     | 1010/2076 [00:11<00:15, 66.70it/s]
+Loading weights:  49%|ΓûêΓûêΓûêΓûêΓûë     | 1024/2076 [00:11<00:14, 70.25it/s]
+Loading weights:  50%|ΓûêΓûêΓûêΓûêΓûë     | 1037/2076 [00:11<00:14, 70.28it/s]
+Loading weights:  50%|ΓûêΓûêΓûêΓûêΓûê     | 1048/2076 [00:11<00:15, 68.29it/s]
+Loading weights:  51%|ΓûêΓûêΓûêΓûêΓûêΓûÅ    | 1064/2076 [00:11<00:13, 76.67it/s]
+Loading weights:  52%|ΓûêΓûêΓûêΓûêΓûêΓûÅ    | 1077/2076 [00:11<00:11, 84.92it/s]
+Loading weights:  52%|ΓûêΓûêΓûêΓûêΓûêΓûÅ    | 1088/2076 [00:12<00:11, 85.48it/s]
+Loading weights:  53%|ΓûêΓûêΓûêΓûêΓûêΓûÄ    | 1099/2076 [00:12<00:11, 83.79it/s]
+Loading weights:  54%|ΓûêΓûêΓûêΓûêΓûêΓûÄ    | 1115/2076 [00:12<00:10, 94.72it/s]
+Loading weights:  54%|ΓûêΓûêΓûêΓûêΓûêΓûì    | 1126/2076 [00:12<00:10, 91.09it/s]
+Loading weights:  55%|ΓûêΓûêΓûêΓûêΓûêΓûì    | 1136/2076 [00:12<00:12, 75.93it/s]
+Loading weights:  55%|ΓûêΓûêΓûêΓûêΓûêΓûî    | 1150/2076 [00:12<00:10, 85.84it/s]
+Loading weights:  56%|ΓûêΓûêΓûêΓûêΓûêΓûî    | 1163/2076 [00:12<00:09, 95.53it/s]
+Loading weights:  57%|ΓûêΓûêΓûêΓûêΓûêΓûï    | 1174/2076 [00:12<00:10, 89.89it/s]
+Loading weights:  57%|ΓûêΓûêΓûêΓûêΓûêΓûï    | 1184/2076 [00:13<00:12, 69.53it/s]
+Loading weights:  58%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1195/2076 [00:13<00:11, 75.00it/s]
+Loading weights:  58%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1206/2076 [00:13<00:11, 76.54it/s]
+Loading weights:  59%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1215/2076 [00:13<00:11, 76.90it/s]
+Loading weights:  59%|ΓûêΓûêΓûêΓûêΓûêΓûë    | 1224/2076 [00:13<00:12, 69.77it/s]
+Loading weights:  60%|ΓûêΓûêΓûêΓûêΓûêΓûë    | 1237/2076 [00:13<00:10, 77.49it/s]
+Loading weights:  60%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1246/2076 [00:14<00:11, 74.86it/s]
+Loading weights:  60%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1254/2076 [00:14<00:11, 70.07it/s]
+Loading weights:  61%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1265/2076 [00:14<00:10, 76.50it/s]
+Loading weights:  61%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ   | 1273/2076 [00:14<00:10, 73.33it/s]
+Loading weights:  62%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ   | 1281/2076 [00:14<00:12, 65.98it/s]
+Loading weights:  62%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ   | 1293/2076 [00:14<00:10, 74.42it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1302/2076 [00:14<00:10, 77.06it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1310/2076 [00:14<00:11, 65.67it/s]
+Loading weights:  64%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1321/2076 [00:15<00:10, 72.72it/s]
+Loading weights:  64%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1334/2076 [00:15<00:09, 79.99it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1343/2076 [00:15<00:09, 75.43it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1351/2076 [00:15<00:11, 64.81it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1363/2076 [00:15<00:09, 72.81it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1376/2076 [00:15<00:10, 67.25it/s]
+Loading weights:  67%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1390/2076 [00:16<00:10, 66.66it/s]
+Loading weights:  67%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1401/2076 [00:16<00:09, 74.86it/s]
+Loading weights:  68%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1410/2076 [00:16<00:09, 70.31it/s]
+Loading weights:  68%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1418/2076 [00:16<00:09, 70.16it/s]
+Loading weights:  73%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ  | 1509/2076 [00:16<00:02, 262.10it/s]
+Loading weights:  78%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûè  | 1627/2076 [00:16<00:00, 488.01it/s]
+Loading weights:  84%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûì | 1744/2076 [00:16<00:00, 665.40it/s]
+Loading weights:  89%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûë | 1856/2076 [00:16<00:00, 782.08it/s]
+Loading weights:  95%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûî| 1974/2076 [00:16<00:00, 890.09it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:17<00:00, 905.82it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:17<00:00, 121.59it/s]
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.0
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.1
+  [WARN] trafilatura               import failed: ModuleNotFoundError
+         -> pip install trafilatura (fallback extractor is cruder)
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 660 GB
+  [OK  ] git                       branch main, 0 commits behind origin/main
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [WARN] searxng                   not running
+         -> .\scripts\planck3.ps1 searxng
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        15,039 texts/s on cuda (~0 min for the G1 graph)
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 2040 ms/decision
+  [OK  ] gemma closed-book         '1943' in 346 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~11 min
+    g0 closed-book (base-chat rival)   ~0 min
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~0 min
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~46 min
+
+  READY: 0 fail, 2 warn

@@ -1,0 +1,157 @@
+{
+  "rows": [
+    {
+      "status": "OK",
+      "check": "python",
+      "detail": "3.12.0",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "numpy",
+      "detail": "2.4.4",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "scipy",
+      "detail": "1.18.0",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "requests",
+      "detail": "2.34.2",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "torch",
+      "detail": "2.5.1+cu121",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "sentencepiece",
+      "detail": "0.2.1",
+      "fix": ""
+    },
+    {
+      "status": "WARN",
+      "check": "trafilatura",
+      "detail": "import failed: ModuleNotFoundError",
+      "fix": "pip install trafilatura (fallback extractor is cruder)"
+    },
+    {
+      "status": "OK",
+      "check": "transformers",
+      "detail": "5.12.1",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "gpu",
+      "detail": "NVIDIA GeForce RTX 4090, 24 GB",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "disk free",
+      "detail": "660 GB",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "git",
+      "detail": "branch main, 0 commits behind origin/main",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "wikipedia api",
+      "detail": "HTTP 200",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "wikimedia dumps",
+      "detail": "HTTP 200",
+      "fix": ""
+    },
+    {
+      "status": "WARN",
+      "check": "searxng",
+      "detail": "not running",
+      "fix": ".\\scripts\\planck3.ps1 searxng"
+    },
+    {
+      "status": "OK",
+      "check": "planck ckpt vs tokenizer",
+      "detail": "vocab 32000 vs 32000 pieces",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "planck embed speed",
+      "detail": "15,039 texts/s on cuda (~0 min for the G1 graph)",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "gemma config",
+      "detail": "models/gemma-4-e4b-it",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "gemma typed decisions",
+      "detail": "3/3 valid, 2040 ms/decision",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "gemma closed-book",
+      "detail": "'1943' in 346 ms",
+      "fix": ""
+    }
+  ],
+  "measured": {
+    "planck_embed_s_per_text": 6.649448243933875e-05,
+    "gemma_ms_per_decision": 2040.01476666114,
+    "gemma_ms_closed_book": 345.9533000132069
+  },
+  "eta": [
+    [
+      "setup + smoke",
+      "~1 min"
+    ],
+    [
+      "g0 teacher (Gemma on tools)",
+      "~11 min"
+    ],
+    [
+      "g0 closed-book (base-chat rival)",
+      "~0 min"
+    ],
+    [
+      "g0 heuristic floor",
+      "~2 min (cached pages)"
+    ],
+    [
+      "g1 build + tasks + hash embed",
+      "~5 min (356 MB download)"
+    ],
+    [
+      "g1 planck embed",
+      "~0 min"
+    ],
+    [
+      "g1 train heads",
+      "~5 min on GPU"
+    ],
+    [
+      "g1 eval incl. Gemma teacher",
+      "~46 min"
+    ]
+  ]
+}
