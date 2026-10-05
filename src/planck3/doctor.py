@@ -127,14 +127,17 @@ class Doctor:
         if deep:
             from .encoders import PlanckEncoder
             enc = PlanckEncoder(ckpt, tok)
-            texts = [f"Example article {i}. It is about a place, a person or a thing with a short lead." for i in range(2048)]
+            # lead-length texts (~60 tokens, like "Title. lead" in the graph), not short stubs
+            lead = ("is a town in the south of the country, known for its old castle, its river port and a "
+                    "university founded in the fourteenth century; it has about forty thousand inhabitants.")
+            texts = [f"Example article {i}. Example article {i} {lead}" for i in range(2048)]
             enc.encode(texts[:256])  # warm-up
             t0 = time.perf_counter()
             enc.encode(texts)
             per = (time.perf_counter() - t0) / len(texts)
             self.measured["planck_embed_s_per_text"] = per
             self.add(OK, "planck embed speed", f"{1 / per:,.0f} texts/s on {enc.device} "
-                     f"(~{per * N_ARTICLES / 60:.0f} min for the G1 graph)")
+                     f"({_dur(per * N_ARTICLES)} for the G1 graph)")
             del enc
 
     def gemma(self, path, deep):
@@ -184,15 +187,15 @@ class Doctor:
         e = m.get("planck_embed_s_per_text")
         rows = [("setup + smoke", "~1 min"),
                 ("g0 teacher (Gemma on tools)",
-                 f"~{(G0_DECISIONS * g / 1000 + 47 * 3) / 60:.0f} min" if g else "~15-25 min (run doctor -Deep to measure)"),
+                 _dur(G0_DECISIONS * g / 1000 + 47 * 3) if g else "~15-25 min (run doctor -Deep to measure)"),
                 ("g0 closed-book (base-chat rival)",
-                 f"~{G0_CLOSED_BOOK_Q * m['gemma_ms_closed_book'] / 60000:.0f} min" if g else "~2-5 min"),
+                 _dur(G0_CLOSED_BOOK_Q * m["gemma_ms_closed_book"] / 1000) if g else "~2-5 min"),
                 ("g0 heuristic floor", "~2 min (cached pages)"),
                 ("g1 build + tasks + hash embed", "~5 min (356 MB download)"),
-                ("g1 planck embed", f"~{e * N_ARTICLES / 60:.0f} min" if e else "unknown (run doctor -Deep)"),
+                ("g1 planck embed", _dur(e * N_ARTICLES) if e else "unknown (run doctor -Deep)"),
                 ("g1 train heads", "~5 min on GPU"),
                 ("g1 eval incl. Gemma teacher",
-                 f"~{(G1_TEACHER_DECISIONS * g * 3 / 1000 + 300) / 60:.0f} min" if g else "~15-30 min")]
+                 _dur(G1_TEACHER_DECISIONS * g * 3 / 1000 + 300) if g else "~15-30 min")]
         return rows
 
     def report(self) -> int:
@@ -208,6 +211,10 @@ class Doctor:
         write_json(REPO_ROOT / "results" / "planck3" / "doctor.json",
                    {"rows": self.rows, "measured": self.measured, "eta": self.eta()})
         return 1 if n_fail else 0
+
+
+def _dur(seconds: float) -> str:
+    return f"~{seconds:.0f} s" if seconds < 90 else f"~{seconds / 60:.0f} min"
 
 
 def _probe_observations() -> list[dict]:

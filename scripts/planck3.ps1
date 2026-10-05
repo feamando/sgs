@@ -56,6 +56,11 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root = Split-Path -Parent $ScriptDir
 Set-Location $Root
 
+# Python writes UTF-8; make PowerShell DECODE it as UTF-8 too, or non-ASCII page text and
+# progress glyphs land in the console/log as mojibake (seen in the first doctor log).
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+$OutputEncoding = [System.Text.Encoding]::UTF8
+$env:TQDM_DISABLE = "1"                # transformers' weight-loading bars flood the logs
 $env:PYTHONUTF8 = "1"                  # page text is not cp1252
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUNBUFFERED = "1"            # live progress through the log tee
@@ -132,7 +137,8 @@ function Get-TeacherPolicy { if ($Policy -eq "gemma" -and -not (Test-Path $GEMMA
 # ── setup / doctor ───────────────────────────────────────────────────────
 function Do-Setup {
     Log "installing Planck 3.0 deps into .venv"
-    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "--upgrade", "trafilatura", "requests", "scipy", "pytest", "sentencepiece")
+    # install-if-missing (no --upgrade): fast on re-runs, no surprise version bumps mid-experiment
+    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "requests", "scipy", "pytest", "sentencepiece")
 }
 
 function Do-Doctor([bool]$DeepRun) {
@@ -250,7 +256,7 @@ function Do-Unschedule {
 
 switch ($Command.ToLower()) {
     "setup"      { Do-Setup }
-    "doctor"     { Start-RunLog "doctor"; Do-Doctor $Deep.IsPresent }
+    "doctor"     { Start-RunLog "doctor"; Do-Setup; Do-Doctor $Deep.IsPresent }
     "smoke"      { Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q") }
     "searxng"    { Do-Searxng }
     "ask"        {
