@@ -1,0 +1,398 @@
+[planck3 18:45:04] logging to C:\Users\feama\sgs\results\planck3\logs\all_20261005_1845.log
+[planck3 18:45:04] installing Planck 3.0 deps into .venv
+[planck3 18:45:07] offline smoke tests
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.1
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.2
+  [OK  ] trafilatura               2.3.0
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 657 GB
+  [OK  ] git                       branch main, 0 commits behind origin/main
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [WARN] searxng                   not running
+         -> .\scripts\planck3.ps1 searxng
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        9,307 texts/s on cuda (~31 s for the G1 graph)
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 1576 ms/decision
+  [OK  ] gemma closed-book         '1943' in 349 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~9 min
+    g0 closed-book (base-chat rival)   ~22 s
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~31 s
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~5 min
+
+  READY: 0 fail, 1 warn
+[planck3 18:46:05] creating SearXNG container (first run pulls the image)
+[planck3 18:46:22] SearXNG is up on http://localhost:8888
+[planck3 18:46:22] G0 teacher on our tools: gemma
+> python scripts/planck3.py g0 --policy gemma --out results/planck3/g0_gemma --gemma-path models/gemma-4-e4b-it
+[planck3] search=searxng net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/47] OK  f01  1943                         p=0.95 steps=4 web=2 $0.00400
+[  2/47] --  f02                               p=0.00 steps=3 web=2 $0.00227
+[  3/47] OK  f03  1889                         p=0.95 steps=4 web=2 $0.00473
+[  4/47] OK  f04  1946                         p=0.90 steps=4 web=2 $0.00440
+[  5/47] OK  f05  2006                         p=0.95 steps=4 web=2 $0.00419
+[  6/47] OK  f06  1997                         p=0.90 steps=4 web=2 $0.00462
+[  7/47] OK  f07  2008                         p=0.90 steps=5 web=3 $0.00518
+[  8/47] OK  f08  2011                         p=0.95 steps=4 web=2 $0.00402
+[  9/47] OK  f09  1879                         p=1.00 steps=4 web=2 $0.00492
+[ 10/47] XX  f10  1894                         p=0.00 steps=5 web=3 $0.00493
+[ 11/47] XX  f11  2013                         p=0.90 steps=4 web=2 $0.00408
+[ 12/47] OK  f12  1989                         p=0.95 steps=4 web=2 $0.00493
+[ 13/47] XX  f13  2025                         p=0.90 steps=5 web=3 $0.00556
+[ 14/47] OK  f14  2017                         p=1.00 steps=4 web=2 $0.00439
+[ 15/47] OK  f15  2002                         p=0.90 steps=4 web=2 $0.00490
+[ 16/47] OK  f16  2019                         p=0.90 steps=4 web=2 $0.00346
+[ 17/47] OK  n01  8,848.86 metres              p=0.95 steps=4 web=2 $0.00560
+[ 18/47] OK  n02  829.8 m                      p=0.80 steps=5 web=3 $0.00655
+[ 19/47] OK  n03  634 metres                   p=0.95 steps=4 web=2 $0.00409
+[ 20/47] OK  n04  79                           p=1.00 steps=4 web=2 $0.00449
+[ 21/47] OK  n05  26                           p=0.95 steps=4 web=2 $0.00471
+[ 22/47] OK  n06  299,792,458 metres           p=0.95 steps=5 web=3 $0.00655
+[ 23/47] OK  n07  206                          p=0.90 steps=5 web=3 $0.00555
+[ 24/47] OK  n08  6.2 inch                     p=0.95 steps=4 web=2 $0.00513
+[ 25/47] XX  n09  10                           p=0.80 steps=5 web=3 $0.00457
+[ 26/47] XX  e01  Kanbarra                     p=0.90 steps=5 web=3 $0.00550
+[ 27/47] OK  e02  Ottawa                       p=1.00 steps=5 web=3 $0.00529
+[ 28/47] XX  e03  Brazil                       p=0.95 steps=4 web=2 $0.00446
+[ 29/47] OK  e04  Hayao Miyazaki               p=0.95 steps=4 web=2 $0.00475
+[ 30/47] XX  e05  One Hundred Years of Solitude p=0.95 steps=4 web=2 $0.00501
+[ 31/47] OK  e06  Elon Musk                    p=0.95 steps=4 web=2 $0.00456
+[ 32/47] OK  e07  Kyoto                        p=0.95 steps=4 web=2 $0.00456
+[ 33/47] OK  e08  Stockholm                    p=0.95 steps=4 web=2 $0.00453
+[ 34/47] --  e09                               p=0.00 steps=2 web=1 $0.00127
+[ 35/47] --  e10                               p=0.00 steps=2 web=1 $0.00134
+[ 36/47] XX  e11  Self                         p=0.95 steps=5 web=3 $0.00574
+[ 37/47] XX  e12  Israel                       p=0.00 steps=5 web=3 $0.00553
+[ 38/47] OK  c01                               p=0.90 steps=12 web=6 $0.01255
+[ 39/47] OK  c02                               p=0.80 steps=13 web=7 $0.01751
+[ 40/47] OK  c03                               p=0.95 steps=8 web=2 $0.00624
+[ 41/47] --  c04                               p=0.00 steps=12 web=7 $0.01182
+[ 42/47] OK  ch01                              p=0.90 steps=12 web=6 $0.01252
+[ 43/47] OK  ch02                              p=0.95 steps=8 web=4 $0.00890
+[ 44/47] OK  ch03                              p=0.80 steps=9 web=5 $0.01230
+[ 45/47] XX  ch04                              p=0.90 steps=10 web=3 $0.00752
+[ 46/47] XX  ch05                              p=0.90 steps=9 web=5 $0.01080
+[ 47/47] OK  ch06                              p=0.95 steps=8 web=4 $0.00909
+
+==== G0 summary (gemma) ====
+  n                      47
+  success                0.681
+  answered_rate          0.915
+  wrong_when_answered    0.256
+  ece                    0.137
+  mean_steps             5.426
+  mean_web_calls         2.809
+  mean_decision_ms       1587.160
+  n_invalid_decisions    5
+  gold_reachable         0.809
+  serp_answer_rate_at3   0.957
+  depth_evidence_recall  1.000
+  cost/1k tasks          $5.9491   per correct $0.00874   LLM tokens/task 5486 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.667
+  family compare         n=4 success=0.750
+  family fact            n=37 success=0.676
+  GATE: PASS
+
+  run dir: results\planck3\g0_gemma
+[planck3 18:55:05] G0 base-chat rival: gemma closed-book (no tools, no sources)
+> python scripts/planck3.py g0 --policy gemma --closed-book --out results/planck3/g0_gemma_closedbook --gemma-path models/gemma-4-e4b-it
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/47] OK  f01  1943
+[  2/47] OK  f02  1932
+[  3/47] OK  f03  1889
+[  4/47] OK  f04  1946
+[  5/47] XX  f05  2008
+[  6/47] OK  f06  1997
+[  7/47] OK  f07  2008
+[  8/47] OK  f08  2011
+[  9/47] OK  f09  1879
+[ 10/47] OK  f10  1867
+[ 11/47] OK  f11  1815
+[ 12/47] OK  f12  1989
+[ 13/47] OK  f13  2007
+[ 14/47] OK  f14  2017
+[ 15/47] OK  f15  2002
+[ 16/47] OK  f16  2019
+[ 17/47] OK  n01  8848.86
+[ 18/47] OK  n02  828
+[ 19/47] OK  n03  634
+[ 20/47] OK  n04  79
+[ 21/47] OK  n05  26
+[ 22/47] OK  n06  299792458
+[ 23/47] OK  n07  206
+[ 24/47] OK  n08  6.2
+[ 25/47] OK  n09  88
+[ 26/47] OK  e01  Canberra
+[ 27/47] OK  e02  Ottawa
+[ 28/47] OK  e03  Brasília
+[ 29/47] OK  e04  Hayao Miyazaki
+[ 30/47] OK  e05  Gabriel García Márquez
+[ 31/47] OK  e06  Elon Musk
+[ 32/47] OK  e07  Kyoto
+[ 33/47] OK  e08  Stockholm
+[ 34/47] XX  e09  Dusseldorf
+[ 35/47] OK  e10  Jupiter
+[ 36/47] OK  e11  Leonardo da Vinci
+[ 37/47] OK  e12  Albert Einstein
+[ 38/47] OK  c01  1943 | 1947 | 1975
+[ 39/47] OK  c02  828 | 634 | 330
+[ 40/47] OK  c03  79 | 26 | 8
+[ 41/47] OK  c04  2020 | 2020 | 2017
+[ 42/47] OK  ch01 1943 | 1947 | 1975
+[ 43/47] OK  ch02 Elon Musk | 2002
+[ 44/47] OK  ch03 828 | 634
+[ 45/47] OK  ch04 Canberra | Ottawa | Brasília
+[ 46/47] OK  ch05 Hayao Miyazaki | 2001
+[ 47/47] OK  ch06 Kyoto | 1889
+
+==== G0 closed-book summary (gemma (closed-book)) ====
+  n                      47
+  success                0.957
+  answered_rate          1.000
+  wrong_when_answered    0.043
+  ece                    0.043
+  mean_steps             1.340
+  mean_web_calls         0.000
+  mean_decision_ms       319.566
+  n_invalid_decisions    None
+  gold_reachable         None
+  serp_answer_rate_at3   None
+  depth_evidence_recall  None
+  cost/1k tasks          $0.1049   per correct $0.00011   LLM tokens/task 82 (priced as claude-haiku-4-5)
+  family chat            n=6 success=1.000
+  family compare         n=4 success=1.000
+  family fact            n=37 success=0.946
+  GATE: COMPARATOR
+
+  run dir: results\planck3\g0_gemma_closedbook
+[planck3 18:55:48] G0 heuristic floor
+> python scripts/planck3.py g0 --policy heuristic --out results/planck3/g0_heuristic --gemma-path models/gemma-4-e4b-it
+[planck3] search=searxng net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/47] OK  f01  1943                         p=1.00 steps=4 web=2 $0.00000
+[  2/47] XX  f02  1990                         p=0.41 steps=6 web=4 $0.00000
+[  3/47] OK  f03  1889                         p=1.00 steps=4 web=2 $0.00000
+[  4/47] OK  f04  1946                         p=1.00 steps=5 web=3 $0.00000
+[  5/47] OK  f05  2006                         p=1.00 steps=4 web=2 $0.00000
+[  6/47] OK  f06  1997                         p=0.90 steps=4 web=2 $0.00000
+[  7/47] OK  f07  2008                         p=1.00 steps=4 web=2 $0.00000
+[  8/47] OK  f08  2011                         p=0.86 steps=4 web=2 $0.00000
+[  9/47] XX  f09  1955                         p=0.40 steps=5 web=3 $0.00000
+[ 10/47] OK  f10  1867                         p=0.44 steps=5 web=3 $0.00000
+[ 11/47] OK  f11  1815                         p=0.99 steps=4 web=2 $0.00000
+[ 12/47] OK  f12  1989                         p=1.00 steps=4 web=2 $0.00000
+[ 13/47] OK  f13  2007                         p=1.00 steps=4 web=2 $0.00000
+[ 14/47] XX  f14  2020                         p=0.44 steps=5 web=3 $0.00000
+[ 15/47] XX  f15  1999                         p=0.60 steps=5 web=3 $0.00000
+[ 16/47] OK  f16  2019                         p=1.00 steps=4 web=2 $0.00000
+[ 17/47] OK  n01  8,848.86 meters              p=0.93 steps=4 web=2 $0.00000
+[ 18/47] OK  n02  828 m                        p=0.41 steps=5 web=3 $0.00000
+[ 19/47] OK  n03  634 metres                   p=0.75 steps=8 web=6 $0.00000
+[ 20/47] OK  n04  79                           p=0.77 steps=4 web=2 $0.00000
+[ 21/47] OK  n05  26                           p=0.98 steps=4 web=2 $0.00000
+[ 22/47] XX  n06  17 metres                    p=0.96 steps=4 web=2 $0.00000
+[ 23/47] --  n07                               p=0.38 steps=6 web=4 $0.00000
+[ 24/47] XX  n08  7.9 inches                   p=0.61 steps=5 web=3 $0.00000
+[ 25/47] OK  n09  88                           p=1.00 steps=4 web=2 $0.00000
+[ 26/47] XX  e01  Australian Capital Territory p=0.75 steps=5 web=3 $0.00000
+[ 27/47] XX  e02  Government                   p=0.74 steps=4 web=2 $0.00000
+[ 28/47] XX  e03  Rio de Janeiro               p=0.44 steps=5 web=3 $0.00000
+[ 29/47] OK  e04  Hayao Miyazaki               p=0.44 steps=5 web=3 $0.00000
+[ 30/47] XX  e05  One Hundred Years of Solitude p=0.71 steps=4 web=2 $0.00000
+[ 31/47] OK  e06  Musk                         p=0.62 steps=4 web=2 $0.00000
+[ 32/47] XX  e07  Nintendo Co                  p=0.70 steps=5 web=3 $0.00000
+[ 33/47] OK  e08  Stockholm                    p=0.83 steps=6 web=4 $0.00000
+[ 34/47] OK  e09  Berlin                       p=0.97 steps=4 web=2 $0.00000
+[ 35/47] XX  e10  Planet Sizes                 p=0.82 steps=4 web=2 $0.00000
+[ 36/47] XX  e11  Lisa</em>                    p=0.78 steps=4 web=2 $0.00000
+[ 37/47] XX  e12  Theory of General Relativity p=0.81 steps=4 web=2 $0.00000
+[ 38/47] OK  c01                               p=0.98 steps=11 web=5 $0.00000
+[ 39/47] OK  c02                               p=0.41 steps=8 web=2 $0.00000
+[ 40/47] OK  c03                               p=0.77 steps=8 web=2 $0.00000
+[ 41/47] XX  c04                               p=0.41 steps=12 web=6 $0.00000
+[ 42/47] OK  ch01                              p=0.98 steps=12 web=6 $0.00000
+[ 43/47] OK  ch02                              p=0.62 steps=6 web=2 $0.00000
+[ 44/47] OK  ch03                              p=0.41 steps=4 web=0 $0.00000
+[ 45/47] XX  ch04                              p=0.44 steps=6 web=0 $0.00000
+[ 46/47] OK  ch05                              p=0.64 steps=9 web=5 $0.00000
+[ 47/47] XX  ch06                              p=0.66 steps=8 web=4 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      47
+  success                0.617
+  answered_rate          0.979
+  wrong_when_answered    0.370
+  ece                    0.132
+  mean_steps             5.383
+  mean_web_calls         2.702
+  mean_decision_ms       0.106
+  n_invalid_decisions    0
+  gold_reachable         0.809
+  serp_answer_rate_at3   0.851
+  depth_evidence_recall  1.000
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.667
+  family compare         n=4 success=0.750
+  family fact            n=37 success=0.595
+  GATE: BASELINE
+
+  run dir: results\planck3\g0_heuristic
+[planck3 18:56:30] SKIP build (exists): data/planck3/wikirace/graph.npz
+[planck3 18:56:30] G1 tasks: BFS labels, split by target
+> python scripts/planck3.py wikirace tasks
+  targets 64/3000 (3s)
+  targets 128/3000 (7s)
+  targets 192/3000 (10s)
+  targets 256/3000 (13s)
+  targets 320/3000 (17s)
+  targets 384/3000 (20s)
+  targets 448/3000 (23s)
+  targets 512/3000 (27s)
+  targets 576/3000 (30s)
+  targets 640/3000 (33s)
+  targets 704/3000 (36s)
+  targets 768/3000 (40s)
+  targets 832/3000 (43s)
+  targets 896/3000 (46s)
+  targets 960/3000 (49s)
+  targets 1024/3000 (53s)
+  targets 1088/3000 (56s)
+  targets 1152/3000 (59s)
+  targets 1216/3000 (63s)
+  targets 1280/3000 (66s)
+  targets 1344/3000 (70s)
+  targets 1408/3000 (73s)
+  targets 1472/3000 (76s)
+  targets 1536/3000 (79s)
+  targets 1600/3000 (83s)
+  targets 1664/3000 (86s)
+  targets 1728/3000 (89s)
+  targets 1792/3000 (93s)
+  targets 1856/3000 (96s)
+  targets 1920/3000 (99s)
+  targets 1984/3000 (103s)
+  targets 2048/3000 (106s)
+  targets 2112/3000 (109s)
+  targets 2176/3000 (113s)
+  targets 2240/3000 (116s)
+  targets 2304/3000 (119s)
+  targets 2368/3000 (122s)
+  targets 2432/3000 (126s)
+  targets 2496/3000 (130s)
+  targets 2560/3000 (134s)
+  targets 2624/3000 (137s)
+  targets 2688/3000 (141s)
+  targets 2752/3000 (145s)
+  targets 2816/3000 (149s)
+  targets 2880/3000 (153s)
+  targets 2944/3000 (156s)
+  targets 3000/3000 (160s)
+[wikirace] tasks: {'train': {'pairs': 9588, 'steps': 47934}, 'val': {'pairs': 1196, 'steps': 5980}, 'test': {'pairs': 1192, 'steps': 5960}, 'n_targets': 3000, 'seed': 0}
+[planck3 18:59:11] G1 train head:hash seed=0
+> python scripts/planck3.py wikirace train --encoder hash --seed 0
+  epoch 0: train_nll=1.5385 val_top1=0.5828 (7s)
+  epoch 1: train_nll=0.8531 val_top1=0.5681 (6s)
+  epoch 2: train_nll=0.4250 val_top1=0.5538 (6s)
+  epoch 3: train_nll=0.2369 val_top1=0.5426 (6s)
+  early stop (val top1 not improving for 3 epochs)
+C:\Users\feama\sgs\src\planck3\wikirace.py:347: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(out_dir / "head.pt", map_location=device)
+[wikirace] trained head:hash seed=0 best val top1=0.5828 T=0.977 -> C:\Users\feama\sgs\results\planck3\g1_head_hash_s0
+[planck3 18:59:55] G1 train head:planck seed=0
+> python scripts/planck3.py wikirace train --encoder planck --seed 0
+  epoch 0: train_nll=1.5136 val_top1=0.6321 (7s)
+  epoch 1: train_nll=1.1176 val_top1=0.6353 (6s)
+  epoch 2: train_nll=0.9253 val_top1=0.6323 (6s)
+  epoch 3: train_nll=0.7826 val_top1=0.6244 (6s)
+  epoch 4: train_nll=0.6569 val_top1=0.6177 (6s)
+  early stop (val top1 not improving for 3 epochs)
+C:\Users\feama\sgs\src\planck3\wikirace.py:347: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(out_dir / "head.pt", map_location=device)
+[wikirace] trained head:planck seed=0 best val top1=0.6353 T=1.095 -> C:\Users\feama\sgs\results\planck3\g1_head_planck_s0
+[planck3 19:00:44] G1 eval: random, lexical, head:hash, head:planck, gemma
+> python scripts/planck3.py wikirace eval --policies random,lexical,head:hash,head:planck,gemma --seed 0 --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model --gemma-path models/gemma-4-e4b-it
+  random         success=0.001 steps/opt=1.0 top1=0.20201342281879195 ece=0.11061727610393667 ms=0.000400003045797348
+  lexical        success=0.153 steps/opt=1.2260073260073259 top1=0.4590604026845638 ece=0.12780397280983488 ms=0.014299992471933365
+C:\Users\feama\sgs\src\planck3\wikirace.py:407: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(head_path, map_location=device)
+  head:hash      success=0.146 steps/opt=1.2513409961685824 top1=0.5795302013422818 ece=0.08450712878819579 ms=0.6512000691145658
+  head:planck    success=0.211 steps/opt=1.2715803452855245 top1=0.6238255033557047 ece=0.09521305478332663 ms=0.4322999157011509
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+    gemma 10/100 success so far 0.300
+    gemma 20/100 success so far 0.200
+    gemma 30/100 success so far 0.167
+    gemma 40/100 success so far 0.200
+    gemma 50/100 success so far 0.180
+    gemma 60/100 success so far 0.200
+    gemma 70/100 success so far 0.271
+    gemma 80/100 success so far 0.275
+    gemma 90/100 success so far 0.311
+    gemma 100/100 success so far 0.300
+  gemma          success=0.300 steps/opt=1.3472222222222223 top1=None ece=None ms=222.66400000080466
+
+  GATE G1: FAIL (try the Hertz encoder)
+  planck-vs-hash head delta +0.065 (<=0 means Planck features add nothing); head/teacher = 0.70 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+  -> C:\Users\feama\sgs\results\planck3\g1_eval_s0\summary.json
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-05 19:04)
+
+## G0 (seed benchmark)
+
+| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | $/correct | LLM tok/task | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| g0_gemma | 47 | 0.681 | 0.915 | 0.256 | 0.137 | 1.000 | 0.957 | 0.008738 | 5486 | PASS |
+| g0_gemma_closedbook | 47 | 0.957 | 1.000 | 0.043 | 0.043 |  |  | 0.000110 | 82 | COMPARATOR |
+| g0_gemma_closedbook_quick | 12 | 1.000 | 1.000 | 0.000 | 0.000 |  |  | 0.000173 | 136 | COMPARATOR |
+| g0_gemma_quick | 12 | 0.667 | 1.000 | 0.333 | 0.183 | 0.667 | 0.417 | 0.015154 | 9337 | PASS |
+| g0_heuristic | 47 | 0.617 | 0.979 | 0.370 | 0.132 | 1.000 | 0.851 | 0.000000 | 0 | BASELINE |
+| g0_heuristic_quick | 12 | 0.250 | 0.833 | 0.700 | 0.278 | 0.667 | 0.417 | 0.000000 | 0 | BASELINE |
+
+**g0_gemma vs base chat:** success 0.681 vs 0.957 (0.71x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 79.8x MORE expensive (5486 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_gemma_quick vs base chat:** success 0.667 vs 1.000 (0.67x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 87.7x MORE expensive (9337 vs 136 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+
+## G1 Wikiracing (g1_eval_s0)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.014 |
+| head:hash | 1192 | 0.146 | 1.251 | 0.580 | 0.085 | 0.651 |
+| head:planck | 1192 | 0.211 | 1.272 | 0.624 | 0.095 | 0.432 |
+| gemma | 100 | 0.300 | 1.347 |  |  | 222.664 |
+
+Cold CPU latency (encode target + all candidate titles): median 94 ms, p90 536 ms, 50 candidates on average
+
+**Verdict:** FAIL (try the Hertz encoder). planck-vs-hash head delta +0.065 (<=0 means Planck features add nothing); head/teacher = 0.70 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+
+## G1 Wikiracing (g1_eval_s0_quick)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 100 | 0.000 |  | 0.190 | 0.105 | 0.000 |
+| lexical | 100 | 0.160 | 1.403 | 0.460 | 0.136 | 0.015 |
+| head:hash | 100 | 0.040 | 1.000 | 0.490 | 0.069 | 0.553 |
+| head:planck | 100 | 0.110 | 1.358 | 0.517 | 0.105 | 0.426 |
+| gemma | 20 | 0.200 | 1.250 |  |  | 272.297 |
+
+Cold CPU latency (encode target + all candidate titles): median 101 ms, p90 584 ms, 50 candidates on average
+
+**Verdict:** FAIL (try the Hertz encoder). planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+
+[planck3 19:04:17] all finished in 19 min
+[planck3 19:04:17] committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)

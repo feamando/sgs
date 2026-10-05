@@ -1,0 +1,103 @@
+{
+  "n": 47,
+  "success": 0.6170212765957447,
+  "answered_rate": 0.9787234042553191,
+  "wrong_when_answered": 0.3695652173913043,
+  "abstain_rate": 0.021276595744680882,
+  "ece": 0.1318316078060575,
+  "mean_steps": 5.382978723404255,
+  "mean_web_calls": 2.702127659574468,
+  "mean_decision_ms": 0.10550829992360866,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.6666666666666666
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.75
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.5945945945945946
+    }
+  },
+  "policy": "heuristic",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.8085106382978723,
+  "serp_answer_rate_at3": 0.851063829787234,
+  "depth_evidence_recall": 1.0,
+  "graph": {
+    "facts": 50,
+    "passages": 273,
+    "entities": 456,
+    "edges": 465,
+    "queries": 63,
+    "domains": 21
+  },
+  "cost": {
+    "usd_per_task": 7.888179633768615e-09,
+    "usd_per_correct": 1.2784291130590514e-08,
+    "usd_per_1k_tasks": 7.888179633768614e-06,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 51,
+    "fetch": 76,
+    "search_net": 0,
+    "fetch_net": 28
+  },
+  "wall_s": 37.1,
+  "store_facts": 50,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9523809523809523,
+      19.0
+    ],
+    [
+      "ecb.europa.eu",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "clay.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "ebsco.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "britannica.com",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "periodic-table.rsc.org",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "ellenmacarthurfoundation.org",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "ikea.com",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "BASELINE",
+    "note": "heuristic is the no-model floor; the G0 gate applies to teachers"
+  }
+}

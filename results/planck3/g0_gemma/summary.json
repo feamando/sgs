@@ -1,0 +1,105 @@
+{
+  "n": 47,
+  "success": 0.6808510638297872,
+  "answered_rate": 0.9148936170212766,
+  "wrong_when_answered": 0.2558139534883721,
+  "abstain_rate": 0.08510638297872342,
+  "ece": 0.13720930232558148,
+  "mean_steps": 5.425531914893617,
+  "mean_web_calls": 2.8085106382978724,
+  "mean_decision_ms": 1587.1603870586328,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.6666666666666666
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.75
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.6756756756756757
+    }
+  },
+  "policy": "gemma",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 5,
+  "gold_reachable": 0.8085106382978723,
+  "serp_answer_rate_at3": 0.9574468085106383,
+  "depth_evidence_recall": 1.0,
+  "graph": {
+    "facts": 54,
+    "passages": 277,
+    "entities": 460,
+    "edges": 464,
+    "queries": 63,
+    "domains": 13
+  },
+  "cost": {
+    "usd_per_task": 0.005949063829787235,
+    "usd_per_correct": 0.0087376875,
+    "usd_per_1k_tasks": 5.949063829787234,
+    "llm_tokens_per_task": 5486.255319148936,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 59,
+    "fetch": 73,
+    "search_net": 52,
+    "fetch_net": 41
+  },
+  "wall_s": 496.4,
+  "store_facts": 54,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.96,
+      23.0
+    ],
+    [
+      "ikea.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "forbes.com",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "nobelprize.org",
+      0.6,
+      0.5
+    ],
+    [
+      "blogs.bodleian.ox.ac.uk",
+      0.6,
+      0.5
+    ],
+    [
+      "britannica.com",
+      0.6,
+      0.5
+    ],
+    [
+      "americanelements.com",
+      0.6,
+      0.5
+    ],
+    [
+      "my.clevelandclinic.org",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "PASS",
+    "success": 0.681,
+    "pass_at": 0.6,
+    "kill_below": 0.4
+  }
+}
