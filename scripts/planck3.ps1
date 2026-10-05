@@ -138,7 +138,9 @@ function Get-TeacherPolicy { if ($Policy -eq "gemma" -and -not (Test-Path $GEMMA
 function Do-Setup {
     Log "installing Planck 3.0 deps into .venv"
     # install-if-missing (no --upgrade): fast on re-runs, no surprise version bumps mid-experiment
-    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "requests", "scipy", "pytest", "sentencepiece")
+    # lxml_html_clean: lxml >= 5.2 split html.clean out; without it trafilatura/justext fail with
+    # ImportError and extraction silently falls back to the crude tag stripper (first box run)
+    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "lxml_html_clean", "requests", "scipy", "pytest", "sentencepiece")
 }
 
 function Do-Doctor([bool]$DeepRun) {

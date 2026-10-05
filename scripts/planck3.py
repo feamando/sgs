@@ -553,10 +553,19 @@ def _vs_rival(rows):
             continue
         a, b = s.get("cost") or {}, rival.get("cost") or {}
         ratio = (b["usd_per_correct"] / a["usd_per_correct"]) if a.get("usd_per_correct") and b.get("usd_per_correct") else None
+        if ratio is None:
+            cost_txt = "n/a"
+        elif ratio >= 1:
+            cost_txt = f"{ratio:.1f}x cheaper"
+        else:
+            cost_txt = (f"{1 / ratio:.1f}x MORE expensive ({a.get('llm_tokens_per_task', 0):.0f} vs "
+                        f"{b.get('llm_tokens_per_task', 0):.0f} LLM tokens/task)")
+        teacher = (s.get("cost") or {}).get("llm_tokens_per_task", 0) > 0
+        note = (" An LLM driving the tools is the expensive path by design; the cheap path is the distilled "
+                "Planck policy (G2), which this run does not include.") if teacher else ""
         out.append(f"**{name} vs base chat:** success {s['success']:.3f} vs {rival['success']:.3f} "
                    f"({s['success'] / max(rival['success'], 1e-9):.2f}x); depth evidence {s.get('depth_evidence_recall', 0):.3f} "
-                   f"vs none (base chat shows no sources); cost per correct "
-                   + (f"{ratio:.1f}x cheaper" if ratio else "n/a (a teacher run is priced as an LLM; the Planck policy run is the cheap one)"))
+                   f"vs none (base chat shows no sources); cost per correct {cost_txt}.{note}")
     return out
 
 

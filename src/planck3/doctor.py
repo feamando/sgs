@@ -24,7 +24,7 @@ OK, WARN, FAIL = "OK", "WARN", "FAIL"
 N_ARTICLES = 284_749          # Simple English Wikipedia graph built 2026-09-29
 G0_DECISIONS = 250            # ~47 tasks x ~5.2 decisions (Mac heuristic run)
 G0_CLOSED_BOOK_Q = 62         # questions incl. compare cells and chat turns
-G1_TEACHER_DECISIONS = 400    # 100 pairs x ~4 steps
+G1_TEACHER_DECISIONS = 400    # 100 pairs x ~4 steps; short replies (a link number), ~prefill-bound
 
 
 class Doctor:
@@ -48,7 +48,11 @@ class Doctor:
                 m = importlib.import_module(mod)
                 self.add(OK, mod, getattr(m, "__version__", "ok"))
             except Exception as e:
-                self.add(need, mod, f"import failed: {e.__class__.__name__}", fix or f"pip install {mod}")
+                msg = str(e).splitlines()[0][:140] if str(e) else ""
+                hint = fix or f"pip install {mod}"
+                if mod == "trafilatura" and "html" in msg.lower() and "clean" in msg.lower():
+                    hint = "pip install lxml_html_clean  (lxml >= 5.2 split html.clean out)"
+                self.add(need, mod, f"import failed: {e.__class__.__name__}: {msg}", hint)
 
     def gpu(self):
         try:
@@ -194,8 +198,10 @@ class Doctor:
                 ("g1 build + tasks + hash embed", "~5 min (356 MB download)"),
                 ("g1 planck embed", _dur(e * N_ARTICLES) if e else "unknown (run doctor -Deep)"),
                 ("g1 train heads", "~5 min on GPU"),
+                # a race decision replies with one number, so it costs ~a closed-book answer, not a
+                # G0 decision (first box run: 272 ms measured vs the old 3x-G0 estimate of ~6 s)
                 ("g1 eval incl. Gemma teacher",
-                 _dur(G1_TEACHER_DECISIONS * g * 3 / 1000 + 300) if g else "~15-30 min")]
+                 _dur(G1_TEACHER_DECISIONS * m["gemma_ms_closed_book"] * 1.5 / 1000 + 120) if g else "~5-15 min")]
         return rows
 
     def report(self) -> int:
