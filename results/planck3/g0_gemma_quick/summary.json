@@ -1,0 +1,70 @@
+{
+  "n": 12,
+  "success": 0.6666666666666666,
+  "answered_rate": 1.0,
+  "wrong_when_answered": 0.3333333333333333,
+  "abstain_rate": 0.0,
+  "ece": 0.1833333333333333,
+  "mean_steps": 9.0,
+  "mean_web_calls": 4.333333333333333,
+  "mean_decision_ms": 2016.676278707261,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 0.5
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.5
+    },
+    "fact": {
+      "n": 4,
+      "success": 1.0
+    }
+  },
+  "policy": "gemma",
+  "search": "wikipedia",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 1.0,
+  "serp_answer_rate_at3": 0.4166666666666667,
+  "depth_evidence_recall": 0.6666666666666666,
+  "graph": {
+    "facts": 26,
+    "passages": 107,
+    "entities": 185,
+    "edges": 181,
+    "queries": 26,
+    "domains": 1
+  },
+  "cost": {
+    "usd_per_task": 0.010102583333333333,
+    "usd_per_correct": 0.015153875,
+    "usd_per_1k_tasks": 10.102583333333333,
+    "llm_tokens_per_task": 9336.583333333334,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 26,
+    "fetch": 26,
+    "search_net": 23,
+    "fetch_net": 22
+  },
+  "wall_s": 237.9,
+  "store_facts": 26,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9333333333333333,
+      13.0
+    ]
+  ],
+  "gate": {
+    "verdict": "PASS",
+    "success": 0.667,
+    "pass_at": 0.6,
+    "kill_below": 0.4
+  }
+}

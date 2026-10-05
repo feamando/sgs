@@ -15,7 +15,7 @@
     {
       "status": "OK",
       "check": "scipy",
-      "detail": "1.18.0",
+      "detail": "1.18.1",
       "fix": ""
     },
     {
@@ -33,13 +33,13 @@
     {
       "status": "OK",
       "check": "sentencepiece",
-      "detail": "0.2.1",
+      "detail": "0.2.2",
       "fix": ""
     },
     {
       "status": "WARN",
       "check": "trafilatura",
-      "detail": "import failed: ModuleNotFoundError",
+      "detail": "import failed: ImportError",
       "fix": "pip install trafilatura (fallback extractor is cruder)"
     },
     {
@@ -61,10 +61,10 @@
       "fix": ""
     },
     {
-      "status": "OK",
+      "status": "WARN",
       "check": "git",
-      "detail": "branch main, 0 commits behind origin/main",
-      "fix": ""
+      "detail": "branch main, 1 commits behind origin/main",
+      "fix": "git pull"
     },
     {
       "status": "OK",
@@ -93,7 +93,7 @@
     {
       "status": "OK",
       "check": "planck embed speed",
-      "detail": "15,039 texts/s on cuda (~0 min for the G1 graph)",
+      "detail": "17,244 texts/s on cuda (~0 min for the G1 graph)",
       "fix": ""
     },
     {
@@ -105,20 +105,20 @@
     {
       "status": "OK",
       "check": "gemma typed decisions",
-      "detail": "3/3 valid, 2040 ms/decision",
+      "detail": "3/3 valid, 2095 ms/decision",
       "fix": ""
     },
     {
       "status": "OK",
       "check": "gemma closed-book",
-      "detail": "'1943' in 346 ms",
+      "detail": "'1943' in 475 ms",
       "fix": ""
     }
   ],
   "measured": {
-    "planck_embed_s_per_text": 6.649448243933875e-05,
-    "gemma_ms_per_decision": 2040.01476666114,
-    "gemma_ms_closed_book": 345.9533000132069
+    "planck_embed_s_per_text": 5.799101563752629e-05,
+    "gemma_ms_per_decision": 2094.5706666680053,
+    "gemma_ms_closed_book": 475.40170000866055
   },
   "eta": [
     [
@@ -151,7 +151,7 @@
     ],
     [
       "g1 eval incl. Gemma teacher",
-      "~46 min"
+      "~47 min"
     ]
   ]
 }

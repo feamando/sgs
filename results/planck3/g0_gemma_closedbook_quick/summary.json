@@ -1,0 +1,42 @@
+{
+  "n": 12,
+  "success": 1.0,
+  "answered_rate": 1.0,
+  "wrong_when_answered": 0.0,
+  "abstain_rate": 0.0,
+  "ece": 0.0,
+  "mean_steps": 2.1666666666666665,
+  "mean_web_calls": 0.0,
+  "mean_decision_ms": 456.5122769518684,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 1.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 1.0
+    },
+    "fact": {
+      "n": 4,
+      "success": 1.0
+    }
+  },
+  "policy": "gemma (closed-book)",
+  "mode": "closed_book",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "cost": {
+    "usd_per_task": 0.00017283333333333332,
+    "usd_per_correct": 0.00017283333333333332,
+    "usd_per_1k_tasks": 0.1728333333333333,
+    "llm_tokens_per_task": 136.5,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "wall_s": 11.9,
+  "note": "base-chat comparator: no tools, no sources, no freshness. 'p' is 1 when it answers (a base chat reply carries no calibrated confidence), so ECE here measures overconfidence.",
+  "gate": {
+    "verdict": "COMPARATOR",
+    "note": "compare success + cost per correct against the tool-using runs"
+  }
+}

@@ -1,0 +1,345 @@
+[planck3 17:49:51] logging to C:\Users\feama\sgs\results\planck3\logs\all_quick_20261005_1749.log
+[planck3 17:49:51] installing Planck 3.0 deps into .venv
+[planck3 17:50:21] offline smoke tests
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]
+Loading weights:  13%|ΓûêΓûÄ        | 267/2076 [00:00<00:00, 2590.14it/s]
+Loading weights:  25%|ΓûêΓûêΓûî       | 527/2076 [00:00<00:00, 2551.23it/s]
+Loading weights:  38%|ΓûêΓûêΓûêΓûè      | 783/2076 [00:03<00:06, 193.45it/s] 
+Loading weights:  45%|ΓûêΓûêΓûêΓûêΓûì     | 926/2076 [00:03<00:05, 207.12it/s]
+Loading weights:  49%|ΓûêΓûêΓûêΓûêΓûë     | 1023/2076 [00:03<00:04, 212.24it/s]
+Loading weights:  53%|ΓûêΓûêΓûêΓûêΓûêΓûÄ    | 1094/2076 [00:04<00:04, 215.48it/s]
+Loading weights:  55%|ΓûêΓûêΓûêΓûêΓûêΓûî    | 1149/2076 [00:04<00:04, 218.19it/s]
+Loading weights:  58%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1194/2076 [00:04<00:04, 216.83it/s]
+Loading weights:  59%|ΓûêΓûêΓûêΓûêΓûêΓûë    | 1231/2076 [00:04<00:03, 212.75it/s]
+Loading weights:  61%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1263/2076 [00:05<00:03, 212.90it/s]
+Loading weights:  62%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ   | 1292/2076 [00:05<00:03, 206.87it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1318/2076 [00:05<00:03, 207.18it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1342/2076 [00:05<00:03, 198.31it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1364/2076 [00:05<00:03, 189.11it/s]
+Loading weights:  67%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1391/2076 [00:05<00:03, 198.22it/s]
+Loading weights:  68%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1413/2076 [00:05<00:03, 200.45it/s]
+Loading weights:  78%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûè  | 1626/2076 [00:05<00:00, 649.63it/s]
+Loading weights:  92%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ| 1914/2076 [00:06<00:00, 1204.61it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:06<00:00, 337.42it/s] 
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.1
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.2
+  [WARN] trafilatura               import failed: ImportError
+         -> pip install trafilatura (fallback extractor is cruder)
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 660 GB
+  [WARN] git                       branch main, 1 commits behind origin/main
+         -> git pull
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [WARN] searxng                   not running
+         -> .\scripts\planck3.ps1 searxng
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        17,244 texts/s on cuda (~0 min for the G1 graph)
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 2095 ms/decision
+  [OK  ] gemma closed-book         '1943' in 475 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~11 min
+    g0 closed-book (base-chat rival)   ~0 min
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~0 min
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~47 min
+
+  READY: 0 fail, 3 warn
+[planck3 17:51:20] creating SearXNG container (first run pulls the image)
+  ! docker run failed (is Docker Desktop running?)
+[planck3 17:51:20] G0 teacher on our tools: gemma
+> python scripts/planck3.py g0 --policy gemma --out results/planck3/g0_gemma_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] SearXNG not reachable at http://localhost:8888; using Wikipedia search (start it with: .\scripts\planck3.ps1 searxng)
+[planck3] search=wikipedia net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]
+Loading weights:  14%|ΓûêΓûÄ        | 282/2076 [00:00<00:00, 2815.46it/s]
+Loading weights:  27%|ΓûêΓûêΓûï       | 564/2076 [00:00<00:00, 2559.85it/s]
+Loading weights:  40%|ΓûêΓûêΓûêΓûë      | 822/2076 [00:03<00:06, 179.83it/s] 
+Loading weights:  47%|ΓûêΓûêΓûêΓûêΓûï     | 966/2076 [00:04<00:05, 191.33it/s]
+Loading weights:  51%|ΓûêΓûêΓûêΓûêΓûê     | 1063/2076 [00:04<00:05, 201.95it/s]
+Loading weights:  55%|ΓûêΓûêΓûêΓûêΓûêΓûì    | 1134/2076 [00:04<00:04, 202.87it/s]
+Loading weights:  57%|ΓûêΓûêΓûêΓûêΓûêΓûï    | 1188/2076 [00:04<00:04, 208.59it/s]
+Loading weights:  59%|ΓûêΓûêΓûêΓûêΓûêΓûë    | 1233/2076 [00:05<00:04, 207.74it/s]
+Loading weights:  61%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1270/2076 [00:05<00:04, 199.84it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1301/2076 [00:05<00:03, 201.40it/s]
+Loading weights:  64%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1329/2076 [00:05<00:03, 201.49it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1355/2076 [00:05<00:03, 198.72it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1379/2076 [00:05<00:03, 190.69it/s]
+Loading weights:  68%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1403/2076 [00:06<00:03, 199.18it/s]
+Loading weights:  71%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ  | 1481/2076 [00:06<00:01, 318.21it/s]
+Loading weights:  88%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûè | 1831/2076 [00:06<00:00, 1038.22it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:06<00:00, 327.56it/s] 
+[  1/12] XX  ch01                              p=0.90 steps=13 web=6 $0.01519
+[  2/12] XX  c01                               p=0.90 steps=12 web=6 $0.01391
+[  3/12] OK  f01  1943                         p=0.90 steps=4 web=2 $0.00478
+[  4/12] OK  ch02                              p=0.95 steps=8 web=4 $0.00854
+[  5/12] OK  c02                               p=0.90 steps=12 web=6 $0.01380
+[  6/12] OK  f02  1932                         p=1.00 steps=4 web=2 $0.00442
+[  7/12] OK  ch03                              p=0.90 steps=8 web=4 $0.00992
+[  8/12] OK  c03                               p=0.95 steps=12 web=6 $0.01338
+[  9/12] OK  f03  1889                         p=0.95 steps=4 web=2 $0.00436
+[ 10/12] XX  ch04                              p=0.90 steps=13 web=6 $0.01388
+[ 11/12] XX  c04                               p=0.00 steps=14 web=6 $0.01451
+[ 12/12] OK  f04  1946                         p=0.95 steps=4 web=2 $0.00452
+
+==== G0 summary (gemma) ====
+  n                      12
+  success                0.667
+  answered_rate          1.000
+  wrong_when_answered    0.333
+  ece                    0.183
+  mean_steps             9.000
+  mean_web_calls         4.333
+  mean_decision_ms       2016.676
+  n_invalid_decisions    0
+  gold_reachable         1.000
+  serp_answer_rate_at3   0.417
+  depth_evidence_recall  0.667
+  cost/1k tasks          $10.1026   per correct $0.01515   LLM tokens/task 9337 (priced as claude-haiku-4-5)
+  family chat            n=4 success=0.500
+  family compare         n=4 success=0.500
+  family fact            n=4 success=1.000
+  GATE: PASS
+
+  run dir: results\planck3\g0_gemma_quick
+[planck3 17:55:49] G0 base-chat rival: gemma closed-book (no tools, no sources)
+> python scripts/planck3.py g0 --policy gemma --closed-book --out results/planck3/g0_gemma_closedbook_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]
+Loading weights:   9%|Γûë         | 195/2076 [00:00<00:00, 1944.30it/s]
+Loading weights:  21%|ΓûêΓûê        | 438/2076 [00:00<00:00, 2216.83it/s]
+Loading weights:  32%|ΓûêΓûêΓûêΓûÅ      | 669/2076 [00:00<00:00, 2249.55it/s]
+Loading weights:  43%|ΓûêΓûêΓûêΓûêΓûÄ     | 894/2076 [00:03<00:07, 165.13it/s] 
+Loading weights:  50%|ΓûêΓûêΓûêΓûêΓûë     | 1033/2076 [00:04<00:05, 176.77it/s]
+Loading weights:  54%|ΓûêΓûêΓûêΓûêΓûêΓûì    | 1130/2076 [00:04<00:05, 186.79it/s]
+Loading weights:  58%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1203/2076 [00:05<00:04, 189.78it/s]
+Loading weights:  61%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1259/2076 [00:05<00:04, 189.60it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1303/2076 [00:05<00:04, 191.63it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1340/2076 [00:05<00:03, 188.86it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1371/2076 [00:05<00:03, 192.22it/s]
+Loading weights:  67%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1399/2076 [00:06<00:03, 194.71it/s]
+Loading weights:  69%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1425/2076 [00:06<00:03, 201.55it/s]
+Loading weights:  83%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ | 1727/2076 [00:06<00:00, 678.71it/s]
+Loading weights:  98%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûè| 2031/2076 [00:06<00:00, 1137.34it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:06<00:00, 327.15it/s] 
+[  1/12] OK  ch01 1943 | 1947 | 1975
+[  2/12] OK  c01  1943 | 1947 | 1975
+[  3/12] OK  f01  1943
+[  4/12] OK  ch02 Elon Musk | 2002
+[  5/12] OK  c02  828 | 634 | 330
+[  6/12] OK  f02  1932
+[  7/12] OK  ch03 828 | 634
+[  8/12] OK  c03  79 | 26 | 8
+[  9/12] OK  f03  1889
+[ 10/12] OK  ch04 Canberra | Ottawa | Bras├¡lia
+[ 11/12] OK  c04  2020 | 2020 | 2017
+[ 12/12] OK  f04  1946
+
+==== G0 closed-book summary (gemma (closed-book)) ====
+  n                      12
+  success                1.000
+  answered_rate          1.000
+  wrong_when_answered    0.000
+  ece                    0.000
+  mean_steps             2.167
+  mean_web_calls         0.000
+  mean_decision_ms       456.512
+  n_invalid_decisions    None
+  gold_reachable         None
+  serp_answer_rate_at3   None
+  depth_evidence_recall  None
+  cost/1k tasks          $0.1728   per correct $0.00017   LLM tokens/task 136 (priced as claude-haiku-4-5)
+  family chat            n=4 success=1.000
+  family compare         n=4 success=1.000
+  family fact            n=4 success=1.000
+  GATE: COMPARATOR
+
+  run dir: results\planck3\g0_gemma_closedbook_quick
+[planck3 17:56:26] G0 heuristic floor
+> python scripts/planck3.py g0 --policy heuristic --out results/planck3/g0_heuristic_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] SearXNG not reachable at http://localhost:8888; using Wikipedia search (start it with: .\scripts\planck3.ps1 searxng)
+[planck3] search=wikipedia net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/12] --  ch01                              p=0.40 steps=14 web=6 $0.00000
+[  2/12] XX  c01                               p=0.40 steps=14 web=6 $0.00000
+[  3/12] OK  f01  1943                         p=0.40 steps=2 web=0 $0.00000
+[  4/12] XX  ch02                              p=0.87 steps=8 web=4 $0.00000
+[  5/12] XX  c02                               p=0.40 steps=13 web=6 $0.00000
+[  6/12] OK  f02  1932                         p=0.90 steps=4 web=2 $0.00000
+[  7/12] XX  ch03                              p=0.40 steps=4 web=0 $0.00000
+[  8/12] XX  c03                               p=0.47 steps=13 web=6 $0.00000
+[  9/12] OK  f03  1889                         p=0.66 steps=4 web=2 $0.00000
+[ 10/12] XX  ch04                              p=0.43 steps=14 web=7 $0.00000
+[ 11/12] XX  c04                               p=0.64 steps=12 web=6 $0.00000
+[ 12/12] --  f04                               p=0.41 steps=5 web=2 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      12
+  success                0.250
+  answered_rate          0.833
+  wrong_when_answered    0.700
+  ece                    0.278
+  mean_steps             8.917
+  mean_web_calls         3.917
+  mean_decision_ms       0.112
+  n_invalid_decisions    0
+  gold_reachable         0.583
+  serp_answer_rate_at3   0.417
+  depth_evidence_recall  0.667
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=4 success=0.000
+  family compare         n=4 success=0.000
+  family fact            n=4 success=0.750
+  GATE: BASELINE
+
+  run dir: results\planck3\g0_heuristic_quick
+[planck3 17:56:43] G1 build: Simple English Wikipedia link graph (356 MB download)
+> python scripts/planck3.py wikirace build
+[wikirace] downloading https://dumps.wikimedia.org/simplewiki/latest/simplewiki-latest-pages-articles.xml.bz2 -> C:\Users\feama\sgs\data\planck3\wikirace\simplewiki-latest-pages-articles.xml.bz2 (358 MB, resume at 0 MB)
+  52/358 MB
+  105/358 MB
+  157/358 MB
+  210/358 MB
+  262/358 MB
+  315/358 MB
+  parsed 50,000 articles (19s)
+  parsed 100,000 articles (37s)
+  parsed 150,000 articles (52s)
+  parsed 200,000 articles (66s)
+  parsed 250,000 articles (82s)
+[wikirace] graph: {'n_articles': 285478, 'n_edges': 3991019, 'n_redirects': 115214, 'mean_outdeg': 13.980128065910508, 'median_outdeg': 8.0, 'max_outdeg': 2715, 'with_lead': 279608, 'dump': 'C:\\Users\\feama\\sgs\\data\\planck3\\wikirace\\simplewiki-latest-pages-articles.xml.bz2', 'build_s': 101.5}
+[planck3 17:59:37] G1 embed: hash control
+> python scripts/planck3.py wikirace embed --encoder hash
+[wikirace] emb_hash: (285478, 1024) in 19s
+[planck3 17:59:56] G1 embed: frozen Planck 1.3 over the whole graph
+> python scripts/planck3.py wikirace embed --encoder planck --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model
+  encoded 256/285,478
+  encoded 13,056/285,478
+  encoded 25,856/285,478
+  encoded 38,656/285,478
+  encoded 51,456/285,478
+  encoded 64,256/285,478
+  encoded 77,056/285,478
+  encoded 89,856/285,478
+  encoded 102,656/285,478
+  encoded 115,456/285,478
+  encoded 128,256/285,478
+  encoded 141,056/285,478
+  encoded 153,856/285,478
+  encoded 166,656/285,478
+  encoded 179,456/285,478
+  encoded 192,256/285,478
+  encoded 205,056/285,478
+  encoded 217,856/285,478
+  encoded 230,656/285,478
+  encoded 243,456/285,478
+  encoded 256,256/285,478
+  encoded 269,056/285,478
+  encoded 281,856/285,478
+[wikirace] emb_planck: (285478, 1000) in 39s
+[planck3 18:00:40] G1 tasks_quick: BFS labels, split by target
+> python scripts/planck3.py wikirace tasks --tag _quick --targets 300
+  targets 64/300 (4s)
+  targets 128/300 (8s)
+  targets 192/300 (12s)
+  targets 256/300 (16s)
+  targets 300/300 (18s)
+[wikirace] tasks: {'train': {'pairs': 952, 'steps': 4760}, 'val': {'pairs': 120, 'steps': 600}, 'test': {'pairs': 120, 'steps': 600}, 'n_targets': 300, 'seed': 0}
+[planck3 18:00:59] G1 train head:hash seed=0_quick
+> python scripts/planck3.py wikirace train --encoder hash --seed 0 --tag _quick --epochs 2
+  epoch 0: train_nll=1.7716 val_top1=0.5317 (1s)
+  epoch 1: train_nll=0.6606 val_top1=0.4267 (1s)
+C:\Users\feama\sgs\src\planck3\wikirace.py:347: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(out_dir / "head.pt", map_location=device)
+[wikirace] trained head:hash seed=0 best val top1=0.5317 T=0.779 -> C:\Users\feama\sgs\results\planck3\g1_head_hash_s0_quick
+[planck3 18:01:07] G1 train head:planck seed=0_quick
+> python scripts/planck3.py wikirace train --encoder planck --seed 0 --tag _quick --epochs 2
+  epoch 0: train_nll=1.8946 val_top1=0.5267 (1s)
+  epoch 1: train_nll=1.1705 val_top1=0.4967 (1s)
+C:\Users\feama\sgs\src\planck3\wikirace.py:347: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(out_dir / "head.pt", map_location=device)
+[wikirace] trained head:planck seed=0 best val top1=0.5267 T=0.873 -> C:\Users\feama\sgs\results\planck3\g1_head_planck_s0_quick
+[planck3 18:01:14] G1 eval_quick: random, lexical, head:hash, head:planck, gemma
+> python scripts/planck3.py wikirace eval --policies random,lexical,head:hash,head:planck,gemma --seed 0 --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model --gemma-path models/gemma-4-e4b-it --tag _quick --limit 100 --teacher-limit 20
+  random         success=0.000 steps/opt=None top1=0.19 ece=0.10488404469113853 ms=0.000400003045797348
+  lexical        success=0.160 steps/opt=1.403125 top1=0.46 ece=0.1362143192969961 ms=0.014999997802078724
+C:\Users\feama\sgs\src\planck3\wikirace.py:407: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ck = torch.load(head_path, map_location=device)
+  head:hash      success=0.040 steps/opt=1.0 top1=0.49 ece=0.0688249826268293 ms=0.5534000229090452
+  head:planck    success=0.110 steps/opt=1.3575757575757577 top1=0.5175 ece=0.10531689224066211 ms=0.4262999864295125
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]
+Loading weights:  13%|ΓûêΓûÄ        | 264/2076 [00:00<00:00, 2625.98it/s]
+Loading weights:  25%|ΓûêΓûêΓûî       | 527/2076 [00:00<00:00, 2486.92it/s]
+Loading weights:  37%|ΓûêΓûêΓûêΓûï      | 777/2076 [00:03<00:07, 179.24it/s] 
+Loading weights:  44%|ΓûêΓûêΓûêΓûêΓûì     | 917/2076 [00:03<00:06, 193.14it/s]
+Loading weights:  49%|ΓûêΓûêΓûêΓûêΓûè     | 1011/2076 [00:04<00:05, 203.53it/s]
+Loading weights:  52%|ΓûêΓûêΓûêΓûêΓûêΓûÅ    | 1081/2076 [00:04<00:04, 207.00it/s]
+Loading weights:  55%|ΓûêΓûêΓûêΓûêΓûêΓûì    | 1135/2076 [00:04<00:04, 208.70it/s]
+Loading weights:  57%|ΓûêΓûêΓûêΓûêΓûêΓûï    | 1179/2076 [00:04<00:04, 216.16it/s]
+Loading weights:  59%|ΓûêΓûêΓûêΓûêΓûêΓûè    | 1217/2076 [00:05<00:04, 210.89it/s]
+Loading weights:  60%|ΓûêΓûêΓûêΓûêΓûêΓûê    | 1249/2076 [00:05<00:03, 209.89it/s]
+Loading weights:  62%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÅ   | 1278/2076 [00:05<00:03, 202.21it/s]
+Loading weights:  63%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûÄ   | 1303/2076 [00:05<00:03, 203.40it/s]
+Loading weights:  64%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûì   | 1327/2076 [00:05<00:03, 199.25it/s]
+Loading weights:  65%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûî   | 1350/2076 [00:05<00:03, 187.98it/s]
+Loading weights:  66%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1376/2076 [00:05<00:03, 197.27it/s]
+Loading weights:  67%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûï   | 1400/2076 [00:06<00:03, 205.62it/s]
+Loading weights:  68%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûè   | 1422/2076 [00:06<00:03, 204.33it/s]
+Loading weights:  85%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûì | 1755/2076 [00:06<00:00, 973.71it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûë| 2075/2076 [00:06<00:00, 1534.00it/s]
+Loading weights: 100%|ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê| 2076/2076 [00:06<00:00, 327.56it/s] 
+    gemma 10/20 success so far 0.300
+    gemma 20/20 success so far 0.200
+  gemma          success=0.200 steps/opt=1.25 top1=None ece=None ms=272.2967999870889
+
+  GATE G1: FAIL (try the Hertz encoder)
+  planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+  -> C:\Users\feama\sgs\results\planck3\g1_eval_s0_quick\summary.json
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-05 18:02)
+
+## G0 (seed benchmark)
+
+| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | $/correct | LLM tok/task | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|
+| g0_gemma_closedbook_quick | 12 | 1.000 | 1.000 | 0.000 | 0.000 |  |  | 0.000173 | 136 | COMPARATOR |
+| g0_gemma_quick | 12 | 0.667 | 1.000 | 0.333 | 0.183 | 0.667 | 0.417 | 0.015154 | 9337 | PASS |
+| g0_heuristic_quick | 12 | 0.250 | 0.833 | 0.700 | 0.278 | 0.667 | 0.417 | 0.000000 | 0 | BASELINE |
+
+**g0_gemma_quick vs base chat:** success 0.667 vs 1.000 (0.67x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 0.0x cheaper
+
+## G1 Wikiracing (g1_eval_s0_quick)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 100 | 0.000 |  | 0.190 | 0.105 | 0.000 |
+| lexical | 100 | 0.160 | 1.403 | 0.460 | 0.136 | 0.015 |
+| head:hash | 100 | 0.040 | 1.000 | 0.490 | 0.069 | 0.553 |
+| head:planck | 100 | 0.110 | 1.358 | 0.517 | 0.105 | 0.426 |
+| gemma | 20 | 0.200 | 1.250 |  |  | 272.297 |
+
+Cold CPU latency (encode target + all candidate titles): median 101 ms, p90 584 ms, 50 candidates on average
+
+**Verdict:** FAIL (try the Hertz encoder). planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+
+[planck3 18:02:32] all_quick finished in 13 min
+[planck3 18:02:32] -NoPush: results left uncommitted

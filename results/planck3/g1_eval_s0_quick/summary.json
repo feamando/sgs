@@ -1,0 +1,84 @@
+{
+  "results": {
+    "random": {
+      "n_pairs": 100,
+      "rollout_success": 0.0,
+      "mean_steps_over_optimal": null,
+      "median_decision_ms": 0.000400003045797348,
+      "wall_s": 0.0,
+      "step_top1": 0.19,
+      "step_ece": 0.10488404469113853
+    },
+    "lexical": {
+      "n_pairs": 100,
+      "rollout_success": 0.16,
+      "mean_steps_over_optimal": 1.403125,
+      "median_decision_ms": 0.014999997802078724,
+      "wall_s": 0.1,
+      "step_top1": 0.46,
+      "step_ece": 0.1362143192969961
+    },
+    "head:hash": {
+      "n_pairs": 100,
+      "rollout_success": 0.04,
+      "mean_steps_over_optimal": 1.0,
+      "median_decision_ms": 0.5534000229090452,
+      "wall_s": 0.5,
+      "step_top1": 0.49,
+      "step_ece": 0.0688249826268293
+    },
+    "head:planck": {
+      "n_pairs": 100,
+      "rollout_success": 0.11,
+      "mean_steps_over_optimal": 1.3575757575757577,
+      "median_decision_ms": 0.4262999864295125,
+      "wall_s": 0.4,
+      "step_top1": 0.5175,
+      "step_ece": 0.10531689224066211
+    },
+    "gemma": {
+      "n_pairs": 20,
+      "rollout_success": 0.2,
+      "mean_steps_over_optimal": 1.25,
+      "median_decision_ms": 272.2967999870889,
+      "wall_s": 36.1
+    },
+    "latency_cpu_cold": {
+      "median_ms": 101.45650000777096,
+      "p90_ms": 583.5330999689177,
+      "mean_candidates": 49.7
+    }
+  },
+  "gate": {
+    "verdict": "FAIL (try the Hertz encoder)",
+    "relative_to_teacher": 0.5499999999999999,
+    "note": "planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)"
+  },
+  "graph": {
+    "n_articles": 285478,
+    "n_edges": 3991019,
+    "n_redirects": 115214,
+    "mean_outdeg": 13.980128065910508,
+    "median_outdeg": 8.0,
+    "max_outdeg": 2715,
+    "with_lead": 279608,
+    "dump": "C:\\Users\\feama\\sgs\\data\\planck3\\wikirace\\simplewiki-latest-pages-articles.xml.bz2",
+    "build_s": 101.5
+  },
+  "tasks": {
+    "train": {
+      "pairs": 952,
+      "steps": 4760
+    },
+    "val": {
+      "pairs": 120,
+      "steps": 600
+    },
+    "test": {
+      "pairs": 120,
+      "steps": 600
+    },
+    "n_targets": 300,
+    "seed": 0
+  }
+}

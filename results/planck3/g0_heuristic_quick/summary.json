@@ -1,0 +1,68 @@
+{
+  "n": 12,
+  "success": 0.25,
+  "answered_rate": 0.8333333333333334,
+  "wrong_when_answered": 0.7,
+  "abstain_rate": 0.16666666666666663,
+  "ece": 0.277676586401267,
+  "mean_steps": 8.916666666666666,
+  "mean_web_calls": 3.9166666666666665,
+  "mean_decision_ms": 0.11207944295743358,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 0.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.0
+    },
+    "fact": {
+      "n": 4,
+      "success": 0.75
+    }
+  },
+  "policy": "heuristic",
+  "search": "wikipedia",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.5833333333333334,
+  "serp_answer_rate_at3": 0.4166666666666667,
+  "depth_evidence_recall": 0.6666666666666666,
+  "graph": {
+    "facts": 21,
+    "passages": 108,
+    "entities": 185,
+    "edges": 179,
+    "queries": 26,
+    "domains": 1
+  },
+  "cost": {
+    "usd_per_task": 1.3880208792182168e-08,
+    "usd_per_correct": 5.5520835168728674e-08,
+    "usd_per_1k_tasks": 1.3880208792182168e-05,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 23,
+    "fetch": 24,
+    "search_net": 0,
+    "fetch_net": 12
+  },
+  "wall_s": 12.4,
+  "store_facts": 21,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9259259259259259,
+      11.5
+    ]
+  ],
+  "gate": {
+    "verdict": "BASELINE",
+    "note": "heuristic is the no-model floor; the G0 gate applies to teachers"
+  }
+}
