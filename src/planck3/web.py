@@ -25,7 +25,7 @@ USER_AGENT = "Planck3-research/0.1 (+https://github.com/feamando/sgs; personal r
 FETCH_TIMEOUT = 15
 MAX_HTML_BYTES = 3_000_000
 MIN_SECONDS_PER_HOST = 1.0
-MIN_SECONDS_BETWEEN_SEARCHES = 1.5   # SearXNG's upstream engines block bursts (round 3, 2026-10-07)
+MIN_SECONDS_BETWEEN_SEARCHES = 3.0   # upstream engines CAPTCHA bursts and SearXNG then suspends them for 24 h
 MAX_CONSECUTIVE_EMPTY = 15           # circuit breaker: abort instead of producing a run of empty results
 
 
@@ -88,6 +88,7 @@ class Web:
         self.fallback = True          # SearXNG empty -> retry once -> Wikipedia for that query
         self._consecutive_empty = 0
         self._last_search = 0.0
+        self.last_backend = None      # which backend actually answered the last search
 
     # ── search ───────────────────────────────────────────────────────────
     def search(self, query: str) -> list[dict]:
@@ -97,9 +98,11 @@ class Web:
             hit = self.cache.get("search", f"{backend}|{query}")
             if hit is not None and hit.get("results"):
                 self._consecutive_empty = 0
+                self.last_backend = backend
                 return hit["results"][: self.n_results]
         if not self.cache.online:
             return []
+        fb0 = self.calls["search_fallback"]
         results = self._search_net(self.backend, query)
         if not results and self.backend == "searxng":
             self.calls["search_empty_primary"] += 1
@@ -109,6 +112,8 @@ class Web:
                 results = self._search_net("wikipedia", query)
                 if results:
                     self.calls["search_fallback"] += 1
+        self.last_backend = "none" if not results else (
+            "wikipedia" if self.backend == "searxng" and self.calls["search_fallback"] > fb0 else self.backend)
         if not results:
             self.calls["search_empty_final"] += 1
             self._consecutive_empty += 1

@@ -170,6 +170,17 @@ function Do-Doctor([bool]$DeepRun) {
 # ── searxng ──────────────────────────────────────────────────────────────
 $script:SearxUp = $false
 function Do-Searxng {
+    if (Test-Docker) {
+        $cfgHash = (Get-FileHash "config/searxng/settings.yml" -Algorithm SHA1).Hash
+        $stamp = "data/planck3/searxng_settings.sha1"
+        $applied = if (Test-Path $stamp) { (Get-Content $stamp -Raw).Trim() } else { "" }
+        if ($applied -ne $cfgHash) {
+            $exists = (Invoke-Quiet docker @("ps", "-a", "--filter", "name=^$SEARX_NAME`$", "--format", "{{.Names}}")).Out -eq $SEARX_NAME
+            if ($exists) { Log "config/searxng/settings.yml changed: recreating the SearXNG container"; Invoke-Quiet docker @("rm", "-f", $SEARX_NAME) | Out-Null }
+            New-Item -ItemType Directory -Force -Path "data/planck3" | Out-Null
+            Set-Content -Path $stamp -Value $cfgHash -Encoding ASCII
+        }
+    }
     $script:SearxUp = Test-Searx
     if (-not (Test-Docker)) { Warn "Docker not found; search falls back to the Wikipedia API (still valid, narrower)"; return }
     if (Test-Searx) { Log "SearXNG up and answering on :$SEARX_PORT"; return }
@@ -298,7 +309,7 @@ function Test-ValidRun([string]$dir) {
     if (-not (($null -ne $j.search_health) -and [bool]$j.search_health.valid)) { return $false }
     # SearXNG is the retrieval layer of record: a tools run on the Wikipedia fallback is kept as
     # <dir>_wikipedia and redone once SearXNG answers (round 3 attempt 2 ran entirely on Wikipedia)
-    if ($j.search -ne "searxng" -and $script:SearxUp) {
+    if ($j.search -ne "searxng" -and $script:SearxUp -and (Test-Searx)) {  # re-check NOW: it can be blocked mid-round
         $aside = "${dir}_wikipedia"
         if (-not (Test-Path $aside)) { Move-Item $dir $aside; Log "kept the Wikipedia-search run as $aside; redoing it on SearXNG" }
         else { Remove-Item -Recurse -Force $dir }

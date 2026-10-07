@@ -88,6 +88,7 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
                     continue
                 labels = [is_correct(c["value"], gold, at) for c in cands]
                 f.write(json.dumps({"task_id": t["id"], "question": q, "answer_type": at, "source": src,
+                                    "search_backend": getattr(web, "last_backend", None),
                                     "cands": [{k: c.get(k) for k in ("value", "context", "score", "margin", "about",
                                                                      "domains", "support", "url")} for c in cands],
                                     "labels": labels}, ensure_ascii=False) + "\n")

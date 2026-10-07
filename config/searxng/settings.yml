@@ -1,6 +1,14 @@
 # Local SearXNG for Planck 3.0 (started by: .\scripts\planck3.ps1 searxng).
 # Bound to localhost only. The JSON API is what src/planck3/web.py calls.
-use_default_settings: true
+#
+# 2026-10-08: engines that CAPTCHA a client get suspended by SearXNG for 24 h (7 days for
+# Google reCAPTCHA). Round 3 lost two runs to that. We RESPECT those suspensions (defaults
+# kept) and instead spread the load: google removed (the quickest to CAPTCHA, the longest
+# ban), several other general engines enabled, and the client paces itself (3 s/search).
+use_default_settings:
+  engines:
+    remove:
+      - google
 
 general:
   instance_name: "planck3-local"
@@ -16,3 +24,19 @@ search:
   formats:
     - html
     - json
+
+engines:
+  - name: bing
+    disabled: false
+  - name: brave
+    disabled: false
+  - name: duckduckgo
+    disabled: false
+  - name: mojeek
+    disabled: false
+  - name: qwant
+    disabled: false
+  - name: startpage
+    disabled: false
+  - name: wikipedia
+    disabled: false
