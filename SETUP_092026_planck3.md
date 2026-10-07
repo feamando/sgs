@@ -270,7 +270,17 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **Base chat collapses on the fresh + long-tail benchmark:** 4.9% (fresh 0.0%, long-tail 8.4%), answering 98.6% and wrong 95% of the time (rule A2 holds).
     - **G1 confirmation FAIL:** `head:planck-rank` paired ratio **0.71** on new races and seeds (0.67 / 0.80 / 0.66), 23.5% ± 0.5 vs teacher 33.7%; beats hash every seed (p ≤ 1e-18); the rank-over-nll gain shrinks to +1.7 pts (n.s.).
   - G0-fresh and G2 must be re-run after the search-robustness fixes.
-- **G2-G4:** G2 is round 3; G3/G4 after.
+- **ROUND 3 RESULTS OF RECORD (attempt 2, 2026-10-07, a77e502; all tools runs on Wikipedia search because SearXNG did not start in time):**
+  - **A1/A2 hold:**
+    - On 143 fresh + long-tail questions, base chat scores 4.9% (2026 facts **0/60**, wrong 95% of the time it answers).
+    - The snippet-first heuristic scores 15.4% (fresh 5/60, long-tail 17/83), better than base chat overall (p = 0.006).
+    - Absolute accuracy is low because Wikipedia search reaches the answer rarely (18.9% in the top-3 snippets).
+  - **G2 FAIL:**
+    - The learned scorer beats the deterministic ranker offline (choice accuracy 59.4% vs 39.8%; Planck > hash).
+    - The policy abstains almost always: the single softmax with "none of these" makes it under-confident under train/deploy shift.
+    - The next design must decouple choice from answerability.
+  - **G1 FAIL confirmed:** planck-rank 0.71, hertz-rank 0.70 (capacity is not the lever), ~0.7× the teacher at ~500x speed.
+- **G2-G4:** next design round pending (see `SETUP_planck_20260903.md` attempt 2).
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)

@@ -127,6 +127,49 @@ No candidate scoring or ranking was changed after seeing this benchmark.
 
 **Attempt 2:** `git pull`, start Docker Desktop. Let SearXNG rest an hour, or recreate it with `docker rm -f planck3-searxng`; the runner makes a new one. Then run `.\scripts\planck3.ps1 round3`. Only the invalid stages re-run; closed-book and G1 are kept, and G1 adds the Hertz arm if it finds the checkpoint.
 
+### Attempt 2 on the box (2026-10-07, commit a77e502): valid, but on Wikipedia search. Results of record.
+
+- **Search:**
+  - All runs are valid (0.7% empty searches).
+  - The recreated SearXNG container took longer than the runner's 60 s wait to come up, so **every tools run used the Wikipedia API**, the weaker retrieval layer. On this benchmark it put the answer in the top-3 snippets only 18.9% of the time.
+  - Comparisons between policies are fair (same retrieval); absolute numbers understate SearXNG. Fixed: the runner now waits up to 5 min for a fresh container, prints its log if it never comes up, and once SearXNG answers it keeps these runs as `*_wikipedia` and redoes them.
+
+**A. Fresh + long-tail benchmark (143 questions):**
+
+| Policy | Overall | Fresh (2026) | Long-tail | Answered | Wrong when answered |
+|---|---|---|---|---|---|
+| Base chat (Gemma closed-book) | 4.9% | **0.0%** (0/60) | 8.4% | 98.6% | 95.0% |
+| Heuristic, snippet-first | **15.4%** | 8.3% (5/60) | 20.5% | 79.7% | 80.7% |
+| Gemma on our tools | 14.0% | 3.3% | 21.7% | 21.0% | 33.3% |
+| `planck` policy (G2, Planck) | 9.8% | 1.7% | 15.7% | 18.2% | 46.2% |
+| `planck` policy (G2, hash control) | 0.7% | 0.0% | 1.2% | 4.2% | 83.3% |
+
+- **A1 holds.** The heuristic ≥ base chat on both regimes: fresh 5 vs 0 (McNemar p = 0.063), long-tail 17 vs 7 (16 vs 6 discordant, p = 0.053). Overall 21 vs 6 discordant, **p = 0.006**.
+- **A2 holds.** Base chat answers almost every 2026 question and gets all 60 wrong, confidently and without sources.
+- **A3: ambiguous, as pre-registered.** The heuristic's 15.4% is far below 80%, but retrieval (Wikipedia search) is the dominant confound. The heuristic also answers far too often (wrong 81% when it answers), where Gemma-on-tools abstains much more (wrong 33%).
+
+**B. G2: FAIL** (seed benchmark 2.1% vs the ≥86.1% bar; fresh 9.8% vs heuristic − 2 = 13.4%; wrong-when-answered 46%; ECE 0.24).
+- **What worked:**
+  - Offline, the scorer learned real signal: choice accuracy **59.4% vs the deterministic ranker's 39.8%** on 133 held-out decision points with a right candidate. The hash control scored 51.9%.
+  - Planck features beat hash end to end (9.8% vs 0.7%).
+- **Why it failed:** one softmax over candidates + "none of these" answers two questions at once (which candidate? is any candidate right?).
+  - The training points came from Wikipedia search, where 52% had no right candidate, so "none of these" absorbs the probability. On the easier seed questions the policy is badly under-confident: 137 of 194 decisions were below 0.1, including the right answer ranked **first** (LEGO 1932 at p = 0.33, Nintendo 1889 at 0.05, Sony 1946 at 0.12).
+  - It then reads two pages and abstains: a design flaw (choice and answerability conflated, plus a train/deploy shift), not a capacity limit.
+
+**C. G1 confirmation: FAIL confirmed; capacity is not the lever.**
+
+| Arm (task seed 1, seeds 3-5) | Rollout success | Paired ratio to teacher |
+|---|---|---|
+| `head:planck-rank` (primary) | 23.5% ± 0.5 | **0.71** |
+| `head:hertz-rank` (640M) | 23.7% ± 1.1 | 0.70 |
+| `head:planck` | 21.8% ± 0.9 | 0.63 |
+| `head:hertz` | 19.8% ± 0.9 | 0.47 |
+| `head:hash` | 10.7% ± 0.5 | 0.25 |
+
+- Hertz-rank = Planck-rank in every seed (p = 0.39 / 0.51 / 0.27).
+- Hertz with the original objective is worse than Planck (p = 0.007, 1.0, 0.046).
+- Both are ~0.7× the teacher at ~0.5-0.7 ms per decision (~350-500x faster).
+
 ## 5. Reading the results
 
 | Question | Where | Good looks like |
