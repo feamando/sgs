@@ -260,7 +260,12 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - The teacher is still significantly better in 2 of 3 seeds (p = 0.044 / 0.117 / 0.004).
     - The objective, not capacity, was the main lever so far (0.58 → 0.78 with the same encoder).
     - Speed: 0.45 ms warm vs teacher 226-238 ms (~500x); cold CPU median 95 ms.
-- **G2-G4:** after G1.
+- **Round 3 (2026-10-07): built, pre-registered, awaiting the box.** Guide + rules: `SETUP_planck_20260903.md`.
+  - A **fresh + long-tail benchmark**: 143 questions from Wikidata (60 fresh 2026 facts, 83 long-tail with ≤3 Wikipedia editions), dated, sourced, not tuned against any policy.
+  - **G2 redesigned:** learn the decisions from known answers. 1,455 disjoint Wikidata training questions → labelled decision points → a candidate scorer with a none-of-these option → the `planck` policy.
+  - The **G1 confirmation:** task seed 1, model seeds 3-5, primary `head:planck-rank`, plus the Hertz arm.
+  - One command: `.\scripts\planck3.ps1 round3`.
+- **G2-G4:** G2 is round 3; G3/G4 after.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
