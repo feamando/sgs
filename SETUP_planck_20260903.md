@@ -170,6 +170,35 @@ No candidate scoring or ranking was changed after seeing this benchmark.
 - Hertz with the original objective is worse than Planck (p = 0.007, 1.0, 0.046).
 - Both are ~0.7× the teacher at ~0.5-0.7 ms per decision (~350-500x faster).
 
+### Round 3b: re-run on SearXNG + G2 v2 (built 2026-10-08, PRE-REGISTERED before the run)
+
+**Why G2 v2.** v1 conflated "which candidate?" with "is any candidate right?" in one softmax with a "none of these" option. Trained where 52% of points had no right candidate, it ranked the right answer first yet gave it p 0.05-0.33, and abstained. v2 separates the two:
+- **Choice head:** a softmax over candidates only, trained only on decision points that have a right candidate, temperature-calibrated.
+- **Answerability gate:** a calibrated logistic model of P(the chosen candidate is right). Its inputs are the choice head's top-1 probability, margin and entropy, the candidate's deterministic features and the answer type. It is fit on **validation questions** the choice head never trained on.
+- **Threshold τ, fixed by rule now:** the lowest gate score whose validation precision is ≥ **0.90**. If no threshold reaches 0.90, τ = 1.01 and the policy never answers; that is reported as coverage 0, not hidden. Coverage and precision at τ are reported on a separate **test split** (10% of questions).
+- **Policy:** EXTRACT the choice head's pick when gate ≥ τ; otherwise read a page (max 2) or abstain. The 0.3 ANSWER gate stays.
+- **Every decision logs** `argmax`, its value, the top-3 choice probabilities, the gate score and τ.
+- **Training data:** collected with the deployment search. With SearXNG up, the runner collects into `points_searxng.jsonl`; if SearXNG is down it reuses the Wikipedia points and says so.
+
+**Pass rules (G2 v2):** rule B unchanged, applied to `planck-g2v2-planck`:
+- seed benchmark ≥ 86.1%;
+- fresh ≥ base chat **and** ≥ the heuristic − 2 pts (same search backend);
+- wrong-when-answered < 5% and ECE < 0.05 on fresh;
+- beats `planck-g2v2-hash` on fresh.
+
+**Required diagnostics:** the v2 choice head must beat the deterministic ranker on the test split (`test_choice_acc` > `test_ranker_acc`); gate AUC; coverage at τ.
+
+**Run it:**
+1. `git pull`
+2. Start Docker Desktop and leave the existing `planck3-searxng` container in place; the runner now waits up to 5 min for it.
+3. `.\scripts\planck3.ps1 round3`
+
+What that does:
+- The Wikipedia-backed G0-fresh runs are kept as `*_wikipedia` and redone on SearXNG.
+- G2 v2 collects ~1,455 questions on SearXNG. That takes about 60-75 min with the 1.5 s pacing; it is resumable, and the circuit breaker stops it if SearXNG gets blocked.
+- G2 v2 then trains and is evaluated.
+- G1 is kept (its evals re-run quickly from the cache).
+
 ## 5. Reading the results
 
 | Question | Where | Good looks like |

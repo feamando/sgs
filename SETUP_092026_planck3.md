@@ -280,7 +280,8 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - The policy abstains almost always: the single softmax with "none of these" makes it under-confident under train/deploy shift.
     - The next design must decouple choice from answerability.
   - **G1 FAIL confirmed:** planck-rank 0.71, hertz-rank 0.70 (capacity is not the lever), ~0.7× the teacher at ~500x speed.
-- **G2-G4:** next design round pending (see `SETUP_planck_20260903.md` attempt 2).
+- **G2 v2 built + pre-registered (2026-10-08):** choice head (candidates only) + calibrated answerability gate + τ = lowest threshold with validation precision ≥ 0.90; decision-level logging (argmax, gate, top-3); training data collected on SearXNG. Same rule-B bars. Runs inside `round3`, together with the SearXNG re-run of G0-fresh.
+- **G3/G4:** after G2.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
