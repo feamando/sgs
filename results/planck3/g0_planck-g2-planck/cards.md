@@ -180,10 +180,12 @@
 **Who painted the Mona Lisa?**
   I couldn't verify an answer (abstain).
 
-### e12 (abstain)
+### e12 (OK)
 
 **Who developed the theory of general relativity?**
-  I couldn't verify an answer (abstain).
+  **Einstein**  (confidence 71%, single source)
+  "General relativity is a theory of gravitation developed by Einstein in the years 1907–1915."
+  Source: https://en.wikipedia.org/wiki/Theory_of_relativity (en.wikipedia.org)
 
 ### c01 Compare the founding years of IKEA, H&M and Zara
 

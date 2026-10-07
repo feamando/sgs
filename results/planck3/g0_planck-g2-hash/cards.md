@@ -50,10 +50,12 @@
 **In what year was Marie Curie born?**
   I couldn't verify an answer (abstain).
 
-### f11 (abstain)
+### f11 (WRONG)
 
 **In what year was Ada Lovelace born?**
-  I couldn't verify an answer (abstain).
+  **1984**  (confidence 84%, single source)
+  "Hannah Mary Fry (born 21 February 1984) is a British mathematician, author and broadcaster."
+  Source: https://en.wikipedia.org/wiki/Hannah_Fry (en.wikipedia.org)
 
 ### f12 (abstain)
 

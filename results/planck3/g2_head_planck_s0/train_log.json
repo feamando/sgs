@@ -2,36 +2,51 @@
   "epochs": [
     {
       "epoch": 0,
-      "train_nll": 5.59798264503479,
-      "val_top1": 0.375
+      "train_nll": 1.6211589804062476,
+      "val_top1": 0.5878136200716846
     },
     {
       "epoch": 1,
-      "train_nll": 4.6399827003479,
-      "val_top1": 0.375
+      "train_nll": 1.187462187730349,
+      "val_top1": 0.6164874551971327
     },
     {
       "epoch": 2,
-      "train_nll": 3.684532880783081,
-      "val_top1": 0.375
+      "train_nll": 0.9647594873721783,
+      "val_top1": 0.6164874551971327
     },
     {
       "epoch": 3,
-      "train_nll": 3.0840799808502197,
-      "val_top1": 0.375
+      "train_nll": 0.7571359292054788,
+      "val_top1": 0.6738351254480287
+    },
+    {
+      "epoch": 4,
+      "train_nll": 0.5725425676657603,
+      "val_top1": 0.6379928315412187
+    },
+    {
+      "epoch": 5,
+      "train_nll": 0.4392872502406438,
+      "val_top1": 0.6344086021505376
+    },
+    {
+      "epoch": 6,
+      "train_nll": 0.3293165954259726,
+      "val_top1": 0.6415770609318996
     }
   ],
-  "best_val_top1": 0.375,
-  "temperature": 0.5287025049600002,
-  "val_heuristic_top1": 0.2,
-  "val_ece": 0.3056693822145462,
-  "val_answer_acc_at_0.5": 0.0,
-  "val_choice_acc": 0.6,
-  "val_points_with_gold": 5,
-  "val_none_acc": 1.0,
-  "val_points_without_gold": 3,
+  "best_val_top1": 0.6738351254480287,
+  "temperature": 1.3090479334957856,
+  "val_heuristic_top1": 0.39849624060150374,
+  "val_ece": 0.058544781753346056,
+  "val_answer_acc_at_0.5": 0.7380952380952381,
+  "val_choice_acc": 0.5939849624060151,
+  "val_points_with_gold": 133,
+  "val_none_acc": 0.8972602739726028,
+  "val_points_without_gold": 146,
   "encoder": "planck",
   "seed": 0,
-  "n_train_points": 84,
-  "n_val_points": 8
+  "n_train_points": 2542,
+  "n_val_points": 279
 }

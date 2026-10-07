@@ -79,10 +79,10 @@
       "fix": ""
     },
     {
-      "status": "OK",
+      "status": "WARN",
       "check": "searxng",
-      "detail": "http://localhost:8888 up",
-      "fix": ""
+      "detail": "not running",
+      "fix": ".\\scripts\\planck3.ps1 searxng"
     },
     {
       "status": "OK",
@@ -93,7 +93,13 @@
     {
       "status": "OK",
       "check": "planck embed speed",
-      "detail": "9,901 texts/s on cuda (~29 s for the G1 graph)",
+      "detail": "9,392 texts/s on cuda (~30 s for the G1 graph)",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "hertz ckpt vs tokenizer",
+      "detail": "vocab 32000 vs 32000 pieces",
       "fix": ""
     },
     {
@@ -105,20 +111,20 @@
     {
       "status": "OK",
       "check": "gemma typed decisions",
-      "detail": "3/3 valid, 2041 ms/decision",
+      "detail": "3/3 valid, 1839 ms/decision",
       "fix": ""
     },
     {
       "status": "OK",
       "check": "gemma closed-book",
-      "detail": "'1943' in 561 ms",
+      "detail": "'1943' in 392 ms",
       "fix": ""
     }
   ],
   "measured": {
-    "planck_embed_s_per_text": 0.00010099589843548529,
-    "gemma_ms_per_decision": 2040.5378333525732,
-    "gemma_ms_closed_book": 560.7354999519885
+    "planck_embed_s_per_text": 0.000106468554690764,
+    "gemma_ms_per_decision": 1839.3937333021313,
+    "gemma_ms_closed_book": 392.3026999691501
   },
   "eta": [
     [
@@ -127,11 +133,11 @@
     ],
     [
       "g0 teacher (Gemma on tools)",
-      "~11 min"
+      "~10 min"
     ],
     [
       "g0 closed-book (base-chat rival)",
-      "~35 s"
+      "~24 s"
     ],
     [
       "g0 heuristic floor",
@@ -143,7 +149,7 @@
     ],
     [
       "g1 planck embed",
-      "~29 s"
+      "~30 s"
     ],
     [
       "g1 train heads",
@@ -151,7 +157,7 @@
     ],
     [
       "g1 eval incl. Gemma teacher",
-      "~8 min"
+      "~6 min"
     ]
   ]
 }

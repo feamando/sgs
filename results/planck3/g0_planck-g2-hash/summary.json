@@ -1,13 +1,13 @@
 {
   "n": 47,
   "success": 0.0,
-  "answered_rate": 0.0,
-  "wrong_when_answered": 0.0,
-  "abstain_rate": 1.0,
-  "ece": null,
-  "mean_steps": 5.8936170212765955,
-  "mean_web_calls": 5.8936170212765955,
-  "mean_decision_ms": 1.5016086668529236,
+  "answered_rate": 0.02127659574468085,
+  "wrong_when_answered": 1.0,
+  "abstain_rate": 0.9787234042553191,
+  "ece": 0.842789351940155,
+  "mean_steps": 5.382978723404255,
+  "mean_web_calls": 5.361702127659575,
+  "mean_decision_ms": 1.9342011874247151,
   "by_family": {
     "chat": {
       "n": 6,
@@ -26,88 +26,63 @@
     "seed": {
       "n": 47,
       "success": 0.0,
-      "wrong_when_answered": 0.0
+      "wrong_when_answered": 1.0
     }
   },
   "policy": "planck",
-  "search": "searxng",
+  "search": "wikipedia",
   "net": "live",
   "tasks": "scripts/assets/planck3_tasks.json",
   "n_invalid_decisions": 0,
-  "gold_reachable": 1.0,
-  "serp_answer_rate_at3": 1.0,
-  "depth_evidence_recall": 1.0,
+  "gold_reachable": 0.9787234042553191,
+  "serp_answer_rate_at3": 0.574468085106383,
+  "depth_evidence_recall": 0.851063829787234,
   "snippet_first": true,
   "answer_threshold": 0.3,
-  "mean_fetches": 4.553191489361702,
-  "mean_answer_fetches": 3.2127659574468086,
+  "mean_fetches": 4.0212765957446805,
+  "mean_answer_fetches": 2.6808510638297873,
   "depth_pages": 1,
   "answered_from_snippet": 0.0,
   "gated_rate": 0.0,
   "gated_would_be_correct": 0,
   "graph": {
-    "facts": 0,
-    "passages": 280,
-    "entities": 515,
-    "edges": 522,
+    "facts": 1,
+    "passages": 260,
+    "entities": 626,
+    "edges": 630,
     "queries": 63,
-    "domains": 17
+    "domains": 1
   },
   "cost": {
-    "usd_per_task": 1.2291536664251178e-07,
+    "usd_per_task": 1.4460783109292345e-07,
     "usd_per_correct": null,
-    "usd_per_1k_tasks": 0.00012291536664251176,
+    "usd_per_1k_tasks": 0.00014460783109292345,
     "llm_tokens_per_task": 0.0,
     "priced_as": "claude-haiku-4-5",
     "prices_as_of": "2026-09-29"
   },
   "web_calls_network": {
     "search": 63,
-    "fetch": 214,
-    "search_net": 0,
-    "fetch_net": 32
+    "fetch": 189,
+    "search_net": 29,
+    "fetch_net": 77,
+    "search_empty_primary": 0,
+    "search_fallback": 0,
+    "search_empty_final": 0
   },
-  "wall_s": 78.2,
-  "store_facts": 0,
+  "search_health": {
+    "searches": 63,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "valid": true
+  },
+  "wall_s": 113.1,
+  "store_facts": 1,
   "top_domains": [
     [
-      "lego.com",
-      0.4,
-      0.5
-    ],
-    [
-      "the-i-land-netflix.fandom.com",
-      0.4,
-      0.5
-    ],
-    [
-      "forums.raspberrypi.com",
-      0.4,
-      0.5
-    ],
-    [
-      "wikiwand.com",
-      0.4,
-      0.5
-    ],
-    [
-      "hyperspace.fandom.com",
-      0.4,
-      0.5
-    ],
-    [
-      "pubmed.ncbi.nlm.nih.gov",
-      0.4,
-      0.5
-    ],
-    [
-      "imdb.com",
-      0.4,
-      0.5
-    ],
-    [
-      "medium.com",
-      0.4,
+      "en.wikipedia.org",
+      0.6,
       0.5
     ]
   ],

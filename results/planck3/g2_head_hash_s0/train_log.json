@@ -2,51 +2,56 @@
   "epochs": [
     {
       "epoch": 0,
-      "train_nll": 5.628895998001099,
-      "val_top1": 0.375
+      "train_nll": 1.7325213964168842,
+      "val_top1": 0.5663082437275986
     },
     {
       "epoch": 1,
-      "train_nll": 4.866499185562134,
-      "val_top1": 0.375
+      "train_nll": 0.8372374918216314,
+      "val_top1": 0.6129032258064516
     },
     {
       "epoch": 2,
-      "train_nll": 3.7341995239257812,
-      "val_top1": 0.5
+      "train_nll": 0.24048705857533675,
+      "val_top1": 0.6129032258064516
     },
     {
       "epoch": 3,
-      "train_nll": 2.4045896530151367,
-      "val_top1": 0.625
+      "train_nll": 0.1408222085581376,
+      "val_top1": 0.6164874551971327
     },
     {
       "epoch": 4,
-      "train_nll": 1.5623392462730408,
-      "val_top1": 0.625
+      "train_nll": 0.07414005754085687,
+      "val_top1": 0.6272401433691757
     },
     {
       "epoch": 5,
-      "train_nll": 1.0509926080703735,
-      "val_top1": 0.625
+      "train_nll": 0.045475912519181386,
+      "val_top1": 0.6021505376344086
     },
     {
       "epoch": 6,
-      "train_nll": 0.7632966339588165,
-      "val_top1": 0.625
+      "train_nll": 0.03244196363271047,
+      "val_top1": 0.5985663082437276
+    },
+    {
+      "epoch": 7,
+      "train_nll": 0.029472818902622048,
+      "val_top1": 0.6164874551971327
     }
   ],
-  "best_val_top1": 0.625,
-  "temperature": 0.9317544625032635,
-  "val_heuristic_top1": 0.2,
-  "val_ece": 0.28145384741947055,
-  "val_answer_acc_at_0.5": 0.0,
-  "val_choice_acc": 0.4,
-  "val_points_with_gold": 5,
-  "val_none_acc": 1.0,
-  "val_points_without_gold": 3,
+  "best_val_top1": 0.6272401433691757,
+  "temperature": 2.8938879279824854,
+  "val_heuristic_top1": 0.39849624060150374,
+  "val_ece": 0.05765249817481925,
+  "val_answer_acc_at_0.5": 0.8125,
+  "val_choice_acc": 0.518796992481203,
+  "val_points_with_gold": 133,
+  "val_none_acc": 0.9041095890410958,
+  "val_points_without_gold": 146,
   "encoder": "hash",
   "seed": 0,
-  "n_train_points": 84,
-  "n_val_points": 8
+  "n_train_points": 2542,
+  "n_val_points": 279
 }

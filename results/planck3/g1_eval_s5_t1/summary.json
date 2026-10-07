@@ -14,7 +14,7 @@
       "n_pairs": 1200,
       "rollout_success": 0.14416666666666667,
       "mean_steps_over_optimal": 1.2314065510597303,
-      "median_decision_ms": 0.014699995517730713,
+      "median_decision_ms": 0.01409999094903469,
       "wall_s": 0.4,
       "cached": false,
       "step_top1": 0.4633333333333333,
@@ -24,18 +24,38 @@
       "n_pairs": 1200,
       "rollout_success": 0.10166666666666667,
       "mean_steps_over_optimal": 1.2207650273224044,
-      "median_decision_ms": 0.6228999700397253,
-      "wall_s": 7.3,
+      "median_decision_ms": 0.5874500493519008,
+      "wall_s": 6.9,
       "cached": false,
       "step_top1": 0.58,
       "step_ece": 0.11767329317967717
+    },
+    "head:hertz-rank": {
+      "n_pairs": 1200,
+      "rollout_success": 0.225,
+      "mean_steps_over_optimal": 1.2699382716049383,
+      "median_decision_ms": 0.6939000450074673,
+      "wall_s": 10.3,
+      "cached": false,
+      "step_top1": 0.6406666666666667,
+      "step_ece": 0.12604439883027224
+    },
+    "head:hertz": {
+      "n_pairs": 1200,
+      "rollout_success": 0.19583333333333333,
+      "mean_steps_over_optimal": 1.2475177304964538,
+      "median_decision_ms": 0.7341000018641353,
+      "wall_s": 10.9,
+      "cached": false,
+      "step_top1": 0.6338333333333334,
+      "step_ece": 0.0877453549868272
     },
     "head:planck-rank": {
       "n_pairs": 1200,
       "rollout_success": 0.24083333333333334,
       "mean_steps_over_optimal": 1.32237600922722,
-      "median_decision_ms": 0.46389998169615865,
-      "wall_s": 5.7,
+      "median_decision_ms": 0.45009999303147197,
+      "wall_s": 5.5,
       "cached": false,
       "step_top1": 0.6353333333333333,
       "step_ece": 0.09875565401907078
@@ -44,8 +64,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.22333333333333333,
       "mean_steps_over_optimal": 1.3062189054726367,
-      "median_decision_ms": 0.4646500456146896,
-      "wall_s": 5.3,
+      "median_decision_ms": 0.4308999632485211,
+      "wall_s": 4.9,
       "cached": false,
       "step_top1": 0.6286666666666667,
       "step_ece": 0.09454527220929353
@@ -76,6 +96,56 @@
       "a_only": 64,
       "b_only": 115,
       "p": 0.0001696452103831031
+    },
+    "head:hertz-rank vs gemma": {
+      "n": 300,
+      "head": 0.23,
+      "teacher": 0.33666666666666667,
+      "ratio": 0.6831683168316832,
+      "a_only": 33,
+      "b_only": 65,
+      "p": 0.0016005802102081266
+    },
+    "head:hertz-rank vs head:hash": {
+      "n": 1200,
+      "head": 0.225,
+      "control": 0.10166666666666667,
+      "a_only": 209,
+      "b_only": 61,
+      "p": 3.856729145253556e-20
+    },
+    "head:hertz-rank vs lexical": {
+      "n": 1200,
+      "head": 0.225,
+      "control": 0.14416666666666667,
+      "a_only": 187,
+      "b_only": 90,
+      "p": 5.654467540215734e-09
+    },
+    "head:hertz vs gemma": {
+      "n": 300,
+      "head": 0.17333333333333334,
+      "teacher": 0.33666666666666667,
+      "ratio": 0.5148514851485149,
+      "a_only": 27,
+      "b_only": 76,
+      "p": 1.4457981791730559e-06
+    },
+    "head:hertz vs head:hash": {
+      "n": 1200,
+      "head": 0.19583333333333333,
+      "control": 0.10166666666666667,
+      "a_only": 182,
+      "b_only": 69,
+      "p": 6.313390396233247e-13
+    },
+    "head:hertz vs lexical": {
+      "n": 1200,
+      "head": 0.19583333333333333,
+      "control": 0.14416666666666667,
+      "a_only": 161,
+      "b_only": 99,
+      "p": 0.00014497125753872372
     },
     "head:planck-rank vs gemma": {
       "n": 300,
@@ -134,6 +204,22 @@
       "a_only": 126,
       "b_only": 105,
       "p": 0.18809043979389803
+    },
+    "head:hertz vs head:planck": {
+      "n": 1200,
+      "head": 0.19583333333333333,
+      "control": 0.22333333333333333,
+      "a_only": 112,
+      "b_only": 145,
+      "p": 0.04571175374722857
+    },
+    "head:hertz-rank vs head:planck-rank": {
+      "n": 1200,
+      "head": 0.225,
+      "control": 0.24083333333333334,
+      "a_only": 124,
+      "b_only": 143,
+      "p": 0.2706121295023085
     }
   },
   "gate": {
@@ -144,6 +230,18 @@
         "paired_ratio": 0.2376237623762376,
         "n": 300,
         "p_vs_teacher": 2.2644944585064495e-17,
+        "pass": false
+      },
+      "head:hertz-rank": {
+        "paired_ratio": 0.6831683168316832,
+        "n": 300,
+        "p_vs_teacher": 0.0016005802102081266,
+        "pass": false
+      },
+      "head:hertz": {
+        "paired_ratio": 0.5148514851485149,
+        "n": 300,
+        "p_vs_teacher": 1.4457981791730559e-06,
         "pass": false
       },
       "head:planck-rank": {
@@ -159,7 +257,7 @@
         "pass": false
       }
     },
-    "note": "head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.5 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:planck 0.54",
+    "note": "head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.5 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.68, head:hertz 0.51, head:planck 0.54",
     "primary": "head:planck-rank"
   },
   "graph": {
