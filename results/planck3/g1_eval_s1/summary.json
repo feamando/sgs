@@ -14,8 +14,8 @@
       "n_pairs": 1192,
       "rollout_success": 0.15268456375838926,
       "mean_steps_over_optimal": 1.2260073260073259,
-      "median_decision_ms": 0.015099998563528061,
-      "wall_s": 0.5,
+      "median_decision_ms": 0.013499986380338669,
+      "wall_s": 0.4,
       "cached": false,
       "step_top1": 0.4590604026845638,
       "step_ece": 0.12780397280983488
@@ -23,148 +23,143 @@
     "head:hash": {
       "n_pairs": 1192,
       "rollout_success": 0.14597315436241612,
-      "mean_steps_over_optimal": 1.2513409961685824,
-      "median_decision_ms": 0.632300041615963,
-      "wall_s": 6.6,
+      "mean_steps_over_optimal": 1.2266283524904216,
+      "median_decision_ms": 0.6359999533742666,
+      "wall_s": 6.9,
       "cached": false,
-      "step_top1": 0.5795302013422818,
-      "step_ece": 0.08450712878819579
+      "step_top1": 0.5842281879194631,
+      "step_ece": 0.10600326043388014
     },
     "head:planck-rank": {
       "n_pairs": 1192,
-      "rollout_success": 0.2709731543624161,
-      "mean_steps_over_optimal": 1.2823529411764707,
-      "median_decision_ms": 0.458099995739758,
-      "wall_s": 5.3,
+      "rollout_success": 0.27684563758389263,
+      "mean_steps_over_optimal": 1.287121212121212,
+      "median_decision_ms": 0.4453000146895647,
+      "wall_s": 5.4,
       "cached": false,
-      "step_top1": 0.6354026845637584,
-      "step_ece": 0.11160473990544754
+      "step_top1": 0.636241610738255,
+      "step_ece": 0.11268943867993059
     },
     "head:planck": {
       "n_pairs": 1192,
-      "rollout_success": 0.2105704697986577,
-      "mean_steps_over_optimal": 1.2715803452855245,
-      "median_decision_ms": 0.44450000859797,
-      "wall_s": 5.3,
+      "rollout_success": 0.24748322147651006,
+      "mean_steps_over_optimal": 1.299265536723164,
+      "median_decision_ms": 0.4257999826222658,
+      "wall_s": 5.0,
       "cached": false,
-      "step_top1": 0.6238255033557047,
-      "step_ece": 0.09521305478332663
+      "step_top1": 0.6281879194630873,
+      "step_ece": 0.10167805995251483
     },
     "gemma": {
       "n_pairs": 300,
       "rollout_success": 0.33666666666666667,
       "mean_steps_over_optimal": 1.3481848184818481,
-      "median_decision_ms": 226.26840008888394,
-      "wall_s": 460.4,
-      "cached": false
-    },
-    "latency_cpu_cold": {
-      "median_ms": 94.89494998706505,
-      "p90_ms": 553.1334499362856,
-      "mean_candidates": 49.7
+      "median_decision_ms": 238.269,
+      "wall_s": 0.0,
+      "cached": true
     }
   },
   "paired": {
     "head:hash vs gemma": {
       "n": 300,
-      "head": 0.16333333333333333,
+      "head": 0.12666666666666668,
       "teacher": 0.33666666666666667,
-      "ratio": 0.48514851485148514,
-      "a_only": 21,
-      "b_only": 73,
-      "p": 6.653665624092613e-08
+      "ratio": 0.37623762376237624,
+      "a_only": 14,
+      "b_only": 77,
+      "p": 1.0476614334105002e-11
     },
     "head:hash vs lexical": {
       "n": 1192,
       "head": 0.14597315436241612,
       "control": 0.15268456375838926,
-      "a_only": 112,
-      "b_only": 120,
-      "p": 0.645917319440978
+      "a_only": 120,
+      "b_only": 128,
+      "p": 0.6567680752327194
     },
     "head:planck-rank vs gemma": {
       "n": 300,
-      "head": 0.26666666666666666,
+      "head": 0.2833333333333333,
       "teacher": 0.33666666666666667,
-      "ratio": 0.7920792079207921,
-      "a_only": 39,
-      "b_only": 60,
-      "p": 0.0438752935870152
+      "ratio": 0.8415841584158416,
+      "a_only": 38,
+      "b_only": 54,
+      "p": 0.11737015883134423
     },
     "head:planck-rank vs head:hash": {
       "n": 1192,
-      "head": 0.2709731543624161,
+      "head": 0.27684563758389263,
       "control": 0.14597315436241612,
-      "a_only": 222,
-      "b_only": 73,
-      "p": 1.2094919366690386e-18
+      "a_only": 234,
+      "b_only": 78,
+      "p": 2.925798899311986e-19
     },
     "head:planck-rank vs lexical": {
       "n": 1192,
-      "head": 0.2709731543624161,
+      "head": 0.27684563758389263,
       "control": 0.15268456375838926,
-      "a_only": 227,
-      "b_only": 86,
-      "p": 8.043364135629818e-16
+      "a_only": 246,
+      "b_only": 98,
+      "p": 8.077242539029989e-16
     },
     "head:planck vs gemma": {
       "n": 300,
-      "head": 0.17666666666666667,
+      "head": 0.2,
       "teacher": 0.33666666666666667,
-      "ratio": 0.5247524752475248,
-      "a_only": 24,
-      "b_only": 72,
-      "p": 9.699232425527422e-07
+      "ratio": 0.594059405940594,
+      "a_only": 28,
+      "b_only": 69,
+      "p": 3.803794805755344e-05
     },
     "head:planck vs head:hash": {
       "n": 1192,
-      "head": 0.2105704697986577,
+      "head": 0.24748322147651006,
       "control": 0.14597315436241612,
-      "a_only": 161,
-      "b_only": 84,
-      "p": 9.875190712884578e-07
+      "a_only": 204,
+      "b_only": 83,
+      "p": 6.407076947143442e-13
     },
     "head:planck vs lexical": {
       "n": 1192,
-      "head": 0.2105704697986577,
+      "head": 0.24748322147651006,
       "control": 0.15268456375838926,
-      "a_only": 171,
-      "b_only": 102,
-      "p": 3.533624030184491e-05
+      "a_only": 218,
+      "b_only": 105,
+      "p": 3.0642356129441586e-10
     },
     "head:planck-rank vs head:planck": {
       "n": 1192,
-      "head": 0.2709731543624161,
-      "control": 0.2105704697986577,
-      "a_only": 174,
-      "b_only": 102,
-      "p": 1.7349540127280605e-05
+      "head": 0.27684563758389263,
+      "control": 0.24748322147651006,
+      "a_only": 152,
+      "b_only": 117,
+      "p": 0.03797316953325997
     }
   },
   "gate": {
     "verdict": "FAIL",
-    "relative_to_teacher": 0.5247524752475248,
+    "relative_to_teacher": 0.594059405940594,
     "arms": {
       "head:hash": {
-        "paired_ratio": 0.48514851485148514,
+        "paired_ratio": 0.37623762376237624,
         "n": 300,
-        "p_vs_teacher": 6.653665624092613e-08,
+        "p_vs_teacher": 1.0476614334105002e-11,
         "pass": false
       },
       "head:planck-rank": {
-        "paired_ratio": 0.7920792079207921,
+        "paired_ratio": 0.8415841584158416,
         "n": 300,
-        "p_vs_teacher": 0.0438752935870152,
-        "pass": false
+        "p_vs_teacher": 0.11737015883134423,
+        "pass": true
       },
       "head:planck": {
-        "paired_ratio": 0.5247524752475248,
+        "paired_ratio": 0.594059405940594,
         "n": 300,
-        "p_vs_teacher": 9.699232425527422e-07,
+        "p_vs_teacher": 3.803794805755344e-05,
         "pass": false
       }
     },
-    "note": "head:planck-vs-hash +0.065 (McNemar p=9.88e-07); paired head/teacher = 0.52 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.49, head:planck-rank 0.79"
+    "note": "head:planck-vs-hash +0.102 (McNemar p=6.41e-13); paired head/teacher = 0.59 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.38, head:planck-rank 0.84"
   },
   "graph": {
     "n_articles": 285478,

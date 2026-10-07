@@ -1,0 +1,192 @@
+{
+  "results": {
+    "random": {
+      "n_pairs": 1192,
+      "rollout_success": 0.0008389261744966443,
+      "mean_steps_over_optimal": 1.0,
+      "median_decision_ms": 0.000400003045797348,
+      "wall_s": 0.1,
+      "cached": false,
+      "step_top1": 0.20201342281879195,
+      "step_ece": 0.11061727610393667
+    },
+    "lexical": {
+      "n_pairs": 1192,
+      "rollout_success": 0.15268456375838926,
+      "mean_steps_over_optimal": 1.2260073260073259,
+      "median_decision_ms": 0.013400102034211159,
+      "wall_s": 0.4,
+      "cached": false,
+      "step_top1": 0.4590604026845638,
+      "step_ece": 0.12780397280983488
+    },
+    "head:hash": {
+      "n_pairs": 1192,
+      "rollout_success": 0.13758389261744966,
+      "mean_steps_over_optimal": 1.2827235772357723,
+      "median_decision_ms": 0.6201000069268048,
+      "wall_s": 6.9,
+      "cached": false,
+      "step_top1": 0.5802013422818791,
+      "step_ece": 0.0823038571850153
+    },
+    "head:planck-rank": {
+      "n_pairs": 1192,
+      "rollout_success": 0.2701342281879195,
+      "mean_steps_over_optimal": 1.310248447204969,
+      "median_decision_ms": 0.4311000229790807,
+      "wall_s": 5.3,
+      "cached": false,
+      "step_top1": 0.6317114093959731,
+      "step_ece": 0.10444712593117042
+    },
+    "head:planck": {
+      "n_pairs": 1192,
+      "rollout_success": 0.23070469798657717,
+      "mean_steps_over_optimal": 1.2919393939393937,
+      "median_decision_ms": 0.4140000091865659,
+      "wall_s": 4.9,
+      "cached": false,
+      "step_top1": 0.6218120805369127,
+      "step_ece": 0.08383102130024513
+    },
+    "gemma": {
+      "n_pairs": 300,
+      "rollout_success": 0.33666666666666667,
+      "mean_steps_over_optimal": 1.3481848184818481,
+      "median_decision_ms": 238.269,
+      "wall_s": 0.0,
+      "cached": true
+    }
+  },
+  "paired": {
+    "head:hash vs gemma": {
+      "n": 300,
+      "head": 0.13333333333333333,
+      "teacher": 0.33666666666666667,
+      "ratio": 0.39603960396039606,
+      "a_only": 13,
+      "b_only": 74,
+      "p": 1.5938987081347696e-11
+    },
+    "head:hash vs lexical": {
+      "n": 1192,
+      "head": 0.13758389261744966,
+      "control": 0.15268456375838926,
+      "a_only": 103,
+      "b_only": 121,
+      "p": 0.25596461781212143
+    },
+    "head:planck-rank vs gemma": {
+      "n": 300,
+      "head": 0.24,
+      "teacher": 0.33666666666666667,
+      "ratio": 0.7128712871287128,
+      "a_only": 34,
+      "b_only": 63,
+      "p": 0.00422580392168276
+    },
+    "head:planck-rank vs head:hash": {
+      "n": 1192,
+      "head": 0.2701342281879195,
+      "control": 0.13758389261744966,
+      "a_only": 231,
+      "b_only": 73,
+      "p": 2.853555933729062e-20
+    },
+    "head:planck-rank vs lexical": {
+      "n": 1192,
+      "head": 0.2701342281879195,
+      "control": 0.15268456375838926,
+      "a_only": 234,
+      "b_only": 94,
+      "p": 6.3918519429364286e-15
+    },
+    "head:planck vs gemma": {
+      "n": 300,
+      "head": 0.21333333333333335,
+      "teacher": 0.33666666666666667,
+      "ratio": 0.6336633663366337,
+      "a_only": 30,
+      "b_only": 67,
+      "p": 0.00021890976301036625
+    },
+    "head:planck vs head:hash": {
+      "n": 1192,
+      "head": 0.23070469798657717,
+      "control": 0.13758389261744966,
+      "a_only": 200,
+      "b_only": 89,
+      "p": 5.7095900598179673e-11
+    },
+    "head:planck vs lexical": {
+      "n": 1192,
+      "head": 0.23070469798657717,
+      "control": 0.15268456375838926,
+      "a_only": 196,
+      "b_only": 103,
+      "p": 8.21023430211599e-08
+    },
+    "head:planck-rank vs head:planck": {
+      "n": 1192,
+      "head": 0.2701342281879195,
+      "control": 0.23070469798657717,
+      "a_only": 141,
+      "b_only": 94,
+      "p": 0.0026181240269771873
+    }
+  },
+  "gate": {
+    "verdict": "FAIL",
+    "relative_to_teacher": 0.6336633663366337,
+    "arms": {
+      "head:hash": {
+        "paired_ratio": 0.39603960396039606,
+        "n": 300,
+        "p_vs_teacher": 1.5938987081347696e-11,
+        "pass": false
+      },
+      "head:planck-rank": {
+        "paired_ratio": 0.7128712871287128,
+        "n": 300,
+        "p_vs_teacher": 0.00422580392168276,
+        "pass": false
+      },
+      "head:planck": {
+        "paired_ratio": 0.6336633663366337,
+        "n": 300,
+        "p_vs_teacher": 0.00021890976301036625,
+        "pass": false
+      }
+    },
+    "note": "head:planck-vs-hash +0.093 (McNemar p=5.71e-11); paired head/teacher = 0.63 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.40, head:planck-rank 0.71"
+  },
+  "graph": {
+    "n_articles": 285478,
+    "n_edges": 3991019,
+    "n_redirects": 115214,
+    "mean_outdeg": 13.980128065910508,
+    "median_outdeg": 8.0,
+    "max_outdeg": 2715,
+    "with_lead": 279608,
+    "dump": "C:\\Users\\feama\\sgs\\data\\planck3\\wikirace\\simplewiki-latest-pages-articles.xml.bz2",
+    "build_s": 101.5
+  },
+  "tasks": {
+    "train": {
+      "pairs": 9588,
+      "steps": 47934
+    },
+    "val": {
+      "pairs": 1196,
+      "steps": 5980
+    },
+    "test": {
+      "pairs": 1192,
+      "steps": 5960
+    },
+    "n_targets": 3000,
+    "seed": 0,
+    "format": 2
+  }
+}

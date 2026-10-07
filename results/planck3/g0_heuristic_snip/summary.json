@@ -1,0 +1,111 @@
+{
+  "n": 47,
+  "success": 0.9361702127659575,
+  "answered_rate": 1.0,
+  "wrong_when_answered": 0.06382978723404255,
+  "abstain_rate": 0.0,
+  "ece": 0.057350207609577895,
+  "mean_steps": 3.851063829787234,
+  "mean_web_calls": 2.1914893617021276,
+  "mean_decision_ms": 0.016921539456475506,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 1.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.75
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.9459459459459459
+    }
+  },
+  "policy": "heuristic",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.851063829787234,
+  "serp_answer_rate_at3": 0.851063829787234,
+  "depth_evidence_recall": 0.9574468085106383,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.1063829787234043,
+  "mean_answer_fetches": 0.02127659574468085,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.8297872340425532,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 51,
+    "passages": 265,
+    "entities": 481,
+    "edges": 492,
+    "queries": 63,
+    "domains": 26
+  },
+  "cost": {
+    "usd_per_task": 9.050823409048659e-10,
+    "usd_per_correct": 9.66792500512016e-10,
+    "usd_per_1k_tasks": 9.05082340904866e-07,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 51,
+    "fetch": 52,
+    "search_net": 0,
+    "fetch_net": 2
+  },
+  "wall_s": 18.3,
+  "store_facts": 51,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9259259259259259,
+      11.5
+    ],
+    [
+      "britannica.com",
+      0.75,
+      2.0
+    ],
+    [
+      "berlintourism.org",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "facebook.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "ikea.com",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "reddit.com",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "nintendo.fandom.com",
+      0.6,
+      0.5
+    ],
+    [
+      "quora.com",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "BASELINE",
+    "note": "heuristic is the no-model floor; the G0 gate applies to teachers"
+  }
+}

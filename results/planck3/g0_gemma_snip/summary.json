@@ -1,0 +1,113 @@
+{
+  "n": 47,
+  "success": 0.851063829787234,
+  "answered_rate": 0.9361702127659575,
+  "wrong_when_answered": 0.09090909090909091,
+  "abstain_rate": 0.06382978723404253,
+  "ece": 0.03863636363636358,
+  "mean_steps": 4.148936170212766,
+  "mean_web_calls": 2.4680851063829787,
+  "mean_decision_ms": 1699.2775056475343,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.6666666666666666
+    },
+    "compare": {
+      "n": 4,
+      "success": 1.0
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.8648648648648649
+    }
+  },
+  "policy": "gemma",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "C:\\Users\\feama\\sgs\\scripts\\assets\\planck3_tasks.json",
+  "n_invalid_decisions": 3,
+  "gold_reachable": 0.9574468085106383,
+  "serp_answer_rate_at3": 0.9574468085106383,
+  "depth_evidence_recall": 0.9574468085106383,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.2340425531914894,
+  "mean_answer_fetches": 0.0,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.8936170212765957,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 55,
+    "passages": 269,
+    "entities": 480,
+    "edges": 493,
+    "queries": 63,
+    "domains": 28
+  },
+  "cost": {
+    "usd_per_task": 0.0045613829787234045,
+    "usd_per_correct": 0.005359625,
+    "usd_per_1k_tasks": 4.561382978723404,
+    "llm_tokens_per_task": 4205.978723404255,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 58,
+    "fetch": 58,
+    "search_net": 0,
+    "fetch_net": 6
+  },
+  "wall_s": 360.3,
+  "store_facts": 55,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9411764705882353,
+      15.0
+    ],
+    [
+      "facebook.com",
+      0.75,
+      2.0
+    ],
+    [
+      "reddit.com",
+      0.75,
+      2.0
+    ],
+    [
+      "quora.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "ebsco.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "ryokancollection.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "pubmed.ncbi.nlm.nih.gov",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "britannica.com",
+      0.7142857142857143,
+      1.5
+    ]
+  ],
+  "gate": {
+    "verdict": "PASS",
+    "success": 0.851,
+    "pass_at": 0.6,
+    "kill_below": 0.4
+  }
+}
