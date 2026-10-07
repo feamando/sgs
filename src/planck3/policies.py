@@ -74,6 +74,12 @@ class HeuristicPolicy(Policy):
             if top["match"] >= 0.9:
                 return Decision("ANSWER", k=0, p=top["p"])
             return Decision("SEARCH", p=0.5)
+        if phase == "results_snip":  # take a snippet value only when it clearly answers
+            spans = obs["lists"].get("spans", [])
+            # only from a page about the subject, or when 2+ domains agree; otherwise read a page
+            if spans and spans[0]["score"] >= 0.4 and (spans[0].get("about", 0) >= 0.5 or len(spans[0].get("domains", [])) >= 2):
+                return Decision("EXTRACT", k=0, p=self._conf(spans[0]))
+            phase = "results"
         if phase == "results":
             k = self._best_unopened(obs)
             return Decision("OPEN", k=k, p=0.5) if k is not None else Decision("ABSTAIN", p=0.0)
@@ -105,15 +111,19 @@ the ALLOWED list and, for pointer actions, the index k of one listed candidate.
 Actions:
   LOOKUP   check the local knowledge store for a fresh stored answer
   SEARCH   run a web search for the question
-  OPEN k   open search result k
-  EXTRACT k  take span candidate k (a value from the open page) as the answer
+  OPEN k   open search result k (read the full page)
+  EXTRACT k  take span candidate k as the answer: values from the search snippets
+           (before any page is opened) or from the open page
   VERIFY   check the held value against another source before answering
   ANSWER   answer with the held value (or ANSWER k = stored fact k)
   ABSTAIN  give up: nothing trustworthy was found (better than a wrong answer)
 
-Prefer reliable sources. Pick the candidate that actually answers the question,
-not one that merely repeats its words. p is your probability that the FINAL
-answer will be correct; be calibrated.
+Snippets first: if a snippet value clearly answers the question (ideally the same
+value from several domains), EXTRACT it; OPEN a page only when the snippets do not.
+Pick the candidate that actually answers the question, not one that repeats its
+words (the subject itself, an alias, a later product version, an unrelated year).
+p is your probability that the FINAL answer is correct; be calibrated. An ANSWER
+with low p is turned into "couldn't verify", which is better than a wrong answer.
 
 Reply with ONLY one JSON object, no prose:
 {"action": "<ACTION>", "k": <integer or null>, "p": <number 0..1>}"""
@@ -139,9 +149,13 @@ def render_observation(obs: dict) -> str:
             lines.append(f"  [{i}] {r['title'][:90]} | {r['domain']} (trust {r.get('trust', 0.5):.2f}){tag}"
                          f" | {r['snippet'][:160]}")
     if lists.get("spans") and "spans" in obs["pointer"].values():
-        lines.append("SPANS (candidate values from the open page):")
+        lines.append(f"SPANS (candidate values from {obs.get('spans_source', 'the open page')}):")
         for i, s in enumerate(lists["spans"]):
-            lines.append(f"  [{i}] {s['value'][:80]} | \"{s['context'][:200]}\"")
+            doms = s.get("domains") or []
+            src = f" | {len(doms)} domains: {', '.join(doms[:3])}" if len(doms) > 1 else (f" | {doms[0]}" if doms else "")
+            if "about" in s:
+                src += " | from a page about the subject" if s["about"] >= 0.5 else " | from a page about something else"
+            lines.append(f"  [{i}] {s['value'][:80]} | \"{s['context'][:200]}\"{src}")
     if obs.get("held"):
         h = obs["held"]
         lines.append(f"HELD VALUE: {h['value']} (from {h['domain']}): \"{h['context'][:200]}\"")

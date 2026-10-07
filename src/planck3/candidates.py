@@ -141,37 +141,81 @@ def _unit_bonus(value: str, q_unit: str | None) -> float:
 
 def span_candidates(question: str, text: str, answer_type: str, url: str = "",
                     extra_lines: list[str] | None = None, limit: int = MAX_SPAN_CANDIDATES) -> list[dict]:
-    """Ranked typed candidates [{value, type, context, url, score, support}]."""
+    """Ranked typed candidates from ONE page [{value, type, context, url, score, support, margin}]."""
+    lines = [(l, url) for l in list(extra_lines or []) + split_sentences(text)]
+    return _rank_lines(question, lines, answer_type, limit)
+
+
+def snippet_candidates(question: str, results: list[dict], answer_type: str,
+                       limit: int = MAX_SPAN_CANDIDATES) -> list[dict]:
+    """
+    Snippet-first: typed candidates read off the search result snippets, before any fetch.
+    A value repeated by several DIFFERENT domains is corroboration (free VERIFY); it is
+    counted in `domains` and earns a small score bonus.
+    """
+    # aboutness: a snippet from a page ABOUT the subject (title names it) is evidence; a snippet
+    # from another page that merely mentions it ("Netflix Animation" for "Netflix founded") is not
+    subject = main_entity(question)
+    s_words = set(norm_text(subject).split()) if subject else set()
+    about = {}
+    for r in results:
+        # title core: drop site suffixes ("IKEA - Wikipedia", "X | Britannica"); then overlap over
+        # union, so "Netflix Animation" (0.5) ranks below "Netflix" (1.0) for a question about Netflix
+        core = re.split(r"\s[-|–—:·]\s", r.get("title", ""))[0]
+        t_words = set(content_words(core))
+        frac = len(s_words & t_words) / len(s_words | t_words) if s_words else 0.5
+        about[r["url"]] = round(frac, 3)
+    lines = [(sent, r["url"]) for r in results for sent in split_sentences(r.get("snippet", ""))]
+    cands = _rank_lines(question, lines, answer_type, limit=10**6, domain_bonus=0.1,
+                        line_bonus={u: 0.4 * a - (0.3 if a == 0 else 0.0) for u, a in about.items()})
+    for c in cands:
+        c["about"] = max(about.get(u, 0.0) for u in c.get("urls", [c["url"]]))
+    return cands[:limit]
+
+
+def _rank_lines(question, lines, answer_type, limit, domain_bonus: float = 0.0,
+                line_bonus: dict | None = None) -> list[dict]:
     q_words = [w for w in content_words(question) if w not in _QFORM]
     q_unit = question_unit(question) if answer_type == "number" else None
-    lines = list(extra_lines or []) + split_sentences(text)
     # in-page IDF: the question's subject ("IKEA") is on every line of its own
     # page and says nothing; the attribute word ("founded") is rare and decisive
-    line_words = [set(norm_text(l).split()) for l in lines]
+    line_words = [set(norm_text(l).split()) for l, _ in lines]
     n = max(len(lines), 1)
     weights = {w: math.log(1 + n / (1 + sum(1 for lw in line_words if w in lw))) + 0.1 for w in q_words}
     best: dict[str, dict] = {}
-    for sent in lines:
+    for sent, url in lines:
         for value, off in mentions(sent, answer_type):
             key = norm_text(value)
             if not key:
                 continue
-            sc = _score(sent, value, off, q_words, weights, q_unit)
+            sc = _score(sent, value, off, q_words, weights, q_unit) + (line_bonus or {}).get(url, 0.0)
+            dom = _domain(url)
             prev = best.get(key)
             if prev is None:
-                best[key] = {"value": value, "type": answer_type, "context": sent[:240],
-                             "url": url, "score": sc, "support": 1}
+                best[key] = {"value": value, "type": answer_type, "context": sent[:240], "url": url,
+                             "score": sc, "support": 1, "domains": [dom], "urls": [url]}
             else:
                 prev["support"] += 1
+                if dom not in prev["domains"]:
+                    prev["domains"].append(dom)
+                if url not in prev["urls"]:
+                    prev["urls"].append(url)
                 if sc > prev["score"]:
-                    prev.update(value=value, context=sent[:240], score=sc)
+                    prev.update(value=value, context=sent[:240], score=sc, url=url)
     cands = list(best.values())
-    for c in cands:  # repeated mentions are weak corroboration
-        c["score"] = round(c["score"] + 0.05 * min(c["support"] - 1, 4), 4)
+    for c in cands:  # repeated mentions are weak corroboration; other domains stronger
+        c["score"] = round(c["score"] + 0.05 * min(c["support"] - 1, 4)
+                           + domain_bonus * min(len(c["domains"]) - 1, 3), 4)
     cands.sort(key=lambda c: -c["score"])
     for a, b in zip(cands, cands[1:] + [None]):  # lead over the runner-up
         a["margin"] = round(a["score"] - (b["score"] if b else 0.0), 4)
     return cands[:limit]
+
+
+def _domain(url: str) -> str:
+    from urllib.parse import urlparse
+    d = urlparse(url).netloc.lower()
+    return d[4:] if d.startswith("www.") else d
 
 
 # ── depth: ranked evidence passages (Brain-style retrieval, over the web) ──

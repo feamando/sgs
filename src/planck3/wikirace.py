@@ -239,7 +239,8 @@ def make_tasks(d: Path, n_targets: int, starts_per_target: int, offpath_per_targ
                 while dv[u] > 0:
                     nb = g.out(u)
                     gold = [int(v) for v in nb if dv[v] == dv[u] - 1]
-                    steps[split].append({"target": tgt, "node": int(u), "dist": int(dv[u]), "gold": gold})
+                    steps[split].append({"target": tgt, "node": int(u), "dist": int(dv[u]), "gold": gold,
+                                         "cand_dist": _cand_dist(dv, nb)})
                     u = rng.choice(gold)
             finite = np.flatnonzero(np.isfinite(dv) & (dv >= 1) & (dv <= 8))
             for j in range(min(offpath_per_target, len(finite))):
@@ -248,7 +249,8 @@ def make_tasks(d: Path, n_targets: int, starts_per_target: int, offpath_per_targ
                 if len(nb) == 0:
                     continue
                 gold = [int(v) for v in nb if dv[v] == dv[u] - 1]
-                steps[split].append({"target": tgt, "node": int(u), "dist": int(dv[u]), "gold": gold})
+                steps[split].append({"target": tgt, "node": int(u), "dist": int(dv[u]), "gold": gold,
+                                     "cand_dist": _cand_dist(dv, nb)})
         print(f"  targets {min(bstart + B, len(targets))}/{len(targets)} ({time.time() - t0:.0f}s)", flush=True)
     for s in pairs:
         with open(td / f"pairs_{s}.jsonl", "w", encoding="utf-8") as f:
@@ -256,9 +258,15 @@ def make_tasks(d: Path, n_targets: int, starts_per_target: int, offpath_per_targ
         with open(td / f"steps_{s}.jsonl", "w", encoding="utf-8") as f:
             f.writelines(json.dumps(x) + "\n" for x in steps[s])
     info = {s: {"pairs": len(pairs[s]), "steps": len(steps[s])} for s in pairs}
-    info.update({"n_targets": len(targets), "seed": seed})
+    info.update({"n_targets": len(targets), "seed": seed, "format": 2})  # 2 = steps carry cand_dist
     write_json(td / "tasks_info.json", info)
     print(f"[wikirace] tasks: {info}")
+
+
+def _cand_dist(dv, nb) -> list[int]:
+    """BFS distance-to-target of every candidate link (aligned with g.out(node)); -1 = unreachable."""
+    cd = dv[nb]
+    return np.where(np.isfinite(cd), cd, -1).astype(int).tolist()
 
 
 # ── embed ────────────────────────────────────────────────────────────────
@@ -281,10 +289,11 @@ def _batches(g, steps, E, max_cands, rng, device, train=True):
         rng.shuffle(order)
     for s in range(0, len(order), B):
         chunk = [steps[i] for i in order[s:s + B]]
-        cand_lists, gold_sets = [], []
+        cand_lists, gold_sets, dist_maps = [], [], []
         for st in chunk:
             nb = g.out(st["node"]).tolist()
             gold = set(st["gold"])
+            dist_maps.append(dict(zip(nb, st["cand_dist"])) if "cand_dist" in st else {})
             if len(nb) > max_cands:
                 neg = [v for v in nb if v not in gold]
                 nb = list(gold) + rng.sample(neg, max_cands - len(gold)) if len(gold) < max_cands else list(gold)[:max_cands]
@@ -294,19 +303,28 @@ def _batches(g, steps, E, max_cands, rng, device, train=True):
         idx = torch.zeros((len(chunk), C), dtype=torch.long)
         cm = torch.zeros((len(chunk), C), dtype=torch.bool)
         gm = torch.zeros((len(chunk), C), dtype=torch.bool)
-        for r, (cl, gs) in enumerate(zip(cand_lists, gold_sets)):
+        dm = torch.full((len(chunk), C), -1.0)
+        for r, (cl, gs, dmap) in enumerate(zip(cand_lists, gold_sets, dist_maps)):
             idx[r, :len(cl)] = torch.tensor(cl)
             cm[r, :len(cl)] = True
             gm[r, :len(cl)] = torch.tensor([v in gs for v in cl])
+            if dmap:
+                dm[r, :len(cl)] = torch.tensor([float(dmap.get(v, -1)) for v in cl])
         t_idx = torch.tensor([st["target"] for st in chunk])
         n_idx = torch.tensor([st["node"] for st in chunk])
         yield (E[t_idx.to(device)], E[n_idx.to(device)], E[idx.to(device)],
-               gm.to(device), cm.to(device), cand_lists, gold_sets)
+               gm.to(device), cm.to(device), cand_lists, gold_sets, dm.to(device))
 
 
 def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, seed: int, td: Path | None = None,
           max_cands: int = 256, hidden: int = 128, dropout: float = 0.3, weight_decay: float = 0.05,
-          patience: int = 2):
+          patience: int = 2, objective: str = "nll"):
+    """
+    objective: nll   multi-positive NLL on the gold set (a link exactly one step closer)
+               rank  listwise soft targets over EVERY candidate from its BFS distance
+                     (q ~ exp(-(d - d_min) / 0.5)), so "two steps away" beats "lost"; the
+                     candidate fix for heads that win single steps but lose whole races
+    """
     import torch
     from .heads import PointerHead, fit_temperature, multi_positive_nll
     torch.manual_seed(seed)
@@ -317,6 +335,8 @@ def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, see
     td = Path(td or d)
     tr = [s for s in read_jsonl(td / "steps_train.jsonl") if s["gold"]]
     va = [s for s in read_jsonl(td / "steps_val.jsonl") if s["gold"]]
+    if objective == "rank" and "cand_dist" not in tr[0]:
+        raise SystemExit("objective=rank needs tasks with cand_dist (format 2): re-run `wikirace tasks`")
     head = PointerHead(E.shape[1], hidden=hidden, dropout=dropout).to(device)
     opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=weight_decay)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -325,8 +345,9 @@ def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, see
         head.train()
         tot, nb = 0.0, 0
         t0 = time.time()
-        for e_t, e_n, e_c, gm, cm, _, _ in _batches(g, tr, E, max_cands, rng, device):
-            loss = multi_positive_nll(head(e_t, e_n, e_c).masked_fill(~cm, -1e4), gm, cm)
+        for e_t, e_n, e_c, gm, cm, _, _, dm in _batches(g, tr, E, max_cands, rng, device):
+            logits = head(e_t, e_n, e_c).masked_fill(~cm, -1e4)
+            loss = multi_positive_nll(logits, gm, cm) if objective == "nll" else rank_loss(logits, dm, cm)
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -343,7 +364,7 @@ def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, see
             continue
         best, bad = acc, 0
         torch.save({"head": head.state_dict(), "dim": E.shape[1], "hidden": hidden,
-                    "encoder": encoder_name, "seed": seed}, out_dir / "head.pt")
+                    "encoder": encoder_name, "seed": seed, "objective": objective}, out_dir / "head.pt")
     ck = torch.load(out_dir / "head.pt", map_location=device)
     head.load_state_dict(ck["head"])
     head.eval()
@@ -353,15 +374,28 @@ def train(d: Path, encoder_name: str, out_dir: Path, epochs: int, lr: float, see
     ck["head"] = head.state_dict()
     torch.save(ck, out_dir / "head.pt")
     write_json(out_dir / "train_log.json", {"epochs": log, "best_val_top1": best, "temperature": T,
-                                            "encoder": encoder_name, "seed": seed})
+                                            "encoder": encoder_name, "seed": seed, "objective": objective})
     print(f"[wikirace] trained head:{encoder_name} seed={seed} best val top1={best:.4f} T={T:.3f} -> {out_dir}")
+
+
+def rank_loss(logits, dist, cand_mask, tau: float = 0.5):
+    """Listwise CE against soft targets from BFS distance (unreachable = worst reachable + 2)."""
+    import torch
+    reach = (dist >= 0) & cand_mask
+    worst = torch.where(reach, dist, torch.full_like(dist, -1)).max(-1, keepdim=True).values
+    d = torch.where(reach, dist, worst + 2)
+    dmin = torch.where(cand_mask, d, torch.full_like(d, 1e9)).min(-1, keepdim=True).values
+    q = torch.exp(-(d - dmin) / tau).masked_fill(~cand_mask, 0)
+    q = q / q.sum(-1, keepdim=True).clamp_min(1e-9)
+    logp = torch.log_softmax(logits.masked_fill(~cand_mask, -1e4), -1)
+    return -(q * logp).sum(-1).mean()
 
 
 def _collect_logits(head, g, steps, E, device):
     import torch
     lg, gl = [], []
     with torch.no_grad():
-        for e_t, e_n, e_c, gm, cm, cls, _ in _batches(g, steps, E, 10**9, random.Random(0), device, train=False):
+        for e_t, e_n, e_c, gm, cm, cls, _, _ in _batches(g, steps, E, 10**9, random.Random(0), device, train=False):
             logits = head(e_t, e_n, e_c)
             for r in range(len(cls)):
                 n = len(cls[r])
@@ -409,7 +443,8 @@ class HeadWR:
         self.head.load_state_dict(ck["head"])
         self.head.eval()
         self.E = torch.from_numpy(E.astype(np.float32)).to(device)
-        self.name = f"head:{ck['encoder']}"
+        obj = ck.get("objective", "nll")
+        self.name = f"head:{ck['encoder']}" + ("" if obj == "nll" else f"-{obj}")
         self.device = device
 
     def pick(self, g, target, node, cands):
@@ -462,44 +497,89 @@ def rollout(g, policy, start, target, max_steps):
     return False, max_steps, ms
 
 
+def mcnemar(a: list[bool], b: list[bool]) -> dict:
+    """Exact two-sided McNemar on paired outcomes (same races): b01 = only B wins, b10 = only A wins."""
+    import math
+    b10 = sum(1 for x, y in zip(a, b) if x and not y)
+    b01 = sum(1 for x, y in zip(a, b) if y and not x)
+    n = b10 + b01
+    p = 1.0 if n == 0 else min(1.0, 2 * sum(math.comb(n, k) for k in range(min(b10, b01) + 1)) / 2 ** n)
+    return {"a_only": b10, "b_only": b01, "p": p}
+
+
+def discover_heads(results: Path, seed: int, tag: str) -> dict[str, Path]:
+    """results/planck3/g1_head_<key>_s<seed><tag>/head.pt -> {key: path}, key = encoder[-objective]."""
+    out = {}
+    for p in sorted(results.glob(f"g1_head_*_s{seed}{tag}/head.pt")):
+        key = p.parent.name[len("g1_head_"):-len(f"_s{seed}{tag}")]
+        if key:
+            out[key] = p
+    return out
+
+
 def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path: str,
              teacher_limit: int, heads: dict[str, Path], latency_ckpt: str | None, latency_tok: str | None,
-             td: Path | None = None):
+             td: Path | None = None, teacher_dir: Path | None = None):
     from .metrics import ece
     g = Graph(d)
     td = Path(td or d)
+    out_dir.mkdir(parents=True, exist_ok=True)
     pairs = read_jsonl(td / "pairs_test.jsonl")[: limit or None]
     test_steps = read_jsonl(td / "steps_test.jsonl")
     embs = {p.stem.replace("emb_", ""): np.load(p) for p in d.glob("emb_*.npy")}
-    results = {}
+    if "heads" in policies:  # expand to every trained head for this seed/tag
+        i = policies.index("heads")
+        policies = policies[:i] + [f"head:{k}" for k in heads] + policies[i + 1:]
+    results, outcomes = {}, {}
     for name in policies:
+        cached = None
         if name == "random":
             pol, n_pairs = RandomWR(), pairs
         elif name == "lexical":
             pol, n_pairs = EmbedWR(embs["hash"], "lexical"), pairs
         elif name.startswith("head:"):
-            enc = name.split(":", 1)[1]
-            if enc not in heads or enc not in embs:
+            key = name.split(":", 1)[1]
+            enc = key.split("-")[0]
+            if key not in heads or enc not in embs:
                 print(f"[wikirace] skip {name}: missing head or emb_{enc}.npy")
                 continue
-            pol, n_pairs = HeadWR(heads[enc], embs[enc]), pairs
+            pol, n_pairs = HeadWR(heads[key], embs[enc]), pairs
         elif name == "gemma":
-            pol, n_pairs = GemmaWR(gemma_path, embs.get("hash")), pairs[:teacher_limit]
+            n_pairs = pairs[:teacher_limit]
+            cache = (teacher_dir or out_dir) / "pairs_gemma.jsonl"
+            if cache.exists():  # the teacher is deterministic and the test races are fixed: run it once
+                rows = read_jsonl(cache)
+                if len(rows) >= len(n_pairs) and all(r["start"] == p["start"] and r["target"] == p["target"]
+                                                     for r, p in zip(rows, n_pairs)):
+                    cached = rows[: len(n_pairs)]
+                    print(f"  gemma: reusing {len(cached)} cached teacher races from {cache}")
+            pol = None if cached else GemmaWR(gemma_path, embs.get("hash"))
         else:
             raise ValueError(name)
-        succ, steps_ratio, ms = 0, [], []
-        t0 = time.time()
-        for i, pr in enumerate(n_pairs):
-            ok, n, m = rollout(g, pol, pr["start"], pr["target"], max_steps=2 * pr["dist"])
-            succ += ok
-            ms += m
-            if ok:
-                steps_ratio.append(n / pr["dist"])
-            if name == "gemma" and (i + 1) % 10 == 0:
-                print(f"    gemma {i + 1}/{len(n_pairs)} success so far {succ / (i + 1):.3f}", flush=True)
-        r = {"n_pairs": len(n_pairs), "rollout_success": succ / max(len(n_pairs), 1),
-             "mean_steps_over_optimal": float(np.mean(steps_ratio)) if steps_ratio else None,
-             "median_decision_ms": float(np.median(ms)) if ms else None, "wall_s": round(time.time() - t0, 1)}
+        rows, ms, t0 = [], [], time.time()
+        if cached is not None:
+            rows = cached
+        else:
+            for i, pr in enumerate(n_pairs):
+                ok, n, m = rollout(g, pol, pr["start"], pr["target"], max_steps=2 * pr["dist"])
+                ms += m
+                rows.append({"i": i, "start": pr["start"], "target": pr["target"], "dist": pr["dist"],
+                             "ok": bool(ok), "steps": n, "ms": round(float(np.mean(m)), 3) if m else None})
+                if name == "gemma" and (i + 1) % 25 == 0:
+                    print(f"    gemma {i + 1}/{len(n_pairs)} success so far {sum(r['ok'] for r in rows) / (i + 1):.3f}", flush=True)
+            if name == "gemma":
+                (teacher_dir or out_dir).mkdir(parents=True, exist_ok=True)
+                with open((teacher_dir or out_dir) / "pairs_gemma.jsonl", "w", encoding="utf-8") as f:
+                    f.writelines(json.dumps(r) + "\n" for r in rows)
+        with open(out_dir / f"pairs_{name.replace(':', '_')}.jsonl", "w", encoding="utf-8") as f:
+            f.writelines(json.dumps(r) + "\n" for r in rows)
+        outcomes[name] = [r["ok"] for r in rows]
+        succ = [r for r in rows if r["ok"]]
+        ms_all = ms or [r["ms"] for r in rows if r.get("ms") is not None]
+        r = {"n_pairs": len(rows), "rollout_success": len(succ) / max(len(rows), 1),
+             "mean_steps_over_optimal": float(np.mean([x["steps"] / x["dist"] for x in succ])) if succ else None,
+             "median_decision_ms": float(np.median(ms_all)) if ms_all else None, "wall_s": round(time.time() - t0, 1),
+             "cached": cached is not None}
         if name != "gemma":  # step-level top-1 + calibration on held-out steps
             top1, probs, corr = 0, [], []
             for st in test_steps[: limit * 4 if limit else None]:
@@ -514,15 +594,41 @@ def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path
             r["step_top1"] = top1 / max(len(corr), 1)
             r["step_ece"] = ece(probs, corr)
         results[name] = r
-        print(f"  {name:<14} success={r['rollout_success']:.3f} steps/opt={r['mean_steps_over_optimal']} "
+        print(f"  {name:<18} success={r['rollout_success']:.3f} steps/opt={r['mean_steps_over_optimal']} "
               f"top1={r.get('step_top1')} ece={r.get('step_ece')} ms={r['median_decision_ms']}", flush=True)
+    paired = paired_stats(outcomes)
     if latency_ckpt:
         results["latency_cpu_cold"] = cold_latency(g, pairs, latency_ckpt, latency_tok)
-    verdict = g1_verdict(results)
-    summary = {"results": results, "gate": verdict, "graph": read_json(d / "graph_info.json"),
+    verdict = g1_verdict(results, paired)
+    summary = {"results": results, "paired": paired, "gate": verdict, "graph": read_json(d / "graph_info.json"),
                "tasks": read_json(td / "tasks_info.json")}
     write_json(out_dir / "summary.json", summary)
     print(f"\n  GATE G1: {verdict['verdict']}\n  {verdict.get('note', '')}\n  -> {out_dir / 'summary.json'}")
+
+
+def paired_stats(outcomes: dict[str, list[bool]]) -> dict:
+    """Every head vs the teacher on the SAME races (the teacher's subset), plus head-vs-control pairs."""
+    out = {}
+    teacher = outcomes.get("gemma")
+    for name, oc in outcomes.items():
+        if not name.startswith("head:"):
+            continue
+        if teacher:
+            n = len(teacher)
+            sub = oc[:n]
+            t_rate = sum(teacher) / n
+            out[f"{name} vs gemma"] = {"n": n, "head": sum(sub) / n, "teacher": t_rate,
+                                       "ratio": (sum(sub) / n) / t_rate if t_rate else None,
+                                       **mcnemar(sub, teacher)}
+        for ctrl in ("head:hash", "lexical"):
+            if ctrl in outcomes and ctrl != name:
+                out[f"{name} vs {ctrl}"] = {"n": len(oc), "head": sum(oc) / len(oc),
+                                            "control": sum(outcomes[ctrl]) / len(oc), **mcnemar(oc, outcomes[ctrl])}
+    for a, b in (("head:planck-rank", "head:planck"), ("head:hertz", "head:planck"), ("head:hertz-rank", "head:planck-rank")):
+        if a in outcomes and b in outcomes:
+            out[f"{a} vs {b}"] = {"n": len(outcomes[a]), "head": sum(outcomes[a]) / len(outcomes[a]),
+                                  "control": sum(outcomes[b]) / len(outcomes[b]), **mcnemar(outcomes[a], outcomes[b])}
+    return out
 
 
 def cold_latency(g, pairs, ckpt, tok, n=30):
@@ -540,31 +646,88 @@ def cold_latency(g, pairs, ckpt, tok, n=30):
             "mean_candidates": float(np.mean([len(g.out(p["start"])) for p in pairs[:n]]))}
 
 
-def g1_verdict(res: dict) -> dict:
-    head = res.get("head:planck")
+def g1_verdict(res: dict, paired: dict | None = None, primary: str = "head:planck") -> dict:
+    """
+    Pre-registered: primary head >= 0.8x the teacher's rollout success ON THE SAME RACES,
+    beats head:hash, < 100 ms warm. Secondary arms (-rank, hertz) are reported with the same
+    rule, flagged exploratory (two arms -> read their p-values with that in mind).
+    """
+    paired = paired or {}
+    head = res.get(primary)
     if head is None:
-        return {"verdict": "INCOMPLETE (no head:planck result)"}
-    teacher = res.get("gemma")
+        return {"verdict": f"INCOMPLETE (no {primary} result)"}
     lat = head["median_decision_ms"]
     fast = lat is not None and lat < G1_MS
-    notes = []
+    notes, arms = [], {}
     hashr = res.get("head:hash")
     if hashr:
         delta = head["rollout_success"] - hashr["rollout_success"]
-        notes.append(f"planck-vs-hash head delta {delta:+.3f} (<=0 means Planck features add nothing)")
-    if teacher is None:
+        pv = paired.get(f"{primary} vs head:hash", {}).get("p")
+        notes.append(f"{primary}-vs-hash {delta:+.3f}" + (f" (McNemar p={pv:.3g})" if pv is not None else ""))
+    if "gemma" not in res:
         return {"verdict": "INCOMPLETE (run the gemma teacher)", "note": "; ".join(notes)}
-    rel = head["rollout_success"] / max(teacher["rollout_success"], 1e-9)
-    ok = rel >= G1_REL and fast
-    notes.append(f"head/teacher = {rel:.2f} (pass >= {G1_REL}); warm decision {lat:.1f} ms (pass < {G1_MS})")
-    return {"verdict": "PASS" if ok else ("FAIL (try the Hertz encoder)" if not ok and fast else "FAIL (latency)"),
-            "relative_to_teacher": rel, "note": "; ".join(notes)}
+    for name in [k for k in res if k.startswith("head:")]:
+        pr = paired.get(f"{name} vs gemma")
+        if pr and pr["ratio"] is not None:
+            arms[name] = {"paired_ratio": pr["ratio"], "n": pr["n"], "p_vs_teacher": pr["p"],
+                          "pass": pr["ratio"] >= G1_REL and res[name]["median_decision_ms"] < G1_MS}
+    pr = paired.get(f"{primary} vs gemma")
+    rel = pr["ratio"] if pr else head["rollout_success"] / max(res["gemma"]["rollout_success"], 1e-9)
+    beats_hash = hashr is None or head["rollout_success"] > hashr["rollout_success"]
+    ok = rel >= G1_REL and fast and beats_hash
+    notes.append(f"paired head/teacher = {rel:.2f} on {pr['n'] if pr else '?'} shared races (pass >= {G1_REL}); "
+                 f"warm decision {lat:.1f} ms (pass < {G1_MS})")
+    extra = [f"{k} {v['paired_ratio']:.2f}" for k, v in arms.items() if k != primary]
+    if extra:
+        notes.append("secondary arms (exploratory): " + ", ".join(extra))
+    v = "PASS" if ok else ("FAIL (latency)" if not fast else "FAIL")
+    return {"verdict": v, "relative_to_teacher": rel, "arms": arms, "note": "; ".join(notes)}
 
 
-# ── CLI ──────────────────────────────────────────────────────────────────
+def aggregate(results_dir: Path, seeds: list[int], tag: str, out_dir: Path):
+    """Across seeds: mean, sd, 95% t-interval per policy; verdict on the mean paired ratio."""
+    import statistics
+    T95 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571}
+    runs = {}
+    for sd in seeds:
+        p = results_dir / f"g1_eval_s{sd}{tag}" / "summary.json"
+        if p.exists():
+            runs[sd] = read_json(p)
+    if not runs:
+        raise SystemExit("no g1_eval summaries found for those seeds")
+    pols = sorted({k for r in runs.values() for k in r["results"] if "rollout_success" in r["results"][k]})
+    table = {}
+    for pol in pols:
+        xs = [r["results"][pol]["rollout_success"] for r in runs.values() if pol in r["results"]]
+        m = statistics.mean(xs)
+        s_ = statistics.stdev(xs) if len(xs) > 1 else 0.0
+        h = T95.get(len(xs), 2.0) * s_ / len(xs) ** 0.5 if len(xs) > 1 else None
+        table[pol] = {"n_seeds": len(xs), "mean": m, "sd": s_, "ci95": [m - h, m + h] if h is not None else None, "per_seed": xs}
+    ratios = {}
+    for arm in [p for p in pols if p.startswith("head:")]:
+        rs = [r["paired"][f"{arm} vs gemma"]["ratio"] for r in runs.values()
+              if f"{arm} vs gemma" in r.get("paired", {}) and r["paired"][f"{arm} vs gemma"]["ratio"] is not None]
+        if rs:
+            ratios[arm] = {"mean": statistics.mean(rs), "per_seed": rs}
+    beats_hash_every_seed = all(r["results"].get("head:planck", {}).get("rollout_success", 0) >
+                                r["results"].get("head:hash", {}).get("rollout_success", 1) for r in runs.values())
+    prim = ratios.get("head:planck", {}).get("mean")
+    ok = prim is not None and prim >= G1_REL and beats_hash_every_seed
+    verdict = {"verdict": "PASS" if ok else ("INCOMPLETE" if prim is None else "FAIL"),
+               "note": f"mean paired head:planck/teacher = {prim:.2f} over {len(runs)} seeds (pass >= {G1_REL}); "
+                       f"beats head:hash in every seed: {beats_hash_every_seed}" if prim is not None else "no paired teacher ratio"}
+    summ = {"seeds": sorted(runs), "policies": table, "paired_ratio_vs_teacher": ratios, "gate": verdict}
+    write_json(out_dir / "summary.json", summ)
+    print(f"[wikirace] aggregate over seeds {sorted(runs)}:")
+    for pol, t in table.items():
+        ci = f"[{t['ci95'][0]:.3f}, {t['ci95'][1]:.3f}]" if t["ci95"] else ""
+        print(f"  {pol:<18} {t['mean']:.3f} ± {t['sd']:.3f} {ci}")
+    print(f"  GATE G1 (seeds): {verdict['verdict']}  {verdict['note']}")
+
+
 def add_cli(sub):
     p = sub.add_parser("wikirace", help="G1 offline Wikiracing pipeline")
-    p.add_argument("stage", choices=["build", "tasks", "embed", "train", "eval"])
+    p.add_argument("stage", choices=["build", "tasks", "embed", "train", "eval", "aggregate"])
     p.add_argument("--dir", default=str(WR_DIR), help="graph + embeddings (shared by every task set)")
     p.add_argument("--tag", default="", help="task-set tag, e.g. _quick: tasks in <dir>/tasks<tag>, results suffixed")
     p.add_argument("--lang", default="simple")
@@ -573,15 +736,17 @@ def add_cli(sub):
     p.add_argument("--targets", type=int, default=3000)
     p.add_argument("--starts", type=int, default=4)
     p.add_argument("--offpath", type=int, default=6)
-    p.add_argument("--encoder", default="hash", choices=["hash", "planck"])
+    p.add_argument("--encoder", default="hash", choices=["hash", "planck", "hertz"])
+    p.add_argument("--objective", default="nll", choices=["nll", "rank"])
     p.add_argument("--checkpoint", default="checkpoints/planck13/best.pt")
     p.add_argument("--tokenizer", default="data/wikipedia/tokenizer.model")
     p.add_argument("--epochs", type=int, default=6)
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--policies", default="random,lexical,head:hash,head:planck,gemma")
+    p.add_argument("--seeds", default="0,1,2", help="aggregate: comma list")
+    p.add_argument("--policies", default="random,lexical,heads,gemma", help="'heads' = every trained head")
     p.add_argument("--limit", type=int, default=0, help="eval: cap test pairs")
-    p.add_argument("--teacher-limit", type=int, default=100)
+    p.add_argument("--teacher-limit", type=int, default=300)
     p.add_argument("--gemma-path", default="models/gemma-4-e4b-it")
     p.add_argument("--no-latency", action="store_true")
     p.set_defaults(fn=_cli)
@@ -605,11 +770,14 @@ def _cli(args):
     elif args.stage == "embed":
         embed(d, args.encoder, checkpoint=args.checkpoint, tokenizer=args.tokenizer)
     elif args.stage == "train":
-        train(d, args.encoder, results / f"g1_head_{args.encoder}_s{args.seed}{args.tag}", args.epochs, args.lr,
-              args.seed, td=td)
+        key = args.encoder + ("" if args.objective == "nll" else f"-{args.objective}")
+        train(d, args.encoder, results / f"g1_head_{key}_s{args.seed}{args.tag}", args.epochs, args.lr,
+              args.seed, td=td, objective=args.objective)
     elif args.stage == "eval":
-        heads = {e: results / f"g1_head_{e}_s{args.seed}{args.tag}" / "head.pt" for e in ("hash", "planck")}
-        heads = {e: p for e, p in heads.items() if p.exists()}
+        heads = discover_heads(results, args.seed, args.tag)
         lat = None if args.no_latency or not Path(args.checkpoint).exists() else args.checkpoint
         evaluate(d, args.policies.split(","), results / f"g1_eval_s{args.seed}{args.tag}", args.limit,
-                 args.gemma_path, args.teacher_limit, heads, lat, args.tokenizer, td=td)
+                 args.gemma_path, args.teacher_limit, heads, lat, args.tokenizer, td=td,
+                 teacher_dir=results / f"g1_teacher{args.tag}")
+    elif args.stage == "aggregate":
+        aggregate(results, [int(x) for x in args.seeds.split(",")], args.tag, results / f"g1_aggregate{args.tag}")

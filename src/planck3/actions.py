@@ -19,6 +19,8 @@ PHASES = {
     "start":     {"allowed": ("LOOKUP", "SEARCH"),                          "pointer": {}},
     "store_hit": {"allowed": ("ANSWER", "SEARCH"),                          "pointer": {"ANSWER": "store"}},
     "results":   {"allowed": ("OPEN", "ABSTAIN"),                           "pointer": {"OPEN": "results"}},
+    # snippet-first: candidate values read straight off the result snippets (0 fetches)
+    "results_snip": {"allowed": ("EXTRACT", "OPEN", "ABSTAIN"), "pointer": {"EXTRACT": "spans", "OPEN": "results"}},
     "page":      {"allowed": ("EXTRACT", "OPEN", "ABSTAIN"),                "pointer": {"EXTRACT": "spans", "OPEN": "results"}},
     "extracted": {"allowed": ("ANSWER", "VERIFY", "OPEN", "ABSTAIN"),       "pointer": {"OPEN": "results"}},
     "verified":  {"allowed": ("ANSWER", "OPEN", "ABSTAIN"),                 "pointer": {"OPEN": "results"}},

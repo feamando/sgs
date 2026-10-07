@@ -252,5 +252,13 @@ def run(deep: bool, ckpt: str, tok: str, gemma: str, searxng_url: str) -> int:
     d.git()
     d.network(searxng_url)
     d.planck(ckpt, tok, deep)
+    hertz_ckpt, hertz_tok = "checkpoints/hertz/best.pt", "data/hertz12_data/tokenizer.model"
+    if Path(hertz_ckpt).exists():  # optional G1 capacity arm (-Hertz); vocab check only
+        n0 = len(d.rows)
+        d.planck(hertz_ckpt, hertz_tok, deep=False)
+        for r in d.rows[n0:]:
+            r["check"] = r["check"].replace("planck", "hertz")
+            if r["status"] == FAIL:
+                r["status"] = WARN  # optional arm: never blocks a run
     d.gemma(gemma, deep)
     return d.report()

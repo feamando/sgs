@@ -6,6 +6,7 @@ Text -> vector encoders for the Planck 3.0 heads.
              features, Planck is adding nothing (report it, don't hide it).
     planck   frozen Planck 1.3 (or any SGSLanguageModel checkpoint): mean-pooled
              post-LN hidden states (return_hidden=True), L2-normalised.
+    hertz    the same over Hertz 1.2 (640M, d_f=3700): the G1 capacity ablation.
 """
 
 import zlib
@@ -85,6 +86,8 @@ class PlanckEncoder:
 def make_encoder(name: str, **kw):
     if name == "hash":
         return HashEncoder()
-    if name == "planck":
-        return PlanckEncoder(kw["checkpoint"], kw["tokenizer"], device=kw.get("device"))
+    if name in ("planck", "hertz"):  # any SGSLanguageModel checkpoint; hertz = Hertz 1.2 (640M) ablation
+        enc = PlanckEncoder(kw["checkpoint"], kw["tokenizer"], device=kw.get("device"))
+        enc.name = name
+        return enc
     raise ValueError(f"unknown encoder {name}")

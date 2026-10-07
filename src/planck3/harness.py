@@ -18,34 +18,40 @@ from .util import content_words, norm_text
 from .web import domain_of, extract_jsonld, extract_main_text
 
 MAX_STEPS = 8
+ANSWER_THRESHOLD = 0.3  # ANSWER with p below this becomes ABSTAIN ("couldn't verify"), not a guess
 
 
 class Harness:
     def __init__(self, policy, web, store, max_steps: int = MAX_STEPS, use_store: bool = True,
-                 depth_pages: int = 0):
+                 depth_pages: int = 0, snippet_first: bool = True, answer_threshold: float = ANSWER_THRESHOLD):
         self.policy = policy
         self.web = web
         self.store = store
         self.max_steps = max_steps
         self.use_store = use_store
         self.depth_pages = depth_pages  # extra sources opened AFTER answering, only for the depth pack
+        self.snippet_first = snippet_first  # offer snippet values before any page fetch
+        self.answer_threshold = answer_threshold
 
     # ── one fact question ────────────────────────────────────────────────
     def run_fact(self, question: str, answer_type: str, entity: str | None = None,
                  attribute: str | None = None, ttl_days: float | None = None,
                  task_id: str | None = None, store_answer: bool = True) -> dict:
         st = {"phase": "start", "results": [], "spans": [], "store": [], "held": None,
-              "verified": None, "opened": set(), "history": [], "docs": []}
+              "verified": None, "opened": set(), "history": [], "docs": [], "snip_spans": []}
         calls0 = self.web.calls["search"] + self.web.calls["fetch"]
         search0 = self.web.calls["search"]
+        fetch0 = self.web.calls["fetch"]
         usage0 = dict(getattr(self.policy, "usage", {}))
         steps, ms, invalid, trajectory = 0, [], 0, []
         outcome = {"answered": False, "value": None, "p": 0.0, "source_url": None,
-                   "context": None, "verified": None, "reason": "step_cap", "from_store": False}
+                   "context": None, "verified": None, "reason": "step_cap", "from_store": False,
+                   "gated_value": None, "from_snippet": False}
 
         def finish(**kw):
             outcome.update(kw)
 
+        self._answer_type = answer_type
         while steps < self.max_steps:
             obs = self._observation(question, answer_type, st)
             t0 = time.perf_counter()
@@ -73,6 +79,7 @@ class Harness:
                                 source_url=outcome["source_url"], domain=domain_of(outcome["source_url"] or ""),
                                 context=outcome["context"], p=outcome["p"], verified=bool(outcome["verified"]),
                                 entity=entity, attribute=attribute, ttl_days=ttl_days, task_id=task_id)
+        answer_fetches = self.web.calls["fetch"] - fetch0  # what the user waits for
         outcome["depth"] = self._depth(question, entity, st)
         if store_answer:  # the knowledge graph grows with every question asked
             from .candidates import main_entity
@@ -83,12 +90,14 @@ class Harness:
         outcome.update(steps=steps, decision_ms=ms, invalid=invalid, trajectory=trajectory,
                        web_calls=self.web.calls["search"] + self.web.calls["fetch"] - calls0,
                        search_calls=self.web.calls["search"] - search0,
+                       fetch_calls=self.web.calls["fetch"] - fetch0, answer_fetch_calls=answer_fetches,
                        usage={k: usage.get(k, 0) - usage0.get(k, 0) for k in usage})
         return outcome
 
     def _observation(self, question, answer_type, st) -> dict:
         spec = PHASES[st["phase"]]
         return {"question": question, "answer_type": answer_type, "phase": st["phase"],
+                "spans_source": "search result snippets" if st["phase"] == "results_snip" else "the open page",
                 "allowed": list(spec["allowed"]), "pointer": dict(spec["pointer"]),
                 "lists": {"results": st["results"], "spans": st["spans"], "store": st["store"]},
                 "held": st["held"], "verified": st["verified"], "history": list(st["history"]),
@@ -109,6 +118,7 @@ class Harness:
         if a == "EXTRACT":
             span = dict(st["spans"][d.k])
             span["domain"] = domain_of(span["url"])
+            span["from_snippet"] = st["phase"] == "results_snip"
             st["held"], st["verified"], st["phase"] = span, None, "extracted"
             self.store.update_domain(span["domain"], True, weight=0.5)
             return False
@@ -118,6 +128,11 @@ class Harness:
             if st["verified"]:
                 self.store.update_domain(st["held"]["domain"], True)
             return False
+        if a == "ANSWER" and d.p < self.answer_threshold:
+            # a guess is worse than "I couldn't verify that": keep the value for analysis only
+            gated = st["store"][d.k]["value"] if st["phase"] == "store_hit" else (st["held"] or {}).get("value")
+            finish(answered=False, p=d.p, reason="low_confidence", gated_value=gated)
+            return True
         if a == "ANSWER":
             if st["phase"] == "store_hit":
                 f = st["store"][d.k]
@@ -126,7 +141,8 @@ class Harness:
             else:
                 h = st["held"]
                 finish(answered=True, value=h["value"], p=d.p, source_url=h["url"],
-                       context=h["context"], verified=st["verified"], reason="answer")
+                       context=h["context"], verified=st["verified"], reason="answer",
+                       from_snippet=bool(h.get("from_snippet")))
             return True
         finish(answered=False, p=d.p, reason="abstain")
         return True
@@ -139,6 +155,11 @@ class Harness:
         if not results:
             finish(answered=False, reason="no_results")
             return True
+        if self.snippet_first:
+            from .candidates import snippet_candidates
+            st["snip_spans"] = snippet_candidates(question, results, self._answer_type)
+            if st["snip_spans"]:
+                st["spans"], st["phase"] = list(st["snip_spans"]), "results_snip"
         return False
 
     def _open(self, k, st, question, answer_type, finish) -> bool:
@@ -198,7 +219,15 @@ class Harness:
                 "n_pages_read": len(st["docs"])}
 
     def _verify(self, st, question, answer_type) -> bool:
-        """Deterministic: open the most query-relevant unopened result, look for the held value."""
+        """
+        Deterministic. Free first: does a snippet from ANOTHER domain carry the same value?
+        Otherwise open the most query-relevant unopened result and look for it there.
+        """
+        held = st["held"]
+        for sp in st["snip_spans"]:
+            if is_correct(sp["value"], [held["value"]], answer_type) and \
+                    any(dom != held["domain"] for dom in sp.get("domains", [])):
+                return True
         q = set(content_words(question))
         best, best_s = None, -1.0
         for i, r in enumerate(st["results"]):
@@ -211,8 +240,7 @@ class Harness:
             return False
         st["opened"].add(best)
         spans = self._page_spans(st["results"][best], question, answer_type, st)
-        held = st["held"]["value"]
-        return any(is_correct(s["value"], [held], answer_type) for s in spans[:10])
+        return any(is_correct(s["value"], [held["value"]], answer_type) for s in spans[:10])
 
     # ── compare = composed fact cards ────────────────────────────────────
     def run_compare(self, task: dict) -> dict:

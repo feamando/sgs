@@ -186,7 +186,8 @@ def cmd_g0(args):
     web = build_web(args, log_path=run / "web_log.jsonl")
     store = Store(store_path)
     policy = make_policy(args)
-    h = Harness(policy, web, store)
+    h = Harness(policy, web, store, snippet_first=not args.no_snippet_first,
+                answer_threshold=args.answer_threshold, depth_pages=args.depth_pages)
     prices = load_prices(args.prices)
     ctx = {"h": h, "policy": policy, "web": web, "prices": prices, "traj": run / "trajectories.jsonl"}
     res_path = run / "results.jsonl"
@@ -212,6 +213,13 @@ def cmd_g0(args):
                  "gold_reachable": sum(r["gold_reachable"] for r in records) / max(len(records), 1),
                  "serp_answer_rate_at3": sum(r["serp_visible"] for r in records) / max(len(records), 1),
                  "depth_evidence_recall": sum(r["evidence_hit"] for r in records) / max(len(records), 1),
+                 "snippet_first": not args.no_snippet_first, "answer_threshold": args.answer_threshold,
+                 "mean_fetches": sum(r["fetch_calls"] for r in records) / max(len(records), 1),
+                 "mean_answer_fetches": sum(r["answer_fetch_calls"] for r in records) / max(len(records), 1),
+                 "depth_pages": args.depth_pages,
+                 "answered_from_snippet": sum(r["from_snippet"] for r in records) / max(len(records), 1),
+                 "gated_rate": sum(r["gated"] for r in records) / max(len(records), 1),
+                 "gated_would_be_correct": sum(r["gated_correct"] for r in records),
                  "graph": store.graph_stats(),
                  "cost": summarize_cost(records, prices),
                  "web_calls_network": {k: v for k, v in web.calls.items()},
@@ -313,6 +321,8 @@ def _score_fact(ctx, question, answer_type, gold, task_id, entity=None, attribut
     res["reachable"] = _gold_reachable(res, gold, answer_type)
     res["serp_visible"] = _serp_visible(res, gold, answer_type)
     res["evidence_hit"] = _evidence_hit(res, gold, answer_type)
+    res["gated"] = res["reason"] == "low_confidence"
+    res["gated_correct"] = res["gated"] and is_correct(res.get("gated_value"), gold, answer_type)
     res["cost"] = task_cost(ctx["prices"], ctx["policy"].kind, res["usage"], res["search_calls"],
                             ctx["web"].backend, res["decision_ms"])
     _log_traj(ctx["traj"], task_id, res, res["correct"], sub=sub)
@@ -332,7 +342,11 @@ def _combine(task, family, parts, extra):
            "gold_reachable": all(p["reachable"] for p in parts),
            "serp_visible": all(p["serp_visible"] for p in parts),
            "evidence_hit": all(p["evidence_hit"] for p in parts),
-           "n_passages": sum(len(p["depth"]["passages"]) for p in parts), "cost": cost}
+           "n_passages": sum(len(p["depth"]["passages"]) for p in parts), "cost": cost,
+           "fetch_calls": sum(p["fetch_calls"] for p in parts),
+           "answer_fetch_calls": sum(p["answer_fetch_calls"] for p in parts),
+           "from_snippet": all(p["from_snippet"] for p in parts),
+           "gated": any(p["gated"] for p in parts), "gated_correct": any(p["gated_correct"] for p in parts)}
     rec.update(extra)
     return rec
 
@@ -347,6 +361,9 @@ def _run_fact_task(task, ctx):
            "steps": r["steps"], "web_calls": r["web_calls"], "decision_ms": r["decision_ms"],
            "invalid": r["invalid"], "gold_reachable": r["reachable"], "serp_visible": r["serp_visible"],
            "evidence_hit": r["evidence_hit"], "n_passages": len(r["depth"]["passages"]),
+           "fetch_calls": r["fetch_calls"], "answer_fetch_calls": r["answer_fetch_calls"],
+           "from_snippet": r["from_snippet"],
+           "gated": r["gated"], "gated_correct": r["gated_correct"], "gated_value": r.get("gated_value"),
            "cost": r["cost"]}
     tag = "OK" if r["correct"] else "WRONG" if r["answered"] else "abstain"
     return rec, f"### {task['id']} ({tag})\n\n{render_card(task['question'], r)}\n"
@@ -444,7 +461,8 @@ def _print_summary(name, s):
     print(f"\n==== {name} summary ({s.get('policy')}) ====")
     for k in ("n", "success", "answered_rate", "wrong_when_answered", "ece", "mean_steps",
               "mean_web_calls", "mean_decision_ms", "n_invalid_decisions", "gold_reachable",
-              "serp_answer_rate_at3", "depth_evidence_recall"):
+              "serp_answer_rate_at3", "depth_evidence_recall", "mean_fetches", "mean_answer_fetches", "answered_from_snippet",
+              "gated_rate", "gated_would_be_correct"):
         v = s.get(k)
         print(f"  {k:<22} {v:.3f}" if isinstance(v, float) else f"  {k:<22} {v}")
     c = s.get("cost") or {}
@@ -501,8 +519,8 @@ def cmd_report(args):
     g0 = sorted(RESULTS.glob("g0_*/summary.json"))
     if g0:
         lines += ["## G0 (seed benchmark)", "",
-                  "| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | $/correct | LLM tok/task | verdict |",
-                  "|---|---|---|---|---|---|---|---|---|---|---|"]
+                  "| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | answer fetches/task | from snippet | gated | $/correct | LLM tok/task | verdict |",
+                  "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         rows = {}
         for p in g0:
             s = read_json(p)
@@ -512,7 +530,8 @@ def cmd_report(args):
             per_ok = "" if not c.get("usd_per_correct") else f"{c['usd_per_correct']:.6f}"
             lines.append(f"| {p.parent.name} | {s.get('n')} | {f('success')} | {f('answered_rate')} | "
                          f"{f('wrong_when_answered')} | {f('ece')} | {f('depth_evidence_recall')} | "
-                         f"{f('serp_answer_rate_at3')} | {per_ok} | {c.get('llm_tokens_per_task', 0):.0f} | "
+                         f"{f('serp_answer_rate_at3')} | {f('mean_answer_fetches') or f('mean_web_calls')} | {f('answered_from_snippet')} | "
+                         f"{f('gated_rate')} | {per_ok} | {c.get('llm_tokens_per_task', 0):.0f} | "
                          f"{s.get('gate', {}).get('verdict', '')} |")
         lines += ["", *_vs_rival(rows), ""]
     g1 = sorted(RESULTS.glob("g1_eval_*/summary.json"))
@@ -531,7 +550,24 @@ def cmd_report(args):
         if cold:
             lines.append(f"\nCold CPU latency (encode target + all candidate titles): median {cold['median_ms']:.0f} ms, "
                          f"p90 {cold['p90_ms']:.0f} ms, {cold['mean_candidates']:.0f} candidates on average")
+        if s.get("paired"):
+            lines += ["", "| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |",
+                      "|---|---|---|---|---|---|---|---|"]
+            for k, v in s["paired"].items():
+                other = v.get("teacher", v.get("control"))
+                ratio = "" if v.get("ratio") is None else f"{v['ratio']:.2f}"
+                lines.append(f"| {k} | {v['n']} | {v['head']:.3f} | {other:.3f} | {ratio} | {v['a_only']} | {v['b_only']} | {v['p']:.3g} |")
         lines += ["", f"**Verdict:** {s['gate']['verdict']}. {s['gate'].get('note', '')}", ""]
+    for p in sorted(RESULTS.glob("g1_aggregate*/summary.json")):
+        s = read_json(p)
+        lines += [f"## G1 across seeds ({p.parent.name}: seeds {s['seeds']})", "",
+                  "| policy | mean rollout success | sd | 95% CI | per seed |", "|---|---|---|---|---|"]
+        for pol, t in s["policies"].items():
+            ci = f"[{t['ci95'][0]:.3f}, {t['ci95'][1]:.3f}]" if t["ci95"] else ""
+            lines.append(f"| {pol} | {t['mean']:.3f} | {t['sd']:.3f} | {ci} | {', '.join(f'{x:.3f}' for x in t['per_seed'])} |")
+        for arm, r in s.get("paired_ratio_vs_teacher", {}).items():
+            lines.append(f"\n{arm}: paired ratio vs teacher {r['mean']:.2f} (per seed {', '.join(f'{x:.2f}' for x in r['per_seed'])})")
+        lines += ["", f"**Verdict (seeds):** {s['gate']['verdict']}. {s['gate']['note']}", ""]
     if not g0 and not g1:
         lines.append("No runs yet.")
     text = "\n".join(lines)
@@ -547,8 +583,8 @@ def _vs_rival(rows):
     for name, s in rows.items():
         if "_closedbook" in name or s.get("mode") == "closed_book":
             continue
-        rival = next((r for n, r in rows.items() if n.startswith(name.split("_quick")[0] + "_closedbook")
-                      and (("_quick" in n) == ("_quick" in name))), None)
+        pol = str(s.get("policy", "")).split(" ")[0]
+        rival = rows.get(f"g0_{pol}_closedbook" + ("_quick" if "_quick" in name else ""))
         if not rival:
             continue
         a, b = s.get("cost") or {}, rival.get("cost") or {}
@@ -614,6 +650,11 @@ def main():
     p.add_argument("--store", default=None, help="reuse a store across runs (G3); default = fresh per run")
     p.add_argument("--family", default=None, help="comma list: fact,compare,chat")
     p.add_argument("--sample", type=int, default=0, help="stratified subset of N tasks across families (quick runs)")
+    p.add_argument("--no-snippet-first", action="store_true", help="pages-first (the 2026-10-05 baseline behaviour)")
+    p.add_argument("--depth-pages", type=int, default=1,
+                   help="pages read AFTER answering for the depth pack (product setting: answer fast, then 1 page)")
+    p.add_argument("--answer-threshold", type=float, default=0.3,
+                   help="ANSWER with p below this abstains instead (0 disables the gate)")
     p.add_argument("--closed-book", action="store_true",
                    help="base-chat comparator: the LLM answers from its weights, no tools/sources")
     p.add_argument("--prices", default=str(REPO_ROOT / "config" / "planck3_prices.json"))

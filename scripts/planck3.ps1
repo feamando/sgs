@@ -18,8 +18,11 @@
      ask       one question:  .\scripts\planck3.ps1 ask "Who founded SpaceX?"
      digest    "For you" from your local knowledge graph (-Explore also reads adjacent entities from trusted sources)
      schedule  run "digest -Explore" daily via Windows Task Scheduler (-At 08:00); unschedule removes it
-     g0        G0: seed benchmark: Gemma on tools, Gemma closed-book (the base-chat rival), heuristic floor
-     g1        G1: Wikiracing: graph -> tasks -> embed -> heads -> eval vs random/lexical/Gemma
+     g0        G0: seed benchmark, snippet-first + confidence gate: Gemma on tools, Gemma closed-book
+               (the base-chat rival), heuristic floor (pages-first runs from 2026-10-05 stay as baseline)
+     g1        G1: Wikiracing: graph -> tasks -> embed -> heads (nll + rank) per seed (-Seeds 0,1,2)
+               -> eval vs random/lexical/Gemma (teacher on 300 races, cached) -> paired stats -> aggregate
+               -Hertz adds the Hertz 1.2 encoder arm (needs checkpoints/hertz/best.pt)
      report    every result in one table -> results/planck3/REPORT.md
      py        pass-through: .\scripts\planck3.ps1 py wikirace eval --limit 50
 
@@ -42,12 +45,14 @@ param(
     [string]$Type = "auto",
     [string]$Policy = "gemma",
     [int]$Seed = 0,
+    [string]$Seeds = "0,1,2",
     [int]$Limit = 0,
     [string]$At = "08:00",
     [switch]$Quick,
     [switch]$Deep,
     [switch]$NoPush,
     [switch]$Explore,
+    [switch]$Hertz,
     [Parameter(ValueFromRemainingArguments = $true)][string[]]$Rest
 )
 
@@ -68,6 +73,8 @@ $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
 
 $PLANCK_CKPT = "checkpoints/planck13/best.pt"
 $PLANCK_TOK  = "data/wikipedia/tokenizer.model"
+$HERTZ_CKPT  = "checkpoints/hertz/best.pt"
+$HERTZ_TOK   = "data/hertz12_data/tokenizer.model"
 $GEMMA       = "models/gemma-4-e4b-it"
 $WR          = "data/planck3/wikirace"
 $RES         = "results/planck3"
@@ -176,10 +183,10 @@ function Do-G0 {
     $pol = Get-TeacherPolicy
     if ($pol -ne $Policy) { Warn "no Gemma at $GEMMA; running the heuristic floor only (G0 verdict needs the teacher)" }
     $sample = @(); if ($Quick) { $sample = @("--sample", "12") } elseif ($Limit -gt 0) { $sample = @("--limit", "$Limit") }
-    $runs = @(@{ Name = "g0_$pol$Tag"; Args = @("--policy", $pol); What = "G0 teacher on our tools: $pol" })
+    $runs = @(@{ Name = "g0_${pol}_snip$Tag"; Args = @("--policy", $pol); What = "G0 teacher on our tools, snippet-first + confidence gate: $pol" })
     if ($pol -ne "heuristic") {
         $runs += @{ Name = "g0_${pol}_closedbook$Tag"; Args = @("--policy", $pol, "--closed-book"); What = "G0 base-chat rival: $pol closed-book (no tools, no sources)" }
-        $runs += @{ Name = "g0_heuristic$Tag"; Args = @("--policy", "heuristic"); What = "G0 heuristic floor" }
+        $runs += @{ Name = "g0_heuristic_snip$Tag"; Args = @("--policy", "heuristic"); What = "G0 heuristic floor, snippet-first" }
     }
     foreach ($r in $runs) {
         $out = "$RES/$($r.Name)"
@@ -190,6 +197,12 @@ function Do-G0 {
 }
 
 # ── G1 ───────────────────────────────────────────────────────────────────
+function Get-TasksFormat([string]$dir) {
+    if (-not (Test-Path "$dir/tasks_info.json")) { return 0 }
+    $f = (Get-Content "$dir/tasks_info.json" -Raw | ConvertFrom-Json).format
+    if ($f) { return [int]$f } else { return 1 }
+}
+
 function Do-G1 {
     # graph + embeddings are shared by the full and quick task sets
     if (-not (Test-Path "$WR/graph.npz")) { Log "G1 build: Simple English Wikipedia link graph (356 MB download)"; P3 @("wikirace", "build") }
@@ -200,27 +213,49 @@ function Do-G1 {
         Log "G1 embed: frozen Planck 1.3 over the whole graph"
         P3 @("wikirace", "embed", "--encoder", "planck", "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
     }
+    $haveHertz = $Hertz -and (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    if ($Hertz -and -not $haveHertz) { Warn "-Hertz: $HERTZ_CKPT or $HERTZ_TOK missing; skipping the Hertz arm" }
+    if ($haveHertz -and -not (Test-Path "$WR/emb_hertz.npy")) {
+        Log "G1 embed: frozen Hertz 1.2 (640M) over the whole graph (capacity ablation)"
+        P3 @("wikirace", "embed", "--encoder", "hertz", "--checkpoint", $HERTZ_CKPT, "--tokenizer", $HERTZ_TOK)
+    }
     $td = if ($Quick) { "$WR/tasks_quick" } else { $WR }
     $tagArg = if ($Quick) { @("--tag", $Tag) } else { @() }   # never pass an empty --tag value
     $tasksArgs = if ($Quick) { @("--targets", "300") } else { @() }
-    if (-not (Test-Path "$td/tasks_info.json")) { Log "G1 tasks${Tag}: BFS labels, split by target"; P3 (@("wikirace", "tasks") + $tagArg + $tasksArgs) }
-    else { Log "SKIP tasks$Tag (exists)" }
-    $encs = @("hash"); if ($havePlanck) { $encs += "planck" }
+    if ((Get-TasksFormat $td) -lt 2) {
+        # format 2 adds per-candidate BFS distances (for the rank objective); same seed = same races
+        Log "G1 tasks${Tag}: BFS labels + candidate distances, split by target"
+        P3 (@("wikirace", "tasks") + $tagArg + $tasksArgs)
+    } else { Log "SKIP tasks$Tag (format 2 exists)" }
+
+    $seedList = if ($Quick) { @(0) } else { @($Seeds.Split(",") | ForEach-Object { [int]$_.Trim() }) }
+    $arms = @(@{ Enc = "hash"; Obj = "nll" })
+    if ($havePlanck) { $arms += @{ Enc = "planck"; Obj = "nll" }; $arms += @{ Enc = "planck"; Obj = "rank" } }
+    else { Warn "no Planck checkpoint/tokenizer; G1 verdict will be INCOMPLETE" }
+    if ($haveHertz) { $arms += @{ Enc = "hertz"; Obj = "nll" }; $arms += @{ Enc = "hertz"; Obj = "rank" } }
     $epochs = if ($Quick) { @("--epochs", "2") } else { @() }
-    foreach ($e in $encs) {
-        if (-not (Test-Path "$RES/g1_head_${e}_s$Seed$Tag/head.pt")) {
-            Log "G1 train head:$e seed=$Seed$Tag"
-            P3 (@("wikirace", "train", "--encoder", $e, "--seed", "$Seed") + $tagArg + $epochs)
-        } else { Log "SKIP train head:$e s$Seed$Tag (exists)" }
+    $haveGemma = Test-Path $GEMMA
+    if (-not $haveGemma) { Warn "no Gemma teacher; G1 verdict will be INCOMPLETE" }
+    foreach ($sd in $seedList) {
+        foreach ($a in $arms) {
+            $key = if ($a.Obj -eq "nll") { $a.Enc } else { "$($a.Enc)-$($a.Obj)" }
+            if (-not (Test-Path "$RES/g1_head_${key}_s$sd$Tag/head.pt")) {
+                Log "G1 train head:$key seed=$sd$Tag"
+                P3 (@("wikirace", "train", "--encoder", $a.Enc, "--objective", $a.Obj, "--seed", "$sd") + $tagArg + $epochs)
+            } else { Log "SKIP train head:$key s$sd$Tag (exists)" }
+        }
+        $pols = "random,lexical,heads" + $(if ($haveGemma) { ",gemma" } else { "" })
+        Log "G1 eval seed=$sd${Tag}: $pols (teacher races cached after the first seed)"
+        $a = @("wikirace", "eval", "--policies", $pols, "--seed", "$sd",
+               "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK, "--gemma-path", $GEMMA) + $tagArg
+        if ($Quick) { $a += @("--limit", "100", "--teacher-limit", "20") } elseif ($Limit -gt 0) { $a += @("--limit", "$Limit") }
+        if ($sd -ne $seedList[0]) { $a += "--no-latency" }
+        P3 $a
     }
-    $pols = @("random", "lexical", "head:hash")
-    if ($havePlanck) { $pols += "head:planck" } else { Warn "no Planck checkpoint/tokenizer; G1 verdict will be INCOMPLETE" }
-    if (Test-Path $GEMMA) { $pols += "gemma" } else { Warn "no Gemma teacher; G1 verdict will be INCOMPLETE" }
-    Log "G1 eval${Tag}: $($pols -join ', ')"
-    $a = @("wikirace", "eval", "--policies", ($pols -join ","), "--seed", "$Seed",
-           "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK, "--gemma-path", $GEMMA) + $tagArg
-    if ($Quick) { $a += @("--limit", "100", "--teacher-limit", "20") } elseif ($Limit -gt 0) { $a += @("--limit", "$Limit") }
-    P3 $a
+    if ($seedList.Count -gt 1) {
+        Log "G1 aggregate over seeds $($seedList -join ',')"
+        P3 (@("wikirace", "aggregate", "--seeds", ($seedList -join ",")) + $tagArg)
+    }
 }
 
 # ── results back to git (readable from any machine) ──────────────────────
@@ -228,7 +263,7 @@ function Do-Push {
     if ($NoPush) { Log "-NoPush: results left uncommitted"; return }
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
-                       "REPORT.md", "doctor.json", "digest.md", "*.log")) {
+                       "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }

@@ -433,3 +433,131 @@ def test_doctor_probe_observations_are_valid_decision_points():
     for obs in _probe_observations():
         d = pol.decide(obs)
         validate(d, obs["phase"], {k: len(v) for k, v in obs["lists"].items()})
+
+
+# ── snippet-first + confidence gate (2026-10-07) ─────────────────────────
+class SnippetWeb(FakeWeb):
+    """Snippets that already carry the answer, from two domains about the subject, plus a distractor."""
+    def search(self, q):
+        self.calls["search"] += 1
+        return [{"url": "https://other.org/ikea-family", "title": "IKEA Family magazine", "domain": "other.org",
+                 "snippet": "The IKEA Family magazine was launched in 1995."},
+                {"url": "https://example.org/ikea", "title": "IKEA", "domain": "example.org",
+                 "snippet": "IKEA was founded in 1943 by Ingvar Kamprad."},
+                {"url": "https://mirror.net/ikea-history", "title": "IKEA history", "domain": "mirror.net",
+                 "snippet": "IKEA history: the company was founded in 1943 in Sweden."}]
+
+
+def test_snippet_first_answers_without_fetching_and_verifies_free(store):
+    pol = ScriptedLLM(['{"action": "SEARCH", "k": null, "p": 0.5}',
+                       '{"action": "EXTRACT", "k": 0, "p": 0.8}',
+                       '{"action": "VERIFY", "k": null, "p": 0.8}',
+                       '{"action": "ANSWER", "k": null, "p": 0.9}'])
+    web = SnippetWeb()
+    res = Harness(pol, web, store).run_fact("What year was IKEA founded?", "year")
+    assert res["value"] == "1943" and res["from_snippet"] and res["verified"]   # 2 domains agree: free VERIFY
+    assert res["answer_fetch_calls"] == 0                                      # nothing fetched to answer
+    assert "search result snippets" in pol.prompts[1] and "2 domains" in pol.prompts[1]
+
+
+def test_snippet_aboutness_beats_a_page_about_something_else():
+    from src.planck3.candidates import snippet_candidates
+    results = [{"url": "https://a.org/x", "title": "Netflix Animation", "snippet": "Netflix Animation was founded in 2018."},
+               {"url": "https://b.org/y", "title": "Netflix", "snippet": "Netflix was founded in 1997 in California."}]
+    c = snippet_candidates("What year was Netflix founded?", results, "year")
+    assert c[0]["value"] == "1997" and c[0]["about"] == 1.0
+
+
+def test_confidence_gate_turns_a_guess_into_abstain(store):
+    pol = ScriptedLLM(['{"action": "SEARCH", "k": null, "p": 0.5}',
+                       '{"action": "EXTRACT", "k": 0, "p": 0.1}',
+                       '{"action": "ANSWER", "k": null, "p": 0.05}'])
+    res = Harness(pol, SnippetWeb(), store, use_store=False).run_fact("What year was IKEA founded?", "year")
+    assert not res["answered"] and res["reason"] == "low_confidence" and res["gated_value"] == "1943"
+    off = ScriptedLLM(['{"action": "SEARCH", "k": null, "p": 0.5}', '{"action": "EXTRACT", "k": 0, "p": 0.1}',
+                       '{"action": "ANSWER", "k": null, "p": 0.05}'])
+    res = Harness(off, SnippetWeb(), store, use_store=False, answer_threshold=0).run_fact("What year was IKEA founded?", "year")
+    assert res["answered"]                                                      # threshold 0 disables the gate
+
+
+def test_pages_first_still_available(store):
+    h = Harness(HeuristicPolicy(), SnippetWeb(), store, snippet_first=False)
+    res = h.run_fact("What year was IKEA founded?", "year", entity="IKEA")
+    assert not res["from_snippet"] and res["answer_fetch_calls"] >= 1
+
+
+# ── G1 follow-up: distances, rank objective, paired stats, seeds ─────────
+def test_cand_dist_labels_and_rank_loss(tmp_path):
+    import torch
+    from src.planck3 import wikirace as wr
+    from src.planck3.util import read_jsonl
+    dump = tmp_path / "mini.xml.bz2"
+    _mini_dump(dump)
+    wr.build_graph(dump, tmp_path)
+    g = wr.Graph(tmp_path)
+    wr.make_tasks(tmp_path, n_targets=7, starts_per_target=2, offpath_per_target=2, seed=0,
+                  min_dist=1, max_dist=4, min_indeg=1)
+    steps = [s for sp in ("train", "val", "test") for s in read_jsonl(tmp_path / f"steps_{sp}.jsonl")]
+    for s in steps:
+        nb = g.out(s["node"]).tolist()
+        assert len(s["cand_dist"]) == len(nb)
+        assert set(s["gold"]) == {v for v, d in zip(nb, s["cand_dist"]) if d == s["dist"] - 1}
+    dist = torch.tensor([[0.0, 1.0, 3.0, -1.0]])
+    mask = torch.ones(1, 4, dtype=torch.bool)
+    good = wr.rank_loss(torch.tensor([[3.0, 2.0, 0.0, -2.0]]), dist, mask)
+    bad = wr.rank_loss(torch.tensor([[-2.0, 0.0, 2.0, 3.0]]), dist, mask)
+    assert good < bad
+
+
+def test_mcnemar_exact():
+    from src.planck3.wikirace import mcnemar
+    r = mcnemar([True] * 10 + [False] * 10, [False] * 10 + [False] * 10)
+    assert r["a_only"] == 10 and r["b_only"] == 0 and r["p"] < 0.01
+    assert mcnemar([True, False], [True, False])["p"] == 1.0
+
+
+def test_eval_reuses_teacher_cache_and_reports_paired(tmp_path, monkeypatch):
+    import json as _json
+    from src.planck3 import wikirace as wr
+    from src.planck3.encoders import HashEncoder
+    dump = tmp_path / "mini.xml.bz2"
+    _mini_dump(dump)
+    wr.build_graph(dump, tmp_path)
+    g = wr.Graph(tmp_path)
+    wr.make_tasks(tmp_path, n_targets=7, starts_per_target=2, offpath_per_target=1, seed=0,
+                  min_dist=1, max_dist=4, min_indeg=1)
+    import numpy as np
+    np.save(tmp_path / "emb_hash.npy", HashEncoder(64).encode([g.text(u) for u in range(g.n)]))
+    pairs = [_json.loads(l) for l in open(tmp_path / "pairs_test.jsonl", encoding="utf-8")]
+    tdir = tmp_path / "teacher"
+    tdir.mkdir()
+    with open(tdir / "pairs_gemma.jsonl", "w", encoding="utf-8") as f:   # pretend the teacher already ran
+        for i, p in enumerate(pairs):
+            f.write(_json.dumps({"i": i, "start": p["start"], "target": p["target"], "dist": p["dist"],
+                                 "ok": i % 2 == 0, "steps": p["dist"], "ms": 200.0}) + "\n")
+    monkeypatch.setattr(wr, "GemmaWR", lambda *a, **k: (_ for _ in ()).throw(AssertionError("teacher must not run")))
+    wr.train(tmp_path, "hash", tmp_path / "results" / "g1_head_hash_s0", epochs=1, lr=1e-3, seed=0)
+    heads = {"hash": tmp_path / "results" / "g1_head_hash_s0" / "head.pt"}
+    out = tmp_path / "eval"
+    wr.evaluate(tmp_path, ["random", "lexical", "heads", "gemma"], out, 0, "unused", len(pairs), heads,
+                None, None, teacher_dir=tdir)
+    s = _json.loads((out / "summary.json").read_text(encoding="utf-8"))
+    assert s["results"]["gemma"]["cached"] is True
+    assert "head:hash vs gemma" in s["paired"] and "head:hash vs lexical" in s["paired"]
+    assert (out / "pairs_head_hash.jsonl").exists()
+
+
+def test_aggregate_over_seeds(tmp_path):
+    import json as _json
+    from src.planck3 import wikirace as wr
+    for sd, (pl, hs, ratio) in enumerate([(0.21, 0.15, 0.70), (0.23, 0.14, 0.77), (0.22, 0.16, 0.73)]):
+        d = tmp_path / f"g1_eval_s{sd}"
+        d.mkdir()
+        (d / "summary.json").write_text(_json.dumps({
+            "results": {"head:planck": {"rollout_success": pl}, "head:hash": {"rollout_success": hs},
+                        "gemma": {"rollout_success": 0.30}},
+            "paired": {"head:planck vs gemma": {"ratio": ratio}}}), encoding="utf-8")
+    wr.aggregate(tmp_path, [0, 1, 2], "", tmp_path / "agg")
+    s = _json.loads((tmp_path / "agg" / "summary.json").read_text(encoding="utf-8"))
+    assert abs(s["policies"]["head:planck"]["mean"] - 0.22) < 1e-9 and s["policies"]["head:planck"]["ci95"]
+    assert s["gate"]["verdict"] == "FAIL" and abs(s["paired_ratio_vs_teacher"]["head:planck"]["mean"] - 0.7333) < 1e-3
