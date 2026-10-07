@@ -57,7 +57,7 @@
     {
       "status": "OK",
       "check": "disk free",
-      "detail": "666 GB",
+      "detail": "662 GB",
       "fix": ""
     },
     {
@@ -79,10 +79,10 @@
       "fix": ""
     },
     {
-      "status": "WARN",
+      "status": "OK",
       "check": "searxng",
-      "detail": "not running",
-      "fix": ".\\scripts\\planck3.ps1 searxng"
+      "detail": "http://localhost:8888 up",
+      "fix": ""
     },
     {
       "status": "OK",
@@ -93,7 +93,7 @@
     {
       "status": "OK",
       "check": "planck embed speed",
-      "detail": "9,392 texts/s on cuda (~30 s for the G1 graph)",
+      "detail": "9,044 texts/s on cuda (~31 s for the G1 graph)",
       "fix": ""
     },
     {
@@ -111,7 +111,7 @@
     {
       "status": "OK",
       "check": "gemma typed decisions",
-      "detail": "3/3 valid, 1839 ms/decision",
+      "detail": "3/3 valid, 1765 ms/decision",
       "fix": ""
     },
     {
@@ -122,9 +122,9 @@
     }
   ],
   "measured": {
-    "planck_embed_s_per_text": 0.000106468554690764,
-    "gemma_ms_per_decision": 1839.3937333021313,
-    "gemma_ms_closed_book": 392.3026999691501
+    "planck_embed_s_per_text": 0.000110565918021166,
+    "gemma_ms_per_decision": 1764.5889999888216,
+    "gemma_ms_closed_book": 392.0014000032097
   },
   "eta": [
     [
@@ -149,7 +149,7 @@
     ],
     [
       "g1 planck embed",
-      "~30 s"
+      "~31 s"
     ],
     [
       "g1 train heads",

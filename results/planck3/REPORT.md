@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-07 18:31)
+# Planck 3.0 results (2026-10-07 22:05)
 
 ## G0 (seed benchmark)
 
@@ -12,20 +12,26 @@
 | g0_heuristic | 47 | 0.617 | 0.979 | 0.370 | 0.132 | 1.000 | 0.851 | 2.702 |  |  | 0.000000 | 0 | BASELINE |
 | g0_heuristic_quick | 12 | 0.250 | 0.833 | 0.700 | 0.278 | 0.667 | 0.417 | 3.917 |  |  | 0.000000 | 0 | BASELINE |
 | g0_heuristic_snip | 47 | 0.936 | 1.000 | 0.064 | 0.057 | 0.957 | 0.851 | 0.021 | 0.830 | 0.000 | 0.000000 | 0 | BASELINE |
-| g0_planck-g2-hash | 47 | 0.000 | 0.021 | 1.000 | 0.843 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-hash | 47 | 0.021 | 0.021 | 0.000 | 0.507 | 0.851 | 0.553 | 2.617 | 0.000 | 0.000 | 0.000006 | 0 | G2 (rule B) |
 | g0_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
-| g0_planck-g2-planck | 47 | 0.021 | 0.021 | 0.000 | 0.286 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 | 0.000098 | 0 | G2 (rule B) |
+| g0_planck-g2-hash_wikipedia | 47 | 0.000 | 0.021 | 1.000 | 0.843 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck | 47 | 0.021 | 0.106 | 0.800 | 0.431 | 0.851 | 0.574 | 2.574 | 0.043 | 0.000 | 0.000128 | 0 | G2 (rule B) |
 | g0_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck_wikipedia | 47 | 0.021 | 0.021 | 0.000 | 0.286 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 | 0.000098 | 0 | G2 (rule B) |
 | g0f_gemma_closedbook | 143 | 0.049 | 0.986 | 0.950 | 0.950 |  |  | 0.000 |  |  | 0.002297 | 75 | COMPARATOR |
 | g0f_gemma_closedbook_quick | 12 | 0.000 | 1.000 | 1.000 | 1.000 |  |  | 0.000 |  |  |  | 110 | COMPARATOR |
-| g0f_gemma_snip | 143 | 0.140 | 0.210 | 0.333 | 0.253 | 0.252 | 0.189 | 0.056 | 0.210 | 0.014 | 0.020229 | 2607 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip | 143 | 0.196 | 0.294 | 0.333 | 0.257 | 0.322 | 0.273 | 0.042 | 0.294 | 0.014 | 0.015155 | 2737 | ROUND 3 (rules A/B) |
 | g0f_gemma_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.267 | 0.750 | 0.917 | 0.000 | 1.000 | 0.000 | 0.007831 | 4830 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip_wikipedia | 143 | 0.140 | 0.210 | 0.333 | 0.253 | 0.252 | 0.189 | 0.056 | 0.210 | 0.014 | 0.020229 | 2607 | ROUND 3 (rules A/B) |
 | g0f_heuristic_snip | 143 | 0.154 | 0.797 | 0.807 | 0.510 | 0.273 | 0.189 | 0.755 | 0.259 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
 | g0f_heuristic_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.302 | 0.750 | 0.917 | 0.250 | 0.833 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
-| g0f_planck-g2-hash | 143 | 0.007 | 0.042 | 0.833 | 0.377 | 0.287 | 0.189 | 1.958 | 0.014 | 0.000 | 0.000016 | 0 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip_wikipedia | 143 | 0.154 | 0.797 | 0.807 | 0.510 | 0.273 | 0.189 | 0.755 | 0.259 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash | 143 | 0.021 | 0.063 | 0.667 | 0.358 | 0.287 | 0.189 | 1.951 | 0.028 | 0.000 | 0.000005 | 0 | ROUND 3 (rules A/B) |
 | g0f_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
-| g0f_planck-g2-planck | 143 | 0.098 | 0.182 | 0.462 | 0.241 | 0.287 | 0.189 | 1.734 | 0.112 | 0.000 | 0.000015 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash_wikipedia | 143 | 0.007 | 0.042 | 0.833 | 0.377 | 0.287 | 0.189 | 1.958 | 0.014 | 0.000 | 0.000016 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck | 143 | 0.091 | 0.189 | 0.519 | 0.287 | 0.287 | 0.189 | 1.706 | 0.133 | 0.000 | 0.000020 | 0 | ROUND 3 (rules A/B) |
 | g0f_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck_wikipedia | 143 | 0.098 | 0.182 | 0.462 | 0.241 | 0.287 | 0.189 | 1.734 | 0.112 | 0.000 | 0.000015 | 0 | ROUND 3 (rules A/B) |
 
 **g0_gemma vs base chat:** success 0.681 vs 0.957 (0.71x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 79.8x MORE expensive (5486 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0_gemma_quick vs base chat:** success 0.667 vs 1.000 (0.67x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 87.7x MORE expensive (9337 vs 136 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
@@ -33,18 +39,24 @@
 **g0_heuristic vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 8567.8x cheaper.
 **g0_heuristic_quick vs base chat:** success 0.250 vs 1.000 (0.25x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 3112.9x cheaper.
 **g0_heuristic_snip vs base chat:** success 0.936 vs 0.957 (0.98x); depth evidence 0.957 vs none (base chat shows no sources); cost per correct 113295.6x cheaper.
-**g0_planck-g2-hash vs base chat:** success 0.000 vs 0.957 (0.00x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-hash vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 17.2x cheaper.
 **g0_planck-g2-hash_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
-**g0_planck-g2-planck vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.1x cheaper.
+**g0_planck-g2-hash_wikipedia vs base chat:** success 0.000 vs 0.957 (0.00x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-planck vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.2x MORE expensive (0 vs 82 LLM tokens/task).
 **g0_planck-g2-planck_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
-**g0f_gemma_snip vs base chat:** success 0.140 vs 0.049 (2.86x); depth evidence 0.252 vs none (base chat shows no sources); cost per correct 8.8x MORE expensive (2607 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_planck-g2-planck_wikipedia vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.1x cheaper.
+**g0f_gemma_snip vs base chat:** success 0.196 vs 0.049 (4.00x); depth evidence 0.322 vs none (base chat shows no sources); cost per correct 6.6x MORE expensive (2737 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0f_gemma_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
-**g0f_heuristic_snip vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69225.3x cheaper.
+**g0f_gemma_snip_wikipedia vs base chat:** success 0.140 vs 0.049 (2.86x); depth evidence 0.252 vs none (base chat shows no sources); cost per correct 8.8x MORE expensive (2607 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_heuristic_snip vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69915.6x cheaper.
 **g0f_heuristic_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
-**g0f_planck-g2-hash vs base chat:** success 0.007 vs 0.049 (0.14x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 146.9x cheaper.
+**g0f_heuristic_snip_wikipedia vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69225.3x cheaper.
+**g0f_planck-g2-hash vs base chat:** success 0.021 vs 0.049 (0.43x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 440.8x cheaper.
 **g0f_planck-g2-hash_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
-**g0f_planck-g2-planck vs base chat:** success 0.098 vs 0.049 (2.00x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 151.3x cheaper.
+**g0f_planck-g2-hash_wikipedia vs base chat:** success 0.007 vs 0.049 (0.14x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 146.9x cheaper.
+**g0f_planck-g2-planck vs base chat:** success 0.091 vs 0.049 (1.86x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 112.8x cheaper.
 **g0f_planck-g2-planck_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2-planck_wikipedia vs base chat:** success 0.098 vs 0.049 (2.00x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 151.3x cheaper.
 
 ### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)
 
@@ -52,21 +64,25 @@
 |---|---|
 | g0f_gemma_closedbook | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.084 (n=83, wrong 0.915) |
 | g0f_gemma_closedbook_quick | fresh: 0.000 (n=6, wrong 1.000) | long_tail: 0.000 (n=6, wrong 1.000) |
-| g0f_gemma_snip | fresh: 0.033 (n=60, wrong 0.600) | long_tail: 0.217 (n=83, wrong 0.280) |
+| g0f_gemma_snip | fresh: 0.083 (n=60, wrong 0.545) | long_tail: 0.277 (n=83, wrong 0.258) |
 | g0f_gemma_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_gemma_snip_wikipedia | fresh: 0.033 (n=60, wrong 0.600) | long_tail: 0.217 (n=83, wrong 0.280) |
 | g0f_heuristic_snip | fresh: 0.083 (n=60, wrong 0.909) | long_tail: 0.205 (n=83, wrong 0.712) |
 | g0f_heuristic_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
-| g0f_planck-g2-hash | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.012 (n=83, wrong 0.800) |
+| g0f_heuristic_snip_wikipedia | fresh: 0.083 (n=60, wrong 0.909) | long_tail: 0.205 (n=83, wrong 0.712) |
+| g0f_planck-g2-hash | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.036 (n=83, wrong 0.667) |
 | g0f_planck-g2-hash_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
-| g0f_planck-g2-planck | fresh: 0.017 (n=60, wrong 0.900) | long_tail: 0.157 (n=83, wrong 0.188) |
+| g0f_planck-g2-hash_wikipedia | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.012 (n=83, wrong 0.800) |
+| g0f_planck-g2-planck | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.157 (n=83, wrong 0.480) |
 | g0f_planck-g2-planck_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
+| g0f_planck-g2-planck_wikipedia | fresh: 0.017 (n=60, wrong 0.900) | long_tail: 0.157 (n=83, wrong 0.188) |
 
 ## G2 heads (learned from known answers)
 
 | head | train points | val points with a right candidate | learned choice accuracy | deterministic ranker | 'none' correct (points without one) | val ECE | answer accuracy when p >= 0.5 |
 |---|---|---|---|---|---|---|---|
-| g2_head_hash_s0 | 2542 | 133 | 0.519 | 0.398 | 0.904 (146) | 0.058 | 0.812 |
-| g2_head_planck_s0 | 2542 | 133 | 0.594 | 0.398 | 0.897 (146) | 0.059 | 0.738 |
+| g2_head_hash_s0 | 2546 | 126 | 0.476 | 0.365 | 0.856 (153) | 0.050 | 0.724 |
+| g2_head_planck_s0 | 2546 | 126 | 0.603 | 0.365 | 0.837 (153) | 0.057 | 0.708 |
 
 ## G1 Wikiracing (g1_eval_s0)
 
@@ -164,15 +180,15 @@ Cold CPU latency (encode target + all candidate titles): median 101 ms, p90 584 
 | policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
 |---|---|---|---|---|---|---|
 | random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
-| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
-| head:hash | 1200 | 0.108 | 1.208 | 0.580 | 0.105 | 0.565 |
-| head:hertz-rank | 1200 | 0.247 | 1.296 | 0.642 | 0.118 | 0.745 |
-| head:hertz | 1200 | 0.190 | 1.312 | 0.626 | 0.094 | 0.713 |
-| head:planck-rank | 1200 | 0.235 | 1.275 | 0.636 | 0.104 | 0.452 |
-| head:planck | 1200 | 0.224 | 1.288 | 0.635 | 0.112 | 0.432 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.015 |
+| head:hash | 1200 | 0.108 | 1.208 | 0.580 | 0.105 | 0.589 |
+| head:hertz-rank | 1200 | 0.247 | 1.296 | 0.642 | 0.118 | 0.781 |
+| head:hertz | 1200 | 0.190 | 1.312 | 0.626 | 0.094 | 0.720 |
+| head:planck-rank | 1200 | 0.235 | 1.275 | 0.636 | 0.104 | 0.489 |
+| head:planck | 1200 | 0.224 | 1.288 | 0.635 | 0.112 | 0.437 |
 | gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
 
-Cold CPU latency (encode target + all candidate titles): median 84 ms, p90 280 ms, 20 candidates on average
+Cold CPU latency (encode target + all candidate titles): median 84 ms, p90 287 ms, 20 candidates on average
 
 | paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
 |---|---|---|---|---|---|---|---|
@@ -202,11 +218,11 @@ Cold CPU latency (encode target + all candidate titles): median 84 ms, p90 280 m
 |---|---|---|---|---|---|---|
 | random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
 | lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
-| head:hash | 1200 | 0.111 | 1.239 | 0.587 | 0.120 | 0.604 |
-| head:hertz-rank | 1200 | 0.239 | 1.288 | 0.644 | 0.103 | 0.717 |
+| head:hash | 1200 | 0.111 | 1.239 | 0.587 | 0.120 | 0.616 |
+| head:hertz-rank | 1200 | 0.239 | 1.288 | 0.644 | 0.103 | 0.731 |
 | head:hertz | 1200 | 0.208 | 1.305 | 0.621 | 0.096 | 0.714 |
-| head:planck-rank | 1200 | 0.230 | 1.296 | 0.633 | 0.102 | 0.443 |
-| head:planck | 1200 | 0.207 | 1.253 | 0.632 | 0.090 | 0.432 |
+| head:planck-rank | 1200 | 0.230 | 1.296 | 0.633 | 0.102 | 0.446 |
+| head:planck | 1200 | 0.207 | 1.253 | 0.632 | 0.090 | 0.442 |
 | gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
 
 | paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
@@ -238,10 +254,10 @@ Cold CPU latency (encode target + all candidate titles): median 84 ms, p90 280 m
 | random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
 | lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
 | head:hash | 1200 | 0.102 | 1.221 | 0.580 | 0.118 | 0.587 |
-| head:hertz-rank | 1200 | 0.225 | 1.270 | 0.641 | 0.126 | 0.694 |
-| head:hertz | 1200 | 0.196 | 1.248 | 0.634 | 0.088 | 0.734 |
-| head:planck-rank | 1200 | 0.241 | 1.322 | 0.635 | 0.099 | 0.450 |
-| head:planck | 1200 | 0.223 | 1.306 | 0.629 | 0.095 | 0.431 |
+| head:hertz-rank | 1200 | 0.225 | 1.270 | 0.641 | 0.126 | 0.712 |
+| head:hertz | 1200 | 0.196 | 1.248 | 0.634 | 0.088 | 0.736 |
+| head:planck-rank | 1200 | 0.241 | 1.322 | 0.635 | 0.099 | 0.452 |
+| head:planck | 1200 | 0.223 | 1.306 | 0.629 | 0.095 | 0.438 |
 | gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
 
 | paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |

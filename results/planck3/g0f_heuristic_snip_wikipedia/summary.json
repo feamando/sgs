@@ -1,0 +1,94 @@
+{
+  "n": 143,
+  "success": 0.15384615384615385,
+  "answered_rate": 0.7972027972027972,
+  "wrong_when_answered": 0.8070175438596491,
+  "abstain_rate": 0.2027972027972028,
+  "ece": 0.5102990584811359,
+  "mean_steps": 4.328671328671328,
+  "mean_web_calls": 2.7902097902097904,
+  "mean_decision_ms": 0.08492617226944506,
+  "by_family": {
+    "chat": {
+      "n": 8,
+      "success": 0.125
+    },
+    "fact": {
+      "n": 135,
+      "success": 0.15555555555555556
+    }
+  },
+  "by_regime": {
+    "fresh": {
+      "n": 60,
+      "success": 0.08333333333333333,
+      "wrong_when_answered": 0.9090909090909091
+    },
+    "long_tail": {
+      "n": 83,
+      "success": 0.20481927710843373,
+      "wrong_when_answered": 0.711864406779661
+    }
+  },
+  "policy": "heuristic",
+  "search": "wikipedia",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.3916083916083916,
+  "serp_answer_rate_at3": 0.1888111888111888,
+  "depth_evidence_recall": 0.2727272727272727,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.7412587412587412,
+  "mean_answer_fetches": 0.7552447552447552,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.25874125874125875,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 121,
+    "passages": 626,
+    "entities": 1750,
+    "edges": 1783,
+    "queries": 151,
+    "domains": 1
+  },
+  "cost": {
+    "usd_per_task": 5.1057984299520675e-09,
+    "usd_per_correct": 3.318768979468844e-08,
+    "usd_per_1k_tasks": 5.105798429952067e-06,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 150,
+    "fetch": 249,
+    "search_net": 1,
+    "fetch_net": 93,
+    "search_empty_primary": 0,
+    "search_fallback": 0,
+    "search_empty_final": 1
+  },
+  "search_health": {
+    "searches": 150,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.006666666666666667,
+    "valid": true
+  },
+  "wall_s": 115.3,
+  "store_facts": 121,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.9868421052631579,
+      74.0
+    ]
+  ],
+  "gate": {
+    "verdict": "ROUND 3 (rules A/B)",
+    "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"
+  }
+}

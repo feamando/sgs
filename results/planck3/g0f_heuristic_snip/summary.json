@@ -7,7 +7,7 @@
   "ece": 0.5102990584811359,
   "mean_steps": 4.328671328671328,
   "mean_web_calls": 2.7902097902097904,
-  "mean_decision_ms": 0.08492617226944506,
+  "mean_decision_ms": 0.0840877244844792,
   "by_family": {
     "chat": {
       "n": 8,
@@ -55,9 +55,9 @@
     "domains": 1
   },
   "cost": {
-    "usd_per_task": 5.1057984299520675e-09,
-    "usd_per_correct": 3.318768979468844e-08,
-    "usd_per_1k_tasks": 5.105798429952067e-06,
+    "usd_per_task": 5.0553905842941555e-09,
+    "usd_per_correct": 3.286003879791201e-08,
+    "usd_per_1k_tasks": 5.055390584294155e-06,
     "llm_tokens_per_task": 0.0,
     "priced_as": "claude-haiku-4-5",
     "prices_as_of": "2026-09-29"
@@ -66,7 +66,7 @@
     "search": 150,
     "fetch": 249,
     "search_net": 1,
-    "fetch_net": 93,
+    "fetch_net": 0,
     "search_empty_primary": 0,
     "search_fallback": 0,
     "search_empty_final": 1
@@ -78,7 +78,7 @@
     "final_empty_rate": 0.006666666666666667,
     "valid": true
   },
-  "wall_s": 115.3,
+  "wall_s": 65.2,
   "store_facts": 121,
   "top_domains": [
     [

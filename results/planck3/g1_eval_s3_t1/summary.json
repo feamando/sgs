@@ -14,8 +14,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.14416666666666667,
       "mean_steps_over_optimal": 1.2314065510597303,
-      "median_decision_ms": 0.014199991710484028,
-      "wall_s": 0.4,
+      "median_decision_ms": 0.015049998182803392,
+      "wall_s": 0.5,
       "cached": false,
       "step_top1": 0.4633333333333333,
       "step_ece": 0.1279441839448021
@@ -24,8 +24,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.10833333333333334,
       "mean_steps_over_optimal": 1.2084615384615385,
-      "median_decision_ms": 0.5649999948218465,
-      "wall_s": 6.7,
+      "median_decision_ms": 0.5888000596314669,
+      "wall_s": 6.8,
       "cached": false,
       "step_top1": 0.5801666666666667,
       "step_ece": 0.10515081967646259
@@ -34,8 +34,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.2475,
       "mean_steps_over_optimal": 1.2960157126823795,
-      "median_decision_ms": 0.7445499650202692,
-      "wall_s": 11.6,
+      "median_decision_ms": 0.7806000066921115,
+      "wall_s": 11.8,
       "cached": false,
       "step_top1": 0.6416666666666667,
       "step_ece": 0.1178228660363238
@@ -44,8 +44,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.19,
       "mean_steps_over_optimal": 1.3119883040935671,
-      "median_decision_ms": 0.7133999606594443,
-      "wall_s": 10.3,
+      "median_decision_ms": 0.7204500143416226,
+      "wall_s": 10.4,
       "cached": false,
       "step_top1": 0.6263333333333333,
       "step_ece": 0.09420771211859151
@@ -54,8 +54,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.235,
       "mean_steps_over_optimal": 1.274645390070922,
-      "median_decision_ms": 0.45234995195642114,
-      "wall_s": 5.5,
+      "median_decision_ms": 0.48889999743551016,
+      "wall_s": 5.8,
       "cached": false,
       "step_top1": 0.6358333333333334,
       "step_ece": 0.10361133427917955
@@ -64,7 +64,7 @@
       "n_pairs": 1200,
       "rollout_success": 0.22416666666666665,
       "mean_steps_over_optimal": 1.2882899628252789,
-      "median_decision_ms": 0.43224997352808714,
+      "median_decision_ms": 0.43685006676241755,
       "wall_s": 5.0,
       "cached": false,
       "step_top1": 0.6346666666666667,
@@ -79,8 +79,8 @@
       "cached": true
     },
     "latency_cpu_cold": {
-      "median_ms": 83.72754999436438,
-      "p90_ms": 280.18167999107396,
+      "median_ms": 83.85400002589449,
+      "p90_ms": 287.13865006575367,
       "mean_candidates": 19.8
     }
   },

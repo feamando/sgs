@@ -1,13 +1,13 @@
 {
   "n": 47,
-  "success": 0.0,
+  "success": 0.02127659574468085,
   "answered_rate": 0.02127659574468085,
-  "wrong_when_answered": 1.0,
+  "wrong_when_answered": 0.0,
   "abstain_rate": 0.9787234042553191,
-  "ece": 0.842789351940155,
-  "mean_steps": 5.382978723404255,
-  "mean_web_calls": 5.361702127659575,
-  "mean_decision_ms": 1.9342011874247151,
+  "ece": 0.5066465377807616,
+  "mean_steps": 5.340425531914893,
+  "mean_web_calls": 5.25531914893617,
+  "mean_decision_ms": 1.822695221874373,
   "by_family": {
     "chat": {
       "n": 6,
@@ -19,14 +19,14 @@
     },
     "fact": {
       "n": 37,
-      "success": 0.0
+      "success": 0.02702702702702703
     }
   },
   "by_regime": {
     "seed": {
       "n": 47,
-      "success": 0.0,
-      "wrong_when_answered": 1.0
+      "success": 0.02127659574468085,
+      "wrong_when_answered": 0.0
     }
   },
   "policy": "planck",
@@ -34,50 +34,50 @@
   "net": "live",
   "tasks": "scripts/assets/planck3_tasks.json",
   "n_invalid_decisions": 0,
-  "gold_reachable": 0.9787234042553191,
-  "serp_answer_rate_at3": 0.574468085106383,
+  "gold_reachable": 0.9574468085106383,
+  "serp_answer_rate_at3": 0.5531914893617021,
   "depth_evidence_recall": 0.851063829787234,
   "snippet_first": true,
   "answer_threshold": 0.3,
-  "mean_fetches": 4.0212765957446805,
-  "mean_answer_fetches": 2.6808510638297873,
+  "mean_fetches": 3.9361702127659575,
+  "mean_answer_fetches": 2.617021276595745,
   "depth_pages": 1,
   "answered_from_snippet": 0.0,
   "gated_rate": 0.0,
   "gated_would_be_correct": 0,
   "graph": {
     "facts": 1,
-    "passages": 260,
+    "passages": 262,
     "entities": 626,
     "edges": 630,
     "queries": 63,
     "domains": 1
   },
   "cost": {
-    "usd_per_task": 1.4460783109292345e-07,
-    "usd_per_correct": null,
-    "usd_per_1k_tasks": 0.00014460783109292345,
+    "usd_per_task": 1.35194001386072e-07,
+    "usd_per_correct": 6.354118065145384e-06,
+    "usd_per_1k_tasks": 0.00013519400138607202,
     "llm_tokens_per_task": 0.0,
     "priced_as": "claude-haiku-4-5",
     "prices_as_of": "2026-09-29"
   },
   "web_calls_network": {
-    "search": 63,
-    "fetch": 189,
-    "search_net": 29,
-    "fetch_net": 77,
+    "search": 62,
+    "fetch": 185,
+    "search_net": 0,
+    "fetch_net": 0,
     "search_empty_primary": 0,
     "search_fallback": 0,
     "search_empty_final": 0
   },
   "search_health": {
-    "searches": 63,
+    "searches": 62,
     "primary_empty_rate": 0.0,
     "fallback_rate": 0.0,
     "final_empty_rate": 0.0,
     "valid": true
   },
-  "wall_s": 113.1,
+  "wall_s": 64.3,
   "store_facts": 1,
   "top_domains": [
     [

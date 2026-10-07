@@ -50,12 +50,10 @@
 **In what year was Marie Curie born?**
   I couldn't verify an answer (abstain).
 
-### f11 (WRONG)
+### f11 (abstain)
 
 **In what year was Ada Lovelace born?**
-  **1984**  (confidence 84%, single source)
-  "Hannah Mary Fry (born 21 February 1984) is a British mathematician, author and broadcaster."
-  Source: https://en.wikipedia.org/wiki/Hannah_Fry (en.wikipedia.org)
+  I couldn't verify an answer (abstain).
 
 ### f12 (abstain)
 
@@ -152,10 +150,12 @@
 **Who wrote the novel One Hundred Years of Solitude?**
   I couldn't verify an answer (abstain).
 
-### e06 (abstain)
+### e06 (OK)
 
 **Who founded SpaceX?**
-  I couldn't verify an answer (abstain).
+  **Musk**  (confidence 49%, single source)
+  "In February 2026 it became a subsidiary of spaceflight company SpaceX, also founded by Musk."
+  Source: https://en.wikipedia.org/wiki/SpaceXAI (en.wikipedia.org)
 
 ### e07 (abstain)
 
@@ -236,7 +236,9 @@ abstain: I couldn't find an answer I'd trust for that. (searched for: "When was 
 ### ch02 (chat)
 **user:** Who founded SpaceX?  
 _(asked: Who founded SpaceX? · entity · NEW)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "Who founded SpaceX?")
+OK: Not sure, but possibly **Musk** (from memory).
+> In February 2026 it became a subsidiary of spaceflight company SpaceX, also founded by Musk.
+Source: en.wikipedia.org · confidence 49%
 
 **user:** When was it founded?  
 _(asked: When was SpaceX founded? · year · PRONOUN)_  

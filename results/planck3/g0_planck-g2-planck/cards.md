@@ -40,20 +40,26 @@
 **What year was HelloFresh founded?**
   I couldn't verify an answer (abstain).
 
-### f09 (abstain)
+### f09 (WRONG)
 
 **In what year was Albert Einstein born?**
-  I couldn't verify an answer (abstain).
+  **1955**  (confidence 52%, single source)
+  "Albert Einstein (14 March 1879 – 18 April 1955) was a German- born theoretical physicist best known for developing the theory of relativity."
+  Source: https://en.wikipedia.org/wiki/Albert_Einstein (en.wikipedia.org)
 
-### f10 (abstain)
+### f10 (WRONG)
 
 **In what year was Marie Curie born?**
-  I couldn't verify an answer (abstain).
+  **1993**  (confidence 51%, single source)
+  "Ailsa Davidson (born August 28, 1993) is a Scottish actress."
+  Source: https://en.wikipedia.org/wiki/Ailsa_Davidson (en.wikipedia.org)
 
-### f11 (abstain)
+### f11 (WRONG)
 
 **In what year was Ada Lovelace born?**
-  I couldn't verify an answer (abstain).
+  **1984**  (confidence 83%, single source)
+  "Hannah Mary Fry (born 21 February 1984) is a British mathematician, author and broadcaster."
+  Source: https://en.wikipedia.org/wiki/Hannah_Fry (en.wikipedia.org)
 
 ### f12 (abstain)
 
@@ -175,15 +181,17 @@
 **What is the largest planet in the Solar System?**
   I couldn't verify an answer (abstain).
 
-### e11 (abstain)
+### e11 (WRONG)
 
 **Who painted the Mona Lisa?**
-  I couldn't verify an answer (abstain).
+  **Max von Schillings**  (confidence 48%, single source)
+  "31, is a 1915 opera by the German composer Max von Schillings on a libretto by Beatrice von Dovsky."
+  Source: https://en.wikipedia.org/wiki/Mona_Lisa_%28opera%29 (en.wikipedia.org)
 
 ### e12 (OK)
 
 **Who developed the theory of general relativity?**
-  **Einstein**  (confidence 71%, single source)
+  **Einstein**  (confidence 82%, single source)
   "General relativity is a theory of gravitation developed by Einstein in the years 1907–1915."
   Source: https://en.wikipedia.org/wiki/Theory_of_relativity (en.wikipedia.org)
 

@@ -170,12 +170,10 @@
 **Who won the 2026 Osaka gubernatorial election?**
   I couldn't verify an answer (abstain).
 
-### belection004 (WRONG)
+### belection004 (abstain)
 
 **Who won the 2026 Croydon mayoral election?**
-  **Party**  (confidence 42%, single source)
-  "Party | Conservative | Labour | Green"
-  Source: https://en.wikipedia.org/wiki/2026_Croydon_mayoral_election (en.wikipedia.org)
+  I couldn't verify an answer (abstain).
 
 ### belection005 (abstain)
 
@@ -302,12 +300,10 @@
 **Who became head of government of Bonnières-sur-Seine in 2026?**
   I couldn't verify an answer (abstain).
 
-### bfounded000 (OK)
+### bfounded000 (abstain)
 
 **In what year was RenoNorden, Norwegian waste collection company founded?**
-  **2000**  (confidence 47%, single source)
-  "The company was founded by Svein Morten Sørensen in 2000."
-  Source: https://en.wikipedia.org/wiki/RenoNorden (en.wikipedia.org)
+  I couldn't verify an answer (abstain).
 
 ### bfounded001 (abstain)
 
@@ -344,12 +340,10 @@
 **In what year was Banijay Group, French entertainment company founded?**
   I couldn't verify an answer (abstain).
 
-### bfounded008 (WRONG)
+### bfounded008 (abstain)
 
 **In what year was Manufacture Modules Technologies founded?**
-  **1954**  (confidence 43%, single source)
-  "was founded in Bangalore, Karnataka, India in 1954."
-  Source: https://en.wikipedia.org/wiki/Bharat_Electronics (en.wikipedia.org)
+  I couldn't verify an answer (abstain).
 
 ### bfounded009 (abstain)
 
@@ -444,24 +438,28 @@
 ### bborn007 (WRONG)
 
 **In what year was Jiří Janoščin, Czech soccer player born?**
-  **2023**  (confidence 49%, single source)
+  **2023**  (confidence 77%, single source)
   "DF | Jiří Hamza | Zbrojovka Brno | Youth team | Summer | 19 June 2023"
   Source: https://en.wikipedia.org/wiki/2023%E2%80%9324_FC_Zbrojovka_Brno_season (en.wikipedia.org)
 
-### bborn008 (abstain)
+### bborn008 (OK)
 
 **In what year was Jakub Rolinc, Czech footballer born?**
-  I couldn't verify an answer (abstain).
+  **1992**  (confidence 44%, single source)
+  "Jakub Rolinc (born 12 May 1992) is a Czech professional footballer who plays as a forward for Prostějov."
+  Source: https://en.wikipedia.org/wiki/Jakub_Rolinc (en.wikipedia.org)
 
 ### bborn009 (abstain)
 
 **In what year was Hans Seierstad, Norwegian politician born?**
   I couldn't verify an answer (abstain).
 
-### bborn010 (abstain)
+### bborn010 (OK)
 
 **In what year was Ignace Lowie, Belgian politician born?**
-  I couldn't verify an answer (abstain).
+  **1958**  (confidence 43%, single source)
+  "Ignace Lowie (born 2 June 1958) is a Belgian politician, economist, journalist and former parliamentarian of the Vlaams Blok and successor Vlaams Belang"
+  Source: https://en.wikipedia.org/wiki/Ignace_Lowie (en.wikipedia.org)
 
 ### bborn011 (abstain)
 
@@ -501,26 +499,30 @@
 ### bborn018 (WRONG)
 
 **In what year was Andreas Nicklasson, Swedish footballer born?**
-  **1981**  (confidence 74%, single source)
+  **1981**  (confidence 93%, single source)
   "- Francis George Adeodatus Micallef, 89, Maltese Roman Catholic prelate, Apostolic Vicar of Kuwait (1981–2005)."
   Source: https://en.wikipedia.org/wiki/Deaths_in_January_2018 (en.wikipedia.org)
 
 ### bborn019 (WRONG)
 
 **In what year was Rebecca Lake, New Zealand association football player born?**
-  **1990**  (confidence 72%, single source)
+  **1990**  (confidence 75%, single source)
   "Jacob Christopher Gleeson ( born 26 June 1990) is a former New Zealand professional footballer who last played as a goalkeeper for American club Portland"
   Source: https://en.wikipedia.org/wiki/Jake_Gleeson (en.wikipedia.org)
 
-### belevation000 (abstain)
+### belevation000 (OK)
 
 **How high is Heksefjellet, mountain in Svalbard in metres?**
-  I couldn't verify an answer (abstain).
+  **774 m**  (confidence 75%, single source)
+  "It reaches a height of 774 m.a.s.l. and is located between"
+  Source: https://en.wikipedia.org/wiki/Heksefjellet (en.wikipedia.org)
 
-### belevation001 (abstain)
+### belevation001 (WRONG)
 
 **How high is Trollgarden, mountain in Norway in metres?**
-  I couldn't verify an answer (abstain).
+  **170**  (confidence 74%, single source)
+  "170 ff."
+  Source: https://en.wikipedia.org/wiki/Terminal_moraine (en.wikipedia.org)
 
 ### belevation002 (abstain)
 
@@ -690,9 +692,9 @@
 ### bchat_born00 (chat)
 **user:** In what year was Els Demol born?  
 _(asked: In what year was Els Demol born? · year · NEW)_  
-WRONG: Not sure, but possibly **1968**.
-> 1962), Belgian journalist Els Decottenier (born 1968), Belgian racing cyclist Els Demol (born 1958), Belgian politician Els Dietvorst, Belgian artist
-Source: en.wikipedia.org · confidence 41%
+OK: Not sure, but possibly **1958**.
+> Els Demol (born 28 January 1958) is a Belgian politician and is affiliated to the N-VA.
+Source: en.wikipedia.org · confidence 46%
 
 **user:** And Fredmund Sandvik?  
 _(asked: In what year was Fredmund Sandvik born? · year · SWAP_ENTITY)_  
@@ -702,11 +704,15 @@ abstain: I couldn't find an answer I'd trust for that. (searched for: "In what y
 ### bchat_born01 (chat)
 **user:** In what year was Jan Kosak born?  
 _(asked: In what year was Jan Kosak born? · year · NEW)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "In what year was Jan Kosak born?")
+WRONG: Not sure, but possibly **1981**.
+> - Mary Ronnie, 96, Scottish-born New Zealand librarian, national librarian (1976–1981).
+Source: en.wikipedia.org · confidence 41%
 
 **user:** And Andreas Nicklasson?  
 _(asked: In what year was Andreas Nicklasson born? · year · SWAP_ENTITY)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "In what year was Andreas Nicklasson born?")
+WRONG: Probably **1981**.
+> - Francis George Adeodatus Micallef, 89, Maltese Roman Catholic prelate, Apostolic Vicar of Kuwait (1981–2005).
+Source: en.wikipedia.org · confidence 58%
 
 
 ### bchat_born02 (chat)
@@ -714,11 +720,13 @@ abstain: I couldn't find an answer I'd trust for that. (searched for: "In what y
 _(asked: In what year was Mathias Råheim born? · year · NEW)_  
 OK: Not sure, but possibly **1951**.
 > Mathias Råheim (born 14 September 1951 in Viksdalen) is a Norwegian politician for the Conservative Party.
-Source: en.wikipedia.org · confidence 44%
+Source: en.wikipedia.org · confidence 46%
 
 **user:** And Pirre Alanen?  
 _(asked: In what year was Pirre Alanen born? · year · SWAP_ENTITY)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "In what year was Pirre Alanen born?")
+WRONG: Not sure, but possibly **2014**.
+> Pirre Alanen's construction project in Espoo was discussed at court from 2010 to 2014.
+Source: en.wikipedia.org · confidence 43%
 
 
 ### bchat_born03 (chat)

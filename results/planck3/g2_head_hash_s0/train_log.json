@@ -2,56 +2,41 @@
   "epochs": [
     {
       "epoch": 0,
-      "train_nll": 1.7325213964168842,
-      "val_top1": 0.5663082437275986
+      "train_nll": 1.692158335294479,
+      "val_top1": 0.5734767025089605
     },
     {
       "epoch": 1,
-      "train_nll": 0.8372374918216314,
-      "val_top1": 0.6129032258064516
-    },
-    {
-      "epoch": 2,
-      "train_nll": 0.24048705857533675,
-      "val_top1": 0.6129032258064516
-    },
-    {
-      "epoch": 3,
-      "train_nll": 0.1408222085581376,
-      "val_top1": 0.6164874551971327
-    },
-    {
-      "epoch": 4,
-      "train_nll": 0.07414005754085687,
-      "val_top1": 0.6272401433691757
-    },
-    {
-      "epoch": 5,
-      "train_nll": 0.045475912519181386,
-      "val_top1": 0.6021505376344086
-    },
-    {
-      "epoch": 6,
-      "train_nll": 0.03244196363271047,
+      "train_nll": 0.7614437983586237,
       "val_top1": 0.5985663082437276
     },
     {
-      "epoch": 7,
-      "train_nll": 0.029472818902622048,
-      "val_top1": 0.6164874551971327
+      "epoch": 2,
+      "train_nll": 0.22923452750994608,
+      "val_top1": 0.5842293906810035
+    },
+    {
+      "epoch": 3,
+      "train_nll": 0.13576159755197856,
+      "val_top1": 0.5949820788530465
+    },
+    {
+      "epoch": 4,
+      "train_nll": 0.07051484270069079,
+      "val_top1": 0.5949820788530465
     }
   ],
-  "best_val_top1": 0.6272401433691757,
-  "temperature": 2.8938879279824854,
-  "val_heuristic_top1": 0.39849624060150374,
-  "val_ece": 0.05765249817481925,
-  "val_answer_acc_at_0.5": 0.8125,
-  "val_choice_acc": 0.518796992481203,
-  "val_points_with_gold": 133,
-  "val_none_acc": 0.9041095890410958,
-  "val_points_without_gold": 146,
+  "best_val_top1": 0.5985663082437276,
+  "temperature": 1.6420697277771137,
+  "val_heuristic_top1": 0.36507936507936506,
+  "val_ece": 0.050322227835101103,
+  "val_answer_acc_at_0.5": 0.7241379310344828,
+  "val_choice_acc": 0.47619047619047616,
+  "val_points_with_gold": 126,
+  "val_none_acc": 0.8562091503267973,
+  "val_points_without_gold": 153,
   "encoder": "hash",
   "seed": 0,
-  "n_train_points": 2542,
+  "n_train_points": 2546,
   "n_val_points": 279
 }

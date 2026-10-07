@@ -1,13 +1,13 @@
 {
   "n": 47,
   "success": 0.02127659574468085,
-  "answered_rate": 0.02127659574468085,
-  "wrong_when_answered": 0.0,
-  "abstain_rate": 0.9787234042553191,
-  "ece": 0.28618669509887695,
-  "mean_steps": 5.382978723404255,
-  "mean_web_calls": 5.361702127659575,
-  "mean_decision_ms": 27.864311861330755,
+  "answered_rate": 0.10638297872340426,
+  "wrong_when_answered": 0.8,
+  "abstain_rate": 0.8936170212765957,
+  "ece": 0.43138916492462154,
+  "mean_steps": 5.425531914893617,
+  "mean_web_calls": 5.25531914893617,
+  "mean_decision_ms": 36.004992947895445,
   "by_family": {
     "chat": {
       "n": 6,
@@ -26,7 +26,7 @@
     "seed": {
       "n": 47,
       "success": 0.02127659574468085,
-      "wrong_when_answered": 0.0
+      "wrong_when_answered": 0.8
     }
   },
   "policy": "planck",
@@ -39,31 +39,31 @@
   "depth_evidence_recall": 0.851063829787234,
   "snippet_first": true,
   "answer_threshold": 0.3,
-  "mean_fetches": 4.0212765957446805,
-  "mean_answer_fetches": 2.6808510638297873,
+  "mean_fetches": 3.9148936170212765,
+  "mean_answer_fetches": 2.574468085106383,
   "depth_pages": 1,
-  "answered_from_snippet": 0.0,
+  "answered_from_snippet": 0.0425531914893617,
   "gated_rate": 0.0,
   "gated_would_be_correct": 0,
   "graph": {
-    "facts": 1,
+    "facts": 5,
     "passages": 260,
-    "entities": 626,
-    "edges": 630,
+    "entities": 614,
+    "edges": 618,
     "queries": 63,
     "domains": 1
   },
   "cost": {
-    "usd_per_task": 2.0832360818311707e-06,
-    "usd_per_correct": 9.791209584606502e-05,
-    "usd_per_1k_tasks": 0.0020832360818311703,
+    "usd_per_task": 2.713142199087866e-06,
+    "usd_per_correct": 0.0001275176833571297,
+    "usd_per_1k_tasks": 0.002713142199087866,
     "llm_tokens_per_task": 0.0,
     "priced_as": "claude-haiku-4-5",
     "prices_as_of": "2026-09-29"
   },
   "web_calls_network": {
     "search": 63,
-    "fetch": 189,
+    "fetch": 184,
     "search_net": 0,
     "fetch_net": 0,
     "search_empty_primary": 0,
@@ -77,13 +77,13 @@
     "final_empty_rate": 0.0,
     "valid": true
   },
-  "wall_s": 66.6,
-  "store_facts": 1,
+  "wall_s": 68.3,
+  "store_facts": 5,
   "top_domains": [
     [
       "en.wikipedia.org",
-      0.6,
-      0.5
+      0.7777777777777778,
+      2.5
     ]
   ],
   "gate": {

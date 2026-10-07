@@ -1,90 +1,125 @@
 {
   "n": 143,
-  "success": 0.13986013986013987,
-  "answered_rate": 0.2097902097902098,
+  "success": 0.1958041958041958,
+  "answered_rate": 0.2937062937062937,
   "wrong_when_answered": 0.3333333333333333,
-  "abstain_rate": 0.7902097902097902,
-  "ece": 0.25333333333333335,
-  "mean_steps": 2.6713286713286712,
-  "mean_web_calls": 2.13986013986014,
-  "mean_decision_ms": 1835.3889007834446,
+  "abstain_rate": 0.7062937062937062,
+  "ece": 0.2571428571428571,
+  "mean_steps": 2.762237762237762,
+  "mean_web_calls": 2.1468531468531467,
+  "mean_decision_ms": 1730.8102399994962,
   "by_family": {
     "chat": {
       "n": 8,
-      "success": 0.125
+      "success": 0.625
     },
     "fact": {
       "n": 135,
-      "success": 0.14074074074074075
+      "success": 0.17037037037037037
     }
   },
   "by_regime": {
     "fresh": {
       "n": 60,
-      "success": 0.03333333333333333,
-      "wrong_when_answered": 0.6
+      "success": 0.08333333333333333,
+      "wrong_when_answered": 0.5454545454545454
     },
     "long_tail": {
       "n": 83,
-      "success": 0.21686746987951808,
-      "wrong_when_answered": 0.28
+      "success": 0.27710843373493976,
+      "wrong_when_answered": 0.25806451612903225
     }
   },
   "policy": "gemma",
-  "search": "wikipedia",
+  "search": "searxng",
   "net": "live",
   "tasks": "scripts/assets/planck3_tasks_fresh.json",
-  "n_invalid_decisions": 70,
-  "gold_reachable": 0.2517482517482518,
-  "serp_answer_rate_at3": 0.1888111888111888,
-  "depth_evidence_recall": 0.2517482517482518,
+  "n_invalid_decisions": 63,
+  "gold_reachable": 0.3356643356643357,
+  "serp_answer_rate_at3": 0.2727272727272727,
+  "depth_evidence_recall": 0.32167832167832167,
   "snippet_first": true,
   "answer_threshold": 0.3,
-  "mean_fetches": 1.083916083916084,
-  "mean_answer_fetches": 0.055944055944055944,
+  "mean_fetches": 1.0909090909090908,
+  "mean_answer_fetches": 0.04195804195804196,
   "depth_pages": 1,
-  "answered_from_snippet": 0.2097902097902098,
+  "answered_from_snippet": 0.2937062937062937,
   "gated_rate": 0.013986013986013986,
   "gated_would_be_correct": 1,
   "graph": {
-    "facts": 34,
-    "passages": 582,
-    "entities": 1531,
-    "edges": 1532,
+    "facts": 49,
+    "passages": 622,
+    "entities": 1593,
+    "edges": 1600,
     "queries": 151,
-    "domains": 1
+    "domains": 11
   },
   "cost": {
-    "usd_per_task": 0.0028291818181818184,
-    "usd_per_correct": 0.02022865,
-    "usd_per_1k_tasks": 2.8291818181818185,
-    "llm_tokens_per_task": 2606.944055944056,
+    "usd_per_task": 0.0029674265734265736,
+    "usd_per_correct": 0.01515507142857143,
+    "usd_per_1k_tasks": 2.9674265734265735,
+    "llm_tokens_per_task": 2736.965034965035,
     "priced_as": "claude-haiku-4-5",
     "prices_as_of": "2026-09-29"
   },
   "web_calls_network": {
     "search": 151,
-    "fetch": 155,
-    "search_net": 151,
-    "fetch_net": 139,
+    "fetch": 156,
+    "search_net": 1,
+    "fetch_net": 1,
     "search_empty_primary": 0,
     "search_fallback": 0,
-    "search_empty_final": 1
+    "search_empty_final": 0
   },
   "search_health": {
     "searches": 151,
     "primary_empty_rate": 0.0,
     "fallback_rate": 0.0,
-    "final_empty_rate": 0.006622516556291391,
+    "final_empty_rate": 0.0,
     "valid": true
   },
-  "wall_s": 850.2,
-  "store_facts": 34,
+  "wall_s": 729.0,
+  "store_facts": 49,
   "top_domains": [
     [
       "en.wikipedia.org",
-      0.9682539682539683,
-      29.5
+      0.967741935483871,
+      29.0
+    ],
+    [
+      "grokipedia.com",
+      0.8333333333333334,
+      4.0
+    ],
+    [
+      "lawzana.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "fifa.com",
+      0.6,
+      0.5
+    ],
+    [
+      "wtatennis.com",
+      0.6,
+      0.5
+    ],
+    [
+      "tennis-db.com",
+      0.6,
+      0.5
+    ],
+    [
+      "youtube.com",
+      0.6,
+      0.5
+    ],
+    [
+      "alchetron.com",
+      0.6,
+      0.5
     ]
   ],
   "gate": {
