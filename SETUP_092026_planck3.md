@@ -243,6 +243,23 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **Primary rule (unchanged bar, now paired):** G1 PASS if head:planck's paired ratio to the teacher, **averaged over seeds 0, 1, 2**, is ≥0.8 **and** head:planck beats head:hash in **every** seed.
   - **Secondary arms (exploratory, declared now):** `head:planck-rank` (listwise soft targets over every candidate's BFS distance), and with `-Hertz` `head:hertz` / `head:hertz-rank` (Hertz 1.2, 640M). Same rule, reported separately; with 1-3 secondary arms, a lone pass near p≈0.05 needs a confirmation run before it counts.
   - Mac signal on the control features (1 seed): `head:hash-rank` 17.3% vs `head:hash` 14.8% on the same 1,192 races (106 vs 77 discordant, McNemar p=0.038), the first hash head above lexical (15.3%). A reason to expect the Planck rank arm to help, not a result.
+- **FOLLOW-UP RUN (2026-10-07, commit 2f175cb, SearXNG): results of record.**
+  - **G0, snippet-first: ADOPTED** (pre-registered rule passed: success ≥ pages-first −2 pts and answer fetches −50%).
+    - **Gemma:** 85.1% vs 68.1% pages-first. Answer-path fetches 0.00 vs 2.81. Wrong-when-answered 9.1% vs 25.6%. ECE 0.039 vs 0.137. 4,206 vs 5,486 tok/task. 89% of answers taken straight from snippets.
+    - **No-model heuristic:** **93.6%** vs 61.7% pages-first, at 0.02 answer fetches.
+    - **That is 0.98× base chat** (95.7%) at ~$0 LLM cost, with sources, and it was right on **both** of base chat's confident hallucinations (Zalando HQ, Spotify founding year).
+    - The gate did not fire: Gemma's low-confidence cases were explicit ABSTAINs.
+  - **G0 reading:**
+    - On stable facts, snippet-first + deterministic tools (aboutness, cross-domain agreement, echo penalty) already reach the G2 quality bar (≥0.9× closed-book) without any model.
+    - The Gemma teacher is now **worse than the heuristic** (85.1 vs 93.6). Its misses are subject echoes ("Brazil", "Spotify") and abstains. Distilling Gemma would teach Planck those errors.
+    - **Caveat:** the candidate generator was developed on these 47 tasks, so the 93.6% must be confirmed on fresh tasks before it counts.
+  - **G1, 3 seeds × 1,192 races, teacher 33.7% on 300 shared races: FAIL under the pre-registered primary rule.**
+    - **head:planck (nll):** mean paired ratio **0.58** (0.52 / 0.59 / 0.63); beats head:hash in every seed (p ≤ 1e-6).
+    - **Secondary arm head:planck-rank:** **27.3% ± 0.4** rollout success (CI 0.264-0.282); paired ratio **0.78** (0.79 / 0.84 / 0.71), just under the bar.
+    - Rank beats nll in every seed (McNemar p = 1.7e-5 / 0.038 / 0.0026) and is 4.5x more stable across seeds (sd 0.004 vs 0.018).
+    - The teacher is still significantly better in 2 of 3 seeds (p = 0.044 / 0.117 / 0.004).
+    - The objective, not capacity, was the main lever so far (0.58 → 0.78 with the same encoder).
+    - Speed: 0.45 ms warm vs teacher 226-238 ms (~500x); cold CPU median 95 ms.
 - **G2-G4:** after G1.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
