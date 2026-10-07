@@ -462,6 +462,9 @@ def _g0_verdict(s):
     if sh and not sh["valid"]:
         return {"verdict": f"INVALID (search failed: {sh['final_empty_rate']:.0%} of searches empty)",
                 "note": "results without evidence; re-run when search works"}
+    if sh and s.get("search") == "searxng" and sh.get("primary_share", 1.0) < 0.8:
+        return {"verdict": f"DEGRADED (SearXNG served only {sh['primary_share']:.0%}; the rest was the Wikipedia fallback)",
+                "note": "valid, but not a SearXNG result"}
     if "fresh" in str(s.get("tasks", "")):
         return {"verdict": "ROUND 3 (rules A/B)", "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"}
     if s["policy"] == "planck":

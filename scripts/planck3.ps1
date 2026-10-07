@@ -309,6 +309,15 @@ function Test-ValidRun([string]$dir) {
     if (-not (($null -ne $j.search_health) -and [bool]$j.search_health.valid)) { return $false }
     # SearXNG is the retrieval layer of record: a tools run on the Wikipedia fallback is kept as
     # <dir>_wikipedia and redone once SearXNG answers (round 3 attempt 2 ran entirely on Wikipedia)
+    # a "searxng" run that SearXNG did not actually serve (cache hits included): until round 3b the
+    # fallback cache was read first, so most fresh-benchmark "SearXNG" runs were really Wikipedia
+    $share = $j.search_health.primary_share
+    if ($j.search -eq "searxng" -and $script:SearxUp -and (($null -eq $share) -or ($share -lt 0.8)) -and (Test-Searx)) {
+        $aside = "${dir}_mixed"
+        if (-not (Test-Path $aside)) { Move-Item $dir $aside; Log "kept $dir as $aside (SearXNG served too little of it); redoing it" }
+        else { Remove-Item -Recurse -Force $dir }
+        return $false
+    }
     if ($j.search -ne "searxng" -and $script:SearxUp -and (Test-Searx)) {  # re-check NOW: it can be blocked mid-round
         $aside = "${dir}_wikipedia"
         if (-not (Test-Path $aside)) { Move-Item $dir $aside; Log "kept the Wikipedia-search run as $aside; redoing it on SearXNG" }
@@ -350,6 +359,16 @@ function Do-G2 {
     if ($backend -ne "searxng") {
         Warn "G2 v2 wants SearXNG-collected training data (train = deploy); SearXNG is not answering, using Wikipedia"
         if ((Test-Path "data/planck3/g2/points.jsonl") -and -not (Test-Path $pts)) { Copy-Item "data/planck3/g2/points.jsonl" $pts }
+    }
+    $health = "data/planck3/g2/points_$backend.health.json"
+    if ($backend -eq "searxng" -and (Test-Path $pts)) {
+        $h = if (Test-Path $health) { Get-Content $health -Raw | ConvertFrom-Json } else { $null }
+        if (($null -eq $h) -or ($null -eq $h.primary_share) -or ($h.primary_share -lt 0.8)) {
+            # collected before the cache-order fix: mostly Wikipedia results under a SearXNG name
+            Move-Item -Force $pts "data/planck3/g2/points_searxng_mixed.jsonl"
+            if (Test-Path $health) { Move-Item -Force $health "data/planck3/g2/points_searxng_mixed.health.json" }
+            Log "G2 points were not really SearXNG-served: kept as points_searxng_mixed.jsonl, collecting again"
+        }
     }
     Log "G2 collect ($backend): labelled decision points from known answers (resumable)"
     P3 (@("g2", "collect", "--points", $pts) + $lim)

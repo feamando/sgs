@@ -698,3 +698,23 @@ def test_g2v2_train_gate_and_policy_logs_argmax(tmp_path):
     snip = [s for s in res["trajectory"] if s["phase"] == "results_snip"]
     assert snip and {"argmax", "gate", "top3", "tau"} <= set(snip[0]["meta"])   # every decision is diagnosable
     st.close()
+
+
+def test_searxng_run_never_reads_old_wikipedia_cache(tmp_path, monkeypatch):
+    """Round 3b bug: a 'SearXNG' run was served cached Wikipedia results without falling back."""
+    from src.planck3 import web as W
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    cache = W.WebCache(tmp_path / "cache")
+    wiki_hit = [{"url": "https://en.wikipedia.org/wiki/X", "title": "X", "snippet": "old", "domain": "en.wikipedia.org"}]
+    cache.put("search", "wikipedia|q", {"query": "q", "backend": "wikipedia", "results": wiki_hit})
+    searx_hit = [{"url": "https://example.org/x", "title": "X", "snippet": "new", "domain": "example.org"}]
+    w = W.Web(cache, search_backend="searxng")
+    monkeypatch.setattr(w, "_search_searxng", lambda q: searx_hit)
+    assert w.search("q") == searx_hit and w.last_backend == "searxng"       # primary first, not the old cache
+    h = w.search_health()
+    assert h["served"] == {"searxng": 1} and h["primary_share"] == 1.0
+    cache.put("search", "wikipedia|q2", {"query": "q2", "backend": "wikipedia", "results": wiki_hit})
+    w2 = W.Web(cache, search_backend="searxng")
+    monkeypatch.setattr(w2, "_search_searxng", lambda q: [])
+    assert w2.search("q2") == wiki_hit and w2.last_backend == "wikipedia"  # the fallback cache only after failing
+    assert w2.search_health()["primary_share"] == 0.0

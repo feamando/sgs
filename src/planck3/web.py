@@ -92,29 +92,44 @@ class Web:
 
     # ── search ───────────────────────────────────────────────────────────
     def search(self, query: str) -> list[dict]:
-        """Return [{url, title, snippet, domain}] (at most n_results)."""
+        """
+        Return [{url, title, snippet, domain}] (at most n_results).
+
+        Order: cache(primary) -> network(primary) -> one retry -> [fallback only] cache(wikipedia)
+        -> network(wikipedia). The fallback cache is read ONLY after the primary failed now:
+        reading it first silently served old Wikipedia results to "SearXNG" runs (round 3b).
+        """
         self.calls["search"] += 1
-        for backend in ([self.backend] + (["wikipedia"] if self.backend == "searxng" and self.fallback else [])):
-            hit = self.cache.get("search", f"{backend}|{query}")
-            if hit is not None and hit.get("results"):
-                self._consecutive_empty = 0
-                self.last_backend = backend
-                return hit["results"][: self.n_results]
+        hit = self.cache.get("search", f"{self.backend}|{query}")
+        if hit is not None and hit.get("results"):
+            return self._served(self.backend, hit["results"])
         if not self.cache.online:
-            return []
-        fb0 = self.calls["search_fallback"]
+            return self._served(None, [], count_empty=False)
         results = self._search_net(self.backend, query)
-        if not results and self.backend == "searxng":
+        if results:
+            return self._served(self.backend, results)
+        if self.backend == "searxng":
             self.calls["search_empty_primary"] += 1
             time.sleep(2.0)
             results = self._search_net("searxng", query)          # one retry: blocks are often transient
-            if not results and self.fallback:
-                results = self._search_net("wikipedia", query)
+            if results:
+                return self._served("searxng", results)
+            if self.fallback:
+                hit = self.cache.get("search", f"wikipedia|{query}")
+                results = hit["results"] if hit and hit.get("results") else self._search_net("wikipedia", query)
                 if results:
                     self.calls["search_fallback"] += 1
-        self.last_backend = "none" if not results else (
-            "wikipedia" if self.backend == "searxng" and self.calls["search_fallback"] > fb0 else self.backend)
-        if not results:
+                    return self._served("wikipedia", results)
+        return self._served(None, [])
+
+    def _served(self, backend, results, count_empty: bool = True):
+        """Book-keeping for every outcome: which backend served it (cache hits included) + the breaker."""
+        self.last_backend = backend or "none"
+        if results:
+            self._consecutive_empty = 0
+            self.calls[f"served_{backend}"] = self.calls.get(f"served_{backend}", 0) + 1
+            return results[: self.n_results]
+        if count_empty:
             self.calls["search_empty_final"] += 1
             self._consecutive_empty += 1
             if self._consecutive_empty >= MAX_CONSECUTIVE_EMPTY:
@@ -123,9 +138,7 @@ class Web:
                     f"fallback {'on' if self.fallback else 'off'}). The search engine is blocked or down: "
                     f"stopping instead of producing results with no evidence. Wait, check `docker logs "
                     f"planck3-searxng`, then re-run (finished work is kept).")
-        else:
-            self._consecutive_empty = 0
-        return results[: self.n_results]
+        return []
 
     def _search_net(self, backend: str, query: str) -> list[dict]:
         self.calls["search_net"] += 1
@@ -156,8 +169,11 @@ class Web:
         c = self.calls
         n = max(c["search"], 1)
         final = c["search_empty_final"] / n
+        served = {k[len("served_"):]: v for k, v in c.items() if k.startswith("served_")}
+        primary = served.get(self.backend, 0) / n
         return {"searches": c["search"], "primary_empty_rate": c["search_empty_primary"] / n,
                 "fallback_rate": c["search_fallback"] / n, "final_empty_rate": final,
+                "served": served, "primary_share": primary,   # who actually answered, cache hits included
                 "valid": final <= 0.2}
 
     def _search_searxng(self, query: str) -> list[dict]:
