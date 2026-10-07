@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "encoder": "hash",
+  "seed": 0,
+  "points": "data\\planck3\\g2\\points_searxng.jsonl",
+  "n_questions": 1455,
+  "n_train_points": 983,
+  "n_val_points": 282,
+  "n_test_points": 276,
+  "temperature": 1.6420697277771137,
+  "tau": 0.879438950822358,
+  "gate_precision_target": 0.9,
+  "test_choice_acc": 0.3356643356643357,
+  "test_ranker_acc": 0.36363636363636365,
+  "test_points_with_gold": 143,
+  "test_gate_auc": 0.7387609649122807,
+  "test_gate_ece": 0.06108103988202364,
+  "val_at_tau": {
+    "coverage": 0.01773049645390071,
+    "precision": 1.0
+  },
+  "test_at_tau": {
+    "coverage": 0.014492753623188406,
+    "precision": 1.0
+  },
+  "test_base_rate": 0.17391304347826086,
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_nll": 2.401355250676473,
+      "val_choice_acc": 0.39285714285714285
+    },
+    {
+      "epoch": 1,
+      "train_nll": 1.08175980647405,
+      "val_choice_acc": 0.45
+    },
+    {
+      "epoch": 2,
+      "train_nll": 0.2755685696999232,
+      "val_choice_acc": 0.42857142857142855
+    },
+    {
+      "epoch": 3,
+      "train_nll": 0.10850699966152509,
+      "val_choice_acc": 0.4142857142857143
+    },
+    {
+      "epoch": 4,
+      "train_nll": 0.05264000811924537,
+      "val_choice_acc": 0.42142857142857143
+    }
+  ]
+}

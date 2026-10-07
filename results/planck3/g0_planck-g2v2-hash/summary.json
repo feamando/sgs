@@ -1,0 +1,128 @@
+{
+  "n": 47,
+  "success": 0.6170212765957447,
+  "answered_rate": 0.7446808510638298,
+  "wrong_when_answered": 0.17142857142857143,
+  "abstain_rate": 0.25531914893617025,
+  "ece": 0.1605543921954562,
+  "mean_steps": 4.382978723404255,
+  "mean_web_calls": 3.127659574468085,
+  "mean_decision_ms": 0.8658378625749746,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.16666666666666666
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.25
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.7297297297297297
+    }
+  },
+  "by_regime": {
+    "seed": {
+      "n": 47,
+      "success": 0.6170212765957447,
+      "wrong_when_answered": 0.17142857142857143
+    }
+  },
+  "policy": "planck",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.851063829787234,
+  "serp_answer_rate_at3": 0.851063829787234,
+  "depth_evidence_recall": 0.9787234042553191,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.9787234042553192,
+  "mean_answer_fetches": 0.8297872340425532,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.6595744680851063,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 41,
+    "passages": 278,
+    "entities": 514,
+    "edges": 528,
+    "queries": 63,
+    "domains": 23
+  },
+  "cost": {
+    "usd_per_task": 5.270762402199905e-08,
+    "usd_per_correct": 8.542270100117087e-08,
+    "usd_per_1k_tasks": 5.2707624021999054e-05,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 54,
+    "fetch": 93,
+    "search_net": 0,
+    "fetch_net": 0,
+    "search_empty_primary": 0,
+    "search_fallback": 0,
+    "search_empty_final": 0
+  },
+  "search_health": {
+    "searches": 54,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "valid": true
+  },
+  "wall_s": 26.7,
+  "store_facts": 41,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.8888888888888888,
+      7.0
+    ],
+    [
+      "britannica.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "periodic-table.rsc.org",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "ikea.com",
+      0.6666666666666666,
+      1.0
+    ],
+    [
+      "nintendo.fandom.com",
+      0.6,
+      0.5
+    ],
+    [
+      "ebsco.com",
+      0.6,
+      0.5
+    ],
+    [
+      "hellofreshgroup.com",
+      0.6,
+      0.5
+    ],
+    [
+      "atomicarchive.com",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "G2 (rule B)",
+    "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"
+  }
+}

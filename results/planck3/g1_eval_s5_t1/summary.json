@@ -14,7 +14,7 @@
       "n_pairs": 1200,
       "rollout_success": 0.14416666666666667,
       "mean_steps_over_optimal": 1.2314065510597303,
-      "median_decision_ms": 0.01409999094903469,
+      "median_decision_ms": 0.013899989426136017,
       "wall_s": 0.4,
       "cached": false,
       "step_top1": 0.4633333333333333,
@@ -24,8 +24,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.10166666666666667,
       "mean_steps_over_optimal": 1.2207650273224044,
-      "median_decision_ms": 0.5870499298907816,
-      "wall_s": 7.0,
+      "median_decision_ms": 0.5199500010348856,
+      "wall_s": 6.2,
       "cached": false,
       "step_top1": 0.58,
       "step_ece": 0.11767329317967717
@@ -34,8 +34,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.225,
       "mean_steps_over_optimal": 1.2699382716049383,
-      "median_decision_ms": 0.7119000656530261,
-      "wall_s": 10.6,
+      "median_decision_ms": 0.6583500071428716,
+      "wall_s": 9.7,
       "cached": false,
       "step_top1": 0.6406666666666667,
       "step_ece": 0.12604439883027224
@@ -44,8 +44,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.19583333333333333,
       "mean_steps_over_optimal": 1.2475177304964538,
-      "median_decision_ms": 0.73640001937747,
-      "wall_s": 11.2,
+      "median_decision_ms": 0.6525000790134072,
+      "wall_s": 9.8,
       "cached": false,
       "step_top1": 0.6338333333333334,
       "step_ece": 0.0877453549868272
@@ -54,8 +54,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.24083333333333334,
       "mean_steps_over_optimal": 1.32237600922722,
-      "median_decision_ms": 0.45220000902190804,
-      "wall_s": 5.5,
+      "median_decision_ms": 0.41414995212107897,
+      "wall_s": 5.0,
       "cached": false,
       "step_top1": 0.6353333333333333,
       "step_ece": 0.09875565401907078
@@ -64,8 +64,8 @@
       "n_pairs": 1200,
       "rollout_success": 0.22333333333333333,
       "mean_steps_over_optimal": 1.3062189054726367,
-      "median_decision_ms": 0.43824996100738645,
-      "wall_s": 5.0,
+      "median_decision_ms": 0.4057500045746565,
+      "wall_s": 4.6,
       "cached": false,
       "step_top1": 0.6286666666666667,
       "step_ece": 0.09454527220929353
@@ -257,7 +257,7 @@
         "pass": false
       }
     },
-    "note": "head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.5 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.68, head:hertz 0.51, head:planck 0.54",
+    "note": "head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.68, head:hertz 0.51, head:planck 0.54",
     "primary": "head:planck-rank"
   },
   "graph": {

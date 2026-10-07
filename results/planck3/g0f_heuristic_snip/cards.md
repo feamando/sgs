@@ -1,46 +1,46 @@
 # G0 answer cards (heuristic)
 
-### bwinner000 (WRONG)
+### bwinner000 (OK)
 
 **Who won the 2026 US Open – Girls' singles?**
-  **Polina Berezina**  (confidence 42%, single source)
-  "and Kristina Penickova won the girls ' doubles title at the 2026 US Open , defeating Polina Berezina and Alisa Terentyeva in the final, 7–6(13–11), 6–3"
-  Source: https://en.wikipedia.org/wiki/2026_US_Open_%E2%80%93_Girls%27_doubles (en.wikipedia.org)
+  **Sun Xinran**  (confidence 47%, single source)
+  "Sun Xinran won the girls' singles title at the 2026 US Open, defeating Anna Pushkareva in the final, 6–4, 4–6, 6–0."
+  Source: https://en.wikipedia.org/wiki/2026_US_Open_%E2%80%93_Girls%27_singles (en.wikipedia.org)
 
-### bwinner001 (WRONG)
+### bwinner001 (OK)
 
 **Who won the 2026 FIFA World Cup?**
-  **Group**  (confidence 40%, single source)
-  "Group A of the 2026 FIFA World Cup took place from June 11 to 24, 2026 ."
-  Source: https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_Group_A (en.wikipedia.org)
+  **Spain**  (confidence 100%, single source)
+  "Won by Spain, the FIFA World Cup 2026™ was the first edition to feature 48 teams and three host countries: Canada, Mexico and the United States."
+  Source: https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026 (fifa.com)
 
 ### bwinner002 (WRONG)
 
 **Who won the 2026 Adana Open – Doubles?**
-  **Jeanjean**  (confidence 61%, single source)
-  "In October, Jeanjean won her maiden WTA 125 singles title at the Adana Open, defeating fellow French player Loïs Boisson in the final."
-  Source: https://en.wikipedia.org/wiki/L%C3%A9olia_Jeanjean (en.wikipedia.org)
+  **Dalila Jakupović**  (confidence 59%, verified by a 2nd source)
+  "Angelica Moratelli and Vendula Valdmannová won the title, defeating Dalila Jakupović and Lara Salden 7–6(7–3), 6–4 in the final."
+  Source: https://en.wikipedia.org/wiki/2026_Adana_Open_%E2%80%93_Doubles (en.wikipedia.org)
 
 ### bwinner003 (WRONG)
 
 **Who won the 2026 Jingshan Tennis Open – Women's singles?**
-  **Hard**  (confidence 43%, single source)
-  "Win | 1–2 | Sep 2026 | Jingshan Tennis Open, China | Hard | Amelia Rajecki | Sofya Lansere Alexandra Shubladze | 6–7(5–7), 7–6(7–1), [10–6]"
-  Source: https://en.wikipedia.org/wiki/Madeleine_Brooks (en.wikipedia.org)
+  **Jingshan Tennis Open Scores**  (confidence 99%, single source)
+  "2026 Jingshan Tennis Open Scores"
+  Source: https://www.espn.com/tennis/scoreboard/tournament/_/eventId/1028-2026/competitionType/2 (espn.com)
 
-### bwinner004 (WRONG)
+### bwinner004 (OK)
 
 **Who won the 2026 Hamburg Open – Women's singles?**
-  **Japan Women Open**  (confidence 40%, single source)
-  "She won one career singles title, at the 2017 Japan Women's Open."
-  Source: https://en.wikipedia.org/wiki/2026_WTA_Tour (en.wikipedia.org)
+  **Tamara Korpatsch**  (confidence 73%, single source)
+  "Tamara Korpatsch won WTA Hamburg Open 2026, defeating Anna Bondar 6-3 6-3 in the final."
+  Source: https://tennis-db.com/wta/tournaments/balldontlie_wta:56/hamburg-open (tennis-db.com)
 
 ### bwinner005 (WRONG)
 
 **Who won the 2026 Tokyo Marathon?**
-  **Tōkyō Marason**  (confidence 74%, single source)
-  "The Tokyo Marathon (東京マラソン, Tōkyō Marason) is an annual marathon sporting event in Tokyo , Japan."
-  Source: https://en.wikipedia.org/wiki/Tokyo_Marathon (en.wikipedia.org)
+  **Feb**  (confidence 64%, single source)
+  "Feb 28, 2026 ..."
+  Source: https://www.runnersworld.com/races-places/a70556568/2026-tokyo-marathon-results/ (runnersworld.com)
 
 ### bwinner006 (WRONG)
 
@@ -436,10 +436,12 @@
   "It was founded in February 1987 as Go-Ahead Northern Ltd as part of the privatisation of the National Bus Company in which Martin Ballinger and Chris Moyes led a management buyout of its northern divi"
   Source: https://en.wikipedia.org/wiki/List_of_companies_of_the_United_Kingdom_A%E2%80%93J (en.wikipedia.org)
 
-### bfounded004 (abstain)
+### bfounded004 (OK)
 
 **In what year was Arntzen Grette, Norwegian law firm founded?**
-  I couldn't verify an answer (no_results).
+  **2025**  (confidence 60%, single source)
+  "About Formed in October 2025 when Arntzen de Besche and Grette combined, in what has been described as the largest merger in the history of the Norwegian legal market."
+  Source: https://dealdrive.co/resources/advisors/firm/arntzen-grette (dealdrive.co)
 
 ### bfounded005 (WRONG)
 
@@ -697,7 +699,7 @@
 
 **How high is Rotgratspitze, mountain in Austria in metres?**
   **3,237 metres**  (confidence 100%, single source)
-  "The Rotgratspitze (3,237 metres) is a mountain in the Stubai Alps, close to the Lisenser Fernerkogel."
+  "Rotgratspitze East summit from West The Rotgratspitze (3,237 metres)  is a mountain in the Stubai Alps, close to the Lisenser Fernerkogel."
   Source: https://en.wikipedia.org/wiki/Rotgratspitze (en.wikipedia.org)
 
 ### belevation006 (WRONG)
@@ -898,25 +900,27 @@
 _(asked: In what year was Els Demol born? · year · NEW)_  
 OK: **1958**.
 > Els Demol (born 28 January 1958) is a Belgian politician and is affiliated to the N-VA.
-Source: en.wikipedia.org · confidence 96%
+Source: en.wikipedia.org · confidence 100%
 
 **user:** And Fredmund Sandvik?  
 _(asked: In what year was Fredmund Sandvik born? · year · SWAP_ENTITY)_  
-WRONG: Probably **2006**.
-> - Fredmund Sandvik, 73, Norwegian farmer and politician, chairman of Tine (2006–2010).
-Source: en.wikipedia.org · confidence 52%
+OK: **1951**.
+> Fredmund Sandvik (born 6 August 1951) is a Norwegian farmers' leader and politician for the Centre Party.
+Source: alchetron.com · confidence 99%
 
 
 ### bchat_born01 (chat)
 **user:** In what year was Jan Kosak born?  
 _(asked: In what year was Jan Kosak born? · year · NEW)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "In what year was Jan Kosak born?")
+OK: **1992**.
+> Jan Kosak (born 3 February 1992) is a Czech football midfielder, who currently plays for FC Vysočina Jihlava.
+Source: en.wikipedia.org · confidence 100%
 
 **user:** And Andreas Nicklasson?  
 _(asked: In what year was Andreas Nicklasson born? · year · SWAP_ENTITY)_  
-WRONG: Probably **1956**.
-> - Peter Wells, 88, British-born New Zealand Olympic athlete (1952, 1956).
-Source: en.wikipedia.org · confidence 68%
+OK: **1978**.
+> Andreas Nicklasson (born 22 April 1978) is a Swedish retired football midfielder. ...
+Source: en.wikipedia.org · confidence 100%
 
 
 ### bchat_born02 (chat)
@@ -929,16 +933,16 @@ Source: en.wikipedia.org · confidence 100%
 **user:** And Pirre Alanen?  
 _(asked: In what year was Pirre Alanen born? · year · SWAP_ENTITY)_  
 OK: **1965**.
-> Pirre Päivikki Alanen (previously Leino, née Pasanen, born 31 December 1965 in Helsinki, Finland) is the daughter of Pirjo and Spede Pasanen.
-Source: en.wikipedia.org · confidence 83%
+> Pirre Alanen (born 1965) is a Finnish woman best known as the only daughter of Pertti "Spede" Pasanen (1930-2001), the influential Finnish comedian, actor, film producer, and inventor renowned for his contributions to Fi
+Source: grokipedia.com · confidence 100%
 
 
 ### bchat_born03 (chat)
 **user:** In what year was Alexandros Pappas born?  
 _(asked: In what year was Alexandros Pappas born? · year · NEW)_  
-WRONG: Not sure, but possibly **1792**.
-> Born | 12 December 1792
-Source: en.wikipedia.org · confidence 46%
+OK: **1978**.
+> Alexandros Pappas (born 13 February 1978) is a Swedish retired professional footballer who primarily played as a defender.
+Source: grokipedia.com · confidence 100%
 
 **user:** And Lukáš Matyska?  
 _(asked: In what year was Lukáš Matyska born? · year · SWAP_ENTITY)_  
@@ -950,27 +954,29 @@ Source: en.wikipedia.org · confidence 100%
 ### bchat_founded00 (chat)
 **user:** In what year was Ginza Musik founded?  
 _(asked: In what year was Ginza Musik founded? · year · NEW)_  
-abstain: I couldn't find an answer I'd trust for that. (searched for: "In what year was Ginza Musik founded?")
+OK: **1968**.
+> Hans Haraldsson founded Ginza Musik (1968).
+Source: founders.io · confidence 100%
 
 **user:** And Storm Studios?  
 _(asked: In what year was Storm Studios founded? · year · SWAP_ENTITY)_  
-WRONG: Not sure, but possibly **1996**.
-> Founded | December 7, 1993 (as Marvel Films) August 7, 1996 (as Marvel Studios)
-Source: en.wikipedia.org · confidence 43%
+OK: **2001**.
+> Storm Studios is a funded company based in Oslo (Norway), founded in 2001 by Kristin Hellebust.
+Source: tracxn.com · confidence 100%
 
 
 ### bchat_founded01 (chat)
 **user:** In what year was Central European Gas Hub founded?  
 _(asked: In what year was Central European Gas Hub founded? · year · NEW)_  
-WRONG: **2013**.
-> Three universities have been set up since 2011 to foster competence in strategic economic areas: Nazarbayev University in Kazakhstan (first intake in 2011), an international research university, Inha University in Uzbeki
-Source: en.wikipedia.org · confidence 92%
+OK: **2005**.
+> The Central European Gas Hub (CEGH) was founded in 2005 as a wholly owned subsidiary of OMV Gas & Power GmbH, an Austrian energy company, to establish a virtual trading point (VTP) for natural gas in Central Europe.
+Source: grokipedia.com · confidence 100%
 
 **user:** And Nobina Sverige?  
 _(asked: In what year was Nobina Sverige founded? · year · SWAP_ENTITY)_  
-OK: **1990**.
-> Founded | 1 January 1990
-Source: en.wikipedia.org · confidence 83%
+WRONG: Probably **1932**.
+> Nobina is a company based in Solna (Sweden) founded in 1932..
+Source: thecompanycheck.com · confidence 63%
 
 
 ### bchat_founded02 (chat)
