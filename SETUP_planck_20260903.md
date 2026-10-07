@@ -225,6 +225,37 @@ What that does:
 
 The changed `settings.yml` makes the runner recreate SearXNG, which also clears today's suspensions; one recreate per config change is not a retry loop. G2 v2 collection takes ~75-90 min at 3 s/search. If engines still block, empty searches fall back to Wikipedia per question and each point records which backend answered it.
 
+### CORRECTION + Round 3b attempt 2 (2026-10-07 22:13, commit 9d58062)
+
+**Correction to "Round 3b attempt 1" above.** The "Gemma on our tools with SearXNG: 19.6%" result was **mostly Wikipedia search**:
+- Until this fix, a SearXNG run read the **Wikipedia cache first**, so results stored by earlier Wikipedia runs were served silently and counted as SearXNG.
+- In that run 131 of 151 result sets were Wikipedia-only; only ~20 questions really hit SearXNG.
+- The paired result (26 vs 5 against base chat, p = 0.0002) stands as a **mixed-search** result, not a SearXNG one.
+- The "SearXNG beats Wikipedia, 8 vs 0" comparison came from those ~20 real SearXNG questions: suggestive, not established.
+- Fixed:
+  - The fallback cache is read only after the primary search failed.
+  - Every run records which backend **served** each search (cache hits included) as `search_health.served` / `primary_share`.
+  - A "searxng" run with `primary_share` < 0.8 is labelled **DEGRADED** and redone (kept as `*_mixed`); G2 points collected the same way are re-collected.
+
+**Attempt 2 results (valid as mixed / mostly-Wikipedia search; training and evaluation saw the same mix):**
+
+| Policy (fresh + long-tail, 143) | Success | Answered | Wrong when answered | ECE |
+|---|---|---|---|---|
+| Heuristic | 21.0% | 81.8% | 74.4% | 0.47 |
+| Gemma on our tools | 19.6% | 29.4% | 33.3% | 0.26 |
+| **G2 v2, Planck** | 8.4% | 11.9% | 29.4% | 0.09 |
+| G2 v2, hash control | 3.5% | 5.6% | 37.5% | 0.35 |
+| Base chat (closed-book) | 4.9% | 98.6% | 95.0% | 0.95 |
+
+**G2 v2: FAIL under rule B.** It misses the seed bar (63.8% vs ≥ 86.1%), the fresh bar (8.4% vs the heuristic − 2 = 19.0%), wrong-when-answered < 5% (29.4%) and ECE < 0.05 (0.094). It does beat the hash control (8.4 vs 3.5; seed 63.8 vs 61.7).
+
+- **Much better than v1** (seed 2.1% → 63.8%). The design diagnosis was right.
+- **The choice head is real:** 49.0% vs the deterministic ranker's 36.4% on 143 held-out decision points (hash: 33.6%, below the ranker).
+- **The gate is calibrated** (AUC 0.78, ECE 0.05). At the pre-registered 90% precision target it answers ~5% of decision points (precision 1.0 on test).
+- **End to end it is a strict subset of the heuristic on fresh** (0 vs 18 discordant, p < 1e-4): never right where the heuristic is wrong. It just declines far more often, trading coverage for reliability (wrong 29% vs 74% when answering).
+
+**What the round says.** On fresh and long-tail questions **retrieval is the ceiling**: the right answer reaches the top-3 snippets only ~19-27% of the time, so every decision policy is capped near there. The learned decision layer is already better than the hand ranker at choosing; the next gain must come from **search**.
+
 ## 5. Reading the results
 
 | Question | Where | Good looks like |

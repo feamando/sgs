@@ -281,10 +281,14 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - The next design must decouple choice from answerability.
   - **G1 FAIL confirmed:** planck-rank 0.71, hertz-rank 0.70 (capacity is not the lever), ~0.7× the teacher at ~500x speed.
 - **G2 v2 built + pre-registered (2026-10-08):** choice head (candidates only) + calibrated answerability gate + τ = lowest threshold with validation precision ≥ 0.90; decision-level logging (argmax, gate, top-3); training data collected on SearXNG. Same rule-B bars. Runs inside `round3`, together with the SearXNG re-run of G0-fresh.
-- **Round 3b attempt 1 (2026-10-07, 59befff), result of record:**
+- **Round 3b attempt 1 (2026-10-07, 59befff), CORRECTED 2026-10-08 (it was mostly Wikipedia search via a cache-order bug; see SETUP_planck_20260903.md):**
   - Gemma on our tools **with SearXNG** answers 28/143 fresh + long-tail questions (19.6%) vs base chat 7/143 (4.9%): 26 vs 5 discordant, **p = 0.0002**. SearXNG beats Wikipedia search for the same policy (8 vs 0, p = 0.008).
   - G2 v2 did not run (the run predates the commit). SearXNG engines CAPTCHA-suspend for 24 h-7 d: load spread across 7 engines, Google removed, 3 s pacing.
-- **G3/G4:** after G2.
+- **Round 3b attempt 2 (9d58062), mixed / mostly-Wikipedia search:**
+  - **G2 v2 FAIL (rule B):** seed 63.8% (v1: 2.1%), fresh 8.4% vs heuristic 21.0%, wrong-when-answered 29%.
+  - The choice head beats the ranker (49.0 vs 36.4%); the gate is calibrated (AUC 0.78, ECE 0.05) but answers ~5% at 90% precision.
+  - Retrieval (answer in top-3 snippets ~19-27%) is the ceiling on fresh + long-tail. Cache-order bug fixed (`primary_share`, DEGRADED verdict, auto-redo).
+- **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
