@@ -95,6 +95,11 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
                 rate = (time.time() - t0) / i
                 print(f"  {i}/{len(todo)} ({rate:.1f}s/question, ~{rate * (len(todo) - i) / 60:.0f} min left; "
                       f"{empty} empty searches)", flush=True)
+    health = web.search_health() if hasattr(web, "search_health") else {}
+    if health:
+        write_json(out_path.with_suffix(".health.json"), health)
+        print(f"[g2] search health: {health['fallback_rate']:.0%} via Wikipedia fallback, "
+              f"{health['final_empty_rate']:.0%} empty")
     if todo and empty / len(todo) > 0.2:
         print(f"  ! {empty}/{len(todo)} searches came back empty: the search engine may be rate-limiting")
 

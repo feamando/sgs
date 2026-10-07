@@ -51,6 +51,8 @@ def build_web(args, log_path=None):
                       f"(start it with: .\\scripts\\planck3.ps1 searxng)")
             web.backend = "wikipedia"
     print(f"[planck3] search={web.backend} net={args.net} cache={args.cache_dir}")
+    if web.backend == "searxng" and args.net != "replay":
+        print("[planck3] empty SearXNG results are retried once, then fall back to Wikipedia per query")
     return web
 
 
@@ -232,6 +234,7 @@ def cmd_g0(args):
                  "graph": store.graph_stats(),
                  "cost": summarize_cost(records, prices),
                  "web_calls_network": {k: v for k, v in web.calls.items()},
+                 "search_health": web.search_health(),
                  "wall_s": round(time.time() - t_start, 1), "store_facts": store.n_facts(),
                  "top_domains": store.top_domains(8)})
     summ["gate"] = _g0_verdict(summ)
@@ -455,6 +458,10 @@ def _log_traj(path, task_id, res, correct, sub=None):
 
 
 def _g0_verdict(s):
+    sh = s.get("search_health")
+    if sh and not sh["valid"]:
+        return {"verdict": f"INVALID (search failed: {sh['final_empty_rate']:.0%} of searches empty)",
+                "note": "results without evidence; re-run when search works"}
     if "fresh" in str(s.get("tasks", "")):
         return {"verdict": "ROUND 3 (rules A/B)", "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"}
     if s["policy"] == "planck":

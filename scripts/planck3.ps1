@@ -76,7 +76,14 @@ $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
 
 $PLANCK_CKPT = "checkpoints/planck13/best.pt"
 $PLANCK_TOK  = "data/wikipedia/tokenizer.model"
-$HERTZ_CKPT  = "checkpoints/hertz/best.pt"
+# Hertz 1.2 lives under different names on different boxes: take the first that exists
+$HERTZ_CKPT  = @("checkpoints/hertz/best.pt", "checkpoints/hertz12/best.pt", "checkpoints/hertz12/final.pt") |
+    Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $HERTZ_CKPT) {
+    $m = Get-ChildItem -Path "checkpoints/hertz12" -Filter "milestone_*.pt" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending | Select-Object -First 1
+    $HERTZ_CKPT = if ($m) { $m.FullName } else { "checkpoints/hertz/best.pt" }
+}
 $HERTZ_TOK   = "data/hertz12_data/tokenizer.model"
 $GEMMA       = "models/gemma-4-e4b-it"
 $WR          = "data/planck3/wikirace"
@@ -163,7 +170,18 @@ function Do-Doctor([bool]$DeepRun) {
 # ── searxng ──────────────────────────────────────────────────────────────
 function Do-Searxng {
     if (-not (Test-Docker)) { Warn "Docker not found; search falls back to the Wikipedia API (still valid, narrower)"; return }
-    if (Test-Searx) { Log "SearXNG already up on :$SEARX_PORT"; return }
+    if (Test-Searx) { Log "SearXNG up and answering on :$SEARX_PORT"; return }
+    $running = (Invoke-Quiet docker @("ps", "--filter", "name=^$SEARX_NAME`$", "--format", "{{.Names}}")).Out -eq $SEARX_NAME
+    if ($running) {
+        # up but returning nothing = upstream engines rate-limit it; blocks are usually temporary
+        Warn "SearXNG is running but returns no results (upstream engines are rate-limiting it); waiting up to 10 min"
+        for ($i = 0; $i -lt 10; $i++) {
+            Start-Sleep -Seconds 60
+            if (Test-Searx) { Log "SearXNG answers again"; return }
+        }
+        Warn "still blocked: continuing; every empty SearXNG search falls back to Wikipedia (recorded per run as search_health)"
+        return
+    }
     $exists = (Invoke-Quiet docker @("ps", "-a", "--filter", "name=^$SEARX_NAME`$", "--format", "{{.Names}}")).Out -eq $SEARX_NAME
     if ($exists) {
         Log "starting existing SearXNG container"
@@ -264,6 +282,19 @@ function Do-G1 {
 }
 
 # ── round 3 (SETUP_planck_20260903.md) ────────────────────────────────────
+# A stage is done only if its summary is VALID: closed-book needs no search; every other run
+# needs search_health.valid (round 3's first attempt ran on a blocked search engine).
+function Test-ValidRun([string]$dir) {
+    if (-not (Test-Path "$dir/summary.json")) { return $false }
+    $j = Get-Content "$dir/summary.json" -Raw | ConvertFrom-Json
+    if ($j.mode -eq "closed_book") { return $true }
+    return ($null -ne $j.search_health) -and [bool]$j.search_health.valid
+}
+
+function Test-Newer([string]$a, [string]$b) {  # is $a newer than $b (or $b missing)?
+    if (-not (Test-Path $b)) { return $true }
+    return (Get-Item $a).LastWriteTime -gt (Get-Item $b).LastWriteTime
+}
 function Do-G0Fresh {
     $pol = Get-TeacherPolicy
     $sample = if ($Quick) { @("--sample", "12") } else { @() }
@@ -275,7 +306,8 @@ function Do-G0Fresh {
     $runs += @{ Name = "g0f_heuristic_snip$Tag"; Args = @("--policy", "heuristic"); What = "fresh/long-tail: heuristic (snippet-first)" }
     foreach ($r in $runs) {
         $out = "$RES/$($r.Name)"
-        if (Test-Path "$out/summary.json") { Log "SKIP $($r.Name) (exists)"; continue }
+        if (Test-ValidRun $out) { Log "SKIP $($r.Name) (valid)"; continue }
+        if (Test-Path "$out/summary.json") { Warn "$($r.Name) exists but is INVALID (search failed): re-running" }
         Log $r.What
         P3 (@("g0") + $r.Args + @("--tasks", $FRESH, "--out", $out, "--gemma-path", $GEMMA) + $sample)
     }
@@ -288,13 +320,18 @@ function Do-G2 {
     P3 (@("g2", "collect") + $lim)
     $encs = @("hash"); if ((Test-Path $PLANCK_CKPT) -and (Test-Path $PLANCK_TOK)) { $encs += "planck" }
     foreach ($e in $encs) {
-        if (-not (Test-Path "data/planck3/g2/emb_$e.npy") -or $Quick) {
+        $pts = "data/planck3/g2/points.jsonl"
+        if ((Test-Newer $pts "data/planck3/g2/emb_$e.npy") -or $Quick) {
             Log "G2 embed: $e"; P3 @("g2", "embed", "--encoder", $e, "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
         }
-        if (-not (Test-Path "$RES/g2_head_${e}_s0/head.pt") -or $Quick) { Log "G2 train head:$e"; P3 @("g2", "train", "--encoder", $e) }
+        if ((Test-Newer "data/planck3/g2/emb_$e.npy" "$RES/g2_head_${e}_s0/head.pt") -or $Quick) {
+            Log "G2 train head:$e"; P3 @("g2", "train", "--encoder", $e)
+        }
         foreach ($b in @(@{ P = "g0f"; T = $FRESH }, @{ P = "g0"; T = "scripts/assets/planck3_tasks.json" })) {
             $out = "$RES/$($b.P)_planck-g2-${e}$Tag"
-            if ((Test-Path "$out/summary.json") -and -not $Quick) { Log "SKIP $out (exists)"; continue }
+            if ((Test-ValidRun $out) -and -not (Test-Newer "$RES/g2_head_${e}_s0/head.pt" "$out/summary.json") -and -not $Quick) {
+                Log "SKIP $out (valid, head unchanged)"; continue
+            }
             Log "G2 eval head:$e on $($b.T)"
             $smp = if ($Quick) { @("--sample", "12") } else { @() }
             P3 (@("g0", "--policy", "planck", "--g2-head", "$RES/g2_head_${e}_s0/head.pt", "--tasks", $b.T, "--out", $out,

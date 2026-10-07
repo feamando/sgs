@@ -25,6 +25,12 @@ USER_AGENT = "Planck3-research/0.1 (+https://github.com/feamando/sgs; personal r
 FETCH_TIMEOUT = 15
 MAX_HTML_BYTES = 3_000_000
 MIN_SECONDS_PER_HOST = 1.0
+MIN_SECONDS_BETWEEN_SEARCHES = 1.5   # SearXNG's upstream engines block bursts (round 3, 2026-10-07)
+MAX_CONSECUTIVE_EMPTY = 15           # circuit breaker: abort instead of producing a run of empty results
+
+
+class SearchUnavailable(RuntimeError):
+    """Search keeps coming back empty even after fallback: the run must stop, not continue blind."""
 
 
 class WebCache:
@@ -77,33 +83,77 @@ class Web:
         self.log_path = log_path
         self._robots: dict[str, robotparser.RobotFileParser | None] = {}
         self._last_hit: dict[str, float] = {}
-        self.calls = {"search": 0, "fetch": 0, "search_net": 0, "fetch_net": 0}
+        self.calls = {"search": 0, "fetch": 0, "search_net": 0, "fetch_net": 0,
+                      "search_empty_primary": 0, "search_fallback": 0, "search_empty_final": 0}
+        self.fallback = True          # SearXNG empty -> retry once -> Wikipedia for that query
+        self._consecutive_empty = 0
+        self._last_search = 0.0
 
     # ── search ───────────────────────────────────────────────────────────
     def search(self, query: str) -> list[dict]:
         """Return [{url, title, snippet, domain}] (at most n_results)."""
         self.calls["search"] += 1
-        key = f"{self.backend}|{query}"
-        hit = self.cache.get("search", key)
-        if hit is not None:
-            return hit["results"][: self.n_results]
+        for backend in ([self.backend] + (["wikipedia"] if self.backend == "searxng" and self.fallback else [])):
+            hit = self.cache.get("search", f"{backend}|{query}")
+            if hit is not None and hit.get("results"):
+                self._consecutive_empty = 0
+                return hit["results"][: self.n_results]
         if not self.cache.online:
             return []
+        results = self._search_net(self.backend, query)
+        if not results and self.backend == "searxng":
+            self.calls["search_empty_primary"] += 1
+            time.sleep(2.0)
+            results = self._search_net("searxng", query)          # one retry: blocks are often transient
+            if not results and self.fallback:
+                results = self._search_net("wikipedia", query)
+                if results:
+                    self.calls["search_fallback"] += 1
+        if not results:
+            self.calls["search_empty_final"] += 1
+            self._consecutive_empty += 1
+            if self._consecutive_empty >= MAX_CONSECUTIVE_EMPTY:
+                raise SearchUnavailable(
+                    f"{self._consecutive_empty} searches in a row came back empty (backend {self.backend}, "
+                    f"fallback {'on' if self.fallback else 'off'}). The search engine is blocked or down: "
+                    f"stopping instead of producing results with no evidence. Wait, check `docker logs "
+                    f"planck3-searxng`, then re-run (finished work is kept).")
+        else:
+            self._consecutive_empty = 0
+        return results[: self.n_results]
+
+    def _search_net(self, backend: str, query: str) -> list[dict]:
         self.calls["search_net"] += 1
+        if backend == "searxng":
+            wait = MIN_SECONDS_BETWEEN_SEARCHES - (time.time() - self._last_search)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_search = time.time()
         try:
-            if self.backend == "searxng":
+            if backend == "searxng":
                 results = self._search_searxng(query)
-            elif self.backend == "wikipedia":
+            elif backend == "wikipedia":
                 results = self._search_wikipedia(query)
             else:
-                raise ValueError(f"unknown search backend {self.backend}")
-        except Exception as e:  # network errors must not kill a benchmark run
-            self._log({"event": "search_error", "query": query, "error": repr(e)})
+                raise ValueError(f"unknown search backend {backend}")
+        except ValueError:
+            raise
+        except Exception as e:  # network errors must not kill a benchmark run (the breaker handles streaks)
+            self._log({"event": "search_error", "backend": backend, "query": query, "error": repr(e)})
             return []
         if results:  # never cache "nothing": a rate-limited engine would poison every later run
-            self.cache.put("search", key, {"query": query, "backend": self.backend,
-                                           "at": now_iso(), "results": results})
-        return results[: self.n_results]
+            self.cache.put("search", f"{backend}|{query}", {"query": query, "backend": backend,
+                                                            "at": now_iso(), "results": results})
+        return results
+
+    def search_health(self) -> dict:
+        """Per-run search quality: a run with mostly empty searches is not evidence of anything."""
+        c = self.calls
+        n = max(c["search"], 1)
+        final = c["search_empty_final"] / n
+        return {"searches": c["search"], "primary_empty_rate": c["search_empty_primary"] / n,
+                "fallback_rate": c["search_fallback"] / n, "final_empty_rate": final,
+                "valid": final <= 0.2}
 
     def _search_searxng(self, query: str) -> list[dict]:
         r = self.session.get(f"{self.searxng_url}/search",
@@ -145,10 +195,11 @@ class Web:
         return out
 
     def searxng_alive(self) -> bool:
+        """Up AND answering: a blocked SearXNG still returns HTTP 200 with an empty result list."""
         try:
             r = self.session.get(f"{self.searxng_url}/search",
-                                 params={"q": "test", "format": "json"}, timeout=5)
-            return r.status_code == 200 and "results" in r.json()
+                                 params={"q": "Wikipedia", "format": "json"}, timeout=10)
+            return r.status_code == 200 and len(r.json().get("results", [])) > 0
         except Exception:
             return False
 

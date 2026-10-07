@@ -601,3 +601,51 @@ def test_benchgen_task_shape_offline(monkeypatch):
     assert t["question"] == "Who won the 2026 Test Cup final?" and t["regime"] == "fresh"
     assert t["gold"][:2] == ["Team A", "A FC"] and t["qid"] == "Q1" and t["gold_as_of"]
     assert bg._clean_desc("American footballer (born 1987)") is None   # answer-leaking description dropped
+
+
+# ── search robustness (round 3 failure: SearXNG blocked, HTTP 200 + empty results) ──
+def _web(tmp_path, monkeypatch, searx, wiki):
+    from src.planck3 import web as W
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    w = W.Web(W.WebCache(tmp_path / "cache"), search_backend="searxng")
+    monkeypatch.setattr(w, "_search_searxng", searx)
+    monkeypatch.setattr(w, "_search_wikipedia", wiki)
+    return w
+
+
+def test_search_falls_back_to_wikipedia_when_searxng_is_empty(tmp_path, monkeypatch):
+    hit = [{"url": "https://en.wikipedia.org/wiki/IKEA", "title": "IKEA", "snippet": "founded 1943", "domain": "en.wikipedia.org"}]
+    w = _web(tmp_path, monkeypatch, lambda q: [], lambda q: hit)
+    assert w.search("What year was IKEA founded?") == hit
+    h = w.search_health()
+    assert h["fallback_rate"] == 1.0 and h["final_empty_rate"] == 0.0 and h["valid"]
+    assert w.search("What year was IKEA founded?") == hit   # served from the wikipedia cache entry
+
+
+def test_search_circuit_breaker_stops_a_blind_run(tmp_path, monkeypatch):
+    from src.planck3.web import MAX_CONSECUTIVE_EMPTY, SearchUnavailable
+    w = _web(tmp_path, monkeypatch, lambda q: [], lambda q: [])
+    for i in range(MAX_CONSECUTIVE_EMPTY - 1):
+        assert w.search(f"q{i}") == []
+    with pytest.raises(SearchUnavailable):
+        w.search("one more")
+    assert not w.search_health()["valid"]
+    assert not list((tmp_path / "cache" / "search").glob("*.json"))   # failures are never cached
+
+
+def test_searxng_alive_needs_real_results(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    w = W.Web(W.WebCache(tmp_path / "c"))
+
+    class R:
+        status_code = 200
+
+        def __init__(self, results):
+            self._r = results
+
+        def json(self):
+            return {"results": self._r}
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R([]))
+    assert not w.searxng_alive()                                   # up but blocked = not alive
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R([{"url": "x"}]))
+    assert w.searxng_alive()

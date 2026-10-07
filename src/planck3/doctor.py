@@ -252,8 +252,14 @@ def run(deep: bool, ckpt: str, tok: str, gemma: str, searxng_url: str) -> int:
     d.git()
     d.network(searxng_url)
     d.planck(ckpt, tok, deep)
-    hertz_ckpt, hertz_tok = "checkpoints/hertz/best.pt", "data/hertz12_data/tokenizer.model"
-    if Path(hertz_ckpt).exists():  # optional G1 capacity arm (-Hertz); vocab check only
+    hertz_tok = "data/hertz12_data/tokenizer.model"
+    cands = ["checkpoints/hertz/best.pt", "checkpoints/hertz12/best.pt", "checkpoints/hertz12/final.pt"]
+    cands += sorted((str(p) for p in Path("checkpoints/hertz12").glob("milestone_*.pt")), reverse=True)
+    hertz_ckpt = next((c for c in cands if Path(c).exists()), None)
+    if hertz_ckpt is None:
+        d.add(WARN, "hertz checkpoint", "not found (looked in checkpoints/hertz/, checkpoints/hertz12/)",
+              "optional G1 capacity arm: copy Hertz 1.2 to checkpoints/hertz/best.pt")
+    if hertz_ckpt:  # optional G1 capacity arm; vocab check only
         n0 = len(d.rows)
         d.planck(hertz_ckpt, hertz_tok, deep=False)
         for r in d.rows[n0:]:
