@@ -1,0 +1,37 @@
+{
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_nll": 5.59798264503479,
+      "val_top1": 0.375
+    },
+    {
+      "epoch": 1,
+      "train_nll": 4.6399827003479,
+      "val_top1": 0.375
+    },
+    {
+      "epoch": 2,
+      "train_nll": 3.684532880783081,
+      "val_top1": 0.375
+    },
+    {
+      "epoch": 3,
+      "train_nll": 3.0840799808502197,
+      "val_top1": 0.375
+    }
+  ],
+  "best_val_top1": 0.375,
+  "temperature": 0.5287025049600002,
+  "val_heuristic_top1": 0.2,
+  "val_ece": 0.3056693822145462,
+  "val_answer_acc_at_0.5": 0.0,
+  "val_choice_acc": 0.6,
+  "val_points_with_gold": 5,
+  "val_none_acc": 1.0,
+  "val_points_without_gold": 3,
+  "encoder": "planck",
+  "seed": 0,
+  "n_train_points": 84,
+  "n_val_points": 8
+}

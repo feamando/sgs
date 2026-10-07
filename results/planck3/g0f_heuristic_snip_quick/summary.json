@@ -1,0 +1,119 @@
+{
+  "n": 12,
+  "success": 0.6666666666666666,
+  "answered_rate": 1.0,
+  "wrong_when_answered": 0.3333333333333333,
+  "abstain_rate": 0.0,
+  "ece": 0.30238911711758976,
+  "mean_steps": 4.833333333333333,
+  "mean_web_calls": 3.25,
+  "mean_decision_ms": 0.03787757756573887,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.8333333333333334
+    },
+    "fact": {
+      "n": 6,
+      "success": 0.5
+    }
+  },
+  "by_regime": {
+    "fresh": {
+      "n": 6,
+      "success": 0.5,
+      "wrong_when_answered": 0.5
+    },
+    "long_tail": {
+      "n": 6,
+      "success": 0.8333333333333334,
+      "wrong_when_answered": 0.16666666666666666
+    }
+  },
+  "policy": "heuristic",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.9166666666666666,
+  "serp_answer_rate_at3": 0.9166666666666666,
+  "depth_evidence_recall": 0.75,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.75,
+  "mean_answer_fetches": 0.25,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.8333333333333334,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 18,
+    "passages": 108,
+    "entities": 285,
+    "edges": 278,
+    "queries": 18,
+    "domains": 10
+  },
+  "cost": {
+    "usd_per_task": 2.542707753255618e-09,
+    "usd_per_correct": 3.8140616298834275e-09,
+    "usd_per_1k_tasks": 2.5427077532556183e-06,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 18,
+    "fetch": 21,
+    "search_net": 0,
+    "fetch_net": 3
+  },
+  "wall_s": 5.2,
+  "store_facts": 18,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.8461538461538461,
+      4.5
+    ],
+    [
+      "grokipedia.com",
+      0.7142857142857143,
+      1.5
+    ],
+    [
+      "alchetron.com",
+      0.6,
+      0.5
+    ],
+    [
+      "fifa.com",
+      0.6,
+      0.5
+    ],
+    [
+      "espn.com",
+      0.6,
+      0.5
+    ],
+    [
+      "founders.io",
+      0.6,
+      0.5
+    ],
+    [
+      "tracxn.com",
+      0.6,
+      0.5
+    ],
+    [
+      "tennis-db.com",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "ROUND 3 (rules A/B)",
+    "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"
+  }
+}

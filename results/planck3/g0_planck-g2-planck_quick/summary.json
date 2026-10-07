@@ -1,0 +1,118 @@
+{
+  "n": 12,
+  "success": 0.0,
+  "answered_rate": 0.0,
+  "wrong_when_answered": 0.0,
+  "abstain_rate": 1.0,
+  "ece": null,
+  "mean_steps": 10.0,
+  "mean_web_calls": 10.0,
+  "mean_decision_ms": 14.692777498081947,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 0.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.0
+    },
+    "fact": {
+      "n": 4,
+      "success": 0.0
+    }
+  },
+  "by_regime": {
+    "seed": {
+      "n": 12,
+      "success": 0.0,
+      "wrong_when_answered": 0.0
+    }
+  },
+  "policy": "planck",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 1.0,
+  "serp_answer_rate_at3": 1.0,
+  "depth_evidence_recall": 1.0,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 7.833333333333333,
+  "mean_answer_fetches": 5.666666666666667,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.0,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 0,
+    "passages": 124,
+    "entities": 218,
+    "edges": 219,
+    "queries": 26,
+    "domains": 11
+  },
+  "cost": {
+    "usd_per_task": 2.0406635414002705e-06,
+    "usd_per_correct": null,
+    "usd_per_1k_tasks": 0.0020406635414002704,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 26,
+    "fetch": 94,
+    "search_net": 0,
+    "fetch_net": 0
+  },
+  "wall_s": 16.0,
+  "store_facts": 0,
+  "top_domains": [
+    [
+      "medium.com",
+      0.4,
+      0.5
+    ],
+    [
+      "linkedin.com",
+      0.4,
+      0.5
+    ],
+    [
+      "britannica.com",
+      0.4,
+      0.5
+    ],
+    [
+      "lego.com",
+      0.4,
+      0.5
+    ],
+    [
+      "nintendo.fandom.com",
+      0.4,
+      0.5
+    ],
+    [
+      "playstation.fandom.com",
+      0.4,
+      0.5
+    ],
+    [
+      "sony.com",
+      0.4,
+      0.5
+    ],
+    [
+      "instagram.com",
+      0.3333333333333333,
+      1.0
+    ]
+  ],
+  "gate": {
+    "verdict": "G2 (rule B)",
+    "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_nll": 5.628895998001099,
+      "val_top1": 0.375
+    },
+    {
+      "epoch": 1,
+      "train_nll": 4.866499185562134,
+      "val_top1": 0.375
+    },
+    {
+      "epoch": 2,
+      "train_nll": 3.7341995239257812,
+      "val_top1": 0.5
+    },
+    {
+      "epoch": 3,
+      "train_nll": 2.4045896530151367,
+      "val_top1": 0.625
+    },
+    {
+      "epoch": 4,
+      "train_nll": 1.5623392462730408,
+      "val_top1": 0.625
+    },
+    {
+      "epoch": 5,
+      "train_nll": 1.0509926080703735,
+      "val_top1": 0.625
+    },
+    {
+      "epoch": 6,
+      "train_nll": 0.7632966339588165,
+      "val_top1": 0.625
+    }
+  ],
+  "best_val_top1": 0.625,
+  "temperature": 0.9317544625032635,
+  "val_heuristic_top1": 0.2,
+  "val_ece": 0.28145384741947055,
+  "val_answer_acc_at_0.5": 0.0,
+  "val_choice_acc": 0.4,
+  "val_points_with_gold": 5,
+  "val_none_acc": 1.0,
+  "val_points_without_gold": 3,
+  "encoder": "hash",
+  "seed": 0,
+  "n_train_points": 84,
+  "n_val_points": 8
+}

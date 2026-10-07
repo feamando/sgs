@@ -1,0 +1,104 @@
+{
+  "n": 12,
+  "success": 0.0,
+  "answered_rate": 0.0,
+  "wrong_when_answered": 0.0,
+  "abstain_rate": 1.0,
+  "ece": null,
+  "mean_steps": 6.25,
+  "mean_web_calls": 6.25,
+  "mean_decision_ms": 10.189625329027573,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.0
+    },
+    "fact": {
+      "n": 6,
+      "success": 0.0
+    }
+  },
+  "by_regime": {
+    "fresh": {
+      "n": 6,
+      "success": 0.0,
+      "wrong_when_answered": 0.0
+    },
+    "long_tail": {
+      "n": 6,
+      "success": 0.0,
+      "wrong_when_answered": 0.0
+    }
+  },
+  "policy": "planck",
+  "search": "searxng",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json",
+  "n_invalid_decisions": 0,
+  "gold_reachable": 1.0,
+  "serp_answer_rate_at3": 0.9166666666666666,
+  "depth_evidence_recall": 0.75,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 4.75,
+  "mean_answer_fetches": 3.25,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.0,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "graph": {
+    "facts": 0,
+    "passages": 108,
+    "entities": 277,
+    "edges": 272,
+    "queries": 18,
+    "domains": 5
+  },
+  "cost": {
+    "usd_per_task": 8.845160875891992e-07,
+    "usd_per_correct": null,
+    "usd_per_1k_tasks": 0.0008845160875891991,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 18,
+    "fetch": 57,
+    "search_net": 0,
+    "fetch_net": 0
+  },
+  "wall_s": 6.3,
+  "store_facts": 0,
+  "top_domains": [
+    [
+      "names.org",
+      0.4,
+      0.5
+    ],
+    [
+      "thecompanycheck.com",
+      0.4,
+      0.5
+    ],
+    [
+      "olympics.com",
+      0.4,
+      0.5
+    ],
+    [
+      "facebook.com",
+      0.3333333333333333,
+      1.0
+    ],
+    [
+      "tracxn.com",
+      0.3333333333333333,
+      1.0
+    ]
+  ],
+  "gate": {
+    "verdict": "ROUND 3 (rules A/B)",
+    "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"
+  }
+}
