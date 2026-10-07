@@ -201,6 +201,29 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 - **Rival clarified (2026-09-29):** cost is vs **base Claude/ChatGPT**, and the product is **direct answer + retrieval in depth** ("Brain for the web"). Added the closed-book base-chat comparator (`g0 --closed-book`) and the depth pack on every answer: ranked passages across everything read + snippets, mirror dedup, sources, related memory, no LLM and no extra fetches. Added `depth_evidence_recall`.
 - **Graph grows with use (2026-09-29):** the store now keeps passages, a co-mention entity graph, the interest log and user feedback. `digest` / "For you" serves interests + adjacent entities from trusted sources only; `--explore` is the continuous-retrieval loop.
 - **Mac v3 (heuristic, Wikipedia search, 47 tasks):** direct answer 48.9% · search-only 55.3% · **depth evidence recall 78.7%**. The evidence pack holds the right value far more often than the one-line answer is right, so the depth layer already carries value before any model is trained. One benchmark pass grew the graph to **258 passages / 477 entities**. A repeat question in the web chat came back from memory with 6 evidence passages and 0 web calls.
+- **FIRST FULL RUN on the 4090 (2026-10-05, commit aec21e6, 19 min, SearXNG): results of record.**
+  - **G0 (47 tasks):**
+    - Gemma on our tools 68.1% (verdict PASS, 5,486 tok/task, $8.74 per 1k correct at Haiku prices)
+    - base chat (Gemma closed-book) 95.7% (82 tok/task, $0.11 per 1k correct)
+    - heuristic floor 61.7%
+    - search-only @3 **95.7%** (Wikipedia search on the Mac: 55.3%)
+    - depth evidence recall 1.000 (snippets are in the pack, so this tracks search-only; generous metric)
+    - `gold_reachable` 80.9%
+  - **G0 errors:**
+    - The teacher misses are reading errors: "Kanbarra", subject echoes ("One Hundred Years of Solitude" for its author), later product variants.
+    - Two wrong answers came with p=0.00, so an ANSWER-below-τ gate would turn them into abstains.
+    - Base chat's 2 misses are confident and unsourced: Zalando HQ "Dusseldorf" (it is Berlin) and Spotify 2008 (launch vs founding).
+  - **G1 (1,192 held-out races):**
+    - head:planck **21.1%**, lexical 15.3%, head:hash 14.6%, random 0.1%, Gemma teacher 30.0% (first 100 pairs)
+    - Planck features add **+6.5 pts** over the identical head on hash features, and at full data the Planck head now beats the untrained lexical baseline (it did not on the quick set).
+    - Speed: 0.43 ms warm vs Gemma 223 ms (~500x); cold CPU median 94 ms / p90 536 ms.
+    - **Pre-registered verdict: FAIL** (head/teacher 0.70 < 0.8).
+    - Caveats: one seed, and the teacher ran on a 100-pair subset, so the ratio is unpaired. The eval does not yet save per-pair outcomes.
+- **What the run says to do next:**
+  1. **Snippet-first extraction.** With open-web search the answer is in the top-3 snippets 95.7% of the time, while reading full pages is where the teacher's errors come from. It is cheaper (0 fetches) and likely more accurate.
+  2. **A fresh + long-tail benchmark.** On stable facts base chat is 95.7%, so the rival must be tested where its memory ends.
+  3. **G1 in order:** a paired eval on the teacher subset + 2 more seeds, then a training-objective fix (distance regression on the full BFS labels / DAgger), then the Hertz encoder ablation (the plan's FAIL branch).
+  4. **An ANSWER-below-τ abstain gate** in the harness.
 - **G2-G4:** after G1.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
