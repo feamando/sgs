@@ -102,8 +102,8 @@ def mentions(sentence: str, answer_type: str) -> list[tuple[str, int]]:
             val = m.group(1) + (f" {m.group(2)}" if m.group(2) else "")
             out.append((val, m.start()))
         return out
-    if answer_type == "entity":
-        return _entities(sentence)
+    if answer_type == "entity":  # a month or weekday is never the answer to a who/which question
+        return [(e, o) for e, o in _entities(sentence) if not (set(norm_text(e).split()) & _NOT_NODES)]
     if answer_type == "text":
         return [(sentence, 0)]
     raise ValueError(f"unknown answer_type {answer_type}")
@@ -146,6 +146,20 @@ def span_candidates(question: str, text: str, answer_type: str, url: str = "",
     return _rank_lines(question, lines, answer_type, limit)
 
 
+def title_aboutness(question: str, title: str) -> float:
+    """
+    Is this result ABOUT the question's subject? Title core (site suffixes like " - Wikipedia"
+    dropped), then overlap over union, so "Netflix Animation" (0.5) ranks below "Netflix" (1.0)
+    for a question about Netflix. 0.5 when the question has no recognisable subject.
+    """
+    subject = main_entity(question)
+    s_words = set(norm_text(subject).split()) if subject else set()
+    if not s_words:
+        return 0.5
+    t_words = set(content_words(re.split(r"\s[-|–—:·]\s", title)[0]))
+    return round(len(s_words & t_words) / len(s_words | t_words), 3) if t_words else 0.0
+
+
 def snippet_candidates(question: str, results: list[dict], answer_type: str,
                        limit: int = MAX_SPAN_CANDIDATES) -> list[dict]:
     """
@@ -155,16 +169,7 @@ def snippet_candidates(question: str, results: list[dict], answer_type: str,
     """
     # aboutness: a snippet from a page ABOUT the subject (title names it) is evidence; a snippet
     # from another page that merely mentions it ("Netflix Animation" for "Netflix founded") is not
-    subject = main_entity(question)
-    s_words = set(norm_text(subject).split()) if subject else set()
-    about = {}
-    for r in results:
-        # title core: drop site suffixes ("IKEA - Wikipedia", "X | Britannica"); then overlap over
-        # union, so "Netflix Animation" (0.5) ranks below "Netflix" (1.0) for a question about Netflix
-        core = re.split(r"\s[-|–—:·]\s", r.get("title", ""))[0]
-        t_words = set(content_words(core))
-        frac = len(s_words & t_words) / len(s_words | t_words) if s_words else 0.5
-        about[r["url"]] = round(frac, 3)
+    about = {r["url"]: title_aboutness(question, r.get("title", "")) for r in results}
     lines = [(sent, r["url"]) for r in results for sent in split_sentences(r.get("snippet", ""))]
     cands = _rank_lines(question, lines, answer_type, limit=10**6, domain_bonus=0.1,
                         line_bonus={u: 0.4 * a - (0.3 if a == 0 else 0.0) for u, a in about.items()})

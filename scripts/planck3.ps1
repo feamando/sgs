@@ -1,7 +1,8 @@
 <#
  .SYNOPSIS
    Planck 3.0 one-stop runner for the Windows 4090 box.
-   Step-by-step guide: SETUP_planck_20260901.md   Plan: SETUP_092026_planck3.md
+   Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3)
+   Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
    Every stage is idempotent: finished outputs are skipped, so re-running after
@@ -23,6 +24,8 @@
      g1        G1: Wikiracing: graph -> tasks -> embed -> heads (nll + rank) per seed (-Seeds 0,1,2)
                -> eval vs random/lexical/Gemma (teacher on 300 races, cached) -> paired stats -> aggregate
                -Hertz adds the Hertz 1.2 encoder arm (needs checkpoints/hertz/best.pt)
+     round3    round 3 (SETUP_planck_20260903.md): fresh + long-tail benchmark vs base chat, G2 (learn the
+               decisions from known answers), G1 confirmation (new task seed, seeds 3-5, rank primary, Hertz)
      report    every result in one table -> results/planck3/REPORT.md
      py        pass-through: .\scripts\planck3.ps1 py wikirace eval --limit 50
 
@@ -81,6 +84,8 @@ $RES         = "results/planck3"
 $SEARX_NAME  = "planck3-searxng"
 $SEARX_PORT  = 8888
 $TASK_NAME   = "Planck3Explore"
+$FRESH       = "scripts/assets/planck3_tasks_fresh.json"
+$G2_TRAIN    = "scripts/assets/planck3_g2_train_tasks.json"
 $Tag         = if ($Quick) { "_quick" } else { "" }
 $script:LogFile = $null
 
@@ -258,6 +263,79 @@ function Do-G1 {
     }
 }
 
+# ── round 3 (SETUP_planck_20260903.md) ────────────────────────────────────
+function Do-G0Fresh {
+    $pol = Get-TeacherPolicy
+    $sample = if ($Quick) { @("--sample", "12") } else { @() }
+    $runs = @()
+    if ($pol -ne "heuristic") {
+        $runs += @{ Name = "g0f_${pol}_closedbook$Tag"; Args = @("--policy", $pol, "--closed-book"); What = "fresh/long-tail: base chat ($pol closed-book)" }
+        $runs += @{ Name = "g0f_${pol}_snip$Tag"; Args = @("--policy", $pol); What = "fresh/long-tail: $pol on our tools (snippet-first)" }
+    } else { Warn "no Gemma: the fresh benchmark runs without the base-chat rival" }
+    $runs += @{ Name = "g0f_heuristic_snip$Tag"; Args = @("--policy", "heuristic"); What = "fresh/long-tail: heuristic (snippet-first)" }
+    foreach ($r in $runs) {
+        $out = "$RES/$($r.Name)"
+        if (Test-Path "$out/summary.json") { Log "SKIP $($r.Name) (exists)"; continue }
+        Log $r.What
+        P3 (@("g0") + $r.Args + @("--tasks", $FRESH, "--out", $out, "--gemma-path", $GEMMA) + $sample)
+    }
+}
+
+function Do-G2 {
+    if (-not (Test-Path $G2_TRAIN)) { throw "missing $G2_TRAIN (git pull: generated on the Mac from Wikidata and committed)" }
+    $lim = if ($Quick) { @("--limit", "100") } else { @() }
+    Log "G2 collect: labelled decision points from known answers (resumable; 1 search + 1 page per question)"
+    P3 (@("g2", "collect") + $lim)
+    $encs = @("hash"); if ((Test-Path $PLANCK_CKPT) -and (Test-Path $PLANCK_TOK)) { $encs += "planck" }
+    foreach ($e in $encs) {
+        if (-not (Test-Path "data/planck3/g2/emb_$e.npy") -or $Quick) {
+            Log "G2 embed: $e"; P3 @("g2", "embed", "--encoder", $e, "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
+        }
+        if (-not (Test-Path "$RES/g2_head_${e}_s0/head.pt") -or $Quick) { Log "G2 train head:$e"; P3 @("g2", "train", "--encoder", $e) }
+        foreach ($b in @(@{ P = "g0f"; T = $FRESH }, @{ P = "g0"; T = "scripts/assets/planck3_tasks.json" })) {
+            $out = "$RES/$($b.P)_planck-g2-${e}$Tag"
+            if ((Test-Path "$out/summary.json") -and -not $Quick) { Log "SKIP $out (exists)"; continue }
+            Log "G2 eval head:$e on $($b.T)"
+            $smp = if ($Quick) { @("--sample", "12") } else { @() }
+            P3 (@("g0", "--policy", "planck", "--g2-head", "$RES/g2_head_${e}_s0/head.pt", "--tasks", $b.T, "--out", $out,
+                  "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) + $smp)
+        }
+    }
+}
+
+function Do-G1Confirm {
+    # PRE-REGISTERED (SETUP_planck_20260903.md): new task seed 1 (new targets + test races), model seeds
+    # 3-5, primary = head:planck-rank; Hertz arms included whenever the checkpoint is present.
+    $tt = "_t1"
+    if ((Get-TasksFormat "$WR/tasks$tt") -lt 2) { Log "G1 confirm: new task set (seed 1)"; P3 @("wikirace", "tasks", "--seed", "1", "--tag", $tt) }
+    $haveHertz = (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    if ($haveHertz -and -not (Test-Path "$WR/emb_hertz.npy")) {
+        Log "G1 embed: Hertz 1.2 (640M) over the graph"; P3 @("wikirace", "embed", "--encoder", "hertz", "--checkpoint", $HERTZ_CKPT, "--tokenizer", $HERTZ_TOK)
+    }
+    $arms = @(@{ Enc = "hash"; Obj = "nll" }, @{ Enc = "planck"; Obj = "nll" }, @{ Enc = "planck"; Obj = "rank" })
+    if ($haveHertz) { $arms += @{ Enc = "hertz"; Obj = "nll" }; $arms += @{ Enc = "hertz"; Obj = "rank" } } else { Warn "no Hertz checkpoint: confirmation runs without the Hertz arm" }
+    $seeds = if ($Quick) { @(3) } else { @(3, 4, 5) }
+    foreach ($sd in $seeds) {
+        foreach ($a in $arms) {
+            $key = if ($a.Obj -eq "nll") { $a.Enc } else { "$($a.Enc)-$($a.Obj)" }
+            if (-not (Test-Path "$RES/g1_head_${key}_s$sd$tt/head.pt")) {
+                Log "G1 confirm train head:$key seed=$sd"
+                P3 @("wikirace", "train", "--encoder", $a.Enc, "--objective", $a.Obj, "--seed", "$sd", "--tag", $tt)
+            }
+        }
+        Log "G1 confirm eval seed=$sd (primary head:planck-rank)"
+        $a = @("wikirace", "eval", "--policies", "random,lexical,heads,gemma", "--seed", "$sd", "--tag", $tt,
+               "--primary", "head:planck-rank", "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK, "--gemma-path", $GEMMA)
+        if ($Quick) { $a += @("--limit", "100", "--teacher-limit", "20") }
+        if ($sd -ne $seeds[0]) { $a += "--no-latency" }
+        P3 $a
+    }
+    if ($seeds.Count -gt 1) {
+        Log "G1 confirm aggregate (seeds 3,4,5, primary head:planck-rank)"
+        P3 @("wikirace", "aggregate", "--seeds", "3,4,5", "--tag", $tt, "--primary", "head:planck-rank")
+    }
+}
+
 # ── results back to git (readable from any machine) ──────────────────────
 function Do-Push {
     if ($NoPush) { Log "-NoPush: results left uncommitted"; return }
@@ -312,6 +390,20 @@ switch ($Command.ToLower()) {
     "schedule"   { Do-Schedule }
     "unschedule" { Do-Unschedule }
     "py"         { P3 @((@($Question) + $Rest) | Where-Object { $_ }) }
+    "round3"     {
+        Start-RunLog "round3"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Doctor $true
+        Do-Searxng
+        Do-G0Fresh
+        Do-G2
+        if (-not $Quick) { Do-G1Confirm } else { Log "-Quick: G1 confirmation skipped" }
+        P3 @("report")
+        Log ("round3$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
     "all"        {
         Start-RunLog "all"
         $t0 = Get-Date

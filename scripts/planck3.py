@@ -60,7 +60,10 @@ def add_web_args(p):
     p.add_argument("--net", default="live", choices=["live", "replay", "refresh"],
                    help="live: cache-then-network (default); replay: cache only; refresh: network only")
     p.add_argument("--cache-dir", default=str(CACHE))
-    p.add_argument("--policy", default="heuristic", choices=["heuristic", "gemma", "bedrock"])
+    p.add_argument("--policy", default="heuristic", choices=["heuristic", "gemma", "bedrock", "planck"])
+    p.add_argument("--g2-head", default=None, help="planck policy: results/planck3/g2_head_<enc>_s<seed>/head.pt")
+    p.add_argument("--planck-checkpoint", default="checkpoints/planck13/best.pt")
+    p.add_argument("--planck-tokenizer", default="data/wikipedia/tokenizer.model")
     p.add_argument("--gemma-path", default="models/gemma-4-e4b-it")
     p.add_argument("--model-id", default=None, help="Bedrock model id (bedrock policy)")
     p.add_argument("--region", default=None)
@@ -68,6 +71,11 @@ def add_web_args(p):
 
 
 def make_policy(args):
+    if args.policy == "planck":
+        from src.planck3.g2 import PlanckPolicy
+        if not args.g2_head:
+            raise SystemExit("--policy planck needs --g2-head results/planck3/g2_head_<enc>_s<seed>/head.pt")
+        return PlanckPolicy(args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer)
     from src.planck3.policies import make_policy as mk
     return mk(args.policy, gemma_path=args.gemma_path, model_id=args.model_id,
               region=args.region, profile=args.profile)
@@ -200,6 +208,7 @@ def cmd_g0(args):
     runners = {"fact": _run_fact_task, "compare": _run_compare_task, "chat": _run_chat_task}
     for i, task in enumerate(tasks, 1):
         rec, card = runners[task["family"]](task, ctx)
+        rec["regime"] = task.get("regime", "seed")
         append_jsonl(res_path, rec)
         records.append(rec)
         cards.append(card)
@@ -297,7 +306,7 @@ def _run_closed_book(args, tasks, run):
         rec = {"task_id": task["id"], "family": task["family"], "answered": all(p["answered"] for p in parts),
                "correct": all(p["correct"] for p in parts), "p": 1.0 if all(p["answered"] for p in parts) else 0.0,
                "steps": len(parts), "web_calls": 0, "decision_ms": [p["ms"] for p in parts], "cost": cost,
-               "answers": [p["answer"] for p in parts]}
+               "answers": [p["answer"] for p in parts], "regime": task.get("regime", "seed")}
         append_jsonl(res_path, rec)
         records.append(rec)
         print(f"[{i:>3}/{len(tasks)}] {'OK ' if rec['correct'] else 'XX '} {task['id']:<4} {' | '.join(rec['answers'])[:60]}")
@@ -446,6 +455,10 @@ def _log_traj(path, task_id, res, correct, sub=None):
 
 
 def _g0_verdict(s):
+    if "fresh" in str(s.get("tasks", "")):
+        return {"verdict": "ROUND 3 (rules A/B)", "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"}
+    if s["policy"] == "planck":
+        return {"verdict": "G2 (rule B)", "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"}
     if s["policy"] == "heuristic":
         return {"verdict": "BASELINE", "note": "heuristic is the no-model floor; the G0 gate applies to teachers"}
     if s["success"] >= G0_PASS:
@@ -516,7 +529,7 @@ def cmd_doctor(args):
 def cmd_report(args):
     """One table for every run under results/planck3/, written to REPORT.md (committed by the runner)."""
     lines = [f"# Planck 3.0 results ({datetime.now():%Y-%m-%d %H:%M})", ""]
-    g0 = sorted(RESULTS.glob("g0_*/summary.json"))
+    g0 = sorted(RESULTS.glob("g0*_*/summary.json"))  # g0_ = seed benchmark, g0f_ = fresh + long-tail
     if g0:
         lines += ["## G0 (seed benchmark)", "",
                   "| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | answer fetches/task | from snippet | gated | $/correct | LLM tok/task | verdict |",
@@ -534,6 +547,27 @@ def cmd_report(args):
                          f"{f('gated_rate')} | {per_ok} | {c.get('llm_tokens_per_task', 0):.0f} | "
                          f"{s.get('gate', {}).get('verdict', '')} |")
         lines += ["", *_vs_rival(rows), ""]
+        reg_lines = []
+        for name, s in rows.items():
+            br = s.get("by_regime") or {}
+            if any(k != "seed" for k in br):
+                reg_lines.append(f"| {name} | " + " | ".join(
+                    f"{k}: {v['success']:.3f} (n={v['n']}, wrong {v['wrong_when_answered']:.3f})" for k, v in sorted(br.items())) + " |")
+        if reg_lines:
+            lines += ["### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)", "",
+                      "| run | per regime: success (n, wrong when answered) |", "|---|---|", *reg_lines, ""]
+    g2 = sorted(RESULTS.glob("g2_head_*/train_log.json"))
+    if g2:
+        lines += ["## G2 heads (learned from known answers)", "",
+                  "| head | train points | val points with a right candidate | learned choice accuracy | deterministic ranker | 'none' correct (points without one) | val ECE | answer accuracy when p >= 0.5 |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for p in g2:
+            t = read_json(p)
+            lines.append(f"| {p.parent.name} | {t['n_train_points']} | {t.get('val_points_with_gold', '')} | "
+                         f"{t.get('val_choice_acc', 0):.3f} | {t['val_heuristic_top1']:.3f} | "
+                         f"{t.get('val_none_acc', 0):.3f} ({t.get('val_points_without_gold', '')}) | {t['val_ece']:.3f} | "
+                         f"{t['val_answer_acc_at_0.5']:.3f} |")
+        lines.append("")
     g1 = sorted(RESULTS.glob("g1_eval_*/summary.json"))
     for p in g1:
         s = read_json(p)
@@ -584,7 +618,10 @@ def _vs_rival(rows):
         if "_closedbook" in name or s.get("mode") == "closed_book":
             continue
         pol = str(s.get("policy", "")).split(" ")[0]
-        rival = rows.get(f"g0_{pol}_closedbook" + ("_quick" if "_quick" in name else ""))
+        prefix = name.split("_")[0]  # g0 = seed benchmark, g0f = fresh + long-tail benchmark
+        rival = rows.get(f"{prefix}_{pol}_closedbook" + ("_quick" if "_quick" in name else "")) or \
+            next((r for n, r in rows.items() if n.startswith(f"{prefix}_") and "_closedbook" in n
+                  and ("_quick" in n) == ("_quick" in name)), None)
         if not rival:
             continue
         a, b = s.get("cost") or {}, rival.get("cost") or {}
@@ -689,8 +726,9 @@ def main():
     p = sub.add_parser("report")
     p.set_defaults(fn=cmd_report)
 
-    from src.planck3 import wikirace
+    from src.planck3 import g2, wikirace
     wikirace.add_cli(sub)
+    g2.add_cli(sub, add_web_args, build_web)
 
     args = ap.parse_args()
     args.fn(args)

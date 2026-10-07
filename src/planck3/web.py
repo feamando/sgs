@@ -100,8 +100,9 @@ class Web:
         except Exception as e:  # network errors must not kill a benchmark run
             self._log({"event": "search_error", "query": query, "error": repr(e)})
             return []
-        self.cache.put("search", key, {"query": query, "backend": self.backend,
-                                       "at": now_iso(), "results": results})
+        if results:  # never cache "nothing": a rate-limited engine would poison every later run
+            self.cache.put("search", key, {"query": query, "backend": self.backend,
+                                           "at": now_iso(), "results": results})
         return results[: self.n_results]
 
     def _search_searxng(self, query: str) -> list[dict]:
@@ -121,6 +122,15 @@ class Web:
         return out[:20]
 
     def _search_wikipedia(self, query: str) -> list[dict]:
+        hits = self._wikipedia_api(query)
+        if not hits:  # the API matches ALL words: a long question can find nothing; retry with its subject
+            from .candidates import main_entity
+            subject = main_entity(query)
+            if subject and subject != query:
+                hits = self._wikipedia_api(subject)
+        return hits
+
+    def _wikipedia_api(self, query: str) -> list[dict]:
         r = self.session.get("https://en.wikipedia.org/w/api.php", params={
             "action": "query", "list": "search", "srsearch": query,
             "format": "json", "srlimit": 10}, timeout=FETCH_TIMEOUT)

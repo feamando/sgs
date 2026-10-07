@@ -561,3 +561,43 @@ def test_aggregate_over_seeds(tmp_path):
     s = _json.loads((tmp_path / "agg" / "summary.json").read_text(encoding="utf-8"))
     assert abs(s["policies"]["head:planck"]["mean"] - 0.22) < 1e-9 and s["policies"]["head:planck"]["ci95"]
     assert s["gate"]["verdict"] == "FAIL" and abs(s["paired_ratio_vs_teacher"]["head:planck"]["mean"] - 0.7333) < 1e-3
+
+
+# ── G2: learn the decisions from known answers ───────────────────────────
+def test_g2_collect_train_and_policy(tmp_path, monkeypatch):
+    import json as _json
+    from src.planck3 import g2
+    tasks = [{"id": f"t{i}", "family": "fact", "question": "What year was IKEA founded?", "answer_type": "year",
+              "gold": ["1943"]} for i in range(12)]
+    pts = tmp_path / "points.jsonl"
+    g2.collect(tasks, SnippetWeb(), pts)
+    rows = [_json.loads(l) for l in open(pts, encoding="utf-8")]
+    assert rows and {r["source"] for r in rows} == {"snippet", "page"}
+    snip = next(r for r in rows if r["source"] == "snippet")
+    assert any(snip["labels"]) and snip["cands"][snip["labels"].index(True)]["value"] == "1943"
+    g2.collect(tasks, SnippetWeb(), pts)                                  # resumable: nothing re-collected
+    assert len([_json.loads(l) for l in open(pts, encoding="utf-8")]) == len(rows)
+    emb = tmp_path / "g2"
+    g2.embed(pts, "hash", emb)
+    g2.train(pts, emb, "hash", tmp_path / "head", epochs=2, seed=0)
+    log = _json.loads((tmp_path / "head" / "train_log.json").read_text(encoding="utf-8"))
+    assert 0 <= log["best_val_top1"] <= 1 and log["temperature"] > 0
+    pol = g2.PlanckPolicy(str(tmp_path / "head" / "head.pt"))
+    store = Store(tmp_path / "s.sqlite")
+    res = Harness(pol, SnippetWeb(), store).run_fact("What year was IKEA founded?", "year")
+    assert res["steps"] >= 2 and res["invalid"] == 0                       # a legal typed trajectory
+    feats = g2.features({"value": "IKEA", "score": 1, "margin": 0.1}, "What year was IKEA founded?", "year", 0, 3, True)
+    assert len(feats) == g2.N_FEAT and feats[6] == 1.0                     # subject echo flagged
+    store.close()
+
+
+def test_benchgen_task_shape_offline(monkeypatch):
+    from src.planck3 import benchgen as bg
+    rows = [{"item": "http://www.wikidata.org/entity/Q1", "itemLabel": "2026 Test Cup final", "ans": "x",
+             "ansLabel": "Team A", "aliases": "A FC|Team A Club"}]
+    monkeypatch.setattr(bg, "sparql", lambda q: rows if "P1346" in q and "P585" in q else [])
+    tasks = bg.generate("bench")
+    t = tasks[0]
+    assert t["question"] == "Who won the 2026 Test Cup final?" and t["regime"] == "fresh"
+    assert t["gold"][:2] == ["Team A", "A FC"] and t["qid"] == "Q1" and t["gold_as_of"]
+    assert bg._clean_desc("American footballer (born 1987)") is None   # answer-leaking description dropped

@@ -4,7 +4,7 @@ Scoring + calibration.
 Correctness rules (per answer_type), documented so the gate is auditable:
     year     exact 4-digit year match
     number   numeric value within 0.5% of any gold (units ignored)
-    date     normalized string equal, or same year+day digits
+    date     the same calendar day, whatever the format ('2026-03-05' = '5 March 2026')
     entity   normalized gold == answer, or one contains the other with the
              shorter side >= 1 content word (so "Miyazaki" ~ "Hayao Miyazaki")
     text     every gold content word appears in the answer
@@ -24,6 +24,25 @@ def parse_number(s: str) -> float | None:
     return float(m.group(0)) if m else None
 
 
+_MONTH = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep",
+                                             "oct", "nov", "dec"])}
+
+
+def parse_date(s) -> tuple[int, int, int] | None:
+    """'2026-03-05', '5 March 2026', 'March 5, 2026', '5 Mar. 2026' -> (2026, 3, 5)."""
+    s = str(s or "").strip()
+    m = re.search(r"\b(\d{4})-(\d{1,2})-(\d{1,2})\b", s)
+    if m:
+        return int(m.group(1)), int(m.group(2)), int(m.group(3))
+    m = re.search(r"\b(\d{1,2})\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})\b", s)
+    if m and m.group(2)[:3].lower() in _MONTH:
+        return int(m.group(3)), _MONTH[m.group(2)[:3].lower()], int(m.group(1))
+    m = re.search(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})\b", s)
+    if m and m.group(1)[:3].lower() in _MONTH:
+        return int(m.group(3)), _MONTH[m.group(1)[:3].lower()], int(m.group(2))
+    return None
+
+
 def is_correct(answer: str | None, gold: list[str], answer_type: str) -> bool:
     if answer is None or not gold:
         return False
@@ -37,10 +56,10 @@ def is_correct(answer: str | None, gold: list[str], answer_type: str) -> bool:
             if a is not None and b is not None and abs(a - b) <= 0.005 * max(abs(b), 1e-9):
                 return True
         elif answer_type == "date":
-            if norm_text(answer) == norm_text(g):
+            pa, pg = parse_date(answer), parse_date(g)
+            if pa and pg and pa == pg:
                 return True
-            da, dg = re.findall(r"\d+", str(answer)), re.findall(r"\d+", str(g))
-            if da and sorted(da) == sorted(dg):
+            if norm_text(answer) == norm_text(g):
                 return True
         elif answer_type == "entity":
             a, b = norm_text(answer), norm_text(g)
@@ -111,4 +130,11 @@ def summarize(records: list[dict]) -> dict:
         sub = [r for r in records if r["family"] == fam]
         by_fam[fam] = {"n": len(sub), "success": sum(1 for r in sub if r["answered"] and r["correct"]) / len(sub)}
     out["by_family"] = by_fam
+    by_reg = {}
+    for reg in sorted({r.get("regime", "seed") for r in records}):
+        sub = [r for r in records if r.get("regime", "seed") == reg]
+        ans = [r for r in sub if r["answered"]]
+        by_reg[reg] = {"n": len(sub), "success": sum(1 for r in ans if r["correct"]) / len(sub),
+                       "wrong_when_answered": (len(ans) - sum(1 for r in ans if r["correct"])) / len(ans) if ans else 0.0}
+    out["by_regime"] = by_reg
     return out

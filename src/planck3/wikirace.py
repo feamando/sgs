@@ -519,7 +519,7 @@ def discover_heads(results: Path, seed: int, tag: str) -> dict[str, Path]:
 
 def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path: str,
              teacher_limit: int, heads: dict[str, Path], latency_ckpt: str | None, latency_tok: str | None,
-             td: Path | None = None, teacher_dir: Path | None = None):
+             td: Path | None = None, teacher_dir: Path | None = None, primary: str = "head:planck"):
     from .metrics import ece
     g = Graph(d)
     td = Path(td or d)
@@ -599,7 +599,8 @@ def evaluate(d: Path, policies: list[str], out_dir: Path, limit: int, gemma_path
     paired = paired_stats(outcomes)
     if latency_ckpt:
         results["latency_cpu_cold"] = cold_latency(g, pairs, latency_ckpt, latency_tok)
-    verdict = g1_verdict(results, paired)
+    verdict = g1_verdict(results, paired, primary=primary)
+    verdict["primary"] = primary
     summary = {"results": results, "paired": paired, "gate": verdict, "graph": read_json(d / "graph_info.json"),
                "tasks": read_json(td / "tasks_info.json")}
     write_json(out_dir / "summary.json", summary)
@@ -684,7 +685,7 @@ def g1_verdict(res: dict, paired: dict | None = None, primary: str = "head:planc
     return {"verdict": v, "relative_to_teacher": rel, "arms": arms, "note": "; ".join(notes)}
 
 
-def aggregate(results_dir: Path, seeds: list[int], tag: str, out_dir: Path):
+def aggregate(results_dir: Path, seeds: list[int], tag: str, out_dir: Path, primary: str = "head:planck"):
     """Across seeds: mean, sd, 95% t-interval per policy; verdict on the mean paired ratio."""
     import statistics
     T95 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571}
@@ -709,12 +710,12 @@ def aggregate(results_dir: Path, seeds: list[int], tag: str, out_dir: Path):
               if f"{arm} vs gemma" in r.get("paired", {}) and r["paired"][f"{arm} vs gemma"]["ratio"] is not None]
         if rs:
             ratios[arm] = {"mean": statistics.mean(rs), "per_seed": rs}
-    beats_hash_every_seed = all(r["results"].get("head:planck", {}).get("rollout_success", 0) >
+    beats_hash_every_seed = all(r["results"].get(primary, {}).get("rollout_success", 0) >
                                 r["results"].get("head:hash", {}).get("rollout_success", 1) for r in runs.values())
-    prim = ratios.get("head:planck", {}).get("mean")
+    prim = ratios.get(primary, {}).get("mean")
     ok = prim is not None and prim >= G1_REL and beats_hash_every_seed
-    verdict = {"verdict": "PASS" if ok else ("INCOMPLETE" if prim is None else "FAIL"),
-               "note": f"mean paired head:planck/teacher = {prim:.2f} over {len(runs)} seeds (pass >= {G1_REL}); "
+    verdict = {"verdict": "PASS" if ok else ("INCOMPLETE" if prim is None else "FAIL"), "primary": primary,
+               "note": f"mean paired {primary}/teacher = {prim:.2f} over {len(runs)} seeds (pass >= {G1_REL}); "
                        f"beats head:hash in every seed: {beats_hash_every_seed}" if prim is not None else "no paired teacher ratio"}
     summ = {"seeds": sorted(runs), "policies": table, "paired_ratio_vs_teacher": ratios, "gate": verdict}
     write_json(out_dir / "summary.json", summ)
@@ -749,6 +750,7 @@ def add_cli(sub):
     p.add_argument("--teacher-limit", type=int, default=300)
     p.add_argument("--gemma-path", default="models/gemma-4-e4b-it")
     p.add_argument("--no-latency", action="store_true")
+    p.add_argument("--primary", default="head:planck", help="the pre-registered primary arm for the verdict")
     p.set_defaults(fn=_cli)
 
 
@@ -778,6 +780,7 @@ def _cli(args):
         lat = None if args.no_latency or not Path(args.checkpoint).exists() else args.checkpoint
         evaluate(d, args.policies.split(","), results / f"g1_eval_s{args.seed}{args.tag}", args.limit,
                  args.gemma_path, args.teacher_limit, heads, lat, args.tokenizer, td=td,
-                 teacher_dir=results / f"g1_teacher{args.tag}")
+                 teacher_dir=results / f"g1_teacher{args.tag}", primary=args.primary)
     elif args.stage == "aggregate":
-        aggregate(results, [int(x) for x in args.seeds.split(",")], args.tag, results / f"g1_aggregate{args.tag}")
+        aggregate(results, [int(x) for x in args.seeds.split(",")], args.tag, results / f"g1_aggregate{args.tag}",
+                  primary=args.primary)

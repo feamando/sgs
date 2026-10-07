@@ -1,0 +1,2390 @@
+{
+  "version": 1,
+  "created": "2026-10-07",
+  "source": "Wikidata SPARQL (query.wikidata.org), cached",
+  "note": "fresh = 2026 facts (after the teacher's training data); long_tail = items with <= 3 Wikipedia sitelinks; gold = Wikidata label + English aliases as of gold_as_of. Not tuned against any policy.",
+  "split": "bench",
+  "tasks": [
+    {
+      "id": "bwinner000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 US Open – Girls' singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Sun Xinran"
+      ],
+      "qid": "Q141326940",
+      "entity": "2026 US Open – Girls' singles",
+      "source": "https://www.wikidata.org/wiki/Q141326940",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 FIFA World Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Spain men's national football team",
+        "The Spanish Fury",
+        "Spanish national team",
+        "Spanish national association football team",
+        "Spain men's national association football team",
+        "Spain futbol team",
+        "La Roja",
+        "La Furia Roja"
+      ],
+      "qid": "Q5020214",
+      "entity": "2026 FIFA World Cup",
+      "source": "https://www.wikidata.org/wiki/Q5020214",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Adana Open – Doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Angelica Moratelli"
+      ],
+      "qid": "Q141605311",
+      "entity": "2026 Adana Open – Doubles",
+      "source": "https://www.wikidata.org/wiki/Q141605311",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Jingshan Tennis Open – Women's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Alexandra Shubladze",
+        "Alexandra Alexandrowna Schubladse"
+      ],
+      "qid": "Q141566477",
+      "entity": "2026 Jingshan Tennis Open – Women's singles",
+      "source": "https://www.wikidata.org/wiki/Q141566477",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Hamburg Open – Women's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Tamara Korpatsch"
+      ],
+      "qid": "Q140608163",
+      "entity": "2026 Hamburg Open – Women's singles",
+      "source": "https://www.wikidata.org/wiki/Q140608163",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Tokyo Marathon?",
+      "answer_type": "entity",
+      "gold": [
+        "Bikila Tadese Takele",
+        "Brigid Kosgei",
+        "Brigid Jepchirchir Kosgei",
+        "Brigid Jepcheschir Kosgei"
+      ],
+      "qid": "Q138529211",
+      "entity": "2026 Tokyo Marathon",
+      "source": "https://www.wikidata.org/wiki/Q138529211",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 OnlyBulls Grand Prix of Portland?",
+      "answer_type": "entity",
+      "gold": [
+        "Álex Palou",
+        "Alex Palou"
+      ],
+      "qid": "Q141212331",
+      "entity": "2026 OnlyBulls Grand Prix of Portland",
+      "source": "https://www.wikidata.org/wiki/Q141212331",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 NAPA Auto Care 150 Greg Biffle Memorial?",
+      "answer_type": "entity",
+      "gold": [
+        "Cole Denton"
+      ],
+      "qid": "Q140246118",
+      "entity": "2026 NAPA Auto Care 150 Greg Biffle Memorial",
+      "source": "https://www.wikidata.org/wiki/Q140246118",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 UEC European Track Championships – Men's scratch?",
+      "answer_type": "entity",
+      "gold": [
+        "Alex Vogel"
+      ],
+      "qid": "Q138536926",
+      "entity": "2026 UEC European Track Championships – Men's scratch",
+      "source": "https://www.wikidata.org/wiki/Q138536926",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Hamburg Cyclassics?",
+      "answer_type": "entity",
+      "gold": [
+        "Mike Teunissen",
+        "Laurence Pithie",
+        "Paul Magnier"
+      ],
+      "qid": "Q136760543",
+      "entity": "2026 Hamburg Cyclassics",
+      "source": "https://www.wikidata.org/wiki/Q136760543",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner010",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Curitiba Challenger – Doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Mariano Kestelboim"
+      ],
+      "qid": "Q141564366",
+      "entity": "2026 Curitiba Challenger – Doubles",
+      "source": "https://www.wikidata.org/wiki/Q141564366",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner011",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 European Speed Skating Championships – Women's 1000 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Nikola Zdráhalová",
+        "Nikola Zdrahalova"
+      ],
+      "qid": "Q137767807",
+      "entity": "2026 European Speed Skating Championships – Women's 1000 metres",
+      "source": "https://www.wikidata.org/wiki/Q137767807",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner012",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Artistic gymnastics at the 2026 Commonwealth Games – Women's individual all-around?",
+      "answer_type": "entity",
+      "gold": [
+        "Ellie Black",
+        "Elsabeth Black"
+      ],
+      "qid": "Q141285143",
+      "entity": "Artistic gymnastics at the 2026 Commonwealth Games – Women's individual all-around",
+      "source": "https://www.wikidata.org/wiki/Q141285143",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner013",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 La Flèche Wallonne?",
+      "answer_type": "entity",
+      "gold": [
+        "Mauro Schmid",
+        "Ben Tulett",
+        "Ben Samuel Tulett",
+        "Paul Seixas"
+      ],
+      "qid": "Q136736501",
+      "entity": "2026 La Flèche Wallonne",
+      "source": "https://www.wikidata.org/wiki/Q136736501",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner014",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 FA Trophy final?",
+      "answer_type": "entity",
+      "gold": [
+        "Southend United F.C.",
+        "Southend United Football Club",
+        "Southend United FC",
+        "Southend United",
+        "SUFC",
+        "The Shrimpers",
+        "United",
+        "Southend"
+      ],
+      "qid": "Q139855714",
+      "entity": "2026 FA Trophy final",
+      "source": "https://www.wikidata.org/wiki/Q139855714",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner015",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 FIBA Intercontinental Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "NBA G League United"
+      ],
+      "qid": "Q140299108",
+      "entity": "2026 FIBA Intercontinental Cup",
+      "source": "https://www.wikidata.org/wiki/Q140299108",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner016",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 World Road Cycling Championships - Men ITT?",
+      "answer_type": "entity",
+      "gold": [
+        "Filippo Ganna",
+        "Paul Seixas",
+        "Remco Evenepoel",
+        "R.EV",
+        "REV"
+      ],
+      "qid": "Q141130468",
+      "entity": "2026 World Road Cycling Championships - Men ITT",
+      "source": "https://www.wikidata.org/wiki/Q141130468",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner017",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 UEFA Champions League final?",
+      "answer_type": "entity",
+      "gold": [
+        "Paris Saint-Germain FC",
+        "PSGFC",
+        "Paris"
+      ],
+      "qid": "Q126044615",
+      "entity": "2026 UEFA Champions League final",
+      "source": "https://www.wikidata.org/wiki/Q126044615",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner018",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Swimming at the 2026 Mediterranean Games - Women's 200 metre butterfly?",
+      "answer_type": "entity",
+      "gold": [
+        "Paola Borrelli"
+      ],
+      "qid": "Q141432020",
+      "entity": "Swimming at the 2026 Mediterranean Games - Women's 200 metre butterfly",
+      "source": "https://www.wikidata.org/wiki/Q141432020",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner019",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Swimming at the 2026 European Aquatics Championships – Men's 1500 metre freestyle?",
+      "answer_type": "entity",
+      "gold": [
+        "Johannes Liebmann"
+      ],
+      "qid": "Q141100652",
+      "entity": "Swimming at the 2026 European Aquatics Championships – Men's 1500 metre freestyle",
+      "source": "https://www.wikidata.org/wiki/Q141100652",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner020",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the short-track speed skating at the 2026 Winter Olympics – men's 1500 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Jens van 't Wout"
+      ],
+      "qid": "Q137864147",
+      "entity": "short-track speed skating at the 2026 Winter Olympics – men's 1500 metres",
+      "source": "https://www.wikidata.org/wiki/Q137864147",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner021",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Kansas Lottery 300?",
+      "answer_type": "entity",
+      "gold": [
+        "Taylor Gray"
+      ],
+      "qid": "Q138857897",
+      "entity": "2026 Kansas Lottery 300",
+      "source": "https://www.wikidata.org/wiki/Q138857897",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner022",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Omloop Het Nieuwsblad – women's race?",
+      "answer_type": "entity",
+      "gold": [
+        "Katarzyna Niewiadoma",
+        "Kasia Niewiadoma",
+        "Lorena Wiebes",
+        "Adriana Geertruida Vollering"
+      ],
+      "qid": "Q136455159",
+      "entity": "2026 Omloop Het Nieuwsblad – women's race",
+      "source": "https://www.wikidata.org/wiki/Q136455159",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner023",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 African Championships in Athletics – Men's 400 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Lee Eppie",
+        "Lee Bhekempilo Eppie"
+      ],
+      "qid": "Q140026712",
+      "entity": "2026 African Championships in Athletics – Men's 400 metres",
+      "source": "https://www.wikidata.org/wiki/Q140026712",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner024",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 French Open – Boys' doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Jamie Mackenzie",
+        "Vincent Reisach"
+      ],
+      "qid": "Q139802284",
+      "entity": "2026 French Open – Boys' doubles",
+      "source": "https://www.wikidata.org/wiki/Q139802284",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner025",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Eastbourne Open – Women's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Madison Keys",
+        "Madi Keys"
+      ],
+      "qid": "Q140298693",
+      "entity": "2026 Eastbourne Open – Women's singles",
+      "source": "https://www.wikidata.org/wiki/Q140298693",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner026",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 European Athletics Championships – Women's pole vault?",
+      "answer_type": "entity",
+      "gold": [
+        "Angelica Moser"
+      ],
+      "qid": "Q140965018",
+      "entity": "2026 European Athletics Championships – Women's pole vault",
+      "source": "https://www.wikidata.org/wiki/Q140965018",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner027",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 NASCAR O'Reilly Auto Parts Series at Chicagoland Speedway?",
+      "answer_type": "entity",
+      "gold": [
+        "Brandon Jones",
+        "Brandon Alexander Jones"
+      ],
+      "qid": "Q140026674",
+      "entity": "2026 NASCAR O'Reilly Auto Parts Series at Chicagoland Speedway",
+      "source": "https://www.wikidata.org/wiki/Q140026674",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner028",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Mission 200 at The Glen?",
+      "answer_type": "entity",
+      "gold": [
+        "Connor Zilisch"
+      ],
+      "qid": "Q139553048",
+      "entity": "2026 Mission 200 at The Glen",
+      "source": "https://www.wikidata.org/wiki/Q139553048",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bwinner029",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Focused Health 250?",
+      "answer_type": "entity",
+      "gold": [
+        "Justin Allgaier",
+        "Justin Myrl Allgaier"
+      ],
+      "qid": "Q140089317",
+      "entity": "2026 Focused Health 250",
+      "source": "https://www.wikidata.org/wiki/Q140089317",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Armenian parliamentary election?",
+      "answer_type": "entity",
+      "gold": [
+        "Civil Contract"
+      ],
+      "qid": "Q111940911",
+      "entity": "2026 Armenian parliamentary election",
+      "source": "https://www.wikidata.org/wiki/Q111940911",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Dublin Central by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Daniel Ennis"
+      ],
+      "qid": "Q137187462",
+      "entity": "2026 Dublin Central by-election",
+      "source": "https://www.wikidata.org/wiki/Q137187462",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Cornwall-Meadowbank provincial by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Tayte Willows"
+      ],
+      "qid": "Q140578150",
+      "entity": "2026 Cornwall-Meadowbank provincial by-election",
+      "source": "https://www.wikidata.org/wiki/Q140578150",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Osaka gubernatorial election?",
+      "answer_type": "entity",
+      "gold": [
+        "Hirofumi Yoshimura",
+        "Yoshimura Hirofumi"
+      ],
+      "qid": "Q137802938",
+      "entity": "2026 Osaka gubernatorial election",
+      "source": "https://www.wikidata.org/wiki/Q137802938",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Croydon mayoral election?",
+      "answer_type": "entity",
+      "gold": [
+        "Jason Perry",
+        "Jason Stephen Perry"
+      ],
+      "qid": "Q139407020",
+      "entity": "2026 Croydon mayoral election",
+      "source": "https://www.wikidata.org/wiki/Q139407020",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Nepean state by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Anthony Marsh"
+      ],
+      "qid": "Q138542330",
+      "entity": "2026 Nepean state by-election",
+      "source": "https://www.wikidata.org/wiki/Q138542330",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Terrebonne federal by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Tatiana Auguste"
+      ],
+      "qid": "Q138296889",
+      "entity": "2026 Terrebonne federal by-election",
+      "source": "https://www.wikidata.org/wiki/Q138296889",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 51st General Election of the House of Representatives?",
+      "answer_type": "entity",
+      "gold": [
+        "Liberal Democratic Party",
+        "Lib Dems",
+        "Jimintō",
+        "Liberal Democrats",
+        "LDP",
+        "Liberal Democrats of Japan",
+        "Liberal Democratic Party of Japan",
+        "Japanese Communist Party"
+      ],
+      "qid": "Q131309666",
+      "entity": "51st General Election of the House of Representatives",
+      "source": "https://www.wikidata.org/wiki/Q131309666",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Hamilton East—Stoney Creek provincial by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Jeff Beattie"
+      ],
+      "qid": "Q141301186",
+      "entity": "2026 Hamilton East—Stoney Creek provincial by-election",
+      "source": "https://www.wikidata.org/wiki/Q141301186",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belection009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Bexley London Borough Council election?",
+      "answer_type": "entity",
+      "gold": [
+        "Conservative Party",
+        "United Kingdom Conservative Party",
+        "UK Conservative Party",
+        "Conservative Party (UK)",
+        "Conservative Party (Great Britain) -- Records and correspondence",
+        "Conservative Party (Great Britain) -- Elections",
+        "British Conservative Party",
+        "Tory Party"
+      ],
+      "qid": "Q136798804",
+      "entity": "2026 Bexley London Borough Council election",
+      "source": "https://www.wikidata.org/wiki/Q136798804",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Four Days of Dunkirk?",
+      "answer_type": "entity",
+      "gold": [
+        "Rasmus Tiller",
+        "Rasmus Fossum Tiller",
+        "Natnael Tesfatsion",
+        "Natnael Tesfatsion Ocbit",
+        "Laurence Pithie",
+        "Victor Papon",
+        "2026 Movistar Team"
+      ],
+      "qid": "Q137397555",
+      "entity": "2026 Four Days of Dunkirk",
+      "source": "https://www.wikidata.org/wiki/Q137397555",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 SWAC men's basketball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Prairie View A&M Panthers basketball",
+        "Prairie View A&M men's basketball",
+        "Prairie View A&M basketball team",
+        "Prairie View A&M basketball",
+        "Prairie View A and M Panthers men's basketball team",
+        "Prairie View A and M Panthers men's basketball",
+        "Prairie View A and M Panthers basketball team",
+        "Prairie View A and M men's basketball team"
+      ],
+      "qid": "Q138542672",
+      "entity": "2026 SWAC men's basketball tournament",
+      "source": "https://www.wikidata.org/wiki/Q138542672",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 French Basketball Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "AS Monaco Basket",
+        "Association Sportive de Monaco Basketball Club"
+      ],
+      "qid": "Q137752896",
+      "entity": "2025–26 French Basketball Cup",
+      "source": "https://www.wikidata.org/wiki/Q137752896",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 ABA League First Division?",
+      "answer_type": "entity",
+      "gold": [
+        "Dubai Basketball"
+      ],
+      "qid": "Q134608302",
+      "entity": "2025–26 ABA League First Division",
+      "source": "https://www.wikidata.org/wiki/Q134608302",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Giro d'Italia Women?",
+      "answer_type": "entity",
+      "gold": [
+        "Anna van der Breggen",
+        "Elisa Balsamo",
+        "Adriana Geertruida Vollering",
+        "Antonia Niedermaier",
+        "Isabella Holmgren",
+        "2026 Lidl-Trek"
+      ],
+      "qid": "Q136455175",
+      "entity": "2026 Giro d'Italia Women",
+      "source": "https://www.wikidata.org/wiki/Q136455175",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025-26 Serie C?",
+      "answer_type": "entity",
+      "gold": [
+        "S.S. Arezzo",
+        "Unione Sportiva Arezzo",
+        "SS Arezzo",
+        "Società Sportiva Arezzo",
+        "Arezzo Sports Society",
+        "AC Arezzo",
+        "A.C. Arezzo",
+        "A. C. Arezzo"
+      ],
+      "qid": "Q134298909",
+      "entity": "2025-26 Serie C",
+      "source": "https://www.wikidata.org/wiki/Q134298909",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 Serie A?",
+      "answer_type": "entity",
+      "gold": [
+        "A.S. Roma Women",
+        "AS Roma Women",
+        "AS Roma (women)",
+        "A.S. Roma (women)",
+        "AS Roma",
+        "A.S. Roma"
+      ],
+      "qid": "Q135274407",
+      "entity": "2025–26 Serie A",
+      "source": "https://www.wikidata.org/wiki/Q135274407",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Leinster Senior Football Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Westmeath county football team"
+      ],
+      "qid": "Q139408341",
+      "entity": "2026 Leinster Senior Football Championship",
+      "source": "https://www.wikidata.org/wiki/Q139408341",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the Survivor 50?",
+      "answer_type": "entity",
+      "gold": [
+        "Aubry Bracco"
+      ],
+      "qid": "Q134599290",
+      "entity": "Survivor 50",
+      "source": "https://www.wikidata.org/wiki/Q134599290",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bseason009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 BNXT League?",
+      "answer_type": "entity",
+      "gold": [
+        "Antwerp Giants",
+        "Windrose Giants Antwerp",
+        "Telenet Giants Antwerp"
+      ],
+      "qid": "Q134992845",
+      "entity": "2025–26 BNXT League",
+      "source": "https://www.wikidata.org/wiki/Q134992845",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Okinawa Prefecture in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Genta Koja",
+        "Koja Genta"
+      ],
+      "qid": "Q766445",
+      "entity": "Okinawa Prefecture",
+      "source": "https://www.wikidata.org/wiki/Q766445",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Ludwigshafen in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Klaus Blettner"
+      ],
+      "qid": "Q2910",
+      "entity": "Ludwigshafen",
+      "source": "https://www.wikidata.org/wiki/Q2910",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Santa Perpètua de Mogoda in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Juan Carlos Mingueza Las Heras"
+      ],
+      "qid": "Q13941",
+      "entity": "Santa Perpètua de Mogoda",
+      "source": "https://www.wikidata.org/wiki/Q13941",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Le Tampon in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Alexis Chaussalet"
+      ],
+      "qid": "Q13648",
+      "entity": "Le Tampon",
+      "source": "https://www.wikidata.org/wiki/Q13648",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Second Oury government in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Bah Oury",
+        "Amadou Bah Oury",
+        "Mamadou Oury Bah"
+      ],
+      "qid": "Q138018538",
+      "entity": "Second Oury government",
+      "source": "https://www.wikidata.org/wiki/Q138018538",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Günzburg in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Michael Jahn"
+      ],
+      "qid": "Q489685",
+      "entity": "Günzburg",
+      "source": "https://www.wikidata.org/wiki/Q489685",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Limoges in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Guillaume Guérin"
+      ],
+      "qid": "Q45656",
+      "entity": "Limoges",
+      "source": "https://www.wikidata.org/wiki/Q45656",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Quimperlé Communauté in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Christophe Le Roux"
+      ],
+      "qid": "Q28123044",
+      "entity": "Quimperlé Communauté",
+      "source": "https://www.wikidata.org/wiki/Q28123044",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Central Denmark in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Anders G. Christensen"
+      ],
+      "qid": "Q26586",
+      "entity": "Central Denmark",
+      "source": "https://www.wikidata.org/wiki/Q26586",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bheadgov009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bonnières-sur-Seine in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Cyril Samson"
+      ],
+      "qid": "Q399509",
+      "entity": "Bonnières-sur-Seine",
+      "source": "https://www.wikidata.org/wiki/Q399509",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded000",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was RenoNorden, Norwegian waste collection company founded?",
+      "answer_type": "year",
+      "gold": [
+        "2000"
+      ],
+      "qid": "Q18888624",
+      "entity": "RenoNorden",
+      "source": "https://www.wikidata.org/wiki/Q18888624",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded001",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was NanoWorld, atomic force microscope component manufacturer founded?",
+      "answer_type": "year",
+      "gold": [
+        "2000"
+      ],
+      "qid": "Q6963970",
+      "entity": "NanoWorld",
+      "source": "https://www.wikidata.org/wiki/Q6963970",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded002",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Syngenta, Swiss agricultural technology company founded?",
+      "answer_type": "year",
+      "gold": [
+        "2000"
+      ],
+      "qid": "Q688613",
+      "entity": "Syngenta",
+      "source": "https://www.wikidata.org/wiki/Q688613",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded003",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Q-go, privately owned international company founded?",
+      "answer_type": "year",
+      "gold": [
+        "1999"
+      ],
+      "qid": "Q7265304",
+      "entity": "Q-go",
+      "source": "https://www.wikidata.org/wiki/Q7265304",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded004",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Arntzen Grette, Norwegian law firm founded?",
+      "answer_type": "year",
+      "gold": [
+        "2025"
+      ],
+      "qid": "Q4795425",
+      "entity": "Arntzen Grette",
+      "source": "https://www.wikidata.org/wiki/Q4795425",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded005",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was J. J. Ugland, group of Norwegian shipping companies founded?",
+      "answer_type": "year",
+      "gold": [
+        "1930"
+      ],
+      "qid": "Q6106159",
+      "entity": "J. J. Ugland",
+      "source": "https://www.wikidata.org/wiki/Q6106159",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded006",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Mecel, German automotive consulting firm founded?",
+      "answer_type": "year",
+      "gold": [
+        "1982"
+      ],
+      "qid": "Q10578918",
+      "entity": "Mecel",
+      "source": "https://www.wikidata.org/wiki/Q10578918",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded007",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Banijay Group, French entertainment company founded?",
+      "answer_type": "year",
+      "gold": [
+        "2022"
+      ],
+      "qid": "Q123631903",
+      "entity": "Banijay Group",
+      "source": "https://www.wikidata.org/wiki/Q123631903",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded008",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Manufacture Modules Technologies founded?",
+      "answer_type": "year",
+      "gold": [
+        "2015"
+      ],
+      "qid": "Q19520534",
+      "entity": "Manufacture Modules Technologies",
+      "source": "https://www.wikidata.org/wiki/Q19520534",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded009",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Czech Coal, company in the Czech Republic founded?",
+      "answer_type": "year",
+      "gold": [
+        "1999"
+      ],
+      "qid": "Q5201745",
+      "entity": "Czech Coal",
+      "source": "https://www.wikidata.org/wiki/Q5201745",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded010",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Metia Interactive, New Zealand video game developer founded?",
+      "answer_type": "year",
+      "gold": [
+        "2003"
+      ],
+      "qid": "Q17042544",
+      "entity": "Metia Interactive",
+      "source": "https://www.wikidata.org/wiki/Q17042544",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded011",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was King of Kings, European kickboxing promotion founded?",
+      "answer_type": "year",
+      "gold": [
+        "2009"
+      ],
+      "qid": "Q50287785",
+      "entity": "King of Kings",
+      "source": "https://www.wikidata.org/wiki/Q50287785",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded012",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Joyces 365, Irish supermarket chain founded?",
+      "answer_type": "year",
+      "gold": [
+        "1951"
+      ],
+      "qid": "Q6297672",
+      "entity": "Joyces 365",
+      "source": "https://www.wikidata.org/wiki/Q6297672",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded013",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Trondhjems Omnibus Aktieselskab founded?",
+      "answer_type": "year",
+      "gold": [
+        "1893"
+      ],
+      "qid": "Q7845490",
+      "entity": "Trondhjems Omnibus Aktieselskab",
+      "source": "https://www.wikidata.org/wiki/Q7845490",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded014",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Norsk Flyforsikringspool founded?",
+      "answer_type": "year",
+      "gold": [
+        "1919"
+      ],
+      "qid": "Q7053426",
+      "entity": "Norsk Flyforsikringspool",
+      "source": "https://www.wikidata.org/wiki/Q7053426",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded015",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Sistema Plastics, New Zealand plastic manufacturer founded?",
+      "answer_type": "year",
+      "gold": [
+        "1987"
+      ],
+      "qid": "Q55633281",
+      "entity": "Sistema Plastics",
+      "source": "https://www.wikidata.org/wiki/Q55633281",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded016",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Uniface (company), software development company headquartered in Amsterdam founded?",
+      "answer_type": "year",
+      "gold": [
+        "1984"
+      ],
+      "qid": "Q23498095",
+      "entity": "Uniface (company)",
+      "source": "https://www.wikidata.org/wiki/Q23498095",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded017",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Møller Mobility Group, Norwegian company founded?",
+      "answer_type": "year",
+      "gold": [
+        "1936"
+      ],
+      "qid": "Q11990455",
+      "entity": "Møller Mobility Group",
+      "source": "https://www.wikidata.org/wiki/Q11990455",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded018",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was Kairos founded?",
+      "answer_type": "year",
+      "gold": [
+        "1999"
+      ],
+      "qid": "Q2517566",
+      "entity": "Kairos",
+      "source": "https://www.wikidata.org/wiki/Q2517566",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounded019",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founded",
+      "question": "In what year was United Shipping & Trading Company, Danish shipping company founded?",
+      "answer_type": "year",
+      "gold": [
+        "1876"
+      ],
+      "qid": "Q7889139",
+      "entity": "United Shipping & Trading Company",
+      "source": "https://www.wikidata.org/wiki/Q7889139",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn000",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Jan Kosak, Czech soccer player born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q6149295",
+      "entity": "Jan Kosak",
+      "source": "https://www.wikidata.org/wiki/Q6149295",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn001",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Stein Reegård, Norwegian politician born?",
+      "answer_type": "year",
+      "gold": [
+        "1951"
+      ],
+      "qid": "Q7606778",
+      "entity": "Stein Reegård",
+      "source": "https://www.wikidata.org/wiki/Q7606778",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn002",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Alexandros Pappas, Swedish footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1978"
+      ],
+      "qid": "Q4721061",
+      "entity": "Alexandros Pappas",
+      "source": "https://www.wikidata.org/wiki/Q4721061",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn003",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Mato Šimunović, Austrian footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1985"
+      ],
+      "qid": "Q6787720",
+      "entity": "Mato Šimunović",
+      "source": "https://www.wikidata.org/wiki/Q6787720",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn004",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Pirre Alanen, Finnish restaurateur born?",
+      "answer_type": "year",
+      "gold": [
+        "1965"
+      ],
+      "qid": "Q11888256",
+      "entity": "Pirre Alanen",
+      "source": "https://www.wikidata.org/wiki/Q11888256",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn005",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Jan Hodas, Czech soccer player born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q6149057",
+      "entity": "Jan Hodas",
+      "source": "https://www.wikidata.org/wiki/Q6149057",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn006",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Lenka Krömrová, Czech footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q10533291",
+      "entity": "Lenka Krömrová",
+      "source": "https://www.wikidata.org/wiki/Q10533291",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn007",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Jiří Janoščin, Czech soccer player born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q12025214",
+      "entity": "Jiří Janoščin",
+      "source": "https://www.wikidata.org/wiki/Q12025214",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn008",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Jakub Rolinc, Czech footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q19577691",
+      "entity": "Jakub Rolinc",
+      "source": "https://www.wikidata.org/wiki/Q19577691",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn009",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Hans Seierstad, Norwegian politician born?",
+      "answer_type": "year",
+      "gold": [
+        "1951"
+      ],
+      "qid": "Q5650720",
+      "entity": "Hans Seierstad",
+      "source": "https://www.wikidata.org/wiki/Q5650720",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn010",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Ignace Lowie, Belgian politician born?",
+      "answer_type": "year",
+      "gold": [
+        "1958"
+      ],
+      "qid": "Q17428785",
+      "entity": "Ignace Lowie",
+      "source": "https://www.wikidata.org/wiki/Q17428785",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn011",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Astrid Søgnen, Norwegian politician born?",
+      "answer_type": "year",
+      "gold": [
+        "1951"
+      ],
+      "qid": "Q4811449",
+      "entity": "Astrid Søgnen",
+      "source": "https://www.wikidata.org/wiki/Q4811449",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn012",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Markus Speiser, Association footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1985"
+      ],
+      "qid": "Q16223976",
+      "entity": "Markus Speiser",
+      "source": "https://www.wikidata.org/wiki/Q16223976",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn013",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Inger Marie Bakken, Norwegian politician born?",
+      "answer_type": "year",
+      "gold": [
+        "1951"
+      ],
+      "qid": "Q6032337",
+      "entity": "Inger Marie Bakken",
+      "source": "https://www.wikidata.org/wiki/Q6032337",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn014",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Mikael Eriksson, Swedish footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1978"
+      ],
+      "qid": "Q6845599",
+      "entity": "Mikael Eriksson",
+      "source": "https://www.wikidata.org/wiki/Q6845599",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn015",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Gabriela Matoušková, Czech association football player born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q20720692",
+      "entity": "Gabriela Matoušková",
+      "source": "https://www.wikidata.org/wiki/Q20720692",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn016",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Luca Scimia, New Zealand footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1999"
+      ],
+      "qid": "Q100571010",
+      "entity": "Luca Scimia",
+      "source": "https://www.wikidata.org/wiki/Q100571010",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn017",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Jan Jeřábek, footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1992"
+      ],
+      "qid": "Q6149174",
+      "entity": "Jan Jeřábek",
+      "source": "https://www.wikidata.org/wiki/Q6149174",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn018",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Andreas Nicklasson, Swedish footballer born?",
+      "answer_type": "year",
+      "gold": [
+        "1978"
+      ],
+      "qid": "Q97766437",
+      "entity": "Andreas Nicklasson",
+      "source": "https://www.wikidata.org/wiki/Q97766437",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bborn019",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "born",
+      "question": "In what year was Rebecca Lake, New Zealand association football player born?",
+      "answer_type": "year",
+      "gold": [
+        "1999"
+      ],
+      "qid": "Q97750607",
+      "entity": "Rebecca Lake",
+      "source": "https://www.wikidata.org/wiki/Q97750607",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation000",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Heksefjellet, mountain in Svalbard in metres?",
+      "answer_type": "number",
+      "gold": [
+        "774"
+      ],
+      "qid": "Q16892256",
+      "entity": "Heksefjellet",
+      "source": "https://www.wikidata.org/wiki/Q16892256",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation001",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Trollgarden, mountain in Norway in metres?",
+      "answer_type": "number",
+      "gold": [
+        "820"
+      ],
+      "qid": "Q16901986",
+      "entity": "Trollgarden",
+      "source": "https://www.wikidata.org/wiki/Q16901986",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation002",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Monte dei Frati, mountain in Italy in metres?",
+      "answer_type": "number",
+      "gold": [
+        "1454"
+      ],
+      "qid": "Q6904966",
+      "entity": "Monte dei Frati",
+      "source": "https://www.wikidata.org/wiki/Q6904966",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation003",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Mount Hugh Neave, mountain in British Columbia, Canada in metres?",
+      "answer_type": "number",
+      "gold": [
+        "2829"
+      ],
+      "qid": "Q6921354",
+      "entity": "Mount Hugh Neave",
+      "source": "https://www.wikidata.org/wiki/Q6921354",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation004",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Mount Burstall, mountain in Alberta, Canada in metres?",
+      "answer_type": "number",
+      "gold": [
+        "2760"
+      ],
+      "qid": "Q22419809",
+      "entity": "Mount Burstall",
+      "source": "https://www.wikidata.org/wiki/Q22419809",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation005",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Rotgratspitze, mountain in Austria in metres?",
+      "answer_type": "number",
+      "gold": [
+        "3270"
+      ],
+      "qid": "Q16897080",
+      "entity": "Rotgratspitze",
+      "source": "https://www.wikidata.org/wiki/Q16897080",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation006",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Monte Oserot, mountain in Italy in metres?",
+      "answer_type": "number",
+      "gold": [
+        "2860"
+      ],
+      "qid": "Q3861799",
+      "entity": "Monte Oserot",
+      "source": "https://www.wikidata.org/wiki/Q3861799",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation007",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Hagberg, hill in metres?",
+      "answer_type": "number",
+      "gold": [
+        "585"
+      ],
+      "qid": "Q21714621",
+      "entity": "Hagberg",
+      "source": "https://www.wikidata.org/wiki/Q21714621",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation008",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Sulgener Berg, mountain in Black Forest, Germany in metres?",
+      "answer_type": "number",
+      "gold": [
+        "764"
+      ],
+      "qid": "Q22694122",
+      "entity": "Sulgener Berg",
+      "source": "https://www.wikidata.org/wiki/Q22694122",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation009",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Linnerberg, mountain in Switzerland in metres?",
+      "answer_type": "number",
+      "gold": [
+        "757"
+      ],
+      "qid": "Q117805706",
+      "entity": "Linnerberg",
+      "source": "https://www.wikidata.org/wiki/Q117805706",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation010",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Narao Peak, mountain in British Columbia, Canada in metres?",
+      "answer_type": "number",
+      "gold": [
+        "2974"
+      ],
+      "qid": "Q22658860",
+      "entity": "Narao Peak",
+      "source": "https://www.wikidata.org/wiki/Q22658860",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation011",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Mount Pauline in metres?",
+      "answer_type": "number",
+      "gold": [
+        "2650"
+      ],
+      "qid": "Q6922674",
+      "entity": "Mount Pauline",
+      "source": "https://www.wikidata.org/wiki/Q6922674",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation012",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Coronation Mountain, mountain in Alberta, Canada in metres?",
+      "answer_type": "number",
+      "gold": [
+        "3170"
+      ],
+      "qid": "Q22351411",
+      "entity": "Coronation Mountain",
+      "source": "https://www.wikidata.org/wiki/Q22351411",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation013",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Lobo Hill, mountain in Spain in metres?",
+      "answer_type": "number",
+      "gold": [
+        "630"
+      ],
+      "qid": "Q6663744",
+      "entity": "Lobo Hill",
+      "source": "https://www.wikidata.org/wiki/Q6663744",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "belevation014",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "elevation",
+      "question": "How high is Patronen, mountain in Svalbard in metres?",
+      "answer_type": "number",
+      "gold": [
+        "745"
+      ],
+      "qid": "Q16889158",
+      "entity": "Patronen",
+      "source": "https://www.wikidata.org/wiki/Q16889158",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder000",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Banque Industrielle Belge, business?",
+      "answer_type": "entity",
+      "gold": [
+        "Édouard Louis Joseph, 1st Baron Empain",
+        "Édouard Louis Joseph Empain",
+        "Édouard Empain",
+        "Baron Édouard Louis Joseph Empain",
+        "Baron Édouard Empain"
+      ],
+      "qid": "Q107222429",
+      "entity": "Banque Industrielle Belge",
+      "source": "https://www.wikidata.org/wiki/Q107222429",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder001",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Bontonfilm, Czech film distributor?",
+      "answer_type": "entity",
+      "gold": [
+        "Bonton, a.s."
+      ],
+      "qid": "Q11228089",
+      "entity": "Bontonfilm",
+      "source": "https://www.wikidata.org/wiki/Q11228089",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder002",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Tieto, nordic tech company?",
+      "answer_type": "entity",
+      "gold": [
+        "Ministry of Government Administration, Reform and Church Affairs"
+      ],
+      "qid": "Q5385805",
+      "entity": "Tieto",
+      "source": "https://www.wikidata.org/wiki/Q5385805",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder003",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Fenno-Filmi, Finnish film production company?",
+      "answer_type": "entity",
+      "gold": [
+        "Theodor Luts"
+      ],
+      "qid": "Q3916353",
+      "entity": "Fenno-Filmi",
+      "source": "https://www.wikidata.org/wiki/Q3916353",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder004",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Proximus TV, Belgian pay television provider?",
+      "answer_type": "entity",
+      "gold": [
+        "Proximus Group",
+        "Regie voor Telegraaf en Telefoon",
+        "Régie des Télégraphes et des Téléphones",
+        "Belgacom",
+        "RTT"
+      ],
+      "qid": "Q2531960",
+      "entity": "Proximus TV",
+      "source": "https://www.wikidata.org/wiki/Q2531960",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder005",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Adams Filmi, Finnish film production company?",
+      "answer_type": "entity",
+      "gold": [
+        "Abel Adams",
+        "Aapeli Korhonen"
+      ],
+      "qid": "Q3954663",
+      "entity": "Adams Filmi",
+      "source": "https://www.wikidata.org/wiki/Q3954663",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder006",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Barong Family, Dutch record label?",
+      "answer_type": "entity",
+      "gold": [
+        "Yellow Claw"
+      ],
+      "qid": "Q24248464",
+      "entity": "Barong Family",
+      "source": "https://www.wikidata.org/wiki/Q24248464",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder007",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Luxo, company?",
+      "answer_type": "entity",
+      "gold": [
+        "Jac Jacobsen",
+        "Jac. Jacobsen",
+        "Jacob Jacobsen"
+      ],
+      "qid": "Q3429278",
+      "entity": "Luxo",
+      "source": "https://www.wikidata.org/wiki/Q3429278",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder008",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded Comviq, Swedish prepaid mobile phone brand?",
+      "answer_type": "entity",
+      "gold": [
+        "Jan Stenbeck",
+        "Jan Hugo Robert Arne Stenbeck"
+      ],
+      "qid": "Q5157869",
+      "entity": "Comviq",
+      "source": "https://www.wikidata.org/wiki/Q5157869",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bfounder009",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "founder",
+      "question": "Who founded International Volunteer HQ, New Zealand-based volunteer travel company?",
+      "answer_type": "entity",
+      "gold": [
+        "Daniel Jon Radcliffe",
+        "Daniel John Radcliffe",
+        "Daniel Radcliffe"
+      ],
+      "qid": "Q25240855",
+      "entity": "International Volunteer HQ",
+      "source": "https://www.wikidata.org/wiki/Q25240855",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor000",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote The Sniper, short story by Liam O'Flaherty?",
+      "answer_type": "entity",
+      "gold": [
+        "Liam O'Flaherty"
+      ],
+      "qid": "Q3311327",
+      "entity": "The Sniper",
+      "source": "https://www.wikidata.org/wiki/Q3311327",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor001",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Out Stealing Horses?",
+      "answer_type": "entity",
+      "gold": [
+        "Per Petterson"
+      ],
+      "qid": "Q7111472",
+      "entity": "Out Stealing Horses",
+      "source": "https://www.wikidata.org/wiki/Q7111472",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor002",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote The Dead Republic?",
+      "answer_type": "entity",
+      "gold": [
+        "Roddy Doyle",
+        "Ruaidhrí Ó Dúill",
+        "Ruaidhri O Duill"
+      ],
+      "qid": "Q7729312",
+      "entity": "The Dead Republic",
+      "source": "https://www.wikidata.org/wiki/Q7729312",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor003",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Athena-Artemis, book by Seppo Telenius?",
+      "answer_type": "entity",
+      "gold": [
+        "Seppo Telenius",
+        "Seppo Sakari Telenius"
+      ],
+      "qid": "Q16962448",
+      "entity": "Athena-Artemis",
+      "source": "https://www.wikidata.org/wiki/Q16962448",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor004",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote The Twins?",
+      "answer_type": "entity",
+      "gold": [
+        "Tessa de Loo"
+      ],
+      "qid": "Q2191633",
+      "entity": "The Twins",
+      "source": "https://www.wikidata.org/wiki/Q2191633",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor005",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Ruma kreivitär?",
+      "answer_type": "entity",
+      "gold": [
+        "Kaari Utrio",
+        "Kaari Marjatta Virkajärvi",
+        "Kaari Marjatta Utrio-Linnilä",
+        "Kaari Marjatta Utrio",
+        "Kaari Virkajärvi",
+        "Kaari Utrio-Linnilä"
+      ],
+      "qid": "Q7379117",
+      "entity": "Ruma kreivitär",
+      "source": "https://www.wikidata.org/wiki/Q7379117",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor006",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Poets and Murder?",
+      "answer_type": "entity",
+      "gold": [
+        "Robert van Gulik",
+        "van Gulik",
+        "Ti Jen-chieh",
+        "Robert Hans van Gulik",
+        "R.H. van Gulik",
+        "Gulik"
+      ],
+      "qid": "Q7207553",
+      "entity": "Poets and Murder",
+      "source": "https://www.wikidata.org/wiki/Q7207553",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor007",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Simon and the Oaks, novel by Marianne Fredriksson?",
+      "answer_type": "entity",
+      "gold": [
+        "Marianne Fredriksson",
+        "Marianne Persson"
+      ],
+      "qid": "Q10668102",
+      "entity": "Simon and the Oaks",
+      "source": "https://www.wikidata.org/wiki/Q10668102",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor008",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Edvard Grieg – mennesket og kunstneren, book by Finn Benestad?",
+      "answer_type": "entity",
+      "gold": [
+        "Dag Schjelderup-Ebbe",
+        "Finn Benestad"
+      ],
+      "qid": "Q5341358",
+      "entity": "Edvard Grieg – mennesket og kunstneren",
+      "source": "https://www.wikidata.org/wiki/Q5341358",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bauthor009",
+      "family": "fact",
+      "regime": "long_tail",
+      "template": "author",
+      "question": "Who wrote Fire?",
+      "answer_type": "entity",
+      "gold": [
+        "Sara Bergmark Elfgren",
+        "Sara Bergmark Elfmark",
+        "Sara B. Elfgren",
+        "Mats Strandberg"
+      ],
+      "qid": "Q5451294",
+      "entity": "Fire",
+      "source": "https://www.wikidata.org/wiki/Q5451294",
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_born00",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_born",
+      "turns": [
+        {
+          "user": "In what year was Els Demol born?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1958"
+          ]
+        },
+        {
+          "user": "And Fredmund Sandvik?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1951"
+          ]
+        }
+      ],
+      "qids": [
+        "Q1838415",
+        "Q5499365"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_born01",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_born",
+      "turns": [
+        {
+          "user": "In what year was Jan Kosak born?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1992"
+          ]
+        },
+        {
+          "user": "And Andreas Nicklasson?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1978"
+          ]
+        }
+      ],
+      "qids": [
+        "Q6149295",
+        "Q97766437"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_born02",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_born",
+      "turns": [
+        {
+          "user": "In what year was Mathias Råheim born?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1951"
+          ]
+        },
+        {
+          "user": "And Pirre Alanen?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1965"
+          ]
+        }
+      ],
+      "qids": [
+        "Q6787149",
+        "Q11888256"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_born03",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_born",
+      "turns": [
+        {
+          "user": "In what year was Alexandros Pappas born?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1978"
+          ]
+        },
+        {
+          "user": "And Lukáš Matyska?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1992"
+          ]
+        }
+      ],
+      "qids": [
+        "Q4721061",
+        "Q6702683"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_founded00",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_founded",
+      "turns": [
+        {
+          "user": "In what year was Ginza Musik founded?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1968"
+          ]
+        },
+        {
+          "user": "And Storm Studios?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "2001"
+          ]
+        }
+      ],
+      "qids": [
+        "Q5563310",
+        "Q7620176"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_founded01",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_founded",
+      "turns": [
+        {
+          "user": "In what year was Central European Gas Hub founded?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "2005"
+          ]
+        },
+        {
+          "user": "And Nobina Sverige?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1990"
+          ]
+        }
+      ],
+      "qids": [
+        "Q5061042",
+        "Q10601542"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_founded02",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_founded",
+      "turns": [
+        {
+          "user": "In what year was PCH International founded?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1996"
+          ]
+        },
+        {
+          "user": "And Northern Norway Pharmaceutical Trust?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "2002"
+          ]
+        }
+      ],
+      "qids": [
+        "Q16258170",
+        "Q7058796"
+      ],
+      "gold_as_of": "2026-10-07"
+    },
+    {
+      "id": "bchat_founded03",
+      "family": "chat",
+      "regime": "long_tail",
+      "template": "chat_founded",
+      "turns": [
+        {
+          "user": "In what year was Greve Graphics founded?",
+          "answer_type": "year",
+          "rewrite": "NEW",
+          "gold": [
+            "1982"
+          ]
+        },
+        {
+          "user": "And Valamon Viiniherman?",
+          "answer_type": "year",
+          "rewrite": "SWAP_ENTITY",
+          "gold": [
+            "1997"
+          ]
+        }
+      ],
+      "qids": [
+        "Q5607827",
+        "Q17400025"
+      ],
+      "gold_as_of": "2026-10-07"
+    }
+  ]
+}
