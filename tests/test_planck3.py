@@ -649,3 +649,52 @@ def test_searxng_alive_needs_real_results(tmp_path, monkeypatch):
     assert not w.searxng_alive()                                   # up but blocked = not alive
     monkeypatch.setattr(w.session, "get", lambda *a, **k: R([{"url": "x"}]))
     assert w.searxng_alive()
+
+
+# ── G2 v2: choice and answerability decoupled ────────────────────────────
+def test_select_threshold_meets_precision_target():
+    from src.planck3.g2 import select_threshold
+    scores = [0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.4]
+    correct = [True, True, True, True, True, False, True, False]
+    t = select_threshold(scores, correct, precision=0.9)
+    sel = [c for s, c in zip(scores, correct) if s >= t]
+    assert sum(sel) / len(sel) >= 0.9 and t == 0.7          # at 0.5 it would be 6/7 = 0.857 < 0.9
+    assert select_threshold([0.9, 0.8], [False, False]) == 1.01   # never answer if nothing is precise enough
+
+
+def _synthetic_points(n=160, seed=0):
+    import random as _r
+    rng = _r.Random(seed)
+    pts = []
+    for i in range(n):
+        year = str(1900 + i % 90)
+        right = rng.random() < 0.6                    # 40% of points have no right candidate
+        vals = [str(1800 + rng.randrange(200)) for _ in range(4)]
+        if right:
+            vals[rng.randrange(4)] = year
+        cands = [{"value": v, "context": f"The company was founded in {v}." if v == year else f"Something in {v}.",
+                  "score": 1.2 if v == year else rng.random(), "margin": 0.1, "about": 1.0 if v == year else 0.3,
+                  "domains": ["a.org"], "support": 1, "url": "https://a.org"} for v in vals]
+        pts.append({"task_id": f"t{i}", "question": f"What year was Company{i} founded?", "answer_type": "year",
+                    "source": "snippet", "cands": cands, "labels": [c["value"] == year for c in cands]})
+    return pts
+
+
+def test_g2v2_train_gate_and_policy_logs_argmax(tmp_path):
+    import json as _json
+    from src.planck3 import g2
+    pts_path = tmp_path / "points_searxng.jsonl"
+    pts_path.write_text("\n".join(_json.dumps(p) for p in _synthetic_points()), encoding="utf-8")
+    g2.embed(pts_path, "hash", tmp_path)
+    assert g2.emb_path(tmp_path, "hash", pts_path).exists()
+    g2.train_v2(pts_path, tmp_path, "hash", tmp_path / "v2", epochs=3)
+    log = _json.loads((tmp_path / "v2" / "train_log.json").read_text(encoding="utf-8"))
+    assert log["version"] == 2 and 0 <= log["test_choice_acc"] <= 1 and log["tau"] > 0
+    assert log["n_train_points"] > 0 and log["test_at_tau"]["coverage"] is not None
+    pol = g2.load_policy(str(tmp_path / "v2" / "head.pt"))
+    assert isinstance(pol, g2.PlanckPolicyV2)
+    st = Store(tmp_path / "s.sqlite")
+    res = Harness(pol, SnippetWeb(), st).run_fact("What year was IKEA founded?", "year")
+    snip = [s for s in res["trajectory"] if s["phase"] == "results_snip"]
+    assert snip and {"argmax", "gate", "top3", "tau"} <= set(snip[0]["meta"])   # every decision is diagnosable
+    st.close()

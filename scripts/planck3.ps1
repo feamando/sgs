@@ -330,27 +330,35 @@ function Do-G0Fresh {
 }
 
 function Do-G2 {
+    # G2 v2 (2026-10-08): choice head + calibrated answerability gate, trained on points collected
+    # with the deployment search (SearXNG). v1 (round 3) stays on record; it is not re-run.
     if (-not (Test-Path $G2_TRAIN)) { throw "missing $G2_TRAIN (git pull: generated on the Mac from Wikidata and committed)" }
     $lim = if ($Quick) { @("--limit", "100") } else { @() }
-    Log "G2 collect: labelled decision points from known answers (resumable; 1 search + 1 page per question)"
-    P3 (@("g2", "collect") + $lim)
+    $backend = if ($script:SearxUp) { "searxng" } else { "wikipedia" }
+    $pts = "data/planck3/g2/points_$backend.jsonl"
+    if ($backend -ne "searxng") {
+        Warn "G2 v2 wants SearXNG-collected training data (train = deploy); SearXNG is not answering, using Wikipedia"
+        if ((Test-Path "data/planck3/g2/points.jsonl") -and -not (Test-Path $pts)) { Copy-Item "data/planck3/g2/points.jsonl" $pts }
+    }
+    Log "G2 collect ($backend): labelled decision points from known answers (resumable)"
+    P3 (@("g2", "collect", "--points", $pts) + $lim)
     $encs = @("hash"); if ((Test-Path $PLANCK_CKPT) -and (Test-Path $PLANCK_TOK)) { $encs += "planck" }
+    $stem = [System.IO.Path]::GetFileNameWithoutExtension($pts)
     foreach ($e in $encs) {
-        $pts = "data/planck3/g2/points.jsonl"
-        if ((Test-Newer $pts "data/planck3/g2/emb_$e.npy") -or $Quick) {
-            Log "G2 embed: $e"; P3 @("g2", "embed", "--encoder", $e, "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
+        $emb = "data/planck3/g2/emb_${e}_$stem.npy"
+        $head = "$RES/g2v2_head_${e}_s0/head.pt"
+        if ((Test-Newer $pts $emb) -or $Quick) {
+            Log "G2 embed: $e ($stem)"; P3 @("g2", "embed", "--encoder", $e, "--points", $pts, "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
         }
-        if ((Test-Newer "data/planck3/g2/emb_$e.npy" "$RES/g2_head_${e}_s0/head.pt") -or $Quick) {
-            Log "G2 train head:$e"; P3 @("g2", "train", "--encoder", $e)
-        }
+        if ((Test-Newer $emb $head) -or $Quick) { Log "G2 v2 train head:$e"; P3 @("g2", "train2", "--encoder", $e, "--points", $pts) }
         foreach ($b in @(@{ P = "g0f"; T = $FRESH }, @{ P = "g0"; T = "scripts/assets/planck3_tasks.json" })) {
-            $out = "$RES/$($b.P)_planck-g2-${e}$Tag"
-            if ((Test-ValidRun $out) -and -not (Test-Newer "$RES/g2_head_${e}_s0/head.pt" "$out/summary.json") -and -not $Quick) {
+            $out = "$RES/$($b.P)_planck-g2v2-${e}$Tag"
+            if ((Test-ValidRun $out) -and -not (Test-Newer $head "$out/summary.json") -and -not $Quick) {
                 Log "SKIP $out (valid, head unchanged)"; continue
             }
-            Log "G2 eval head:$e on $($b.T)"
+            Log "G2 v2 eval head:$e on $($b.T)"
             $smp = if ($Quick) { @("--sample", "12") } else { @() }
-            P3 (@("g0", "--policy", "planck", "--g2-head", "$RES/g2_head_${e}_s0/head.pt", "--tasks", $b.T, "--out", $out,
+            P3 (@("g0", "--policy", "planck", "--g2-head", $head, "--tasks", $b.T, "--out", $out,
                   "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) + $smp)
         }
     }

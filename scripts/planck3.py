@@ -74,10 +74,10 @@ def add_web_args(p):
 
 def make_policy(args):
     if args.policy == "planck":
-        from src.planck3.g2 import PlanckPolicy
+        from src.planck3.g2 import load_policy
         if not args.g2_head:
-            raise SystemExit("--policy planck needs --g2-head results/planck3/g2_head_<enc>_s<seed>/head.pt")
-        return PlanckPolicy(args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer)
+            raise SystemExit("--policy planck needs --g2-head results/planck3/g2[v2]_head_<enc>_s<seed>/head.pt")
+        return load_policy(args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer)
     from src.planck3.policies import make_policy as mk
     return mk(args.policy, gemma_path=args.gemma_path, model_id=args.model_id,
               region=args.region, profile=args.profile)
@@ -563,6 +563,19 @@ def cmd_report(args):
         if reg_lines:
             lines += ["### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)", "",
                       "| run | per regime: success (n, wrong when answered) |", "|---|---|", *reg_lines, ""]
+    v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
+    if v2:
+        lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
+                  "| head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |",
+                  "|---|---|---|---|---|---|---|---|---|---|"]
+        for p in v2:
+            t = read_json(p)
+            ta = t["test_at_tau"]
+            fmt = lambda x: "" if x is None else f"{x:.3f}"  # noqa: E731
+            lines.append(f"| {p.parent.name} | {Path(t['points']).name} | {t['test_points_with_gold']} | {t['test_choice_acc']:.3f} | "
+                         f"{t['test_ranker_acc']:.3f} | {fmt(t['test_gate_auc'])} | {fmt(t['test_gate_ece'])} | {t['tau']:.3f} | "
+                         f"{ta['coverage']:.3f} | {fmt(ta['precision'])} ({t['gate_precision_target']}) |")
+        lines.append("")
     g2 = sorted(RESULTS.glob("g2_head_*/train_log.json"))
     if g2:
         lines += ["## G2 heads (learned from known answers)", "",

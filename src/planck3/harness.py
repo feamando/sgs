@@ -67,7 +67,8 @@ class Harness:
                 d = fallback(st["phase"])
                 d.meta["invalid"] = f"{bad.action} k={bad.k}: {e}"
             trajectory.append({"step": steps, "phase": st["phase"], "obs": _compact(obs),
-                               "decision": d.to_dict(), "valid": valid, "raw": d.raw[:300]})
+                               "decision": d.to_dict(), "valid": valid, "raw": d.raw[:300],
+                               "meta": {k: v for k, v in d.meta.items() if k != "fallback"}})
             steps += 1
             st["history"].append(d.action + (f" {d.k}" if d.k is not None else ""))
             done = self._apply(d, st, question, answer_type, entity, attribute, finish)
