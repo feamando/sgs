@@ -102,6 +102,31 @@ The Mac has no SearXNG, so it searches through the Wikipedia API (all words must
 
 No candidate scoring or ranking was changed after seeing this benchmark.
 
+### Attempt 1 on the box (2026-10-07, commit 343e0e2): search blocked, half the round invalid
+
+- **What happened:**
+  - The shakedown worked: the heuristic answered 8 of 12 fresh questions, against 0 of 12 for base chat.
+  - Minutes into the full run, SearXNG's upstream engines blocked it. SearXNG kept answering HTTP 200 with empty result lists. The old health check only tested that a results field existed, so every stage ran blind.
+  - G2 collection got an empty result for nearly every search (699 of the first 700), and G2 trained on 84 points instead of thousands.
+- **Invalid, to be re-run:** every `g0f_*` run that searches (`gemma_snip`, `heuristic_snip`, `planck-g2-*`), `g0_planck-g2-*`, and both G2 heads.
+- **Valid (no web search involved):**
+  - **Base chat on the new benchmark:** 4.9% (fresh **0.0%**, long-tail 8.4%), answering 98.6% of the time with 95% of those answers wrong. Rule **A2 holds**: base chat collapses where its memory ends.
+  - **G1 confirmation (task seed 1, seeds 3-5): FAIL as pre-registered.**
+    - `head:planck-rank` 23.5% ± 0.5, paired ratio to the teacher **0.71** (0.67 / 0.80 / 0.66); the teacher scored 33.7% on 300 new races (no overlap with round 2's races).
+    - It beats `head:hash` in every seed (p ≤ 1e-18) and lexical (p ≤ 1e-9).
+    - Its gain over `head:planck` shrank to +1.7 pts (p = 0.45 / 0.06 / 0.19), so round 2's +4.3 was partly selection on those seeds.
+    - The Hertz arm did not run (no checkpoint found).
+- **Fixed before attempt 2:**
+  1. The SearXNG health check requires real results.
+  2. Every empty SearXNG search waits, retries once, then falls back to Wikipedia for that query (logged as `fallback_rate`).
+  3. ≥1.5 s between searches.
+  4. A circuit breaker stops a run after 15 empty searches in a row.
+  5. Every run records `search_health`; a run with >20% empty searches is labelled **INVALID**, and `round3` re-runs invalid stages automatically.
+  6. The runner waits up to 10 min for a blocked SearXNG to recover.
+  7. Hertz is auto-detected in `checkpoints/hertz/`, `checkpoints/hertz12/` (incl. the latest `milestone_*.pt`).
+
+**Attempt 2:** `git pull`, start Docker Desktop. Let SearXNG rest an hour, or recreate it with `docker rm -f planck3-searxng`; the runner makes a new one. Then run `.\scripts\planck3.ps1 round3`. Only the invalid stages re-run; closed-book and G1 are kept, and G1 adds the Hertz arm if it finds the checkpoint.
+
 ## 5. Reading the results
 
 | Question | Where | Good looks like |

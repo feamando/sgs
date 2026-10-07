@@ -265,6 +265,11 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **G2 redesigned:** learn the decisions from known answers. 1,455 disjoint Wikidata training questions → labelled decision points → a candidate scorer with a none-of-these option → the `planck` policy.
   - The **G1 confirmation:** task seed 1, model seeds 3-5, primary `head:planck-rank`, plus the Hertz arm.
   - One command: `.\scripts\planck3.ps1 round3`.
+- **Round 3, attempt 1 (2026-10-07, 343e0e2): partly invalid** (SearXNG blocked mid-run; details in `SETUP_planck_20260903.md`).
+  - **Results of record (no web search involved):**
+    - **Base chat collapses on the fresh + long-tail benchmark:** 4.9% (fresh 0.0%, long-tail 8.4%), answering 98.6% and wrong 95% of the time (rule A2 holds).
+    - **G1 confirmation FAIL:** `head:planck-rank` paired ratio **0.71** on new races and seeds (0.67 / 0.80 / 0.66), 23.5% ± 0.5 vs teacher 33.7%; beats hash every seed (p ≤ 1e-18); the rank-over-nll gain shrinks to +1.7 pts (n.s.).
+  - G0-fresh and G2 must be re-run after the search-robustness fixes.
 - **G2-G4:** G2 is round 3; G3/G4 after.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
