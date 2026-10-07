@@ -199,6 +199,32 @@ What that does:
 - G2 v2 then trains and is evaluated.
 - G1 is kept (its evals re-run quickly from the cache).
 
+### Round 3b, attempt 1 (2026-10-07 21:38, commit 59befff): partial
+
+- **G2 v2 did not run.** The run started at 21:38 on the previous commit; the v2 code landed at 21:47. It re-ran the old v1 instead.
+- **SearXNG blocked again** after ~150 searches (the Gemma run).
+  - Root cause: an engine that answers with a CAPTCHA is **suspended by SearXNG for 24 h (7 days for Google reCAPTCHA)**. Waiting minutes could never help.
+  - Recreating the container clears the suspensions; that is why the first ~150 searches worked.
+  - A runner bug made it worse: it moved runs aside "to redo on SearXNG" and then redid them on Wikipedia, because it trusted a SearXNG check made at the start of the round.
+- **Result of record (the one SearXNG-backed run; 0% empty, 0% fallback):**
+  - **Gemma on our tools 28/143 (19.6%) vs base chat 7/143 (4.9%):** 26 vs 5 discordant, **McNemar p = 0.0002**. Fresh 5/60 vs 0/60; long-tail 23/83 vs 7/83 (p = 0.002).
+  - The same policy on SearXNG beats itself on Wikipedia search, 8 vs 0 discordant (p = 0.008): **retrieval is the lever on this benchmark**.
+  - Even on SearXNG the answer is in the top-3 snippets only 27% of the time (19% on Wikipedia).
+- **Fixed (respecting the engines, not evading them):**
+  - `config/searxng/settings.yml` removes Google and enables Bing, Brave, DuckDuckGo, Mojeek, Qwant, Startpage and Wikipedia (names verified against SearXNG's defaults). Suspension times are kept at their defaults.
+  - The runner recreates the container when `settings.yml` changes.
+  - 3 s between searches.
+  - A live SearXNG check before moving any run aside.
+  - Every G2 decision point records which backend answered it.
+- **Product note:** a local SearXNG scraping public engines is a research harness, not a production search layer. A deployed Planck would sit on a licensed search API; that cost line belongs in the cost model when this gets real.
+
+**Run 3b again:**
+1. `git pull` (it must show commit `0799af5` or later).
+2. Docker Desktop running.
+3. `.\scripts\planck3.ps1 round3`
+
+The changed `settings.yml` makes the runner recreate SearXNG, which also clears today's suspensions; one recreate per config change is not a retry loop. G2 v2 collection takes ~75-90 min at 3 s/search. If engines still block, empty searches fall back to Wikipedia per question and each point records which backend answered it.
+
 ## 5. Reading the results
 
 | Question | Where | Good looks like |
