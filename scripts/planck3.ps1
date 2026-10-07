@@ -168,7 +168,9 @@ function Do-Doctor([bool]$DeepRun) {
 }
 
 # ── searxng ──────────────────────────────────────────────────────────────
+$script:SearxUp = $false
 function Do-Searxng {
+    $script:SearxUp = Test-Searx
     if (-not (Test-Docker)) { Warn "Docker not found; search falls back to the Wikipedia API (still valid, narrower)"; return }
     if (Test-Searx) { Log "SearXNG up and answering on :$SEARX_PORT"; return }
     $running = (Invoke-Quiet docker @("ps", "--filter", "name=^$SEARX_NAME`$", "--format", "{{.Names}}")).Out -eq $SEARX_NAME
@@ -177,7 +179,7 @@ function Do-Searxng {
         Warn "SearXNG is running but returns no results (upstream engines are rate-limiting it); waiting up to 10 min"
         for ($i = 0; $i -lt 10; $i++) {
             Start-Sleep -Seconds 60
-            if (Test-Searx) { Log "SearXNG answers again"; return }
+            if (Test-Searx) { Log "SearXNG answers again"; $script:SearxUp = $true; return }
         }
         Warn "still blocked: continuing; every empty SearXNG search falls back to Wikipedia (recorded per run as search_health)"
         return
@@ -194,11 +196,16 @@ function Do-Searxng {
             "-e", "SEARXNG_BASE_URL=http://localhost:${SEARX_PORT}/", "searxng/searxng:latest")
         if ($r.Code -ne 0) { Warn "docker run failed (is Docker Desktop running?)"; return }
     }
-    for ($i = 0; $i -lt 30; $i++) {
-        Start-Sleep -Seconds 2
-        if (Test-Searx) { Log "SearXNG is up on http://localhost:$SEARX_PORT"; return }
+    # a fresh container pulls the image and warms its engines: give it up to 5 min (round 3 attempt 2
+    # gave up after 60 s and the whole run fell back to Wikipedia search)
+    for ($i = 0; $i -lt 60; $i++) {
+        Start-Sleep -Seconds 5
+        if (Test-Searx) { Log "SearXNG is up on http://localhost:$SEARX_PORT"; $script:SearxUp = $true; return }
+        if ($i % 12 -eq 11) { Log "  still waiting for SearXNG ($([int](($i + 1) * 5 / 60)) min)" }
     }
-    Warn "SearXNG did not answer in 60s; check: docker logs $SEARX_NAME  (search falls back to Wikipedia)"
+    Warn "SearXNG did not answer in 5 min (search falls back to Wikipedia). Last container log lines:"
+    $logs = (Invoke-Quiet docker @("logs", "--tail", "15", $SEARX_NAME)).Out
+    if ($logs) { $logs | ForEach-Object { Write-Host "    $_"; Write-Log "    $_" } }
 }
 
 # ── G0 ───────────────────────────────────────────────────────────────────
@@ -288,7 +295,16 @@ function Test-ValidRun([string]$dir) {
     if (-not (Test-Path "$dir/summary.json")) { return $false }
     $j = Get-Content "$dir/summary.json" -Raw | ConvertFrom-Json
     if ($j.mode -eq "closed_book") { return $true }
-    return ($null -ne $j.search_health) -and [bool]$j.search_health.valid
+    if (-not (($null -ne $j.search_health) -and [bool]$j.search_health.valid)) { return $false }
+    # SearXNG is the retrieval layer of record: a tools run on the Wikipedia fallback is kept as
+    # <dir>_wikipedia and redone once SearXNG answers (round 3 attempt 2 ran entirely on Wikipedia)
+    if ($j.search -ne "searxng" -and $script:SearxUp) {
+        $aside = "${dir}_wikipedia"
+        if (-not (Test-Path $aside)) { Move-Item $dir $aside; Log "kept the Wikipedia-search run as $aside; redoing it on SearXNG" }
+        else { Remove-Item -Recurse -Force $dir }
+        return $false
+    }
+    return $true
 }
 
 function Test-Newer([string]$a, [string]$b) {  # is $a newer than $b (or $b missing)?
