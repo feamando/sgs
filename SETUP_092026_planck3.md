@@ -176,7 +176,7 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 | `.\scripts\planck3.ps1 all -Quick -NoPush` | shakedown of every stage at small size into `*_quick` outputs (does not block the full run) | `results/planck3/*_quick/`, `REPORT.md` |
 | `.\scripts\planck3.ps1 setup` | pip-installs trafilatura/requests/scipy/pytest/sentencepiece into `.venv` | pip |
 | `.\scripts\planck3.ps1 schedule -At 08:00` | daily `digest -Explore` via Task Scheduler (`unschedule` removes it) | `results/planck3/digest.md` |
-| `.\scripts\planck3.ps1 smoke` | 39 offline tests (fake web, synthetic Wikipedia dump, tiny Planck checkpoint, chat server), ~5s | pytest |
+| `.\scripts\planck3.ps1 smoke` | 47 offline tests (fake web, synthetic Wikipedia dump, tiny Planck checkpoint, chat server), ~5s | pytest |
 | `.\scripts\planck3.ps1 serve` | **local web chat** at http://127.0.0.1:8010: follow-ups, cited answers, decision trace per reply (`-Policy heuristic` for instant start) | browser |
 | `.\scripts\planck3.ps1 chat` | the same in the terminal (`more` shows the evidence behind the last answer) | console |
 | `.\scripts\planck3.ps1 digest` | **"For you"** from your local knowledge graph: interests, adjacent entities, stale facts, trusted sources only (`-Explore` also reads adjacent entities from trusted sources) | console; also the "For you" button in `serve` |
@@ -224,6 +224,25 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   2. **A fresh + long-tail benchmark.** On stable facts base chat is 95.7%, so the rival must be tested where its memory ends.
   3. **G1 in order:** a paired eval on the teacher subset + 2 more seeds, then a training-objective fix (distance regression on the full BFS labels / DAgger), then the Hertz encoder ablation (the plan's FAIL branch).
   4. **An ANSWER-below-τ abstain gate** in the harness.
+- **Follow-up build (2026-10-07), PRE-REGISTERED before the next box run:**
+  - **Snippet-first extraction (built):**
+    - After SEARCH, typed candidates are read off the result snippets (`results_snip` phase: EXTRACT from snippets, or OPEN a page).
+    - **Aboutness** weighs a snippet by whether its result title is about the question's subject (overlap over union on the title core), so "Netflix Animation" does not answer "when was Netflix founded".
+    - VERIFY is free when another domain's snippet carries the same value.
+    - G0 now also reads one page **after** answering for the depth pack (product setting: answer fast, then depth), and reports answer-path fetches separately.
+    - **Adoption rule:** snippet-first becomes the default if `g0_gemma_snip` success ≥ `g0_gemma` (pages-first, 68.1%) minus 2 pts **and** answer-path fetches drop ≥50%.
+    - Mac read (heuristic, Wikipedia API snippets, the worst case): 40.4% vs 48.9% pages-first at 0.15 vs ~1.2 answer fetches/question; depth evidence 78.7% with one page after. Not tuned further on Mac snippets; the box (SearXNG, where the answer is in the top-3 snippets 95.7% of the time) decides.
+  - **Confidence gate (built):**
+    - ANSWER with p < τ = 0.3 becomes ABSTAIN (`low_confidence`); the value is kept for analysis (`gated_value`, `gated_would_be_correct`).
+    - Replayed over the first box run: blocks exactly Gemma's 2 confidence-0.00 answers (both wrong) and no right one, so wrong-when-answered goes 25.6% → 22.0% at equal success.
+    - Gemma's p is near-binary, so τ in 0.3-0.7 is equivalent. Its 9 remaining wrong answers sit at p 0.9-0.95, which is a calibration problem for distillation, not one for the gate.
+  - **G1 paired + seeds (built):**
+    - The eval saves per-race outcomes. The teacher runs **once** on the first **300** test races (was 100) and is cached.
+    - Every head is compared to it on the **same races** (exact McNemar), plus head-vs-hash and head-vs-lexical.
+    - The new task format (per-candidate BFS distances) reproduces the first run's pairs and steps exactly (verified on the full graph).
+    - **Primary rule (unchanged bar, now paired):** G1 PASS if head:planck's paired ratio to the teacher, **averaged over seeds 0, 1, 2**, is ≥0.8 **and** head:planck beats head:hash in **every** seed.
+  - **Secondary arms (exploratory, declared now):** `head:planck-rank` (listwise soft targets over every candidate's BFS distance), and with `-Hertz` `head:hertz` / `head:hertz-rank` (Hertz 1.2, 640M). Same rule, reported separately; with 1-3 secondary arms, a lone pass near p≈0.05 needs a confirmation run before it counts.
+  - Mac signal on the control features (1 seed): `head:hash-rank` 17.3% vs `head:hash` 14.8% on the same 1,192 races (106 vs 77 discordant, McNemar p=0.038), the first hash head above lexical (15.3%). A reason to expect the Planck rank arm to help, not a result.
 - **G2-G4:** after G1.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 

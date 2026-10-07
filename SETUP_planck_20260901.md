@@ -66,6 +66,32 @@ If all three hold, the pipeline works end to end.
 
 Same stages at full size. It ends by committing and pushing: summaries, answer cards, `REPORT.md`, the run log and compressed teacher trajectories (`results\planck3\...`). If it is interrupted, run the same command again; finished stages print `SKIP`.
 
+### Step 4b: the follow-up run (snippet-first, confidence gate, paired + 3-seed G1), about 45 min
+
+After `git pull` (2026-10-07 or later), the same command runs the follow-up:
+
+```powershell
+.\scripts\planck3.ps1 all
+```
+
+What is new in that run (the first run's results stay as the baseline; nothing is overwritten):
+
+- **G0:**
+  - `g0_gemma_snip` and `g0_heuristic_snip`: snippet-first answers + the confidence gate.
+  - Compare against `g0_gemma` / `g0_heuristic` (pages-first, 2026-10-05).
+  - The closed-book rival is not re-run (it does not use tools).
+- **G1:**
+  - Tasks are rebuilt once in the new format: same races, now with candidate distances.
+  - For each of seeds **0, 1, 2**: heads `hash`, `planck`, `planck-rank`, then an eval.
+  - The Gemma teacher runs once on **300** races (~6-8 min) and is cached for the other seeds.
+  - Then `aggregate` gives the cross-seed verdict.
+- **Optional Hertz arm** (only after the above, if you want the capacity ablation now): `.\scripts\planck3.ps1 g1 -Hertz`. It needs `checkpoints\hertz\best.pt` + `data\hertz12_data\tokenizer.model`; the doctor checks that their vocabularies match.
+
+In `REPORT.md`, look for:
+- the **G0** columns `answer fetches/task`, `from snippet`, `gated`;
+- the **G1 paired table** (`head:planck vs gemma`, `head:planck-rank vs head:planck`);
+- the **"G1 across seeds"** section and its verdict.
+
 ### Step 5: try the product (as long as you like)
 
 ```powershell
@@ -105,7 +131,8 @@ Nothing to do if Step 4 pushed: I `git pull` and read `REPORT.md`, the logs and 
 | Does it match the rival on quality? | `g0_gemma` vs `g0_gemma_closedbook` success, the "vs base chat" line | ≥0.9× closed-book. On stable facts base chat may win; that is expected and fine |
 | Is the depth layer useful? | `depth evidence` column | ≥0.8 (Mac floor was 0.787) |
 | Better than plain search? | success vs `search-only @3` | success ≥ search-only |
-| Does Planck learn to choose? (G1) | G1 table, verdict line | **PASS**: head:planck ≥0.8× gemma rollout success, and head:planck > head:hash |
+| Does Planck learn to choose? (G1) | "G1 across seeds" verdict + the paired table | **PASS**: head:planck's paired ratio to the teacher (same races) averages ≥0.8 over 3 seeds, and head:planck > head:hash in every seed |
+| Does snippet-first pay? | `g0_gemma_snip` vs `g0_gemma` | success within 2 pts of pages-first and answer fetches/task at least halved |
 | Fast enough for any device? | G1 `ms / decision` for head:planck | <100 ms |
 
 What each verdict leads to:
@@ -125,7 +152,9 @@ What each verdict leads to:
 |---|---|
 | Re-run only G0 | `.\scripts\planck3.ps1 g0` (always re-runs; `all` skips finished runs) |
 | Re-run only G1 | `.\scripts\planck3.ps1 g1` |
-| A second seed | `.\scripts\planck3.ps1 g1 -Seed 1` |
+| Different seeds | `.\scripts\planck3.ps1 g1 -Seeds 0,1,2,3` (trains + evaluates each, then aggregates) |
+| The Hertz capacity arm | `.\scripts\planck3.ps1 g1 -Hertz` |
+| Pages-first G0 (the old behaviour) | `.\scripts\planck3.ps1 py g0 --policy gemma --no-snippet-first --out results/planck3/g0_gemma_pages2` |
 | Force one stage from scratch | delete its folder under `results\planck3\` (or `data\planck3\wikirace\tasks_info.json` for tasks), re-run |
 | Try another teacher | `.\scripts\planck3.ps1 g0 -Policy bedrock` (needs AWS credentials for Bedrock Haiku) |
 | Re-score G0 without touching the web | `.\scripts\planck3.ps1 py g0 --policy gemma --net replay --out results/planck3/g0_gemma_replay` |
