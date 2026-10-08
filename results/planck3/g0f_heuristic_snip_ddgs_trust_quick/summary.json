@@ -1,0 +1,156 @@
+{
+  "n": 12,
+  "success": 0.5833333333333334,
+  "answered_rate": 1.0,
+  "wrong_when_answered": 0.4166666666666667,
+  "abstain_rate": 0.0,
+  "ece": 0.30034643996242255,
+  "mean_steps": 4.75,
+  "mean_web_calls": 3.0833333333333335,
+  "mean_decision_ms": 0.02066317635277907,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.8333333333333334
+    },
+    "fact": {
+      "n": 6,
+      "success": 0.3333333333333333
+    }
+  },
+  "by_regime": {
+    "fresh": {
+      "n": 6,
+      "success": 0.3333333333333333,
+      "wrong_when_answered": 0.6666666666666666
+    },
+    "long_tail": {
+      "n": 6,
+      "success": 0.8333333333333334,
+      "wrong_when_answered": 0.16666666666666666
+    }
+  },
+  "policy": "heuristic",
+  "search": "ddgs",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json",
+  "system_trust_domains": 30,
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.9166666666666666,
+  "serp_answer_rate_at3": 0.9166666666666666,
+  "depth_evidence_recall": 0.9166666666666666,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.5833333333333333,
+  "mean_answer_fetches": 0.08333333333333333,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.9166666666666666,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "tiers": {
+    "confident": {
+      "n": 12,
+      "rate": 1.0,
+      "precision": 0.5833333333333334,
+      "evidence_recall": 0.9166666666666666
+    },
+    "low_confidence": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    },
+    "none": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    }
+  },
+  "graph": {
+    "facts": 18,
+    "passages": 108,
+    "entities": 233,
+    "edges": 230,
+    "queries": 18,
+    "domains": 12
+  },
+  "cost": {
+    "usd_per_task": 1.3631956621625081e-09,
+    "usd_per_correct": 2.3369068494214428e-09,
+    "usd_per_1k_tasks": 1.3631956621625082e-06,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 18,
+    "fetch": 19,
+    "search_net": 0,
+    "fetch_net": 0,
+    "search_empty_primary": 0,
+    "search_fallback": 0,
+    "search_empty_final": 0,
+    "search_ratelimited": 0,
+    "served_ddgs": 18
+  },
+  "search_health": {
+    "searches": 18,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 18
+    },
+    "primary_share": 1.0,
+    "valid": true
+  },
+  "wall_s": 1.6,
+  "store_facts": 18,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.892,
+      3.5
+    ],
+    [
+      "grokipedia.com",
+      0.805,
+      1.5
+    ],
+    [
+      "marathonballot.com",
+      0.714,
+      1.5
+    ],
+    [
+      "alchetron.com",
+      0.692,
+      0.5
+    ],
+    [
+      "usopen.org",
+      0.6,
+      0.5
+    ],
+    [
+      "worldcupwiki.com",
+      0.6,
+      0.5
+    ],
+    [
+      "transfermarkt.com",
+      0.6,
+      0.5
+    ],
+    [
+      "founders.io",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "ROUND 4 (rules S/P)",
+    "note": "ddgs search + answer tiers: judged by SETUP_planck_20261008.md section 3"
+  }
+}

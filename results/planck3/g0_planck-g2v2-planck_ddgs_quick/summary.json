@@ -1,0 +1,130 @@
+{
+  "n": 12,
+  "success": 0.0,
+  "answered_rate": 0.0,
+  "wrong_when_answered": 0.0,
+  "abstain_rate": 1.0,
+  "ece": null,
+  "mean_steps": 8.583333333333334,
+  "mean_web_calls": 8.416666666666666,
+  "mean_decision_ms": 33.54705437267362,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 0.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.0
+    },
+    "fact": {
+      "n": 4,
+      "success": 0.0
+    }
+  },
+  "by_regime": {
+    "seed": {
+      "n": 12,
+      "success": 0.0,
+      "wrong_when_answered": 0.0
+    }
+  },
+  "policy": "planck",
+  "search": "ddgs",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks.json",
+  "system_trust_domains": 30,
+  "n_invalid_decisions": 0,
+  "gold_reachable": 1.0,
+  "serp_answer_rate_at3": 0.9166666666666666,
+  "depth_evidence_recall": 1.0,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 6.25,
+  "mean_answer_fetches": 4.083333333333333,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.0,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "tiers": {
+    "confident": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    },
+    "low_confidence": {
+      "n": 12,
+      "rate": 1.0,
+      "precision": 0.08333333333333333,
+      "evidence_recall": 1.0
+    },
+    "none": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    }
+  },
+  "graph": {
+    "facts": 2,
+    "passages": 123,
+    "entities": 210,
+    "edges": 204,
+    "queries": 26,
+    "domains": 3
+  },
+  "cost": {
+    "usd_per_task": 3.999243750446045e-06,
+    "usd_per_correct": null,
+    "usd_per_1k_tasks": 0.003999243750446045,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 26,
+    "fetch": 75,
+    "search_net": 2,
+    "fetch_net": 15,
+    "search_empty_primary": 0,
+    "search_fallback": 0,
+    "search_empty_final": 0,
+    "search_ratelimited": 0,
+    "served_ddgs": 26
+  },
+  "search_health": {
+    "searches": 26,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 26
+    },
+    "primary_share": 1.0,
+    "valid": true
+  },
+  "wall_s": 35.0,
+  "store_facts": 2,
+  "top_domains": [
+    [
+      "toureiffel.paris",
+      0.6,
+      0.5
+    ],
+    [
+      "periodictable.chemicalaid.com",
+      0.6,
+      0.5
+    ],
+    [
+      "britannica.com",
+      0.4,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "G2 (rule B)",
+    "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"
+  }
+}

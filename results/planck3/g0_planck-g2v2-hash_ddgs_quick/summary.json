@@ -1,0 +1,152 @@
+{
+  "n": 12,
+  "success": 0.0,
+  "answered_rate": 0.3333333333333333,
+  "wrong_when_answered": 1.0,
+  "abstain_rate": 0.6666666666666667,
+  "ece": 0.7385457820653052,
+  "mean_steps": 7.666666666666667,
+  "mean_web_calls": 5.75,
+  "mean_decision_ms": 1.1889869625599163,
+  "by_family": {
+    "chat": {
+      "n": 4,
+      "success": 0.0
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.0
+    },
+    "fact": {
+      "n": 4,
+      "success": 0.0
+    }
+  },
+  "by_regime": {
+    "seed": {
+      "n": 12,
+      "success": 0.0,
+      "wrong_when_answered": 1.0
+    }
+  },
+  "policy": "planck",
+  "search": "ddgs",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks.json",
+  "system_trust_domains": 30,
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.75,
+  "serp_answer_rate_at3": 0.6666666666666666,
+  "depth_evidence_recall": 1.0,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 3.75,
+  "mean_answer_fetches": 1.75,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.25,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "tiers": {
+    "confident": {
+      "n": 4,
+      "rate": 0.3333333333333333,
+      "precision": 0.0,
+      "evidence_recall": 1.0
+    },
+    "low_confidence": {
+      "n": 8,
+      "rate": 0.6666666666666666,
+      "precision": 0.25,
+      "evidence_recall": 1.0
+    },
+    "none": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    }
+  },
+  "graph": {
+    "facts": 14,
+    "passages": 119,
+    "entities": 198,
+    "edges": 191,
+    "queries": 26,
+    "domains": 7
+  },
+  "cost": {
+    "usd_per_task": 1.2660509323554666e-07,
+    "usd_per_correct": null,
+    "usd_per_1k_tasks": 0.00012660509323554666,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 24,
+    "fetch": 45,
+    "search_net": 37,
+    "fetch_net": 14,
+    "search_empty_primary": 14,
+    "search_fallback": 2,
+    "search_empty_final": 0,
+    "search_ratelimited": 0,
+    "served_ddgs": 22,
+    "served_wikipedia": 2
+  },
+  "search_health": {
+    "searches": 24,
+    "primary_empty_rate": 0.5833333333333334,
+    "fallback_rate": 0.08333333333333333,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 22,
+      "wikipedia": 2
+    },
+    "primary_share": 0.9166666666666666,
+    "valid": true
+  },
+  "wall_s": 122.6,
+  "store_facts": 14,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.888,
+      2.5
+    ],
+    [
+      "historydraft.com",
+      0.714,
+      1.5
+    ],
+    [
+      "britannica.com",
+      0.714,
+      1.5
+    ],
+    [
+      "periodictable.chemicalaid.com",
+      0.714,
+      1.5
+    ],
+    [
+      "mappr.co",
+      0.714,
+      1.5
+    ],
+    [
+      "periodictable.one",
+      0.667,
+      1.0
+    ],
+    [
+      "newspacetracker.com",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "G2 (rule B)",
+    "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"
+  }
+}

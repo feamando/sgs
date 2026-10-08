@@ -1,4 +1,433 @@
-# Planck 3.0 results (2026-10-09 00:53)
+[planck3 20:59:53] logging to C:\Users\feama\sgs\results\planck3\logs\round4_quick_20261008_2059.log
+[planck3 20:59:53] installing Planck 3.0 deps into .venv
+[planck3 20:59:59] offline smoke tests
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.1
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.2
+  [OK  ] trafilatura               2.3.0
+  [OK  ] ddgs                      9.16.0
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 660 GB
+  [OK  ] git                       branch main, 0 commits behind origin/main
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [OK  ] ddgs                      9.16.0 answering
+  [OK  ] brave api key             set (from .env or the environment); live check: planck3.py search-check --backend brave
+  [OK  ] searxng                   not running (optional since round 4: ddgs is the search of record)
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        9,446 texts/s on cuda (~30 s for the G1 graph)
+  [OK  ] hertz ckpt vs tokenizer   vocab 32000 vs 32000 pieces
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 1837 ms/decision
+  [OK  ] gemma closed-book         '1943' in 463 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~10 min
+    g0 closed-book (base-chat rival)   ~29 s
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~30 s
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~7 min
+
+  READY: 0 fail, 0 warn
+[planck3 21:01:57] ddgs answering (no Docker needed)
+[planck3 21:01:57] round 4: heuristic on ddgs (rule S2, P)
+> python scripts/planck3.py g0 --policy heuristic --tasks scripts/assets/planck3_tasks_fresh.json --system-trust none --search ddgs --out results/planck3/g0f_heuristic_snip_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bchat_born00                              p=0.52 steps=7 web=4 $0.00000
+[  2/12] XX  bwinner000 Elena Rybakina               p=0.81 steps=3 web=2 $0.00000
+[  3/12] OK  bchat_born01                              p=1.00 steps=6 web=4 $0.00000
+[  4/12] XX  bwinner001 Group                        p=0.40 steps=4 web=2 $0.00000
+[  5/12] OK  bchat_born02                              p=1.00 steps=6 web=4 $0.00000
+[  6/12] XX  bwinner002 Adana Open Women Doubles     p=0.84 steps=3 web=2 $0.00000
+[  7/12] XX  bchat_born03                              p=0.46 steps=8 web=5 $0.00000
+[  8/12] XX  bwinner003 Women Tennis Association     p=0.75 steps=5 web=3 $0.00000
+[  9/12] OK  bchat_founded00                              p=1.00 steps=6 web=4 $0.00000
+[ 10/12] XX  bwinner004 WTA                          p=0.65 steps=3 web=2 $0.00000
+[ 11/12] XX  bchat_founded01                              p=0.75 steps=6 web=4 $0.00000
+[ 12/12] OK  bwinner005 Tadese Takele                p=0.78 steps=4 web=2 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      12
+  success                0.333
+  answered_rate          1.000
+  wrong_when_answered    0.667
+  ece                    0.414
+  mean_steps             5.083
+  mean_web_calls         3.167
+  mean_decision_ms       0.041
+  n_invalid_decisions    0
+  gold_reachable         0.667
+  serp_answer_rate_at3   0.667
+  depth_evidence_recall  0.667
+  mean_fetches           1.667
+  mean_answer_fetches    0.250
+  answered_from_snippet  0.750
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.833 (n=10) precision 0.400
+  tier low_confidence    0.167 (n=2) precision 0.000
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.500
+  family fact            n=6 success=0.167
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_heuristic_snip_ddgs_quick
+[planck3 21:03:20] round 4: gemma on our tools, ddgs (rules S2, A1, P)
+> python scripts/planck3.py g0 --policy gemma --tasks scripts/assets/planck3_tasks_fresh.json --system-trust none --search ddgs --out results/planck3/g0f_gemma_snip_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/12] OK  bchat_born00                              p=0.95 steps=6 web=4 $0.00604
+[  2/12] OK  bwinner000 Sun Xinran                   p=0.95 steps=3 web=2 $0.00389
+[  3/12] OK  bchat_born01                              p=0.95 steps=6 web=4 $0.00542
+[  4/12] OK  bwinner001 Spain                        p=0.95 steps=3 web=2 $0.00466
+[  5/12] OK  bchat_born02                              p=0.95 steps=6 web=4 $0.00616
+[  6/12] OK  bwinner002 Angelica Moratelli           p=0.95 steps=3 web=2 $0.00376
+[  7/12] --  bchat_born03                              p=0.00 steps=7 web=4 $0.00667
+[  8/12] OK  bwinner003 Alexandra Shubladze          p=0.95 steps=3 web=2 $0.00382
+[  9/12] OK  bchat_founded00                              p=0.95 steps=6 web=4 $0.00531
+[ 10/12] OK  bwinner004 Tamara Korpatsch             p=0.95 steps=3 web=2 $0.00386
+[ 11/12] XX  bchat_founded01                              p=0.90 steps=7 web=5 $0.00634
+[ 12/12] OK  bwinner005 Tadese Takele                p=0.95 steps=3 web=2 $0.00375
+
+==== G0 summary (gemma) ====
+  n                      12
+  success                0.833
+  answered_rate          0.917
+  wrong_when_answered    0.091
+  ece                    0.036
+  mean_steps             4.667
+  mean_web_calls         3.083
+  mean_decision_ms       1676.303
+  n_invalid_decisions    1
+  gold_reachable         0.917
+  serp_answer_rate_at3   0.917
+  depth_evidence_recall  0.917
+  mean_fetches           1.583
+  mean_answer_fetches    0.083
+  answered_from_snippet  0.917
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.917 (n=11) precision 0.909
+  tier low_confidence    0.083 (n=1) precision 1.000
+  tier none              0.000 (n=0)
+  cost/1k tasks          $4.9745   per correct $0.00597   LLM tokens/task 4576 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.667
+  family fact            n=6 success=1.000
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_gemma_snip_ddgs_quick
+[planck3 21:05:24] G2 collect on ddgs: labelled decision points from known answers (resumable; ~2 h first time)
+> python scripts/planck3.py g2 collect --search ddgs --points data/planck3/g2/points_ddgs_quick.jsonl --limit 100
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[g2] collecting 100 questions (0 already done) -> data\planck3\g2\points_ddgs_quick.jsonl
+  50/100 (4.7s/question, ~4 min left; 0 empty searches)
+  100/100 (4.8s/question, ~0 min left; 0 empty searches)
+[g2] search health: 11% via Wikipedia fallback, 0% empty
+[planck3 21:13:24] system trust layer from data/planck3/g2/points_ddgs_quick.jsonl -> config/planck3/source_trust.json
+> python scripts/planck3.py trust build --points data/planck3/g2/points_ddgs_quick.jsonl
+[trust] system layer: 30 domains from points_ddgs_quick.jsonl -> C:\Users\feama\sgs\config\planck3\source_trust.json
+  en.wikipedia.org                     0.87  (weight 18)
+  wikiwand.com                         0.85  (weight 18)
+  everything.explained.today           0.69  (weight 18)
+  grokipedia.com                       0.79  (weight 17)
+  wikidata.org                         0.79  (weight 12)
+  wtatennis.com                        0.17  (weight 10)
+  dbpedia.org                          0.91  (weight 9)
+  flashscore.com                       0.09  (weight 9)
+  de.wikipedia.org                     0.30  (weight 8)
+  formula1archive.com                  0.89  (weight 7)
+  formula1.com                         0.44  (weight 7)
+  es.wikipedia.org                     0.56  (weight 7)
+  espn.com                             0.56  (weight 7)
+  f1-fansite.com                       0.75  (weight 6)
+  the-sports.org                       0.25  (weight 6)
+  tennis-db.com                        0.75  (weight 6)
+  bbc.com                              0.43  (weight 5)
+  football.fandom.com                  0.71  (weight 5)
+  olympics.com                         0.14  (weight 5)
+  si.com                               0.50  (weight 4)
+  alchetron.com                        0.67  (weight 4)
+  youtube.com                          0.67  (weight 4)
+  sportskeeda.com                      0.50  (weight 4)
+  racefans.net                         0.60  (weight 3)
+  f1report.net                         0.80  (weight 3)
+[planck3 21:13:24] G2 embed: hash (points_ddgs_quick)
+> python scripts/planck3.py g2 embed --encoder hash --points data/planck3/g2/points_ddgs_quick.jsonl --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model
+[g2] points: data\planck3\g2\points_ddgs_quick.jsonl
+[g2] emb_hash_points_ddgs_quick.npy: (4845, 1024) in 0s
+[planck3 21:13:25] G2 v2 train head:hash on ddgs points
+> python scripts/planck3.py g2 train2 --encoder hash --points data/planck3/g2/points_ddgs_quick.jsonl --tag _ddgs_quick
+[g2] points: data\planck3\g2\points_ddgs_quick.jsonl
+  epoch 0: train_nll=3.9707 val_choice_acc=0.2308
+  epoch 1: train_nll=3.0766 val_choice_acc=0.3077
+  epoch 2: train_nll=1.8084 val_choice_acc=0.3077
+  epoch 3: train_nll=0.9421 val_choice_acc=0.3846
+  epoch 4: train_nll=0.6275 val_choice_acc=0.2308
+  epoch 5: train_nll=0.2851 val_choice_acc=0.2308
+  epoch 6: train_nll=0.1271 val_choice_acc=0.1538
+C:\Users\feama\sgs\src\planck3\g2.py:491: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(out_dir / "choice.pt", map_location=device)["model"])
+[g2v2] head:hash: test choice 0.529 vs ranker 0.176 (17 test points with a right one); gate AUC 0.4848484848484848; tau=0.532 -> test coverage 0.20 at precision 0.5 (target 0.9) -> C:\Users\feama\sgs\results\planck3\g2v2_head_hash_s0_ddgs_quick
+[planck3 21:13:38] round 4: G2 v2 head:hash (ddgs-trained) on the fresh benchmark (rules B, P)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_hash_s0_ddgs_quick/head.pt --tasks scripts/assets/planck3_tasks_fresh.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0f_planck-g2v2-hash_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] --  bchat_born00                              p=0.06 steps=7 web=6 $0.00000
+[  2/12] --  bwinner000                              p=0.01 steps=4 web=4 $0.00000
+[  3/12] XX  bchat_born01                              p=0.71 steps=8 web=6 $0.00000
+[  4/12] OK  bwinner001 Spain                        p=0.79 steps=3 web=2 $0.00000
+[  5/12] XX  bchat_born02                              p=0.92 steps=6 web=4 $0.00000
+[  6/12] --  bwinner002                              p=0.02 steps=4 web=4 $0.00000
+[  7/12] XX  bchat_born03                              p=0.47 steps=10 web=8 $0.00000
+[  8/12] OK  bwinner003 Alexandra Shubladze          p=0.43 steps=4 web=3 $0.00000
+[  9/12] --  bchat_founded00                              p=0.12 steps=13 web=11 $0.00000
+[ 10/12] --  bwinner004                              p=0.07 steps=4 web=4 $0.00000
+[ 11/12] XX  bchat_founded01                              p=0.78 steps=7 web=5 $0.00000
+[ 12/12] --  bwinner005                              p=0.07 steps=4 web=4 $0.00000
+
+==== G0 summary (planck) ====
+  n                      12
+  success                0.167
+  answered_rate          0.500
+  wrong_when_answered    0.667
+  ece                    0.382
+  mean_steps             6.167
+  mean_web_calls         5.083
+  mean_decision_ms       1.352
+  n_invalid_decisions    0
+  gold_reachable         0.917
+  serp_answer_rate_at3   0.917
+  depth_evidence_recall  0.917
+  mean_fetches           3.583
+  mean_answer_fetches    2.083
+  answered_from_snippet  0.250
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.333 (n=4) precision 0.250
+  tier low_confidence    0.667 (n=8) precision 0.250
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0001   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.000
+  family fact            n=6 success=0.333
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_planck-g2v2-hash_ddgs_quick
+[planck3 21:14:15] round 4: G2 v2 head:hash on the 47-question seed benchmark (rule B)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_hash_s0_ddgs_quick/head.pt --tasks scripts/assets/planck3_tasks.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0_planck-g2v2-hash_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] --  ch01                              p=0.44 steps=11 web=8 $0.00000
+[  2/12] --  c01                               p=0.34 steps=11 web=8 $0.00000
+[  3/12] XX  f01  2018                         p=0.83 steps=2 web=0 $0.00000
+[  4/12] XX  ch02                              p=0.53 steps=7 web=5 $0.00000
+[  5/12] --  c02                               p=0.08 steps=11 web=8 $0.00000
+[  6/12] XX  f02  1950                         p=0.76 steps=3 web=2 $0.00000
+[  7/12] --  ch03                              p=0.08 steps=6 web=4 $0.00000
+[  8/12] XX  c03                               p=0.83 steps=10 web=6 $0.00000
+[  9/12] --  f03                               p=0.06 steps=4 web=4 $0.00000
+[ 10/12] --  ch04                              p=0.10 steps=12 web=10 $0.00000
+[ 11/12] --  c04                               p=0.16 steps=11 web=10 $0.00000
+[ 12/12] --  f04                               p=0.10 steps=4 web=4 $0.00000
+
+==== G0 summary (planck) ====
+  n                      12
+  success                0.000
+  answered_rate          0.333
+  wrong_when_answered    1.000
+  ece                    0.739
+  mean_steps             7.667
+  mean_web_calls         5.750
+  mean_decision_ms       1.189
+  n_invalid_decisions    0
+  gold_reachable         0.750
+  serp_answer_rate_at3   0.667
+  depth_evidence_recall  1.000
+  mean_fetches           3.750
+  mean_answer_fetches    1.750
+  answered_from_snippet  0.250
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.333 (n=4) precision 0.000
+  tier low_confidence    0.667 (n=8) precision 0.250
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0001   per correct n/a   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=4 success=0.000
+  family compare         n=4 success=0.000
+  family fact            n=4 success=0.000
+  GATE: G2 (rule B)
+
+  run dir: results\planck3\g0_planck-g2v2-hash_ddgs_quick
+[planck3 21:16:20] G2 embed: planck (points_ddgs_quick)
+> python scripts/planck3.py g2 embed --encoder planck --points data/planck3/g2/points_ddgs_quick.jsonl --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model
+[g2] points: data\planck3\g2\points_ddgs_quick.jsonl
+  encoded 256/4,845
+[g2] emb_planck_points_ddgs_quick.npy: (4845, 1000) in 1s
+[planck3 21:16:25] G2 v2 train head:planck on ddgs points
+> python scripts/planck3.py g2 train2 --encoder planck --points data/planck3/g2/points_ddgs_quick.jsonl --tag _ddgs_quick
+[g2] points: data\planck3\g2\points_ddgs_quick.jsonl
+  epoch 0: train_nll=3.6633 val_choice_acc=0.3846
+  epoch 1: train_nll=3.1836 val_choice_acc=0.3077
+  epoch 2: train_nll=2.2224 val_choice_acc=0.3846
+  epoch 3: train_nll=2.1106 val_choice_acc=0.4615
+  epoch 4: train_nll=1.6621 val_choice_acc=0.4615
+  epoch 5: train_nll=1.5728 val_choice_acc=0.4615
+  epoch 6: train_nll=0.9762 val_choice_acc=0.5385
+  epoch 7: train_nll=0.7960 val_choice_acc=0.5385
+  epoch 8: train_nll=0.6501 val_choice_acc=0.5385
+  epoch 9: train_nll=0.5797 val_choice_acc=0.5385
+C:\Users\feama\sgs\src\planck3\g2.py:491: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(out_dir / "choice.pt", map_location=device)["model"])
+[g2v2] head:planck: test choice 0.765 vs ranker 0.176 (17 test points with a right one); gate AUC 0.8681318681318682; tau=0.719 -> test coverage 0.15 at precision 1.0 (target 0.9) -> C:\Users\feama\sgs\results\planck3\g2v2_head_planck_s0_ddgs_quick
+[planck3 21:16:38] round 4: G2 v2 head:planck (ddgs-trained) on the fresh benchmark (rules B, P)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_planck_s0_ddgs_quick/head.pt --tasks scripts/assets/planck3_tasks_fresh.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0f_planck-g2v2-planck_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] --  bchat_born00                              p=0.00 steps=8 web=8 $0.00001
+[  2/12] XX  bwinner000 Elena Rybakina               p=0.83 steps=3 web=2 $0.00000
+[  3/12] --  bchat_born01                              p=0.00 steps=8 web=8 $0.00000
+[  4/12] OK  bwinner001 Spain                        p=0.87 steps=3 web=2 $0.00000
+[  5/12] --  bchat_born02                              p=0.05 steps=12 web=12 $0.00000
+[  6/12] --  bwinner002                              p=0.08 steps=4 web=4 $0.00000
+[  7/12] --  bchat_born03                              p=0.00 steps=9 web=9 $0.00000
+[  8/12] --  bwinner003                              p=0.07 steps=4 web=4 $0.00000
+[  9/12] --  bchat_founded00                              p=0.00 steps=11 web=11 $0.00000
+[ 10/12] --  bwinner004                              p=0.01 steps=4 web=4 $0.00000
+[ 11/12] --  bchat_founded01                              p=0.02 steps=8 web=8 $0.00000
+[ 12/12] --  bwinner005                              p=0.10 steps=4 web=4 $0.00000
+
+==== G0 summary (planck) ====
+  n                      12
+  success                0.083
+  answered_rate          0.167
+  wrong_when_answered    0.500
+  ece                    0.351
+  mean_steps             6.500
+  mean_web_calls         6.333
+  mean_decision_ms       24.568
+  n_invalid_decisions    0
+  gold_reachable         1.000
+  serp_answer_rate_at3   0.917
+  depth_evidence_recall  0.917
+  mean_fetches           4.833
+  mean_answer_fetches    3.333
+  answered_from_snippet  0.167
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.167 (n=2) precision 0.500
+  tier low_confidence    0.833 (n=10) precision 0.400
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0022   per correct $0.00003   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.000
+  family fact            n=6 success=0.167
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_planck-g2v2-planck_ddgs_quick
+[planck3 21:16:56] round 4: G2 v2 head:planck on the 47-question seed benchmark (rule B)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_planck_s0_ddgs_quick/head.pt --tasks scripts/assets/planck3_tasks.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0_planck-g2v2-planck_ddgs_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] --  ch01                              p=0.00 steps=12 web=12 $0.00001
+[  2/12] --  c01                               p=0.00 steps=12 web=12 $0.00000
+[  3/12] --  f01                               p=0.11 steps=4 web=4 $0.00000
+[  4/12] --  ch02                              p=0.12 steps=8 web=8 $0.00000
+[  5/12] --  c02                               p=0.20 steps=12 web=11 $0.00000
+[  6/12] --  f02                               p=0.29 steps=4 web=4 $0.00000
+[  7/12] --  ch03                              p=0.20 steps=8 web=8 $0.00000
+[  8/12] --  c03                               p=0.45 steps=11 web=10 $0.00001
+[  9/12] --  f03                               p=0.19 steps=4 web=4 $0.00000
+[ 10/12] --  ch04                              p=0.35 steps=12 web=12 $0.00001
+[ 11/12] --  c04                               p=0.13 steps=12 web=12 $0.00001
+[ 12/12] --  f04                               p=0.07 steps=4 web=4 $0.00000
+
+==== G0 summary (planck) ====
+  n                      12
+  success                0.000
+  answered_rate          0.000
+  wrong_when_answered    0.000
+  ece                    None
+  mean_steps             8.583
+  mean_web_calls         8.417
+  mean_decision_ms       33.547
+  n_invalid_decisions    0
+  gold_reachable         1.000
+  serp_answer_rate_at3   0.917
+  depth_evidence_recall  1.000
+  mean_fetches           6.250
+  mean_answer_fetches    4.083
+  answered_from_snippet  0.000
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.000 (n=0)
+  tier low_confidence    1.000 (n=12) precision 0.083
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0040   per correct n/a   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=4 success=0.000
+  family compare         n=4 success=0.000
+  family fact            n=4 success=0.000
+  GATE: G2 (rule B)
+
+  run dir: results\planck3\g0_planck-g2v2-planck_ddgs_quick
+[planck3 21:17:34] round 4: heuristic on ddgs + system trust layer (rule T)
+> python scripts/planck3.py g0 --policy heuristic --tasks scripts/assets/planck3_tasks_fresh.json --search ddgs --out results/planck3/g0f_heuristic_snip_ddgs_trust_quick --gemma-path models/gemma-4-e4b-it --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] OK  bchat_born00                              p=1.00 steps=6 web=4 $0.00000
+[  2/12] XX  bwinner000 Elena Rybakina               p=0.81 steps=3 web=2 $0.00000
+[  3/12] OK  bchat_born01                              p=1.00 steps=6 web=4 $0.00000
+[  4/12] OK  bwinner001 Spain                        p=0.98 steps=3 web=2 $0.00000
+[  5/12] OK  bchat_born02                              p=1.00 steps=6 web=4 $0.00000
+[  6/12] XX  bwinner002 Adana Open Women Doubles     p=0.84 steps=3 web=2 $0.00000
+[  7/12] OK  bchat_born03                              p=1.00 steps=6 web=4 $0.00000
+[  8/12] XX  bwinner003 Women Tennis Association     p=0.75 steps=5 web=3 $0.00000
+[  9/12] OK  bchat_founded00                              p=1.00 steps=6 web=4 $0.00000
+[ 10/12] XX  bwinner004 WTA                          p=0.65 steps=3 web=2 $0.00000
+[ 11/12] XX  bchat_founded01                              p=0.75 steps=6 web=4 $0.00000
+[ 12/12] OK  bwinner005 Tadese Takele                p=0.78 steps=4 web=2 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      12
+  success                0.583
+  answered_rate          1.000
+  wrong_when_answered    0.417
+  ece                    0.300
+  mean_steps             4.750
+  mean_web_calls         3.083
+  mean_decision_ms       0.021
+  n_invalid_decisions    0
+  gold_reachable         0.917
+  serp_answer_rate_at3   0.917
+  depth_evidence_recall  0.917
+  mean_fetches           1.583
+  mean_answer_fetches    0.083
+  answered_from_snippet  0.917
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         1.000 (n=12) precision 0.583
+  tier low_confidence    0.000 (n=0)
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.833
+  family fact            n=6 success=0.333
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_heuristic_snip_ddgs_trust_quick
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-08 21:17)
 
 ## G0 (seed benchmark)
 
@@ -19,22 +448,17 @@
 | g0_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
 | g0_planck-g2-planck_wikipedia | 47 | 0.021 | 0.021 | 0.000 | 0.286 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 | 0.000098 | 0 | G2 (rule B) |
 | g0_planck-g2v2-hash | 47 | 0.617 | 0.745 | 0.171 | 0.161 | 0.979 | 0.851 | 0.830 | 0.660 | 0.000 | 0.000000 | 0 | G2 (rule B) |
-| g0_planck-g2v2-hash_ddgs | 47 | 0.426 | 0.489 | 0.130 | 0.109 | 0.979 | 0.830 | 1.191 | 0.404 | 0.000 | 0.000000 | 0 | G2 (rule B) |
 | g0_planck-g2v2-hash_ddgs_quick | 12 | 0.000 | 0.333 | 1.000 | 0.739 | 1.000 | 0.667 | 1.750 | 0.250 | 0.000 |  | 0 | G2 (rule B) |
 | g0_planck-g2v2-planck | 47 | 0.638 | 0.787 | 0.189 | 0.182 | 1.000 | 0.872 | 0.660 | 0.702 | 0.000 | 0.000002 | 0 | G2 (rule B) |
-| g0_planck-g2v2-planck_ddgs | 47 | 0.298 | 0.340 | 0.125 | 0.109 | 0.979 | 0.872 | 1.596 | 0.298 | 0.000 | 0.000005 | 0 | G2 (rule B) |
 | g0_planck-g2v2-planck_ddgs_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 0.917 | 4.083 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
 | g0f_gemma_closedbook | 143 | 0.049 | 0.986 | 0.950 | 0.950 |  |  | 0.000 |  |  | 0.002297 | 75 | COMPARATOR |
 | g0f_gemma_closedbook_quick | 12 | 0.000 | 1.000 | 1.000 | 1.000 |  |  | 0.000 |  |  |  | 110 | COMPARATOR |
 | g0f_gemma_snip | 143 | 0.196 | 0.294 | 0.333 | 0.257 | 0.322 | 0.273 | 0.042 | 0.294 | 0.014 | 0.015155 | 2737 | ROUND 3 (rules A/B) |
-| g0f_gemma_snip_ddgs | 143 | 0.601 | 0.797 | 0.246 | 0.177 | 0.839 | 0.846 | 0.063 | 0.797 | 0.007 | 0.006522 | 3635 | ROUND 4 (rules S/P) |
 | g0f_gemma_snip_ddgs_quick | 12 | 0.833 | 0.917 | 0.091 | 0.036 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.005969 | 4576 | ROUND 4 (rules S/P) |
 | g0f_gemma_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.267 | 0.750 | 0.917 | 0.000 | 1.000 | 0.000 | 0.007831 | 4830 | ROUND 3 (rules A/B) |
 | g0f_gemma_snip_wikipedia | 143 | 0.140 | 0.210 | 0.333 | 0.253 | 0.252 | 0.189 | 0.056 | 0.210 | 0.014 | 0.020229 | 2607 | ROUND 3 (rules A/B) |
 | g0f_heuristic_snip | 143 | 0.210 | 0.818 | 0.744 | 0.471 | 0.336 | 0.273 | 0.699 | 0.308 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
-| g0f_heuristic_snip_ddgs | 143 | 0.510 | 0.958 | 0.467 | 0.319 | 0.734 | 0.734 | 0.133 | 0.860 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
 | g0f_heuristic_snip_ddgs_quick | 12 | 0.333 | 1.000 | 0.667 | 0.414 | 0.667 | 0.667 | 0.250 | 0.750 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
-| g0f_heuristic_snip_ddgs_trust | 143 | 0.566 | 1.000 | 0.434 | 0.297 | 0.832 | 0.846 | 0.077 | 0.944 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
 | g0f_heuristic_snip_ddgs_trust_quick | 12 | 0.583 | 1.000 | 0.417 | 0.300 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
 | g0f_heuristic_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.302 | 0.750 | 0.917 | 0.250 | 0.833 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
 | g0f_heuristic_snip_wikipedia | 143 | 0.154 | 0.797 | 0.807 | 0.510 | 0.273 | 0.189 | 0.755 | 0.259 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
@@ -45,10 +469,8 @@
 | g0f_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
 | g0f_planck-g2-planck_wikipedia | 143 | 0.098 | 0.182 | 0.462 | 0.241 | 0.287 | 0.189 | 1.734 | 0.112 | 0.000 | 0.000015 | 0 | ROUND 3 (rules A/B) |
 | g0f_planck-g2v2-hash | 143 | 0.035 | 0.056 | 0.375 | 0.345 | 0.343 | 0.273 | 1.916 | 0.042 | 0.000 | 0.000003 | 0 | ROUND 3 (rules A/B) |
-| g0f_planck-g2v2-hash_ddgs | 143 | 0.245 | 0.294 | 0.167 | 0.102 | 0.839 | 0.853 | 1.580 | 0.217 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
 | g0f_planck-g2v2-hash_ddgs_quick | 12 | 0.167 | 0.500 | 0.667 | 0.382 | 0.917 | 0.917 | 2.083 | 0.250 | 0.000 | 0.000001 | 0 | ROUND 4 (rules S/P) |
 | g0f_planck-g2v2-planck | 143 | 0.084 | 0.119 | 0.294 | 0.094 | 0.343 | 0.273 | 1.783 | 0.084 | 0.000 | 0.000024 | 0 | ROUND 3 (rules A/B) |
-| g0f_planck-g2v2-planck_ddgs | 143 | 0.294 | 0.322 | 0.087 | 0.022 | 0.839 | 0.853 | 1.580 | 0.245 | 0.000 | 0.000004 | 0 | ROUND 4 (rules S/P) |
 | g0f_planck-g2v2-planck_ddgs_quick | 12 | 0.083 | 0.167 | 0.500 | 0.351 | 0.917 | 0.917 | 3.333 | 0.167 | 0.000 | 0.000027 | 0 | ROUND 4 (rules S/P) |
 
 **g0_gemma vs base chat:** success 0.681 vs 0.957 (0.71x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 79.8x MORE expensive (5486 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
@@ -64,20 +486,15 @@
 **g0_planck-g2-planck_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
 **g0_planck-g2-planck_wikipedia vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.1x cheaper.
 **g0_planck-g2v2-hash vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 1282.3x cheaper.
-**g0_planck-g2v2-hash_ddgs vs base chat:** success 0.426 vs 0.957 (0.44x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 564.9x cheaper.
 **g0_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
 **g0_planck-g2v2-planck vs base chat:** success 0.638 vs 0.957 (0.67x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 72.8x cheaper.
-**g0_planck-g2v2-planck_ddgs vs base chat:** success 0.298 vs 0.957 (0.31x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 23.8x cheaper.
 **g0_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
 **g0f_gemma_snip vs base chat:** success 0.196 vs 0.049 (4.00x); depth evidence 0.322 vs none (base chat shows no sources); cost per correct 6.6x MORE expensive (2737 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
-**g0f_gemma_snip_ddgs vs base chat:** success 0.601 vs 0.049 (12.29x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 2.8x MORE expensive (3635 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0f_gemma_snip_ddgs_quick vs base chat:** success 0.833 vs 0.000 (833333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0f_gemma_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0f_gemma_snip_wikipedia vs base chat:** success 0.140 vs 0.049 (2.86x); depth evidence 0.252 vs none (base chat shows no sources); cost per correct 8.8x MORE expensive (2607 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
 **g0f_heuristic_snip vs base chat:** success 0.210 vs 0.049 (4.29x); depth evidence 0.336 vs none (base chat shows no sources); cost per correct 136268.0x cheaper.
-**g0f_heuristic_snip_ddgs vs base chat:** success 0.510 vs 0.049 (10.43x); depth evidence 0.734 vs none (base chat shows no sources); cost per correct 530110.6x cheaper.
 **g0f_heuristic_snip_ddgs_quick vs base chat:** success 0.333 vs 0.000 (333333333.33x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct n/a.
-**g0f_heuristic_snip_ddgs_trust vs base chat:** success 0.566 vs 0.049 (11.57x); depth evidence 0.832 vs none (base chat shows no sources); cost per correct 915042.4x cheaper.
 **g0f_heuristic_snip_ddgs_trust_quick vs base chat:** success 0.583 vs 0.000 (583333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
 **g0f_heuristic_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
 **g0f_heuristic_snip_wikipedia vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69225.3x cheaper.
@@ -88,48 +505,20 @@
 **g0f_planck-g2-planck_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
 **g0f_planck-g2-planck_wikipedia vs base chat:** success 0.098 vs 0.049 (2.00x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 151.3x cheaper.
 **g0f_planck-g2v2-hash vs base chat:** success 0.035 vs 0.049 (0.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 738.7x cheaper.
-**g0f_planck-g2v2-hash_ddgs vs base chat:** success 0.245 vs 0.049 (5.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 6108.9x cheaper.
 **g0f_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.167 vs 0.000 (166666666.67x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
 **g0f_planck-g2v2-planck vs base chat:** success 0.084 vs 0.049 (1.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 94.2x cheaper.
-**g0f_planck-g2v2-planck_ddgs vs base chat:** success 0.294 vs 0.049 (6.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 537.5x cheaper.
 **g0f_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.083 vs 0.000 (83333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
-
-### Round 4 paired comparisons (same questions; exact McNemar)
-
-| rule | run | vs | metric | run | vs | only run | only vs | p |
-|---|---|---|---|---|---|---|---|---|
-| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | serp_visible | 0.830 | 0.851 | 1 | 2 | 1 |
-| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | correct | 0.426 | 0.617 | 2 | 11 | 0.0225 |
-| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | serp_visible | 0.872 | 0.872 | 2 | 2 | 1 |
-| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | correct | 0.298 | 0.638 | 4 | 20 | 0.00154 |
-| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | serp_visible | 0.846 | 0.189 | 94 | 0 | 1.01e-28 |
-| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | correct | 0.601 | 0.140 | 70 | 4 | 1.29e-16 |
-| A1 | g0f_gemma_snip_ddgs | g0f_gemma_closedbook | correct | 0.601 | 0.049 | 83 | 4 | 3.02e-20 |
-| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | serp_visible | 0.734 | 0.189 | 78 | 0 | 6.62e-24 |
-| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | correct | 0.510 | 0.154 | 53 | 2 | 8.55e-14 |
-| T | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.566 | 0.510 | 9 | 1 | 0.0215 |
-| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
-| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | correct | 0.245 | 0.035 | 31 | 1 | 1.54e-08 |
-| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
-| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | correct | 0.294 | 0.084 | 32 | 2 | 6.94e-08 |
 
 ### Answer tiers (what the card shows: confident / low confidence / evidence only)
 
 | run | confident: share | precision | low confidence: share | precision | none: share | its evidence has the answer |
 |---|---|---|---|---|---|---|
-| g0_planck-g2v2-hash_ddgs | 0.489 | 0.870 | 0.511 | 0.500 | 0.000 |  |
 | g0_planck-g2v2-hash_ddgs_quick | 0.333 | 0.000 | 0.667 | 0.250 | 0.000 |  |
-| g0_planck-g2v2-planck_ddgs | 0.340 | 0.875 | 0.660 | 0.710 | 0.000 |  |
 | g0_planck-g2v2-planck_ddgs_quick | 0.000 |  | 1.000 | 0.083 | 0.000 |  |
-| g0f_gemma_snip_ddgs | 0.797 | 0.754 | 0.203 | 0.379 | 0.000 |  |
 | g0f_gemma_snip_ddgs_quick | 0.917 | 0.909 | 0.083 | 1.000 | 0.000 |  |
-| g0f_heuristic_snip_ddgs | 0.909 | 0.562 | 0.084 | 0.000 | 0.007 | 0.000 |
 | g0f_heuristic_snip_ddgs_quick | 0.833 | 0.400 | 0.167 | 0.000 | 0.000 |  |
-| g0f_heuristic_snip_ddgs_trust | 0.979 | 0.571 | 0.021 | 0.333 | 0.000 |  |
 | g0f_heuristic_snip_ddgs_trust_quick | 1.000 | 0.583 | 0.000 |  | 0.000 |  |
-| g0f_planck-g2v2-hash_ddgs | 0.294 | 0.833 | 0.706 | 0.287 | 0.000 |  |
 | g0f_planck-g2v2-hash_ddgs_quick | 0.333 | 0.250 | 0.667 | 0.250 | 0.000 |  |
-| g0f_planck-g2v2-planck_ddgs | 0.322 | 0.913 | 0.678 | 0.495 | 0.000 |  |
 | g0f_planck-g2v2-planck_ddgs_quick | 0.167 | 0.500 | 0.833 | 0.400 | 0.000 |  |
 
 ### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)
@@ -139,14 +528,11 @@
 | g0f_gemma_closedbook | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.084 (n=83, wrong 0.915) |
 | g0f_gemma_closedbook_quick | fresh: 0.000 (n=6, wrong 1.000) | long_tail: 0.000 (n=6, wrong 1.000) |
 | g0f_gemma_snip | fresh: 0.083 (n=60, wrong 0.545) | long_tail: 0.277 (n=83, wrong 0.258) |
-| g0f_gemma_snip_ddgs | fresh: 0.567 (n=60, wrong 0.244) | long_tail: 0.627 (n=83, wrong 0.246) |
 | g0f_gemma_snip_ddgs_quick | fresh: 1.000 (n=6, wrong 0.000) | long_tail: 0.667 (n=6, wrong 0.200) |
 | g0f_gemma_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
 | g0f_gemma_snip_wikipedia | fresh: 0.033 (n=60, wrong 0.600) | long_tail: 0.217 (n=83, wrong 0.280) |
 | g0f_heuristic_snip | fresh: 0.133 (n=60, wrong 0.855) | long_tail: 0.265 (n=83, wrong 0.645) |
-| g0f_heuristic_snip_ddgs | fresh: 0.250 (n=60, wrong 0.737) | long_tail: 0.699 (n=83, wrong 0.275) |
 | g0f_heuristic_snip_ddgs_quick | fresh: 0.167 (n=6, wrong 0.833) | long_tail: 0.500 (n=6, wrong 0.500) |
-| g0f_heuristic_snip_ddgs_trust | fresh: 0.333 (n=60, wrong 0.667) | long_tail: 0.735 (n=83, wrong 0.265) |
 | g0f_heuristic_snip_ddgs_trust_quick | fresh: 0.333 (n=6, wrong 0.667) | long_tail: 0.833 (n=6, wrong 0.167) |
 | g0f_heuristic_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
 | g0f_heuristic_snip_wikipedia | fresh: 0.083 (n=60, wrong 0.909) | long_tail: 0.205 (n=83, wrong 0.712) |
@@ -157,10 +543,8 @@
 | g0f_planck-g2-planck_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
 | g0f_planck-g2-planck_wikipedia | fresh: 0.017 (n=60, wrong 0.900) | long_tail: 0.157 (n=83, wrong 0.188) |
 | g0f_planck-g2v2-hash | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.060 (n=83, wrong 0.167) |
-| g0f_planck-g2v2-hash_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.422 (n=83, wrong 0.167) |
 | g0f_planck-g2v2-hash_ddgs_quick | fresh: 0.333 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 1.000) |
 | g0f_planck-g2v2-planck | fresh: 0.017 (n=60, wrong 0.500) | long_tail: 0.133 (n=83, wrong 0.267) |
-| g0f_planck-g2v2-planck_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.506 (n=83, wrong 0.087) |
 | g0f_planck-g2v2-planck_ddgs_quick | fresh: 0.167 (n=6, wrong 0.500) | long_tail: 0.000 (n=6, wrong 0.000) |
 
 ## G2 v2 heads (choice head + calibrated answerability gate)
@@ -168,10 +552,8 @@
 | head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
 |---|---|---|---|---|---|---|---|---|---|
 | g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
-| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
 | g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.529 | 0.176 | 0.485 | 0.420 | 0.532 | 0.200 | 0.500 (0.9) |
 | g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
-| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
 | g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.765 | 0.176 | 0.868 | 0.239 | 0.719 | 0.150 | 1.000 (0.9) |
 
 ## G2 heads (learned from known answers)
@@ -423,3 +805,5 @@ head:planck-rank: paired ratio vs teacher 0.71 (per seed 0.67, 0.80, 0.66)
 
 **Verdict (seeds):** FAIL. mean paired head:planck-rank/teacher = 0.71 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
 
+[planck3 21:17:38] round4_quick finished in 18 min
+[planck3 21:17:38] -NoPush: results left uncommitted

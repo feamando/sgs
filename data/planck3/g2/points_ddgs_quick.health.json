@@ -1,0 +1,12 @@
+{
+  "searches": 100,
+  "primary_empty_rate": 0.41,
+  "fallback_rate": 0.11,
+  "final_empty_rate": 0.0,
+  "served": {
+    "ddgs": 89,
+    "wikipedia": 11
+  },
+  "primary_share": 0.89,
+  "valid": true
+}

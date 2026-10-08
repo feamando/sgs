@@ -1,0 +1,79 @@
+{
+  "version": 2,
+  "encoder": "planck",
+  "seed": 0,
+  "points": "data\\planck3\\g2\\points_ddgs_quick.jsonl",
+  "n_questions": 100,
+  "n_train_points": 135,
+  "n_val_points": 20,
+  "n_test_points": 20,
+  "temperature": 1.3090479334957856,
+  "tau": 0.7189675028106759,
+  "gate_precision_target": 0.9,
+  "test_choice_acc": 0.7647058823529411,
+  "test_ranker_acc": 0.17647058823529413,
+  "test_points_with_gold": 17,
+  "test_gate_auc": 0.8681318681318682,
+  "test_gate_ece": 0.23941921277200803,
+  "val_at_tau": {
+    "coverage": 0.15,
+    "precision": 1.0
+  },
+  "test_at_tau": {
+    "coverage": 0.15,
+    "precision": 1.0
+  },
+  "test_base_rate": 0.65,
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_nll": 3.663314461708069,
+      "val_choice_acc": 0.38461538461538464
+    },
+    {
+      "epoch": 1,
+      "train_nll": 3.1835711002349854,
+      "val_choice_acc": 0.3076923076923077
+    },
+    {
+      "epoch": 2,
+      "train_nll": 2.2223747968673706,
+      "val_choice_acc": 0.38461538461538464
+    },
+    {
+      "epoch": 3,
+      "train_nll": 2.110605001449585,
+      "val_choice_acc": 0.46153846153846156
+    },
+    {
+      "epoch": 4,
+      "train_nll": 1.6621010303497314,
+      "val_choice_acc": 0.46153846153846156
+    },
+    {
+      "epoch": 5,
+      "train_nll": 1.572783350944519,
+      "val_choice_acc": 0.46153846153846156
+    },
+    {
+      "epoch": 6,
+      "train_nll": 0.9761559814214706,
+      "val_choice_acc": 0.5384615384615384
+    },
+    {
+      "epoch": 7,
+      "train_nll": 0.7960372567176819,
+      "val_choice_acc": 0.5384615384615384
+    },
+    {
+      "epoch": 8,
+      "train_nll": 0.6501171141862869,
+      "val_choice_acc": 0.5384615384615384
+    },
+    {
+      "epoch": 9,
+      "train_nll": 0.5796863883733749,
+      "val_choice_acc": 0.5384615384615384
+    }
+  ]
+}

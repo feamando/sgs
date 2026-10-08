@@ -1,0 +1,1608 @@
+[planck3 22:31:03] logging to C:\Users\feama\sgs\results\planck3\logs\round4_20261008_2231.log
+[planck3 22:31:03] installing Planck 3.0 deps into .venv
+[planck3 22:31:06] offline smoke tests
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.1
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.2
+  [OK  ] trafilatura               2.3.0
+  [OK  ] ddgs                      9.16.0
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 659 GB
+  [OK  ] git                       branch main, 0 commits behind origin/main
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [OK  ] ddgs                      9.16.0 answering
+  [OK  ] brave api key             set (from .env or the environment); live check: planck3.py search-check --backend brave
+  [OK  ] searxng                   not running (optional since round 4: ddgs is the search of record)
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        8,465 texts/s on cuda (~34 s for the G1 graph)
+  [OK  ] hertz ckpt vs tokenizer   vocab 32000 vs 32000 pieces
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 2513 ms/decision
+  [OK  ] gemma closed-book         '1943' in 583 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~13 min
+    g0 closed-book (base-chat rival)   ~36 s
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~34 s
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~8 min
+
+  READY: 0 fail, 0 warn
+[planck3 22:32:34] ddgs answering (no Docker needed)
+[planck3 22:32:34] round 4: heuristic on ddgs (rule S2, P)
+> python scripts/planck3.py g0 --policy heuristic --tasks scripts/assets/planck3_tasks_fresh.json --system-trust none --search ddgs --out results/planck3/g0f_heuristic_snip_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/143] XX  bwinner000 Elena Rybakina               p=0.81 steps=3 web=2 $0.00000
+[  2/143] OK  bwinner001 Spain                        p=0.98 steps=3 web=2 $0.00000
+[  3/143] XX  bwinner002 Adana Open Women Doubles     p=0.84 steps=3 web=2 $0.00000
+[  4/143] XX  bwinner003 Women Tennis Association     p=0.75 steps=5 web=3 $0.00000
+[  5/143] XX  bwinner004 WTA                          p=0.65 steps=3 web=2 $0.00000
+[  6/143] OK  bwinner005 Tadese Takele                p=0.78 steps=4 web=2 $0.00000
+[  7/143] XX  bwinner006 OnlyBulls Grand Prix of Portland p=0.92 steps=3 web=2 $0.00000
+[  8/143] XX  bwinner007 Tri-City Raceway             p=0.99 steps=3 web=2 $0.00000
+[  9/143] XX  bwinner008 Bekijk UEC Track European Championships p=0.47 steps=4 web=3 $0.00000
+[ 10/143] OK  bwinner009 Paul Magnier                 p=0.64 steps=3 web=2 $0.00000
+[ 11/143] XX  bwinner010 ATP Challenger Tour          p=0.81 steps=4 web=2 $0.00000
+[ 12/143] XX  bwinner011 Czech Republic               p=0.81 steps=5 web=3 $0.00000
+[ 13/143] XX  bwinner012 Glasgow                      p=0.96 steps=3 web=2 $0.00000
+[ 14/143] OK  bwinner013 Paul Seixas                  p=0.92 steps=3 web=2 $0.00000
+[ 15/143] XX  bwinner014 Wembley Stadium              p=0.84 steps=4 web=2 $0.00000
+[ 16/143] XX  bwinner015 National Indoor Stadium      p=0.80 steps=3 web=2 $0.00000
+[ 17/143] XX  bwinner016 UCI Road World Championships p=0.93 steps=3 web=2 $0.00000
+[ 18/143] XX  bwinner017 Arsenal                      p=0.63 steps=3 web=2 $0.00000
+[ 19/143] XX  bwinner018 Olympic Games                p=0.42 steps=5 web=3 $0.00000
+[ 20/143] XX  bwinner019 Paris                        p=0.75 steps=3 web=2 $0.00000
+[ 21/143] XX  bwinner020 Milan                        p=0.96 steps=3 web=2 $0.00000
+[ 22/143] OK  bwinner021 Taylor Gray                  p=0.73 steps=3 web=2 $0.00000
+[ 23/143] XX  bwinner022 Muur van Geraardsbergen      p=0.79 steps=4 web=2 $0.00000
+[ 24/143] XX  bwinner023 Accra                        p=0.82 steps=3 web=2 $0.00000
+[ 25/143] XX  bwinner024 Pavic                        p=0.40 steps=4 web=2 $0.00000
+[ 26/143] OK  bwinner025 Madison Keys                 p=0.77 steps=3 web=2 $0.00000
+[ 27/143] XX  bwinner026 Duplantis                    p=0.40 steps=5 web=3 $0.00000
+[ 28/143] XX  bwinner027 NASCAR O'Reilly Auto Parts Series p=0.98 steps=3 web=2 $0.00000
+[ 29/143] XX  bwinner028 NASCAR O’Reilly Auto Parts Series p=0.81 steps=4 web=2 $0.00000
+[ 30/143] OK  bwinner029 Justin Allgaier              p=0.75 steps=4 web=2 $0.00000
+[ 31/143] XX  belection000 Armenia                      p=0.90 steps=3 web=2 $0.00000
+[ 32/143] XX  belection001 Dáil                         p=0.64 steps=3 web=2 $0.00000
+[ 33/143] OK  belection002 Tayte Willows                p=0.99 steps=3 web=2 $0.00000
+[ 34/143] XX  belection003 Japanese                     p=0.82 steps=4 web=2 $0.00000
+[ 35/143] OK  belection004 Jason Perry                  p=0.79 steps=5 web=3 $0.00000
+[ 36/143] OK  belection005 Anthony Marsh                p=0.91 steps=3 web=2 $0.00000
+[ 37/143] OK  belection006 Tatiana Auguste              p=0.70 steps=3 web=2 $0.00000
+[ 38/143] XX  belection007 House of Representatives     p=1.00 steps=3 web=2 $0.00000
+[ 39/143] OK  belection008 Jeff Beattie                 p=0.88 steps=3 web=2 $0.00000
+[ 40/143] OK  belection009 United Kingdom               p=0.89 steps=3 web=2 $0.00000
+[ 41/143] XX  bseason000 Overall Four Days of Dunkirk p=0.97 steps=4 web=3 $0.00000
+[ 42/143] XX  bseason001 NCAA Division                p=0.82 steps=4 web=3 $0.00000
+[ 43/143] XX  bseason002 Coupe de France de Basket    p=0.67 steps=3 web=2 $0.00000
+[ 44/143] XX  bseason003 AdmiralBet ABA League        p=0.62 steps=3 web=2 $0.00000
+[ 45/143] XX  bseason004 Demi Vollering               p=0.86 steps=3 web=2 $0.00000
+[ 46/143] XX  bseason005 Serie C                      p=0.97 steps=3 web=2 $0.00000
+[ 47/143] XX  bseason006 Serie C                      p=0.97 steps=2 web=0 $0.00000
+[ 48/143] XX  bseason007 Leinster Senior Club Football Championship p=0.92 steps=3 web=2 $0.00000
+[ 49/143] OK  bseason008 Aubry Bracco                 p=0.82 steps=3 web=2 $0.00000
+[ 50/143] XX  bseason009 Het BNXT League-seizoen      p=0.85 steps=3 web=2 $0.00000
+[ 51/143] XX  bheadgov000 Naha                         p=0.63 steps=3 web=2 $0.00000
+[ 52/143] XX  bheadgov001 Januar                       p=0.78 steps=3 web=2 $0.00000
+[ 53/143] XX  bheadgov002 Santa Perpètua de Mogoda Barcelona p=0.85 steps=3 web=2 $0.00000
+[ 54/143] OK  bheadgov003 Alexis Chaussalet            p=0.63 steps=3 web=2 $0.00000
+[ 55/143] XX  bheadgov004 Amadou Oury Bah              p=0.99 steps=3 web=2 $0.00000
+[ 56/143] --  bheadgov005                              p=0.42 steps=5 web=3 $0.00000
+[ 57/143] --  bheadgov006                              p=0.44 steps=4 web=2 $0.00000
+[ 58/143] --  bheadgov007                              p=0.48 steps=5 web=3 $0.00000
+[ 59/143] XX  bheadgov008 Prime Minister               p=0.43 steps=5 web=3 $0.00000
+[ 60/143] XX  bheadgov009 Le                           p=0.77 steps=4 web=3 $0.00000
+[ 61/143] OK  bfounded000 2000                         p=1.00 steps=3 web=2 $0.00000
+[ 62/143] --  bfounded001                              p=0.34 steps=5 web=3 $0.00000
+[ 63/143] OK  bfounded002 2000                         p=1.00 steps=3 web=2 $0.00000
+[ 64/143] OK  bfounded003 1999                         p=0.99 steps=3 web=2 $0.00000
+[ 65/143] --  bfounded004                              p=0.00 steps=1 web=1 $0.00000
+[ 66/143] OK  bfounded005 1930                         p=0.81 steps=3 web=2 $0.00000
+[ 67/143] OK  bfounded006 1982                         p=1.00 steps=3 web=2 $0.00000
+[ 68/143] XX  bfounded007 2008                         p=0.41 steps=5 web=3 $0.00000
+[ 69/143] XX  bfounded008 2005                         p=0.76 steps=4 web=3 $0.00000
+[ 70/143] XX  bfounded009 2005                         p=1.00 steps=3 web=2 $0.00000
+[ 71/143] OK  bfounded010 2003                         p=1.00 steps=3 web=2 $0.00000
+[ 72/143] OK  bfounded011 2009                         p=1.00 steps=3 web=2 $0.00000
+[ 73/143] OK  bfounded012 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 74/143] OK  bfounded013 1893                         p=0.89 steps=3 web=2 $0.00000
+[ 75/143] OK  bfounded014 1919                         p=1.00 steps=3 web=2 $0.00000
+[ 76/143] OK  bfounded015 1987                         p=0.98 steps=3 web=2 $0.00000
+[ 77/143] --  bfounded016                              p=0.30 steps=4 web=2 $0.00000
+[ 78/143] OK  bfounded017 1936                         p=1.00 steps=3 web=2 $0.00000
+[ 79/143] XX  bfounded018 2012                         p=0.95 steps=3 web=2 $0.00000
+[ 80/143] OK  bfounded019 1876                         p=1.00 steps=3 web=2 $0.00000
+[ 81/143] OK  bborn000 1992                         p=0.86 steps=3 web=2 $0.00000
+[ 82/143] OK  bborn001 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 83/143] OK  bborn002 1978                         p=1.00 steps=3 web=2 $0.00000
+[ 84/143] OK  bborn003 1985                         p=1.00 steps=3 web=2 $0.00000
+[ 85/143] OK  bborn004 1965                         p=1.00 steps=3 web=2 $0.00000
+[ 86/143] OK  bborn005 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 87/143] OK  bborn006 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 88/143] OK  bborn007 1992                         p=0.90 steps=3 web=2 $0.00000
+[ 89/143] OK  bborn008 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 90/143] OK  bborn009 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 91/143] OK  bborn010 1958                         p=0.99 steps=3 web=2 $0.00000
+[ 92/143] OK  bborn011 1951                         p=0.67 steps=3 web=2 $0.00000
+[ 93/143] OK  bborn012 1985                         p=1.00 steps=3 web=2 $0.00000
+[ 94/143] OK  bborn013 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 95/143] XX  bborn014 1970                         p=0.82 steps=3 web=2 $0.00000
+[ 96/143] OK  bborn015 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 97/143] OK  bborn016 1999                         p=0.98 steps=3 web=2 $0.00000
+[ 98/143] XX  bborn017 1984                         p=1.00 steps=3 web=2 $0.00000
+[ 99/143] OK  bborn018 1978                         p=1.00 steps=3 web=2 $0.00000
+[100/143] OK  bborn019 1999                         p=1.00 steps=3 web=2 $0.00000
+[101/143] OK  belevation000 774 m                        p=0.80 steps=3 web=2 $0.00000
+[102/143] XX  belevation001 800 metres                   p=0.99 steps=3 web=2 $0.00000
+[103/143] OK  belevation002 1,454 metres                 p=0.83 steps=3 web=2 $0.00000
+[104/143] OK  belevation003 2,829 m                      p=0.80 steps=4 web=3 $0.00000
+[105/143] OK  belevation004 2,760 m                      p=0.66 steps=3 web=2 $0.00000
+[106/143] XX  belevation005 3,237 metres                 p=1.00 steps=3 web=2 $0.00000
+[107/143] OK  belevation006 2,861 m                      p=0.99 steps=3 web=2 $0.00000
+[108/143] OK  belevation007 585.2 m                      p=1.00 steps=3 web=2 $0.00000
+[109/143] OK  belevation008 763.5 m                      p=1.00 steps=3 web=2 $0.00000
+[110/143] OK  belevation009 757 meters                   p=0.69 steps=3 web=2 $0.00000
+[111/143] OK  belevation010 2,974 m                      p=0.97 steps=3 web=2 $0.00000
+[112/143] OK  belevation011 2,650 metres                 p=0.96 steps=3 web=2 $0.00000
+[113/143] OK  belevation012 3,170 m                      p=0.99 steps=3 web=2 $0.00000
+[114/143] OK  belevation013 630 m                        p=1.00 steps=3 web=2 $0.00000
+[115/143] OK  belevation014 745                          p=0.83 steps=4 web=2 $0.00000
+[116/143] XX  bfounder000 Société Générale de Belgique p=0.82 steps=4 web=2 $0.00000
+[117/143] XX  bfounder001 Falcon                       p=0.64 steps=3 web=2 $0.00000
+[118/143] XX  bfounder002 Tietoevry                    p=0.40 steps=5 web=4 $0.00000
+[119/143] OK  bfounder003 Theodor Luts                 p=0.79 steps=4 web=2 $0.00000
+[120/143] OK  bfounder004 Belgacom TV                  p=0.90 steps=3 web=2 $0.00000
+[121/143] XX  bfounder005 Adams Filmi Oy               p=0.83 steps=3 web=2 $0.00000
+[122/143] OK  bfounder006 Yellow Claw                  p=0.97 steps=3 web=2 $0.00000
+[123/143] XX  bfounder007 Luxo ASA                     p=0.83 steps=3 web=2 $0.00000
+[124/143] XX  bfounder008 Comvik                       p=0.76 steps=3 web=2 $0.00000
+[125/143] XX  bfounder009 International Volunteer HQ IVHQ p=0.85 steps=3 web=2 $0.00000
+[126/143] OK  bauthor000 Liam O'Flaherty Irish        p=0.82 steps=3 web=2 $0.00000
+[127/143] XX  bauthor001 Out Stealing Horses Norwegian p=0.75 steps=3 web=2 $0.00000
+[128/143] OK  bauthor002 Doyle                        p=0.76 steps=4 web=2 $0.00000
+[129/143] OK  bauthor003 Seppo Sakari Telenius        p=0.79 steps=3 web=2 $0.00000
+[130/143] XX  bauthor004 Silent Twins                 p=0.63 steps=4 web=3 $0.00000
+[131/143] XX  bauthor005 Finnish                      p=0.78 steps=4 web=2 $0.00000
+[132/143] OK  bauthor006 Robert van Gulik             p=0.93 steps=3 web=2 $0.00000
+[133/143] XX  bauthor007 SIMON OCH EKARNA             p=0.75 steps=4 web=2 $0.00000
+[134/143] OK  bauthor008 Dag Schjelderup-Ebbe         p=0.80 steps=3 web=2 $0.00000
+[135/143] XX  bauthor009 Bruce Springsteen            p=0.78 steps=3 web=2 $0.00000
+[136/143] OK  bchat_born00                              p=1.00 steps=6 web=4 $0.00000
+[137/143] OK  bchat_born01                              p=1.00 steps=6 web=4 $0.00000
+[138/143] OK  bchat_born02                              p=1.00 steps=6 web=4 $0.00000
+[139/143] OK  bchat_born03                              p=1.00 steps=6 web=4 $0.00000
+[140/143] OK  bchat_founded00                              p=1.00 steps=6 web=4 $0.00000
+[141/143] XX  bchat_founded01                              p=0.75 steps=6 web=4 $0.00000
+[142/143] OK  bchat_founded02                              p=1.00 steps=6 web=4 $0.00000
+[143/143] XX  bchat_founded03                              p=0.66 steps=6 web=4 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      143
+  success                0.510
+  answered_rate          0.958
+  wrong_when_answered    0.467
+  ece                    0.319
+  mean_steps             3.462
+  mean_web_calls         2.224
+  mean_decision_ms       0.046
+  n_invalid_decisions    0
+  gold_reachable         0.818
+  serp_answer_rate_at3   0.734
+  depth_evidence_recall  0.734
+  mean_fetches           1.175
+  mean_answer_fetches    0.133
+  answered_from_snippet  0.860
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.909 (n=130) precision 0.562
+  tier low_confidence    0.084 (n=12) precision 0.000
+  tier none              0.007 (n=1)
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=8 success=0.750
+  family fact            n=135 success=0.496
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_heuristic_snip_ddgs
+[planck3 22:42:13] round 4: gemma on our tools, ddgs (rules S2, A1, P)
+> python scripts/planck3.py g0 --policy gemma --tasks scripts/assets/planck3_tasks_fresh.json --system-trust none --search ddgs --out results/planck3/g0f_gemma_snip_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/143] OK  bwinner000 Sun Xinran                   p=0.90 steps=3 web=2 $0.00388
+[  2/143] OK  bwinner001 Spain                        p=0.95 steps=3 web=2 $0.00466
+[  3/143] OK  bwinner002 Angelica Moratelli           p=0.95 steps=3 web=2 $0.00376
+[  4/143] OK  bwinner003 Alexandra Shubladze          p=0.95 steps=3 web=2 $0.00382
+[  5/143] OK  bwinner004 Tamara Korpatsch             p=0.95 steps=3 web=2 $0.00386
+[  6/143] OK  bwinner005 Tadese Takele                p=0.95 steps=3 web=2 $0.00375
+[  7/143] OK  bwinner006 Alex Palou                   p=0.95 steps=3 web=2 $0.00436
+[  8/143] OK  bwinner007 Cole Denton                  p=0.90 steps=3 web=2 $0.00365
+[  9/143] --  bwinner008                              p=0.10 steps=4 web=3 $0.00510
+[ 10/143] OK  bwinner009 Paul Magnier                 p=0.95 steps=3 web=2 $0.00421
+[ 11/143] --  bwinner010                              p=0.10 steps=4 web=3 $0.00496
+[ 12/143] OK  bwinner011 Nikola Zdráhalová            p=0.90 steps=4 web=2 $0.00500
+[ 13/143] XX  bwinner012 Commonwealth Games           p=0.95 steps=3 web=2 $0.00399
+[ 14/143] OK  bwinner013 Paul Seixas                  p=0.95 steps=4 web=2 $0.00510
+[ 15/143] --  bwinner014                              p=0.00 steps=3 web=2 $0.00383
+[ 16/143] OK  bwinner015 NBA G League United          p=0.95 steps=3 web=2 $0.00407
+[ 17/143] OK  bwinner016 Remco Evenepoel              p=0.95 steps=3 web=2 $0.00400
+[ 18/143] --  bwinner017                              p=0.00 steps=3 web=2 $0.00347
+[ 19/143] OK  bwinner018 Paola Borrelli               p=0.90 steps=3 web=2 $0.00430
+[ 20/143] OK  bwinner019 Germany Johannes Liebmann    p=0.95 steps=3 web=2 $0.00362
+[ 21/143] XX  bwinner020 Hwang Dae-heon               p=0.90 steps=3 web=2 $0.00502
+[ 22/143] OK  bwinner021 Taylor Gray                  p=0.95 steps=3 web=2 $0.00389
+[ 23/143] XX  bwinner022 Demi Vollering of FDJ United–Suez p=0.95 steps=3 web=2 $0.00480
+[ 24/143] XX  bwinner023 Accra                        p=0.90 steps=3 web=2 $0.00421
+[ 25/143] --  bwinner024                              p=0.00 steps=3 web=2 $0.00490
+[ 26/143] --  bwinner025                              p=0.00 steps=3 web=2 $0.00410
+[ 27/143] OK  bwinner026 Angelica Moser SUI           p=0.95 steps=3 web=2 $0.00483
+[ 28/143] OK  bwinner027 Brandon Jones                p=0.95 steps=3 web=2 $0.00349
+[ 29/143] XX  bwinner028 Mission                      p=0.95 steps=3 web=2 $0.00392
+[ 30/143] OK  bwinner029 Justin Allgaier              p=0.90 steps=3 web=2 $0.00439
+[ 31/143] OK  belection000 Civil Contract               p=0.90 steps=4 web=2 $0.00440
+[ 32/143] OK  belection001 Daniel Ennis                 p=0.95 steps=3 web=2 $0.00373
+[ 33/143] OK  belection002 Tayte Willows                p=0.95 steps=3 web=2 $0.00334
+[ 34/143] OK  belection003 Osaka Governor Hirofumi Yoshimura p=0.90 steps=3 web=2 $0.00351
+[ 35/143] XX  belection004 Executive Mayor of Croydon   p=0.95 steps=3 web=2 $0.00342
+[ 36/143] --  belection005                              p=0.00 steps=3 web=2 $0.00344
+[ 37/143] OK  belection006 Tatiana Auguste Liberal      p=0.95 steps=3 web=2 $0.00455
+[ 38/143] --  belection007                              p=0.10 steps=4 web=3 $0.00587
+[ 39/143] XX  belection008 Hamilton East—Stoney Creek   p=0.95 steps=3 web=2 $0.00363
+[ 40/143] OK  belection009 Conservative Party           p=0.90 steps=3 web=2 $0.00427
+[ 41/143] OK  bseason000 Laurence Pithie              p=0.90 steps=4 web=2 $0.00518
+[ 42/143] OK  bseason001 Prairie View A&M             p=0.95 steps=3 web=2 $0.00406
+[ 43/143] OK  bseason002 Monaco                       p=0.90 steps=3 web=2 $0.00426
+[ 44/143] --  bseason003                              p=0.00 steps=3 web=2 $0.00441
+[ 45/143] XX  bseason004 Giro                         p=0.95 steps=3 web=2 $0.00398
+[ 46/143] --  bseason005                              p=0.10 steps=2 web=2 $0.00299
+[ 47/143] XX  bseason006 Inter Milan                  p=0.95 steps=3 web=2 $0.00339
+[ 48/143] OK  bseason007 Westmeath                    p=0.95 steps=3 web=2 $0.00400
+[ 49/143] XX  bseason008 Sole Survivor                p=0.95 steps=3 web=2 $0.00385
+[ 50/143] --  bseason009                              p=0.10 steps=4 web=3 $0.00507
+[ 51/143] OK  bheadgov000 Genta Koja                   p=0.95 steps=3 web=2 $0.00367
+[ 52/143] OK  bheadgov001 Klaus Blettner CDU           p=0.95 steps=3 web=2 $0.00425
+[ 53/143] XX  bheadgov002 Joan Carles Mingueza         p=0.90 steps=3 web=2 $0.00402
+[ 54/143] OK  bheadgov003 Alexis Chaussalet            p=0.90 steps=3 web=2 $0.00502
+[ 55/143] --  bheadgov004                              p=0.00 steps=3 web=2 $0.00367
+[ 56/143] --  bheadgov005                              p=0.00 steps=3 web=2 $0.00451
+[ 57/143] --  bheadgov006                              p=0.00 steps=2 web=2 $0.00306
+[ 58/143] OK  bheadgov007 Christophe Le Roux           p=0.95 steps=3 web=2 $0.00406
+[ 59/143] --  bheadgov008                              p=0.00 steps=3 web=2 $0.00376
+[ 60/143] OK  bheadgov009 Cyril SAMSON                 p=0.90 steps=4 web=3 $0.00630
+[ 61/143] OK  bfounded000 2000                         p=0.95 steps=3 web=2 $0.00276
+[ 62/143] OK  bfounded001 2000                         p=0.95 steps=4 web=2 $0.00376
+[ 63/143] OK  bfounded002 2000                         p=0.90 steps=4 web=2 $0.00375
+[ 64/143] OK  bfounded003 1999                         p=0.95 steps=4 web=2 $0.00389
+[ 65/143] XX  bfounded004 1887                         p=0.60 steps=4 web=3 $0.00391
+[ 66/143] OK  bfounded005 1930                         p=0.95 steps=3 web=2 $0.00338
+[ 67/143] OK  bfounded006 1982                         p=0.95 steps=4 web=2 $0.00369
+[ 68/143] XX  bfounded007 2007                         p=0.90 steps=3 web=2 $0.00296
+[ 69/143] OK  bfounded008 2015                         p=0.95 steps=4 web=2 $0.00348
+[ 70/143] XX  bfounded009 2005                         p=0.95 steps=4 web=2 $0.00376
+[ 71/143] OK  bfounded010 2003                         p=0.95 steps=3 web=2 $0.00265
+[ 72/143] OK  bfounded011 2009                         p=0.95 steps=3 web=2 $0.00268
+[ 73/143] OK  bfounded012 1951                         p=0.95 steps=3 web=2 $0.00287
+[ 74/143] OK  bfounded013 1893                         p=0.95 steps=3 web=2 $0.00275
+[ 75/143] OK  bfounded014 1919                         p=0.95 steps=3 web=2 $0.00271
+[ 76/143] XX  bfounded015 1982                         p=0.90 steps=4 web=2 $0.00379
+[ 77/143] OK  bfounded016 1984                         p=0.95 steps=3 web=2 $0.00288
+[ 78/143] OK  bfounded017 1936                         p=0.95 steps=3 web=2 $0.00290
+[ 79/143] XX  bfounded018 2012                         p=0.95 steps=4 web=2 $0.00369
+[ 80/143] OK  bfounded019 1876                         p=0.95 steps=3 web=2 $0.00258
+[ 81/143] --  bborn000                              p=0.00 steps=3 web=2 $0.00347
+[ 82/143] OK  bborn001 1951                         p=0.95 steps=3 web=2 $0.00271
+[ 83/143] OK  bborn002 1978                         p=0.95 steps=4 web=2 $0.00381
+[ 84/143] OK  bborn003 1985                         p=0.95 steps=3 web=2 $0.00268
+[ 85/143] OK  bborn004 1965                         p=0.95 steps=3 web=2 $0.00278
+[ 86/143] OK  bborn005 1992                         p=0.95 steps=3 web=2 $0.00295
+[ 87/143] OK  bborn006 1992                         p=0.95 steps=3 web=2 $0.00294
+[ 88/143] --  bborn007                              p=0.00 steps=3 web=2 $0.00300
+[ 89/143] OK  bborn008 1992                         p=0.95 steps=3 web=2 $0.00281
+[ 90/143] OK  bborn009 1951                         p=0.95 steps=3 web=2 $0.00324
+[ 91/143] OK  bborn010 1958                         p=0.95 steps=3 web=2 $0.00313
+[ 92/143] OK  bborn011 1951                         p=0.95 steps=3 web=2 $0.00300
+[ 93/143] OK  bborn012 1985                         p=0.95 steps=3 web=2 $0.00265
+[ 94/143] OK  bborn013 1951                         p=0.95 steps=3 web=2 $0.00274
+[ 95/143] OK  bborn014 1978                         p=0.95 steps=3 web=2 $0.00297
+[ 96/143] OK  bborn015 1992                         p=0.95 steps=3 web=2 $0.00261
+[ 97/143] --  bborn016                              p=0.00 steps=3 web=2 $0.00303
+[ 98/143] --  bborn017                              p=0.00 steps=3 web=2 $0.00288
+[ 99/143] OK  bborn018 1978                         p=0.95 steps=3 web=2 $0.00299
+[100/143] OK  bborn019 1999                         p=0.95 steps=3 web=2 $0.00293
+[101/143] OK  belevation000 774 m                        p=0.95 steps=3 web=2 $0.00369
+[102/143] XX  belevation001 800 metres                   p=0.90 steps=4 web=2 $0.00428
+[103/143] OK  belevation002 1,454 meters                 p=0.95 steps=4 web=2 $0.00467
+[104/143] OK  belevation003 2,829 m                      p=0.95 steps=3 web=2 $0.00328
+[105/143] XX  belevation004 2,740 metres                 p=0.95 steps=4 web=2 $0.00409
+[106/143] OK  belevation005 3,273                        p=0.95 steps=4 web=2 $0.00450
+[107/143] OK  belevation006 2,861 m                      p=0.95 steps=3 web=2 $0.00366
+[108/143] OK  belevation007 585.2 m                      p=0.95 steps=3 web=2 $0.00304
+[109/143] OK  belevation008 763.5 m                      p=0.95 steps=3 web=2 $0.00264
+[110/143] OK  belevation009 757 meters                   p=0.95 steps=4 web=2 $0.00399
+[111/143] OK  belevation010 2,974                        p=0.95 steps=3 web=2 $0.00343
+[112/143] --  belevation011                              p=0.00 steps=3 web=2 $0.00408
+[113/143] OK  belevation012 3,175                        p=0.95 steps=4 web=2 $0.00458
+[114/143] OK  belevation013 630 m                        p=0.95 steps=3 web=2 $0.00311
+[115/143] OK  belevation014 745 m                        p=0.95 steps=3 web=2 $0.00270
+[116/143] XX  bfounder000 Banque Industrielle Belge    p=0.90 steps=3 web=2 $0.00391
+[117/143] XX  bfounder001 Lucernafilm Video            p=0.90 steps=4 web=2 $0.00508
+[118/143] XX  bfounder002 Union Bank of Finland        p=0.80 steps=3 web=2 $0.00388
+[119/143] --  bfounder003                              p=0.00 steps=3 web=2 $0.00393
+[120/143] XX  bfounder004 Ashootosh Suudhir            p=0.80 steps=4 web=3 $0.00519
+[121/143] XX  bfounder005 Adams Filmi Oy               p=0.95 steps=3 web=2 $0.00371
+[122/143] OK  bfounder006 Yellow Claw                  p=0.95 steps=3 web=2 $0.00437
+[123/143] OK  bfounder007 Norwegian Industrialist Jac Jacobsen p=0.95 steps=3 web=2 $0.00355
+[124/143] XX  bfounder008 Kinnevik Group               p=0.90 steps=3 web=2 $0.00397
+[125/143] --  bfounder009                              p=0.00 steps=3 web=2 $0.00356
+[126/143] --  bauthor000                              p=0.00 steps=3 web=2 $0.00429
+[127/143] --  bauthor001                              p=0.00 steps=3 web=2 $0.00354
+[128/143] OK  bauthor002 Roddy Doyle                  p=0.95 steps=3 web=2 $0.00432
+[129/143] OK  bauthor003 Seppo Sakari Telenius        p=0.90 steps=3 web=2 $0.00376
+[130/143] --  bauthor004                              p=0.10 steps=3 web=2 $0.00383
+[131/143] --  bauthor005                              p=0.00 steps=3 web=2 $0.00398
+[132/143] OK  bauthor006 Robert van Gulik             p=0.95 steps=3 web=2 $0.00403
+[133/143] XX  bauthor007 SIMON OCH EKARNA             p=0.95 steps=3 web=2 $0.00396
+[134/143] --  bauthor008                              p=0.00 steps=3 web=2 $0.00466
+[135/143] --  bauthor009                              p=0.00 steps=3 web=2 $0.00423
+[136/143] OK  bchat_born00                              p=0.95 steps=6 web=4 $0.00604
+[137/143] OK  bchat_born01                              p=0.95 steps=6 web=4 $0.00542
+[138/143] OK  bchat_born02                              p=0.95 steps=6 web=4 $0.00616
+[139/143] --  bchat_born03                              p=0.00 steps=7 web=4 $0.00668
+[140/143] OK  bchat_founded00                              p=0.95 steps=6 web=4 $0.00531
+[141/143] XX  bchat_founded01                              p=0.90 steps=7 web=5 $0.00634
+[142/143] XX  bchat_founded02                              p=0.80 steps=7 web=5 $0.00619
+[143/143] XX  bchat_founded03                              p=0.80 steps=7 web=4 $0.00645
+
+==== G0 summary (gemma) ====
+  n                      143
+  success                0.601
+  answered_rate          0.797
+  wrong_when_answered    0.246
+  ece                    0.177
+  mean_steps             3.371
+  mean_web_calls         2.175
+  mean_decision_ms       2334.066
+  n_invalid_decisions    23
+  gold_reachable         0.909
+  serp_answer_rate_at3   0.846
+  depth_evidence_recall  0.839
+  mean_fetches           1.119
+  mean_answer_fetches    0.063
+  answered_from_snippet  0.797
+  gated_rate             0.007
+  gated_would_be_correct 0
+  tier confident         0.797 (n=114) precision 0.754
+  tier low_confidence    0.203 (n=29) precision 0.379
+  tier none              0.000 (n=0)
+  cost/1k tasks          $3.9223   per correct $0.00652   LLM tokens/task 3635 (priced as claude-haiku-4-5)
+  family chat            n=8 success=0.500
+  family fact            n=135 success=0.607
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_gemma_snip_ddgs
+[planck3 23:02:41] G2 collect on ddgs: labelled decision points from known answers (resumable; ~2 h first time)
+> python scripts/planck3.py g2 collect --search ddgs --points data/planck3/g2/points_ddgs.jsonl
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[g2] collecting 1455 questions (0 already done) -> data\planck3\g2\points_ddgs.jsonl
+  50/1455 (0.5s/question, ~11 min left; 0 empty searches)
+  100/1455 (0.5s/question, ~12 min left; 0 empty searches)
+  150/1455 (2.0s/question, ~43 min left; 0 empty searches)
+  200/1455 (2.6s/question, ~54 min left; 0 empty searches)
+  250/1455 (3.0s/question, ~60 min left; 0 empty searches)
+  300/1455 (3.2s/question, ~62 min left; 0 empty searches)
+  350/1455 (3.5s/question, ~65 min left; 0 empty searches)
+  400/1455 (3.6s/question, ~64 min left; 0 empty searches)
+  450/1455 (3.7s/question, ~62 min left; 0 empty searches)
+  500/1455 (3.8s/question, ~61 min left; 0 empty searches)
+  550/1455 (3.9s/question, ~58 min left; 0 empty searches)
+  600/1455 (3.9s/question, ~55 min left; 0 empty searches)
+  650/1455 (3.9s/question, ~52 min left; 0 empty searches)
+  700/1455 (3.9s/question, ~50 min left; 0 empty searches)
+  750/1455 (4.0s/question, ~47 min left; 0 empty searches)
+  800/1455 (4.0s/question, ~44 min left; 0 empty searches)
+  850/1455 (4.0s/question, ~41 min left; 0 empty searches)
+  900/1455 (4.1s/question, ~38 min left; 0 empty searches)
+  950/1455 (4.1s/question, ~34 min left; 0 empty searches)
+  1000/1455 (4.1s/question, ~31 min left; 0 empty searches)
+  1050/1455 (4.1s/question, ~28 min left; 0 empty searches)
+  1100/1455 (4.1s/question, ~24 min left; 0 empty searches)
+  1150/1455 (4.1s/question, ~21 min left; 0 empty searches)
+  1200/1455 (4.1s/question, ~18 min left; 0 empty searches)
+  1250/1455 (4.1s/question, ~14 min left; 0 empty searches)
+  1300/1455 (4.1s/question, ~11 min left; 0 empty searches)
+  1350/1455 (4.1s/question, ~7 min left; 0 empty searches)
+  1400/1455 (4.1s/question, ~4 min left; 0 empty searches)
+  1450/1455 (4.1s/question, ~0 min left; 0 empty searches)
+[g2] search health: 14% via Wikipedia fallback, 0% empty
+[planck3 00:43:03] system trust layer from data/planck3/g2/points_ddgs.jsonl -> config/planck3/source_trust.json
+> python scripts/planck3.py trust build --points data/planck3/g2/points_ddgs.jsonl
+[trust] system layer: 236 domains from points_ddgs.jsonl -> C:\Users\feama\sgs\config\planck3\source_trust.json
+  en.wikipedia.org                     0.85  (weight 18)
+  grokipedia.com                       0.89  (weight 18)
+  wikiwand.com                         0.78  (weight 18)
+  everything.explained.today           0.78  (weight 18)
+  de.wikipedia.org                     0.71  (weight 18)
+  transfermarkt.com                    0.74  (weight 18)
+  no.wikipedia.org                     0.68  (weight 18)
+  peakvisor.com                        0.82  (weight 18)
+  sv.wikipedia.org                     0.71  (weight 18)
+  goodreads.com                        0.85  (weight 18)
+  mapcarta.com                         0.85  (weight 18)
+  reference.org                        0.75  (weight 18)
+  bbc.com                              0.27  (weight 18)
+  bbc.co.uk                            0.20  (weight 18)
+  wikidata.org                         0.76  (weight 18)
+  dbpedia.org                          0.80  (weight 18)
+  tracxn.com                           0.66  (weight 18)
+  es.wikipedia.org                     0.58  (weight 18)
+  en-academic.com                      0.83  (weight 18)
+  nl.wikipedia.org                     0.73  (weight 18)
+  fr.wikipedia.org                     0.46  (weight 18)
+  entityfacts.com                      0.95  (weight 18)
+  books.google.com                     0.74  (weight 18)
+  football.fandom.com                  0.69  (weight 18)
+  britannica.com                       0.81  (weight 18)
+[planck3 00:43:03] G2 embed: hash (points_ddgs)
+> python scripts/planck3.py g2 embed --encoder hash --points data/planck3/g2/points_ddgs.jsonl --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model
+[g2] points: data\planck3\g2\points_ddgs.jsonl
+[g2] emb_hash_points_ddgs.npy: (53676, 1024) in 2s
+[planck3 00:43:06] G2 v2 train head:hash on ddgs points
+> python scripts/planck3.py g2 train2 --encoder hash --points data/planck3/g2/points_ddgs.jsonl --tag _ddgs
+[g2] points: data\planck3\g2\points_ddgs.jsonl
+  epoch 0: train_nll=1.7357 val_choice_acc=0.5874
+  epoch 1: train_nll=0.5587 val_choice_acc=0.5964
+  epoch 2: train_nll=0.1210 val_choice_acc=0.5381
+  epoch 3: train_nll=0.0484 val_choice_acc=0.5247
+  epoch 4: train_nll=0.0263 val_choice_acc=0.5561
+C:\Users\feama\sgs\src\planck3\g2.py:491: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(out_dir / "choice.pt", map_location=device)["model"])
+[g2v2] head:hash: test choice 0.494 vs ranker 0.481 (243 test points with a right one); gate AUC 0.8088855421686746; tau=0.843 -> test coverage 0.13 at precision 0.9166666666666666 (target 0.9) -> C:\Users\feama\sgs\results\planck3\g2v2_head_hash_s0_ddgs
+[planck3 00:43:36] round 4: G2 v2 head:hash (ddgs-trained) on the fresh benchmark (rules B, P)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_hash_s0_ddgs/head.pt --tasks scripts/assets/planck3_tasks_fresh.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0f_planck-g2v2-hash_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/143] --  bwinner000                              p=0.28 steps=4 web=4 $0.00000
+[  2/143] --  bwinner001                              p=0.37 steps=4 web=4 $0.00000
+[  3/143] --  bwinner002                              p=0.31 steps=4 web=4 $0.00000
+[  4/143] --  bwinner003                              p=0.20 steps=4 web=4 $0.00000
+[  5/143] --  bwinner004                              p=0.40 steps=4 web=4 $0.00000
+[  6/143] --  bwinner005                              p=0.26 steps=4 web=4 $0.00000
+[  7/143] --  bwinner006                              p=0.10 steps=4 web=4 $0.00000
+[  8/143] --  bwinner007                              p=0.18 steps=4 web=4 $0.00000
+[  9/143] --  bwinner008                              p=0.23 steps=4 web=4 $0.00000
+[ 10/143] --  bwinner009                              p=0.18 steps=5 web=5 $0.00000
+[ 11/143] --  bwinner010                              p=0.30 steps=4 web=4 $0.00000
+[ 12/143] --  bwinner011                              p=0.57 steps=4 web=4 $0.00000
+[ 13/143] --  bwinner012                              p=0.32 steps=5 web=5 $0.00000
+[ 14/143] --  bwinner013                              p=0.30 steps=4 web=4 $0.00000
+[ 15/143] --  bwinner014                              p=0.15 steps=4 web=4 $0.00000
+[ 16/143] --  bwinner015                              p=0.45 steps=4 web=4 $0.00000
+[ 17/143] --  bwinner016                              p=0.17 steps=4 web=4 $0.00000
+[ 18/143] --  bwinner017                              p=0.30 steps=4 web=4 $0.00000
+[ 19/143] --  bwinner018                              p=0.22 steps=4 web=4 $0.00000
+[ 20/143] --  bwinner019                              p=0.32 steps=4 web=4 $0.00000
+[ 21/143] --  bwinner020                              p=0.14 steps=4 web=4 $0.00000
+[ 22/143] --  bwinner021                              p=0.26 steps=4 web=4 $0.00000
+[ 23/143] --  bwinner022                              p=0.41 steps=4 web=4 $0.00000
+[ 24/143] --  bwinner023                              p=0.19 steps=4 web=4 $0.00000
+[ 25/143] --  bwinner024                              p=0.57 steps=4 web=4 $0.00000
+[ 26/143] --  bwinner025                              p=0.38 steps=4 web=4 $0.00000
+[ 27/143] --  bwinner026                              p=0.42 steps=4 web=4 $0.00000
+[ 28/143] --  bwinner027                              p=0.22 steps=4 web=4 $0.00000
+[ 29/143] --  bwinner028                              p=0.15 steps=4 web=4 $0.00000
+[ 30/143] --  bwinner029                              p=0.26 steps=4 web=4 $0.00000
+[ 31/143] --  belection000                              p=0.57 steps=4 web=4 $0.00000
+[ 32/143] --  belection001                              p=0.23 steps=4 web=4 $0.00000
+[ 33/143] --  belection002                              p=0.34 steps=4 web=4 $0.00000
+[ 34/143] --  belection003                              p=0.35 steps=4 web=4 $0.00000
+[ 35/143] --  belection004                              p=0.12 steps=4 web=4 $0.00000
+[ 36/143] --  belection005                              p=0.49 steps=4 web=4 $0.00000
+[ 37/143] --  belection006                              p=0.25 steps=4 web=4 $0.00000
+[ 38/143] --  belection007                              p=0.66 steps=4 web=4 $0.00000
+[ 39/143] --  belection008                              p=0.39 steps=4 web=4 $0.00000
+[ 40/143] --  belection009                              p=0.74 steps=4 web=4 $0.00000
+[ 41/143] --  bseason000                              p=0.24 steps=4 web=4 $0.00000
+[ 42/143] --  bseason001                              p=0.17 steps=4 web=4 $0.00000
+[ 43/143] --  bseason002                              p=0.25 steps=4 web=4 $0.00000
+[ 44/143] --  bseason003                              p=0.57 steps=4 web=4 $0.00000
+[ 45/143] --  bseason004                              p=0.43 steps=4 web=4 $0.00000
+[ 46/143] --  bseason005                              p=0.57 steps=4 web=4 $0.00000
+[ 47/143] --  bseason006                              p=0.57 steps=4 web=4 $0.00000
+[ 48/143] --  bseason007                              p=0.17 steps=4 web=4 $0.00000
+[ 49/143] --  bseason008                              p=0.45 steps=4 web=4 $0.00000
+[ 50/143] --  bseason009                              p=0.32 steps=4 web=4 $0.00000
+[ 51/143] --  bheadgov000                              p=0.19 steps=4 web=4 $0.00000
+[ 52/143] --  bheadgov001                              p=0.15 steps=4 web=4 $0.00000
+[ 53/143] --  bheadgov002                              p=0.25 steps=4 web=4 $0.00000
+[ 54/143] --  bheadgov003                              p=0.33 steps=4 web=4 $0.00000
+[ 55/143] --  bheadgov004                              p=0.40 steps=4 web=4 $0.00000
+[ 56/143] --  bheadgov005                              p=0.10 steps=4 web=4 $0.00000
+[ 57/143] --  bheadgov006                              p=0.17 steps=4 web=4 $0.00000
+[ 58/143] --  bheadgov007                              p=0.17 steps=4 web=4 $0.00000
+[ 59/143] --  bheadgov008                              p=0.28 steps=4 web=4 $0.00000
+[ 60/143] --  bheadgov009                              p=0.18 steps=5 web=5 $0.00000
+[ 61/143] --  bfounded000                              p=0.41 steps=4 web=4 $0.00000
+[ 62/143] OK  bfounded001 2000                         p=0.93 steps=3 web=2 $0.00000
+[ 63/143] --  bfounded002                              p=0.50 steps=4 web=4 $0.00000
+[ 64/143] --  bfounded003                              p=0.66 steps=5 web=5 $0.00000
+[ 65/143] OK  bfounded004 2025                         p=0.94 steps=5 web=4 $0.00000
+[ 66/143] --  bfounded005                              p=0.18 steps=4 web=4 $0.00000
+[ 67/143] OK  bfounded006 1982                         p=0.91 steps=3 web=2 $0.00000
+[ 68/143] --  bfounded007                              p=0.74 steps=4 web=4 $0.00000
+[ 69/143] OK  bfounded008 2015                         p=0.96 steps=3 web=2 $0.00000
+[ 70/143] XX  bfounded009 2005                         p=0.87 steps=3 web=2 $0.00000
+[ 71/143] OK  bfounded010 2003                         p=0.98 steps=3 web=2 $0.00000
+[ 72/143] OK  bfounded011 2009                         p=0.99 steps=3 web=2 $0.00000
+[ 73/143] OK  bfounded012 1951                         p=0.92 steps=3 web=2 $0.00000
+[ 74/143] --  bfounded013                              p=0.56 steps=4 web=4 $0.00000
+[ 75/143] --  bfounded014                              p=0.13 steps=4 web=4 $0.00000
+[ 76/143] --  bfounded015                              p=0.46 steps=4 web=4 $0.00000
+[ 77/143] --  bfounded016                              p=0.54 steps=4 web=4 $0.00000
+[ 78/143] OK  bfounded017 1936                         p=0.87 steps=3 web=2 $0.00000
+[ 79/143] --  bfounded018                              p=0.57 steps=5 web=5 $0.00000
+[ 80/143] OK  bfounded019 1876                         p=0.93 steps=3 web=2 $0.00000
+[ 81/143] XX  bborn000 1954                         p=0.86 steps=4 web=3 $0.00000
+[ 82/143] OK  bborn001 1951                         p=0.87 steps=3 web=2 $0.00000
+[ 83/143] OK  bborn002 1978                         p=0.98 steps=3 web=2 $0.00000
+[ 84/143] OK  bborn003 1985                         p=0.99 steps=3 web=2 $0.00000
+[ 85/143] OK  bborn004 1965                         p=0.94 steps=3 web=2 $0.00000
+[ 86/143] OK  bborn005 1992                         p=0.96 steps=3 web=2 $0.00000
+[ 87/143] --  bborn006                              p=0.81 steps=4 web=4 $0.00000
+[ 88/143] --  bborn007                              p=0.13 steps=4 web=4 $0.00000
+[ 89/143] OK  bborn008 1992                         p=0.97 steps=3 web=2 $0.00000
+[ 90/143] OK  bborn009 1951                         p=0.96 steps=3 web=2 $0.00000
+[ 91/143] OK  bborn010 1958                         p=0.86 steps=3 web=2 $0.00000
+[ 92/143] --  bborn011                              p=0.18 steps=5 web=5 $0.00000
+[ 93/143] OK  bborn012 1985                         p=0.98 steps=3 web=2 $0.00000
+[ 94/143] --  bborn013                              p=0.29 steps=4 web=4 $0.00000
+[ 95/143] --  bborn014                              p=0.15 steps=5 web=5 $0.00000
+[ 96/143] OK  bborn015 1992                         p=0.97 steps=3 web=2 $0.00000
+[ 97/143] OK  bborn016 1999                         p=0.93 steps=3 web=2 $0.00000
+[ 98/143] XX  bborn017 1984                         p=0.94 steps=3 web=2 $0.00000
+[ 99/143] OK  bborn018 1978                         p=0.94 steps=4 web=3 $0.00000
+[100/143] OK  bborn019 1999                         p=0.86 steps=3 web=2 $0.00000
+[101/143] OK  belevation000 774 meters                   p=0.87 steps=4 web=3 $0.00000
+[102/143] XX  belevation001 800 metres                   p=0.91 steps=3 web=2 $0.00000
+[103/143] OK  belevation002 1,453 metres                 p=0.96 steps=4 web=3 $0.00000
+[104/143] --  belevation003                              p=0.73 steps=4 web=4 $0.00000
+[105/143] XX  belevation004 2,740 metres                 p=0.95 steps=4 web=3 $0.00000
+[106/143] XX  belevation005 3,237 metres                 p=0.97 steps=5 web=4 $0.00000
+[107/143] OK  belevation006 2,861 m                      p=0.92 steps=3 web=2 $0.00000
+[108/143] OK  belevation007 585.2 m                      p=0.94 steps=3 web=2 $0.00000
+[109/143] OK  belevation008 763.5 m                      p=0.98 steps=3 web=2 $0.00000
+[110/143] OK  belevation009 757 meters                   p=0.90 steps=4 web=3 $0.00000
+[111/143] --  belevation010                              p=0.64 steps=4 web=4 $0.00000
+[112/143] OK  belevation011 2,650 metres                 p=0.97 steps=4 web=3 $0.00000
+[113/143] --  belevation012                              p=0.73 steps=4 web=4 $0.00000
+[114/143] OK  belevation013 630 m                        p=0.93 steps=3 web=2 $0.00000
+[115/143] --  belevation014                              p=0.48 steps=4 web=4 $0.00000
+[116/143] --  bfounder000                              p=0.24 steps=4 web=4 $0.00000
+[117/143] --  bfounder001                              p=0.14 steps=4 web=4 $0.00000
+[118/143] --  bfounder002                              p=0.62 steps=4 web=4 $0.00000
+[119/143] --  bfounder003                              p=0.21 steps=4 web=4 $0.00000
+[120/143] --  bfounder004                              p=0.18 steps=4 web=4 $0.00000
+[121/143] --  bfounder005                              p=0.33 steps=4 web=4 $0.00000
+[122/143] --  bfounder006                              p=0.20 steps=5 web=5 $0.00000
+[123/143] --  bfounder007                              p=0.26 steps=4 web=4 $0.00000
+[124/143] --  bfounder008                              p=0.37 steps=4 web=4 $0.00000
+[125/143] --  bfounder009                              p=0.14 steps=4 web=4 $0.00000
+[126/143] --  bauthor000                              p=0.28 steps=4 web=4 $0.00000
+[127/143] --  bauthor001                              p=0.39 steps=4 web=4 $0.00000
+[128/143] --  bauthor002                              p=0.14 steps=4 web=4 $0.00000
+[129/143] --  bauthor003                              p=0.20 steps=4 web=4 $0.00000
+[130/143] --  bauthor004                              p=0.49 steps=4 web=4 $0.00000
+[131/143] --  bauthor005                              p=0.19 steps=4 web=4 $0.00000
+[132/143] --  bauthor006                              p=0.55 steps=4 web=4 $0.00000
+[133/143] --  bauthor007                              p=0.24 steps=4 web=4 $0.00000
+[134/143] --  bauthor008                              p=0.29 steps=4 web=4 $0.00000
+[135/143] --  bauthor009                              p=0.57 steps=4 web=4 $0.00000
+[136/143] OK  bchat_born00                              p=0.93 steps=6 web=4 $0.00000
+[137/143] OK  bchat_born01                              p=0.97 steps=6 web=4 $0.00000
+[138/143] --  bchat_born02                              p=0.24 steps=7 web=6 $0.00000
+[139/143] OK  bchat_born03                              p=0.96 steps=6 web=4 $0.00000
+[140/143] OK  bchat_founded00                              p=0.97 steps=6 web=4 $0.00000
+[141/143] --  bchat_founded01                              p=0.54 steps=7 web=6 $0.00000
+[142/143] OK  bchat_founded02                              p=0.93 steps=7 web=5 $0.00000
+[143/143] XX  bchat_founded03                              p=0.89 steps=10 web=8 $0.00000
+
+==== G0 summary (planck) ====
+  n                      143
+  success                0.245
+  answered_rate          0.294
+  wrong_when_answered    0.167
+  ece                    0.102
+  mean_steps             4.042
+  mean_web_calls         3.692
+  mean_decision_ms       1.640
+  n_invalid_decisions    0
+  gold_reachable         0.951
+  serp_answer_rate_at3   0.853
+  depth_evidence_recall  0.839
+  mean_fetches           2.636
+  mean_answer_fetches    1.580
+  answered_from_snippet  0.217
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.294 (n=42) precision 0.833
+  tier low_confidence    0.706 (n=101) precision 0.287
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0001   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=8 success=0.625
+  family fact            n=135 success=0.222
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_planck-g2v2-hash_ddgs
+[planck3 00:47:07] round 4: G2 v2 head:hash on the 47-question seed benchmark (rule B)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_hash_s0_ddgs/head.pt --tasks scripts/assets/planck3_tasks.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0_planck-g2v2-hash_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/47] OK  f01  1943                         p=0.96 steps=3 web=2 $0.00000
+[  2/47] OK  f02  1932                         p=0.95 steps=3 web=2 $0.00000
+[  3/47] OK  f03  1889                         p=0.94 steps=3 web=2 $0.00000
+[  4/47] OK  f04  1946                         p=0.97 steps=3 web=2 $0.00000
+[  5/47] OK  f05  2006                         p=0.97 steps=3 web=2 $0.00000
+[  6/47] OK  f06  1997                         p=0.92 steps=3 web=2 $0.00000
+[  7/47] --  f07                               p=0.21 steps=4 web=4 $0.00000
+[  8/47] OK  f08  2011                         p=0.91 steps=3 web=2 $0.00000
+[  9/47] --  f09                               p=0.50 steps=4 web=4 $0.00000
+[ 10/47] --  f10                               p=0.14 steps=4 web=4 $0.00000
+[ 11/47] OK  f11  1815                         p=0.94 steps=3 web=2 $0.00000
+[ 12/47] --  f12                               p=0.36 steps=4 web=4 $0.00000
+[ 13/47] OK  f13  2007                         p=0.93 steps=3 web=2 $0.00000
+[ 14/47] OK  f14  2017                         p=0.89 steps=3 web=2 $0.00000
+[ 15/47] OK  f15  2002                         p=0.90 steps=3 web=2 $0.00000
+[ 16/47] XX  f16  2023                         p=0.89 steps=3 web=2 $0.00000
+[ 17/47] --  n01                               p=0.77 steps=4 web=4 $0.00000
+[ 18/47] OK  n02  828 metres                   p=0.95 steps=3 web=2 $0.00000
+[ 19/47] --  n03                               p=0.76 steps=4 web=4 $0.00000
+[ 20/47] OK  n04  79                           p=0.86 steps=3 web=2 $0.00000
+[ 21/47] XX  n05  2                            p=0.89 steps=4 web=3 $0.00000
+[ 22/47] --  n06                               p=0.57 steps=4 web=4 $0.00000
+[ 23/47] OK  n07  206                          p=0.89 steps=3 web=2 $0.00000
+[ 24/47] --  n08                               p=0.53 steps=4 web=4 $0.00000
+[ 25/47] OK  n09  88                           p=0.95 steps=3 web=2 $0.00000
+[ 26/47] --  e01                               p=0.47 steps=4 web=4 $0.00000
+[ 27/47] OK  e02  Ottawa                       p=0.85 steps=3 web=2 $0.00000
+[ 28/47] --  e03                               p=0.39 steps=4 web=4 $0.00000
+[ 29/47] --  e04                               p=0.57 steps=6 web=6 $0.00000
+[ 30/47] --  e05                               p=0.56 steps=4 web=4 $0.00000
+[ 31/47] --  e06                               p=0.44 steps=4 web=4 $0.00000
+[ 32/47] --  e07                               p=0.57 steps=4 web=4 $0.00000
+[ 33/47] --  e08                               p=0.18 steps=4 web=4 $0.00000
+[ 34/47] --  e09                               p=0.57 steps=4 web=4 $0.00000
+[ 35/47] OK  e10  Jupiter                      p=0.85 steps=3 web=2 $0.00000
+[ 36/47] --  e11                               p=0.43 steps=4 web=4 $0.00000
+[ 37/47] --  e12                               p=0.31 steps=4 web=4 $0.00000
+[ 38/47] OK  c01                               p=0.94 steps=8 web=4 $0.00000
+[ 39/47] --  c02                               p=0.34 steps=9 web=6 $0.00000
+[ 40/47] XX  c03                               p=0.86 steps=8 web=3 $0.00000
+[ 41/47] --  c04                               p=0.29 steps=9 web=6 $0.00000
+[ 42/47] OK  ch01                              p=0.89 steps=9 web=6 $0.00000
+[ 43/47] --  ch02                              p=0.44 steps=7 web=6 $0.00000
+[ 44/47] OK  ch03                              p=0.94 steps=4 web=0 $0.00000
+[ 45/47] --  ch04                              p=0.39 steps=10 web=8 $0.00000
+[ 46/47] --  ch05                              p=0.22 steps=8 web=8 $0.00000
+[ 47/47] --  ch06                              p=0.33 steps=7 web=6 $0.00000
+
+==== G0 summary (planck) ====
+  n                      47
+  success                0.426
+  answered_rate          0.489
+  wrong_when_answered    0.130
+  ece                    0.109
+  mean_steps             4.489
+  mean_web_calls         3.532
+  mean_decision_ms       1.323
+  n_invalid_decisions    0
+  gold_reachable         0.851
+  serp_answer_rate_at3   0.830
+  depth_evidence_recall  0.979
+  mean_fetches           2.362
+  mean_answer_fetches    1.191
+  answered_from_snippet  0.404
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.489 (n=23) precision 0.870
+  tier low_confidence    0.511 (n=24) precision 0.500
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0001   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.333
+  family compare         n=4 success=0.250
+  family fact            n=37 success=0.459
+  GATE: G2 (rule B)
+
+  run dir: results\planck3\g0_planck-g2v2-hash_ddgs
+[planck3 00:49:41] G2 embed: planck (points_ddgs)
+> python scripts/planck3.py g2 embed --encoder planck --points data/planck3/g2/points_ddgs.jsonl --checkpoint checkpoints/planck13/best.pt --tokenizer data/wikipedia/tokenizer.model
+[g2] points: data\planck3\g2\points_ddgs.jsonl
+  encoded 256/53,676
+  encoded 13,056/53,676
+  encoded 25,856/53,676
+  encoded 38,656/53,676
+  encoded 51,456/53,676
+[g2] emb_planck_points_ddgs.npy: (53676, 1000) in 5s
+[planck3 00:49:50] G2 v2 train head:planck on ddgs points
+> python scripts/planck3.py g2 train2 --encoder planck --points data/planck3/g2/points_ddgs.jsonl --tag _ddgs
+[g2] points: data\planck3\g2\points_ddgs.jsonl
+  epoch 0: train_nll=1.4855 val_choice_acc=0.6457
+  epoch 1: train_nll=0.8539 val_choice_acc=0.6726
+  epoch 2: train_nll=0.5984 val_choice_acc=0.6682
+  epoch 3: train_nll=0.4076 val_choice_acc=0.6906
+  epoch 4: train_nll=0.2446 val_choice_acc=0.6951
+  epoch 5: train_nll=0.1684 val_choice_acc=0.6771
+  epoch 6: train_nll=0.1482 val_choice_acc=0.6771
+  epoch 7: train_nll=0.1148 val_choice_acc=0.6771
+C:\Users\feama\sgs\src\planck3\g2.py:491: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model.load_state_dict(torch.load(out_dir / "choice.pt", map_location=device)["model"])
+[g2v2] head:planck: test choice 0.667 vs ranker 0.481 (243 test points with a right one); gate AUC 0.831441656710474; tau=0.811 -> test coverage 0.20 at precision 0.9310344827586207 (target 0.9) -> C:\Users\feama\sgs\results\planck3\g2v2_head_planck_s0_ddgs
+[planck3 00:50:17] round 4: G2 v2 head:planck (ddgs-trained) on the fresh benchmark (rules B, P)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --tasks scripts/assets/planck3_tasks_fresh.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0f_planck-g2v2-planck_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/143] --  bwinner000                              p=0.67 steps=4 web=4 $0.00000
+[  2/143] --  bwinner001                              p=0.44 steps=4 web=4 $0.00000
+[  3/143] --  bwinner002                              p=0.08 steps=4 web=4 $0.00000
+[  4/143] --  bwinner003                              p=0.18 steps=4 web=4 $0.00000
+[  5/143] --  bwinner004                              p=0.41 steps=4 web=4 $0.00000
+[  6/143] --  bwinner005                              p=0.21 steps=4 web=4 $0.00000
+[  7/143] --  bwinner006                              p=0.12 steps=4 web=4 $0.00000
+[  8/143] --  bwinner007                              p=0.21 steps=4 web=4 $0.00000
+[  9/143] --  bwinner008                              p=0.27 steps=4 web=4 $0.00000
+[ 10/143] --  bwinner009                              p=0.40 steps=5 web=5 $0.00000
+[ 11/143] --  bwinner010                              p=0.19 steps=4 web=4 $0.00000
+[ 12/143] --  bwinner011                              p=0.49 steps=4 web=4 $0.00000
+[ 13/143] --  bwinner012                              p=0.50 steps=5 web=5 $0.00000
+[ 14/143] --  bwinner013                              p=0.27 steps=4 web=4 $0.00000
+[ 15/143] --  bwinner014                              p=0.33 steps=4 web=4 $0.00000
+[ 16/143] --  bwinner015                              p=0.31 steps=4 web=4 $0.00000
+[ 17/143] --  bwinner016                              p=0.09 steps=4 web=4 $0.00000
+[ 18/143] --  bwinner017                              p=0.66 steps=4 web=4 $0.00000
+[ 19/143] --  bwinner018                              p=0.15 steps=4 web=4 $0.00000
+[ 20/143] --  bwinner019                              p=0.16 steps=4 web=4 $0.00000
+[ 21/143] --  bwinner020                              p=0.27 steps=4 web=4 $0.00000
+[ 22/143] --  bwinner021                              p=0.14 steps=4 web=4 $0.00000
+[ 23/143] --  bwinner022                              p=0.15 steps=4 web=4 $0.00000
+[ 24/143] --  bwinner023                              p=0.12 steps=4 web=4 $0.00000
+[ 25/143] --  bwinner024                              p=0.49 steps=4 web=4 $0.00000
+[ 26/143] --  bwinner025                              p=0.41 steps=4 web=4 $0.00000
+[ 27/143] --  bwinner026                              p=0.45 steps=4 web=4 $0.00000
+[ 28/143] --  bwinner027                              p=0.24 steps=4 web=4 $0.00000
+[ 29/143] --  bwinner028                              p=0.09 steps=4 web=4 $0.00000
+[ 30/143] --  bwinner029                              p=0.18 steps=4 web=4 $0.00000
+[ 31/143] --  belection000                              p=0.49 steps=4 web=4 $0.00000
+[ 32/143] --  belection001                              p=0.32 steps=4 web=4 $0.00000
+[ 33/143] --  belection002                              p=0.24 steps=4 web=4 $0.00000
+[ 34/143] --  belection003                              p=0.36 steps=4 web=4 $0.00000
+[ 35/143] --  belection004                              p=0.15 steps=4 web=4 $0.00000
+[ 36/143] --  belection005                              p=0.28 steps=4 web=4 $0.00000
+[ 37/143] --  belection006                              p=0.45 steps=4 web=4 $0.00000
+[ 38/143] --  belection007                              p=0.57 steps=4 web=4 $0.00000
+[ 39/143] --  belection008                              p=0.45 steps=4 web=4 $0.00000
+[ 40/143] --  belection009                              p=0.59 steps=4 web=4 $0.00000
+[ 41/143] --  bseason000                              p=0.50 steps=4 web=4 $0.00000
+[ 42/143] --  bseason001                              p=0.19 steps=4 web=4 $0.00000
+[ 43/143] --  bseason002                              p=0.45 steps=4 web=4 $0.00000
+[ 44/143] --  bseason003                              p=0.49 steps=4 web=4 $0.00000
+[ 45/143] --  bseason004                              p=0.11 steps=4 web=4 $0.00000
+[ 46/143] --  bseason005                              p=0.49 steps=4 web=4 $0.00000
+[ 47/143] --  bseason006                              p=0.49 steps=4 web=4 $0.00000
+[ 48/143] --  bseason007                              p=0.09 steps=4 web=4 $0.00000
+[ 49/143] --  bseason008                              p=0.68 steps=4 web=4 $0.00000
+[ 50/143] --  bseason009                              p=0.21 steps=4 web=4 $0.00000
+[ 51/143] --  bheadgov000                              p=0.21 steps=4 web=4 $0.00000
+[ 52/143] --  bheadgov001                              p=0.25 steps=4 web=4 $0.00000
+[ 53/143] --  bheadgov002                              p=0.33 steps=4 web=4 $0.00000
+[ 54/143] --  bheadgov003                              p=0.22 steps=4 web=4 $0.00000
+[ 55/143] --  bheadgov004                              p=0.40 steps=4 web=4 $0.00000
+[ 56/143] --  bheadgov005                              p=0.12 steps=4 web=4 $0.00000
+[ 57/143] --  bheadgov006                              p=0.04 steps=4 web=4 $0.00000
+[ 58/143] --  bheadgov007                              p=0.16 steps=4 web=4 $0.00000
+[ 59/143] --  bheadgov008                              p=0.26 steps=4 web=4 $0.00000
+[ 60/143] --  bheadgov009                              p=0.23 steps=5 web=5 $0.00000
+[ 61/143] OK  bfounded000 2000                         p=0.92 steps=3 web=2 $0.00000
+[ 62/143] --  bfounded001                              p=0.38 steps=4 web=4 $0.00000
+[ 63/143] --  bfounded002                              p=0.11 steps=4 web=4 $0.00000
+[ 64/143] --  bfounded003                              p=0.73 steps=5 web=5 $0.00000
+[ 65/143] OK  bfounded004 2025                         p=0.87 steps=5 web=4 $0.00000
+[ 66/143] --  bfounded005                              p=0.33 steps=4 web=4 $0.00000
+[ 67/143] OK  bfounded006 1982                         p=0.91 steps=3 web=2 $0.00000
+[ 68/143] --  bfounded007                              p=0.75 steps=4 web=4 $0.00000
+[ 69/143] OK  bfounded008 2015                         p=0.98 steps=3 web=2 $0.00000
+[ 70/143] --  bfounded009                              p=0.03 steps=4 web=4 $0.00000
+[ 71/143] OK  bfounded010 2003                         p=0.96 steps=3 web=2 $0.00000
+[ 72/143] OK  bfounded011 2009                         p=0.98 steps=3 web=2 $0.00000
+[ 73/143] --  bfounded012                              p=0.00 steps=8 web=8 $0.00000
+[ 74/143] --  bfounded013                              p=0.25 steps=4 web=4 $0.00000
+[ 75/143] --  bfounded014                              p=0.10 steps=4 web=4 $0.00000
+[ 76/143] --  bfounded015                              p=0.67 steps=4 web=4 $0.00000
+[ 77/143] OK  bfounded016 1984                         p=0.82 steps=3 web=2 $0.00000
+[ 78/143] --  bfounded017                              p=0.71 steps=4 web=4 $0.00000
+[ 79/143] --  bfounded018                              p=0.27 steps=5 web=5 $0.00000
+[ 80/143] --  bfounded019                              p=0.60 steps=4 web=4 $0.00000
+[ 81/143] XX  bborn000 1954                         p=0.85 steps=4 web=3 $0.00000
+[ 82/143] OK  bborn001 1951                         p=0.95 steps=3 web=2 $0.00000
+[ 83/143] OK  bborn002 1978                         p=0.97 steps=3 web=2 $0.00000
+[ 84/143] OK  bborn003 1985                         p=0.98 steps=3 web=2 $0.00000
+[ 85/143] OK  bborn004 1965                         p=0.94 steps=3 web=2 $0.00000
+[ 86/143] OK  bborn005 1992                         p=0.93 steps=3 web=2 $0.00000
+[ 87/143] OK  bborn006 1992                         p=0.89 steps=5 web=4 $0.00000
+[ 88/143] --  bborn007                              p=0.13 steps=4 web=4 $0.00000
+[ 89/143] OK  bborn008 1992                         p=0.96 steps=3 web=2 $0.00000
+[ 90/143] OK  bborn009 1951                         p=0.95 steps=3 web=2 $0.00000
+[ 91/143] OK  bborn010 1958                         p=0.92 steps=3 web=2 $0.00000
+[ 92/143] --  bborn011                              p=0.06 steps=5 web=5 $0.00000
+[ 93/143] OK  bborn012 1985                         p=0.97 steps=3 web=2 $0.00000
+[ 94/143] OK  bborn013 1951                         p=0.91 steps=3 web=2 $0.00000
+[ 95/143] --  bborn014                              p=0.42 steps=5 web=5 $0.00000
+[ 96/143] OK  bborn015 1992                         p=0.95 steps=3 web=2 $0.00000
+[ 97/143] OK  bborn016 1999                         p=0.94 steps=3 web=2 $0.00000
+[ 98/143] XX  bborn017 1984                         p=0.93 steps=3 web=2 $0.00000
+[ 99/143] OK  bborn018 1978                         p=0.92 steps=3 web=2 $0.00000
+[100/143] OK  bborn019 1999                         p=0.86 steps=3 web=2 $0.00000
+[101/143] OK  belevation000 774 m                        p=0.83 steps=5 web=4 $0.00000
+[102/143] OK  belevation001 820 m                        p=0.90 steps=5 web=4 $0.00000
+[103/143] OK  belevation002 1,453 metres                 p=0.85 steps=4 web=3 $0.00000
+[104/143] OK  belevation003 2,829 m                      p=0.88 steps=3 web=2 $0.00000
+[105/143] XX  belevation004 2740 m                       p=0.88 steps=3 web=2 $0.00000
+[106/143] OK  belevation005 3,273 m                      p=0.85 steps=4 web=3 $0.00000
+[107/143] OK  belevation006 2,861 m                      p=0.98 steps=3 web=2 $0.00000
+[108/143] OK  belevation007 585.2 m                      p=0.96 steps=3 web=2 $0.00000
+[109/143] OK  belevation008 763.5 m                      p=0.96 steps=3 web=2 $0.00000
+[110/143] --  belevation009                              p=0.29 steps=4 web=4 $0.00000
+[111/143] OK  belevation010 2,974 meters                 p=0.88 steps=5 web=4 $0.00000
+[112/143] OK  belevation011 2,650 metres                 p=0.89 steps=4 web=3 $0.00000
+[113/143] OK  belevation012 3,176 metres                 p=0.83 steps=4 web=3 $0.00000
+[114/143] OK  belevation013 630 m                        p=0.96 steps=3 web=2 $0.00000
+[115/143] OK  belevation014 745                          p=0.82 steps=4 web=3 $0.00000
+[116/143] --  bfounder000                              p=0.32 steps=4 web=4 $0.00000
+[117/143] --  bfounder001                              p=0.30 steps=4 web=4 $0.00000
+[118/143] --  bfounder002                              p=0.52 steps=4 web=4 $0.00000
+[119/143] --  bfounder003                              p=0.26 steps=4 web=4 $0.00000
+[120/143] --  bfounder004                              p=0.24 steps=4 web=4 $0.00000
+[121/143] --  bfounder005                              p=0.54 steps=4 web=4 $0.00000
+[122/143] XX  bfounder006 Barong Family                p=0.83 steps=3 web=2 $0.00000
+[123/143] --  bfounder007                              p=0.33 steps=4 web=4 $0.00000
+[124/143] --  bfounder008                              p=0.29 steps=4 web=4 $0.00000
+[125/143] --  bfounder009                              p=0.04 steps=4 web=4 $0.00000
+[126/143] --  bauthor000                              p=0.62 steps=4 web=4 $0.00000
+[127/143] --  bauthor001                              p=0.38 steps=4 web=4 $0.00000
+[128/143] --  bauthor002                              p=0.18 steps=4 web=4 $0.00000
+[129/143] --  bauthor003                              p=0.36 steps=4 web=4 $0.00000
+[130/143] --  bauthor004                              p=0.75 steps=4 web=4 $0.00000
+[131/143] --  bauthor005                              p=0.28 steps=4 web=4 $0.00000
+[132/143] OK  bauthor006 Robert van Gulik             p=0.83 steps=3 web=2 $0.00000
+[133/143] OK  bauthor007 Marianne Fredriksson         p=0.91 steps=3 web=2 $0.00000
+[134/143] --  bauthor008                              p=0.37 steps=4 web=4 $0.00000
+[135/143] --  bauthor009                              p=0.49 steps=4 web=4 $0.00000
+[136/143] OK  bchat_born00                              p=0.95 steps=6 web=4 $0.00000
+[137/143] OK  bchat_born01                              p=0.97 steps=6 web=4 $0.00000
+[138/143] --  bchat_born02                              p=0.59 steps=7 web=6 $0.00000
+[139/143] OK  bchat_born03                              p=0.96 steps=6 web=4 $0.00000
+[140/143] OK  bchat_founded00                              p=0.95 steps=6 web=4 $0.00000
+[141/143] --  bchat_founded01                              p=0.47 steps=7 web=6 $0.00000
+[142/143] OK  bchat_founded02                              p=0.86 steps=6 web=4 $0.00000
+[143/143] --  bchat_founded03                              p=0.42 steps=10 web=10 $0.00000
+
+==== G0 summary (planck) ====
+  n                      143
+  success                0.294
+  answered_rate          0.322
+  wrong_when_answered    0.087
+  ece                    0.022
+  mean_steps             4.056
+  mean_web_calls         3.685
+  mean_decision_ms       22.285
+  n_invalid_decisions    0
+  gold_reachable         0.958
+  serp_answer_rate_at3   0.853
+  depth_evidence_recall  0.839
+  mean_fetches           2.629
+  mean_answer_fetches    1.580
+  answered_from_snippet  0.245
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.322 (n=46) precision 0.913
+  tier low_confidence    0.678 (n=97) precision 0.495
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0013   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=8 success=0.625
+  family fact            n=135 success=0.274
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_planck-g2v2-planck_ddgs
+[planck3 00:51:45] round 4: G2 v2 head:planck on the 47-question seed benchmark (rule B)
+> python scripts/planck3.py g0 --policy planck --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --tasks scripts/assets/planck3_tasks.json --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --search ddgs --out results/planck3/g0_planck-g2v2-planck_ddgs --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/47] --  f01                               p=0.52 steps=4 web=4 $0.00000
+[  2/47] OK  f02  1932                         p=0.94 steps=3 web=2 $0.00000
+[  3/47] OK  f03  1889                         p=0.97 steps=3 web=2 $0.00000
+[  4/47] OK  f04  1946                         p=0.95 steps=3 web=2 $0.00000
+[  5/47] OK  f05  2006                         p=0.97 steps=3 web=2 $0.00000
+[  6/47] OK  f06  1997                         p=0.94 steps=3 web=2 $0.00000
+[  7/47] OK  f07  2008                         p=0.99 steps=3 web=2 $0.00000
+[  8/47] OK  f08  2011                         p=0.95 steps=3 web=2 $0.00000
+[  9/47] XX  f09  1955                         p=0.83 steps=3 web=2 $0.00000
+[ 10/47] --  f10                               p=0.19 steps=4 web=4 $0.00000
+[ 11/47] --  f11                               p=0.36 steps=4 web=4 $0.00000
+[ 12/47] --  f12                               p=0.23 steps=4 web=4 $0.00000
+[ 13/47] OK  f13  2007                         p=0.90 steps=3 web=2 $0.00000
+[ 14/47] OK  f14  2017                         p=0.94 steps=3 web=2 $0.00000
+[ 15/47] --  f15                               p=0.45 steps=4 web=4 $0.00000
+[ 16/47] XX  f16  2023                         p=0.86 steps=3 web=2 $0.00000
+[ 17/47] OK  n01  8,848.86 m                   p=0.88 steps=3 web=2 $0.00000
+[ 18/47] OK  n02  828 metres                   p=0.96 steps=3 web=2 $0.00000
+[ 19/47] --  n03                               p=0.60 steps=4 web=4 $0.00000
+[ 20/47] --  n04                               p=0.65 steps=4 web=4 $0.00000
+[ 21/47] OK  n05  26                           p=0.82 steps=3 web=2 $0.00000
+[ 22/47] OK  n06  299,792,458 metres           p=0.83 steps=4 web=3 $0.00000
+[ 23/47] --  n07                               p=0.71 steps=4 web=4 $0.00000
+[ 24/47] --  n08                               p=0.65 steps=4 web=4 $0.00000
+[ 25/47] --  n09                               p=0.55 steps=4 web=4 $0.00000
+[ 26/47] --  e01                               p=0.54 steps=4 web=4 $0.00000
+[ 27/47] --  e02                               p=0.39 steps=4 web=4 $0.00000
+[ 28/47] --  e03                               p=0.65 steps=4 web=4 $0.00000
+[ 29/47] --  e04                               p=0.49 steps=7 web=7 $0.00000
+[ 30/47] --  e05                               p=0.58 steps=4 web=4 $0.00000
+[ 31/47] --  e06                               p=0.50 steps=4 web=4 $0.00000
+[ 32/47] --  e07                               p=0.49 steps=4 web=4 $0.00000
+[ 33/47] --  e08                               p=0.17 steps=4 web=4 $0.00000
+[ 34/47] --  e09                               p=0.49 steps=4 web=4 $0.00000
+[ 35/47] --  e10                               p=0.45 steps=4 web=4 $0.00000
+[ 36/47] --  e11                               p=0.48 steps=4 web=4 $0.00000
+[ 37/47] --  e12                               p=0.49 steps=4 web=4 $0.00000
+[ 38/47] --  c01                               p=0.52 steps=10 web=8 $0.00000
+[ 39/47] --  c02                               p=0.61 steps=9 web=6 $0.00000
+[ 40/47] --  c03                               p=0.65 steps=11 web=9 $0.00000
+[ 41/47] --  c04                               p=0.45 steps=9 web=6 $0.00000
+[ 42/47] --  ch01                              p=0.62 steps=10 web=8 $0.00000
+[ 43/47] --  ch02                              p=0.50 steps=7 web=6 $0.00000
+[ 44/47] OK  ch03                              p=0.95 steps=4 web=0 $0.00000
+[ 45/47] --  ch04                              p=0.39 steps=12 web=12 $0.00001
+[ 46/47] --  ch05                              p=0.20 steps=8 web=8 $0.00000
+[ 47/47] --  ch06                              p=0.49 steps=7 web=6 $0.00000
+
+==== G0 summary (planck) ====
+  n                      47
+  success                0.298
+  answered_rate          0.340
+  wrong_when_answered    0.125
+  ece                    0.109
+  mean_steps             4.766
+  mean_web_calls         4.064
+  mean_decision_ms       20.669
+  n_invalid_decisions    0
+  gold_reachable         0.894
+  serp_answer_rate_at3   0.872
+  depth_evidence_recall  0.979
+  mean_fetches           2.830
+  mean_answer_fetches    1.596
+  answered_from_snippet  0.298
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.340 (n=16) precision 0.875
+  tier low_confidence    0.660 (n=31) precision 0.710
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0014   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=6 success=0.167
+  family compare         n=4 success=0.000
+  family fact            n=37 success=0.351
+  GATE: G2 (rule B)
+
+  run dir: results\planck3\g0_planck-g2v2-planck_ddgs
+[planck3 00:53:08] round 4: heuristic on ddgs + system trust layer (rule T)
+> python scripts/planck3.py g0 --policy heuristic --tasks scripts/assets/planck3_tasks_fresh.json --search ddgs --out results/planck3/g0f_heuristic_snip_ddgs_trust --gemma-path models/gemma-4-e4b-it
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/143] XX  bwinner000 Elena Rybakina               p=0.81 steps=3 web=2 $0.00000
+[  2/143] OK  bwinner001 Spain                        p=0.98 steps=3 web=2 $0.00000
+[  3/143] XX  bwinner002 Adana Open Women Doubles     p=0.84 steps=3 web=2 $0.00000
+[  4/143] XX  bwinner003 Women Tennis Association     p=0.75 steps=5 web=3 $0.00000
+[  5/143] XX  bwinner004 WTA                          p=0.65 steps=3 web=2 $0.00000
+[  6/143] OK  bwinner005 Tadese Takele                p=0.78 steps=4 web=2 $0.00000
+[  7/143] XX  bwinner006 OnlyBulls Grand Prix of Portland p=0.68 steps=3 web=2 $0.00000
+[  8/143] XX  bwinner007 Tri-City Raceway             p=0.99 steps=3 web=2 $0.00000
+[  9/143] XX  bwinner008 Bekijk UEC Track European Championships p=0.47 steps=4 web=3 $0.00000
+[ 10/143] OK  bwinner009 Paul Magnier                 p=0.64 steps=3 web=2 $0.00000
+[ 11/143] XX  bwinner010 ATP Challenger Tour          p=0.81 steps=4 web=2 $0.00000
+[ 12/143] XX  bwinner011 Czech Republic               p=0.81 steps=5 web=3 $0.00000
+[ 13/143] XX  bwinner012 Glasgow                      p=0.96 steps=3 web=2 $0.00000
+[ 14/143] OK  bwinner013 Paul Seixas                  p=0.92 steps=3 web=2 $0.00000
+[ 15/143] XX  bwinner014 Wembley Stadium              p=0.84 steps=4 web=2 $0.00000
+[ 16/143] XX  bwinner015 National Indoor Stadium      p=0.80 steps=3 web=2 $0.00000
+[ 17/143] XX  bwinner016 UCI Road World Championships p=0.93 steps=3 web=2 $0.00000
+[ 18/143] XX  bwinner017 Arsenal                      p=0.63 steps=3 web=2 $0.00000
+[ 19/143] XX  bwinner018 Taranto                      p=0.96 steps=3 web=2 $0.00000
+[ 20/143] XX  bwinner019 Paris                        p=0.75 steps=3 web=2 $0.00000
+[ 21/143] XX  bwinner020 Milan                        p=0.96 steps=3 web=2 $0.00000
+[ 22/143] OK  bwinner021 Taylor Gray                  p=0.73 steps=3 web=2 $0.00000
+[ 23/143] XX  bwinner022 Muur van Geraardsbergen      p=0.79 steps=4 web=2 $0.00000
+[ 24/143] XX  bwinner023 Accra                        p=0.82 steps=3 web=2 $0.00000
+[ 25/143] XX  bwinner024 Mathys Domenc                p=0.70 steps=3 web=2 $0.00000
+[ 26/143] OK  bwinner025 Madison Keys                 p=0.77 steps=3 web=2 $0.00000
+[ 27/143] XX  bwinner026 Birmingham                   p=0.92 steps=3 web=2 $0.00000
+[ 28/143] XX  bwinner027 NASCAR O'Reilly Auto Parts Series p=0.98 steps=3 web=2 $0.00000
+[ 29/143] XX  bwinner028 NASCAR O’Reilly Auto Parts Series p=0.81 steps=4 web=2 $0.00000
+[ 30/143] OK  bwinner029 Justin Allgaier              p=0.75 steps=4 web=2 $0.00000
+[ 31/143] XX  belection000 Armenia                      p=0.90 steps=3 web=2 $0.00000
+[ 32/143] OK  belection001 Daniel Ennis                 p=0.60 steps=3 web=2 $0.00000
+[ 33/143] OK  belection002 Tayte Willows                p=0.99 steps=3 web=2 $0.00000
+[ 34/143] XX  belection003 Japanese                     p=0.82 steps=4 web=2 $0.00000
+[ 35/143] OK  belection004 Jason Perry                  p=0.79 steps=5 web=3 $0.00000
+[ 36/143] OK  belection005 Anthony Marsh                p=0.91 steps=3 web=2 $0.00000
+[ 37/143] OK  belection006 Tatiana Auguste              p=0.70 steps=3 web=2 $0.00000
+[ 38/143] XX  belection007 House of Representatives     p=1.00 steps=3 web=2 $0.00000
+[ 39/143] OK  belection008 Jeff Beattie                 p=0.88 steps=3 web=2 $0.00000
+[ 40/143] OK  belection009 United Kingdom               p=0.41 steps=4 web=3 $0.00000
+[ 41/143] OK  bseason000 Laurence Pithie              p=0.85 steps=3 web=2 $0.00000
+[ 42/143] OK  bseason001 Prairie View A&M             p=0.91 steps=3 web=2 $0.00000
+[ 43/143] XX  bseason002 Coupe de France de Basket    p=0.67 steps=3 web=2 $0.00000
+[ 44/143] XX  bseason003 AdmiralBet ABA League        p=0.62 steps=3 web=2 $0.00000
+[ 45/143] XX  bseason004 Demi Vollering               p=0.86 steps=3 web=2 $0.00000
+[ 46/143] XX  bseason005 Serie C                      p=0.97 steps=3 web=2 $0.00000
+[ 47/143] XX  bseason006 Serie C                      p=0.97 steps=2 web=0 $0.00000
+[ 48/143] OK  bseason007 Westmeath                    p=0.76 steps=4 web=2 $0.00000
+[ 49/143] OK  bseason008 Aubry Bracco                 p=0.82 steps=3 web=2 $0.00000
+[ 50/143] XX  bseason009 Het BNXT League-seizoen      p=0.85 steps=3 web=2 $0.00000
+[ 51/143] XX  bheadgov000 Naha                         p=0.63 steps=3 web=2 $0.00000
+[ 52/143] XX  bheadgov001 Januar                       p=0.78 steps=3 web=2 $0.00000
+[ 53/143] XX  bheadgov002 Santa Perpètua de Mogoda Barcelona p=0.85 steps=3 web=2 $0.00000
+[ 54/143] OK  bheadgov003 Alexis Chaussalet            p=0.63 steps=3 web=2 $0.00000
+[ 55/143] XX  bheadgov004 Amadou Oury Bah              p=0.99 steps=3 web=2 $0.00000
+[ 56/143] XX  bheadgov005 März                         p=0.80 steps=5 web=3 $0.00000
+[ 57/143] XX  bheadgov006 Limoges Métropole            p=0.85 steps=3 web=2 $0.00000
+[ 58/143] OK  bheadgov007 Christophe Le Roux           p=0.74 steps=3 web=2 $0.00000
+[ 59/143] XX  bheadgov008 Mette Frederiksen            p=0.91 steps=3 web=2 $0.00000
+[ 60/143] XX  bheadgov009 Le                           p=0.77 steps=4 web=3 $0.00000
+[ 61/143] OK  bfounded000 2000                         p=1.00 steps=3 web=2 $0.00000
+[ 62/143] OK  bfounded001 2000                         p=1.00 steps=3 web=2 $0.00000
+[ 63/143] OK  bfounded002 2000                         p=1.00 steps=3 web=2 $0.00000
+[ 64/143] OK  bfounded003 1999                         p=0.99 steps=3 web=2 $0.00000
+[ 65/143] OK  bfounded004 2025                         p=0.87 steps=3 web=2 $0.00000
+[ 66/143] OK  bfounded005 1930                         p=0.81 steps=3 web=2 $0.00000
+[ 67/143] OK  bfounded006 1982                         p=1.00 steps=3 web=2 $0.00000
+[ 68/143] XX  bfounded007 2008                         p=0.88 steps=3 web=2 $0.00000
+[ 69/143] OK  bfounded008 2015                         p=1.00 steps=3 web=2 $0.00000
+[ 70/143] XX  bfounded009 2005                         p=1.00 steps=3 web=2 $0.00000
+[ 71/143] OK  bfounded010 2003                         p=1.00 steps=3 web=2 $0.00000
+[ 72/143] OK  bfounded011 2009                         p=1.00 steps=3 web=2 $0.00000
+[ 73/143] OK  bfounded012 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 74/143] OK  bfounded013 1893                         p=0.89 steps=3 web=2 $0.00000
+[ 75/143] OK  bfounded014 1919                         p=1.00 steps=3 web=2 $0.00000
+[ 76/143] OK  bfounded015 1987                         p=0.98 steps=3 web=2 $0.00000
+[ 77/143] OK  bfounded016 1984                         p=1.00 steps=3 web=2 $0.00000
+[ 78/143] OK  bfounded017 1936                         p=1.00 steps=3 web=2 $0.00000
+[ 79/143] XX  bfounded018 2012                         p=0.95 steps=3 web=2 $0.00000
+[ 80/143] OK  bfounded019 1876                         p=1.00 steps=3 web=2 $0.00000
+[ 81/143] OK  bborn000 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 82/143] OK  bborn001 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 83/143] OK  bborn002 1978                         p=1.00 steps=3 web=2 $0.00000
+[ 84/143] OK  bborn003 1985                         p=1.00 steps=3 web=2 $0.00000
+[ 85/143] OK  bborn004 1965                         p=1.00 steps=3 web=2 $0.00000
+[ 86/143] OK  bborn005 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 87/143] OK  bborn006 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 88/143] OK  bborn007 1992                         p=0.90 steps=3 web=2 $0.00000
+[ 89/143] OK  bborn008 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 90/143] OK  bborn009 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 91/143] OK  bborn010 1958                         p=0.99 steps=3 web=2 $0.00000
+[ 92/143] OK  bborn011 1951                         p=0.67 steps=3 web=2 $0.00000
+[ 93/143] OK  bborn012 1985                         p=1.00 steps=3 web=2 $0.00000
+[ 94/143] OK  bborn013 1951                         p=1.00 steps=3 web=2 $0.00000
+[ 95/143] XX  bborn014 1970                         p=0.82 steps=3 web=2 $0.00000
+[ 96/143] OK  bborn015 1992                         p=1.00 steps=3 web=2 $0.00000
+[ 97/143] OK  bborn016 1999                         p=0.98 steps=3 web=2 $0.00000
+[ 98/143] XX  bborn017 1984                         p=1.00 steps=3 web=2 $0.00000
+[ 99/143] OK  bborn018 1978                         p=1.00 steps=3 web=2 $0.00000
+[100/143] OK  bborn019 1999                         p=1.00 steps=3 web=2 $0.00000
+[101/143] XX  belevation000 78                           p=0.70 steps=3 web=2 $0.00000
+[102/143] XX  belevation001 800 metres                   p=0.99 steps=3 web=2 $0.00000
+[103/143] OK  belevation002 1,454 metres                 p=0.83 steps=3 web=2 $0.00000
+[104/143] OK  belevation003 2,829 metres                 p=0.81 steps=4 web=3 $0.00000
+[105/143] OK  belevation004 2,760 m                      p=0.66 steps=3 web=2 $0.00000
+[106/143] XX  belevation005 3,237 metres                 p=1.00 steps=3 web=2 $0.00000
+[107/143] OK  belevation006 2,861 m                      p=0.99 steps=3 web=2 $0.00000
+[108/143] OK  belevation007 585.2 m                      p=1.00 steps=3 web=2 $0.00000
+[109/143] OK  belevation008 763.5 m                      p=1.00 steps=3 web=2 $0.00000
+[110/143] OK  belevation009 757 meters                   p=0.69 steps=3 web=2 $0.00000
+[111/143] OK  belevation010 2,974 m                      p=0.97 steps=3 web=2 $0.00000
+[112/143] OK  belevation011 2,650 metres                 p=0.96 steps=3 web=2 $0.00000
+[113/143] OK  belevation012 3,170 m                      p=0.99 steps=3 web=2 $0.00000
+[114/143] OK  belevation013 630 m                        p=1.00 steps=3 web=2 $0.00000
+[115/143] OK  belevation014 745                          p=0.83 steps=4 web=2 $0.00000
+[116/143] XX  bfounder000 Société Générale de Belgique p=0.82 steps=4 web=2 $0.00000
+[117/143] XX  bfounder001 Falcon                       p=0.64 steps=3 web=2 $0.00000
+[118/143] XX  bfounder002 Tietoevry                    p=0.40 steps=5 web=4 $0.00000
+[119/143] OK  bfounder003 Theodor Luts                 p=0.79 steps=4 web=2 $0.00000
+[120/143] OK  bfounder004 Belgacom TV                  p=0.90 steps=3 web=2 $0.00000
+[121/143] XX  bfounder005 Adams Filmi Oy               p=0.83 steps=3 web=2 $0.00000
+[122/143] OK  bfounder006 Yellow Claw                  p=0.97 steps=3 web=2 $0.00000
+[123/143] XX  bfounder007 Luxo ASA                     p=0.83 steps=3 web=2 $0.00000
+[124/143] XX  bfounder008 Comvik                       p=0.76 steps=3 web=2 $0.00000
+[125/143] XX  bfounder009 International Volunteer HQ IVHQ p=0.85 steps=3 web=2 $0.00000
+[126/143] OK  bauthor000 Liam O'Flaherty              p=0.72 steps=3 web=2 $0.00000
+[127/143] XX  bauthor001 Out Stealing Horses Norwegian p=0.75 steps=3 web=2 $0.00000
+[128/143] OK  bauthor002 Doyle                        p=0.76 steps=4 web=2 $0.00000
+[129/143] OK  bauthor003 Seppo Sakari Telenius        p=0.79 steps=3 web=2 $0.00000
+[130/143] XX  bauthor004 Silent Twins                 p=0.63 steps=4 web=3 $0.00000
+[131/143] XX  bauthor005 Finnish                      p=0.78 steps=4 web=2 $0.00000
+[132/143] OK  bauthor006 Robert van Gulik             p=0.93 steps=3 web=2 $0.00000
+[133/143] XX  bauthor007 SIMON OCH EKARNA             p=0.75 steps=4 web=2 $0.00000
+[134/143] OK  bauthor008 Dag Schjelderup-Ebbe         p=0.80 steps=3 web=2 $0.00000
+[135/143] XX  bauthor009 Bruce Springsteen            p=0.78 steps=3 web=2 $0.00000
+[136/143] OK  bchat_born00                              p=1.00 steps=6 web=4 $0.00000
+[137/143] OK  bchat_born01                              p=1.00 steps=6 web=4 $0.00000
+[138/143] OK  bchat_born02                              p=1.00 steps=6 web=4 $0.00000
+[139/143] OK  bchat_born03                              p=1.00 steps=6 web=4 $0.00000
+[140/143] OK  bchat_founded00                              p=1.00 steps=6 web=4 $0.00000
+[141/143] XX  bchat_founded01                              p=0.75 steps=6 web=4 $0.00000
+[142/143] OK  bchat_founded02                              p=1.00 steps=6 web=4 $0.00000
+[143/143] XX  bchat_founded03                              p=0.66 steps=6 web=4 $0.00000
+
+==== G0 summary (heuristic) ====
+  n                      143
+  success                0.566
+  answered_rate          1.000
+  wrong_when_answered    0.434
+  ece                    0.297
+  mean_steps             3.364
+  mean_web_calls         2.175
+  mean_decision_ms       0.030
+  n_invalid_decisions    0
+  gold_reachable         0.909
+  serp_answer_rate_at3   0.846
+  depth_evidence_recall  0.832
+  mean_fetches           1.126
+  mean_answer_fetches    0.077
+  answered_from_snippet  0.944
+  gated_rate             0.000
+  gated_would_be_correct 0
+  tier confident         0.979 (n=140) precision 0.571
+  tier low_confidence    0.021 (n=3) precision 0.333
+  tier none              0.000 (n=0)
+  cost/1k tasks          $0.0000   per correct $0.00000   LLM tokens/task 0 (priced as claude-haiku-4-5)
+  family chat            n=8 success=0.750
+  family fact            n=135 success=0.556
+  GATE: ROUND 4 (rules S/P)
+
+  run dir: results\planck3\g0f_heuristic_snip_ddgs_trust
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-09 00:53)
+
+## G0 (seed benchmark)
+
+| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | answer fetches/task | from snippet | gated | $/correct | LLM tok/task | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| g0_gemma | 47 | 0.681 | 0.915 | 0.256 | 0.137 | 1.000 | 0.957 | 2.809 |  |  | 0.008738 | 5486 | PASS |
+| g0_gemma_closedbook | 47 | 0.957 | 1.000 | 0.043 | 0.043 |  |  | 0.000 |  |  | 0.000110 | 82 | COMPARATOR |
+| g0_gemma_closedbook_quick | 12 | 1.000 | 1.000 | 0.000 | 0.000 |  |  | 0.000 |  |  | 0.000173 | 136 | COMPARATOR |
+| g0_gemma_quick | 12 | 0.667 | 1.000 | 0.333 | 0.183 | 0.667 | 0.417 | 4.333 |  |  | 0.015154 | 9337 | PASS |
+| g0_gemma_snip | 47 | 0.851 | 0.936 | 0.091 | 0.039 | 0.957 | 0.957 | 0.000 | 0.894 | 0.000 | 0.005360 | 4206 | PASS |
+| g0_heuristic | 47 | 0.617 | 0.979 | 0.370 | 0.132 | 1.000 | 0.851 | 2.702 |  |  | 0.000000 | 0 | BASELINE |
+| g0_heuristic_quick | 12 | 0.250 | 0.833 | 0.700 | 0.278 | 0.667 | 0.417 | 3.917 |  |  | 0.000000 | 0 | BASELINE |
+| g0_heuristic_snip | 47 | 0.936 | 1.000 | 0.064 | 0.057 | 0.957 | 0.851 | 0.021 | 0.830 | 0.000 | 0.000000 | 0 | BASELINE |
+| g0_planck-g2-hash | 47 | 0.021 | 0.021 | 0.000 | 0.507 | 0.851 | 0.553 | 2.617 | 0.000 | 0.000 | 0.000006 | 0 | G2 (rule B) |
+| g0_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-hash_wikipedia | 47 | 0.000 | 0.021 | 1.000 | 0.843 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck | 47 | 0.021 | 0.106 | 0.800 | 0.431 | 0.851 | 0.574 | 2.574 | 0.043 | 0.000 | 0.000128 | 0 | G2 (rule B) |
+| g0_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck_wikipedia | 47 | 0.021 | 0.021 | 0.000 | 0.286 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 | 0.000098 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash | 47 | 0.617 | 0.745 | 0.171 | 0.161 | 0.979 | 0.851 | 0.830 | 0.660 | 0.000 | 0.000000 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash_ddgs | 47 | 0.426 | 0.489 | 0.130 | 0.109 | 0.979 | 0.830 | 1.191 | 0.404 | 0.000 | 0.000000 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash_ddgs_quick | 12 | 0.000 | 0.333 | 1.000 | 0.739 | 1.000 | 0.667 | 1.750 | 0.250 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck | 47 | 0.638 | 0.787 | 0.189 | 0.182 | 1.000 | 0.872 | 0.660 | 0.702 | 0.000 | 0.000002 | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck_ddgs | 47 | 0.298 | 0.340 | 0.125 | 0.109 | 0.979 | 0.872 | 1.596 | 0.298 | 0.000 | 0.000005 | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck_ddgs_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 0.917 | 4.083 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0f_gemma_closedbook | 143 | 0.049 | 0.986 | 0.950 | 0.950 |  |  | 0.000 |  |  | 0.002297 | 75 | COMPARATOR |
+| g0f_gemma_closedbook_quick | 12 | 0.000 | 1.000 | 1.000 | 1.000 |  |  | 0.000 |  |  |  | 110 | COMPARATOR |
+| g0f_gemma_snip | 143 | 0.196 | 0.294 | 0.333 | 0.257 | 0.322 | 0.273 | 0.042 | 0.294 | 0.014 | 0.015155 | 2737 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip_ddgs | 143 | 0.601 | 0.797 | 0.246 | 0.177 | 0.839 | 0.846 | 0.063 | 0.797 | 0.007 | 0.006522 | 3635 | ROUND 4 (rules S/P) |
+| g0f_gemma_snip_ddgs_quick | 12 | 0.833 | 0.917 | 0.091 | 0.036 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.005969 | 4576 | ROUND 4 (rules S/P) |
+| g0f_gemma_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.267 | 0.750 | 0.917 | 0.000 | 1.000 | 0.000 | 0.007831 | 4830 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip_wikipedia | 143 | 0.140 | 0.210 | 0.333 | 0.253 | 0.252 | 0.189 | 0.056 | 0.210 | 0.014 | 0.020229 | 2607 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip | 143 | 0.210 | 0.818 | 0.744 | 0.471 | 0.336 | 0.273 | 0.699 | 0.308 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip_ddgs | 143 | 0.510 | 0.958 | 0.467 | 0.319 | 0.734 | 0.734 | 0.133 | 0.860 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_quick | 12 | 0.333 | 1.000 | 0.667 | 0.414 | 0.667 | 0.667 | 0.250 | 0.750 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_trust | 143 | 0.566 | 1.000 | 0.434 | 0.297 | 0.832 | 0.846 | 0.077 | 0.944 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_trust_quick | 12 | 0.583 | 1.000 | 0.417 | 0.300 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.302 | 0.750 | 0.917 | 0.250 | 0.833 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip_wikipedia | 143 | 0.154 | 0.797 | 0.807 | 0.510 | 0.273 | 0.189 | 0.755 | 0.259 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash | 143 | 0.021 | 0.063 | 0.667 | 0.358 | 0.287 | 0.189 | 1.951 | 0.028 | 0.000 | 0.000005 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash_wikipedia | 143 | 0.007 | 0.042 | 0.833 | 0.377 | 0.287 | 0.189 | 1.958 | 0.014 | 0.000 | 0.000016 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck | 143 | 0.091 | 0.189 | 0.519 | 0.287 | 0.287 | 0.189 | 1.706 | 0.133 | 0.000 | 0.000020 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck_wikipedia | 143 | 0.098 | 0.182 | 0.462 | 0.241 | 0.287 | 0.189 | 1.734 | 0.112 | 0.000 | 0.000015 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-hash | 143 | 0.035 | 0.056 | 0.375 | 0.345 | 0.343 | 0.273 | 1.916 | 0.042 | 0.000 | 0.000003 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-hash_ddgs | 143 | 0.245 | 0.294 | 0.167 | 0.102 | 0.839 | 0.853 | 1.580 | 0.217 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-hash_ddgs_quick | 12 | 0.167 | 0.500 | 0.667 | 0.382 | 0.917 | 0.917 | 2.083 | 0.250 | 0.000 | 0.000001 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-planck | 143 | 0.084 | 0.119 | 0.294 | 0.094 | 0.343 | 0.273 | 1.783 | 0.084 | 0.000 | 0.000024 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-planck_ddgs | 143 | 0.294 | 0.322 | 0.087 | 0.022 | 0.839 | 0.853 | 1.580 | 0.245 | 0.000 | 0.000004 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-planck_ddgs_quick | 12 | 0.083 | 0.167 | 0.500 | 0.351 | 0.917 | 0.917 | 3.333 | 0.167 | 0.000 | 0.000027 | 0 | ROUND 4 (rules S/P) |
+
+**g0_gemma vs base chat:** success 0.681 vs 0.957 (0.71x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 79.8x MORE expensive (5486 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_gemma_quick vs base chat:** success 0.667 vs 1.000 (0.67x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 87.7x MORE expensive (9337 vs 136 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_gemma_snip vs base chat:** success 0.851 vs 0.957 (0.89x); depth evidence 0.957 vs none (base chat shows no sources); cost per correct 48.9x MORE expensive (4206 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_heuristic vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 8567.8x cheaper.
+**g0_heuristic_quick vs base chat:** success 0.250 vs 1.000 (0.25x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 3112.9x cheaper.
+**g0_heuristic_snip vs base chat:** success 0.936 vs 0.957 (0.98x); depth evidence 0.957 vs none (base chat shows no sources); cost per correct 113295.6x cheaper.
+**g0_planck-g2-hash vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 17.2x cheaper.
+**g0_planck-g2-hash_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-hash_wikipedia vs base chat:** success 0.000 vs 0.957 (0.00x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-planck vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.2x MORE expensive (0 vs 82 LLM tokens/task).
+**g0_planck-g2-planck_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-planck_wikipedia vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.1x cheaper.
+**g0_planck-g2v2-hash vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 1282.3x cheaper.
+**g0_planck-g2v2-hash_ddgs vs base chat:** success 0.426 vs 0.957 (0.44x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 564.9x cheaper.
+**g0_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2v2-planck vs base chat:** success 0.638 vs 0.957 (0.67x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 72.8x cheaper.
+**g0_planck-g2v2-planck_ddgs vs base chat:** success 0.298 vs 0.957 (0.31x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 23.8x cheaper.
+**g0_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_gemma_snip vs base chat:** success 0.196 vs 0.049 (4.00x); depth evidence 0.322 vs none (base chat shows no sources); cost per correct 6.6x MORE expensive (2737 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_ddgs vs base chat:** success 0.601 vs 0.049 (12.29x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 2.8x MORE expensive (3635 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_ddgs_quick vs base chat:** success 0.833 vs 0.000 (833333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_wikipedia vs base chat:** success 0.140 vs 0.049 (2.86x); depth evidence 0.252 vs none (base chat shows no sources); cost per correct 8.8x MORE expensive (2607 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_heuristic_snip vs base chat:** success 0.210 vs 0.049 (4.29x); depth evidence 0.336 vs none (base chat shows no sources); cost per correct 136268.0x cheaper.
+**g0f_heuristic_snip_ddgs vs base chat:** success 0.510 vs 0.049 (10.43x); depth evidence 0.734 vs none (base chat shows no sources); cost per correct 530110.6x cheaper.
+**g0f_heuristic_snip_ddgs_quick vs base chat:** success 0.333 vs 0.000 (333333333.33x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_ddgs_trust vs base chat:** success 0.566 vs 0.049 (11.57x); depth evidence 0.832 vs none (base chat shows no sources); cost per correct 915042.4x cheaper.
+**g0f_heuristic_snip_ddgs_trust_quick vs base chat:** success 0.583 vs 0.000 (583333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_wikipedia vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69225.3x cheaper.
+**g0f_planck-g2-hash vs base chat:** success 0.021 vs 0.049 (0.43x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 440.8x cheaper.
+**g0f_planck-g2-hash_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2-hash_wikipedia vs base chat:** success 0.007 vs 0.049 (0.14x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 146.9x cheaper.
+**g0f_planck-g2-planck vs base chat:** success 0.091 vs 0.049 (1.86x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 112.8x cheaper.
+**g0f_planck-g2-planck_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2-planck_wikipedia vs base chat:** success 0.098 vs 0.049 (2.00x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 151.3x cheaper.
+**g0f_planck-g2v2-hash vs base chat:** success 0.035 vs 0.049 (0.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 738.7x cheaper.
+**g0f_planck-g2v2-hash_ddgs vs base chat:** success 0.245 vs 0.049 (5.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 6108.9x cheaper.
+**g0f_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.167 vs 0.000 (166666666.67x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2v2-planck vs base chat:** success 0.084 vs 0.049 (1.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 94.2x cheaper.
+**g0f_planck-g2v2-planck_ddgs vs base chat:** success 0.294 vs 0.049 (6.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 537.5x cheaper.
+**g0f_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.083 vs 0.000 (83333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+
+### Round 4 paired comparisons (same questions; exact McNemar)
+
+| rule | run | vs | metric | run | vs | only run | only vs | p |
+|---|---|---|---|---|---|---|---|---|
+| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | serp_visible | 0.830 | 0.851 | 1 | 2 | 1 |
+| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | correct | 0.426 | 0.617 | 2 | 11 | 0.0225 |
+| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | serp_visible | 0.872 | 0.872 | 2 | 2 | 1 |
+| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | correct | 0.298 | 0.638 | 4 | 20 | 0.00154 |
+| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | serp_visible | 0.846 | 0.189 | 94 | 0 | 1.01e-28 |
+| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | correct | 0.601 | 0.140 | 70 | 4 | 1.29e-16 |
+| A1 | g0f_gemma_snip_ddgs | g0f_gemma_closedbook | correct | 0.601 | 0.049 | 83 | 4 | 3.02e-20 |
+| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | serp_visible | 0.734 | 0.189 | 78 | 0 | 6.62e-24 |
+| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | correct | 0.510 | 0.154 | 53 | 2 | 8.55e-14 |
+| T | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.566 | 0.510 | 9 | 1 | 0.0215 |
+| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
+| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | correct | 0.245 | 0.035 | 31 | 1 | 1.54e-08 |
+| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
+| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | correct | 0.294 | 0.084 | 32 | 2 | 6.94e-08 |
+
+### Answer tiers (what the card shows: confident / low confidence / evidence only)
+
+| run | confident: share | precision | low confidence: share | precision | none: share | its evidence has the answer |
+|---|---|---|---|---|---|---|
+| g0_planck-g2v2-hash_ddgs | 0.489 | 0.870 | 0.511 | 0.500 | 0.000 |  |
+| g0_planck-g2v2-hash_ddgs_quick | 0.333 | 0.000 | 0.667 | 0.250 | 0.000 |  |
+| g0_planck-g2v2-planck_ddgs | 0.340 | 0.875 | 0.660 | 0.710 | 0.000 |  |
+| g0_planck-g2v2-planck_ddgs_quick | 0.000 |  | 1.000 | 0.083 | 0.000 |  |
+| g0f_gemma_snip_ddgs | 0.797 | 0.754 | 0.203 | 0.379 | 0.000 |  |
+| g0f_gemma_snip_ddgs_quick | 0.917 | 0.909 | 0.083 | 1.000 | 0.000 |  |
+| g0f_heuristic_snip_ddgs | 0.909 | 0.562 | 0.084 | 0.000 | 0.007 | 0.000 |
+| g0f_heuristic_snip_ddgs_quick | 0.833 | 0.400 | 0.167 | 0.000 | 0.000 |  |
+| g0f_heuristic_snip_ddgs_trust | 0.979 | 0.571 | 0.021 | 0.333 | 0.000 |  |
+| g0f_heuristic_snip_ddgs_trust_quick | 1.000 | 0.583 | 0.000 |  | 0.000 |  |
+| g0f_planck-g2v2-hash_ddgs | 0.294 | 0.833 | 0.706 | 0.287 | 0.000 |  |
+| g0f_planck-g2v2-hash_ddgs_quick | 0.333 | 0.250 | 0.667 | 0.250 | 0.000 |  |
+| g0f_planck-g2v2-planck_ddgs | 0.322 | 0.913 | 0.678 | 0.495 | 0.000 |  |
+| g0f_planck-g2v2-planck_ddgs_quick | 0.167 | 0.500 | 0.833 | 0.400 | 0.000 |  |
+
+### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)
+
+| run | per regime: success (n, wrong when answered) |
+|---|---|
+| g0f_gemma_closedbook | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.084 (n=83, wrong 0.915) |
+| g0f_gemma_closedbook_quick | fresh: 0.000 (n=6, wrong 1.000) | long_tail: 0.000 (n=6, wrong 1.000) |
+| g0f_gemma_snip | fresh: 0.083 (n=60, wrong 0.545) | long_tail: 0.277 (n=83, wrong 0.258) |
+| g0f_gemma_snip_ddgs | fresh: 0.567 (n=60, wrong 0.244) | long_tail: 0.627 (n=83, wrong 0.246) |
+| g0f_gemma_snip_ddgs_quick | fresh: 1.000 (n=6, wrong 0.000) | long_tail: 0.667 (n=6, wrong 0.200) |
+| g0f_gemma_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_gemma_snip_wikipedia | fresh: 0.033 (n=60, wrong 0.600) | long_tail: 0.217 (n=83, wrong 0.280) |
+| g0f_heuristic_snip | fresh: 0.133 (n=60, wrong 0.855) | long_tail: 0.265 (n=83, wrong 0.645) |
+| g0f_heuristic_snip_ddgs | fresh: 0.250 (n=60, wrong 0.737) | long_tail: 0.699 (n=83, wrong 0.275) |
+| g0f_heuristic_snip_ddgs_quick | fresh: 0.167 (n=6, wrong 0.833) | long_tail: 0.500 (n=6, wrong 0.500) |
+| g0f_heuristic_snip_ddgs_trust | fresh: 0.333 (n=60, wrong 0.667) | long_tail: 0.735 (n=83, wrong 0.265) |
+| g0f_heuristic_snip_ddgs_trust_quick | fresh: 0.333 (n=6, wrong 0.667) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_heuristic_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_heuristic_snip_wikipedia | fresh: 0.083 (n=60, wrong 0.909) | long_tail: 0.205 (n=83, wrong 0.712) |
+| g0f_planck-g2-hash | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.036 (n=83, wrong 0.667) |
+| g0f_planck-g2-hash_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
+| g0f_planck-g2-hash_wikipedia | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.012 (n=83, wrong 0.800) |
+| g0f_planck-g2-planck | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.157 (n=83, wrong 0.480) |
+| g0f_planck-g2-planck_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
+| g0f_planck-g2-planck_wikipedia | fresh: 0.017 (n=60, wrong 0.900) | long_tail: 0.157 (n=83, wrong 0.188) |
+| g0f_planck-g2v2-hash | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.060 (n=83, wrong 0.167) |
+| g0f_planck-g2v2-hash_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.422 (n=83, wrong 0.167) |
+| g0f_planck-g2v2-hash_ddgs_quick | fresh: 0.333 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 1.000) |
+| g0f_planck-g2v2-planck | fresh: 0.017 (n=60, wrong 0.500) | long_tail: 0.133 (n=83, wrong 0.267) |
+| g0f_planck-g2v2-planck_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.506 (n=83, wrong 0.087) |
+| g0f_planck-g2v2-planck_ddgs_quick | fresh: 0.167 (n=6, wrong 0.500) | long_tail: 0.000 (n=6, wrong 0.000) |
+
+## G2 v2 heads (choice head + calibrated answerability gate)
+
+| head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
+|---|---|---|---|---|---|---|---|---|---|
+| g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
+| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
+| g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.529 | 0.176 | 0.485 | 0.420 | 0.532 | 0.200 | 0.500 (0.9) |
+| g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
+| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
+| g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.765 | 0.176 | 0.868 | 0.239 | 0.719 | 0.150 | 1.000 (0.9) |
+
+## G2 heads (learned from known answers)
+
+| head | train points | val points with a right candidate | learned choice accuracy | deterministic ranker | 'none' correct (points without one) | val ECE | answer accuracy when p >= 0.5 |
+|---|---|---|---|---|---|---|---|
+| g2_head_hash_s0 | 2546 | 126 | 0.476 | 0.365 | 0.856 (153) | 0.050 | 0.724 |
+| g2_head_planck_s0 | 2546 | 126 | 0.603 | 0.365 | 0.837 (153) | 0.057 | 0.708 |
+
+## G1 Wikiracing (g1_eval_s0)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.015 |
+| head:hash | 1192 | 0.146 | 1.251 | 0.580 | 0.085 | 0.632 |
+| head:planck-rank | 1192 | 0.271 | 1.282 | 0.635 | 0.112 | 0.458 |
+| head:planck | 1192 | 0.211 | 1.272 | 0.624 | 0.095 | 0.445 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 226.268 |
+
+Cold CPU latency (encode target + all candidate titles): median 95 ms, p90 553 ms, 50 candidates on average
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.163 | 0.337 | 0.49 | 21 | 73 | 6.65e-08 |
+| head:hash vs lexical | 1192 | 0.146 | 0.153 |  | 112 | 120 | 0.646 |
+| head:planck-rank vs gemma | 300 | 0.267 | 0.337 | 0.79 | 39 | 60 | 0.0439 |
+| head:planck-rank vs head:hash | 1192 | 0.271 | 0.146 |  | 222 | 73 | 1.21e-18 |
+| head:planck-rank vs lexical | 1192 | 0.271 | 0.153 |  | 227 | 86 | 8.04e-16 |
+| head:planck vs gemma | 300 | 0.177 | 0.337 | 0.52 | 24 | 72 | 9.7e-07 |
+| head:planck vs head:hash | 1192 | 0.211 | 0.146 |  | 161 | 84 | 9.88e-07 |
+| head:planck vs lexical | 1192 | 0.211 | 0.153 |  | 171 | 102 | 3.53e-05 |
+| head:planck-rank vs head:planck | 1192 | 0.271 | 0.211 |  | 174 | 102 | 1.73e-05 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.065 (McNemar p=9.88e-07); paired head/teacher = 0.52 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.49, head:planck-rank 0.79
+
+## G1 Wikiracing (g1_eval_s0_quick)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 100 | 0.000 |  | 0.190 | 0.105 | 0.000 |
+| lexical | 100 | 0.160 | 1.403 | 0.460 | 0.136 | 0.015 |
+| head:hash | 100 | 0.040 | 1.000 | 0.490 | 0.069 | 0.553 |
+| head:planck | 100 | 0.110 | 1.358 | 0.517 | 0.105 | 0.426 |
+| gemma | 20 | 0.200 | 1.250 |  |  | 272.297 |
+
+Cold CPU latency (encode target + all candidate titles): median 101 ms, p90 584 ms, 50 candidates on average
+
+**Verdict:** FAIL (try the Hertz encoder). planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+
+## G1 Wikiracing (g1_eval_s1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.013 |
+| head:hash | 1192 | 0.146 | 1.227 | 0.584 | 0.106 | 0.636 |
+| head:planck-rank | 1192 | 0.277 | 1.287 | 0.636 | 0.113 | 0.445 |
+| head:planck | 1192 | 0.247 | 1.299 | 0.628 | 0.102 | 0.426 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 238.269 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.127 | 0.337 | 0.38 | 14 | 77 | 1.05e-11 |
+| head:hash vs lexical | 1192 | 0.146 | 0.153 |  | 120 | 128 | 0.657 |
+| head:planck-rank vs gemma | 300 | 0.283 | 0.337 | 0.84 | 38 | 54 | 0.117 |
+| head:planck-rank vs head:hash | 1192 | 0.277 | 0.146 |  | 234 | 78 | 2.93e-19 |
+| head:planck-rank vs lexical | 1192 | 0.277 | 0.153 |  | 246 | 98 | 8.08e-16 |
+| head:planck vs gemma | 300 | 0.200 | 0.337 | 0.59 | 28 | 69 | 3.8e-05 |
+| head:planck vs head:hash | 1192 | 0.247 | 0.146 |  | 204 | 83 | 6.41e-13 |
+| head:planck vs lexical | 1192 | 0.247 | 0.153 |  | 218 | 105 | 3.06e-10 |
+| head:planck-rank vs head:planck | 1192 | 0.277 | 0.247 |  | 152 | 117 | 0.038 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.102 (McNemar p=6.41e-13); paired head/teacher = 0.59 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.38, head:planck-rank 0.84
+
+## G1 Wikiracing (g1_eval_s2)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.013 |
+| head:hash | 1192 | 0.138 | 1.283 | 0.580 | 0.082 | 0.620 |
+| head:planck-rank | 1192 | 0.270 | 1.310 | 0.632 | 0.104 | 0.431 |
+| head:planck | 1192 | 0.231 | 1.292 | 0.622 | 0.084 | 0.414 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 238.269 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.133 | 0.337 | 0.40 | 13 | 74 | 1.59e-11 |
+| head:hash vs lexical | 1192 | 0.138 | 0.153 |  | 103 | 121 | 0.256 |
+| head:planck-rank vs gemma | 300 | 0.240 | 0.337 | 0.71 | 34 | 63 | 0.00423 |
+| head:planck-rank vs head:hash | 1192 | 0.270 | 0.138 |  | 231 | 73 | 2.85e-20 |
+| head:planck-rank vs lexical | 1192 | 0.270 | 0.153 |  | 234 | 94 | 6.39e-15 |
+| head:planck vs gemma | 300 | 0.213 | 0.337 | 0.63 | 30 | 67 | 0.000219 |
+| head:planck vs head:hash | 1192 | 0.231 | 0.138 |  | 200 | 89 | 5.71e-11 |
+| head:planck vs lexical | 1192 | 0.231 | 0.153 |  | 196 | 103 | 8.21e-08 |
+| head:planck-rank vs head:planck | 1192 | 0.270 | 0.231 |  | 141 | 94 | 0.00262 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.093 (McNemar p=5.71e-11); paired head/teacher = 0.63 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.40, head:planck-rank 0.71
+
+## G1 Wikiracing (g1_eval_s3_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.016 |
+| head:hash | 1200 | 0.108 | 1.208 | 0.580 | 0.105 | 0.560 |
+| head:hertz-rank | 1200 | 0.247 | 1.296 | 0.642 | 0.118 | 0.712 |
+| head:hertz | 1200 | 0.190 | 1.312 | 0.626 | 0.094 | 0.688 |
+| head:planck-rank | 1200 | 0.235 | 1.275 | 0.636 | 0.104 | 0.434 |
+| head:planck | 1200 | 0.224 | 1.288 | 0.635 | 0.112 | 0.417 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+Cold CPU latency (encode target + all candidate titles): median 83 ms, p90 286 ms, 20 candidates on average
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.093 | 0.337 | 0.28 | 11 | 84 | 4.52e-15 |
+| head:hash vs lexical | 1200 | 0.108 | 0.144 |  | 80 | 123 | 0.0031 |
+| head:hertz-rank vs gemma | 300 | 0.237 | 0.337 | 0.70 | 28 | 58 | 0.00161 |
+| head:hertz-rank vs head:hash | 1200 | 0.247 | 0.108 |  | 236 | 69 | 1.57e-22 |
+| head:hertz-rank vs lexical | 1200 | 0.247 | 0.144 |  | 213 | 89 | 6.97e-13 |
+| head:hertz vs gemma | 300 | 0.133 | 0.337 | 0.40 | 17 | 78 | 1.64e-10 |
+| head:hertz vs head:hash | 1200 | 0.190 | 0.108 |  | 176 | 78 | 7.17e-10 |
+| head:hertz vs lexical | 1200 | 0.190 | 0.144 |  | 156 | 101 | 0.000725 |
+| head:planck-rank vs gemma | 300 | 0.227 | 0.337 | 0.67 | 23 | 56 | 0.000264 |
+| head:planck-rank vs head:hash | 1200 | 0.235 | 0.108 |  | 215 | 63 | 1.35e-20 |
+| head:planck-rank vs lexical | 1200 | 0.235 | 0.144 |  | 198 | 89 | 1.1e-10 |
+| head:planck vs gemma | 300 | 0.220 | 0.337 | 0.65 | 25 | 60 | 0.000187 |
+| head:planck vs head:hash | 1200 | 0.224 | 0.108 |  | 198 | 59 | 9.81e-19 |
+| head:planck vs lexical | 1200 | 0.224 | 0.144 |  | 180 | 84 | 3.4e-09 |
+| head:planck-rank vs head:planck | 1200 | 0.235 | 0.224 |  | 134 | 121 | 0.452 |
+| head:hertz vs head:planck | 1200 | 0.190 | 0.224 |  | 89 | 130 | 0.00674 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.247 | 0.235 |  | 140 | 125 | 0.39 |
+
+**Verdict:** FAIL. head:planck-rank-vs-hash +0.127 (McNemar p=1.35e-20); paired head/teacher = 0.67 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.28, head:hertz-rank 0.70, head:hertz 0.40, head:planck 0.65
+
+## G1 Wikiracing (g1_eval_s4_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
+| head:hash | 1200 | 0.111 | 1.239 | 0.587 | 0.120 | 0.624 |
+| head:hertz-rank | 1200 | 0.239 | 1.288 | 0.644 | 0.103 | 0.686 |
+| head:hertz | 1200 | 0.208 | 1.305 | 0.621 | 0.096 | 0.659 |
+| head:planck-rank | 1200 | 0.230 | 1.296 | 0.633 | 0.102 | 0.393 |
+| head:planck | 1200 | 0.207 | 1.253 | 0.632 | 0.090 | 0.395 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.080 | 0.337 | 0.24 | 8 | 85 | 2.26e-17 |
+| head:hash vs lexical | 1200 | 0.111 | 0.144 |  | 83 | 123 | 0.00644 |
+| head:hertz-rank vs gemma | 300 | 0.243 | 0.337 | 0.72 | 33 | 61 | 0.00508 |
+| head:hertz-rank vs head:hash | 1200 | 0.239 | 0.111 |  | 214 | 60 | 1.86e-21 |
+| head:hertz-rank vs lexical | 1200 | 0.239 | 0.144 |  | 198 | 84 | 8.94e-12 |
+| head:hertz vs gemma | 300 | 0.163 | 0.337 | 0.49 | 25 | 77 | 2.45e-07 |
+| head:hertz vs head:hash | 1200 | 0.208 | 0.111 |  | 189 | 72 | 2.77e-13 |
+| head:hertz vs lexical | 1200 | 0.208 | 0.144 |  | 178 | 101 | 4.71e-06 |
+| head:planck-rank vs gemma | 300 | 0.270 | 0.337 | 0.80 | 34 | 54 | 0.0422 |
+| head:planck-rank vs head:hash | 1200 | 0.230 | 0.111 |  | 208 | 65 | 1.28e-18 |
+| head:planck-rank vs lexical | 1200 | 0.230 | 0.144 |  | 187 | 84 | 3.58e-10 |
+| head:planck vs gemma | 300 | 0.230 | 0.337 | 0.68 | 21 | 53 | 0.000256 |
+| head:planck vs head:hash | 1200 | 0.207 | 0.111 |  | 185 | 69 | 2.03e-13 |
+| head:planck vs lexical | 1200 | 0.207 | 0.144 |  | 173 | 97 | 4.37e-06 |
+| head:planck-rank vs head:planck | 1200 | 0.230 | 0.207 |  | 111 | 84 | 0.0623 |
+| head:hertz vs head:planck | 1200 | 0.208 | 0.207 |  | 124 | 123 | 1 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.239 | 0.230 |  | 122 | 111 | 0.512 |
+
+**Verdict:** PASS. head:planck-rank-vs-hash +0.119 (McNemar p=1.28e-18); paired head/teacher = 0.80 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.72, head:hertz 0.49, head:planck 0.68
+
+## G1 Wikiracing (g1_eval_s5_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
+| head:hash | 1200 | 0.102 | 1.221 | 0.580 | 0.118 | 0.520 |
+| head:hertz-rank | 1200 | 0.225 | 1.270 | 0.641 | 0.126 | 0.658 |
+| head:hertz | 1200 | 0.196 | 1.248 | 0.634 | 0.088 | 0.653 |
+| head:planck-rank | 1200 | 0.241 | 1.322 | 0.635 | 0.099 | 0.414 |
+| head:planck | 1200 | 0.223 | 1.306 | 0.629 | 0.095 | 0.406 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.080 | 0.337 | 0.24 | 8 | 85 | 2.26e-17 |
+| head:hash vs lexical | 1200 | 0.102 | 0.144 |  | 64 | 115 | 0.00017 |
+| head:hertz-rank vs gemma | 300 | 0.230 | 0.337 | 0.68 | 33 | 65 | 0.0016 |
+| head:hertz-rank vs head:hash | 1200 | 0.225 | 0.102 |  | 209 | 61 | 3.86e-20 |
+| head:hertz-rank vs lexical | 1200 | 0.225 | 0.144 |  | 187 | 90 | 5.65e-09 |
+| head:hertz vs gemma | 300 | 0.173 | 0.337 | 0.51 | 27 | 76 | 1.45e-06 |
+| head:hertz vs head:hash | 1200 | 0.196 | 0.102 |  | 182 | 69 | 6.31e-13 |
+| head:hertz vs lexical | 1200 | 0.196 | 0.144 |  | 161 | 99 | 0.000145 |
+| head:planck-rank vs gemma | 300 | 0.223 | 0.337 | 0.66 | 34 | 68 | 0.000987 |
+| head:planck-rank vs head:hash | 1200 | 0.241 | 0.102 |  | 224 | 57 | 1.43e-24 |
+| head:planck-rank vs lexical | 1200 | 0.241 | 0.144 |  | 206 | 90 | 1.28e-11 |
+| head:planck vs gemma | 300 | 0.183 | 0.337 | 0.54 | 24 | 70 | 2.2e-06 |
+| head:planck vs head:hash | 1200 | 0.223 | 0.102 |  | 213 | 67 | 6.81e-19 |
+| head:planck vs lexical | 1200 | 0.223 | 0.144 |  | 193 | 98 | 2.72e-08 |
+| head:planck-rank vs head:planck | 1200 | 0.241 | 0.223 |  | 126 | 105 | 0.188 |
+| head:hertz vs head:planck | 1200 | 0.196 | 0.223 |  | 112 | 145 | 0.0457 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.225 | 0.241 |  | 124 | 143 | 0.271 |
+
+**Verdict:** FAIL. head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.68, head:hertz 0.51, head:planck 0.54
+
+## G1 across seeds (g1_aggregate: seeds [0, 1, 2])
+
+| policy | mean rollout success | sd | 95% CI | per seed |
+|---|---|---|---|---|
+| gemma | 0.337 | 0.000 | [0.337, 0.337] | 0.337, 0.337, 0.337 |
+| head:hash | 0.143 | 0.005 | [0.131, 0.155] | 0.146, 0.146, 0.138 |
+| head:planck | 0.230 | 0.018 | [0.184, 0.276] | 0.211, 0.247, 0.231 |
+| head:planck-rank | 0.273 | 0.004 | [0.264, 0.282] | 0.271, 0.277, 0.270 |
+| lexical | 0.153 | 0.000 | [0.153, 0.153] | 0.153, 0.153, 0.153 |
+| random | 0.001 | 0.000 | [0.001, 0.001] | 0.001, 0.001, 0.001 |
+
+head:hash: paired ratio vs teacher 0.42 (per seed 0.49, 0.38, 0.40)
+
+head:planck: paired ratio vs teacher 0.58 (per seed 0.52, 0.59, 0.63)
+
+head:planck-rank: paired ratio vs teacher 0.78 (per seed 0.79, 0.84, 0.71)
+
+**Verdict (seeds):** FAIL. mean paired head:planck/teacher = 0.58 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
+
+## G1 across seeds (g1_aggregate_t1: seeds [3, 4, 5])
+
+| policy | mean rollout success | sd | 95% CI | per seed |
+|---|---|---|---|---|
+| gemma | 0.337 | 0.000 | [0.337, 0.337] | 0.337, 0.337, 0.337 |
+| head:hash | 0.107 | 0.005 | [0.095, 0.119] | 0.108, 0.111, 0.102 |
+| head:hertz | 0.198 | 0.009 | [0.175, 0.221] | 0.190, 0.208, 0.196 |
+| head:hertz-rank | 0.237 | 0.011 | [0.209, 0.265] | 0.247, 0.239, 0.225 |
+| head:planck | 0.218 | 0.009 | [0.195, 0.242] | 0.224, 0.207, 0.223 |
+| head:planck-rank | 0.235 | 0.005 | [0.222, 0.249] | 0.235, 0.230, 0.241 |
+| lexical | 0.144 | 0.000 | [0.144, 0.144] | 0.144, 0.144, 0.144 |
+| random | 0.001 | 0.000 | [0.001, 0.001] | 0.001, 0.001, 0.001 |
+
+head:hash: paired ratio vs teacher 0.25 (per seed 0.28, 0.24, 0.24)
+
+head:hertz: paired ratio vs teacher 0.47 (per seed 0.40, 0.49, 0.51)
+
+head:hertz-rank: paired ratio vs teacher 0.70 (per seed 0.70, 0.72, 0.68)
+
+head:planck: paired ratio vs teacher 0.63 (per seed 0.65, 0.68, 0.54)
+
+head:planck-rank: paired ratio vs teacher 0.71 (per seed 0.67, 0.80, 0.66)
+
+**Verdict (seeds):** FAIL. mean paired head:planck-rank/teacher = 0.71 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
+
+[planck3 00:53:21] round4 finished in 142 min
+[planck3 00:53:21] committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)

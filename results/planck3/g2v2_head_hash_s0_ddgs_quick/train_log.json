@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "encoder": "hash",
+  "seed": 0,
+  "points": "data\\planck3\\g2\\points_ddgs_quick.jsonl",
+  "n_questions": 100,
+  "n_train_points": 135,
+  "n_val_points": 20,
+  "n_test_points": 20,
+  "temperature": 1.6420697277771137,
+  "tau": 0.5316061759968852,
+  "gate_precision_target": 0.9,
+  "test_choice_acc": 0.5294117647058824,
+  "test_ranker_acc": 0.17647058823529413,
+  "test_points_with_gold": 17,
+  "test_gate_auc": 0.4848484848484848,
+  "test_gate_ece": 0.42021299647475335,
+  "val_at_tau": {
+    "coverage": 0.2,
+    "precision": 1.0
+  },
+  "test_at_tau": {
+    "coverage": 0.2,
+    "precision": 0.5
+  },
+  "test_base_rate": 0.45,
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_nll": 3.9707289934158325,
+      "val_choice_acc": 0.23076923076923078
+    },
+    {
+      "epoch": 1,
+      "train_nll": 3.0765753984451294,
+      "val_choice_acc": 0.3076923076923077
+    },
+    {
+      "epoch": 2,
+      "train_nll": 1.808372050523758,
+      "val_choice_acc": 0.3076923076923077
+    },
+    {
+      "epoch": 3,
+      "train_nll": 0.942071795463562,
+      "val_choice_acc": 0.38461538461538464
+    },
+    {
+      "epoch": 4,
+      "train_nll": 0.627519279718399,
+      "val_choice_acc": 0.23076923076923078
+    },
+    {
+      "epoch": 5,
+      "train_nll": 0.2851371392607689,
+      "val_choice_acc": 0.23076923076923078
+    },
+    {
+      "epoch": 6,
+      "train_nll": 0.12708312552422285,
+      "val_choice_acc": 0.15384615384615385
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "n": 143,
+  "success": 0.6013986013986014,
+  "answered_rate": 0.7972027972027972,
+  "wrong_when_answered": 0.24561403508771928,
+  "abstain_rate": 0.2027972027972028,
+  "ece": 0.1767543859649122,
+  "mean_steps": 3.370629370629371,
+  "mean_web_calls": 2.174825174825175,
+  "mean_decision_ms": 2334.0661338181717,
+  "by_family": {
+    "chat": {
+      "n": 8,
+      "success": 0.5
+    },
+    "fact": {
+      "n": 135,
+      "success": 0.6074074074074074
+    }
+  },
+  "by_regime": {
+    "fresh": {
+      "n": 60,
+      "success": 0.5666666666666667,
+      "wrong_when_answered": 0.24444444444444444
+    },
+    "long_tail": {
+      "n": 83,
+      "success": 0.6265060240963856,
+      "wrong_when_answered": 0.2463768115942029
+    }
+  },
+  "policy": "gemma",
+  "search": "ddgs",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json",
+  "system_trust_domains": 0,
+  "n_invalid_decisions": 23,
+  "gold_reachable": 0.9090909090909091,
+  "serp_answer_rate_at3": 0.8461538461538461,
+  "depth_evidence_recall": 0.8391608391608392,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 1.118881118881119,
+  "mean_answer_fetches": 0.06293706293706294,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.7972027972027972,
+  "gated_rate": 0.006993006993006993,
+  "gated_would_be_correct": 0,
+  "tiers": {
+    "confident": {
+      "n": 114,
+      "rate": 0.7972027972027972,
+      "precision": 0.7543859649122807,
+      "evidence_recall": 0.8771929824561403
+    },
+    "low_confidence": {
+      "n": 29,
+      "rate": 0.20279720279720279,
+      "precision": 0.3793103448275862,
+      "evidence_recall": 0.6896551724137931
+    },
+    "none": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    }
+  },
+  "graph": {
+    "facts": 122,
+    "passages": 786,
+    "entities": 1733,
+    "edges": 1825,
+    "queries": 151,
+    "domains": 82
+  },
+  "cost": {
+    "usd_per_task": 0.00392234965034965,
+    "usd_per_correct": 0.006522046511627907,
+    "usd_per_1k_tasks": 3.92234965034965,
+    "llm_tokens_per_task": 3634.6853146853146,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 151,
+    "fetch": 160,
+    "search_net": 26,
+    "fetch_net": 22,
+    "search_empty_primary": 3,
+    "search_fallback": 1,
+    "search_empty_final": 0,
+    "search_ratelimited": 0,
+    "served_ddgs": 150,
+    "served_wikipedia": 1
+  },
+  "search_health": {
+    "searches": 151,
+    "primary_empty_rate": 0.019867549668874173,
+    "fallback_rate": 0.006622516556291391,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 150,
+      "wikipedia": 1
+    },
+    "primary_share": 0.9933774834437086,
+    "valid": true
+  },
+  "wall_s": 1200.5,
+  "store_facts": 122,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.962,
+      24.5
+    ],
+    [
+      "grokipedia.com",
+      0.947,
+      17.0
+    ],
+    [
+      "tracxn.com",
+      0.8,
+      3.0
+    ],
+    [
+      "memesita.com",
+      0.714,
+      1.5
+    ],
+    [
+      "cyclingflash.com",
+      0.714,
+      1.5
+    ],
+    [
+      "youtube.com",
+      0.714,
+      1.5
+    ],
+    [
+      "sundayguardianlive.com",
+      0.714,
+      1.5
+    ],
+    [
+      "sport-histoire.fr",
+      0.714,
+      1.5
+    ]
+  ],
+  "gate": {
+    "verdict": "ROUND 4 (rules S/P)",
+    "note": "ddgs search + answer tiers: judged by SETUP_planck_20261008.md section 3"
+  }
+}

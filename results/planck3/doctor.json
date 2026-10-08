@@ -44,6 +44,12 @@
     },
     {
       "status": "OK",
+      "check": "ddgs",
+      "detail": "9.16.0",
+      "fix": ""
+    },
+    {
+      "status": "OK",
       "check": "transformers",
       "detail": "5.12.1",
       "fix": ""
@@ -57,7 +63,7 @@
     {
       "status": "OK",
       "check": "disk free",
-      "detail": "661 GB",
+      "detail": "659 GB",
       "fix": ""
     },
     {
@@ -80,8 +86,20 @@
     },
     {
       "status": "OK",
+      "check": "ddgs",
+      "detail": "9.16.0 answering",
+      "fix": ""
+    },
+    {
+      "status": "OK",
+      "check": "brave api key",
+      "detail": "set (from .env or the environment); live check: planck3.py search-check --backend brave",
+      "fix": ""
+    },
+    {
+      "status": "OK",
       "check": "searxng",
-      "detail": "http://localhost:8888 up",
+      "detail": "not running (optional since round 4: ddgs is the search of record)",
       "fix": ""
     },
     {
@@ -93,7 +111,7 @@
     {
       "status": "OK",
       "check": "planck embed speed",
-      "detail": "10,180 texts/s on cuda (~28 s for the G1 graph)",
+      "detail": "8,465 texts/s on cuda (~34 s for the G1 graph)",
       "fix": ""
     },
     {
@@ -111,20 +129,20 @@
     {
       "status": "OK",
       "check": "gemma typed decisions",
-      "detail": "3/3 valid, 1538 ms/decision",
+      "detail": "3/3 valid, 2513 ms/decision",
       "fix": ""
     },
     {
       "status": "OK",
       "check": "gemma closed-book",
-      "detail": "'1943' in 376 ms",
+      "detail": "'1943' in 583 ms",
       "fix": ""
     }
   ],
   "measured": {
-    "planck_embed_s_per_text": 9.82285156396756e-05,
-    "gemma_ms_per_decision": 1537.8312000151102,
-    "gemma_ms_closed_book": 376.2629999546334
+    "planck_embed_s_per_text": 0.0001181355469270784,
+    "gemma_ms_per_decision": 2513.434433300669,
+    "gemma_ms_closed_book": 583.0383999273181
   },
   "eta": [
     [
@@ -133,11 +151,11 @@
     ],
     [
       "g0 teacher (Gemma on tools)",
-      "~9 min"
+      "~13 min"
     ],
     [
       "g0 closed-book (base-chat rival)",
-      "~23 s"
+      "~36 s"
     ],
     [
       "g0 heuristic floor",
@@ -149,7 +167,7 @@
     ],
     [
       "g1 planck embed",
-      "~28 s"
+      "~34 s"
     ],
     [
       "g1 train heads",
@@ -157,7 +175,7 @@
     ],
     [
       "g1 eval incl. Gemma teacher",
-      "~6 min"
+      "~8 min"
     ]
   ]
 }

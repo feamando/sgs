@@ -1,6 +1,1662 @@
 {
-  "_note": "System layer of source trust (src/planck3/trust.py). Empty until built on the box from the G2 training points: .\\scripts\\planck3.ps1 round4 runs `planck3.py trust build` and commits this file. Empty = every domain starts at 0.5, the pre-round-4 behaviour.",
-  "built_at": null,
-  "built_from": [],
-  "domains": {}
+  "_note": "System layer of source trust (src/planck3/trust.py). Measured on the G2 training questions (disjoint from every benchmark), never hand-edited. Counts are capped at 20 so a user's own signals can outvote it.",
+  "built_at": "2026-10-08T22:43:03Z",
+  "built_from": [
+    "points_ddgs.jsonl"
+  ],
+  "min_n": 3,
+  "domains": {
+    "en.wikipedia.org": {
+      "a": 16.901,
+      "b": 3.099,
+      "n": 1108,
+      "right": 937,
+      "rate": 0.846
+    },
+    "grokipedia.com": {
+      "a": 17.753,
+      "b": 2.247,
+      "n": 363,
+      "right": 323,
+      "rate": 0.89
+    },
+    "wikiwand.com": {
+      "a": 15.578,
+      "b": 4.422,
+      "n": 292,
+      "right": 228,
+      "rate": 0.781
+    },
+    "everything.explained.today": {
+      "a": 15.668,
+      "b": 4.332,
+      "n": 215,
+      "right": 169,
+      "rate": 0.786
+    },
+    "de.wikipedia.org": {
+      "a": 14.178,
+      "b": 5.822,
+      "n": 211,
+      "right": 150,
+      "rate": 0.711
+    },
+    "transfermarkt.com": {
+      "a": 14.815,
+      "b": 5.185,
+      "n": 79,
+      "right": 59,
+      "rate": 0.747
+    },
+    "no.wikipedia.org": {
+      "a": 13.6,
+      "b": 6.4,
+      "n": 73,
+      "right": 50,
+      "rate": 0.685
+    },
+    "peakvisor.com": {
+      "a": 16.486,
+      "b": 3.514,
+      "n": 72,
+      "right": 60,
+      "rate": 0.833
+    },
+    "sv.wikipedia.org": {
+      "a": 14.118,
+      "b": 5.882,
+      "n": 66,
+      "right": 47,
+      "rate": 0.712
+    },
+    "goodreads.com": {
+      "a": 17.015,
+      "b": 2.985,
+      "n": 65,
+      "right": 56,
+      "rate": 0.862
+    },
+    "mapcarta.com": {
+      "a": 16.923,
+      "b": 3.077,
+      "n": 63,
+      "right": 54,
+      "rate": 0.857
+    },
+    "reference.org": {
+      "a": 14.915,
+      "b": 5.085,
+      "n": 57,
+      "right": 43,
+      "rate": 0.754
+    },
+    "bbc.com": {
+      "a": 5.357,
+      "b": 14.643,
+      "n": 54,
+      "right": 14,
+      "rate": 0.259
+    },
+    "bbc.co.uk": {
+      "a": 4.074,
+      "b": 15.926,
+      "n": 52,
+      "right": 10,
+      "rate": 0.192
+    },
+    "wikidata.org": {
+      "a": 15.294,
+      "b": 4.706,
+      "n": 49,
+      "right": 38,
+      "rate": 0.776
+    },
+    "dbpedia.org": {
+      "a": 16.0,
+      "b": 4.0,
+      "n": 48,
+      "right": 39,
+      "rate": 0.812
+    },
+    "tracxn.com": {
+      "a": 13.2,
+      "b": 6.8,
+      "n": 48,
+      "right": 32,
+      "rate": 0.667
+    },
+    "es.wikipedia.org": {
+      "a": 11.628,
+      "b": 8.372,
+      "n": 41,
+      "right": 24,
+      "rate": 0.585
+    },
+    "en-academic.com": {
+      "a": 16.667,
+      "b": 3.333,
+      "n": 40,
+      "right": 34,
+      "rate": 0.85
+    },
+    "nl.wikipedia.org": {
+      "a": 14.634,
+      "b": 5.366,
+      "n": 39,
+      "right": 29,
+      "rate": 0.744
+    },
+    "fr.wikipedia.org": {
+      "a": 9.231,
+      "b": 10.769,
+      "n": 37,
+      "right": 17,
+      "rate": 0.459
+    },
+    "entityfacts.com": {
+      "a": 18.974,
+      "b": 1.026,
+      "n": 37,
+      "right": 36,
+      "rate": 0.973
+    },
+    "books.google.com": {
+      "a": 14.872,
+      "b": 5.128,
+      "n": 37,
+      "right": 28,
+      "rate": 0.757
+    },
+    "football.fandom.com": {
+      "a": 13.889,
+      "b": 6.111,
+      "n": 34,
+      "right": 24,
+      "rate": 0.706
+    },
+    "britannica.com": {
+      "a": 16.25,
+      "b": 3.75,
+      "n": 30,
+      "right": 25,
+      "rate": 0.833
+    },
+    "footballdatabase.eu": {
+      "a": 12.667,
+      "b": 7.333,
+      "n": 28,
+      "right": 18,
+      "rate": 0.643
+    },
+    "fi.wikipedia.org": {
+      "a": 13.103,
+      "b": 6.897,
+      "n": 27,
+      "right": 18,
+      "rate": 0.667
+    },
+    "wtatennis.com": {
+      "a": 3.571,
+      "b": 16.429,
+      "n": 26,
+      "right": 4,
+      "rate": 0.154
+    },
+    "cs.wikipedia.org": {
+      "a": 11.852,
+      "b": 8.148,
+      "n": 25,
+      "right": 15,
+      "rate": 0.6
+    },
+    "formula1.com": {
+      "a": 6.923,
+      "b": 13.077,
+      "n": 24,
+      "right": 8,
+      "rate": 0.333
+    },
+    "it.wikipedia.org": {
+      "a": 13.077,
+      "b": 6.923,
+      "n": 24,
+      "right": 16,
+      "rate": 0.667
+    },
+    "mapy.com": {
+      "a": 16.923,
+      "b": 3.077,
+      "n": 24,
+      "right": 21,
+      "rate": 0.875
+    },
+    "espn.com": {
+      "a": 13.6,
+      "b": 6.4,
+      "n": 23,
+      "right": 16,
+      "rate": 0.696
+    },
+    "formula1archive.com": {
+      "a": 19.167,
+      "b": 0.833,
+      "n": 22,
+      "right": 22,
+      "rate": 1.0
+    },
+    "olympics.com": {
+      "a": 5.0,
+      "b": 15.0,
+      "n": 22,
+      "right": 5,
+      "rate": 0.227
+    },
+    "flashscore.com": {
+      "a": 0.833,
+      "b": 19.167,
+      "n": 22,
+      "right": 0,
+      "rate": 0.0
+    },
+    "britain.votes.now": {
+      "a": 5.0,
+      "b": 15.0,
+      "n": 22,
+      "right": 5,
+      "rate": 0.227
+    },
+    "thecompanycheck.com": {
+      "a": 12.5,
+      "b": 7.5,
+      "n": 22,
+      "right": 14,
+      "rate": 0.636
+    },
+    "f1-fansite.com": {
+      "a": 14.783,
+      "b": 5.217,
+      "n": 21,
+      "right": 16,
+      "rate": 0.762
+    },
+    "company-histories.com": {
+      "a": 11.304,
+      "b": 8.696,
+      "n": 21,
+      "right": 12,
+      "rate": 0.571
+    },
+    "nn.wikipedia.org": {
+      "a": 16.522,
+      "b": 3.478,
+      "n": 21,
+      "right": 18,
+      "rate": 0.857
+    },
+    "simple.wikipedia.org": {
+      "a": 17.273,
+      "b": 2.727,
+      "n": 20,
+      "right": 18,
+      "rate": 0.9
+    },
+    "founders.io": {
+      "a": 18.182,
+      "b": 1.818,
+      "n": 20,
+      "right": 19,
+      "rate": 0.95
+    },
+    "cbinsights.com": {
+      "a": 12.727,
+      "b": 7.273,
+      "n": 20,
+      "right": 13,
+      "rate": 0.65
+    },
+    "bleacherreport.com": {
+      "a": 16.19,
+      "b": 3.81,
+      "n": 19,
+      "right": 16,
+      "rate": 0.842
+    },
+    "youtube.com": {
+      "a": 17.0,
+      "b": 3.0,
+      "n": 18,
+      "right": 16,
+      "rate": 0.889
+    },
+    "summitpost.org": {
+      "a": 16.0,
+      "b": 4.0,
+      "n": 18,
+      "right": 15,
+      "rate": 0.833
+    },
+    "aroundus.com": {
+      "a": 18.0,
+      "b": 2.0,
+      "n": 18,
+      "right": 17,
+      "rate": 0.944
+    },
+    "alchetron.com": {
+      "a": 16.0,
+      "b": 3.0,
+      "n": 17,
+      "right": 15,
+      "rate": 0.882
+    },
+    "baike.baidu.com": {
+      "a": 15.0,
+      "b": 4.0,
+      "n": 17,
+      "right": 14,
+      "rate": 0.824
+    },
+    "alltrails.com": {
+      "a": 16.0,
+      "b": 2.0,
+      "n": 16,
+      "right": 15,
+      "rate": 0.938
+    },
+    "pitchbook.com": {
+      "a": 15.0,
+      "b": 2.0,
+      "n": 15,
+      "right": 14,
+      "rate": 0.933
+    },
+    "worldmeasure.com": {
+      "a": 13.0,
+      "b": 4.0,
+      "n": 15,
+      "right": 12,
+      "rate": 0.8
+    },
+    "uselectionatlas.org": {
+      "a": 1.0,
+      "b": 15.0,
+      "n": 14,
+      "right": 0,
+      "rate": 0.0
+    },
+    "amazon.com": {
+      "a": 15.0,
+      "b": 1.0,
+      "n": 14,
+      "right": 14,
+      "rate": 1.0
+    },
+    "uefa.com": {
+      "a": 12.0,
+      "b": 3.0,
+      "n": 13,
+      "right": 11,
+      "rate": 0.846
+    },
+    "the-sports.org": {
+      "a": 4.0,
+      "b": 11.0,
+      "n": 13,
+      "right": 3,
+      "rate": 0.231
+    },
+    "celebrity-birthdays.com": {
+      "a": 14.0,
+      "b": 1.0,
+      "n": 13,
+      "right": 13,
+      "rate": 1.0
+    },
+    "mountain-forecast.com": {
+      "a": 8.0,
+      "b": 7.0,
+      "n": 13,
+      "right": 7,
+      "rate": 0.538
+    },
+    "electionresults.uk": {
+      "a": 1.0,
+      "b": 13.0,
+      "n": 12,
+      "right": 0,
+      "rate": 0.0
+    },
+    "andrewteale.me.uk": {
+      "a": 1.0,
+      "b": 13.0,
+      "n": 12,
+      "right": 0,
+      "rate": 0.0
+    },
+    "financecharts.com": {
+      "a": 11.0,
+      "b": 3.0,
+      "n": 12,
+      "right": 10,
+      "rate": 0.833
+    },
+    "da.wikipedia.org": {
+      "a": 11.0,
+      "b": 3.0,
+      "n": 12,
+      "right": 10,
+      "rate": 0.833
+    },
+    "stockanalysis.com": {
+      "a": 10.0,
+      "b": 4.0,
+      "n": 12,
+      "right": 9,
+      "rate": 0.75
+    },
+    "snl.no": {
+      "a": 5.0,
+      "b": 9.0,
+      "n": 12,
+      "right": 4,
+      "rate": 0.333
+    },
+    "peoplepill.com": {
+      "a": 11.0,
+      "b": 3.0,
+      "n": 12,
+      "right": 10,
+      "rate": 0.833
+    },
+    "peakery.com": {
+      "a": 9.0,
+      "b": 5.0,
+      "n": 12,
+      "right": 8,
+      "rate": 0.667
+    },
+    "theguardian.com": {
+      "a": 9.0,
+      "b": 4.0,
+      "n": 11,
+      "right": 8,
+      "rate": 0.727
+    },
+    "justapedia.org": {
+      "a": 6.0,
+      "b": 7.0,
+      "n": 11,
+      "right": 5,
+      "rate": 0.455
+    },
+    "tennis-db.com": {
+      "a": 11.0,
+      "b": 2.0,
+      "n": 11,
+      "right": 10,
+      "rate": 0.909
+    },
+    "handwiki.org": {
+      "a": 11.0,
+      "b": 2.0,
+      "n": 11,
+      "right": 10,
+      "rate": 0.909
+    },
+    "cyclingnews.com": {
+      "a": 5.0,
+      "b": 7.0,
+      "n": 10,
+      "right": 4,
+      "rate": 0.4
+    },
+    "cnn.com": {
+      "a": 10.0,
+      "b": 2.0,
+      "n": 10,
+      "right": 9,
+      "rate": 0.9
+    },
+    "topendsports.com": {
+      "a": 7.0,
+      "b": 5.0,
+      "n": 10,
+      "right": 6,
+      "rate": 0.6
+    },
+    "pt.wikipedia.org": {
+      "a": 5.0,
+      "b": 7.0,
+      "n": 10,
+      "right": 4,
+      "rate": 0.4
+    },
+    "transfermarkt.us": {
+      "a": 9.0,
+      "b": 3.0,
+      "n": 10,
+      "right": 8,
+      "rate": 0.8
+    },
+    "emis.com": {
+      "a": 9.0,
+      "b": 3.0,
+      "n": 10,
+      "right": 8,
+      "rate": 0.8
+    },
+    "prabook.com": {
+      "a": 4.0,
+      "b": 8.0,
+      "n": 10,
+      "right": 3,
+      "rate": 0.3
+    },
+    "imdb.com": {
+      "a": 10.0,
+      "b": 2.0,
+      "n": 10,
+      "right": 9,
+      "rate": 0.9
+    },
+    "mountainplanet.com": {
+      "a": 2.0,
+      "b": 10.0,
+      "n": 10,
+      "right": 1,
+      "rate": 0.1
+    },
+    "racefans.net": {
+      "a": 5.0,
+      "b": 6.0,
+      "n": 9,
+      "right": 4,
+      "rate": 0.444
+    },
+    "wiki2.org": {
+      "a": 7.0,
+      "b": 4.0,
+      "n": 9,
+      "right": 6,
+      "rate": 0.667
+    },
+    "nytimes.com": {
+      "a": 3.0,
+      "b": 8.0,
+      "n": 9,
+      "right": 2,
+      "rate": 0.222
+    },
+    "forbes.com": {
+      "a": 8.0,
+      "b": 3.0,
+      "n": 9,
+      "right": 7,
+      "rate": 0.778
+    },
+    "companieshistory.com": {
+      "a": 9.0,
+      "b": 2.0,
+      "n": 9,
+      "right": 8,
+      "rate": 0.889
+    },
+    "bornglorious.com": {
+      "a": 10.0,
+      "b": 1.0,
+      "n": 9,
+      "right": 9,
+      "rate": 1.0
+    },
+    "stortinget.no": {
+      "a": 6.0,
+      "b": 5.0,
+      "n": 9,
+      "right": 5,
+      "rate": 0.556
+    },
+    "gutenberg.org": {
+      "a": 10.0,
+      "b": 1.0,
+      "n": 9,
+      "right": 9,
+      "rate": 1.0
+    },
+    "procyclingstats.com": {
+      "a": 8.0,
+      "b": 2.0,
+      "n": 8,
+      "right": 7,
+      "rate": 0.875
+    },
+    "rocketreach.co": {
+      "a": 7.0,
+      "b": 3.0,
+      "n": 8,
+      "right": 6,
+      "rate": 0.75
+    },
+    "mergr.com": {
+      "a": 6.0,
+      "b": 4.0,
+      "n": 8,
+      "right": 5,
+      "rate": 0.625
+    },
+    "en-us.topographic-map.com": {
+      "a": 5.0,
+      "b": 5.0,
+      "n": 8,
+      "right": 4,
+      "rate": 0.5
+    },
+    "peakbook.org": {
+      "a": 8.0,
+      "b": 2.0,
+      "n": 8,
+      "right": 7,
+      "rate": 0.875
+    },
+    "notablepeopleproject.org": {
+      "a": 9.0,
+      "b": 1.0,
+      "n": 8,
+      "right": 8,
+      "rate": 1.0
+    },
+    "archive.org": {
+      "a": 8.0,
+      "b": 2.0,
+      "n": 8,
+      "right": 7,
+      "rate": 0.875
+    },
+    "penguin.co.uk": {
+      "a": 9.0,
+      "b": 1.0,
+      "n": 8,
+      "right": 8,
+      "rate": 1.0
+    },
+    "si.com": {
+      "a": 6.0,
+      "b": 3.0,
+      "n": 7,
+      "right": 5,
+      "rate": 0.714
+    },
+    "f1.fandom.com": {
+      "a": 7.0,
+      "b": 2.0,
+      "n": 7,
+      "right": 6,
+      "rate": 0.857
+    },
+    "famousfix.com": {
+      "a": 4.0,
+      "b": 5.0,
+      "n": 7,
+      "right": 3,
+      "rate": 0.429
+    },
+    "civicsmatter.com": {
+      "a": 1.0,
+      "b": 8.0,
+      "n": 7,
+      "right": 0,
+      "rate": 0.0
+    },
+    "transfermarkt.co.uk": {
+      "a": 5.0,
+      "b": 4.0,
+      "n": 7,
+      "right": 4,
+      "rate": 0.571
+    },
+    "soccerbase.com": {
+      "a": 8.0,
+      "b": 1.0,
+      "n": 7,
+      "right": 7,
+      "rate": 1.0
+    },
+    "playmakerstats.com": {
+      "a": 8.0,
+      "b": 1.0,
+      "n": 7,
+      "right": 7,
+      "rate": 1.0
+    },
+    "fotmob.com": {
+      "a": 8.0,
+      "b": 1.0,
+      "n": 7,
+      "right": 7,
+      "rate": 1.0
+    },
+    "footballbirthdays.com": {
+      "a": 8.0,
+      "b": 1.0,
+      "n": 7,
+      "right": 7,
+      "rate": 1.0
+    },
+    "trek.zone": {
+      "a": 6.0,
+      "b": 3.0,
+      "n": 7,
+      "right": 5,
+      "rate": 0.714
+    },
+    "mountainfyi.com": {
+      "a": 8.0,
+      "b": 1.0,
+      "n": 7,
+      "right": 7,
+      "rate": 1.0
+    },
+    "ebsco.com": {
+      "a": 7.0,
+      "b": 2.0,
+      "n": 7,
+      "right": 6,
+      "rate": 0.857
+    },
+    "kicker.de": {
+      "a": 3.0,
+      "b": 5.0,
+      "n": 6,
+      "right": 2,
+      "rate": 0.333
+    },
+    "worldathletics.org": {
+      "a": 5.0,
+      "b": 3.0,
+      "n": 6,
+      "right": 4,
+      "rate": 0.667
+    },
+    "redbull.com": {
+      "a": 6.0,
+      "b": 2.0,
+      "n": 6,
+      "right": 5,
+      "rate": 0.833
+    },
+    "manchestereveningnews.co.uk": {
+      "a": 1.0,
+      "b": 7.0,
+      "n": 6,
+      "right": 0,
+      "rate": 0.0
+    },
+    "basketball-reference.com": {
+      "a": 2.0,
+      "b": 6.0,
+      "n": 6,
+      "right": 1,
+      "rate": 0.167
+    },
+    "footylogos.com": {
+      "a": 1.0,
+      "b": 7.0,
+      "n": 6,
+      "right": 0,
+      "rate": 0.0
+    },
+    "wealthrank.in": {
+      "a": 6.0,
+      "b": 2.0,
+      "n": 6,
+      "right": 5,
+      "rate": 0.833
+    },
+    "encyclopedia.com": {
+      "a": 7.0,
+      "b": 1.0,
+      "n": 6,
+      "right": 6,
+      "rate": 1.0
+    },
+    "en.hory.app": {
+      "a": 6.0,
+      "b": 2.0,
+      "n": 6,
+      "right": 5,
+      "rate": 0.833
+    },
+    "sbnation.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "eurobasket.com": {
+      "a": 4.0,
+      "b": 3.0,
+      "n": 5,
+      "right": 3,
+      "rate": 0.6
+    },
+    "soccer365.net": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "mykhel.com": {
+      "a": 1.0,
+      "b": 6.0,
+      "n": 5,
+      "right": 0,
+      "rate": 0.0
+    },
+    "facebook.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "reuters.com": {
+      "a": 3.0,
+      "b": 4.0,
+      "n": 5,
+      "right": 2,
+      "rate": 0.4
+    },
+    "chess.com": {
+      "a": 6.0,
+      "b": 1.0,
+      "n": 5,
+      "right": 5,
+      "rate": 1.0
+    },
+    "myfootballfacts.com": {
+      "a": 2.0,
+      "b": 5.0,
+      "n": 5,
+      "right": 1,
+      "rate": 0.2
+    },
+    "bikeraceinfo.com": {
+      "a": 1.0,
+      "b": 6.0,
+      "n": 5,
+      "right": 0,
+      "rate": 0.0
+    },
+    "football.fm": {
+      "a": 6.0,
+      "b": 1.0,
+      "n": 5,
+      "right": 5,
+      "rate": 1.0
+    },
+    "hu.wikipedia.org": {
+      "a": 4.0,
+      "b": 3.0,
+      "n": 5,
+      "right": 3,
+      "rate": 0.6
+    },
+    "crunchbase.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "linkedin.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "lt.wikipedia.org": {
+      "a": 4.0,
+      "b": 3.0,
+      "n": 5,
+      "right": 3,
+      "rate": 0.6
+    },
+    "agemdb.com": {
+      "a": 6.0,
+      "b": 1.0,
+      "n": 5,
+      "right": 5,
+      "rate": 1.0
+    },
+    "pickapeak.com": {
+      "a": 4.0,
+      "b": 3.0,
+      "n": 5,
+      "right": 3,
+      "rate": 0.6
+    },
+    "bing.com": {
+      "a": 1.0,
+      "b": 6.0,
+      "n": 5,
+      "right": 0,
+      "rate": 0.0
+    },
+    "penguinrandomhouse.com": {
+      "a": 4.0,
+      "b": 3.0,
+      "n": 5,
+      "right": 3,
+      "rate": 0.6
+    },
+    "supersummary.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "americanliterature.com": {
+      "a": 5.0,
+      "b": 2.0,
+      "n": 5,
+      "right": 4,
+      "rate": 0.8
+    },
+    "sport.de": {
+      "a": 1.0,
+      "b": 5.0,
+      "n": 4,
+      "right": 0,
+      "rate": 0.0
+    },
+    "sandiegouniontribune.com": {
+      "a": 4.0,
+      "b": 2.0,
+      "n": 4,
+      "right": 3,
+      "rate": 0.75
+    },
+    "sport-histoire.fr": {
+      "a": 1.0,
+      "b": 5.0,
+      "n": 4,
+      "right": 0,
+      "rate": 0.0
+    },
+    "worldfootball.net": {
+      "a": 2.0,
+      "b": 4.0,
+      "n": 4,
+      "right": 1,
+      "rate": 0.25
+    },
+    "sportskeeda.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "motorsport.com": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "grandprix.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "futbolupdate.com": {
+      "a": 1.0,
+      "b": 5.0,
+      "n": 4,
+      "right": 0,
+      "rate": 0.0
+    },
+    "marca.com": {
+      "a": 2.0,
+      "b": 4.0,
+      "n": 4,
+      "right": 1,
+      "rate": 0.25
+    },
+    "crash.net": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "cyclingstage.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "mcnews.com.au": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "ru.wikipedia.org": {
+      "a": 1.0,
+      "b": 5.0,
+      "n": 4,
+      "right": 0,
+      "rate": 0.0
+    },
+    "ukvote.org.uk": {
+      "a": 1.0,
+      "b": 5.0,
+      "n": 4,
+      "right": 0,
+      "rate": 0.0
+    },
+    "theamericanvote.com": {
+      "a": 4.0,
+      "b": 2.0,
+      "n": 4,
+      "right": 3,
+      "rate": 0.75
+    },
+    "realclearpolitics.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "standard.co.uk": {
+      "a": 4.0,
+      "b": 2.0,
+      "n": 4,
+      "right": 3,
+      "rate": 0.75
+    },
+    "electionresults.parliament.uk": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "palmares.fyi": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "balancedscorecardexamples.com": {
+      "a": 4.0,
+      "b": 2.0,
+      "n": 4,
+      "right": 3,
+      "rate": 0.75
+    },
+    "corpdigest.com": {
+      "a": 4.0,
+      "b": 2.0,
+      "n": 4,
+      "right": 3,
+      "rate": 0.75
+    },
+    "famousbirthdays.com": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "outdooractive.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "wanderlog.com": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "mountainfieldguide.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "goatbound.com": {
+      "a": 3.0,
+      "b": 3.0,
+      "n": 4,
+      "right": 2,
+      "rate": 0.5
+    },
+    "peakify.ai": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "tovejansson.com": {
+      "a": 5.0,
+      "b": 1.0,
+      "n": 4,
+      "right": 4,
+      "rate": 1.0
+    },
+    "sports.yahoo.com": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "cyclingflash.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "f1report.net": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "eurohoops.net": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "escore.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "lobandsmash.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "elpais.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "tennis.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "rtve.es": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "sportstralia.com.au": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "olympics.fandom.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "f1slam.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "usatoday.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "pl.wikipedia.org": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "fia.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "les-sports.info": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "domestiquecycling.com": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "en.as.com": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "as.com": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "cyclenews.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "es.uefa.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "chesslab.academy": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "smh.com.au": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "motorsportmagazine.com": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "firstpost.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "miamiopen.com": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "soccer365.ru": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "electionscentre.co.uk": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "hampshirelive.news": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "news.hull.gov.uk": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "hulldailymail.co.uk": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "mancunianmatters.co.uk": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "lancs.live": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "poliwave.com": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "mylondon.news": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "trafford.gov.uk": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "washingtonpost.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "theinfolist.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "globalscorex.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "rally-base.com": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "juwra.com": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "olympedia.org": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "gracesguide.co.uk": {
+      "a": 2.0,
+      "b": 3.0,
+      "n": 3,
+      "right": 1,
+      "rate": 0.333
+    },
+    "pestel-analysis.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "madeometer.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "norstedtsagency.se": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "rekvizitai.vz.lt": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "glassandnote.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "enipedia.org": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "unanswered.io": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "zoominfo.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "eu-football.info": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "wiki.grail-watch.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "analogsoundware.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "thisdayinhistory.ai": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "breakingthelines.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "et.wikipedia.org": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "playback.fm": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "olympic.org.nz": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "oefb.at": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "themoviedb.org": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "summitgo.eu": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "dangerousroads.org": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "getamap.net": {
+      "a": 1.0,
+      "b": 4.0,
+      "n": 3,
+      "right": 0,
+      "rate": 0.0
+    },
+    "backfromsummit.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "all-things-nordic.com": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "jstor.org": {
+      "a": 3.0,
+      "b": 2.0,
+      "n": 3,
+      "right": 2,
+      "rate": 0.667
+    },
+    "fairytalez.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "us.macmillan.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "andersenstories.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    },
+    "nextbookinorder.com": {
+      "a": 4.0,
+      "b": 1.0,
+      "n": 3,
+      "right": 3,
+      "rate": 1.0
+    }
+  }
 }

@@ -1,0 +1,157 @@
+{
+  "n": 47,
+  "success": 0.425531914893617,
+  "answered_rate": 0.48936170212765956,
+  "wrong_when_answered": 0.13043478260869565,
+  "abstain_rate": 0.5106382978723405,
+  "ece": 0.10900227253843009,
+  "mean_steps": 4.48936170212766,
+  "mean_web_calls": 3.5319148936170213,
+  "mean_decision_ms": 1.3234061619346318,
+  "by_family": {
+    "chat": {
+      "n": 6,
+      "success": 0.3333333333333333
+    },
+    "compare": {
+      "n": 4,
+      "success": 0.25
+    },
+    "fact": {
+      "n": 37,
+      "success": 0.4594594594594595
+    }
+  },
+  "by_regime": {
+    "seed": {
+      "n": 47,
+      "success": 0.425531914893617,
+      "wrong_when_answered": 0.13043478260869565
+    }
+  },
+  "policy": "planck",
+  "search": "ddgs",
+  "net": "live",
+  "tasks": "scripts/assets/planck3_tasks.json",
+  "system_trust_domains": 236,
+  "n_invalid_decisions": 0,
+  "gold_reachable": 0.851063829787234,
+  "serp_answer_rate_at3": 0.8297872340425532,
+  "depth_evidence_recall": 0.9787234042553191,
+  "snippet_first": true,
+  "answer_threshold": 0.3,
+  "mean_fetches": 2.3617021276595747,
+  "mean_answer_fetches": 1.1914893617021276,
+  "depth_pages": 1,
+  "answered_from_snippet": 0.40425531914893614,
+  "gated_rate": 0.0,
+  "gated_would_be_correct": 0,
+  "tiers": {
+    "confident": {
+      "n": 23,
+      "rate": 0.48936170212765956,
+      "precision": 0.8695652173913043,
+      "evidence_recall": 0.9565217391304348
+    },
+    "low_confidence": {
+      "n": 24,
+      "rate": 0.5106382978723404,
+      "precision": 0.5,
+      "evidence_recall": 1.0
+    },
+    "none": {
+      "n": 0,
+      "rate": 0.0,
+      "precision": null,
+      "evidence_recall": null
+    }
+  },
+  "graph": {
+    "facts": 29,
+    "passages": 286,
+    "entities": 506,
+    "edges": 505,
+    "queries": 63,
+    "domains": 14
+  },
+  "cost": {
+    "usd_per_task": 8.251734638540405e-08,
+    "usd_per_correct": 1.9391576400569952e-07,
+    "usd_per_1k_tasks": 8.251734638540405e-05,
+    "llm_tokens_per_task": 0.0,
+    "priced_as": "claude-haiku-4-5",
+    "prices_as_of": "2026-09-29"
+  },
+  "web_calls_network": {
+    "search": 55,
+    "fetch": 111,
+    "search_net": 42,
+    "fetch_net": 26,
+    "search_empty_primary": 13,
+    "search_fallback": 5,
+    "search_empty_final": 0,
+    "search_ratelimited": 0,
+    "served_ddgs": 50,
+    "served_wikipedia": 5
+  },
+  "search_health": {
+    "searches": 55,
+    "primary_empty_rate": 0.23636363636363636,
+    "fallback_rate": 0.09090909090909091,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 50,
+      "wikipedia": 5
+    },
+    "primary_share": 0.9090909090909091,
+    "valid": true
+  },
+  "wall_s": 152.3,
+  "store_facts": 29,
+  "top_domains": [
+    [
+      "en.wikipedia.org",
+      0.874,
+      4.5
+    ],
+    [
+      "britannica.com",
+      0.819,
+      3.5
+    ],
+    [
+      "imdb.com",
+      0.769,
+      1.0
+    ],
+    [
+      "tracxn.com",
+      0.676,
+      1.0
+    ],
+    [
+      "historydraft.com",
+      0.667,
+      1.0
+    ],
+    [
+      "iphonelife.com",
+      0.6,
+      0.5
+    ],
+    [
+      "eur-lex.europa.eu",
+      0.6,
+      0.5
+    ],
+    [
+      "electromaker.io",
+      0.6,
+      0.5
+    ]
+  ],
+  "gate": {
+    "verdict": "G2 (rule B)",
+    "note": "the learned policy: judged by SETUP_planck_20260903.md section 3B"
+  }
+}
