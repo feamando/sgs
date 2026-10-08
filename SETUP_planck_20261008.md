@@ -84,6 +84,16 @@ The rules below were written **before** the run (2026-10-08).
    If ddgs gets rate-limited partway, the run keeps going on the per-query Wikipedia fallback and records it. A run below 80% ddgs is set aside once and redone on the next `round4`. If it stops, run it again: finished work is kept and G2 collection resumes.
 5. Optional, to try the product: `.\scripts\planck3.ps1 serve`, then open http://127.0.0.1:8010. Ask something, open "How I got this", click "trust more" or "more from here" on a source.
 
+### Brave Search API key (added 2026-10-08, optional)
+
+The key lives in `.env` at the repo root. `.env` is gitignored, because the repo is public; `.env.example` is the committed template. `planck3.py` and `planck3.ps1` both read `.env`, and a variable already set in the environment wins. On the box, once:
+
+```powershell
+.\scripts\planck3.ps1 setkey        # paste the key at the hidden prompt; it writes .env, then checks the API answers
+```
+
+Brave is **opt-in** (`--search brave`, e.g. `.\scripts\planck3.ps1 ask "..." --search brave`). Round 4's pre-registered runs stay on ddgs, so the rules below are unchanged. If S2 passes, the next step is the same paired comparison with Brave against ddgs, before Brave is used anywhere user-facing. `config/planck3_prices.json` still carries a placeholder Brave price: check your plan's price before reading any cost line.
+
 ## 4. Pre-registered rules (2026-10-08, before the run)
 
 All rules are judged on the 143-question fresh + long-tail benchmark, paired by question (exact McNemar), and only on **valid** ddgs runs (≤ 20% empty, ddgs served ≥ 80%).

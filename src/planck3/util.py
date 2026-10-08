@@ -28,6 +28,28 @@ def utf8_console():
             pass
 
 
+def load_env(path: str | Path | None = None) -> list[str]:
+    """
+    KEY=VALUE lines from the repo's .env (gitignored; template .env.example) into os.environ.
+    A variable already set in the environment wins. Returns the names loaded (never the values).
+    """
+    import os
+    p = Path(path) if path else REPO_ROOT / ".env"
+    if not p.exists():
+        return []
+    loaded = []
+    for line in p.read_text(encoding="utf-8-sig").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k, v = k.strip().removeprefix("export ").strip(), v.strip().strip('"').strip("'")
+        if k and v and k not in os.environ:
+            os.environ[k] = v
+            loaded.append(k)
+    return loaded
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 

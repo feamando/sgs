@@ -36,7 +36,11 @@ MAX_CONSECUTIVE_EMPTY = 15           # circuit breaker: abort instead of produci
 # identities or solve challenges.
 DDGS_ENGINES = "duckduckgo,bing,brave,yahoo,mojeek"
 RATE_LIMIT_BACKOFF = 30.0
-SCRAPED_BACKENDS = ("ddgs", "searxng")  # may come back empty when blocked: retry once, then Wikipedia
+SCRAPED_BACKENDS = ("ddgs", "searxng", "brave")  # general web search: empty -> retry once -> Wikipedia
+# brave = the Brave Search API (licensed, keyed: BRAVE_API_KEY from .env). Opt-in (--search brave);
+# round 4's pre-registered runs stay on ddgs. Its own pacing: the API meters requests per second.
+BRAVE_URL = "https://api.search.brave.com/res/v1/web/search"
+MIN_SECONDS_BRAVE = 1.1
 
 
 class SearchUnavailable(RuntimeError):
@@ -156,13 +160,16 @@ class Web:
     def _search_net(self, backend: str, query: str) -> list[dict]:
         self.calls["search_net"] += 1
         if backend in SCRAPED_BACKENDS:
-            wait = MIN_SECONDS_BETWEEN_SEARCHES - (time.time() - self._last_search)
+            gap = MIN_SECONDS_BRAVE if backend == "brave" else MIN_SECONDS_BETWEEN_SEARCHES
+            wait = gap - (time.time() - self._last_search)
             if wait > 0:
                 time.sleep(wait)
             self._last_search = time.time()
         try:
             if backend == "ddgs":
                 results = self._search_ddgs(query)
+            elif backend == "brave":
+                results = self._search_brave(query)
             elif backend == "searxng":
                 results = self._search_searxng(query)
             elif backend == "wikipedia":
@@ -222,6 +229,37 @@ class Web:
             out.append({"url": url, "title": item.get("title", ""), "snippet": item.get("body", "") or "",
                         "domain": domain_of(url)})
         return out[:20]
+
+    def _search_brave(self, query: str) -> list[dict]:
+        import os
+        key = os.environ.get("BRAVE_API_KEY")
+        if not key:
+            raise ValueError("BRAVE_API_KEY is not set: put it in .env (template .env.example; on the box: "
+                             ".\\scripts\\planck3.ps1 setkey)")
+        r = self.session.get(BRAVE_URL, params={"q": query, "count": 10},
+                             headers={"Accept": "application/json", "X-Subscription-Token": key},
+                             timeout=FETCH_TIMEOUT)
+        if r.status_code == 429:  # over the plan's rate or quota: back off, count it, fall back
+            self.calls["search_ratelimited"] += 1
+            self._log({"event": "search_ratelimited", "backend": "brave", "query": query})
+            time.sleep(RATE_LIMIT_BACKOFF)
+            return []
+        r.raise_for_status()
+        out, seen = [], set()
+        for item in (r.json().get("web") or {}).get("results", []):
+            url = item.get("url")
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            out.append({"url": url, "title": _inline_text(item.get("title", "")),
+                        "snippet": _inline_text(item.get("description", "") or ""), "domain": domain_of(url)})
+        return out[:20]
+
+    def brave_alive(self) -> bool:
+        try:
+            return len(self._search_brave("Wikipedia")) > 0
+        except Exception:
+            return False
 
     def ddgs_alive(self) -> bool:
         """Installed AND answering (a rate-limited client returns nothing)."""
@@ -339,6 +377,11 @@ class Web:
 def domain_of(url: str) -> str:
     d = urlparse(url).netloc.lower()
     return d[4:] if d.startswith("www.") else d
+
+
+def _inline_text(s: str) -> str:
+    """API snippets mark matches with <strong>/<b>: drop those tags without adding spaces ("1943 .")."""
+    return html_to_text(re.sub(r"(?i)</?(?:strong|b|em|i|mark)>", "", s or ""))
 
 
 def html_to_text(html: str) -> str:

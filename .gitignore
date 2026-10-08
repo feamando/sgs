@@ -24,3 +24,8 @@ results/planck3/**/web_log.jsonl
 results/planck3/**/*.sqlite
 results/planck3/**/head.pt
 config/searxng/uwsgi.ini
+
+# secrets: never committed (the repo is public). Template: .env.example
+.env
+.env.*
+!.env.example

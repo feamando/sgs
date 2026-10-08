@@ -29,6 +29,8 @@
                decisions from known answers), G1 confirmation (new task seed, seeds 3-5, rank primary, Hertz)
      round4    round 4 (SETUP_planck_20261008.md): ddgs search (no Docker) on the fresh benchmark, answer
                tiers (confident / low confidence / evidence only), G2 v2 retrained on ddgs, system trust layer
+     setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
+               (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
      py        pass-through: .\scripts\planck3.ps1 py wikirace eval --limit 50
 
@@ -76,6 +78,17 @@ $env:PYTHONUTF8 = "1"                  # page text is not cp1252
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUNBUFFERED = "1"            # live progress through the log tee
 $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
+
+# .env (gitignored; template .env.example): API keys for every child process. The real environment wins.
+if (Test-Path (Join-Path $Root ".env")) {
+    foreach ($line in Get-Content (Join-Path $Root ".env")) {
+        if ($line.TrimStart().StartsWith("#")) { continue }
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
+            $k = $Matches[1]; $v = $Matches[2].Trim().Trim('"').Trim("'")
+            if ($v -and -not [Environment]::GetEnvironmentVariable($k)) { [Environment]::SetEnvironmentVariable($k, $v, "Process") }
+        }
+    }
+}
 
 $PLANCK_CKPT = "checkpoints/planck13/best.pt"
 $PLANCK_TOK  = "data/wikipedia/tokenizer.model"
@@ -507,6 +520,24 @@ function Do-Round4 {
     Invoke-R4Run "g0f_heuristic_snip_ddgs_trust$Tag" @("--policy", "heuristic", "--tasks", $FRESH) "round 4: heuristic on ddgs + system trust layer (rule T)"
 }
 
+# ── secrets ──────────────────────────────────────────────────────────────
+function Do-SetKey {
+    $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
+    $sec = Read-Host "Paste $name (input hidden)" -AsSecureString
+    $val = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+    if (-not $val) { throw "nothing entered; .env unchanged" }
+    $path = Join-Path $Root ".env"
+    $lines = @()
+    if (Test-Path $path) { $lines = @(Get-Content $path | Where-Object { $_ -notmatch "^\s*$name\s*=" }) }
+    $lines += "$name=$($val.Trim())"
+    Set-Content -Path $path -Value $lines -Encoding UTF8
+    [Environment]::SetEnvironmentVariable($name, $val.Trim(), "Process")
+    Log "$name saved to .env (gitignored, never pushed)"
+    if ($name -eq "BRAVE_API_KEY") {
+        try { P3 @("search-check", "--backend", "brave") } catch { Warn "the Brave API did not answer with this key (typo, or over quota?)" }
+    }
+}
+
 # ── results back to git (readable from any machine) ──────────────────────
 function Do-Push {
     if ($NoPush) { Log "-NoPush: results left uncommitted"; return }
@@ -520,6 +551,7 @@ function Do-Push {
     if (Test-Path "config/planck3/source_trust.json") { Invoke-Quiet git @("add", "--", "config/planck3/source_trust.json") | Out-Null }
     Get-ChildItem -Path "data/planck3/g2" -Filter "points_*.health.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null   # belt and braces: the repo is public
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
     Invoke-Checked git @("commit", "-m", "results(planck3): run$Tag $(Get-Date -Format yyyy-MM-dd_HHmm)")
     Invoke-Checked git @("pull", "--rebase", "origin", "main")
@@ -549,6 +581,7 @@ switch ($Command.ToLower()) {
     "doctor"     { Start-RunLog "doctor"; Do-Setup; Do-Doctor $Deep.IsPresent }
     "smoke"      { Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q") }
     "searxng"    { Do-Searxng }
+    "setkey"     { Do-SetKey }
     "ask"        {
         if (-not $Question) { throw 'usage: .\scripts\planck3.ps1 ask "your question"' }
         P3 (@("ask", $Question, "--type", $Type, "--policy", (Get-TeacherPolicy), "--gemma-path", $GEMMA, "-v") + $Rest)

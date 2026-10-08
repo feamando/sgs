@@ -900,3 +900,45 @@ def test_snippet_publish_stamp_is_not_the_answer():
     r = [{"url": "https://a.org/x", "title": "Final", "snippet": "Sep 13, 2026 \u00b7 Who won the girls' final? Jane Doe beat Mary Roe."}]
     vals = [c["value"] for c in snippet_candidates("Who won the girls' final?", r, "entity")]
     assert "Sep" not in vals and "Jane Doe" in vals
+
+
+def test_env_file_loads_without_overriding(tmp_path, monkeypatch):
+    import os
+    from src.planck3.util import load_env
+    env = tmp_path / ".env"
+    env.write_text("# comment\nP3_TEST_A=one\nexport P3_TEST_B='two'\nP3_TEST_C=\nnot a line\n", encoding="utf-8")
+    monkeypatch.delenv("P3_TEST_A", raising=False)
+    monkeypatch.delenv("P3_TEST_C", raising=False)
+    monkeypatch.setenv("P3_TEST_B", "already")
+    assert load_env(env) == ["P3_TEST_A"]                         # names only, never values
+    assert os.environ["P3_TEST_A"] == "one" and os.environ["P3_TEST_B"] == "already" and "P3_TEST_C" not in os.environ
+    assert load_env(tmp_path / "missing.env") == []
+
+
+def test_brave_backend_maps_results_and_needs_a_key(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    seen = {}
+
+    class R:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"web": {"results": [{"url": "https://www.ikea.com/a", "title": "<b>IKEA</b>",
+                                         "description": "Founded in <strong>1943</strong>."}]}}
+
+    def get(url, params=None, headers=None, timeout=None):
+        seen.update(url=url, headers=headers)
+        return R()
+    monkeypatch.setattr(w.session, "get", get)
+    monkeypatch.delenv("BRAVE_API_KEY", raising=False)
+    with pytest.raises(ValueError):
+        w.search("When was IKEA founded?")                         # no key: a clear error, not a blind run
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    r = w.search("When was IKEA founded?")
+    assert r == [{"url": "https://www.ikea.com/a", "title": "IKEA", "snippet": "Founded in 1943.", "domain": "ikea.com"}]
+    assert seen["headers"]["X-Subscription-Token"] == "k" and seen["url"] == W.BRAVE_URL and w.last_backend == "brave"

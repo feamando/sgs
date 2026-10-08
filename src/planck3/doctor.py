@@ -107,6 +107,13 @@ class Doctor:
                      "" if ok else "wait a few minutes and re-run doctor; runs fall back to Wikipedia search per query")
         except ImportError:
             self.add(WARN, "ddgs", "not installed", ".\\scripts\\planck3.ps1 setup  (pip install ddgs)")
+        import os
+        from .util import load_env
+        load_env()
+        if os.environ.get("BRAVE_API_KEY"):  # presence only: a live check would spend quota on every doctor run
+            self.add(OK, "brave api key", "set (from .env or the environment); live check: planck3.py search-check --backend brave")
+        else:
+            self.add(OK, "brave api key", "not set (optional: only for --search brave)", ".\\scripts\\planck3.ps1 setkey")
         try:
             r = requests.get(f"{searxng_url}/search", params={"q": "test", "format": "json"}, timeout=5)
             ok = r.status_code == 200 and "results" in r.json()

@@ -60,7 +60,8 @@ def build_web(args, log_path=None):
 
 
 def add_web_args(p):
-    p.add_argument("--search", default="auto", choices=["auto", "ddgs", "searxng", "wikipedia"])
+    p.add_argument("--search", default="auto", choices=["auto", "ddgs", "searxng", "brave", "wikipedia"],
+                   help="auto = ddgs -> SearXNG -> Wikipedia; brave = Brave Search API (BRAVE_API_KEY in .env), opt-in")
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--net", default="live", choices=["live", "replay", "refresh"],
                    help="live: cache-then-network (default); replay: cache only; refresh: network only")
@@ -578,7 +579,11 @@ def cmd_watch(args):
 def cmd_search_check(args):
     from src.planck3.web import Web, WebCache
     web = Web(WebCache(args.cache_dir, mode="refresh"), searxng_url=args.searxng_url)
-    if args.backend == "ddgs":
+    if args.backend == "brave":
+        import os
+        ok = bool(os.environ.get("BRAVE_API_KEY")) and web.brave_alive()
+        print(f"Brave Search API: {'UP' if ok else 'DOWN (BRAVE_API_KEY missing from .env, invalid, or over quota)'}")
+    elif args.backend == "ddgs":
         ok = web.ddgs_alive()
         print(f"ddgs ({web.ddgs_engines}): {'UP' if ok else 'DOWN (pip install ddgs, or rate-limited: wait and retry)'}")
     else:
@@ -790,6 +795,8 @@ def _vs_rival(rows):
 
 def main():
     utf8_console()
+    from src.planck3.util import load_env
+    load_env()  # .env (gitignored): BRAVE_API_KEY etc.; the real environment wins
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -859,7 +866,7 @@ def main():
     p.set_defaults(fn=cmd_watch)
 
     p = sub.add_parser("search-check")
-    p.add_argument("--backend", default="searxng", choices=["searxng", "ddgs"])
+    p.add_argument("--backend", default="searxng", choices=["searxng", "ddgs", "brave"])
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--cache-dir", default=str(CACHE))
     p.set_defaults(fn=cmd_search_check)
