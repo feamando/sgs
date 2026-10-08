@@ -1,0 +1,6 @@
+{
+  "_note": "System layer of source trust (src/planck3/trust.py). Empty until built on the box from the G2 training points: .\\scripts\\planck3.ps1 round4 runs `planck3.py trust build` and commits this file. Empty = every domain starts at 0.5, the pre-round-4 behaviour.",
+  "built_at": null,
+  "built_from": [],
+  "domains": {}
+}

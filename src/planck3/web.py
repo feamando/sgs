@@ -27,6 +27,16 @@ MAX_HTML_BYTES = 3_000_000
 MIN_SECONDS_PER_HOST = 1.0
 MIN_SECONDS_BETWEEN_SEARCHES = 3.0   # upstream engines CAPTCHA bursts and SearXNG then suspends them for 24 h
 MAX_CONSECUTIVE_EMPTY = 15           # circuit breaker: abort instead of producing a run of empty results
+# ddgs (2026-10-08, round 4): metasearch library, no Docker. It scrapes (DuckDuckGo has no API),
+# so it is a research backend, not a product one. Engines are tried in this fixed order (two at a
+# time) until enough results come back, so one blocked engine is skipped, not fatal. On the Mac,
+# ~15 test queries were enough for DuckDuckGo to answer HTTP 202 (its rate-limit page), Brave 429
+# and Mojeek 403 while Bing and Yahoo still answered: blocks are fast and per engine. google is left
+# out (it CAPTCHAs scripted clients). A block is RESPECTED: back off and fall back, never rotate
+# identities or solve challenges.
+DDGS_ENGINES = "duckduckgo,bing,brave,yahoo,mojeek"
+RATE_LIMIT_BACKOFF = 30.0
+SCRAPED_BACKENDS = ("ddgs", "searxng")  # may come back empty when blocked: retry once, then Wikipedia
 
 
 class SearchUnavailable(RuntimeError):
@@ -70,7 +80,7 @@ class WebCache:
 class Web:
     """Search + fetch with cache, robots.txt and per-host rate limiting."""
 
-    def __init__(self, cache: WebCache, search_backend: str = "searxng",
+    def __init__(self, cache: WebCache, search_backend: str = "ddgs",
                  searxng_url: str = "http://localhost:8888", n_results: int = 8,
                  log_path: str | Path | None = None):
         import requests
@@ -84,8 +94,10 @@ class Web:
         self._robots: dict[str, robotparser.RobotFileParser | None] = {}
         self._last_hit: dict[str, float] = {}
         self.calls = {"search": 0, "fetch": 0, "search_net": 0, "fetch_net": 0,
-                      "search_empty_primary": 0, "search_fallback": 0, "search_empty_final": 0}
-        self.fallback = True          # SearXNG empty -> retry once -> Wikipedia for that query
+                      "search_empty_primary": 0, "search_fallback": 0, "search_empty_final": 0,
+                      "search_ratelimited": 0}
+        self.ddgs_engines = DDGS_ENGINES
+        self.fallback = True          # scraped backend empty -> retry once -> Wikipedia for that query
         self._consecutive_empty = 0
         self._last_search = 0.0
         self.last_backend = None      # which backend actually answered the last search
@@ -108,12 +120,12 @@ class Web:
         results = self._search_net(self.backend, query)
         if results:
             return self._served(self.backend, results)
-        if self.backend == "searxng":
+        if self.backend in SCRAPED_BACKENDS:
             self.calls["search_empty_primary"] += 1
             time.sleep(2.0)
-            results = self._search_net("searxng", query)          # one retry: blocks are often transient
+            results = self._search_net(self.backend, query)        # one retry: blocks are often transient
             if results:
-                return self._served("searxng", results)
+                return self._served(self.backend, results)
             if self.fallback:
                 hit = self.cache.get("search", f"wikipedia|{query}")
                 results = hit["results"] if hit and hit.get("results") else self._search_net("wikipedia", query)
@@ -137,18 +149,21 @@ class Web:
                     f"{self._consecutive_empty} searches in a row came back empty (backend {self.backend}, "
                     f"fallback {'on' if self.fallback else 'off'}). The search engine is blocked or down: "
                     f"stopping instead of producing results with no evidence. Wait, check `docker logs "
-                    f"planck3-searxng`, then re-run (finished work is kept).")
+                    f"planck3-searxng` (SearXNG) or try again later (ddgs rate limit), then re-run "
+                f"(finished work is kept).")
         return []
 
     def _search_net(self, backend: str, query: str) -> list[dict]:
         self.calls["search_net"] += 1
-        if backend == "searxng":
+        if backend in SCRAPED_BACKENDS:
             wait = MIN_SECONDS_BETWEEN_SEARCHES - (time.time() - self._last_search)
             if wait > 0:
                 time.sleep(wait)
             self._last_search = time.time()
         try:
-            if backend == "searxng":
+            if backend == "ddgs":
+                results = self._search_ddgs(query)
+            elif backend == "searxng":
                 results = self._search_searxng(query)
             elif backend == "wikipedia":
                 results = self._search_wikipedia(query)
@@ -175,6 +190,49 @@ class Web:
                 "fallback_rate": c["search_fallback"] / n, "final_empty_rate": final,
                 "served": served, "primary_share": primary,   # who actually answered, cache hits included
                 "valid": final <= 0.2}
+
+    def search_site(self, domain: str, query: str) -> list[dict]:
+        """'More results from here': the same question restricted to one source (no fallback)."""
+        if self.backend not in SCRAPED_BACKENDS or not self.cache.online:
+            return []
+        q = f"site:{domain} {query}"
+        hit = self.cache.get("search", f"{self.backend}|{q}")
+        results = hit["results"] if hit and hit.get("results") else self._search_net(self.backend, q)
+        return [r for r in results if r["domain"] == domain or r["domain"].endswith("." + domain)][: self.n_results]
+
+    def _search_ddgs(self, query: str) -> list[dict]:
+        from ddgs import DDGS
+        from ddgs.exceptions import DDGSException, RatelimitException
+        try:
+            raw = DDGS(timeout=FETCH_TIMEOUT).text(query, region="us-en", safesearch="off",
+                                                   max_results=10, backend=self.ddgs_engines)
+        except RatelimitException as e:
+            self.calls["search_ratelimited"] += 1
+            self._log({"event": "search_ratelimited", "backend": "ddgs", "query": query, "error": repr(e)})
+            time.sleep(RATE_LIMIT_BACKOFF)
+            return []
+        except DDGSException:  # "No results found." is an ordinary empty answer
+            return []
+        out, seen = [], set()
+        for item in raw or []:
+            url = item.get("href") or item.get("url")
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            out.append({"url": url, "title": item.get("title", ""), "snippet": item.get("body", "") or "",
+                        "domain": domain_of(url)})
+        return out[:20]
+
+    def ddgs_alive(self) -> bool:
+        """Installed AND answering (a rate-limited client returns nothing)."""
+        try:
+            import ddgs  # noqa: F401
+        except ImportError:
+            return False
+        try:
+            return len(self._search_ddgs("Wikipedia")) > 0
+        except Exception:
+            return False
 
     def _search_searxng(self, query: str) -> list[dict]:
         r = self.session.get(f"{self.searxng_url}/search",

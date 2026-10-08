@@ -43,6 +43,7 @@ class Doctor:
                                ("torch", FAIL, "pip install torch --index-url https://download.pytorch.org/whl/cu124"),
                                ("sentencepiece", WARN, "pip install sentencepiece (needed for head:planck)"),
                                ("trafilatura", WARN, "pip install trafilatura (fallback extractor is cruder)"),
+                               ("ddgs", WARN, "pip install ddgs (round 4 search; without it: SearXNG or Wikipedia)"),
                                ("transformers", WARN, "pip install -U transformers (needed for the Gemma teacher)")):
             try:
                 m = importlib.import_module(mod)
@@ -96,16 +97,23 @@ class Doctor:
                 self.add(OK if r.status_code == 200 else need, name, f"HTTP {r.status_code}")
             except Exception as e:
                 self.add(need, name, f"unreachable ({e.__class__.__name__})", "check network / VPN / proxy")
+        try:  # round 4 search of record: ddgs (no Docker)
+            import ddgs
+            from .web import Web, WebCache
+            import tempfile
+            ok = Web(WebCache(tempfile.mkdtemp(), mode="refresh")).ddgs_alive()
+            self.add(OK if ok else WARN, "ddgs", f"{getattr(ddgs, '__version__', 'installed')} " +
+                     ("answering" if ok else "installed but returned nothing (rate-limited?)"),
+                     "" if ok else "wait a few minutes and re-run doctor; runs fall back to Wikipedia search per query")
+        except ImportError:
+            self.add(WARN, "ddgs", "not installed", ".\\scripts\\planck3.ps1 setup  (pip install ddgs)")
         try:
             r = requests.get(f"{searxng_url}/search", params={"q": "test", "format": "json"}, timeout=5)
             ok = r.status_code == 200 and "results" in r.json()
             self.add(OK if ok else WARN, "searxng", f"{searxng_url} {'up' if ok else 'answered but not JSON'}",
                      "" if ok else "check config/searxng/settings.yml has json in search.formats")
         except Exception:
-            docker = shutil.which("docker")
-            self.add(WARN, "searxng", "not running" + ("" if docker else ", Docker not installed"),
-                     ".\\scripts\\planck3.ps1 searxng" if docker else
-                     "optional: install Docker Desktop; without it search uses the Wikipedia API")
+            self.add(OK, "searxng", "not running (optional since round 4: ddgs is the search of record)")
 
     # ── models ───────────────────────────────────────────────────────────
     def planck(self, ckpt, tok, deep):

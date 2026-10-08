@@ -35,6 +35,8 @@ class Policy:
     name = "base"
     kind = "local"          # local (CPU rules / small model) | llm (priced per token)
     model_id = None
+    calibrated = False      # is p a calibrated probability? (the answer card says which)
+    confidence_kind = "rule-based score, not calibrated"
 
     def __init__(self):
         self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
@@ -193,6 +195,7 @@ CLOSED_BOOK_SYSTEM = ("You are a helpful assistant. Answer the user's question f
 
 class LLMPolicy(Policy):
     kind = "llm"
+    confidence_kind = "the model's own estimate, not calibrated"
 
     def _complete(self, system: str, user: str) -> str:
         raise NotImplementedError

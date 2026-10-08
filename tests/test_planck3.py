@@ -718,3 +718,185 @@ def test_searxng_run_never_reads_old_wikipedia_cache(tmp_path, monkeypatch):
     monkeypatch.setattr(w2, "_search_searxng", lambda q: [])
     assert w2.search("q2") == wiki_hit and w2.last_backend == "wikipedia"  # the fallback cache only after failing
     assert w2.search_health()["primary_share"] == 0.0
+
+
+# ── round 4: ddgs search, answer tiers + explanations, three-layer source trust ──
+def test_ddgs_backend_maps_results_and_falls_back(tmp_path, monkeypatch):
+    import types
+    from src.planck3 import web as W
+    exc = types.ModuleType("ddgs.exceptions")
+
+    class DDGSException(Exception):
+        pass
+
+    class RatelimitException(DDGSException):
+        pass
+    exc.DDGSException, exc.RatelimitException = DDGSException, RatelimitException
+    calls = []
+
+    class DDGS:
+        def __init__(self, **kw):
+            pass
+
+        def text(self, query, **kw):
+            calls.append((query, kw["backend"]))
+            if query == "blocked":
+                raise DDGSException("No results found.")
+            return [{"title": "IKEA", "href": "https://www.ikea.com/about", "body": "IKEA was founded in 1943."},
+                    {"title": "dup", "href": "https://www.ikea.com/about", "body": "x"}]
+    mod = types.ModuleType("ddgs")
+    mod.DDGS, mod.exceptions = DDGS, exc
+    monkeypatch.setitem(sys.modules, "ddgs", mod)
+    monkeypatch.setitem(sys.modules, "ddgs.exceptions", exc)
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="ddgs")
+    r = w.search("When was IKEA founded?")
+    assert r == [{"url": "https://www.ikea.com/about", "title": "IKEA", "snippet": "IKEA was founded in 1943.",
+                  "domain": "ikea.com"}] and w.last_backend == "ddgs"
+    assert calls[0][1] == W.DDGS_ENGINES and "google" not in W.DDGS_ENGINES
+    hit = [{"url": "https://en.wikipedia.org/wiki/X", "title": "X", "snippet": "s", "domain": "en.wikipedia.org"}]
+    monkeypatch.setattr(w, "_search_wikipedia", lambda q: hit)
+    assert w.search("blocked") == hit and w.last_backend == "wikipedia"      # empty -> retry -> Wikipedia
+    h = w.search_health()
+    assert h["served"] == {"ddgs": 1, "wikipedia": 1} and h["primary_share"] == 0.5
+    assert w.ddgs_alive()
+    assert w.search_site("ikea.com", "founded") and not W.Web(W.WebCache(tmp_path / "d"), search_backend="wikipedia").search_site("ikea.com", "q")
+
+
+def test_trust_layers_add_in_log_odds_and_user_can_outvote_system(tmp_path):
+    from src.planck3.trust import SYSTEM_MAX_STRENGTH, build_system, layers, logit
+    t = layers((15.0, 5.0), None)
+    assert t["system"] == 0.75 and t["user"] == 0.75 and t["weights"]["user"] == 0 and t["combined"] == 0.75
+    t = layers((15.0, 5.0), (1.0, 1.0 + 30), session_shift=0.0)       # 30 "nothing usable / trust less" signals
+    assert t["user"] < 0.5 and t["weights"]["user"] < 0
+    t2 = layers((15.0, 5.0), None, session_shift=1.0)
+    assert t2["combined"] > 0.75 and abs(logit(t2["combined"]) - (t2["weights"]["system"] + 1.0)) < 0.01
+    assert layers(None, None, session_shift=9)["session"] == 2.0                      # capped
+    import json as _json
+    pts = tmp_path / "points_ddgs.jsonl"
+    rows = []
+    for i in range(30):
+        rows.append({"source": "snippet", "cands": [{"value": "A", "domains": ["good.org"]},
+                                                    {"value": "B", "domains": ["bad.com"]}], "labels": [True, False]})
+    rows.append({"source": "snippet", "cands": [{"value": "Z", "domains": ["x.org"]}], "labels": [False]})  # nothing right: skipped
+    rows += [{"source": "page", "cands": [{"value": "C", "domains": ["page.net"]}], "labels": [True]}] * 5      # pages: skipped
+    pts.write_text("\n".join(_json.dumps(r) for r in rows), encoding="utf-8")
+    table = build_system([pts], tmp_path / "trust.json")
+    good, bad = table["domains"]["good.org"], table["domains"]["bad.com"]
+    assert good["rate"] == 1.0 and bad["rate"] == 0.0 and not {"x.org", "page.net"} & set(table["domains"])
+    assert good["a"] + good["b"] <= SYSTEM_MAX_STRENGTH + 1e-6
+    st = Store(tmp_path / "s.sqlite", system_trust=tmp_path / "trust.json")
+    assert st.domain_prior("good.org") > 0.9 and st.domain_prior("bad.com") < 0.1 and st.domain_prior("new.net") == 0.5
+    for _ in range(12):
+        st.feedback("source", "bad.com", 1)                          # explicit "trust more" x12 (weight 2 each)
+    assert st.domain_prior("bad.com") > 0.5
+    st.close()
+
+
+def test_answer_tiers_and_explanation(store):
+    from src.planck3.chat import Turn, chat_answer, render_why
+    res = Harness(HeuristicPolicy(), SnippetWeb(), store, use_store=False).run_fact("What year was IKEA founded?", "year")
+    ex = res["explain"]
+    assert res["tier"] == "confident" and ex["value"] == "1943" and not ex["calibrated"]
+    assert ex["steps"][0].startswith("Searched") and ex["steps"][-1].startswith("Answered")
+    assert {s["role"] for s in ex["sources"]} >= {"answer", "agrees"}                     # 2nd snippet domain agrees
+    assert {"system", "user", "session", "combined"} <= set(ex["sources"][0]["trust"])
+    assert any("question's words" in k for k, _ in ex["why_value"])
+    t = Turn("q", "What year was IKEA founded?", "year", "IKEA", "NEW", res)
+    assert "**1943**" in chat_answer(t) and "agrees" in chat_answer(t) and "How I got this" in render_why(t)
+    # a value the policy will not commit to is SHOWN, labelled low confidence
+    pol = ScriptedLLM(['{"action": "SEARCH", "k": null, "p": 0.5}', '{"action": "EXTRACT", "k": 0, "p": 0.1}',
+                       '{"action": "ANSWER", "k": null, "p": 0.05}'])
+    low = Harness(pol, SnippetWeb(), store, use_store=False).run_fact("What year was IKEA founded?", "year")
+    assert not low["answered"] and low["tier"] == "low_confidence" and low["guess"]["value"] == "1943"
+    reply = chat_answer(Turn("q", "What year was IKEA founded?", "year", "IKEA", "NEW", low))
+    assert reply.startswith("Low confidence in my results") and "**1943**" in reply and "5%" in reply
+
+    class Empty(FakeWeb):
+        def search(self, q):
+            self.calls["search"] += 1
+            return []
+    none = Harness(HeuristicPolicy(), Empty(), store, use_store=False).run_fact("Who is the mayor of Atlantis?", "entity")
+    assert none["tier"] == "none" and none["guess"] is None and none["explain"]["steps"][-1].startswith("Nothing")
+
+
+def test_g2v2_explains_its_confidence_with_gate_weights(tmp_path):
+    import json as _json
+    from src.planck3 import g2
+    pts_path = tmp_path / "points_ddgs.jsonl"
+    pts_path.write_text("\n".join(_json.dumps(p) for p in _synthetic_points()), encoding="utf-8")
+    g2.embed(pts_path, "hash", tmp_path)
+    g2.train_v2(pts_path, tmp_path, "hash", tmp_path / "v2", epochs=2)
+    pol = g2.load_policy(str(tmp_path / "v2" / "head.pt"))
+    st = Store(tmp_path / "s.sqlite")
+    res = Harness(pol, SnippetWeb(), st).run_fact("What year was IKEA founded?", "year")
+    ex = res["explain"]
+    assert ex["calibrated"] and ex["candidates"] and all("p" in c for c in ex["candidates"])
+    assert ex["why_confidence"]["kind"].startswith("log-odds")
+    names = [k for k, _ in ex["why_confidence"]["items"]]
+    assert names[-1] == "baseline" and set(names[:-1]) <= set(g2.GATE_FEATURE_NAMES)
+    assert res["tier"] in ("confident", "low_confidence")       # v2 always names its best candidate
+    st.close()
+
+
+def test_session_layer_more_from_here(tmp_path):
+    class SiteWeb(SnippetWeb):
+        backend = "ddgs"
+
+        def search_site(self, domain, q):
+            return [{"url": f"https://{domain}/deep", "title": "Deep dive", "domain": domain,
+                     "snippet": "IKEA was founded in 1943; the first store opened in 1958."}]
+    st = Store(tmp_path / "s.sqlite")
+    h = Harness(HeuristicPolicy(), SiteWeb(), st)
+    r = h.more_from("mirror.net", "What year was IKEA founded?")
+    assert r["trust"]["session"] == 1.0 and r["trust"]["combined"] > 0.5 and r["passages"]
+    assert h._trust("mirror.net")["combined"] > st.domain_prior("mirror.net")     # session layer only here
+    res = h.run_fact("When did the first IKEA store open?", "year")
+    assert any(s["session"] for s in res["depth"]["sources"])                      # later turns search it too
+    fresh = Harness(HeuristicPolicy(), SiteWeb(), st)                              # "New chat": session gone
+    assert fresh._trust("mirror.net")["session"] == 0
+    st.close()
+
+
+def test_server_more_endpoint_and_explain(tmp_path):
+    import json as _json
+    import threading
+    import urllib.request
+    from src.planck3.serve import make_server
+    st = Store(tmp_path / "chat.sqlite")
+    srv = make_server(lambda: Harness(HeuristicPolicy(), SnippetWeb(), st), port=0)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{srv.server_address[1]}"
+
+    def post(path, obj):
+        return _json.loads(urllib.request.urlopen(urllib.request.Request(url + path, data=_json.dumps(obj).encode())).read())
+    assert "error" in post("/api/more", {"session": "s", "domain": "example.org"})
+    r = post("/api/chat", {"message": "When was IKEA founded?", "session": "s"})
+    assert r["tier"] == "confident" and r["explain"]["steps"] and r["explain"]["sources"]
+    m = post("/api/more", {"session": "s", "domain": "example.org"})
+    assert m["trust"]["session"] == 1.0
+    srv.shutdown()
+    st.close()
+
+
+def test_answer_tier_summary():
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    import importlib
+    cli = importlib.import_module("planck3")
+    recs = [{"tier": "confident", "shown_correct": True, "evidence_hit": True},
+            {"tier": "confident", "shown_correct": False, "evidence_hit": True},
+            {"tier": "low_confidence", "shown_correct": False, "evidence_hit": False},
+            {"tier": "none", "shown_correct": False, "evidence_hit": True}]
+    t = cli.answer_tiers(recs)
+    assert t["confident"]["precision"] == 0.5 and t["confident"]["rate"] == 0.5
+    assert t["low_confidence"]["precision"] == 0.0 and t["none"]["precision"] is None
+    assert t["none"]["evidence_recall"] == 1.0
+
+
+def test_snippet_publish_stamp_is_not_the_answer():
+    from src.planck3.candidates import _unstamp, snippet_candidates
+    assert _unstamp("Sep 13, 2026 \u00b7 Who won? Jane won.").startswith("Sep 13, 2026. Who won?")
+    assert _unstamp("3 days ago \u00b7 Tadej won.") == "3 days ago. Tadej won."
+    r = [{"url": "https://a.org/x", "title": "Final", "snippet": "Sep 13, 2026 \u00b7 Who won the girls' final? Jane Doe beat Mary Roe."}]
+    vals = [c["value"] for c in snippet_candidates("Who won the girls' final?", r, "entity")]
+    assert "Sep" not in vals and "Jane Doe" in vals

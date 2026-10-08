@@ -111,10 +111,23 @@ def mentions(sentence: str, answer_type: str) -> list[tuple[str, int]]:
 
 def _score(sentence: str, value: str, offset: int, q_words: list[str], weights: dict,
            q_unit: str | None = None) -> float:
+    return sum(_score_parts(sentence, value, offset, q_words, weights, q_unit).values())
+
+
+# what each score term means, in the words an answer card shows ("why this value")
+PART_LABELS = {"overlap": "sentence uses the question's words", "near": "value sits next to them",
+               "echo": "value repeats the question's subject", "unit": "unit matches the question",
+               "about": "source is about the subject", "repeats": "mentioned more than once",
+               "agree": "other sources give the same value"}
+
+
+def _score_parts(sentence: str, value: str, offset: int, q_words: list[str], weights: dict,
+                 q_unit: str | None = None) -> dict:
+    """The additive terms of a candidate's score, kept so an answer can say why it won."""
     s_norm = norm_text(sentence)
     s_words = set(s_norm.split())
     if not q_words:
-        return 0.0
+        return {"overlap": 0.0}
     overlap = sum(weights[w] for w in q_words if w in s_words) / sum(weights.values())
     # proximity: value close to a query word in the sentence
     prox = 0.0
@@ -126,7 +139,7 @@ def _score(sentence: str, value: str, offset: int, q_words: list[str], weights: 
     # a value that IS the subject of the question is not its answer
     v_words = set(norm_text(value).split())
     echo = 1.0 if v_words and v_words <= set(q_words) else 0.0
-    return overlap + 0.5 * prox - 1.5 * echo + _unit_bonus(value, q_unit)
+    return {"overlap": overlap, "near": 0.5 * prox, "echo": -1.5 * echo, "unit": _unit_bonus(value, q_unit)}
 
 
 def _unit_bonus(value: str, q_unit: str | None) -> float:
@@ -170,12 +183,21 @@ def snippet_candidates(question: str, results: list[dict], answer_type: str,
     # aboutness: a snippet from a page ABOUT the subject (title names it) is evidence; a snippet
     # from another page that merely mentions it ("Netflix Animation" for "Netflix founded") is not
     about = {r["url"]: title_aboutness(question, r.get("title", "")) for r in results}
-    lines = [(sent, r["url"]) for r in results for sent in split_sentences(r.get("snippet", ""))]
+    lines = [(sent, r["url"]) for r in results for sent in split_sentences(_unstamp(r.get("snippet", "")))]
     cands = _rank_lines(question, lines, answer_type, limit=10**6, domain_bonus=0.1,
                         line_bonus={u: 0.4 * a - (0.3 if a == 0 else 0.0) for u, a in about.items()})
     for c in cands:
         c["about"] = max(about.get(u, 0.0) for u in c.get("urls", [c["url"]]))
     return cands[:limit]
+
+
+_STAMP = re.compile(rf"^\s*((?:{_MONTHS})\.? \d{{1,2}}, \d{{4}}|\d+ (?:minutes?|hours?|days?|weeks?) ago)\s*[\u00b7\u2013\u2014-]\s*")
+
+
+def _unstamp(snippet: str) -> str:
+    """Bing-style snippets (ddgs) open with a publish stamp, 'Sep 13, 2026 · Who won ...': make it its own
+    sentence, so the stamp's month/year is not read as part of the answer sentence (round 4, Mac check)."""
+    return _STAMP.sub(lambda m: m.group(1) + ". ", snippet or "", count=1)
 
 
 def _rank_lines(question, lines, answer_type, limit, domain_bonus: float = 0.0,
@@ -193,12 +215,14 @@ def _rank_lines(question, lines, answer_type, limit, domain_bonus: float = 0.0,
             key = norm_text(value)
             if not key:
                 continue
-            sc = _score(sent, value, off, q_words, weights, q_unit) + (line_bonus or {}).get(url, 0.0)
+            parts = _score_parts(sent, value, off, q_words, weights, q_unit)
+            parts["about"] = (line_bonus or {}).get(url, 0.0)
+            sc = sum(parts.values())
             dom = _domain(url)
             prev = best.get(key)
             if prev is None:
                 best[key] = {"value": value, "type": answer_type, "context": sent[:240], "url": url,
-                             "score": sc, "support": 1, "domains": [dom], "urls": [url]}
+                             "score": sc, "support": 1, "domains": [dom], "urls": [url], "parts": parts}
             else:
                 prev["support"] += 1
                 if dom not in prev["domains"]:
@@ -206,11 +230,13 @@ def _rank_lines(question, lines, answer_type, limit, domain_bonus: float = 0.0,
                 if url not in prev["urls"]:
                     prev["urls"].append(url)
                 if sc > prev["score"]:
-                    prev.update(value=value, context=sent[:240], score=sc, url=url)
+                    prev.update(value=value, context=sent[:240], score=sc, url=url, parts=parts)
     cands = list(best.values())
     for c in cands:  # repeated mentions are weak corroboration; other domains stronger
-        c["score"] = round(c["score"] + 0.05 * min(c["support"] - 1, 4)
-                           + domain_bonus * min(len(c["domains"]) - 1, 3), 4)
+        c["parts"] = dict(c["parts"], repeats=0.05 * min(c["support"] - 1, 4),
+                          agree=domain_bonus * min(len(c["domains"]) - 1, 3))
+        c["parts"] = {k: round(v, 3) for k, v in c["parts"].items() if abs(v) >= 0.0005}
+        c["score"] = round(c["score"] + c["parts"].get("repeats", 0.0) + c["parts"].get("agree", 0.0), 4)
     cands.sort(key=lambda c: -c["score"])
     for a, b in zip(cands, cands[1:] + [None]):  # lead over the runner-up
         a["margin"] = round(a["score"] - (b["score"] if b else 0.0), 4)
@@ -290,6 +316,7 @@ def rank_passages(question: str, docs: list[dict], k: int = 6, per_source: int =
 
 
 _NOT_NODES = set("""january february march april may june july august september october november december
+jan feb mar apr jun jul aug sep sept oct nov dec
 monday tuesday wednesday thursday friday saturday sunday""".split())
 # nationality/language adjectives ("Swedish", "American", "Japanese") describe, they are not places to go
 _ADJ_SUFFIX = ("ish", "ese", "ian", "ean", "ican", "ic", "an")

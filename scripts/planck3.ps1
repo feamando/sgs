@@ -1,7 +1,8 @@
 <#
  .SYNOPSIS
    Planck 3.0 one-stop runner for the Windows 4090 box.
-   Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3)
+   Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
+   SETUP_planck_20261008.md (round 4)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -26,6 +27,8 @@
                -Hertz adds the Hertz 1.2 encoder arm (needs checkpoints/hertz/best.pt)
      round3    round 3 (SETUP_planck_20260903.md): fresh + long-tail benchmark vs base chat, G2 (learn the
                decisions from known answers), G1 confirmation (new task seed, seeds 3-5, rank primary, Hertz)
+     round4    round 4 (SETUP_planck_20261008.md): ddgs search (no Docker) on the fresh benchmark, answer
+               tiers (confident / low confidence / evidence only), G2 v2 retrained on ddgs, system trust layer
      report    every result in one table -> results/planck3/REPORT.md
      py        pass-through: .\scripts\planck3.ps1 py wikirace eval --limit 50
 
@@ -159,7 +162,8 @@ function Do-Setup {
     # install-if-missing (no --upgrade): fast on re-runs, no surprise version bumps mid-experiment
     # lxml_html_clean: lxml >= 5.2 split html.clean out; without it trafilatura/justext fail with
     # ImportError and extraction silently falls back to the crude tag stripper (first box run)
-    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "lxml_html_clean", "requests", "scipy", "pytest", "sentencepiece")
+    # ddgs: round 4 search (metasearch library, no Docker); scikit-learn: the G2 v2 gate
+    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "lxml_html_clean", "requests", "scipy", "pytest", "sentencepiece", "ddgs", "scikit-learn")
 }
 
 function Do-Doctor([bool]$DeepRun) {
@@ -218,6 +222,22 @@ function Do-Searxng {
     $logs = (Invoke-Quiet docker @("logs", "--tail", "15", $SEARX_NAME)).Out
     if ($logs) { $logs | ForEach-Object { Write-Host "    $_"; Write-Log "    $_" } }
 }
+
+# ── ddgs (round 4 search of record) ──────────────────────────────────────
+$script:DdgsUp = $false
+function Test-Ddgs { return (Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "ddgs")).Code -eq 0 }
+function Do-Ddgs([bool]$Required) {
+    if (Test-Ddgs) { Log "ddgs answering (no Docker needed)"; $script:DdgsUp = $true; return }
+    Warn "ddgs returned nothing (search engines rate-limit scripted clients); re-checking every 2 min for up to 10 min"
+    for ($i = 0; $i -lt 5; $i++) {
+        Start-Sleep -Seconds 120
+        if (Test-Ddgs) { Log "ddgs answers again"; $script:DdgsUp = $true; return }
+    }
+    if ($Required) { throw "ddgs is not answering. Round 4 measures ddgs search, so it stops instead of running on the Wikipedia fallback. Try again in an hour; finished work is kept." }
+    Warn "ddgs still not answering: trying SearXNG"; Do-Searxng
+}
+# chat / serve / explore: ddgs if it answers, else SearXNG, else Wikipedia search
+function Do-Search { if (Test-Ddgs) { Log "search: ddgs"; $script:DdgsUp = $true } else { Do-Searxng } }
 
 # ── G0 ───────────────────────────────────────────────────────────────────
 function Do-G0 {
@@ -427,6 +447,66 @@ function Do-G1Confirm {
     }
 }
 
+# ── round 4 (SETUP_planck_20261008.md) ────────────────────────────────────
+# A ddgs run is valid if ddgs served >= 80% of its searches and <= 20% came back empty. A run that
+# misses that is set aside ONCE as <dir>_degraded and redone; a second miss is kept (DEGRADED in the report).
+function Test-Round4Run([string]$dir) {
+    if (-not (Test-Path "$dir/summary.json")) { return $false }
+    $j = Get-Content "$dir/summary.json" -Raw | ConvertFrom-Json
+    if ($j.mode -eq "closed_book") { return $true }
+    $h = $j.search_health
+    $ok = ($null -ne $h) -and [bool]$h.valid -and ($j.search -eq "ddgs") -and ($null -ne $h.primary_share) -and ($h.primary_share -ge 0.8)
+    if ($ok) { return $true }
+    if (Test-Path "${dir}_degraded") { Warn "$dir is below the bar again (ddgs served $($h.primary_share)); keeping it, reported as DEGRADED"; return $true }
+    Move-Item $dir "${dir}_degraded"; Log "kept $dir as ${dir}_degraded (ddgs served too little of it); redoing it"
+    return $false
+}
+
+function Invoke-R4Run([string]$name, [string[]]$a, [string]$what) {
+    $out = "$RES/$name"
+    if (Test-Round4Run $out) { Log "SKIP $name (valid)"; return }
+    Log $what
+    $smp = if ($Quick) { @("--sample", "12") } else { @() }
+    P3 (@("g0") + $a + @("--search", "ddgs", "--out", $out, "--gemma-path", $GEMMA) + $smp)
+}
+
+function Do-Round4 {
+    $pol = Get-TeacherPolicy
+    # 1. the search change alone (system trust OFF = same reading order as round 3): rules S2, A1, P
+    if ($pol -ne "heuristic" -and -not (Test-Path "$RES/g0f_${pol}_closedbook/summary.json")) {
+        Log "fresh/long-tail: base chat ($pol closed-book)"
+        P3 @("g0", "--policy", $pol, "--closed-book", "--tasks", $FRESH, "--out", "$RES/g0f_${pol}_closedbook", "--gemma-path", $GEMMA)
+    }
+    Invoke-R4Run "g0f_heuristic_snip_ddgs$Tag" @("--policy", "heuristic", "--tasks", $FRESH, "--system-trust", "none") "round 4: heuristic on ddgs (rule S2, P)"
+    if ($pol -ne "heuristic") {
+        Invoke-R4Run "g0f_${pol}_snip_ddgs$Tag" @("--policy", $pol, "--tasks", $FRESH, "--system-trust", "none") "round 4: $pol on our tools, ddgs (rules S2, A1, P)"
+    }
+    # 2. G2 v2 trained on what deployment sees (ddgs), then the system trust layer from the same points
+    if (-not (Test-Path $G2_TRAIN)) { throw "missing $G2_TRAIN (git pull)" }
+    $pts = "data/planck3/g2/points_ddgs$Tag.jsonl"
+    $lim = if ($Quick) { @("--limit", "100") } else { @() }
+    Log "G2 collect on ddgs: labelled decision points from known answers (resumable; ~2 h first time)"
+    P3 (@("g2", "collect", "--search", "ddgs", "--points", $pts) + $lim)
+    Log "system trust layer from $pts -> config/planck3/source_trust.json"
+    P3 @("trust", "build", "--points", $pts)
+    $encs = @("hash"); if ((Test-Path $PLANCK_CKPT) -and (Test-Path $PLANCK_TOK)) { $encs += "planck" }
+    $stem = [System.IO.Path]::GetFileNameWithoutExtension($pts)
+    foreach ($e in $encs) {
+        $emb = "data/planck3/g2/emb_${e}_$stem.npy"
+        $head = "$RES/g2v2_head_${e}_s0_ddgs$Tag/head.pt"
+        if ((Test-Newer $pts $emb) -or $Quick) {
+            Log "G2 embed: $e ($stem)"; P3 @("g2", "embed", "--encoder", $e, "--points", $pts, "--checkpoint", $PLANCK_CKPT, "--tokenizer", $PLANCK_TOK)
+        }
+        if ((Test-Newer $emb $head) -or $Quick) { Log "G2 v2 train head:$e on ddgs points"; P3 @("g2", "train2", "--encoder", $e, "--points", $pts, "--tag", "_ddgs$Tag") }
+        Invoke-R4Run "g0f_planck-g2v2-${e}_ddgs$Tag" @("--policy", "planck", "--g2-head", $head, "--tasks", $FRESH,
+            "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) "round 4: G2 v2 head:$e (ddgs-trained) on the fresh benchmark (rules B, P)"
+        Invoke-R4Run "g0_planck-g2v2-${e}_ddgs$Tag" @("--policy", "planck", "--g2-head", $head, "--tasks", "scripts/assets/planck3_tasks.json",
+            "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) "round 4: G2 v2 head:$e on the 47-question seed benchmark (rule B)"
+    }
+    # 3. the same heuristic WITH the system trust layer: rule T (does measured source trust help?)
+    Invoke-R4Run "g0f_heuristic_snip_ddgs_trust$Tag" @("--policy", "heuristic", "--tasks", $FRESH) "round 4: heuristic on ddgs + system trust layer (rule T)"
+}
+
 # ── results back to git (readable from any machine) ──────────────────────
 function Do-Push {
     if ($NoPush) { Log "-NoPush: results left uncommitted"; return }
@@ -436,6 +516,10 @@ function Do-Push {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
+    # the system trust layer is shared with every user: it ships in git
+    if (Test-Path "config/planck3/source_trust.json") { Invoke-Quiet git @("add", "--", "config/planck3/source_trust.json") | Out-Null }
+    Get-ChildItem -Path "data/planck3/g2" -Filter "points_*.health.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
     Invoke-Checked git @("commit", "-m", "results(planck3): run$Tag $(Get-Date -Format yyyy-MM-dd_HHmm)")
     Invoke-Checked git @("pull", "--rebase", "origin", "main")
@@ -470,14 +554,14 @@ switch ($Command.ToLower()) {
         P3 (@("ask", $Question, "--type", $Type, "--policy", (Get-TeacherPolicy), "--gemma-path", $GEMMA, "-v") + $Rest)
     }
     { $_ -in @("chat", "serve") } {
-        Do-Searxng
+        Do-Search
         if ($Command -eq "serve") { Log "open http://127.0.0.1:8010 in a browser (Ctrl+C to stop)" }
         P3 (@($Command.ToLower(), "--policy", (Get-TeacherPolicy), "--gemma-path", $GEMMA) + $Rest)
     }
     "g0"         { Start-RunLog "g0"; Do-Searxng; Do-G0; P3 @("report") }
     "g1"         { Start-RunLog "g1"; Do-G1; P3 @("report") }
     "report"     { P3 @("report") }
-    "digest"     { $a = @("digest"); if ($Explore) { Do-Searxng; $a += "--explore" }; P3 ($a + $Rest) }
+    "digest"     { $a = @("digest"); if ($Explore) { Do-Search; $a += "--explore" }; P3 ($a + $Rest) }
     "schedule"   { Do-Schedule }
     "unschedule" { Do-Unschedule }
     "py"         { P3 @((@($Question) + $Rest) | Where-Object { $_ }) }
@@ -493,6 +577,18 @@ switch ($Command.ToLower()) {
         if (-not $Quick) { Do-G1Confirm } else { Log "-Quick: G1 confirmation skipped" }
         P3 @("report")
         Log ("round3$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round4"     {
+        Start-RunLog "round4"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Doctor $true
+        Do-Ddgs $true
+        Do-Round4
+        P3 @("report")
+        Log ("round4$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "all"        {

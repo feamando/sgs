@@ -28,7 +28,7 @@ def infer_answer_type(question: str) -> str:
     if re.search(r"\b(what|which|in what|in which) year\b|^\s*when\b|\bwhat year\b", q):
         return "year"
     if re.search(r"\bhow (many|much|tall|high|long|far|big|large|heavy|old|fast|deep|wide)\b", q) or \
-       re.search(r"\b(height|population|number|price|cost|size|length|weight|speed|atomic number|"
+       re.search(r"\b(height|elevation|altitude|population|number|price|cost|size|length|weight|speed|atomic number|"
                  r"capacity|area|distance|temperature|percentage)\b", q):
         return "number"
     if re.search(r"^\s*(who|whom)\b|\bwho (is|was|were|founded|wrote|directed|painted|invented|developed|created)\b", q) or \
@@ -70,20 +70,61 @@ def resolve_followup(utterance: str, prev: Turn | None) -> tuple[str, str, str |
 
 
 def chat_answer(turn: Turn) -> str:
-    """A chat reply: direct answer first, then the evidence and source. No generation."""
+    """
+    A chat reply: the direct answer first, then its evidence, source and confidence. When the
+    confidence is low it says so up front and still shows the best guess. No generation.
+    """
     r = turn.result
-    if not r.get("answered"):
-        return ("I couldn't find an answer I'd trust for that. "
+    ex = r.get("explain") or {}
+    tier = ex.get("tier") or ("confident" if r.get("answered") else "none")
+    if tier == "none":
+        return ("I couldn't find an answer in what I read. The evidence I found is below. "
                 f"(searched for: \"{turn.question}\")")
-    conf = r["p"]
-    hedge = "" if conf >= 0.75 else "Probably " if conf >= 0.5 else "Not sure, but possibly "
-    src = domain_of(r["source_url"] or "")
-    extra = ", and a second source agrees" if r.get("verified") else ""
+    value, p = ex.get("value", r.get("value")), ex.get("confidence", r.get("p"))
+    ctx = (ex.get("context") or r.get("context") or "").strip()
+    srcs = ex.get("sources") or []
+    main = next((s["domain"] for s in srcs if s["role"] == "answer"), domain_of(r.get("source_url") or ""))
+    agree = next((s["domain"] for s in srcs if s["role"] == "agrees"), None)
+    src = main + (f", and {agree} agrees" if agree else ", single source")
     mem = " (from memory)" if r.get("from_store") else ""
-    ctx = (r.get("context") or "").strip()
-    return (f"{hedge}**{r['value']}**{mem}.\n"
-            f"> {ctx[:220]}\n"
-            f"Source: {src}{extra} · confidence {conf:.0%}")
+    kind = ex.get("confidence_kind", "")
+    conf = f"confidence {p:.0%}" if p is not None else "no confidence estimate"
+    if tier == "confident":
+        return f"**{value}**{mem}.\n> {ctx[:220]}\nSource: {src} · {conf} ({kind})"
+    cands = [c for c in ex.get("candidates", []) if c["value"] != value][:1]
+    runner = ""
+    if cands:
+        c = cands[0]
+        runner = f" · runner-up {c['value']}" + (f" ({c['p']:.0%})" if c.get("p") is not None else "")
+    return (f"Low confidence in my results. Best guess: **{value}**{mem} ({conf}, below my "
+            f"{ex.get('bar', 0.5):.0%} bar; {kind}).\n> {ctx[:220]}\nSource: {src}{runner}")
+
+
+def render_why(turn: Turn) -> str:
+    """How the answer was collated, the confidence and the weights behind it, the trust of each source."""
+    ex = turn.result.get("explain") or {}
+    if not ex:
+        return "(no explanation recorded)"
+    lines = ["How I got this:"] + [f"  {i}. {s}" for i, s in enumerate(ex["steps"], 1)]
+    if ex.get("confidence") is not None:
+        lines.append(f"Confidence: {ex['confidence']:.0%} ({ex['confidence_kind']}); my bar is {ex['bar']:.0%}")
+    if ex.get("candidates"):
+        lines.append("Candidates: " + " · ".join(
+            c["value"] + (f" ({c['p']:.0%})" if c.get("p") is not None else f" (score {c.get('score', 0):.2f})")
+            for c in ex["candidates"]))
+    if ex.get("why_value"):
+        lines.append("Why this value: " + " · ".join(f"{k} {v:+.2f}" for k, v in ex["why_value"]))
+    wc = ex.get("why_confidence") or {}
+    if wc.get("items"):
+        lines.append(f"Why this confidence ({wc['kind']}): " + " · ".join(
+            f"{k} {v:+.2f}" if isinstance(v, (int, float)) else f"{k} {v}" for k, v in wc["items"]))
+    if ex.get("sources"):
+        lines.append("Sources (trust: everyone / you, from your clicks and your questions / this chat -> combined):")
+        for s in ex["sources"]:
+            t = s["trust"]
+            lines.append(f"  {s['role']:<7} {s['domain']:<28} {t['system']:.2f} / {t['user']:.2f} / "
+                         f"{t['session']:+.1f} -> {t['combined']:.2f}")
+    return "\n".join(lines)
 
 
 def depth_summary(turn: Turn) -> str:

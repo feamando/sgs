@@ -41,6 +41,12 @@ MAX_PAGES = 2  # fetch budget per question (declared 2026-10-07, before the box 
 
 
 # ── features (identical at train and decision time) ──────────────────────
+# names in the words an answer card uses ("why this confidence")
+FEATURE_NAMES = ["lexical match", "lexical lead over the next candidate", "source is about the subject",
+                 "sources agreeing", "times mentioned", "position in the ranking", "repeats the question",
+                 "read from a snippet", "near the top of the ranking"] + [f"answer type {t}" for t in ANSWER_TYPES]
+
+
 def cand_text(c: dict) -> str:
     return f"{c['value']}. {c.get('context', '')}"[:400]
 
@@ -389,6 +395,8 @@ class PlanckPolicy(Policy):
 #   threshold     the lowest gate score whose validation precision >= GATE_PRECISION,
 #                 fixed before any benchmark run; coverage/precision reported on a test split
 GATE_PRECISION = 0.90
+GATE_FEATURE_NAMES = ["choice head's probability", "lead over the runner-up", "spread across candidates",
+                      "number of candidates", "agrees with the lexical ranker"] + FEATURE_NAMES
 
 
 def gate_features(choice_p, cands, question, answer_type, from_snippet) -> list[float]:
@@ -542,6 +550,8 @@ def train_v2(points_path: Path, emb_dir: Path, encoder_name: str, out_dir: Path,
 
 class PlanckPolicyV2(PlanckPolicy):
     """v2: choose with the choice head; answer only when the calibrated gate clears tau."""
+    calibrated = True
+    confidence_kind = "calibrated on held-out questions"
 
     def __init__(self, head_path: str, checkpoint: str | None = None, tokenizer: str | None = None):
         super().__init__(head_path, checkpoint, tokenizer)
@@ -562,9 +572,13 @@ class PlanckPolicyV2(PlanckPolicy):
             lg = self.model(torch.from_numpy(E[:1]), torch.from_numpy(E[1:]).unsqueeze(0), ft)[0, :len(spans)]
             pr = torch.softmax(lg / self.T, -1).numpy()
         x = np.array(gate_features(pr, spans, q, at, from_snippet))
-        gate = float(1 / (1 + np.exp(-((x - self.g_mu) / self.g_sd @ self.g_coef + self.g_b)))) \
-            if self.g_coef is not None else float(1 / (1 + np.exp(-self.g_b)))
-        return pr, gate
+        if self.g_coef is None:
+            self._weights = []
+            return pr, float(1 / (1 + np.exp(-self.g_b)))
+        contrib = (x - self.g_mu) / self.g_sd * self.g_coef      # each feature's push, in log-odds
+        order = np.argsort(-np.abs(contrib))[:5]
+        self._weights = [[GATE_FEATURE_NAMES[i], round(float(contrib[i]), 3)] for i in order]
+        return pr, float(1 / (1 + np.exp(-(contrib.sum() + self.g_b))))
 
     def decide(self, obs):
         phase = obs["phase"]
@@ -574,7 +588,8 @@ class PlanckPolicyV2(PlanckPolicy):
             k = int(pr.argmax())
             top = np.argsort(-pr)[:3]
             meta = {"argmax": k, "argmax_value": spans[k]["value"], "gate": round(gate, 4), "tau": self.tau,
-                    "top3": [[int(i), spans[int(i)]["value"], round(float(pr[i]), 4)] for i in top]}
+                    "top3": [[int(i), spans[int(i)]["value"], round(float(pr[i]), 4)] for i in top],
+                    "gate_weights": self._weights, "gate_bias": round(float(self.g_b), 3)}
             if gate >= self.tau:
                 self._held_p = gate
                 return Decision("EXTRACT", k=k, p=gate, meta=meta)
@@ -605,6 +620,7 @@ def add_cli(sub, add_web_args, build_web):
     p.add_argument("--checkpoint", default="checkpoints/planck13/best.pt")
     p.add_argument("--tokenizer", default="data/wikipedia/tokenizer.model")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--tag", default="", help="suffix for the head dir (round 4: _ddgs)")
     add_web_args(p)
 
     def default_points():
@@ -628,5 +644,5 @@ def add_cli(sub, add_web_args, build_web):
                   REPO_ROOT / "results" / "planck3" / f"g2_head_{args.encoder}_s{args.seed}", seed=args.seed)
         else:
             train_v2(pts, G2_DIR, args.encoder,
-                     REPO_ROOT / "results" / "planck3" / f"g2v2_head_{args.encoder}_s{args.seed}", seed=args.seed)
+                     REPO_ROOT / "results" / "planck3" / f"g2v2_head_{args.encoder}_s{args.seed}{args.tag}", seed=args.seed)
     p.set_defaults(fn=run)

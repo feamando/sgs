@@ -288,13 +288,32 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **G2 v2 FAIL (rule B):** seed 63.8% (v1: 2.1%), fresh 8.4% vs heuristic 21.0%, wrong-when-answered 29%.
   - The choice head beats the ranker (49.0 vs 36.4%); the gate is calibrated (AUC 0.78, ECE 0.05) but answers ~5% at 90% precision.
   - Retrieval (answer in top-3 snippets ~19-27%) is the ceiling on fresh + long-tail. Cache-order bug fixed (`primary_share`, DEGRADED verdict, auto-redo).
+- **Round 4 built + pre-registered (2026-10-08, `SETUP_planck_20261008.md`, `planck3.ps1 round4`, no Docker):**
+  - **Search of record: ddgs.** It is the duckduckgo_search library; engines are tried in the order duckduckgo, bing, brave, yahoo, mojeek, with Google excluded, then per-query Wikipedia fallback.
+    - It scrapes, so it is a research backend, not a product one.
+    - A browser scraper was not built: it adds only looking human to bot detection.
+    - On the Mac, ~15 test queries got DuckDuckGo to answer HTTP 202, Brave 429 and Mojeek 403, while Bing and Yahoo kept answering.
+  - **Answers show their work.** Every answer carries an `explain` record and lands in one of three tiers, Confident / "Low confidence in my results" (best guess still shown) / No answer found (evidence only), with the line at p = 0.5.
+    - The record holds the steps in words, the candidates, why this value (additive score terms), why this confidence (G2 v2: gate log-odds contributions; heuristic: match, lead, second source), and the kind of confidence (calibrated or not).
+  - **Three-layer source trust**, `logit = system + user + session`:
+    - **system:** measured on the G2 training snippets, capped at 20 observations, `config/planck3/source_trust.json`.
+    - **user:** trust more / trust less buttons plus implicit corroboration.
+    - **session:** the "more results from here" button, which runs a `site:` search now and in later turns.
+    - Trust orders reading and depth; it does not move the answer value yet.
+  - **Rules:**
+    - **S2:** ddgs snippet recall @3 > pure-Wikipedia 18.9%, paired p < 0.05.
+    - **A1:** repeated.
+    - **P1:** confident-tier precision ≥ 0.80.
+    - **P2:** confident − low precision ≥ 0.20.
+    - **B:** unchanged, with G2 v2 retrained on ddgs.
+    - **T:** system trust on vs off, reported.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
 
 1. **Encoder base:** Planck 1.3 (100M) first. It serves "runs on anything" and the task is choosing, not generating. Hertz 1.2 (640M) only as the G1 fallback ablation.
-2. **Search backend:** self-hosted **SearXNG** (free, no key, local). Keep the Brave Search API as a paid fallback if result quality blocks G0.
+2. **Search backend:** **ddgs** from round 4 (free, no Docker; scraping, so research only), SearXNG and Wikipedia as fallbacks. A licensed API (Brave Search API or similar) for anything user-facing, through the same S2 rule.
 3. **Teacher:** **Gemma 4 E4B** for bulk trajectories ($0, local), with **Haiku** on a 10% sample to measure the teacher gap.
 4. **Name the consumer surface:** fold it into **Satz** (next minor) rather than a new product swimlane. Your call when G1 passes.
 

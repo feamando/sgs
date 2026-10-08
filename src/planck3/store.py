@@ -8,8 +8,10 @@ adjacent to it, from the sources they trust, instead of what an ad auction wants
     passages  the evidence read to answer (retrievable later with no web at all)
     edges     entity co-mention graph built from passages ("what is adjacent")
     queries   the interest log (what this user asks about, recency-weighted)
-    domains   per-domain Beta(a, b) trust prior: success = extraction corroborated or
-              the user liked the source; failure = opened but nothing usable / disliked
+    domains   the USER layer of source trust: per-domain Beta(a, b), success = extraction
+              corroborated or "trust more"; failure = opened but nothing usable / "trust less".
+              It sits on top of the shipped SYSTEM layer and under the per-chat SESSION layer
+              (src/planck3/trust.py)
     watches   stored fact queries re-run on a schedule; notify on change
 
 Lookup is lexical in v0 (exact entity/attribute, else fuzzy question match).
@@ -70,7 +72,8 @@ def ttl_for(attribute: str | None, question: str, override: float | None = None)
 
 
 class Store:
-    def __init__(self, path: str | Path, clock=time.time):
+    def __init__(self, path: str | Path, clock=time.time, system_trust: str | Path | dict | None = None):
+        from .trust import load_system
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         # the chat server serializes turns behind a lock, so cross-thread use is safe
@@ -78,6 +81,7 @@ class Store:
         self.db.row_factory = sqlite3.Row
         self.db.executescript(_SCHEMA)
         self.clock = clock
+        self.system = system_trust if isinstance(system_trust, dict) else load_system(system_trust)
 
     def close(self):
         self.db.close()
@@ -241,11 +245,14 @@ class Store:
                 "entities": q("SELECT COUNT(DISTINCT src) FROM edges"), "edges": q("SELECT COUNT(*) FROM edges") // 2,
                 "queries": q("SELECT COUNT(*) FROM queries"), "domains": q("SELECT COUNT(*) FROM domains")}
 
-    # ── domain prior ─────────────────────────────────────────────────────
-    def domain_prior(self, domain: str) -> float:
+    # ── source trust (system + user here; the session layer lives on the chat harness) ──
+    def trust(self, domain: str, session_shift: float = 0.0) -> dict:
+        from .trust import layers
         row = self.db.execute("SELECT a, b FROM domains WHERE domain=?", (domain,)).fetchone()
-        a, b = (row["a"], row["b"]) if row else (1.0, 1.0)
-        return a / (a + b)
+        return layers(self.system.get(domain), (row["a"], row["b"]) if row else None, session_shift)
+
+    def domain_prior(self, domain: str) -> float:
+        return self.trust(domain)["combined"]
 
     def update_domain(self, domain: str, success: bool, weight: float = 1.0):
         row = self.db.execute("SELECT a, b FROM domains WHERE domain=?", (domain,)).fetchone()
@@ -256,9 +263,13 @@ class Store:
 
     def top_domains(self, n: int = 10) -> list[tuple[str, float, float]]:
         rows = self.db.execute("SELECT domain, a, b FROM domains").fetchall()
-        ranked = sorted(((r["domain"], r["a"] / (r["a"] + r["b"]), r["a"] + r["b"] - 2) for r in rows),
+        ranked = sorted(((r["domain"], self.domain_prior(r["domain"]), r["a"] + r["b"] - 2) for r in rows),
                         key=lambda x: (-x[1], -x[2]))
         return ranked[:n]
+
+    def known_domains(self) -> set[str]:
+        """Every domain with an opinion: shipped (system) or this user's own."""
+        return set(self.system) | {r["domain"] for r in self.db.execute("SELECT domain FROM domains")}
 
     # ── watches ──────────────────────────────────────────────────────────
     def add_watch(self, question, answer_type, condition: dict | None = None,

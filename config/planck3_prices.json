@@ -7,8 +7,8 @@
     "claude-opus-5":    {"input": 5.00, "output": 25.00}
   },
   "llm_equivalent": "claude-haiku-4-5",
-  "search_per_call": {"searxng": 0.0, "wikipedia": 0.0, "brave": 0.005},
-  "_search_note": "searxng/wikipedia are free to call. 'brave' is a PLACEHOLDER; verify against the current Brave Search API price sheet before quoting it.",
+  "search_per_call": {"ddgs": 0.0, "searxng": 0.0, "wikipedia": 0.0, "brave": 0.005},
+  "_search_note": "ddgs/searxng/wikipedia are free to call. 'brave' is a PLACEHOLDER; verify against the current Brave Search API price sheet before quoting it.",
   "cpu_per_hour": 0.05,
   "_cpu_note": "ASSUMPTION: rough price of one cloud vCPU-hour, used only to put a number on local policy compute if it were served from a box. On a user's own device the marginal cost is ~0."
 }

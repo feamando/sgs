@@ -18,8 +18,8 @@ DEFAULT_MIN_TRUST = 0.6
 
 
 def trusted_domains(store, min_trust: float = DEFAULT_MIN_TRUST) -> set[str]:
-    rows = store.db.execute("SELECT domain, a, b FROM domains").fetchall()
-    return {r["domain"] for r in rows if r["a"] / (r["a"] + r["b"]) >= min_trust}
+    """System layer (shipped, measured) + this user's layer, combined (src/planck3/trust.py)."""
+    return {d for d in store.known_domains() if store.domain_prior(d) >= min_trust}
 
 
 def build_digest(store, n_interests: int = 5, n_adjacent: int = 3, min_trust: float = DEFAULT_MIN_TRUST) -> dict:

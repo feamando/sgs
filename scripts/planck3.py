@@ -12,7 +12,8 @@ Commands:
     ask "question" --type year        one question -> answer card + decision trace
     g0  --policy gemma                G0: run the seed benchmark, write trajectories + gate verdict
     watch add|list|run                background watch tasks (read-only)
-    search-check                      is SearXNG up? (auto falls back to Wikipedia search)
+    search-check [--backend ddgs]     does search answer? (auto: ddgs -> SearXNG -> Wikipedia search)
+    trust build|show                  system layer of source trust from the G2 training points
     wikirace build|embed|train|eval   G1 pipeline (see src/planck3/wikirace.py)
     doctor [--deep]                   preflight + ETA per stage; --deep loads Gemma/Planck and measures them
     report                            every G0/G1 result in one table -> results/planck3/REPORT.md
@@ -28,7 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.planck3.util import REPO_ROOT, append_jsonl, read_json, utf8_console, write_json  # noqa: E402
+from src.planck3.util import REPO_ROOT, append_jsonl, read_json, read_jsonl, utf8_console, write_json  # noqa: E402
 
 RESULTS = REPO_ROOT / "results" / "planck3"
 CACHE = REPO_ROOT / "data" / "planck3_cache"
@@ -37,27 +38,29 @@ G0_PASS, G0_KILL = 0.60, 0.40
 
 
 def build_web(args, log_path=None):
-    from src.planck3.web import Web, WebCache
+    """auto (round 4): ddgs if installed and answering, else SearXNG if up, else Wikipedia search."""
+    from src.planck3.web import SCRAPED_BACKENDS, Web, WebCache
     cache = WebCache(args.cache_dir, mode=args.net)
     backend = args.search
-    web = Web(cache, search_backend="searxng" if backend == "auto" else backend,
+    web = Web(cache, search_backend="ddgs" if backend == "auto" else backend,
               searxng_url=args.searxng_url, log_path=log_path)
-    if backend == "auto":
-        if args.net != "replay" and web.searxng_alive():
+    if backend == "auto" and args.net != "replay":
+        if web.ddgs_alive():
+            web.backend = "ddgs"
+        elif web.searxng_alive():
+            print("[planck3] ddgs not answering (not installed or rate-limited); using SearXNG")
             web.backend = "searxng"
         else:
-            if args.net != "replay":
-                print(f"[planck3] SearXNG not reachable at {args.searxng_url}; using Wikipedia search "
-                      f"(start it with: .\\scripts\\planck3.ps1 searxng)")
+            print("[planck3] neither ddgs nor SearXNG answers; using Wikipedia search")
             web.backend = "wikipedia"
     print(f"[planck3] search={web.backend} net={args.net} cache={args.cache_dir}")
-    if web.backend == "searxng" and args.net != "replay":
-        print("[planck3] empty SearXNG results are retried once, then fall back to Wikipedia per query")
+    if web.backend in SCRAPED_BACKENDS and args.net != "replay":
+        print(f"[planck3] empty {web.backend} results are retried once, then fall back to Wikipedia per query")
     return web
 
 
 def add_web_args(p):
-    p.add_argument("--search", default="auto", choices=["auto", "searxng", "wikipedia"])
+    p.add_argument("--search", default="auto", choices=["auto", "ddgs", "searxng", "wikipedia"])
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--net", default="live", choices=["live", "replay", "refresh"],
                    help="live: cache-then-network (default); replay: cache only; refresh: network only")
@@ -113,10 +116,11 @@ def _chat_harness_factory(args):
 
 
 def cmd_chat(args):
-    from src.planck3.chat import ChatSession, chat_answer, depth_summary, render_depth
+    from src.planck3.chat import ChatSession, chat_answer, depth_summary, render_depth, render_why
     sess = ChatSession(_chat_harness_factory(args)())
-    print("Planck 3.0 chat. Follow up naturally ('and H&M?', 'when was it founded?'). "
-          "'more' shows the evidence behind the last answer, 'new' resets, 'quit' exits.")
+    print("Planck 3.0 chat. Follow up naturally ('and H&M?', 'when was it founded?'). 'why' shows how the "
+          "last answer was collated (steps, confidence, weights, source trust), 'more' the evidence, "
+          "'more from <site>' reads more of one source, 'trust <site> up|down', 'new' resets, 'quit' exits.")
     while True:
         try:
             msg = input("\nyou> ").strip()
@@ -129,6 +133,23 @@ def cmd_chat(args):
             continue
         if msg == "more":
             print(render_depth(sess.turns[-1]) if sess.turns else "(ask something first)")
+            continue
+        if msg == "why":
+            print(render_why(sess.turns[-1]) if sess.turns else "(ask something first)")
+            continue
+        if msg.startswith("more from "):
+            if not sess.turns:
+                print("(ask something first)")
+                continue
+            r = sess.h.more_from(msg[len("more from "):].strip(), sess.turns[-1].question)
+            print(f"  this chat now weights {r['domain']} {r['trust']['session']:+.1f} (trust {r['trust']['combined']:.2f})")
+            for i, p_ in enumerate(r["passages"], 1):
+                print(f"  {i}. \"{p_['text'][:300]}\"\n     {p_['url']}")
+            continue
+        if msg.startswith("trust ") and len(msg.split()) == 3:
+            _, dom, v = msg.split()
+            sess.h.store.feedback("source", dom, 1 if v in ("up", "more", "+") else -1)
+            print(f"  {dom}: trust now {sess.h.store.trust(dom)['combined']:.2f} (your layer)")
             continue
         if not msg:
             continue
@@ -194,7 +215,7 @@ def cmd_g0(args):
     if args.store is None and store_path.exists():
         store_path.unlink()  # a run's own store starts empty unless you pass --store (G3)
     web = build_web(args, log_path=run / "web_log.jsonl")
-    store = Store(store_path)
+    store = Store(store_path, system_trust={} if args.system_trust == "none" else args.system_trust)
     policy = make_policy(args)
     h = Harness(policy, web, store, snippet_first=not args.no_snippet_first,
                 answer_threshold=args.answer_threshold, depth_pages=args.depth_pages)
@@ -220,6 +241,7 @@ def cmd_g0(args):
 
     summ = summarize(records)
     summ.update({"policy": args.policy, "search": web.backend, "net": args.net, "tasks": str(args.tasks),
+                 "system_trust_domains": len(store.system),
                  "n_invalid_decisions": sum(r["invalid"] for r in records),
                  "gold_reachable": sum(r["gold_reachable"] for r in records) / max(len(records), 1),
                  "serp_answer_rate_at3": sum(r["serp_visible"] for r in records) / max(len(records), 1),
@@ -231,6 +253,7 @@ def cmd_g0(args):
                  "answered_from_snippet": sum(r["from_snippet"] for r in records) / max(len(records), 1),
                  "gated_rate": sum(r["gated"] for r in records) / max(len(records), 1),
                  "gated_would_be_correct": sum(r["gated_correct"] for r in records),
+                 "tiers": answer_tiers(records),
                  "graph": store.graph_stats(),
                  "cost": summarize_cost(records, prices),
                  "web_calls_network": {k: v for k, v in web.calls.items()},
@@ -244,6 +267,24 @@ def cmd_g0(args):
     _print_summary("G0", summ)
     _gzip(ctx["traj"])
     print(f"\n  run dir: {run}")
+
+
+def answer_tiers(records) -> dict:
+    """
+    The product view (pre-registered 2026-10-08, round 4): every question lands in one tier.
+    confident = answered with p >= CONFIDENT_P; low_confidence = a value shown with a clear
+    "Low confidence" label; none = evidence only. Precision is over the values shown.
+    """
+    n = max(len(records), 1)
+    out = {}
+    for t in ("confident", "low_confidence", "none"):
+        sub = [r for r in records if r.get("tier") == t]
+        right = sum(1 for r in sub if r.get("shown_correct"))
+        ev = sum(1 for r in sub if r.get("evidence_hit"))
+        out[t] = {"n": len(sub), "rate": len(sub) / n,
+                  "precision": (right / len(sub)) if sub and t != "none" else None,
+                  "evidence_recall": ev / len(sub) if sub else None}
+    return out
 
 
 def _stratified(tasks, n):
@@ -335,6 +376,8 @@ def _score_fact(ctx, question, answer_type, gold, task_id, entity=None, attribut
     res["evidence_hit"] = _evidence_hit(res, gold, answer_type)
     res["gated"] = res["reason"] == "low_confidence"
     res["gated_correct"] = res["gated"] and is_correct(res.get("gated_value"), gold, answer_type)
+    shown = res["value"] if res["answered"] else (res.get("guess") or {}).get("value")
+    res["shown_correct"] = is_correct(shown, gold, answer_type)   # what the card displays, any tier
     res["cost"] = task_cost(ctx["prices"], ctx["policy"].kind, res["usage"], res["search_calls"],
                             ctx["web"].backend, res["decision_ms"])
     _log_traj(ctx["traj"], task_id, res, res["correct"], sub=sub)
@@ -358,7 +401,9 @@ def _combine(task, family, parts, extra):
            "fetch_calls": sum(p["fetch_calls"] for p in parts),
            "answer_fetch_calls": sum(p["answer_fetch_calls"] for p in parts),
            "from_snippet": all(p["from_snippet"] for p in parts),
-           "gated": any(p["gated"] for p in parts), "gated_correct": any(p["gated_correct"] for p in parts)}
+           "gated": any(p["gated"] for p in parts), "gated_correct": any(p["gated_correct"] for p in parts),
+           "tier": min((p["tier"] for p in parts), key=["none", "low_confidence", "confident"].index),
+           "shown_correct": all(p["shown_correct"] for p in parts)}
     rec.update(extra)
     return rec
 
@@ -376,7 +421,9 @@ def _run_fact_task(task, ctx):
            "fetch_calls": r["fetch_calls"], "answer_fetch_calls": r["answer_fetch_calls"],
            "from_snippet": r["from_snippet"],
            "gated": r["gated"], "gated_correct": r["gated_correct"], "gated_value": r.get("gated_value"),
-           "cost": r["cost"]}
+           "tier": r["tier"], "shown_value": r["value"] if r["answered"] else (r.get("guess") or {}).get("value"),
+           "shown_p": r["p"] if r["answered"] else (r.get("guess") or {}).get("p"),
+           "shown_correct": r["shown_correct"], "cost": r["cost"]}
     tag = "OK" if r["correct"] else "WRONG" if r["answered"] else "abstain"
     return rec, f"### {task['id']} ({tag})\n\n{render_card(task['question'], r)}\n"
 
@@ -462,9 +509,11 @@ def _g0_verdict(s):
     if sh and not sh["valid"]:
         return {"verdict": f"INVALID (search failed: {sh['final_empty_rate']:.0%} of searches empty)",
                 "note": "results without evidence; re-run when search works"}
-    if sh and s.get("search") == "searxng" and sh.get("primary_share", 1.0) < 0.8:
-        return {"verdict": f"DEGRADED (SearXNG served only {sh['primary_share']:.0%}; the rest was the Wikipedia fallback)",
-                "note": "valid, but not a SearXNG result"}
+    if sh and s.get("search") in ("searxng", "ddgs") and sh.get("primary_share", 1.0) < 0.8:
+        return {"verdict": f"DEGRADED ({s['search']} served only {sh['primary_share']:.0%}; the rest was the Wikipedia fallback)",
+                "note": f"valid, but not a {s['search']} result"}
+    if s.get("search") == "ddgs" and "fresh" in str(s.get("tasks", "")):
+        return {"verdict": "ROUND 4 (rules S/P)", "note": "ddgs search + answer tiers: judged by SETUP_planck_20261008.md section 3"}
     if "fresh" in str(s.get("tasks", "")):
         return {"verdict": "ROUND 3 (rules A/B)", "note": "fresh + long-tail benchmark: judged by SETUP_planck_20260903.md section 3"}
     if s["policy"] == "planck":
@@ -488,6 +537,9 @@ def _print_summary(name, s):
               "gated_rate", "gated_would_be_correct"):
         v = s.get(k)
         print(f"  {k:<22} {v:.3f}" if isinstance(v, float) else f"  {k:<22} {v}")
+    for t, d in (s.get("tiers") or {}).items():
+        prec = "" if d["precision"] is None else f" precision {d['precision']:.3f}"
+        print(f"  tier {t:<17} {d['rate']:.3f} (n={d['n']}){prec}")
     c = s.get("cost") or {}
     if c:
         per_ok = f"${c['usd_per_correct']:.5f}" if c.get("usd_per_correct") else "n/a"
@@ -526,9 +578,25 @@ def cmd_watch(args):
 def cmd_search_check(args):
     from src.planck3.web import Web, WebCache
     web = Web(WebCache(args.cache_dir, mode="refresh"), searxng_url=args.searxng_url)
-    ok = web.searxng_alive()
-    print(f"SearXNG at {args.searxng_url}: {'UP' if ok else 'DOWN'}")
+    if args.backend == "ddgs":
+        ok = web.ddgs_alive()
+        print(f"ddgs ({web.ddgs_engines}): {'UP' if ok else 'DOWN (pip install ddgs, or rate-limited: wait and retry)'}")
+    else:
+        ok = web.searxng_alive()
+        print(f"SearXNG at {args.searxng_url}: {'UP' if ok else 'DOWN'}")
     sys.exit(0 if ok else 1)
+
+
+def cmd_trust(args):
+    from src.planck3.trust import SYSTEM_TRUST, build_system, load_system
+    if args.action == "build":
+        pts = [Path(x) for x in args.points] if args.points else sorted((REPO_ROOT / "data" / "planck3" / "g2").glob("points_ddgs.jsonl"))
+        t = build_system(pts, Path(args.out) if args.out else SYSTEM_TRUST)
+        print(f"[trust] system layer: {len(t['domains'])} domains from {', '.join(t['built_from']) or 'nothing'} -> {args.out or SYSTEM_TRUST}")
+    table = load_system(args.out) if args.out else load_system()
+    rows = sorted(((d, a / (a + b), a + b - 2) for d, (a, b) in table.items()), key=lambda x: -x[2])[:25]
+    for d, p_, n in rows:
+        print(f"  {d:<36} {p_:.2f}  (weight {n:.0f})")
 
 
 def cmd_doctor(args):
@@ -557,6 +625,18 @@ def cmd_report(args):
                          f"{f('gated_rate')} | {per_ok} | {c.get('llm_tokens_per_task', 0):.0f} | "
                          f"{s.get('gate', {}).get('verdict', '')} |")
         lines += ["", *_vs_rival(rows), ""]
+        lines += _paired_round4(rows)
+        tier_rows = [(n, s["tiers"]) for n, s in rows.items() if s.get("tiers")]
+        if tier_rows:
+            f3 = lambda x: "" if x is None else f"{x:.3f}"  # noqa: E731
+            lines += ["### Answer tiers (what the card shows: confident / low confidence / evidence only)", "",
+                      "| run | confident: share | precision | low confidence: share | precision | none: share | its evidence has the answer |",
+                      "|---|---|---|---|---|---|---|"]
+            for n, t in tier_rows:
+                c, lo, no = t["confident"], t["low_confidence"], t["none"]
+                lines.append(f"| {n} | {f3(c['rate'])} | {f3(c['precision'])} | {f3(lo['rate'])} | {f3(lo['precision'])} | "
+                             f"{f3(no['rate'])} | {f3(no['evidence_recall'])} |")
+            lines.append("")
         reg_lines = []
         for name, s in rows.items():
             br = s.get("by_regime") or {}
@@ -632,6 +712,49 @@ def cmd_report(args):
     with open(RESULTS / "REPORT.md", "w", encoding="utf-8") as f:
         f.write(text + "\n")
     print(text)
+
+
+def _paired_round4(rows) -> list[str]:
+    """
+    Round 4 (SETUP_planck_20261008.md), paired by task on the same 143 questions:
+      S2  ddgs run vs the same policy on pure Wikipedia search (<base>_wikipedia): snippet recall @3, success
+      A1  Gemma on tools (ddgs) vs Gemma closed-book: success
+      T   heuristic with the system trust layer (_ddgs_trust) vs without (_ddgs): success
+    """
+    from src.planck3.wikirace import mcnemar
+
+    def recs(name):
+        path = RESULTS / name / "results.jsonl"
+        return {r["task_id"]: r for r in read_jsonl(path)} if path.exists() else {}
+    pairs = []
+    for name in rows:
+        if "_ddgs" not in name or "_quick" in name:
+            continue
+        if name.endswith("_ddgs_trust"):
+            pairs.append(("T", name, name[: -len("_trust")], ["correct"]))
+            continue
+        base = name.replace("_ddgs", "")
+        other = f"{base}_wikipedia" if f"{base}_wikipedia" in rows else base if base in rows else None
+        if other:
+            pairs.append(("S2", name, other, ["serp_visible", "correct"]))
+        if name.startswith("g0f_gemma_snip") and "g0f_gemma_closedbook" in rows:
+            pairs.append(("A1", name, "g0f_gemma_closedbook", ["correct"]))
+    out = []
+    for rule, a, b, metrics in pairs:
+        ra, rb = recs(a), recs(b)
+        ids = sorted(set(ra) & set(rb))
+        for m in metrics:
+            if not ids or any(m not in ra[i] or m not in rb[i] for i in ids):
+                continue
+            xa, xb = [bool(ra[i][m]) for i in ids], [bool(rb[i][m]) for i in ids]
+            t = mcnemar(xa, xb)
+            out.append(f"| {rule} | {a} | {b} | {m} | {sum(xa) / len(ids):.3f} | {sum(xb) / len(ids):.3f} | "
+                       f"{t['a_only']} | {t['b_only']} | {t['p']:.3g} |")
+    if not out:
+        return []
+    return ["### Round 4 paired comparisons (same questions; exact McNemar)", "",
+            "| rule | run | vs | metric | run | vs | only run | only vs | p |", "|---|---|---|---|---|---|---|---|---|",
+            *out, ""]
 
 
 def _vs_rival(rows):
@@ -715,6 +838,8 @@ def main():
                    help="pages read AFTER answering for the depth pack (product setting: answer fast, then 1 page)")
     p.add_argument("--answer-threshold", type=float, default=0.3,
                    help="ANSWER with p below this abstains instead (0 disables the gate)")
+    p.add_argument("--system-trust", default=None,
+                   help="system trust table (default config/planck3/source_trust.json); 'none' = every domain 0.5")
     p.add_argument("--closed-book", action="store_true",
                    help="base-chat comparator: the LLM answers from its weights, no tools/sources")
     p.add_argument("--prices", default=str(REPO_ROOT / "config" / "planck3_prices.json"))
@@ -734,6 +859,7 @@ def main():
     p.set_defaults(fn=cmd_watch)
 
     p = sub.add_parser("search-check")
+    p.add_argument("--backend", default="searxng", choices=["searxng", "ddgs"])
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--cache-dir", default=str(CACHE))
     p.set_defaults(fn=cmd_search_check)
@@ -748,6 +874,12 @@ def main():
 
     p = sub.add_parser("report")
     p.set_defaults(fn=cmd_report)
+
+    p = sub.add_parser("trust", help="system layer of source trust (measured on the G2 training points)")
+    p.add_argument("action", choices=["build", "show"])
+    p.add_argument("--points", nargs="*", default=None, help="default: data/planck3/g2/points_ddgs.jsonl")
+    p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
+    p.set_defaults(fn=cmd_trust)
 
     from src.planck3 import g2, wikirace
     wikirace.add_cli(sub)
