@@ -62,7 +62,7 @@ Every model answer is checked. It must state the chosen value and cite only list
 
 **Your answers, applied:**
 - **US agencies:** technical agencies (CDC, NIH, NOAA, NASA, Census, BLS, FEC...) score **9**, which is 10 historically minus 1 for the current administration. Other `.gov` sources score 8. Directly controlled sources (White House communications, VOA, RFE/RL, Stars and Stripes) score 5.
-- **DW, ARD, ZDF:** **10** (licence fee, independence in the Basic Law). The BBC stays at 7 under your UK news rule, even though its licence-fee model is similar. Say if you want it moved.
+- **DW, ARD, ZDF:** **10** (licence fee, independence in the Basic Law). The BBC stays at 7 despite a similar licence-fee model, because of reported weaknesses in the robustness of its editorial process (owner, 2026-10-09).
 - **Pressure jurisdictions:** **4** for media located in Russia, China, the Gulf states or Israel, state-controlled or not. **2** for state media (RT, TASS, Xinhua, CGTN, Global Times). Exiled outlets like Meduza and Novaya Gazeta Europe count as independent.
 - **Grokipedia:** **4** (AI-generated), and counted as a Wikipedia copy, not independent confirmation.
 

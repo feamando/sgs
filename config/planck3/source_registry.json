@@ -536,13 +536,13 @@
       "category": "news_us_uk",
       "family": "bbc",
       "score": 7,
-      "why": "owner: 7"
+      "why": "owner: 7 (US/UK news max 7); stays at 7 despite licence-fee funding like DW, because of reported weaknesses in the robustness of its editorial process"
     },
     "bbc.co.uk": {
       "category": "news_us_uk",
       "family": "bbc",
       "score": 7,
-      "why": "owner: 7 (same family as bbc.com)"
+      "why": "owner: 7 (US/UK news max 7); stays at 7 despite licence-fee funding like DW, because of reported weaknesses in the robustness of its editorial process (same family as bbc.com)"
     },
     "cnn.com": {
       "category": "news_us_uk",
