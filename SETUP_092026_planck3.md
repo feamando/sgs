@@ -320,6 +320,19 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - A non-Wikidata benchmark.
     - Per-question-type trust.
     - Brave vs ddgs paired.
+- **Round 5 built + pre-registered (2026-10-09, `SETUP_planck_20261009.md`, `planck3.ps1 round5`):** the objective restated by the owner: a simple AI search that writes an answer from retrieved sources, balanced with confidence and source accuracy, traceable and auditable, personal trust capped. **No retraining for the world, only skills trained once.**
+  - **Read:** the Planck 1.3 choice head (round 4, gate dropped).
+  - **Weigh:** an itemized 0-10 confidence (top source trust, +1 per independent source at 7+ (max +2), -2 conflict, -1/-2 reader doubt, question type -2 news / -1 encyclopedic / 0 general info).
+  - **Write:** Hertz 1.2 / Planck 1.3 fine-tuned once on Gemma-written, faithfulness-filtered answers; a template fallback when the check fails.
+  - **Trust:** a hand-scored registry on the owner's rubric (families: Wikipedia + mirrors count once), with a personal score blended at 30% max and conflicts shown. "More from here" is retrieval only.
+  - **Benchmarks:** 143 fresh + long-tail, plus 60 news + 40 general info (2 sources each).
+  - **Rules:**
+    - **C1:** high band ≥ 90% right, good band ≥ 70%, monotone.
+    - **C2:** ≥ 62.9% on fresh.
+    - **C3:** not worse than Gemma.
+    - **W:** writer faithful ≥ 95%.
+    - **E:** worst-case personal profile ≤ 10 pts drop.
+    - **B:** Brave vs ddgs.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 

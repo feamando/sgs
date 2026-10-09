@@ -23,7 +23,6 @@ import time
 from .actions import PHASES, Decision, InvalidDecision, fallback, validate
 from .candidates import span_candidates
 from .metrics import is_correct, parse_number
-from .trust import SESSION_MAX, SESSION_STEP
 from .util import content_words, norm_text
 from .web import domain_of, extract_jsonld, extract_main_text
 
@@ -44,10 +43,12 @@ class Harness:
         self.depth_pages = depth_pages  # extra sources opened AFTER answering, only for the depth pack
         self.snippet_first = snippet_first  # offer snippet values before any page fetch
         self.answer_threshold = answer_threshold
-        self.session_trust: dict[str, float] = {}  # session layer: "more results from here" (this chat only)
+        # "more results from here" (this chat only): changes what is RETRIEVED in later turns, never a
+        # source's trust (round 5: trust = system registry + capped personal score, nothing else)
+        self.session_more: list[str] = []
 
     def _trust(self, domain: str) -> dict:
-        return self.store.trust(domain, self.session_trust.get(domain, 0.0))
+        return self.store.trust(domain)
 
     # ── one fact question ────────────────────────────────────────────────
     def run_fact(self, question: str, answer_type: str, entity: str | None = None,
@@ -256,20 +257,21 @@ class Harness:
     # ── session layer: "more results from here" ──────────────────────────
     def _session_results(self, question, results) -> list[dict]:
         """Later turns of a chat also search the sources this session asked for more of."""
-        if not self.session_trust or not hasattr(self.web, "search_site"):
+        if not self.session_more or not hasattr(self.web, "search_site"):
             return []
         have = {r["url"] for r in results}
         extra = []
-        for dom, _ in sorted(self.session_trust.items(), key=lambda x: -x[1])[:1]:
+        for dom in self.session_more[-1:]:
             for r in self.web.search_site(dom, question)[:2]:
                 if r["url"] not in have:
                     extra.append(dict(r, trust=self._trust(dom)["combined"], session=True))
         return extra
 
     def more_from(self, domain: str, question: str, pages: int = 2) -> dict:
-        """The 'more results from here' button: boost the source for this session and read more of it."""
+        """The 'more results from here' button: read more of one source now and in later turns of this chat."""
         from .candidates import main_entity, rank_passages
-        self.session_trust[domain] = min(SESSION_MAX, self.session_trust.get(domain, 0.0) + SESSION_STEP)
+        if domain not in self.session_more:
+            self.session_more.append(domain)
         results = self.web.search_site(domain, question) if hasattr(self.web, "search_site") else []
         if not results:  # backends without site: search (Wikipedia API): keep that source's normal results
             results = [r for r in self.web.search(question) if r["domain"] == domain]

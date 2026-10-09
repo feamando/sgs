@@ -8,10 +8,10 @@ adjacent to it, from the sources they trust, instead of what an ad auction wants
     passages  the evidence read to answer (retrievable later with no web at all)
     edges     entity co-mention graph built from passages ("what is adjacent")
     queries   the interest log (what this user asks about, recency-weighted)
-    domains   the USER layer of source trust: per-domain Beta(a, b), success = extraction
-              corroborated or "trust more"; failure = opened but nothing usable / "trust less".
-              It sits on top of the shipped SYSTEM layer and under the per-chat SESSION layer
-              (src/planck3/trust.py)
+    personal  the user's own 0-10 score per source ("trust more / less"); effective trust =
+              0.7 x system (hand-scored registry) + 0.3 x personal (src/planck3/registry.py)
+    domains   per-domain Beta(a, b) usage statistics (corroborated vs nothing usable): an AUDIT
+              record only since round 5; it no longer moves trust (scores must stay explainable)
     watches   stored fact queries re-run on a schedule; notify on change
 
 Lookup is lexical in v0 (exact entity/attribute, else fuzzy question match).
@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS facts (
 );
 CREATE INDEX IF NOT EXISTS facts_ea ON facts(entity, attribute);
 CREATE TABLE IF NOT EXISTS domains (domain TEXT PRIMARY KEY, a REAL, b REAL);
+CREATE TABLE IF NOT EXISTS personal (domain TEXT PRIMARY KEY, score REAL, ts REAL);
 CREATE TABLE IF NOT EXISTS passages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT, domain TEXT, title TEXT, text TEXT, text_norm TEXT UNIQUE, entity TEXT, question TEXT, ts REAL
@@ -72,8 +73,8 @@ def ttl_for(attribute: str | None, question: str, override: float | None = None)
 
 
 class Store:
-    def __init__(self, path: str | Path, clock=time.time, system_trust: str | Path | dict | None = None):
-        from .trust import load_system
+    def __init__(self, path: str | Path, clock=time.time, registry=None):
+        from .registry import default_registry
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         # the chat server serializes turns behind a lock, so cross-thread use is safe
@@ -81,7 +82,7 @@ class Store:
         self.db.row_factory = sqlite3.Row
         self.db.executescript(_SCHEMA)
         self.clock = clock
-        self.system = system_trust if isinstance(system_trust, dict) else load_system(system_trust)
+        self.registry = registry or default_registry()
 
     def close(self):
         self.db.close()
@@ -232,8 +233,11 @@ class Store:
         self.db.execute("INSERT INTO feedback (kind, target, value, ts) VALUES (?,?,?,?)",
                         (kind, norm_text(target) if kind == "entity" else target, value, self.clock()))
         self.db.commit()
-        if kind == "source":
-            self.update_domain(target, value > 0, weight=2.0)  # explicit feedback outweighs implicit
+        if kind == "source":  # one click = +/- PERSONAL_STEP on the user's own 0-10 score (default: the system's)
+            from .registry import PERSONAL_STEP
+            cur = self.personal(target)
+            base = self.registry.lookup(target)["score"] if cur is None else cur
+            self.set_personal(target, base + (PERSONAL_STEP if value > 0 else -PERSONAL_STEP))
 
     def stale_facts(self, limit: int = 10) -> list[dict]:
         return [dict(r) for r in self.db.execute("SELECT * FROM facts ORDER BY retrieved_at DESC LIMIT 5000")
@@ -245,11 +249,24 @@ class Store:
                 "entities": q("SELECT COUNT(DISTINCT src) FROM edges"), "edges": q("SELECT COUNT(*) FROM edges") // 2,
                 "queries": q("SELECT COUNT(*) FROM queries"), "domains": q("SELECT COUNT(*) FROM domains")}
 
-    # ── source trust (system + user here; the session layer lives on the chat harness) ──
-    def trust(self, domain: str, session_shift: float = 0.0) -> dict:
-        from .trust import layers
-        row = self.db.execute("SELECT a, b FROM domains WHERE domain=?", (domain,)).fetchone()
-        return layers(self.system.get(domain), (row["a"], row["b"]) if row else None, session_shift)
+    # ── source trust: hand-scored system registry + this user's personal score (capped at 30%) ──
+    def personal(self, domain: str) -> float | None:
+        row = self.db.execute("SELECT score FROM personal WHERE domain=?", (domain,)).fetchone()
+        return None if row is None else float(row["score"])
+
+    def set_personal(self, domain: str, score: float | None):
+        if score is None:
+            self.db.execute("DELETE FROM personal WHERE domain=?", (domain,))
+        else:
+            self.db.execute("INSERT OR REPLACE INTO personal (domain, score, ts) VALUES (?,?,?)",
+                            (domain, max(0.0, min(10.0, float(score))), self.clock()))
+        self.db.commit()
+
+    def trust(self, domain: str, session_shift: float = 0.0, personal: bool = True) -> dict:
+        """0-10 trust record (system, personal, effective, band, family). session_shift is ignored since
+        round 5: 'more results from here' changes what is RETRIEVED, never a source's trust."""
+        from .registry import trust_record
+        return trust_record(domain, self.personal(domain) if personal else None, self.registry)
 
     def domain_prior(self, domain: str) -> float:
         return self.trust(domain)["combined"]
@@ -268,8 +285,9 @@ class Store:
         return ranked[:n]
 
     def known_domains(self) -> set[str]:
-        """Every domain with an opinion: shipped (system) or this user's own."""
-        return set(self.system) | {r["domain"] for r in self.db.execute("SELECT domain FROM domains")}
+        """Every domain with an opinion: scored in the registry, personally scored, or seen."""
+        return (set(self.registry.domains) | {r["domain"] for r in self.db.execute("SELECT domain FROM personal")}
+                | {r["domain"] for r in self.db.execute("SELECT domain FROM domains")})
 
     # ── watches ──────────────────────────────────────────────────────────
     def add_watch(self, question, answer_type, condition: dict | None = None,

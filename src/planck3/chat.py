@@ -76,6 +76,8 @@ def chat_answer(turn: Turn) -> str:
     """
     r = turn.result
     ex = r.get("explain") or {}
+    if ex.get("pipeline") == "answer":
+        return answer_card_text(turn)
     tier = ex.get("tier") or ("confident" if r.get("answered") else "none")
     if tier == "none":
         return ("I couldn't find an answer in what I read. The evidence I found is below. "
@@ -100,11 +102,53 @@ def chat_answer(turn: Turn) -> str:
             f"{ex.get('bar', 0.5):.0%} bar; {kind}).\n> {ctx[:220]}\nSource: {src}{runner}")
 
 
+LEADS = {"high": "", "good": "", "low": "Low confidence in my results. ", "sceptical": "Treat this with scepticism. "}
+
+
+def answer_card_text(turn: Turn) -> str:
+    """Round 5 card text: the written answer, its 0-10 confidence and band, and any personal-tilt warning."""
+    r = turn.result
+    ex = r["explain"]
+    if ex["band"] == "none":
+        return f"{r['answer_text']} (searched for: \"{turn.question}\")"
+    text = r["answer_text"]
+    v = str(ex["value"])
+    i = text.find(v)
+    if i >= 0:
+        text = text[:i] + f"**{v}**" + text[i + len(v):]
+    lines = [LEADS.get(ex["band"], "") + text,
+             f"Confidence {ex['confidence10']:.1f}/10 ({ex['band_label']}) · {ex['qtype'].replace('_', ' ')} question"]
+    d = ex.get("divergence")
+    if d:
+        lines.append(f"Your source preferences changed this answer. Without them: {d['system_value']} "
+                     f"({d['system_confidence']}/10, {d['system_band']}).")
+    return "\n".join(lines)
+
+
 def render_why(turn: Turn) -> str:
     """How the answer was collated, the confidence and the weights behind it, the trust of each source."""
     ex = turn.result.get("explain") or {}
     if not ex:
         return "(no explanation recorded)"
+    if ex.get("pipeline") == "answer":
+        lines = ["How I got this:"] + [f"  {i}. {s}" for i, s in enumerate(ex["steps"], 1)]
+        if ex.get("items"):
+            lines.append(f"Confidence {ex['confidence10']:.1f}/10 =")
+            lines += [f"  {v:+5.1f}  {k}" for k, v in ex["items"]]
+        if ex.get("candidates"):
+            lines.append("Candidates (reader p, best source trust): " + " · ".join(
+                f"{c['value']} ({c['r']:.2f}, {c['top_trust'] or 0:.0f}/10)" for c in ex["candidates"]))
+        lines.append(f"Reader: {ex['reader']} · writer: {ex['writer']}"
+                     + (" (fell back to the template: " + "; ".join(ex["writer_problems"][:2]) + ")" if ex.get("writer_fallback") else ""))
+        if ex.get("sources"):
+            lines.append("Sources (system / you / effective, 0-10; you count for at most 30%):")
+            for s in ex["sources"]:
+                t = s["trust"]
+                you = "-" if t["personal"] is None else f"{t['personal']:.0f}"
+                flag = "  <- you and the system disagree" if t["conflict"] else ""
+                lines.append(f"  {s['role'][:22]:<22} {s['domain']:<28} {t['system']:.0f} / {you} / {t['effective']:.1f}  "
+                             f"{t['category']}{flag}")
+        return "\n".join(lines)
     lines = ["How I got this:"] + [f"  {i}. {s}" for i, s in enumerate(ex["steps"], 1)]
     if ex.get("confidence") is not None:
         lines.append(f"Confidence: {ex['confidence']:.0%} ({ex['confidence_kind']}); my bar is {ex['bar']:.0%}")
@@ -119,11 +163,11 @@ def render_why(turn: Turn) -> str:
         lines.append(f"Why this confidence ({wc['kind']}): " + " · ".join(
             f"{k} {v:+.2f}" if isinstance(v, (int, float)) else f"{k} {v}" for k, v in wc["items"]))
     if ex.get("sources"):
-        lines.append("Sources (trust: everyone / you, from your clicks and your questions / this chat -> combined):")
+        lines.append("Sources (trust 0-10: system / you / effective; you count for at most 30%):")
         for s in ex["sources"]:
             t = s["trust"]
-            lines.append(f"  {s['role']:<7} {s['domain']:<28} {t['system']:.2f} / {t['user']:.2f} / "
-                         f"{t['session']:+.1f} -> {t['combined']:.2f}")
+            you = "-" if t["personal"] is None else f"{t['personal']:.0f}"
+            lines.append(f"  {s['role']:<7} {s['domain']:<28} {t['system']:.0f} / {you} / {t['effective']:.1f}  {t['category']}")
     return "\n".join(lines)
 
 

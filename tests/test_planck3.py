@@ -109,8 +109,10 @@ def test_store_ttl_prior_watch(tmp_path):
     assert s.lookup("What is the price of X?", "X", "price")
     now[0] += 2 * DAY
     assert s.lookup("What is the price of X?", "X", "price") == []  # stale after 1-day TTL
-    assert s.domain_prior("d.com") == 0.5
+    assert s.domain_prior("d.com") == 0.5                       # unscored domain: 5/10
     s.update_domain("d.com", True)
+    assert s.domain_prior("d.com") == 0.5                       # usage stats no longer move trust (round 5)
+    s.feedback("source", "d.com", 1)
     assert s.domain_prior("d.com") > 0.5
     wid = s.add_watch("What is the price of X?", "number", {"op": "lt", "value": 5})
     s.update_watch(wid, "10")
@@ -362,7 +364,10 @@ def test_digest_and_feedback(store):
     from src.planck3.digest import build_digest, render_digest, trusted_domains
     assert "Nothing yet" in render_digest(build_digest(store))
     Harness(HeuristicPolicy(), FakeWeb(), store).run_fact("What year was IKEA founded?", "year", entity="IKEA")
-    store.feedback("source", "example.org", 1)             # explicit trust beats implicit
+    store.feedback("source", "example.org", 1)             # one click: 5 -> personal 7 -> effective 5.6
+    assert "example.org" not in trusted_domains(store)     # the 30% cap: one click cannot make a source trusted
+    store.feedback("source", "example.org", 1)
+    store.feedback("source", "example.org", 1)             # personal 10 -> effective 6.5
     assert "example.org" in trusted_domains(store)
     d = build_digest(store)
     assert d["interests"][0]["entity"] == "ikea"
@@ -763,15 +768,8 @@ def test_ddgs_backend_maps_results_and_falls_back(tmp_path, monkeypatch):
     assert w.search_site("ikea.com", "founded") and not W.Web(W.WebCache(tmp_path / "d"), search_backend="wikipedia").search_site("ikea.com", "q")
 
 
-def test_trust_layers_add_in_log_odds_and_user_can_outvote_system(tmp_path):
-    from src.planck3.trust import SYSTEM_MAX_STRENGTH, build_system, layers, logit
-    t = layers((15.0, 5.0), None)
-    assert t["system"] == 0.75 and t["user"] == 0.75 and t["weights"]["user"] == 0 and t["combined"] == 0.75
-    t = layers((15.0, 5.0), (1.0, 1.0 + 30), session_shift=0.0)       # 30 "nothing usable / trust less" signals
-    assert t["user"] < 0.5 and t["weights"]["user"] < 0
-    t2 = layers((15.0, 5.0), None, session_shift=1.0)
-    assert t2["combined"] > 0.75 and abs(logit(t2["combined"]) - (t2["weights"]["system"] + 1.0)) < 0.01
-    assert layers(None, None, session_shift=9)["session"] == 2.0                      # capped
+def test_measured_trust_table_is_audit_only(tmp_path):
+    from src.planck3.trust import SYSTEM_MAX_STRENGTH, build_system
     import json as _json
     pts = tmp_path / "points_ddgs.jsonl"
     rows = []
@@ -785,11 +783,8 @@ def test_trust_layers_add_in_log_odds_and_user_can_outvote_system(tmp_path):
     good, bad = table["domains"]["good.org"], table["domains"]["bad.com"]
     assert good["rate"] == 1.0 and bad["rate"] == 0.0 and not {"x.org", "page.net"} & set(table["domains"])
     assert good["a"] + good["b"] <= SYSTEM_MAX_STRENGTH + 1e-6
-    st = Store(tmp_path / "s.sqlite", system_trust=tmp_path / "trust.json")
-    assert st.domain_prior("good.org") > 0.9 and st.domain_prior("bad.com") < 0.1 and st.domain_prior("new.net") == 0.5
-    for _ in range(12):
-        st.feedback("source", "bad.com", 1)                          # explicit "trust more" x12 (weight 2 each)
-    assert st.domain_prior("bad.com") > 0.5
+    st = Store(tmp_path / "s.sqlite")
+    assert st.domain_prior("good.org") == st.domain_prior("bad.com") == 0.5      # measured table never scores sources
     st.close()
 
 
@@ -800,7 +795,7 @@ def test_answer_tiers_and_explanation(store):
     assert res["tier"] == "confident" and ex["value"] == "1943" and not ex["calibrated"]
     assert ex["steps"][0].startswith("Searched") and ex["steps"][-1].startswith("Answered")
     assert {s["role"] for s in ex["sources"]} >= {"answer", "agrees"}                     # 2nd snippet domain agrees
-    assert {"system", "user", "session", "combined"} <= set(ex["sources"][0]["trust"])
+    assert {"system", "personal", "effective", "band", "family"} <= set(ex["sources"][0]["trust"])
     assert any("question's words" in k for k, _ in ex["why_value"])
     t = Turn("q", "What year was IKEA founded?", "year", "IKEA", "NEW", res)
     assert "**1943**" in chat_answer(t) and "agrees" in chat_answer(t) and "How I got this" in render_why(t)
@@ -848,13 +843,13 @@ def test_session_layer_more_from_here(tmp_path):
                      "snippet": "IKEA was founded in 1943; the first store opened in 1958."}]
     st = Store(tmp_path / "s.sqlite")
     h = Harness(HeuristicPolicy(), SiteWeb(), st)
+    before = st.domain_prior("mirror.net")
     r = h.more_from("mirror.net", "What year was IKEA founded?")
-    assert r["trust"]["session"] == 1.0 and r["trust"]["combined"] > 0.5 and r["passages"]
-    assert h._trust("mirror.net")["combined"] > st.domain_prior("mirror.net")     # session layer only here
+    assert r["passages"] and h._trust("mirror.net")["combined"] == before         # retrieval only: trust unchanged
     res = h.run_fact("When did the first IKEA store open?", "year")
     assert any(s["session"] for s in res["depth"]["sources"])                      # later turns search it too
     fresh = Harness(HeuristicPolicy(), SiteWeb(), st)                              # "New chat": session gone
-    assert fresh._trust("mirror.net")["session"] == 0
+    assert fresh.session_more == []
     st.close()
 
 
@@ -874,7 +869,7 @@ def test_server_more_endpoint_and_explain(tmp_path):
     r = post("/api/chat", {"message": "When was IKEA founded?", "session": "s"})
     assert r["tier"] == "confident" and r["explain"]["steps"] and r["explain"]["sources"]
     m = post("/api/more", {"session": "s", "domain": "example.org"})
-    assert m["trust"]["session"] == 1.0
+    assert m["trust"]["effective"] == 5.0 and m["passages"] is not None       # unscored, and unchanged by the button
     srv.shutdown()
     st.close()
 
@@ -942,3 +937,136 @@ def test_brave_backend_maps_results_and_needs_a_key(tmp_path, monkeypatch):
     r = w.search("When was IKEA founded?")
     assert r == [{"url": "https://www.ikea.com/a", "title": "IKEA", "snippet": "Founded in 1943.", "domain": "ikea.com"}]
     assert seen["headers"]["X-Subscription-Token"] == "k" and seen["url"] == W.BRAVE_URL and w.last_backend == "brave"
+
+
+# ── round 5: hand-scored registry, question types, read -> weigh -> write ─────
+def test_registry_scores_families_and_the_30_percent_cap():
+    from src.planck3.registry import CONFLICT_GAP, default_registry, effective, trust_record
+    reg = default_registry()
+    w, mirror, grok = reg.lookup("en.wikipedia.org"), reg.lookup("www.wikiwand.com"), reg.lookup("grokipedia.com")
+    assert w["score"] == 9 and mirror["family"] == w["family"] == grok["family"] == "wikimedia" and grok["score"] == 4
+    assert reg.lookup("de.wikipedia.org")["family"] == "wikimedia"                       # suffix rule keeps the family
+    assert reg.lookup("meduza.io")["score"] == 10 and reg.lookup("dw.com")["score"] == 10
+    assert reg.lookup("news.bbc.co.uk")["family"] == "bbc" and reg.lookup("bbc.com")["score"] == 7
+    assert reg.lookup("cdc.gov")["score"] == 9 and reg.lookup("rt.com")["score"] <= 4
+    a, b = reg.lookup("usa.gov"), reg.lookup("ed.gov")
+    assert a["category"] == b["category"] == "us_gov" and a["family"] != b["family"]     # every .gov site is its own source
+    u = reg.lookup("some-new-blog.example")
+    assert u["score"] == 5 and not u["scored"]
+    for s in (0, 4, 9, 10):
+        for p in (0, 10):
+            assert abs(effective(s, p) - s) <= 3.0 + 1e-9                               # personal moves a source <= 3 points
+    t = trust_record("rt.com", personal=10.0)
+    assert t["effective"] <= 0.7 * t["system"] + 3 + 1e-9 and t["conflict"] and t["band"] in ("low", "sceptical")
+    assert not trust_record("bbc.com", personal=7 + CONFLICT_GAP - 1)["conflict"]
+
+
+def test_question_types_and_penalties():
+    from src.planck3.qtype import PENALTY, classify
+    assert classify("Who won the 2026 US Open girls' singles?", 2026) == "news"
+    assert classify("Who is the current CEO of Nokia?", 2026) == "news"
+    assert classify("When was IKEA founded?", 2026) == "encyclopedic"
+    assert classify("When was Port Moresby founded?", 2026) == "encyclopedic"           # 'Port' is a name here
+    assert classify("Which terminal does Lufthansa use at Heathrow?", 2026) == "general_info"
+    assert PENALTY == {"news": 2.0, "encyclopedic": 1.0, "general_info": 0.0}
+
+
+def _pool(cands, r, snippet=True):
+    return {"name": "p", "cands": cands, "r": r, "snippet": snippet}
+
+
+def _cand(value, urls, ctx="x"):
+    return {"value": value, "context": ctx, "url": urls[0], "urls": urls, "score": 1.0}
+
+
+def test_consolidation_itemizes_confidence_counts_mirrors_once_and_flags_conflicts():
+    from src.planck3.consolidate import consolidate, divergence
+    from src.planck3.registry import trust_record
+    tf = lambda d: trust_record(d)  # noqa: E731
+    mirrors = _pool([_cand("1943", ["https://en.wikipedia.org/a", "https://www.wikiwand.com/a"])], [0.9])
+    c = consolidate([mirrors], "year", "encyclopedic", tf)
+    assert c["value"] == "1943" and len(c["families"]) == 1                           # Wikipedia + mirror = one source
+    assert c["confidence"] == 8.0 and [round(v) for _, v in c["items"]] == [9, -1]   # 9, no agreement bonus, -1 type
+    indep = _pool([_cand("1943", ["https://en.wikipedia.org/a", "https://www.britannica.com/a", "https://www.bbc.com/a"])], [0.9])
+    c = consolidate([indep], "year", "encyclopedic", tf)
+    assert c["confidence"] == 10.0 and len(c["families"]) == 3                        # 10 + 2 agree - 1, clamped
+    conflict = _pool([_cand("1943", ["https://www.britannica.com/a"]), _cand("1948", ["https://www.bbc.com/b"])], [0.6, 0.35])
+    c = consolidate([conflict], "year", "news", tf)
+    assert c["value"] == "1943" and c["conflicts"][0]["value"] == "1948"
+    assert c["confidence"] == 10 - 2 - 2 and c["band"] == "low"                       # conflict (BBC at 7) and news
+    low_only = _pool([_cand("1950", ["https://rt.com/x"])], [0.9])
+    assert consolidate([low_only], "year", "news", tf)["band"] == "sceptical"
+    assert consolidate([_pool([_cand("x", ["https://a.org"])], [0.01])], "entity", "news", tf)["band"] == "none"
+    # a contrarian user (personal = 10 - system) tilts the choice: it must be detected and shown
+    split = _pool([_cand("Kyiv says A", ["https://kyivindependent.com/a"]), _cand("Moscow says B", ["https://rt.com/b"])], [0.5, 0.5])
+    sysc = consolidate([split], "text", "news", tf)
+    contra = consolidate([split], "text", "news", lambda d: trust_record(d, personal=10 - trust_record(d)["system"]))
+    assert sysc["value"] == "Kyiv says A"
+    d = divergence(contra, sysc, "text")
+    assert contra["value"] == sysc["value"] or d["changed_value"]
+    assert contra["confidence"] < sysc["confidence"] and d is not None and d["changed_band"]
+
+
+def test_writer_faithfulness_and_template():
+    from src.planck3.writer import faithful, source_name, template_text
+    src = [{"domain": "bbc.com", "name": "BBC", "context": "IKEA was founded in 1943 by Ingvar Kamprad.", "says": None, "trust": 7},
+           {"domain": "meduza.io", "name": "Meduza", "context": "Founded in 1943 in Sweden.", "says": None, "trust": 10}]
+    assert faithful("1943, according to BBC [1] and Meduza [2].", "When was IKEA founded?", "1943", src, "year")[0]
+    ok, probs = faithful("1943, according to BBC [1]; it opened 12 stores in Norway [3].", "When was IKEA founded?", "1943", src, "year")
+    assert not ok and any("12" in p for p in probs) and any("Norway" in p for p in probs) and any("cites" in p for p in probs)
+    assert not faithful("It was founded long ago [1].", "When was IKEA founded?", "1943", src, "year")[0]
+    assert source_name("en.wikipedia.org") == "Wikipedia" and source_name("bbc.co.uk") == "BBC" and source_name("meduza.io") == "Meduza"
+    for b, start in (("high", "1943."), ("good", "1943, according"), ("low", "Possibly"), ("sceptical", "Unclear")):
+        t = template_text({"value": "1943", "band": b}, src)
+        assert t.startswith(start) and faithful(t, "When was IKEA founded?", "1943", src, "year")[0]
+
+
+def test_answer_pipeline_end_to_end_with_personal_tilt(tmp_path):
+    from src.planck3.answer import Answerer
+    from src.planck3.readers import HeuristicReader
+    from src.planck3.writer import TemplateWriter
+    st = Store(tmp_path / "s.sqlite")
+    a = Answerer(SnippetWeb(), st, HeuristicReader(), TemplateWriter())
+    r = a.run("What year was IKEA founded?")
+    ex = r["explain"]
+    assert r["value"] == "1943" and "1943" in r["answer_text"] and ex["pipeline"] == "answer"
+    assert ex["qtype"] == "encyclopedic" and sum(v for _, v in ex["items"]) == pytest.approx(ex["confidence10"], abs=0.11)
+    assert ex["steps"][0].startswith("Searched") and ex["writer_faithful"] and ex["divergence"] is None
+    st.feedback("source", "example.org", 1)
+    st.feedback("source", "example.org", 1)
+    st.feedback("source", "example.org", 1)
+    r2 = a.run("What year was IKEA founded?")
+    t = next(s["trust"] for s in r2["explain"]["sources"] if s["domain"] == "example.org")
+    assert t["personal"] == 10 and t["effective"] == 6.5 and t["conflict"]              # capped and flagged
+    assert r2["explain"]["divergence"] is not None                                       # the band moved: shown on the card
+    from src.planck3.chat import Turn, answer_card_text, render_why
+    turn = Turn("q", "What year was IKEA founded?", "year", "IKEA", "NEW", r2)
+    assert "Your source preferences changed this answer" in answer_card_text(turn)
+    assert "you and the system disagree" in render_why(turn)
+    st.close()
+
+
+def test_sgs_writer_trains_and_generates_on_a_tiny_checkpoint(tmp_path):
+    import json as _json
+    import sentencepiece as spm
+    import torch
+    from src.planck3.writer import SGSWriter, train_writer
+    from src.sgs_lm import SGSLanguageModel
+    corpus = tmp_path / "corpus.txt"
+    corpus.write_text("\n".join(["QUESTION: When was IKEA founded? ANSWER: 1943 SOURCES: BBC says founded in 1943",
+                                 "1943, according to BBC [1]. <END>", "the quick brown fox"] * 40), encoding="utf-8")
+    spm.SentencePieceTrainer.train(input=str(corpus), model_prefix=str(tmp_path / "tok"), vocab_size=80,
+                                   model_type="unigram", hard_vocab_limit=False, user_defined_symbols=["<END>"])
+    model = SGSLanguageModel(vocab_size=spm.SentencePieceProcessor(model_file=str(tmp_path / "tok.model")).get_piece_size(),
+                             d_s=8, d_f=16, n_passes=2, n_heads=2, max_len=128)
+    torch.save({"model": model.state_dict()}, tmp_path / "tiny.pt")
+    data = tmp_path / "train.jsonl"
+    row = {"prompt": "QUESTION: When was IKEA founded?\nANSWER: 1943\nCONFIDENCE: 8/10 good\nSOURCES:\n[1] BBC (7/10): founded in 1943\nANSWER TEXT:",
+           "target": "1943, according to BBC [1].", "faithful": True}
+    data.write_text("\n".join(_json.dumps(row) for _ in range(20)), encoding="utf-8")
+    meta = train_writer(data, str(tmp_path / "tiny.pt"), str(tmp_path / "tok.model"), tmp_path / "w", "tiny", epochs=1, batch_size=4)
+    assert meta["examples"] == 20 and (tmp_path / "w" / "best.pt").exists()
+    w = SGSWriter(str(tmp_path / "w" / "best.pt"), device="cpu", max_new=8)
+    out = w.write("When was IKEA founded?", "year", {"value": "1943", "confidence": 8.0, "band": "good",
+                                                    "families": [], "conflicts": []}, {})
+    assert out["text"] and (out["faithful"] or out["fallback"])                        # either faithful or the template

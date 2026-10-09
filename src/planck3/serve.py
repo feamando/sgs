@@ -58,22 +58,35 @@ function md(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^&gt
 function add(cls, html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;log.appendChild(d);d.scrollIntoView();return d}
 function pct(x){return x==null ? 'n/a' : Math.round(x*100)+'%'}
 function num(x){if(typeof x!=='number') return esc(x); const c=x>0?'pos':x<0?'neg':''; return `<span class="w ${c}">${x>0?'+':''}${x.toFixed(2)}</span>`}
-const LABEL = {confident:'Confident', low_confidence:'Low confidence in my results', none:'No answer found'};
-function trustRow(s){
-  const t = s.trust, d = esc(s.domain);
-  return `<tr><td>${esc(s.role)}</td><td>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${d}</a>` : d}</td>
-   <td class="w">${t.system.toFixed(2)}</td><td class="w">${t.user.toFixed(2)}</td><td class="w">${t.session>0?'+'+t.session.toFixed(1):'0'}</td>
-   <td class="w"><b>${t.combined.toFixed(2)}</b></td>
+const LABEL = {confident:'Confident', low_confidence:'Low confidence in my results', none:'No answer found',
+  high:'High confidence', good:'Good confidence, might have bias', low:'Low confidence in my results', sceptical:'Treat with scepticism'};
+const TIERCLS = {high:'confident', good:'confident', low:'low_confidence', sceptical:'low_confidence', none:'none', confident:'confident', low_confidence:'low_confidence'};
+function trustRow(s){ return trustRow5(s); }   // one trust record shape since round 5
+function trustRow5(s){
+  const t = s.trust, d = esc(s.domain), you = t.personal==null ? '–' : t.personal.toFixed(0);
+  const flag = t.conflict ? ' <span class="tier low_confidence" title="your score is 3+ points from the system score">you disagree</span>' : '';
+  return `<tr><td>${esc(s.role)}</td><td>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${d}</a>` : d}${flag}</td>
+   <td class="w">${t.system.toFixed(0)}</td><td class="w">${you}</td><td class="w"><b>${t.effective.toFixed(1)}</b></td>
+   <td title="${esc(t.why)}">${esc(t.category)}</td>
    <td class="act"><a href="#" data-fb="1" data-d="${d}">trust more</a><a href="#" data-fb="-1" data-d="${d}">trust less</a><a href="#" data-more="${d}">more from here</a></td></tr>`;
+}
+function explain5(ex){
+  let h = `<ol>${ex.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`;
+  if(ex.items?.length) h += `<div class="src"><b>Confidence ${ex.confidence10.toFixed(1)}/10</b> (${esc(ex.band_label)}), point by point:</div><table>` + ex.items.map(([k,v])=>`<tr><td>${num(v)}</td><td>${esc(k)}</td></tr>`).join('') + '</table>';
+  if(ex.candidates?.length) h += '<div class="src"><b>Candidates</b> (reader p · best source trust): ' + ex.candidates.map(c=>`${esc(c.value)} (${c.r.toFixed(2)} · ${(c.top_trust||0).toFixed(0)}/10)`).join(' · ') + '</div>';
+  h += `<div class="src">reader: ${esc(ex.reader)} · writer: ${esc(ex.writer)}${ex.writer_fallback ? ' (fell back to the template: '+esc(ex.writer_problems.slice(0,2).join('; '))+')' : ''}</div>`;
+  if(ex.sources?.length) h += '<div class="src"><b>Sources</b>: trust 0-10, system · you · effective (you count for at most 30%)</div><div class="tw"><table><tr><th>role</th><th>source</th><th>system</th><th>you</th><th>effective</th><th>category</th><th></th></tr>' + ex.sources.map(trustRow5).join('') + '</table></div>';
+  return h;
 }
 function explainHtml(ex){
   if(!ex) return '';
+  if(ex.pipeline === 'answer') return explain5(ex);
   let h = `<ol>${ex.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`;
   if(ex.candidates?.length) h += '<div class="src"><b>Candidates it chose between:</b> ' + ex.candidates.map(c=>esc(c.value)+(c.p!=null?` (${pct(c.p)})`:` (score ${(c.score||0).toFixed(2)})`)).join(' · ') + '</div>';
   if(ex.why_value?.length) h += '<div class="src"><b>Why this value</b> (score terms):</div><table>' + ex.why_value.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${num(v)}</td></tr>`).join('') + '</table>';
   const wc = ex.why_confidence || {};
   if(wc.items?.length) h += `<div class="src"><b>Why this confidence</b> (${esc(wc.kind)}):</div><table>` + wc.items.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${num(v)}</td></tr>`).join('') + '</table>';
-  if(ex.sources?.length) h += '<div class="src"><b>Sources</b>: trust from everyone (system) · you · this chat, combined</div><div class="tw"><table><tr><th>role</th><th>source</th><th>system</th><th>you</th><th>chat</th><th>trust</th><th></th></tr>' + ex.sources.map(trustRow).join('') + '</table></div>';
+  if(ex.sources?.length) h += '<div class="src"><b>Sources</b>: trust 0-10, system · you · effective</div><div class="tw"><table><tr><th>role</th><th>source</th><th>system</th><th>you</th><th>effective</th><th>category</th><th></th></tr>' + ex.sources.map(trustRow).join('') + '</table></div>';
   return h;
 }
 function depthHtml(d){
@@ -86,12 +99,18 @@ document.getElementById('f').onsubmit = async e => {
   e.preventDefault(); const q = document.getElementById('q'); const m = q.value.trim(); if(!m) return;
   q.value=''; add('u', esc(m)); const b = add('b', '<span class="meta">thinking…</span>');
   const r = await fetch('/api/chat',{method:'POST',body:JSON.stringify({message:m,session:S})}).then(r=>r.json());
-  const ex = r.explain || {tier:'none'}, d = r.depth;
-  if(ex.tier==='low_confidence') b.classList.add('lowc');
-  const meter = ex.confidence!=null ? `<div class="bar" title="confidence ${pct(ex.confidence)} · bar ${pct(ex.bar)}"><i style="width:${Math.round(ex.confidence*100)}%"></i><b style="left:${Math.round(ex.bar*100)}%"></b></div><div class="meta">confidence ${pct(ex.confidence)} (${esc(ex.confidence_kind)}) · bar ${pct(ex.bar)}</div>` : '';
-  const how = `<details ${ex.tier!=='confident'?'open':''}><summary>How I got this</summary>${explainHtml(r.explain)}</details>`;
+  const ex = r.explain || {tier:'none'}, d = r.depth, cls = TIERCLS[ex.tier] || 'none';
+  if(cls==='low_confidence') b.classList.add('lowc');
+  let meter = '';
+  if(ex.pipeline==='answer' && ex.confidence10!=null){
+    meter = `<div class="bar" title="confidence ${ex.confidence10}/10"><i style="width:${ex.confidence10*10}%"></i><b style="left:70%"></b></div><div class="meta">confidence ${ex.confidence10.toFixed(1)}/10 · ${esc(ex.band_label)} · ${esc(ex.qtype.replace('_',' '))} question</div>`;
+    if(ex.divergence) meter += `<div class="b lowc" style="margin-top:6px">Your source preferences changed this answer. Without them: <b>${esc(ex.divergence.system_value)}</b> (${ex.divergence.system_confidence}/10, ${esc(ex.divergence.system_band)}).</div>`;
+  } else if(ex.confidence!=null) {
+    meter = `<div class="bar" title="confidence ${pct(ex.confidence)} · bar ${pct(ex.bar)}"><i style="width:${Math.round(ex.confidence*100)}%"></i><b style="left:${Math.round(ex.bar*100)}%"></b></div><div class="meta">confidence ${pct(ex.confidence)} (${esc(ex.confidence_kind)}) · bar ${pct(ex.bar)}</div>`;
+  }
+  const how = `<details ${cls!=='confident'?'open':''}><summary>How I got this</summary>${explainHtml(r.explain)}</details>`;
   const depth = `<details ${ex.tier==='none'?'open':''}><summary>In depth: ${d.passages.length} passages from ${new Set(d.passages.map(p=>p.url)).size} sources</summary>${depthHtml(d)}</details>`;
-  b.innerHTML = `<span class="tier ${ex.tier}">${LABEL[ex.tier]}</span><br>` + md(r.reply) + meter + how + depth +
+  b.innerHTML = `<span class="tier ${cls}">${LABEL[ex.tier] || ''}</span><br>` + md(r.reply) + meter + how + depth +
     `<div class="meta">asked: “${esc(r.question)}” · ${r.answer_type} · ${r.rewrite} · ${r.steps} decisions · ${r.web_calls} web calls · ${r.ms} ms</div>`;
 };
 log.addEventListener('click', async e => {
@@ -104,8 +123,8 @@ log.addEventListener('click', async e => {
   const r = await fetch('/api/more',{method:'POST',body:JSON.stringify({session:S,domain:a.dataset.more})}).then(r=>r.json());
   a.textContent = 'more from here ✓';
   if(r.error){ add('b', `<span class="meta">${esc(r.error)}</span>`); return; }
-  const t = r.trust;
-  add('b', `<b>More from ${esc(r.domain)}</b> <span class="meta">this chat now weights it ${t.session>0?'+'+t.session.toFixed(1):'0'} (trust ${t.combined.toFixed(2)}); later questions here also search it</span>` +
+  const t = r.trust, tr = t.effective!=null ? `trust ${t.effective.toFixed(1)}/10` : `trust ${t.combined.toFixed(2)}`;
+  add('b', `<b>More from ${esc(r.domain)}</b> <span class="meta">${tr} (unchanged: this button fetches more, it does not change trust); later questions in this chat also search it</span>` +
     (r.passages.length ? r.passages.map(p=>`<div class="ev">${esc(p.text)}<br><small><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title||p.domain)}</a></small></div>`).join('') : '<div class="meta">nothing more on this question from there</div>'));
 });
 document.getElementById('fy').onclick = async () => {

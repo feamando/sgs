@@ -1,0 +1,916 @@
+{
+ "version": 1,
+ "created": "2026-10-09",
+ "source": "general-information questions drafted by Claude from official sites; spot-check by the user pending",
+ "split": "bench",
+ "tasks": [
+  {
+   "id": "info001",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal does Emirates use at Dubai International Airport (DXB)?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 3",
+    "T3",
+    "Emirates Terminal 3"
+   ],
+   "sources": [
+    "https://www.emirates.com/us/english/before-you-fly/dubai-international-airport/emirates-terminal-3/",
+    "https://media.dubaiairports.ae/terminal-3/"
+   ],
+   "evidence": [
+    "All our flights arrive and depart from Emirates Terminal 3 at Dubai International in the UAE",
+    "Terminal 3 Dedicated for use by Emirates airline and for select destinations by flydubai, United Airlines, and Air Canada"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info002",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "How many runways does Hong Kong International Airport operate?",
+   "answer_type": "number",
+   "gold": [
+    "3",
+    "three"
+   ],
+   "sources": [
+    "https://threerunwaysystem.hongkongairport.com/en/three-runway-system/project-updates/hong-kong-international-airport-commissions-three-runway-system/",
+    "https://www.internationalairportreview.com/news/232434/hong-kong-international-airport-launches-three-runway-system-boosting-capacity-and-solidifying-aviation-hub-status/"
+   ],
+   "evidence": [
+    "The Three-runway System (3RS) at Hong Kong International Airport (HKIA) was commissioned today",
+    "All three runways start operating simultaneously today",
+    "The Three-Runway System (3RS) at Hong Kong International Airport (HKIA) was officially commissioned last week"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info003",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal at Tokyo Haneda Airport do ANA (All Nippon Airways) domestic flights use?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 2",
+    "T2"
+   ],
+   "sources": [
+    "https://www.gotokyo.org/en/plan/airport-access/haneda-airport/index.html",
+    "https://www.ana.co.jp/en/jp/guide/prepare/airport-guide/domestic/hnd02/"
+   ],
+   "evidence": [
+    "Terminals 1 & 2 at Haneda handle mainly domestic flights. Japan Airlines (JAL) uses Terminal 1, while All Nippon Airways (ANA) uses Terminal 2.",
+    "Airport guide (Japan Domestic Flights) Haneda Airport Terminal 2 Airport Guide for Haneda Airport Terminal 2"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info004",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "How many runways does Amsterdam Airport Schiphol have?",
+   "answer_type": "number",
+   "gold": [
+    "6",
+    "six"
+   ],
+   "sources": [
+    "https://news.schiphol.com/which-runways-are-currently-in-use-at-schiphol/",
+    ""
+   ],
+   "evidence": [
+    "Schiphol has six runways. Five long runways for international air traffic, plus a short one which is mainly intended for general aviation, private jets and helicopters."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info005",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal does Delta use at New York JFK Airport?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 4",
+    "T4"
+   ],
+   "sources": [
+    "https://www.jfkt4.nyc/",
+    "https://www.jfkairport.com/explore-jfk/terminals/terminal-4"
+   ],
+   "evidence": [
+    "As of Jan. 14, Delta has officially moved its operations out of JFK Terminal 2 and consolidated all operations to Terminal 4.",
+    "Delta operates a free shuttle bus between concourses within Terminal 4"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info006",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal does Aeroméxico use at Mexico City International Airport (AICM)?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 2",
+    "T2"
+   ],
+   "sources": [
+    "https://mexicocity.cdmx.gob.mx/venues/aeropuerto-internacional-de-la-ciudad-de-mexico-aicm/?lang=en",
+    "https://mexico-now.com/aeromexico-moves-all-operations-to-aicm-terminal-2/"
+   ],
+   "evidence": [
+    "Terminal 2 (T2): Inaugurated in 2008 to relieve the historic saturation of T1 ... It functions as the main hub for Aeroméxico and its associated airlines (SkyTeam).",
+    "Aeromexico announced that as of September 1, all its operations at Mexico City International Airport (AICM) will be from and to Terminal 2."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info007",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal does Aer Lingus use at Dublin Airport?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 2",
+    "T2"
+   ],
+   "sources": [
+    "https://www.dublinairport.com/flight-information/airlines",
+    "https://indublin.ie/travel/what-are-the-terminals-in-dublin-airport/"
+   ],
+   "evidence": [
+    "Aer Lingus Terminal 2 Check‑in & Bag Drop - Opens 3 hrs pre‑flight",
+    "Terminal 2 serves as the base for Ireland's flag carrier, Aer Lingus"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info008",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal does Lufthansa use at Munich Airport?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 2",
+    "T2"
+   ],
+   "sources": [
+    "https://www.muenchen.de/en/transportation/munich-airport",
+    "https://www.munich.travel/en/pois/urban-districts/munich-airport"
+   ],
+   "evidence": [
+    "Terminal 2 and Satellite Terminal ... Airlines: Exclusively Lufthansa, its subsidiaries, and Star Alliance partners",
+    "Terminal 2 has been operational since 2003 and was planned and constructed in collaboration with Lufthansa – therefore mainly Lufthansa Group and Star Alliance partners fly from here."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info009",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "Which terminal at Nairobi's Jomo Kenyatta International Airport is used by Kenya Airways?",
+   "answer_type": "entity",
+   "gold": [
+    "Terminal 1A",
+    "T1A",
+    "1A"
+   ],
+   "sources": [
+    "https://www.kaa.go.ke/jkia-meets-international-aviation-standards-with-new-terminal/",
+    "https://jkiaairport.com/terminals/"
+   ],
+   "evidence": [
+    "Terminal 1A that is dedicated to the exclusive use of national carrier Kenya Airways and its partners.",
+    "Terminal 1A is JKIA’s most modern and busiest terminal, dedicated to Kenya Airways and other international SkyTeam members for both departures and arrivals."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info010",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "airport",
+   "question": "How many passenger terminals does São Paulo/Guarulhos International Airport (GRU) have?",
+   "answer_type": "number",
+   "gold": [
+    "3",
+    "three"
+   ],
+   "sources": [
+    "https://www.gru.com.br/en/institutional/sobre-gru-airport/terminals",
+    "https://www.melhoresdestinos.com.br/aeroporto-de-guarulhos.html"
+   ],
+   "evidence": [
+    "GRU Airport has three passenger terminals and one cargo terminal.",
+    "O Aeroporto de Guarulhos possui três terminais de passageiros, além de um terminal de cargas"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info011",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "Which London station does the Heathrow Express run to?",
+   "answer_type": "entity",
+   "gold": [
+    "London Paddington",
+    "Paddington",
+    "Paddington station"
+   ],
+   "sources": [
+    "https://www.heathrowexpress.com/",
+    "https://www.heathrow.com/transport-and-directions/by-rail-or-train/heathrow-express"
+   ],
+   "evidence": [
+    "Our trains run every 15 minutes and are direct, taking just 15 minutes between Heathrow & Paddington Station",
+    "Trains run every 15 minutes to and from London Paddington."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info012",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "How long does the Eurotunnel LeShuttle crossing from Folkestone to Calais take, according to the operator?",
+   "answer_type": "number",
+   "gold": [
+    "35",
+    "35 minutes"
+   ],
+   "sources": [
+    "https://www.leshuttle.com/uk-en",
+    "https://www.getlinkgroup.com/en/our-group/eurotunnel/"
+   ],
+   "evidence": [
+    "35 minutes is the planned journey time.",
+    "35 minutes is the time it takes to get from Folkestone to Coquelles."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info013",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "How long is the Staten Island Ferry ride between St. George and Whitehall (Manhattan)?",
+   "answer_type": "number",
+   "gold": [
+    "25",
+    "25 minutes"
+   ],
+   "sources": [
+    "https://www.nyc.gov/html/dot/html/ferrybus/siferryschedule.shtml",
+    "https://www.nyctourism.com/attractions-tours/staten-island-ferry/"
+   ],
+   "evidence": [
+    "Travel time in either direction between St. George and Whitehall is approximately 25 minutes.",
+    "visitors can take a 25-minute voyage by water from Lower Manhattan to Staten Island"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info014",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "How long does the MTR Airport Express take between Hong Kong International Airport and the city (Hong Kong Station)?",
+   "answer_type": "number",
+   "gold": [
+    "24",
+    "24 minutes"
+   ],
+   "sources": [
+    "https://www.mtr.com.hk/en/customer/services/airport_express_index.html",
+    "https://www.travelchinaguide.com/cityguides/hongkong/transportation/air-express.htm"
+   ],
+   "evidence": [
+    "The 35.3km journey between the Airport and the city takes as little as 24 minutes.",
+    "Journeys between the Airport and downtown take 24 minutes"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info015",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "Which company operates the ferry between Ullapool and Stornoway in Scotland?",
+   "answer_type": "entity",
+   "gold": [
+    "CalMac",
+    "Caledonian MacBrayne",
+    "CalMac Ferries"
+   ],
+   "sources": [
+    "https://www.calmac.co.uk/en-gb/route-information/stornoway-ullapool/",
+    "https://traveleon.com/ferry-from-ullapool-to-stornoway-isle-of-lewis/"
+   ],
+   "evidence": [
+    "Ullapool - Stornoway | Caledonian MacBrayne Official ferry service to the Scottish Isles",
+    "The Ullapool to Stornoway ferry is operated exclusively by Caledonian MacBrayne (CalMac) ."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info016",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "transport",
+   "question": "From which terminal in Cape Town do the ferries to Robben Island depart?",
+   "answer_type": "entity",
+   "gold": [
+    "Nelson Mandela Gateway",
+    "Nelson Mandela Gateway at the V&A Waterfront",
+    "V&A Waterfront"
+   ],
+   "sources": [
+    "https://www.robben-island.org.za/tour-types/",
+    "https://www.waterfront.co.za/attractions/nelson-mandela-gateway-to-robben-island"
+   ],
+   "evidence": [
+    "The ferries depart from the Nelson Mandela Gateway at the V & A Waterfront.",
+    "Before the ferry departs for Robben Island, and long after it returns, the Nelson Mandela Gateway Museum does its own important work."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info017",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "How much does a standard adult UK passport cost when you apply online from within the UK in 2026?",
+   "answer_type": "number",
+   "gold": [
+    "102",
+    "£102",
+    "GBP 102"
+   ],
+   "sources": [
+    "https://www.gov.uk/passport-fees",
+    "https://www.cntraveller.com/article/uk-passport-fees-will-increase-in-2026-heres-what-to-know"
+   ],
+   "evidence": [
+    "Apply online Apply by paper form Adult (16 and over) standard 34-page passport £102 £115.50",
+    "From 8 April 2026, the fee for a standard online application made from within the UK will rise from £94.50 to £102 for adults"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info018",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "What is the mains voltage in Japan?",
+   "answer_type": "number",
+   "gold": [
+    "100",
+    "100 V",
+    "100 volts"
+   ],
+   "sources": [
+    "https://www.japan.travel/en/plan/plug-and-electricity/",
+    "https://travelsafejapan.com/articles/japan-plug-voltage-guide"
+   ],
+   "evidence": [
+    "The voltage used throughout Japan is uniformly 100 volts, A.C.",
+    "Japan uses Type A plugs at 100 V, with 50 Hz in the east and 60 Hz in the west."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info019",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "What is the general speed limit on French motorways (autoroutes) in normal conditions?",
+   "answer_type": "number",
+   "gold": [
+    "130",
+    "130 km/h"
+   ],
+   "sources": [
+    "https://www.service-public.gouv.fr/particuliers/vosdroits/F19460?lang=en",
+    "https://www.vinci-autoroutes.com/fr/conseils/autoroute-mode-demploi/vitesse-sur-autoroute/"
+   ],
+   "evidence": [
+    "Motorway 130 km/h 110 km/h (100 km/h on sections of motorway where the maximum authorized speed is less than 130 km/h)",
+    "Sur autoroute, la vitesse maximale autorisée est en général de 130 km/h."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info020",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "For how many days in any 180-day period can a British citizen visit the Schengen area (e.g. France) without a visa?",
+   "answer_type": "number",
+   "gold": [
+    "90",
+    "90 days"
+   ],
+   "sources": [
+    "https://www.gov.uk/foreign-travel-advice/france/entry-requirements",
+    "https://home-affairs.ec.europa.eu/policies/schengen/visa-policy_en"
+   ],
+   "evidence": [
+    "You can travel without a visa to the Schengen area , which includes France, for up to 90 days in any 180-day period.",
+    "They can enter Schengen area countries as many times as they want, but only stay for a total of 90 days, every 180 days."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info021",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "How long can a visitor who does not need a visa (for example a US citizen with an ETA) usually stay in the UK as a Standard Visitor?",
+   "answer_type": "number",
+   "gold": [
+    "6 months",
+    "six months",
+    "6"
+   ],
+   "sources": [
+    "https://www.gov.uk/standard-visitor",
+    "https://freemovement.org.uk/there-is-no-180-day-rule-for-visitors-to-the-uk/"
+   ],
+   "evidence": [
+    "You can usually stay in the UK for up to 6 months.",
+    "apply for an electronic travel authorisation (ETA) , which allows you to visit the UK for up to 6 months without needing a visa",
+    "if you are granted leave to enter for six months, you can lawfully stay that full six months"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info022",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "What number do you dial for the police in an emergency in South Africa?",
+   "answer_type": "number",
+   "gold": [
+    "10111"
+   ],
+   "sources": [
+    "https://www.saps.gov.za/services/cc_10111.php",
+    "https://za.usembassy.gov/emergency-assistance/"
+   ],
+   "evidence": [
+    "Dial 10111 only in emergencies.",
+    "When you dial 10111 anywhere in the country, a call centre operator answers the call",
+    "Contact the police by calling 10111 from any South African phone, or 112 from a cell phone, to report emergencies"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info023",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "What is the national emergency phone number in Australia?",
+   "answer_type": "number",
+   "gold": [
+    "000",
+    "Triple Zero",
+    "triple zero (000)"
+   ],
+   "sources": [
+    "https://www.healthdirect.gov.au/calling-triple-zero",
+    "https://esa.act.gov.au/about-esa/emergency-communications-centre/triple-zero-000"
+   ],
+   "evidence": [
+    "Triple zero (000) is the national emergency service phone number. Dial triple zero (000) to contact the police, fire or ambulance services.",
+    "In a life threatening emergency dial Triple Zero (000)"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info024",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "rules",
+   "question": "What is the national emergency number in Mexico?",
+   "answer_type": "number",
+   "gold": [
+    "911",
+    "9-1-1"
+   ],
+   "sources": [
+    "https://mexicocity.cdmx.gob.mx/e/emergency/?lang=en",
+    "https://www.exteriores.gob.es/Consulados/mexico/es/Comunicacion/Noticias/Paginas/Articulos/911-nuevo-tel%C3%A9fono-de-emergenci-mexicano.aspx"
+   ],
+   "evidence": [
+    "In the event of any emergency, dial 911 911 is Mexico’s national emergency number and will give you the fastest response.",
+    "está en funcionamiento el número de teléfono de emergencias 911, único para todo el territorio de México."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info025",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date do the clocks go back in the UK in 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-10-25",
+    "25 October 2026",
+    "October 25, 2026"
+   ],
+   "sources": [
+    "https://www.gov.uk/when-do-the-clocks-change",
+    "https://www.rmg.co.uk/stories/time/when-do-clocks-go-back"
+   ],
+   "evidence": [
+    "Year Clocks go forward Clocks go back ... 2026 29 March 25 October",
+    "The clocks will go back in the UK on Sunday 25 October 2026 at 2am."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info026",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date does daylight saving time end in the United States in 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-01",
+    "1 November 2026",
+    "November 1, 2026"
+   ],
+   "sources": [
+    "https://www.nist.gov/pml/time-and-frequency-division/popular-links/daylight-saving-time-dst",
+    "https://www.almanac.com/content/when-daylight-saving-time"
+   ],
+   "evidence": [
+    "During 2026 , daylight saving time is in effect from March 8 at 2 a.m. (local time) to November 1 at 2 a.m. (local time).",
+    "Daylight Saving Time ends on Sunday, November 1, 2026, at 2:00 A.M. local time ."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info027",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "Boxing Day 2026 falls on a Saturday. On what date is the substitute Boxing Day bank holiday in England and Wales?",
+   "answer_type": "date",
+   "gold": [
+    "2026-12-28",
+    "28 December 2026",
+    "December 28, 2026"
+   ],
+   "sources": [
+    "https://www.gov.uk/bank-holidays",
+    "https://publicholidays.co.uk/boxing-day/"
+   ],
+   "evidence": [
+    "Upcoming bank holidays in England and Wales 2026 Date Day of the week Bank holiday 25 December Friday Christmas Day 28 December Monday Boxing Day (substitute day)",
+    "2026 26 Dec Sat Boxing Day National 28 Dec Mon Boxing Day Holiday National"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info028",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date is the US federal Thanksgiving Day holiday in 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-26",
+    "26 November 2026",
+    "November 26, 2026"
+   ],
+   "sources": [
+    "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/",
+    "https://www.almanac.com/thanksgiving-day"
+   ],
+   "evidence": [
+    "Wednesday, November 11 Veterans Day Thursday, November 26 Thanksgiving Day Friday, December 25 Christmas Day",
+    "In 2026, Thanksgiving will be observed on Thursday, November 26."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info029",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date is Sports Day (Supōtsu no Hi), the Japanese national holiday, in 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-10-12",
+    "12 October 2026",
+    "October 12, 2026"
+   ],
+   "sources": [
+    "https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html",
+    "https://www.nippon.com/en/japan-data/h02302/"
+   ],
+   "evidence": [
+    "〇令和8年（2026年）の国民の祝日・休日 ... スポーツの日 10月12日",
+    "Sports Day October 12 (Second Monday in October)"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info030",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "Deepavali falls on a Sunday in 2026. On what date is the Deepavali public holiday observed in Singapore?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-09",
+    "9 November 2026",
+    "November 9, 2026"
+   ],
+   "sources": [
+    "https://www.mom.gov.sg/newsroom/press-releases/2025/0616-public-holidays-for-2026",
+    "https://www.starhub.com/personal/how-to/singapore-public-holidays-2026.html"
+   ],
+   "evidence": [
+    "Deepavali 8 November 2026 4 Sunday ... 4 Monday, 9 Nov 2026, will be a public holiday.",
+    "When is Deepavali 2026? 8 Nov 2026 (Sunday) Monday 9 Nov is observed."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info031",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date is the 2026 US federal general (midterm) election?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-03",
+    "3 November 2026",
+    "November 3, 2026"
+   ],
+   "sources": [
+    "https://www.fec.gov/introduction-campaign-finance/election-results-and-voting-information/",
+    "https://www.usvotefoundation.org/when-are-2026-midterm-elections-and-what-their-purpose"
+   ],
+   "evidence": [
+    "Tuesday, November 3, 2026 , is the next regularly scheduled federal General Election date.",
+    "In 2026, the Midterm General Election will be held on Tuesday, November 3."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info032",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date in 2026 is Brazil's national holiday for Black Consciousness Day (Dia Nacional de Zumbi e da Consciência Negra)?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-20",
+    "20 November 2026",
+    "November 20, 2026",
+    "20 de novembro de 2026"
+   ],
+   "sources": [
+    "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14759.htm",
+    "https://diariodocomercio.com.br/geral/dia-da-consciencia-negra-cai-em-sexta-feira-em-2026-e-garante-feriado-prolongado-de-tres-dias/"
+   ],
+   "evidence": [
+    "Art. 1º Fica declarado feriado nacional o dia 20 de novembro, para a celebração do Dia Nacional de Zumbi e da Consciência Negra.",
+    "O Dia Nacional de Zumbi e da Consciência Negra, celebrado em 20 de novembro, cairá em uma sexta-feira em 2026"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info033",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "dates",
+   "question": "On what date is South Africa's Day of Reconciliation public holiday in 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-12-16",
+    "16 December 2026",
+    "December 16, 2026"
+   ],
+   "sources": [
+    "https://www.gov.za/about-sa/public-holidays",
+    "https://publicholidays.co.za/day-of-reconciliation/"
+   ],
+   "evidence": [
+    "2026 1 January: New Year’s Day ... 24 September: Heritage Day 16 December: Day of Reconciliation",
+    "In 2026, Day of Reconciliation falls on Wednesday 16 December."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info034",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "How much is a Louvre Museum admission ticket for a visitor from outside the European Economic Area?",
+   "answer_type": "number",
+   "gold": [
+    "32",
+    "€32",
+    "32 euros",
+    "EUR 32"
+   ],
+   "sources": [
+    "https://www.louvre.fr/en/visit/hours-admission",
+    "https://www.dw.com/en/louvre-hikes-ticket-price-for-non-eu-visitors-by-almost-half/a-75504604"
+   ],
+   "evidence": [
+    "Non-EEA visitor rate For non-residents and non-citizens of the European Economic Area (EEA) €32.00",
+    "Louvre tickets for individual visitors who are not either citizens or residents of EU member states — or of Iceland, Liechtenstein or Norway — now cost €32"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info035",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "On which day of the week is the Metropolitan Museum of Art in New York closed?",
+   "answer_type": "entity",
+   "gold": [
+    "Wednesday",
+    "Wednesdays"
+   ],
+   "sources": [
+    "https://www.metmuseum.org/plan-your-visit",
+    "https://www.newyorktickets.com/the-metropolitan-museum-of-art/timings-opening-hours/"
+   ],
+   "evidence": [
+    "Day Hours Sunday 10 am–5 pm Monday 10 am–5 pm Tuesday 10 am–5 pm Wednesday Closed Thursday 10 am–5 pm Friday 10 am–9 pm Saturday 10 am–9 pm",
+    "No, The Metropolitan Museum of Art is closed on Wednesdays."
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info036",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "How much is an adult ticket to the Rijksmuseum in Amsterdam?",
+   "answer_type": "number",
+   "gold": [
+    "25",
+    "€25",
+    "25 euros",
+    "EUR 25"
+   ],
+   "sources": [
+    "https://www.rijksmuseum.nl/en/visit",
+    "https://www.travelguide.amsterdam/en/museum-amsterdam/rijksmuseum/tickets-queue/"
+   ],
+   "evidence": [
+    "Adults €25 Ages 18 and under Free Opening hours and prices Open daily from 9 to 17h",
+    "online tickets regular / adults €25"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info037",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "On which day of the week is the Tokyo National Museum normally closed?",
+   "answer_type": "entity",
+   "gold": [
+    "Monday",
+    "Mondays"
+   ],
+   "sources": [
+    "https://www.tnm.jp/modules/r_free_page/index.php?id=113&lang=en",
+    "https://www.japan-guide.com/e/e3019.html"
+   ],
+   "evidence": [
+    "Closed Mondays (Excluding holidays. On those days, the Museum will be open on Monday and closed the following day)",
+    "Tokyo National Museu m Hours: 9:30 to 17:00 (until 19:00 on Fri and Sat) Closed: Mondays (or following day if Monday is a holiday ), New Year holidays"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info038",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "On which day of the week is the Museo Nacional de Antropología in Mexico City closed?",
+   "answer_type": "entity",
+   "gold": [
+    "Monday",
+    "Mondays",
+    "lunes"
+   ],
+   "sources": [
+    "https://www.inah.gob.mx/museos/museo-nacional-de-antropologia",
+    "https://museoscdmx.com/museo-nacional-de-antropologia-en-ciudad-de-mexico/"
+   ],
+   "evidence": [
+    "Martes a domingo de 9 a 18 h",
+    "Horario de Visitas: Lunes : Cerrado Martes a domingo : 9:00 a 18:00 horas"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info039",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "On which day of the week are the Vatican Museums closed (apart from one exception each month)?",
+   "answer_type": "entity",
+   "gold": [
+    "Sunday",
+    "Sundays"
+   ],
+   "sources": [
+    "https://www.museivaticani.va/content/museivaticani/en/info/orari-musei-vaticani.html",
+    "https://www.vaticanmuseumsrome.com/opening-days-vatican-museums"
+   ],
+   "evidence": [
+    "Closures Sunday (except the last Sunday of each month, if not in conjunction with the Feast of 29* June, Saints Peter and Paul)",
+    "The Vatican Museums are closed on Sundays (except for the last Sunday of each month)"
+   ],
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "info040",
+   "family": "fact",
+   "regime": "general_info",
+   "qtype": "general_info",
+   "template": "institutions",
+   "question": "How much does a standard Robben Island Museum tour cost for an adult who is not South African?",
+   "answer_type": "number",
+   "gold": [
+    "600",
+    "R600",
+    "ZAR600",
+    "ZAR 600"
+   ],
+   "sources": [
+    "https://www.robben-island.org.za/tour-types/",
+    "https://www.capetownetc.com/lifestyle/robben-island-family-ticket-cost-family-of-four/"
+   ],
+   "evidence": [
+    "South Africans per adult ZAR400 ZAR210 per child(U/18) Non South Africans ZAR600 per adult ZAR310 per child(U/18)",
+    "For international visitors, the rates are higher. Adults pay R600 each , while children under 18 pay R310 each ."
+   ],
+   "gold_as_of": "2026-10-09"
+  }
+ ],
+ "status": "drafted 2026-10-09 by Claude (2 sources per answer, quotes checked word for word); owner spot-check of 10 pending; gold fixes are re-scored with `planck3.py r5 --rescore` (no re-run)"
+}

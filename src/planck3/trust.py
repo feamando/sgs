@@ -1,4 +1,8 @@
 """
+ROUND 4 (superseded 2026-10-09 by src/planck3/registry.py, hand-scored 0-10 + capped personal score).
+Kept for `planck3.py trust build|show`: the MEASURED table is now an audit signal only (how often a
+domain's snippet carried the right answer on encyclopedic training questions), never a trust score.
+
 Source trust in three layers (2026-10-08). Every source an answer cites shows all three:
 
     system   the same for every user, and measured, not hand-picked: on the G2 training

@@ -2,7 +2,7 @@
  .SYNOPSIS
    Planck 3.0 one-stop runner for the Windows 4090 box.
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
-   SETUP_planck_20261008.md (round 4)
+   SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -29,6 +29,9 @@
                decisions from known answers), G1 confirmation (new task seed, seeds 3-5, rank primary, Hertz)
      round4    round 4 (SETUP_planck_20261008.md): ddgs search (no Docker) on the fresh benchmark, answer
                tiers (confident / low confidence / evidence only), G2 v2 retrained on ddgs, system trust layer
+     round5    round 5 (SETUP_planck_20261009.md): read -> weigh -> write on 3 benchmarks (fresh, news,
+               general info); hand-scored 0-10 source trust; writers trained once (Hertz / Planck, from Gemma);
+               worst-case personal profile; Brave vs ddgs; CPU latency (phone proxy)
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -520,6 +523,79 @@ function Do-Round4 {
     Invoke-R4Run "g0f_heuristic_snip_ddgs_trust$Tag" @("--policy", "heuristic", "--tasks", $FRESH) "round 4: heuristic on ddgs + system trust layer (rule T)"
 }
 
+# ── round 5 (SETUP_planck_20261009.md) ────────────────────────────────────
+$NEWS   = "scripts/assets/planck3_tasks_news.json"
+$INFO   = "scripts/assets/planck3_tasks_geninfo.json"
+$V2HEAD = "$RES/g2v2_head_planck_s0_ddgs/head.pt"     # the round 4 choice head (trained once): the Planck reader
+
+function Test-R5Run([string]$dir, [string]$backend) {
+    if (-not (Test-Path "$dir/summary.json")) { return $false }
+    $j = Get-Content "$dir/summary.json" -Raw | ConvertFrom-Json
+    $h = $j.search_health
+    $ok = ($null -ne $h) -and [bool]$h.valid -and ($j.search -eq $backend) -and ($null -ne $h.primary_share) -and ($h.primary_share -ge 0.8)
+    if ($ok) { return $true }
+    if (Test-Path "${dir}_degraded") { Warn "$dir is below the search bar again; keeping it (reported as is)"; return $true }
+    Move-Item $dir "${dir}_degraded"; Log "kept $dir as ${dir}_degraded ($backend served too little of it); redoing it"
+    return $false
+}
+
+function Invoke-R5([string]$name, [string[]]$a, [string]$what, [string]$backend = "ddgs", [int]$sample = 0) {
+    $out = "$RES/$name$Tag"
+    if (Test-R5Run $out $backend) { Log "SKIP $name (valid)"; return }
+    Log $what
+    $smp = if ($Quick) { @("--sample", "12") } elseif ($sample -gt 0) { @("--sample", "$sample") } else { @() }
+    P3 (@("r5") + $a + @("--tasks", "$FRESH,$NEWS,$INFO", "--search", $backend, "--out", $out, "--gemma-path", $GEMMA,
+          "--g2-head", $V2HEAD, "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) + $smp)
+}
+
+function Do-Round5 {
+    foreach ($f in @($NEWS, $INFO, $V2HEAD, $PLANCK_CKPT)) { if (-not (Test-Path $f)) { throw "missing $f (git pull; the G2 v2 ddgs head is from round 4)" } }
+    $haveGemma = Test-Path $GEMMA
+    $haveHertz = (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    # 1. no-model floor, and the Planck reader with the template writer (isolates reading from writing)
+    Invoke-R5 "r5_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 5: no-model floor (heuristic reader, template writer)"
+    Invoke-R5 "r5_planck_template" @("--reader", "planck", "--writer", "template") "round 5: Planck reader, template writer"
+    # 2. one-time writer training set: Gemma writes for G2 TRAINING questions (never a benchmark), faithfulness-filtered
+    $wdata = "data/planck3/writer/train$Tag.jsonl"
+    if ($haveGemma) {
+        $lim = if ($Quick) { @("--limit", "60") } else { @("--limit", "1200") }
+        Log "writer data: Gemma writes answers for G2 training questions (resumable; ~1-1.5 h first time)"
+        P3 (@("writer", "collect", "--out", $wdata, "--search", "ddgs", "--reader", "planck", "--g2-head", $V2HEAD,
+              "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK, "--gemma-path", $GEMMA) + $lim)
+    } else { Warn "no Gemma at ${GEMMA}: no writer training data, so no Hertz / Planck writer this round" }
+    # 3. train the small writers ONCE (never pass an empty --tag: PowerShell 5.1 drops empty arguments)
+    $wtag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $writers = @()
+    if ((Test-Path $wdata) -and $haveHertz) {
+        if (Test-Newer $wdata "checkpoints/writer_hertz$Tag/best.pt") {
+            Log "train the Hertz 1.2 writer (640M), once"
+            P3 (@("writer", "train", "--base", "hertz", "--out", $wdata, "--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK, "--batch-size", "4") + $wtag)
+        }
+        $writers += "hertz"
+    } elseif (-not $haveHertz) { Warn "no Hertz checkpoint: the Hertz writer arm is skipped" }
+    if (Test-Path $wdata) {
+        if (Test-Newer $wdata "checkpoints/writer_planck$Tag/best.pt") {
+            Log "train the Planck 1.3 writer (100M), once"
+            P3 (@("writer", "train", "--base", "planck", "--out", $wdata, "--base-checkpoint", $PLANCK_CKPT, "--base-tokenizer", $PLANCK_TOK) + $wtag)
+        }
+        $writers += "planck"
+    }
+    # 4. the product candidates, the Gemma reference, and the checks around the product
+    foreach ($w in $writers) {
+        Invoke-R5 "r5_planck_$w" @("--reader", "planck", "--writer", $w, "--writer-checkpoint", "checkpoints/writer_$w$Tag/best.pt") "round 5: Planck reader + $w writer (small-model product)"
+    }
+    if ($haveGemma) { Invoke-R5 "r5_gemma_gemma" @("--reader", "gemma", "--writer", "gemma") "round 5: Gemma reader + Gemma writer (reference)" }
+    $prod = if ($writers.Count) { $writers[0] } else { "template" }
+    $pa = @("--reader", "planck", "--writer", $prod) + $(if ($prod -ne "template") { @("--writer-checkpoint", "checkpoints/writer_$prod$Tag/best.pt") } else { @() })
+    Invoke-R5 "r5_planck_${prod}_contrarian" ($pa + @("--personal", "contrarian")) "round 5: worst-case personal profile (every source scored 10 - system): rule E"
+    if ($env:BRAVE_API_KEY) { Invoke-R5 "r5_planck_${prod}_brave" $pa "round 5: the same on the Brave Search API (paired vs ddgs)" "brave" }
+    else { Warn "no BRAVE_API_KEY (.\scripts\planck3.ps1 setkey): the Brave comparison is skipped" }
+    # 5. CPU only, 4 threads: a phone proxy for the small models (searches and pages are cached by now)
+    $old = $env:CUDA_VISIBLE_DEVICES; $env:CUDA_VISIBLE_DEVICES = "-1"; $env:OMP_NUM_THREADS = "4"
+    try { Invoke-R5 "r5_planck_${prod}_cpu" $pa "round 5: CPU-only latency, 4 threads, 10 questions (phone proxy; no KV cache yet)" "ddgs" 10 }
+    finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -610,6 +686,18 @@ switch ($Command.ToLower()) {
         if (-not $Quick) { Do-G1Confirm } else { Log "-Quick: G1 confirmation skipped" }
         P3 @("report")
         Log ("round3$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round5"     {
+        Start-RunLog "round5"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Doctor $true
+        Do-Ddgs $true
+        Do-Round5
+        P3 @("report")
+        Log ("round5$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round4"     {

@@ -1,0 +1,1406 @@
+{
+ "version": 1,
+ "created": "2026-10-09",
+ "source": "news questions drafted by Claude from news reports (2 independent sources each); spot-check by the user pending",
+ "split": "bench",
+ "tasks": [
+  {
+   "id": "news001",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "How many Riksdag seats did the left-wing opposition bloc win in Sweden's September 2026 general election?",
+   "answer_type": "number",
+   "gold": [
+    "176"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/cxr50l3d762po",
+    "https://www.aljazeera.com/news/2026/9/17/sweden-prime-minister-to-resign-as-left-wing-bloc-seals-narrow-election-win"
+   ],
+   "evidence": [
+    "Opposition parties led by Magdalena Andersson of the Social Democrats look set to win 176 seats in the 349-seat Riksdag",
+    "the four left-wing opposition parties won 176 seats in the 349-seat parliament in Stockholm"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news002",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Which former press secretary did Ukrainian President Volodymyr Zelensky place under sanctions in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Iuliia Mendel",
+    "Yuliia Mendel",
+    "Yulia Mendel",
+    "Julia Mendel",
+    "Mendel"
+   ],
+   "sources": [
+    "https://kyivindependent.com/zelensky-imposes-sanctions-on-former-press-secretary-mendel-who-echoed-russian-propaganda/",
+    "https://www.pravda.com.ua/eng/news/2026/09/13/8053233/"
+   ],
+   "evidence": [
+    "Zelensky imposes sanctions on former press secretary Mendel who echoed Russian propaganda",
+    "Zelenskyy sanctions his former press secretary Yuliia Mendel"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news003",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Who won the September 2026 presidential election in South Ossetia?",
+   "answer_type": "entity",
+   "gold": [
+    "Marat Kambolov",
+    "Kambolov"
+   ],
+   "sources": [
+    "https://www.themoscowtimes.com/2026/09/20/former-russian-official-elected-president-of-south-ossetia-a93751",
+    "https://sovanews.tv/en/2026/09/19/marat-kambolov-wins-de-facto-presidential-election-in-south-ossetia/"
+   ],
+   "evidence": [
+    "Marat Kambolov, the new president, is from North Ossetia",
+    "Marat Kambolov Wins De Facto Presidential Election in South Ossetia"
+   ],
+   "event_date": "2026-09-18",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news004",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "How many of the 450 State Duma seats did United Russia win in Russia's September 2026 parliamentary election?",
+   "answer_type": "number",
+   "gold": [
+    "349"
+   ],
+   "sources": [
+    "https://www.themoscowtimes.com/2026/09/25/united-russia-wins-record-state-duma-majority-in-elections-dubbed-as-the-most-uncompetitive-in-modern-history-a93791",
+    "https://www.thehindu.com/news/international/full-results-from-russias-parliamentary-election-confirm-kremlins-dominance/article71510124.ece"
+   ],
+   "evidence": [
+    "Ella Pamfilova said United Russia received 349 seats in the 450-seat State Duma",
+    "Central Election Commission chief Ella Pamfilova said that United Russia got 349 out of 450 Duma seats."
+   ],
+   "event_date": "2026-09-20",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news005",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Which party came first in the September 2026 Berlin state election?",
+   "answer_type": "entity",
+   "gold": [
+    "Die Linke",
+    "The Left",
+    "Left Party",
+    "Linke"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/9/20/two-german-states-go-to-the-polls-after-far-right-gains",
+    "https://www.bbc.com/news/articles/cvwyz29n0nn2o"
+   ],
+   "evidence": [
+    "Germany’s far-left party Die Linke (the Left) has taken first place in a state election in Berlin",
+    "Meanwhile in Berlin, the ruling CDU was on course to be beaten by Die Linke (The Left)."
+   ],
+   "event_date": "2026-09-20",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news006",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Who became acting president of Serbia after Aleksandar Vučić resigned in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Ana Brnabić",
+    "Ana Brnabic",
+    "Brnabić"
+   ],
+   "sources": [
+    "https://www.theguardian.com/world/2026/sep/27/serbia-president-aleksandar-vucic-resigns-run-prime-minister",
+    "https://europeanwesternbalkans.com/2026/09/28/ana-brnabic-becomes-acting-president-of-serbia/"
+   ],
+   "evidence": [
+    "The new acting president will be Ana Brnabić, a close Vučić ally and former prime minister",
+    "Ana Brnabić becomes Acting President of Serbia"
+   ],
+   "event_date": "2026-09-27",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news007",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Who did King Mohammed VI appoint as Morocco's first female prime minister in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Fatima Ezzahra El Mansouri",
+    "Fatima Zahra El Mansouri",
+    "Fatima Zahra Mansouri",
+    "Fatima-Zahra Mansouri",
+    "El Mansouri"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/c674kkjllw17o",
+    "https://www.aljazeera.com/news/2026/9/29/truly-historic-moroccos-king-appoints-first-woman-prime-minister"
+   ],
+   "evidence": [
+    "Fatima Zahra El Mansouri named as Morocco's first female prime minister",
+    "Fatima Ezzahra El Mansouri becomes the third woman to serve as prime minister in the Arab world."
+   ],
+   "event_date": "2026-09-29",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news008",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Which party won Latvia's October 2026 parliamentary election?",
+   "answer_type": "entity",
+   "gold": [
+    "United List",
+    "Apvienotais saraksts"
+   ],
+   "sources": [
+    "https://www.dw.com/en/latvia-election-pro-ukraine-pm-kulbergs-set-to-retain-power-after-historic-victory-for-his-united-list-party/a-79527253",
+    "https://www.aljazeera.com/news/2026/10/3/latvians-head-to-polls-with-security-and-cost-of-living-in-focus"
+   ],
+   "evidence": [
+    "his centrist United List secured 35.3% of the vote in the country's parliamentary election",
+    "Latvian Prime Minister Andris Kulbergs’s centrist, pro-Ukraine United List party has won parliamentary elections by a wide margin."
+   ],
+   "event_date": "2026-10-03",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news009",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Which candidate won the first round of Brazil's 2026 presidential election?",
+   "answer_type": "entity",
+   "gold": [
+    "Flávio Bolsonaro",
+    "Flavio Bolsonaro"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/ck1l34ed592no",
+    "https://www.theguardian.com/world/2026/oct/05/brazil-presidential-race-election-result-second-round-lula-flavio-bolsonaro"
+   ],
+   "evidence": [
+    "Brazil election goes to run-off as right-wing Flávio Bolsonaro wins first round",
+    "Brazil’s presidential race goes to second round as Flávio Bolsonaro leads incumbent Lula"
+   ],
+   "event_date": "2026-10-04",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news010",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "On what date will Spain hold the snap general election called by Pedro Sánchez in October 2026?",
+   "answer_type": "date",
+   "gold": [
+    "2026-11-29",
+    "29 November 2026",
+    "November 29, 2026"
+   ],
+   "sources": [
+    "https://www.theguardian.com/world/2026/oct/05/spain-prime-minister-pedro-sanchez-snap-election-housing-crisis",
+    "https://www.aljazeera.com/news/2026/10/5/spanish-prime-minister-pedro-sanchez-announces-snap-election"
+   ],
+   "evidence": [
+    "Announcing on Monday morning that an early general election would be held on 29 November",
+    "Sanchez said on Monday the vote would take place on November 29."
+   ],
+   "event_date": "2026-10-05",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news011",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Which party won the most seats in the October 2026 Quebec general election?",
+   "answer_type": "entity",
+   "gold": [
+    "Parti Québécois",
+    "Parti Quebecois",
+    "PQ"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/crly09gz7ew4o",
+    "https://www.aljazeera.com/news/2026/10/6/secessionist-parti-quebecois-wins-quebec-election-in-canada"
+   ],
+   "evidence": [
+    "Canada's Parti Québécois (PQ) is projected to have won enough seats in Quebec's provincial election to form a minority government",
+    "The secessionist Parti Quebecois has won the most seats in Quebec’s election"
+   ],
+   "event_date": "2026-10-05",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news012",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "election",
+   "question": "Who was elected president of Kosovo by parliament in October 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Justina Shiroka Pula",
+    "Justina Shiroka-Pula",
+    "Justina Pula"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/10/7/justina-shiroka-pula-kosovos-new-president-elected-during-a-crisis",
+    "https://www.rferl.org/a/kosovo-elects-president-opposition-deal-war-crimes/33871583.html"
+   ],
+   "evidence": [
+    "Justina Shiroka Pula: Kosovo’s new president, elected during a crisis",
+    "Parliament elected Justina Shiroka Pula as Kosovo's new president early on October 7"
+   ],
+   "event_date": "2026-10-07",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news013",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Who won the men's singles title at the 2026 US Open?",
+   "answer_type": "entity",
+   "gold": [
+    "Alexander Zverev",
+    "Zverev",
+    "Sascha Zverev"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/sep/13/alexander-zverev-wins-us-open-four-sets-ben-shelton",
+    "https://people.com/ben-shelton-alexander-zverev-2026-us-open-final-12116565"
+   ],
+   "evidence": [
+    "Alexander Zverev claims first US Open after four-set battle with Ben Shelton",
+    "Zverev defeated Shelton 6-3, 7-6(2), 5-7, 6-2 on Sept. 13"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news014",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Who won the inaugural Formula One Spanish Grand Prix at the Madring in Madrid in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Kimi Antonelli",
+    "Andrea Kimi Antonelli",
+    "Antonelli"
+   ],
+   "sources": [
+    "https://www.skysports.com/f1/news/12433/13585287/spanish-gp-kimi-antonelli-wins-first-f1-race-at-madring-to-increase-title-lead-after-lando-norris-misfortune",
+    "https://sports.yahoo.com/f1/live/f1-spanish-grand-prix-results-kimi-antonelli-wins-inaugural-race-at-new-madring-120000705.html"
+   ],
+   "evidence": [
+    "Spanish GP: Kimi Antonelli wins F1's first Madring race to increase title lead after Lando Norris misfortune",
+    "F1 Spanish Grand Prix results: Kimi Antonelli wins inaugural race at new Madring"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news015",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which team won the 2026 Solheim Cup?",
+   "answer_type": "entity",
+   "gold": [
+    "Europe",
+    "Team Europe"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/sep/13/europe-win-solheim-cup-against-usa-anna-nordqvist-golf-report",
+    "https://www.cbssports.com/golf/news/solheim-2026-cup-results-europe-united-states/"
+   ],
+   "evidence": [
+    "Europe beat USA 15-13 after 7-5 win in singles matches",
+    "2026 Solheim Cup results, scores: Europe edges United States, continuing dominance"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news016",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which country did the United States beat in the final of the 2026 FIBA Women's Basketball World Cup?",
+   "answer_type": "entity",
+   "gold": [
+    "France"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/live/2026/sep/13/fiba-womens-basketball-world-cup-final-usa-v-france-live-score",
+    "https://www.nbcsports.com/olympics/news/fiba-womens-basketball-world-cup-final-usa-france"
+   ],
+   "evidence": [
+    "Fiba Women’s Basketball World Cup final: USA 97-79 France – as it happened",
+    "the Americans won a fifth consecutive World Cup by beating France 97-79"
+   ],
+   "event_date": "2026-09-13",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news017",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which city was awarded the 2029 World Athletics Championships in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Nairobi"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/sep/15/london-snubbed-nairobi-2029-world-athletics-championships",
+    "https://www.aljazeera.com/sports/2026/9/15/nairobi-to-host-world-athletics-championships-in-2029"
+   ],
+   "evidence": [
+    "London snubbed in favour of Nairobi for 2029 World Athletics Championships",
+    "Nairobi to host World Athletics Championships in 2029"
+   ],
+   "event_date": "2026-09-15",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news018",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which country won the 2026 World Rugby Pacific Nations Cup?",
+   "answer_type": "entity",
+   "gold": [
+    "Japan"
+   ],
+   "sources": [
+    "https://www.world.rugby/pacific-nations-cup/en/news/1046877/japan-crowned-asahi-super-dry-pacific-nations-cup-2026-champions-after-tight-win-over-fiji",
+    "https://english.kyodonews.net/articles/-/85752"
+   ],
+   "evidence": [
+    "Hosts Japan claimed a gloriously thrilling 20-15 victory over Fiji in Asahi Super Dry Pacific Nations Cup 2026 final",
+    "Rugby: Japan end Fiji's Pacific Nations Cup reign with 20-15 victory"
+   ],
+   "event_date": "2026-09-19",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news019",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Who won the men's individual time trial at the 2026 UCI Road World Championships?",
+   "answer_type": "entity",
+   "gold": [
+    "Remco Evenepoel",
+    "Evenepoel"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/sep/20/cycling-world-time-trial-marlen-reusser-zoe-backstedt-evenepoel-montreal",
+    "https://www.cyclingnews.com/pro-cycling/record-breaking-remco-evenepoel-makes-it-four-in-a-row-with-blistering-time-trial-performance-in-montreal/"
+   ],
+   "evidence": [
+    "Evenepoel wins fourth world time trial title in a row, Reusser retains her crown",
+    "Record-breaking Remco Evenepoel makes it four in a row with blistering time trial performance in Montreal"
+   ],
+   "event_date": "2026-09-20",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news020",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which team won the 2026 AFL Grand Final?",
+   "answer_type": "entity",
+   "gold": [
+    "Brisbane Lions",
+    "Brisbane"
+   ],
+   "sources": [
+    "https://www.afl.com.au/news/1621721/match-report-its-wharfie-time-fremantle-dockers-give-brisbane-lions-the-old-heave-ho-to-win-first-flag",
+    "https://www.theguardian.com/sport/2026/sep/26/afl-grand-final-2026-brisbane-three-peat-win-over-fremantle"
+   ],
+   "evidence": [
+    "Match report: Brisbane Lions beat Fremantle Dockers in epic Grand Final",
+    "Brisbane roar back to seal three-peat and break Fremantle hearts in AFL grand final classic"
+   ],
+   "event_date": "2026-09-26",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news021",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which country won the 2026 Billie Jean King Cup?",
+   "answer_type": "entity",
+   "gold": [
+    "Czech Republic",
+    "Czechia"
+   ],
+   "sources": [
+    "https://www.bbc.com/sport/tennis/articles/cqdj4vgxn1g1o",
+    "https://www.wtatennis.com/news/4582629/czechia-wins-12th-billie-jean-king-cup-title-with-sweep-of-ukraine"
+   ],
+   "evidence": [
+    "Billie Jean King Cup: Czech Republic thrash Ukraine to win 12th title",
+    "Czechia wins 12th Billie Jean King Cup title with sweep of Ukraine"
+   ],
+   "event_date": "2026-09-27",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news022",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Who won the men's elite road race at the 2026 UCI Road World Championships in Montreal?",
+   "answer_type": "entity",
+   "gold": [
+    "Brandon McNulty",
+    "McNulty"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/sep/27/brandon-mcnulty-uci-world-championship-road-race-2026-lance-armstrong-cycling",
+    "https://www.bbc.com/sport/cycling/articles/cqe8xr05dj1no"
+   ],
+   "evidence": [
+    "USA’s McNulty transcends chaos of Montreal road race to claim ‘miracle’ world title",
+    "UCI Road World Championships: Brandon McNulty becomes first American winner in 33 years"
+   ],
+   "event_date": "2026-09-27",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news023",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Who won the men's race at the 2026 Berlin Marathon?",
+   "answer_type": "entity",
+   "gold": [
+    "Guye Adola",
+    "Adola"
+   ],
+   "sources": [
+    "https://www.bbc.com/sport/athletics/articles/c6rr4y59n0r0o",
+    "https://www.nbcsports.com/olympics/news/berlin-marathon-2026-tigst-assefa-challenges-world-record-runs-no-3-time-in-history"
+   ],
+   "evidence": [
+    "Guye Adola - another Ethiopian - won the men's race with a time of 2:02:50.",
+    "Guye Adola won the men’s race Sunday in 2:02:50"
+   ],
+   "event_date": "2026-09-27",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news024",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "sport",
+   "question": "Which team won the 2026 NRL Grand Final?",
+   "answer_type": "entity",
+   "gold": [
+    "Sydney Roosters",
+    "Roosters"
+   ],
+   "sources": [
+    "https://www.theguardian.com/sport/2026/oct/04/nrl-grand-final-sydney-roosters-newcastle-knights-match-report",
+    "https://www.abc.net.au/news/2026-10-04/nrl-grand-final-live-nrlw-roosters-knights-broncos/107219724"
+   ],
+   "evidence": [
+    "Sydney Roosters hold off brave Newcastle Knights to win thrilling NRL grand final",
+    "The Sydney Roosters have held off a fast-finishing Newcastle to win 19-18 in a pulsating NRL grand final at Stadium Australia."
+   ],
+   "event_date": "2026-10-04",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news025",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "To what level did the European Central Bank raise its deposit facility rate on 10 September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "2.50",
+    "2.5",
+    "2.50%",
+    "2.5%"
+   ],
+   "sources": [
+    "https://www.cnbc.com/2026/09/10/ecb-interest-rate-hike-lagarde-iran.html",
+    "https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.mp260910~314e508016.en.html"
+   ],
+   "evidence": [
+    "The European Central Bank has voted to raise its key deposit rate by 25 basis points to 2.5% from 2.25%",
+    "the interest rates on the deposit facility, the main refinancing operations and the marginal lending facility will be increased to 2.50%, 2.65% and 2.90% respectively"
+   ],
+   "event_date": "2026-09-10",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news026",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "At what price per share, in naira, did the Dangote refinery offer shares in its September 2026 IPO?",
+   "answer_type": "number",
+   "gold": [
+    "525",
+    "N525",
+    "₦525"
+   ],
+   "sources": [
+    "https://africa.businessinsider.com/local/markets/dangote-launches-naira215-trillion-ipo-with-41-billion-new-ordinary-shares-as-net/v9825tz",
+    "https://punchng.com/dangote-shares-how-soon-will-returns-come/"
+   ],
+   "evidence": [
+    "The offering includes 4.1 billion new ordinary shares at N525 each",
+    "The offer comprises 4.1 billion ordinary shares at N525 each"
+   ],
+   "event_date": "2026-09-14",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news027",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "Which investment firm took full control of Chelsea FC in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Clearlake Capital",
+    "Clearlake"
+   ],
+   "sources": [
+    "https://www.bbc.com/sport/football/articles/cvrl6egl1254o",
+    "https://www.theguardian.com/football/2026/sep/17/boehly-and-walter-sell-chelsea-shares-as-clearlake-capital-takes-full-control-of-club"
+   ],
+   "evidence": [
+    "Chelsea: Clearlake Capital acquires full control as Todd Boehly and Mark Walter sell stakes",
+    "Boehly and Walter sell Chelsea shares as Clearlake Capital takes full control of club"
+   ],
+   "event_date": "2026-09-16",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news028",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "To what level did the Bank of Japan raise its benchmark interest rate in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "1.25",
+    "1.25%"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/9/18/japans-interest-rate-hiked-to-31-year-high-at-1-25-as-inflation-rises",
+    "https://bbc.co.uk/news/articles/cqn74jeek06no"
+   ],
+   "evidence": [
+    "Bank of Japan raises rates to 31-year high of 1.25% as inflation rises",
+    "the Bank of Japan (BOJ) increased the rate from 1% to 1.25% - a level not seen since 1995"
+   ],
+   "event_date": "2026-09-18",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news029",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "To what level did the Reserve Bank of Australia raise its cash rate on 29 September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "4.60",
+    "4.6",
+    "4.60%",
+    "4.6%"
+   ],
+   "sources": [
+    "https://www.abc.net.au/news/2026-09-29/rba-lifts-rates-highest-level-in-15-years-september-2026/107206640",
+    "https://www.theguardian.com/business/2026/sep/29/rba-interest-rate-announcement-decision-cash-rate"
+   ],
+   "evidence": [
+    "It lifts the cash rate target to 4.60 per cent, up from 4.35 per cent.",
+    "The Reserve Bank of Australia has lifted its key interest rate to 4.6%, its highest level since 2011"
+   ],
+   "event_date": "2026-09-29",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news030",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "What is the name of the company created when Paramount completed its takeover of Warner Bros. Discovery in October 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Skydance",
+    "Skydance Corporation"
+   ],
+   "sources": [
+    "https://www.theguardian.com/business/2026/oct/06/paramount-warner-bros-skydance-merger",
+    "https://www.nbcnews.com/business/media/paramount-warner-bros-skydance-closes-rcna601833"
+   ],
+   "evidence": [
+    "Paramount completes $111bn acquisition of Warner Bros to form new media empire Skydance",
+    "Paramount wraps up mega Warner Bros merger to create Skydance"
+   ],
+   "event_date": "2026-10-06",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news031",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "To what level did the Reserve Bank of India raise its repo rate on 7 October 2026?",
+   "answer_type": "number",
+   "gold": [
+    "5.5",
+    "5.50",
+    "5.5%",
+    "5.50%"
+   ],
+   "sources": [
+    "https://www.thehindu.com/business/Economy/rbi-hikes-repo-rate-by-25-basis-points-to-55/article71554369.ece",
+    "https://timesofindia.indiatimes.com/business/india-business/loans-set-to-get-dearer-as-rbi-hikes-repo-rate-after-44-months/articleshow/134774530.cms"
+   ],
+   "evidence": [
+    "RBI raises repo rate by 25 basis points to 5.50%",
+    "RBI raised the repo rate by a widely expected 25 basis points to 5.5% on Wednesday, its first increase since Feb 2023"
+   ],
+   "event_date": "2026-10-07",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news032",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "business",
+   "question": "What was the record value of Taiwan's exports in September 2026, in US dollars?",
+   "answer_type": "number",
+   "gold": [
+    "87220000000",
+    "87200000000",
+    "87.22 billion",
+    "87.2 billion"
+   ],
+   "sources": [
+    "https://focustaiwan.tw/business/202610080020",
+    "https://taipeitimes.com/News/biz/archives/2026/10/09/2003865634"
+   ],
+   "evidence": [
+    "Taiwan's exports hit a monthly record of US$87.22 billion in September",
+    "Exports jumped 60.9 percent from a year earlier to US$87.22 billion last month, the highest monthly figure on record"
+   ],
+   "event_date": "2026-10-08",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news033",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "Which country became the first in South America validated by the WHO for eliminating dog-transmitted rabies, in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "Chile"
+   ],
+   "sources": [
+    "https://latimes.com/science/story/2026-09-15/chile-eliminates-rabies-transmitted-by-dogs-first-south-american-country-to-do-so",
+    "https://who.int/es/news/item/14-09-2026-chile-becomes-first-country-in-south-america-validated-for-eliminating-dog-transmitted-rabies-as-a-public-health-problem"
+   ],
+   "evidence": [
+    "Chile eliminates rabies transmitted by dogs, the first South American country to do so",
+    "Chile se convierte en el primer país de América del Sur validado por la OMS por eliminar la rabia transmitida por el perro"
+   ],
+   "event_date": "2026-09-14",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news034",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "How many people aged 100 or older did Japan's health ministry count in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "107677",
+    "107,677"
+   ],
+   "sources": [
+    "https://edition.cnn.com/2026/09/15/asia/japan-centenarians-population-intl-hnk",
+    "https://www.manilatimes.net/2026/09/16/world/asia-oceania/japan-centenarians-top-100000-for-the-first-time/2426159"
+   ],
+   "evidence": [
+    "The population of centenarians rose again – for the 56th consecutive year – to 107,677 in September",
+    "the number of those aged 100 or older stood at 107,677 as of Sept. 1"
+   ],
+   "event_date": "2026-09-15",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news035",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "What name was given to the new wild cat species described in Bolivia in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "tilcayo",
+    "Leopardus tilcayo"
+   ],
+   "sources": [
+    "https://www.theguardian.com/world/2026/sep/17/new-cat-species-identified-bolivia",
+    "https://www.bbc.com/news/articles/c6x2zgv9rr4ro"
+   ],
+   "evidence": [
+    "The cat, called tilcayo by local communities",
+    "we have a new species for the world, which is the Leopardus tilcayo"
+   ],
+   "event_date": "2026-09-17",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news036",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "Croatia became which numbered signatory of the Artemis Accords in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "74",
+    "74th"
+   ],
+   "sources": [
+    "https://www.nasa.gov/organizations/oiir/artemis-accords/nasa-welcomes-croatia-as-newest-artemis-accords-signatory/",
+    "https://www.croatiaweek.com/croatia-signs-artemis-accords-us-space-exploration/"
+   ],
+   "evidence": [
+    "The Republic of Croatia became the 74th signatory to the Artemis Accords on Wednesday",
+    "meaning Croatia’s accession brings the total to 74 signatories"
+   ],
+   "event_date": "2026-09-23",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news037",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "On which numbered test flight did SpaceX's Starship reach orbit for the first time?",
+   "answer_type": "number",
+   "gold": [
+    "14",
+    "Flight 14"
+   ],
+   "sources": [
+    "https://www.npr.org/2026/09/28/nx-s1-5983418/spacex-starship-first-orbital-flight-14-nasa",
+    "https://www.aljazeera.com/news/2026/9/28/spacexs-showpiece-starship-rocket-reaches-orbit-for-first-time"
+   ],
+   "evidence": [
+    "This is the 14th flight of the uncrewed Starship, but the first time it reached orbit.",
+    "It was Starship’s 14th full-scale launch from Texas’s southern tip in three years."
+   ],
+   "event_date": "2026-09-28",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news038",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "Which Stanford scientist shared the 2026 Nobel Prize in Physiology or Medicine with Peter Hegemann and Georg Nagel?",
+   "answer_type": "entity",
+   "gold": [
+    "Karl Deisseroth",
+    "Deisseroth"
+   ],
+   "sources": [
+    "https://edition.cnn.com/2026/10/05/science/nobel-prize-medicine-karl-deisseroth-peter-hegemann-georg-nagel-intl",
+    "https://www.nbcnews.com/world/europe/nobel-prize-medicine-2026-karl-deisseroth-peter-hegemann-georg-nagel-rcna601564"
+   ],
+   "evidence": [
+    "This year's Nobel Prize in Physiology or Medicine has been awarded to Karl Deisseroth, Peter Hegemann and Georg Nagel.",
+    "Nobel Prize medicine 2026: Karl Deisseroth, Peter Hegemann and Georg Nagel win for brain research"
+   ],
+   "event_date": "2026-10-05",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news039",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "Who won the 2026 Nobel Prize in Physics?",
+   "answer_type": "entity",
+   "gold": [
+    "Francis Halzen",
+    "Halzen"
+   ],
+   "sources": [
+    "https://edition.cnn.com/2026/10/06/science/nobel-prize-physics-francis-halzen-winner-intl",
+    "https://www.theguardian.com/science/2026/oct/06/nobel-prize-in-physics-francis-halzen-south-pole-neutrinos-icecube-detector"
+   ],
+   "evidence": [
+    "Nobel Prize in physics awarded to Francis Halzen for his work detecting ‘ghostly’ cosmic particles",
+    "Nobel prize in physics goes to Francis Halzen for south pole work on neutrinos"
+   ],
+   "event_date": "2026-10-06",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news040",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "science",
+   "question": "Which Japanese chemist shared the 2026 Nobel Prize in Chemistry with Henri Kagan?",
+   "answer_type": "entity",
+   "gold": [
+    "Kenso Soai",
+    "Kensō Soai",
+    "Soai"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/c6ly038jg0d4o",
+    "https://aljazeera.com/news/2026/10/7/henri-kagan-kenso-soai-win-chemistry-nobel-for-mirror-image-breakthrough"
+   ],
+   "evidence": [
+    "The Nobel Prize in Chemistry has been awarded to French scientist Henri B. Kagan and Japan's Kenso Soai",
+    "Henri Kagan, Kenso Soai win Nobel chemistry prize for ‘mirror image’ work"
+   ],
+   "event_date": "2026-10-07",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news041",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people died when a Flying Doctor Service helicopter crashed near Long Lellang, Sarawak, on 8 September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "5",
+    "five"
+   ],
+   "sources": [
+    "https://www.thestar.com.my/news/nation/2026/09/08/sarawak-heli-crash-all-on-board-confirmed-dead",
+    "https://www.malaymail.com/news/malaysia/2026/09/11/sarawak-police-confirm-cause-of-death-for-all-five-lost-in-long-lellang-helicopter-crash/234785"
+   ],
+   "evidence": [
+    "confirmed that all five people on board the helicopter died in the crash",
+    "Sarawak police confirm cause of death for all five lost in Long Lellang helicopter crash"
+   ],
+   "event_date": "2026-09-08",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news042",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people died when a news helicopter covering a bus crash in Chatsworth, Los Angeles, crashed in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "3",
+    "three"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/cw4gq0j5jg10o",
+    "https://www.nbcnews.com/news/us-news/helicopter-crashes-los-angeles-chatsworth-rcna598061"
+   ],
+   "evidence": [
+    "Journalist Eliana Moreno and pilot George Marciniw among three killed in Los Angeles news helicopter crash",
+    "3 dead after news helicopter crashes while covering deadly Los Angeles bus collision"
+   ],
+   "event_date": "2026-09-15",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news043",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people died in the helicopter crash in Urubici, Brazil, that killed singer Rick Sollo in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "5",
+    "five"
+   ],
+   "sources": [
+    "https://english.news.cn/20260923/92b6db503534403dbb8c284ce4778d5b/c.html",
+    "https://www.metropoles.com/colunas/fabia-oliveira/rick-bombeiros-confirmam-morte-dos-cinco-ocupantes-de-helicoptero-leia"
+   ],
+   "evidence": [
+    "Five people, including Brazilian singer Rick Sollo of the sertanejo music duo Rick & Renner, were found dead Tuesday after their helicopter",
+    "Rick: bombeiros confirmam morte dos cinco ocupantes de helicóptero."
+   ],
+   "event_date": "2026-09-21",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news044",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people were killed when a sleeper bus caught fire on the Yamuna Expressway in Greater Noida, India, in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "9",
+    "nine"
+   ],
+   "sources": [
+    "https://www.deccanherald.com/india/uttar-pradesh/9-killed-as-sleeper-bus-catches-fire-on-yamuna-expressway-in-greater-noida-newsalert-4157568",
+    "https://www.dw.com/en/india-news-9-killed-after-bus-catches-fire-outside-delhi/live-79405879"
+   ],
+   "evidence": [
+    "Yamuna Expressway bus fire: 9 killed, sleeper coach bound for Bihar catches fire",
+    "Fire on sleeper bus kills nine outside of Delhi"
+   ],
+   "event_date": "2026-09-24",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news045",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people were killed in the explosion and building collapse in Athens's Plaka district in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "6",
+    "six"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/c6p3kk78l4l1o",
+    "https://www.theguardian.com/world/2026/sep/26/greek-authorities-seek-answers-after-six-killed-in-athens-apartment-block-explosion"
+   ],
+   "evidence": [
+    "Athens explosion: Six dead in blast near Acropolis in Plaka district",
+    "Greek authorities seek answers after six killed in Athens apartment block explosion"
+   ],
+   "event_date": "2026-09-25",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news046",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people died in the helicopter crash in Marondera, Zimbabwe, that killed businessman Wicknell Chivayo?",
+   "answer_type": "number",
+   "gold": [
+    "6",
+    "six"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/cr4gvg0yenl4o",
+    "https://www.thecitizen.co.tz/tanzania/news/africa/zimbabwean-businessman-wicknell-chivayo-his-wife-die-in-helicopter-crash-5615326"
+   ],
+   "evidence": [
+    "Wicknell Chivayo and his wife have been killed in a helicopter crash that left six people dead",
+    "saying the aircraft had six occupants"
+   ],
+   "event_date": "2026-09-30",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news047",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people were aboard the Latitude Air Ambulance jet from Bermuda that went missing over the Atlantic in October 2026 and were presumed dead?",
+   "answer_type": "number",
+   "gold": [
+    "6",
+    "six"
+   ],
+   "sources": [
+    "https://www.cbc.ca/news/canada/hamilton/u-s-coast-guard-hamilton-bermuda-latitude-9.7369243",
+    "https://winnipeg.citynews.ca/2026/10/05/ontario-air-ambulance-flight-missing/"
+   ],
+   "evidence": [
+    "U.S. Coast Guard suspends search for six aboard air ambulance",
+    "Ontario air ambulance company says 6 aboard missing flight presumed dead"
+   ],
+   "event_date": "2026-10-03",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news048",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "disaster",
+   "question": "How many people were killed in the Nigerian Air Force ATR 42 crash in Ondo State in October 2026?",
+   "answer_type": "number",
+   "gold": [
+    "25",
+    "twenty-five"
+   ],
+   "sources": [
+    "https://www.dw.com/en/military-aircraft-with-32-people-onboard-crashes-in-southern-nigeria/a-79552403",
+    "https://www.bbc.com/news/articles/ck1wvjer20qqo"
+   ],
+   "evidence": [
+    "Nigerian military plane crash kills all 25 on board",
+    "Nigerian Air Force plane crash: Bola Tinubu declares three days of mourning as 25 killed"
+   ],
+   "event_date": "2026-10-05",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news049",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "Which film won the Golden Lion at the 2026 Venice Film Festival?",
+   "answer_type": "entity",
+   "gold": [
+    "Woman Unknown"
+   ],
+   "sources": [
+    "https://www.theguardian.com/film/2026/sep/12/woman-unknown-wins-venice-film-festival-as-naza-takes-special-jury-prize",
+    "https://www.thenationalnews.com/arts-culture/film-tv/2026/09/13/danish-egyptian-director-may-el-toukhy-wins-venice-golden-lion-for-woman-unknown/"
+   ],
+   "evidence": [
+    "Woman Unknown director, May el-Toukhy, who won the Golden Lion for best film",
+    "Danish-Egyptian director May el-Toukhy wins Venice Golden Lion for Woman Unknown"
+   ],
+   "event_date": "2026-09-12",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news050",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "Which series won Outstanding Comedy Series at the 2026 Primetime Emmy Awards?",
+   "answer_type": "entity",
+   "gold": [
+    "Widow's Bay",
+    "Widows Bay",
+    "Widow’s Bay"
+   ],
+   "sources": [
+    "https://www.latimes.com/entertainment-arts/awards/story/2026-09-14/widows-bay-emmys-2026-comedy-series-winner",
+    "https://www.hollywoodreporter.com/tv/tv-news/2026-emmy-best-comedy-winner-widows-bay-sets-emmys-record-1236697070/"
+   ],
+   "evidence": [
+    "'Widow's Bay' breaks Emmys comedy record with 14 wins, including best series",
+    "‘Widow’s Bay’ Wins Emmy for Best Comedy Series, Setting New Record"
+   ],
+   "event_date": "2026-09-14",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news051",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "Which bird won New Zealand's Bird of the Year competition in 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "black robin",
+    "Chatham Island black robin",
+    "karure"
+   ],
+   "sources": [
+    "https://www.theguardian.com/world/2026/sep/21/nz-bird-of-the-year-2026-black-robin-wins-new-zealand",
+    "https://www.cnn.com/2026/09/21/travel/new-zealand-bird-of-the-year-2026-intl-scli"
+   ],
+   "evidence": [
+    "The black robin, once down to just a single breeding pair, wins NZ bird of the year",
+    "New Zealand’s Bird of the Year 2026 is a tiny black robin"
+   ],
+   "event_date": "2026-09-21",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news052",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "In which US city was Archbishop Fulton Sheen beatified in September 2026?",
+   "answer_type": "entity",
+   "gold": [
+    "St. Louis",
+    "Saint Louis",
+    "St Louis"
+   ],
+   "sources": [
+    "https://www.vaticannews.va/en/church/news/2026-09/cardinal-tagle-homily-beatification-mass-fulton-sheen-missionary.html",
+    "https://www.stlpr.org/race-identity-and-faith/2026-09-24/archbishop-fulton-sheen-beatification-st-louis"
+   ],
+   "evidence": [
+    "Opening his homily at the beatification Mass in St. Louis, Missouri, on Thursday",
+    "St. Louis hosts Fulton Sheen getting to closer to sainthood"
+   ],
+   "event_date": "2026-09-24",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news053",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "Which song won Video of the Year at the 2026 MTV Video Music Awards?",
+   "answer_type": "entity",
+   "gold": [
+    "The Fate of Ophelia",
+    "Fate of Ophelia"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/c8ly403p1rwpo",
+    "https://www.nbcnews.com/pop-culture/pop-culture-news/taylor-swift-mtv-vmas-2026-breaks-beyonce-tie-debuts-patient-zero-rcna600112"
+   ],
+   "evidence": [
+    "went on to score the night's top award for the visuals for her track The Fate of Ophelia",
+    "Swift won the coveted video of the year award for “The Fate of Ophelia”"
+   ],
+   "event_date": "2026-09-27",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news054",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "culture",
+   "question": "Who won the 2026 Nobel Prize in Literature?",
+   "answer_type": "entity",
+   "gold": [
+    "Anne Carson",
+    "Carson"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/cq4g1j54nepyo",
+    "https://www.theguardian.com/books/2026/oct/08/wins-the-nobel-prize-in-literature-2026"
+   ],
+   "evidence": [
+    "Anne Carson: 'Bold and inventive' Canadian poet wins Nobel Prize in Literature",
+    "Anne Carson wins Nobel prize in literature 2026"
+   ],
+   "event_date": "2026-10-08",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news055",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "Until what year does the Lindsey O. Graham Sanctioning Russia and Iran Act, signed by Trump in September 2026, extend sanctions on Iran?",
+   "answer_type": "year",
+   "gold": [
+    "2031"
+   ],
+   "sources": [
+    "https://www.middleeasteye.net/live-blog/live-blog-update/trump-signs-lindsey-graham-act-extending-iran-sanctions-2031",
+    "https://www.thenationalnews.com/news/us/2026/09/18/trump-russia-iran-sanctions-bill/"
+   ],
+   "evidence": [
+    "Trump signs Lindsey Graham Act extending Iran sanctions to 2031",
+    "Legislation locks in punitive measures against Iran until 2031"
+   ],
+   "event_date": "2026-09-18",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news056",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "How many new US military bases in Greenland does the September 2026 US-Denmark-Greenland security agreement provide for, according to Trump?",
+   "answer_type": "number",
+   "gold": [
+    "2",
+    "two"
+   ],
+   "sources": [
+    "https://www.bbc.com/news/articles/c9dr74g32g8go",
+    "https://www.cbsnews.com/news/trump-greenland-deal-denmark-united-nations/"
+   ],
+   "evidence": [
+    "US to build two military bases in Greenland under new deal with Denmark",
+    "Mr. Trump said the agreement allows for the U.S. to build two new bases in Greenland."
+   ],
+   "event_date": "2026-09-22",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news057",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "Which European country restored diplomatic relations with Rwanda in September 2026, 18 months after the two expelled each other's diplomats?",
+   "answer_type": "entity",
+   "gold": [
+    "Belgium"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/9/23/qatar-says-no-alternative-to-diplomacy-as-belgium-and-rwanda-restore-ties",
+    "https://www.newtimes.co.rw/article/39146/news/international/rwanda-belgium-agree-to-restore-diplomatic-ties-reopen-embassies"
+   ],
+   "evidence": [
+    "Brussels and Kigali resume relations 18 months after rupture, crediting meeting Qatar hosted in Doha.",
+    "Rwanda, Belgium agree to restore diplomatic ties, reopen embassies"
+   ],
+   "event_date": "2026-09-22",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news058",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "How many North Korean prisoners of war did Ukraine say it had transferred to South Korea, as disclosed by Zelensky in September 2026?",
+   "answer_type": "number",
+   "gold": [
+    "2",
+    "two"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/9/24/zelenskyy-says-ukraine-sent-two-north-korean-pows-to-south-korea",
+    "https://meduza.io/en/news/2026/10/08/south-korea-recalls-ambassador-from-ukraine-demands-apology-over-zelensky-s-disclosure-of-north-korean-pow-transfer"
+   ],
+   "evidence": [
+    "Zelenskyy says Ukraine sent two North Korean POWs to South Korea",
+    "Kyiv had transferred two North Korean prisoners of war to South Korea"
+   ],
+   "event_date": "2026-09-23",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news059",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "The US troop withdrawal from Iraq completed in September 2026 ended a campaign against Islamic State that had lasted how many years?",
+   "answer_type": "number",
+   "gold": [
+    "12",
+    "twelve"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/9/30/pentagon-says-us-troop-withdrawal-from-iraq-is-complete",
+    "https://www.theguardian.com/us-news/2026/sep/30/pentagon-formal-withdrawal-troops-iraq"
+   ],
+   "evidence": [
+    "the success of a 12-year campaign that defeated ISIS as an organised military threat in Iraq",
+    "12 years since the US mission to fight the Islamic State started"
+   ],
+   "event_date": "2026-09-30",
+   "gold_as_of": "2026-10-09"
+  },
+  {
+   "id": "news060",
+   "family": "fact",
+   "regime": "news",
+   "qtype": "news",
+   "template": "diplomacy",
+   "question": "Which country announced on 1 October 2026 that it was severing diplomatic ties with Ethiopia?",
+   "answer_type": "entity",
+   "gold": [
+    "Eritrea"
+   ],
+   "sources": [
+    "https://www.aljazeera.com/news/2026/10/1/eritrea-severs-diplomatic-ties-with-ethiopia-in-tit-for-tat-move",
+    "https://www.bbc.com/news/articles/crpd0d0jl0y0o"
+   ],
+   "evidence": [
+    "Eritrea severs diplomatic ties with Ethiopia in tit-for-tat move",
+    "Ethiopia and Eritrea cut diplomatic ties as Tigray conflict escalates"
+   ],
+   "event_date": "2026-10-01",
+   "gold_as_of": "2026-10-09"
+  }
+ ],
+ "status": "drafted 2026-10-09 by Claude (2 sources per answer, quotes checked word for word); owner spot-check of 10 pending; gold fixes are re-scored with `planck3.py r5 --rescore` (no re-run)"
+}

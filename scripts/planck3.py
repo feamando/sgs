@@ -109,11 +109,31 @@ def cmd_ask(args):
 
 # ── chat ─────────────────────────────────────────────────────────────────
 def _chat_harness_factory(args):
-    """One web client + policy + store shared across chat sessions (Gemma loads once)."""
-    from src.planck3.harness import Harness
+    """
+    One web client + models + store shared across chat sessions (models load once). pipeline 'answer'
+    (default, round 5): read -> weigh -> write with the best local reader/writer present; 'harness':
+    the round 1-4 typed-decision loop.
+    """
     from src.planck3.store import Store
-    web, policy, store = build_web(args), make_policy(args), Store(args.store)
-    return lambda: Harness(policy, web, store, depth_pages=args.depth_pages)
+    web, store = build_web(args), Store(args.store)
+    if args.pipeline == "harness":
+        from src.planck3.harness import Harness
+        policy = make_policy(args)
+        return lambda: Harness(policy, web, store, depth_pages=args.depth_pages)
+    from src.planck3.answer import Answerer
+    from src.planck3.readers import make_reader
+    from src.planck3.writer import make_writer
+    rd = args.reader
+    if rd == "auto":
+        rd = "planck" if args.g2_head and Path(args.g2_head).exists() else "heuristic"
+    wr = args.writer
+    if wr == "auto":
+        wr = next((w for w in ("hertz", "planck") if (REPO_ROOT / "checkpoints" / f"writer_{w}" / "best.pt").exists()), "template")
+    reader = make_reader(rd, head=args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer,
+                         gemma_path=args.gemma_path)
+    writer = make_writer(wr, gemma_path=args.gemma_path)
+    print(f"[planck3] answer pipeline: reader={reader.name} writer={writer.name} (trust: config/planck3/source_registry.json)")
+    return lambda: Answerer(web, store, reader, writer)
 
 
 def cmd_chat(args):
@@ -216,7 +236,7 @@ def cmd_g0(args):
     if args.store is None and store_path.exists():
         store_path.unlink()  # a run's own store starts empty unless you pass --store (G3)
     web = build_web(args, log_path=run / "web_log.jsonl")
-    store = Store(store_path, system_trust={} if args.system_trust == "none" else args.system_trust)
+    store = Store(store_path)
     policy = make_policy(args)
     h = Harness(policy, web, store, snippet_first=not args.no_snippet_first,
                 answer_threshold=args.answer_threshold, depth_pages=args.depth_pages)
@@ -242,7 +262,7 @@ def cmd_g0(args):
 
     summ = summarize(records)
     summ.update({"policy": args.policy, "search": web.backend, "net": args.net, "tasks": str(args.tasks),
-                 "system_trust_domains": len(store.system),
+                 "registry_domains": len(store.registry.domains),
                  "n_invalid_decisions": sum(r["invalid"] for r in records),
                  "gold_reachable": sum(r["gold_reachable"] for r in records) / max(len(records), 1),
                  "serp_answer_rate_at3": sum(r["serp_visible"] for r in records) / max(len(records), 1),
@@ -651,6 +671,8 @@ def cmd_report(args):
         if reg_lines:
             lines += ["### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)", "",
                       "| run | per regime: success (n, wrong when answered) |", "|---|---|", *reg_lines, ""]
+    from src.planck3.round5 import report_lines as r5_lines
+    lines += r5_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -841,6 +863,9 @@ def main():
         p.add_argument("--port", type=int, default=8010)
         p.add_argument("--depth-pages", type=int, default=1,
                        help="extra sources read after answering, for the depth pack (0 = only pages already read)")
+        p.add_argument("--pipeline", default="answer", choices=["answer", "harness"])
+        p.add_argument("--reader", default="auto", choices=["auto", "heuristic", "planck", "gemma"])
+        p.add_argument("--writer", default="auto", choices=["auto", "template", "hertz", "planck", "gemma"])
         add_web_args(p)
         p.set_defaults(fn=fn)
 
@@ -870,8 +895,7 @@ def main():
                    help="pages read AFTER answering for the depth pack (product setting: answer fast, then 1 page)")
     p.add_argument("--answer-threshold", type=float, default=0.3,
                    help="ANSWER with p below this abstains instead (0 disables the gate)")
-    p.add_argument("--system-trust", default=None,
-                   help="system trust table (default config/planck3/source_trust.json); 'none' = every domain 0.5")
+    p.add_argument("--system-trust", default=None, help="ignored since round 5 (trust = config/planck3/source_registry.json)")
     p.add_argument("--closed-book", action="store_true",
                    help="base-chat comparator: the LLM answers from its weights, no tools/sources")
     p.add_argument("--prices", default=str(REPO_ROOT / "config" / "planck3_prices.json"))
@@ -913,9 +937,10 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import g2, wikirace
+    from src.planck3 import g2, round5, wikirace
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
+    round5.add_cli(sub, add_web_args, build_web)
 
     args = ap.parse_args()
     args.fn(args)
