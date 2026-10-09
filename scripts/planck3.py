@@ -731,12 +731,37 @@ def _paired_round4(rows) -> list[str]:
     def recs(name):
         path = RESULTS / name / "results.jsonl"
         return {r["task_id"]: r for r in read_jsonl(path)} if path.exists() else {}
+    def web_served(name):
+        """Tasks whose first search was NOT a Wikipedia-only fallback (T must compare like with like)."""
+        import gzip
+        path = RESULTS / name / "trajectories.jsonl.gz"
+        if not path.exists():
+            return None
+        fb = {}
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            for line in f:
+                st = __import__("json").loads(line)
+                res = st["obs"]["lists"].get("results")
+                key = (st["task_id"], st.get("sub"))
+                if res and key not in fb:
+                    fb[key] = all(r["url"].startswith("https://en.wikipedia.org/wiki/") for r in res)
+        bad = {t for (t, _), v in fb.items() if v}
+        return {t for t, _ in fb} - bad
+
     pairs = []
     for name in rows:
         if "_ddgs" not in name or "_quick" in name:
             continue
         if name.endswith("_ddgs_trust"):
             pairs.append(("T", name, name[: -len("_trust")], ["correct"]))
+            a, b = web_served(name), web_served(name[: -len("_trust")])
+            if a is not None and b is not None:
+                pairs.append(("T (both web-served)", name, name[: -len("_trust")], ["correct"], a & b))
+            continue
+        if "planck-g2v2" in name:  # a different head (ddgs-trained) vs round 3b's: context, not S2
+            base = name.replace("_ddgs", "")
+            if base in rows:
+                pairs.append(("v2 ddgs head vs 3b head", name, base, ["correct"]))
             continue
         base = name.replace("_ddgs", "")
         other = f"{base}_wikipedia" if f"{base}_wikipedia" in rows else base if base in rows else None
@@ -745,9 +770,9 @@ def _paired_round4(rows) -> list[str]:
         if name.startswith("g0f_gemma_snip") and "g0f_gemma_closedbook" in rows:
             pairs.append(("A1", name, "g0f_gemma_closedbook", ["correct"]))
     out = []
-    for rule, a, b, metrics in pairs:
+    for rule, a, b, metrics, *only in pairs:
         ra, rb = recs(a), recs(b)
-        ids = sorted(set(ra) & set(rb))
+        ids = sorted(set(ra) & set(rb) & (only[0] if only else set(ra)))
         for m in metrics:
             if not ids or any(m not in ra[i] or m not in rb[i] for i in ids):
                 continue

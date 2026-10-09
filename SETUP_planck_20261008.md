@@ -150,3 +150,48 @@ All rules are judged on the 143-question fresh + long-tail benchmark, paired by 
 | Low-confidence guesses read as answers | label first ("Low confidence in my results"), bar drawn on the meter, no guess below lexical score 0.4; P2 checks that the label carries information |
 | The system trust layer shifts the round-3 comparison | S2 runs with system trust **off**; T measures the layer separately |
 | Trust table overfits to Wikipedia-heavy training questions | capped at 20 observations, min 3; users outvote it; measured on disjoint questions |
+
+## 9. Results of record (round 4, 2026-10-08/09, e28d6aa)
+
+All valid ddgs runs (ddgs served 85-100% of searches, 0-0.7% empty). G2 collect: 1,455 searches, ddgs 86%, Wikipedia fallback 14%.
+
+| Run (143 fresh + long-tail) | Success | Snippet recall @3 | Confident: share / precision | Low confidence: share / precision | Value shown is right | ECE |
+|---|---|---|---|---|---|---|
+| Base chat (Gemma closed-book, round 3) | 4.9% | n/a | n/a | n/a | n/a | n/a |
+| Heuristic, Wikipedia search (round 3) | 15.4% | 18.9% | n/a | n/a | n/a | n/a |
+| **Heuristic, ddgs** | **51.0%** | **73.4%** | 0.909 / 0.562 | 0.084 / 0.000 | 51.0% | 0.319 |
+| Heuristic, ddgs + system trust | 56.6% | 84.6% | 0.979 / 0.571 | 0.021 / 0.333 | 56.6% | 0.297 |
+| **Gemma on tools, ddgs** | **60.1%** (fresh 56.7%) | 84.6% | 0.797 / 0.754 | 0.203 / 0.379 | 67.8% | 0.177 |
+| **G2 v2 Planck, ddgs-trained** | 29.4% (fresh 0/60) | 85.3% | 0.322 / **0.913** | 0.678 / 0.495 | 62.9% | **0.022** |
+| G2 v2 hash control | 24.5% | 85.3% | 0.294 / 0.833 | 0.706 / 0.287 | 42.0% | 0.102 |
+
+**Verdicts (section 4 rules):**
+- **S2 PASS, by a wide margin.**
+  - Heuristic snippet recall @3: 18.9% → 73.4% (78 vs 0 discordant, p = 7e-24). Success: 15.4% → 51.0% (53 vs 2, p = 9e-14).
+  - Gemma on tools: 14.0% → 60.1% (70 vs 4, p = 1e-16).
+  - Retrieval was the ceiling, as round 3 said.
+  - Conservative: 21 of the heuristic's 143 questions still ran on the Wikipedia fallback.
+- **A1 PASS:** Gemma on tools 60.1% vs base chat 4.9% (83 vs 4, p = 3e-20). On 2026 facts: 56.7% vs 0%.
+- **P1 (confident precision ≥ 0.80):**
+  - **PASS for G2 v2** (0.913; hash 0.833).
+  - **FAIL for the heuristic** (0.562): its rule-based score is uncalibrated (ECE 0.32), and it labels 91-98% of answers confident.
+- **P2 (confident − low ≥ 0.20):**
+  - **PASS for G2 v2** (0.913 vs 0.495: +0.42).
+  - The heuristic passes formally (+0.56), but its low tier is 3-12 questions, so the label rarely appears.
+- **B FAIL** for G2 v2 on ddgs:
+  - Seed benchmark 29.8% (bar 86.1%).
+  - Fresh 29.4% vs heuristic 56.6% (4 vs 43 discordant).
+  - Wrong-when-answered 8.7% (bar 5%); ECE 0.022 passes.
+  - vs hash: 12 vs 5, p = 0.14 (n.s.).
+- **T, reported:** the raw +5.6 pts (9 vs 1, p = 0.02) is a **search artifact**. The no-trust run hit ddgs first and got the Wikipedia fallback on 21 questions; the trust run came later and got none. On the 120 questions where both runs got web results: **0 vs 0**, no effect. Per the rule, the layer stays on, since it does not lose.
+
+**What it means:**
+1. **The product case holds on the questions that matter.** On fresh + long-tail questions, tools + ddgs reach 51-60% against base chat's 4.9%, with sources, and the no-model path costs ~$0. Gemma driving the tools costs 3,635 LLM tokens/task ($0.0065 per correct at Haiku prices).
+2. **G2 v2 is the honest one, not the accurate one.**
+   - It is the only policy whose labels tell the truth: confident is 91% right and ECE is 0.02.
+   - Its *displayed* value (any tier) is right 62.9% of the time, between the heuristic (56.6%) and Gemma (67.8%), neither difference significant (p = 0.22, 0.35). This metric was reported, not a pre-registered rule.
+   - But it commits too rarely. On 2026 facts it never clears τ = 0.81, although its best guess is right 24/60 times (more than the heuristic's 20/60). The training questions are past events, so the gate is under-confident on the present.
+3. **The fix is new training data, not tuning on this benchmark:** G2 training questions about recent events (2025-2026, disjoint from the benchmark), so the gate sees the regime it will be used in.
+4. **Caveats:**
+   - **The benchmark is built from Wikidata.** The domains ddgs surfaces most (Wikipedia, grokipedia, wikiwand, wikidata.org) mirror it. A non-Wikidata benchmark (news questions with human-checked answers) is the next generalization test.
+   - **The system trust table reflects the encyclopedic training mix:** bbc.com scores 0.26 and en.wikipedia.org 0.85. That is wrong for news questions. Trust needs to be per question type before it moves anything.

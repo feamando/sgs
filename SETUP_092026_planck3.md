@@ -307,6 +307,19 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **P2:** confident − low precision ≥ 0.20.
     - **B:** unchanged, with G2 v2 retrained on ddgs.
     - **T:** system trust on vs off, reported.
+- **ROUND 4 RESULTS OF RECORD (2026-10-09, e28d6aa; details in SETUP_planck_20261008.md section 9):**
+  - **S2 PASS:**
+    - Retrieval was the ceiling: ddgs lifts snippet recall @3 from 18.9% to 73.4% (p = 7e-24).
+    - Heuristic success: 15.4% → 51.0%; Gemma on tools: 14.0% → 60.1%.
+  - **A1 PASS:** Gemma on tools 60.1% vs base chat 4.9% (2026 facts: 56.7% vs 0%).
+  - **P1/P2 PASS for G2 v2** (confident 91.3% right vs low 49.5%, ECE 0.022). **P1 FAIL for the heuristic** (confident 56.2% right; uncalibrated).
+  - **B FAIL for G2 v2:** seed 29.8%, fresh 29.4%, and never confident on 2026 facts (best guess right 24/60) because the training questions are past events.
+  - **T:** no effect once search coverage is equalized (0 vs 0 on 120 questions); the raw +5.6 pts was a fallback artifact.
+  - **Next:**
+    - G2 training data on recent events (disjoint from the benchmark).
+    - A non-Wikidata benchmark.
+    - Per-question-type trust.
+    - Brave vs ddgs paired.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 

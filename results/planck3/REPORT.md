@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-09 00:53)
+# Planck 3.0 results (2026-10-09 10:07)
 
 ## G0 (seed benchmark)
 
@@ -98,20 +98,17 @@
 
 | rule | run | vs | metric | run | vs | only run | only vs | p |
 |---|---|---|---|---|---|---|---|---|
-| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | serp_visible | 0.830 | 0.851 | 1 | 2 | 1 |
-| S2 | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | correct | 0.426 | 0.617 | 2 | 11 | 0.0225 |
-| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | serp_visible | 0.872 | 0.872 | 2 | 2 | 1 |
-| S2 | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | correct | 0.298 | 0.638 | 4 | 20 | 0.00154 |
+| v2 ddgs head vs 3b head | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | correct | 0.426 | 0.617 | 2 | 11 | 0.0225 |
+| v2 ddgs head vs 3b head | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | correct | 0.298 | 0.638 | 4 | 20 | 0.00154 |
 | S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | serp_visible | 0.846 | 0.189 | 94 | 0 | 1.01e-28 |
 | S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | correct | 0.601 | 0.140 | 70 | 4 | 1.29e-16 |
 | A1 | g0f_gemma_snip_ddgs | g0f_gemma_closedbook | correct | 0.601 | 0.049 | 83 | 4 | 3.02e-20 |
 | S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | serp_visible | 0.734 | 0.189 | 78 | 0 | 6.62e-24 |
 | S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | correct | 0.510 | 0.154 | 53 | 2 | 8.55e-14 |
 | T | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.566 | 0.510 | 9 | 1 | 0.0215 |
-| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
-| S2 | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | correct | 0.245 | 0.035 | 31 | 1 | 1.54e-08 |
-| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | serp_visible | 0.853 | 0.273 | 83 | 0 | 2.07e-25 |
-| S2 | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | correct | 0.294 | 0.084 | 32 | 2 | 6.94e-08 |
+| T (both web-served) | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.575 | 0.575 | 0 | 0 | 1 |
+| v2 ddgs head vs 3b head | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | correct | 0.245 | 0.035 | 31 | 1 | 1.54e-08 |
+| v2 ddgs head vs 3b head | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | correct | 0.294 | 0.084 | 32 | 2 | 6.94e-08 |
 
 ### Answer tiers (what the card shows: confident / low confidence / evidence only)
 
@@ -167,12 +164,12 @@
 
 | head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
 |---|---|---|---|---|---|---|---|---|---|
-| g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
-| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
-| g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.529 | 0.176 | 0.485 | 0.420 | 0.532 | 0.200 | 0.500 (0.9) |
-| g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
-| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
-| g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 17 | 0.765 | 0.176 | 0.868 | 0.239 | 0.719 | 0.150 | 1.000 (0.9) |
+| g2v2_head_hash_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
+| g2v2_head_hash_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
+| g2v2_head_hash_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 17 | 0.529 | 0.176 | 0.485 | 0.420 | 0.532 | 0.200 | 0.500 (0.9) |
+| g2v2_head_planck_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
+| g2v2_head_planck_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
+| g2v2_head_planck_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 17 | 0.765 | 0.176 | 0.868 | 0.239 | 0.719 | 0.150 | 1.000 (0.9) |
 
 ## G2 heads (learned from known answers)
 
