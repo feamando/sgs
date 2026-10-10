@@ -1,0 +1,83 @@
+{
+  "n": 12,
+  "accuracy": 0.6666666666666666,
+  "bands": {
+    "high": {
+      "n": 2,
+      "share": 0.16666666666666666,
+      "precision": 1.0
+    },
+    "good": {
+      "n": 2,
+      "share": 0.16666666666666666,
+      "precision": 0.5
+    },
+    "low": {
+      "n": 7,
+      "share": 0.5833333333333334,
+      "precision": 0.7142857142857143
+    },
+    "sceptical": {
+      "n": 1,
+      "share": 0.08333333333333333,
+      "precision": 0.0
+    },
+    "none": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 3,
+      "accuracy": 0.0
+    },
+    "general_info": {
+      "n": 1,
+      "accuracy": 1.0
+    },
+    "long_tail": {
+      "n": 5,
+      "accuracy": 1.0
+    },
+    "news": {
+      "n": 3,
+      "accuracy": 0.6666666666666666
+    }
+  },
+  "qtype_accuracy": 1.0,
+  "writer_faithful": 0.38461538461538464,
+  "writer_fallback": 0.6153846153846154,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.9230769230769231,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 827.5083333333333,
+    "fetch_ms": 620.8333333333334,
+    "read_ms": 54.60833333333333,
+    "write_ms": 328.78333333333336,
+    "total_ms": 1995.8583333333333
+  },
+  "mean_search_calls": 1.0833333333333333,
+  "mean_fetch_calls": 1.5,
+  "reader": "planck",
+  "writer": "hertz-writer",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 13,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 13
+    },
+    "primary_share": 1.0,
+    "valid": true
+  },
+  "wall_s": 24.0,
+  "llm_usd_per_task_as_haiku": 0.0
+}

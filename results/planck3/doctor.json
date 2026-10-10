@@ -63,7 +63,7 @@
     {
       "status": "OK",
       "check": "disk free",
-      "detail": "659 GB",
+      "detail": "611 GB",
       "fix": ""
     },
     {
@@ -111,7 +111,7 @@
     {
       "status": "OK",
       "check": "planck embed speed",
-      "detail": "8,465 texts/s on cuda (~34 s for the G1 graph)",
+      "detail": "10,220 texts/s on cuda (~28 s for the G1 graph)",
       "fix": ""
     },
     {
@@ -129,20 +129,20 @@
     {
       "status": "OK",
       "check": "gemma typed decisions",
-      "detail": "3/3 valid, 2513 ms/decision",
+      "detail": "3/3 valid, 1818 ms/decision",
       "fix": ""
     },
     {
       "status": "OK",
       "check": "gemma closed-book",
-      "detail": "'1943' in 583 ms",
+      "detail": "'1943' in 350 ms",
       "fix": ""
     }
   ],
   "measured": {
-    "planck_embed_s_per_text": 0.0001181355469270784,
-    "gemma_ms_per_decision": 2513.434433300669,
-    "gemma_ms_closed_book": 583.0383999273181
+    "planck_embed_s_per_text": 9.784921871869301e-05,
+    "gemma_ms_per_decision": 1817.965400017177,
+    "gemma_ms_closed_book": 350.0787999946624
   },
   "eta": [
     [
@@ -151,11 +151,11 @@
     ],
     [
       "g0 teacher (Gemma on tools)",
-      "~13 min"
+      "~10 min"
     ],
     [
       "g0 closed-book (base-chat rival)",
-      "~36 s"
+      "~22 s"
     ],
     [
       "g0 heuristic floor",
@@ -167,7 +167,7 @@
     ],
     [
       "g1 planck embed",
-      "~34 s"
+      "~28 s"
     ],
     [
       "g1 train heads",
@@ -175,7 +175,7 @@
     ],
     [
       "g1 eval incl. Gemma teacher",
-      "~8 min"
+      "~6 min"
     ]
   ]
 }

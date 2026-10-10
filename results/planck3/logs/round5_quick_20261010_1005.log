@@ -1,4 +1,319 @@
-# Planck 3.0 results (2026-10-10 13:12)
+[planck3 10:05:30] logging to C:\Users\feama\sgs\results\planck3\logs\round5_quick_20261010_1005.log
+[planck3 10:05:30] installing Planck 3.0 deps into .venv
+[planck3 10:05:34] offline smoke tests
+> python scripts/planck3.py doctor --deep
+Planck 3.0 doctor (deep: loads and measures the models)
+
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [OK  ] python                    3.12.0
+  [OK  ] numpy                     2.4.4
+  [OK  ] scipy                     1.18.1
+  [OK  ] requests                  2.34.2
+  [OK  ] torch                     2.5.1+cu121
+  [OK  ] sentencepiece             0.2.2
+  [OK  ] trafilatura               2.3.0
+  [OK  ] ddgs                      9.16.0
+  [OK  ] transformers              5.12.1
+  [OK  ] gpu                       NVIDIA GeForce RTX 4090, 24 GB
+  [OK  ] disk free                 614 GB
+  [OK  ] git                       branch main, 0 commits behind origin/main
+  [OK  ] wikipedia api             HTTP 200
+  [OK  ] wikimedia dumps           HTTP 200
+  [OK  ] ddgs                      9.16.0 answering
+  [OK  ] brave api key             set (from .env or the environment); live check: planck3.py search-check --backend brave
+  [OK  ] searxng                   not running (optional since round 4: ddgs is the search of record)
+  [OK  ] planck ckpt vs tokenizer  vocab 32000 vs 32000 pieces
+  [OK  ] planck embed speed        9,565 texts/s on cuda (~30 s for the G1 graph)
+  [OK  ] hertz ckpt vs tokenizer   vocab 32000 vs 32000 pieces
+  [OK  ] gemma config              models/gemma-4-e4b-it
+  [OK  ] gemma typed decisions     3/3 valid, 1890 ms/decision
+  [OK  ] gemma closed-book         '1943' in 342 ms
+
+  Estimated time per stage:
+    setup + smoke                      ~1 min
+    g0 teacher (Gemma on tools)        ~10 min
+    g0 closed-book (base-chat rival)   ~21 s
+    g0 heuristic floor                 ~2 min (cached pages)
+    g1 build + tasks + hash embed      ~5 min (356 MB download)
+    g1 planck embed                    ~30 s
+    g1 train heads                     ~5 min on GPU
+    g1 eval incl. Gemma teacher        ~5 min
+
+  READY: 0 fail, 0 warn
+[planck3 10:07:20] ddgs answering (no Docker needed)
+[planck3 10:07:20] round 5: no-model floor (heuristic reader, template writer)
+> python scripts/planck3.py r5 --reader heuristic --writer template --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_heuristic_template_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] OK  bwinner000   Sun Xinran                     sceptical 4.0/10  
+[  2/12] XX  bwinner020   Milan                          good      8.0/10  
+[  3/12] OK  bseason000   Laurence Pithie                good      8.0/10  
+[  4/12] OK  bfounded000  2000                           good      8.0/10  
+[  5/12] OK  bborn000     1992                           high      9.0/10  
+[  6/12] OK  belevation000 774 metre                      low       5.0/10  
+[  7/12] XX  bfounder005  Adams Filmi Oy                 low       5.0/10  
+[  8/12] XX  bchat_founded01 ['2005', '1932']               low       5.0/10  
+[  9/12] XX  news018      Fiji                           sceptical 4.0/10  
+[ 10/12] XX  news038      Stanford University            low       5.0/10  
+[ 11/12] --  news058      None                           none      -/10  
+[ 12/12] OK  info018      100                            good      8.0/10  
+
+==== r5 summary: reader=heuristic writer=template personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.500  bands monotone True
+  band high       0.083 (n=1) precision 1.000
+  band good       0.333 (n=4) precision 0.750
+  band low        0.333 (n=4) precision 0.250
+  band sceptical  0.167 (n=2) precision 0.500
+  band none       0.083 (n=1)
+  regime fresh         accuracy 0.667 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 0.600 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 803, "fetch_ms": 624, "read_ms": 0, "write_ms": 0, "total_ms": 1574}
+[planck3 10:07:40] round 5: Planck reader, template writer
+> python scripts/planck3.py r5 --reader planck --writer template --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_planck_template_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      low       5.0/10  
+[  2/12] OK  bwinner020   Jens                           good      7.0/10  
+[  3/12] OK  bseason000   Laurence Pithie                good      7.0/10  
+[  4/12] OK  bfounded000  2000                           good      8.0/10  
+[  5/12] XX  bborn000     1954                           good      8.0/10  
+[  6/12] OK  belevation000 774 metre                      good      7.0/10  
+[  7/12] OK  bfounder005  Abel Adams                     low       5.0/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  
+[  9/12] XX  news018      Canada                         low       5.0/10  
+[ 10/12] XX  news038      Just                           sceptical 4.0/10  
+[ 11/12] XX  news058      18                             sceptical 3.0/10  
+[ 12/12] OK  info018      100                            low       6.0/10  
+
+==== r5 summary: reader=planck writer=template personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.583  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.417 (n=5) precision 0.800
+  band low        0.417 (n=5) precision 0.600
+  band sceptical  0.167 (n=2) precision 0.000
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.667 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 0.800 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 2, "fetch_ms": 39, "read_ms": 53, "write_ms": 0, "total_ms": 246}
+[planck3 10:07:47] writer data: Gemma writes answers for G2 training questions (resumable; ~1-1.5 h first time)
+> python scripts/planck3.py writer collect --out data/planck3/writer/train_quick.jsonl --search ddgs --reader planck --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --gemma-path models/gemma-4-e4b-it --limit 60
+[writer] collecting 60 examples (0 done) -> data\planck3\writer\train_quick.jsonl
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  50/60 (22 faithful)
+[writer] 26/60 new examples faithful -> data\planck3\writer\train_quick.jsonl
+[planck3 10:11:20] train the Hertz 1.2 writer (640M), once
+> python scripts/planck3.py writer train --base hertz --out data/planck3/writer/train_quick.jsonl --base-checkpoint checkpoints/hertz12/best.pt --base-tokenizer data/hertz12_data/tokenizer.model --batch-size 4 --tag _quick
+  [writer:hertz] epoch 0: train 1.199 val 1.202 (1s)
+  [writer:hertz] epoch 1: train 0.338 val 1.131 (1s)
+  [writer:hertz] epoch 2: train 0.177 val 1.200 (1s)
+  [writer:hertz] epoch 3: train 0.114 val 1.201 (1s)
+[writer] hertz: 26 examples, best val loss 1.131
+[planck3 10:11:50] train the Planck 1.3 writer (100M), once
+> python scripts/planck3.py writer train --base planck --out data/planck3/writer/train_quick.jsonl --base-checkpoint checkpoints/planck13/best.pt --base-tokenizer data/wikipedia/tokenizer.model --tag _quick
+  [writer:planck] epoch 0: train 1.734 val 1.433 (0s)
+  [writer:planck] epoch 1: train 0.524 val 1.381 (0s)
+  [writer:planck] epoch 2: train 0.256 val 1.373 (0s)
+  [writer:planck] epoch 3: train 0.166 val 1.340 (0s)
+[writer] planck: 26 examples, best val loss 1.340
+[planck3 10:11:56] round 5: Planck reader + hertz writer (small-model product)
+> python scripts/planck3.py r5 --reader planck --writer hertz --writer-checkpoint checkpoints/writer_hertz_quick/best.pt --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_planck_hertz_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      low       5.0/10  UNFAITHFUL->template
+[  2/12] OK  bwinner020   Jens                           good      7.0/10  UNFAITHFUL->template
+[  3/12] OK  bseason000   Laurence Pithie                good      7.0/10  
+[  4/12] OK  bfounded000  2000                           good      8.0/10  UNFAITHFUL->template
+[  5/12] XX  bborn000     1954                           good      8.0/10  UNFAITHFUL->template
+[  6/12] OK  belevation000 774 metre                      good      7.0/10  
+[  7/12] OK  bfounder005  Abel Adams                     low       5.0/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         low       5.0/10  UNFAITHFUL->template
+[ 10/12] XX  news038      Just                           sceptical 4.0/10  UNFAITHFUL->template
+[ 11/12] XX  news058      18                             sceptical 3.0/10  UNFAITHFUL->template
+[ 12/12] OK  info018      100                            low       6.0/10  
+
+==== r5 summary: reader=planck writer=hertz-writer personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.583  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.417 (n=5) precision 0.800
+  band low        0.417 (n=5) precision 0.600
+  band sceptical  0.167 (n=2) precision 0.000
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.667 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 0.800 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 0.3076923076923077  fallback 0.6923076923076923  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 0, "fetch_ms": 3, "read_ms": 44, "write_ms": 294, "total_ms": 495}
+[planck3 10:12:10] round 5: Planck reader + planck writer (small-model product)
+> python scripts/planck3.py r5 --reader planck --writer planck --writer-checkpoint checkpoints/writer_planck_quick/best.pt --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_planck_planck_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      low       5.0/10  UNFAITHFUL->template
+[  2/12] OK  bwinner020   Jens                           good      7.0/10  
+[  3/12] OK  bseason000   Laurence Pithie                good      7.0/10  
+[  4/12] OK  bfounded000  2000                           good      8.0/10  UNFAITHFUL->template
+[  5/12] XX  bborn000     1954                           good      8.0/10  UNFAITHFUL->template
+[  6/12] OK  belevation000 774 metre                      good      7.0/10  
+[  7/12] OK  bfounder005  Abel Adams                     low       5.0/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         low       5.0/10  UNFAITHFUL->template
+[ 10/12] XX  news038      Just                           sceptical 4.0/10  UNFAITHFUL->template
+[ 11/12] XX  news058      18                             sceptical 3.0/10  UNFAITHFUL->template
+[ 12/12] OK  info018      100                            low       6.0/10  
+
+==== r5 summary: reader=planck writer=planck-writer personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.583  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.417 (n=5) precision 0.800
+  band low        0.417 (n=5) precision 0.600
+  band sceptical  0.167 (n=2) precision 0.000
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.667 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 0.800 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 0.38461538461538464  fallback 0.6153846153846154  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 0, "fetch_ms": 2, "read_ms": 36, "write_ms": 83, "total_ms": 283}
+[planck3 10:12:17] round 5: Gemma reader + Gemma writer (reference)
+> python scripts/planck3.py r5 --reader gemma --writer gemma --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_gemma_gemma_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/12] OK  bwinner000   Sun Xinran                     good      7.0/10  
+[  2/12] OK  bwinner020   Jens                           high      9.0/10  
+[  3/12] OK  bseason000   Laurence Pithie                good      8.0/10  UNFAITHFUL->template
+[  4/12] OK  bfounded000  2000                           good      8.0/10  UNFAITHFUL->template
+[  5/12] OK  bborn000     1992                           high      9.0/10  UNFAITHFUL->template
+[  6/12] OK  belevation000 774 m                          high      9.0/10  UNFAITHFUL->template
+[  7/12] OK  bfounder005  Abel Adams                     good      8.0/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         good      7.0/10  UNFAITHFUL->template
+[ 10/12] XX  news038      Stanford University            good      8.0/10  UNFAITHFUL->template
+[ 11/12] --  news058      None                           none      -/10  
+[ 12/12] OK  info018      100                            high      9.0/10  UNFAITHFUL->template
+
+==== r5 summary: reader=gemma writer=gemma personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.750  bands monotone True
+  band high       0.333 (n=4) precision 1.000
+  band good       0.500 (n=6) precision 0.667
+  band low        0.083 (n=1) precision 1.000
+  band sceptical  0.000 (n=0)
+  band none       0.083 (n=1)
+  regime fresh         accuracy 1.000 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 1.000 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 0.3333333333333333  fallback 0.6666666666666666  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 1811
+  ms/task {"search_ms": 0, "fetch_ms": 1, "read_ms": 2160, "write_ms": 2233, "total_ms": 4453}
+[planck3 10:13:41] round 5: worst-case personal profile (every source scored 10 - system): rule E
+> python scripts/planck3.py r5 --reader planck --writer hertz --writer-checkpoint checkpoints/writer_hertz_quick/best.pt --personal contrarian --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_planck_hertz_contrarian_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      sceptical 4.6/10  
+[  2/12] XX  bwinner020   Kjeld Nuis                     sceptical 3.6/10  UNFAITHFUL->template
+[  3/12] OK  bseason000   Laurence Pithie                sceptical 3.6/10  
+[  4/12] OK  bfounded000  2000                           low       5.6/10  UNFAITHFUL->template
+[  5/12] OK  bborn000     1992                           low       5.6/10  UNFAITHFUL->template
+[  6/12] OK  belevation000 774 metre                      low       5.6/10  
+[  7/12] OK  bfounder005  Abel Adams                     sceptical 4.6/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       5.6/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         sceptical 4.6/10  
+[ 10/12] XX  news038      Just                           sceptical 4.2/10  UNFAITHFUL->template
+[ 11/12] XX  news058      18                             sceptical 3.0/10  UNFAITHFUL->template
+[ 12/12] OK  info018      100                            low       5.6/10  
+
+==== r5 summary: reader=planck writer=hertz-writer personal=contrarian search=ddgs ====
+  n 12  accuracy (value shown is right) 0.583  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.000 (n=0)
+  band low        0.417 (n=5) precision 1.000
+  band sceptical  0.583 (n=7) precision 0.286
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.333 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 1.000 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 0.5384615384615384  fallback 0.46153846153846156  qtype accuracy 1.0
+  changed by personal profile 0.500  LLM tokens/task 0
+  ms/task {"search_ms": 0, "fetch_ms": 145, "read_ms": 63, "write_ms": 333, "total_ms": 760}
+[planck3 10:13:59] round 5: the same on the Brave Search API (paired vs ddgs)
+> python scripts/planck3.py r5 --reader planck --writer hertz --writer-checkpoint checkpoints/writer_hertz_quick/best.pt --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search brave --out results/planck3/r5_planck_hertz_brave_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=brave net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty brave results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      low       5.0/10  UNFAITHFUL->template
+[  2/12] XX  bwinner020   Ning Zhongyan                  good      7.0/10  UNFAITHFUL->template
+[  3/12] XX  bseason000   Red Bull–Bora–Hansgrohe        sceptical 4.0/10  
+[  4/12] OK  bfounded000  2000                           high      10.0/10  UNFAITHFUL->template
+[  5/12] OK  bborn000     1992                           good      7.0/10  UNFAITHFUL->template
+[  6/12] OK  belevation000 774 metre                      low       6.0/10  UNFAITHFUL->template
+[  7/12] OK  bfounder005  Abel Adams                     low       5.0/10  UNFAITHFUL->template
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         low       5.0/10  
+[ 10/12] OK  news038      Karl Deisseroth                high      9.0/10  
+[ 11/12] OK  news058      2                              low       5.0/10  
+[ 12/12] OK  info018      100                            low       5.0/10  
+
+==== r5 summary: reader=planck writer=hertz-writer personal=none search=brave ====
+  n 12  accuracy (value shown is right) 0.667  bands monotone True
+  band high       0.167 (n=2) precision 1.000
+  band good       0.167 (n=2) precision 0.500
+  band low        0.583 (n=7) precision 0.714
+  band sceptical  0.083 (n=1) precision 0.000
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.000 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 1.000 (n=5)
+  regime news          accuracy 0.667 (n=3)
+  writer faithful 0.38461538461538464  fallback 0.6153846153846154  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 828, "fetch_ms": 621, "read_ms": 55, "write_ms": 329, "total_ms": 1996}
+[planck3 10:14:31] round 5: CPU-only latency, 4 threads, 10 questions (phone proxy; no KV cache yet)
+> python scripts/planck3.py r5 --reader planck --writer hertz --writer-checkpoint checkpoints/writer_hertz_quick/best.pt --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search ddgs --out results/planck3/r5_planck_hertz_cpu_quick --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 12
+[planck3] search=ddgs net=live cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] empty ddgs results are retried once, then fall back to Wikipedia per query
+[  1/12] XX  bwinner000   Sabalenka                      low       5.0/10  UNFAITHFUL->template
+[  2/12] OK  bwinner020   Jens                           good      7.0/10  UNFAITHFUL->template
+[  3/12] OK  bseason000   Laurence Pithie                good      7.0/10  
+[  4/12] OK  bfounded000  2000                           good      8.0/10  UNFAITHFUL->template
+[  5/12] XX  bborn000     1954                           good      8.0/10  UNFAITHFUL->template
+[  6/12] XX  belevation000 78                             good      7.0/10  UNFAITHFUL->template
+[  7/12] OK  bfounder005  Abel Adams                     low       5.0/10  
+[  8/12] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  UNFAITHFUL->template
+[  9/12] XX  news018      Canada                         low       5.0/10  UNFAITHFUL->template
+[ 10/12] XX  news038      Just                           sceptical 4.0/10  UNFAITHFUL->template
+[ 11/12] XX  news058      18                             sceptical 3.0/10  UNFAITHFUL->template
+[ 12/12] OK  info018      100                            low       6.0/10  
+
+==== r5 summary: reader=planck writer=hertz-writer personal=none search=ddgs ====
+  n 12  accuracy (value shown is right) 0.500  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.417 (n=5) precision 0.600
+  band low        0.417 (n=5) precision 0.600
+  band sceptical  0.167 (n=2) precision 0.000
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.667 (n=3)
+  regime general_info  accuracy 1.000 (n=1)
+  regime long_tail     accuracy 0.600 (n=5)
+  regime news          accuracy 0.000 (n=3)
+  writer faithful 0.23076923076923078  fallback 0.7692307692307693  qtype accuracy 1.0
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 0, "fetch_ms": 2, "read_ms": 499, "write_ms": 20399, "total_ms": 21044}
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-10 10:18)
 
 ## G0 (seed benchmark)
 
@@ -164,58 +479,26 @@
 
 | run | n | value shown is right | high: n / precision | good | low | sceptical | none | monotone | writer faithful | fallback | LLM tok/task | read ms | write ms | changed by personal | question type acc |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| r5_gemma_gemma | 243 | 0.531 | 41 / 0.927 | 92 / 0.772 | 25 / 0.560 | 12 / 0.500 | 73 | True | 0.371 | 0.629 | 1898 | 2663 | 1977 | 0.000 | 0.979 |
 | r5_gemma_gemma_quick | 12 | 0.750 | 4 / 1.000 | 6 / 0.667 | 1 / 1.000 | 0 /  | 1 | True | 0.333 | 0.667 | 1811 | 2160 | 2233 | 0.000 | 1.000 |
-| r5_heuristic_template | 243 | 0.391 | 27 / 0.815 | 70 / 0.614 | 61 / 0.295 | 59 / 0.203 | 26 | True | 1.000 | 0.000 | 0 | 0 | 0 | 0.000 | 0.979 |
 | r5_heuristic_template_quick | 12 | 0.500 | 1 / 1.000 | 4 / 0.750 | 4 / 0.250 | 2 / 0.500 | 1 | True | 1.000 | 0.000 | 0 | 0 | 0 | 0.000 | 1.000 |
-| r5_planck_hertz | 243 | 0.387 | 28 / 0.786 | 74 / 0.581 | 59 / 0.339 | 81 / 0.111 | 1 | True | 0.460 | 0.540 | 0 | 17 | 267 | 0.000 | 0.979 |
-| r5_planck_hertz_brave | 243 | 0.514 | 39 / 0.641 | 66 / 0.621 | 71 / 0.535 | 66 / 0.318 | 1 | True | 0.540 | 0.460 | 0 | 22 | 344 | 0.000 | 0.979 |
 | r5_planck_hertz_brave_quick | 12 | 0.667 | 2 / 1.000 | 2 / 0.500 | 7 / 0.714 | 1 / 0.000 | 0 | True | 0.385 | 0.615 | 0 | 55 | 329 | 0.000 | 1.000 |
-| r5_planck_hertz_contrarian | 243 | 0.391 | 0 /  | 4 / 0.750 | 96 / 0.635 | 142 / 0.218 | 1 | True | 0.480 | 0.520 | 0 | 23 | 251 | 0.473 | 0.979 |
 | r5_planck_hertz_contrarian_quick | 12 | 0.583 | 0 /  | 0 /  | 5 / 1.000 | 7 / 0.286 | 0 | True | 0.538 | 0.462 | 0 | 63 | 333 | 0.500 | 1.000 |
-| r5_planck_hertz_cpu | 10 | 0.300 | 2 / 0.500 | 2 / 0.500 | 3 / 0.333 | 3 / 0.000 | 0 | True | 0.500 | 0.500 | 0 | 934 | 27765 | 0.000 | 0.900 |
 | r5_planck_hertz_cpu_quick | 12 | 0.500 | 0 /  | 5 / 0.600 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.231 | 0.769 | 0 | 499 | 20399 | 0.000 | 1.000 |
 | r5_planck_hertz_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.308 | 0.692 | 0 | 44 | 294 | 0.000 | 1.000 |
-| r5_planck_planck | 243 | 0.391 | 29 / 0.793 | 73 / 0.589 | 59 / 0.339 | 81 / 0.111 | 1 | True | 0.472 | 0.528 | 0 | 16 | 99 | 0.000 | 0.979 |
 | r5_planck_planck_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.385 | 0.615 | 0 | 36 | 83 | 0.000 | 1.000 |
-| r5_planck_template | 243 | 0.383 | 28 / 0.786 | 73 / 0.575 | 59 / 0.339 | 82 / 0.110 | 1 | True | 1.000 | 0.000 | 0 | 68 | 0 | 0.000 | 0.979 |
 | r5_planck_template_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 1.000 | 0.000 | 0 | 53 | 0 | 0.000 | 1.000 |
 
 | run | accuracy per benchmark regime |
 |---|---|
-| r5_gemma_gemma | fresh: 0.750 (n=60) | general_info: 0.250 (n=40) | long_tail: 0.819 (n=83) | news: 0.100 (n=60) |
 | r5_gemma_gemma_quick | fresh: 1.000 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.000 (n=3) |
-| r5_heuristic_template | fresh: 0.350 (n=60) | general_info: 0.225 (n=40) | long_tail: 0.723 (n=83) | news: 0.083 (n=60) |
 | r5_heuristic_template_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.600 (n=5) | news: 0.000 (n=3) |
-| r5_planck_hertz | fresh: 0.350 (n=60) | general_info: 0.175 (n=40) | long_tail: 0.759 (n=83) | news: 0.050 (n=60) |
-| r5_planck_hertz_brave | fresh: 0.400 (n=60) | general_info: 0.550 (n=40) | long_tail: 0.663 (n=83) | news: 0.400 (n=60) |
 | r5_planck_hertz_brave_quick | fresh: 0.000 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.667 (n=3) |
-| r5_planck_hertz_contrarian | fresh: 0.333 (n=60) | general_info: 0.200 (n=40) | long_tail: 0.771 (n=83) | news: 0.050 (n=60) |
 | r5_planck_hertz_contrarian_quick | fresh: 0.333 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.000 (n=3) |
-| r5_planck_hertz_cpu | fresh: 0.000 (n=3) | general_info: 0.000 (n=1) | long_tail: 1.000 (n=3) | news: 0.000 (n=3) |
 | r5_planck_hertz_cpu_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.600 (n=5) | news: 0.000 (n=3) |
 | r5_planck_hertz_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
-| r5_planck_planck | fresh: 0.350 (n=60) | general_info: 0.200 (n=40) | long_tail: 0.759 (n=83) | news: 0.050 (n=60) |
 | r5_planck_planck_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
-| r5_planck_template | fresh: 0.350 (n=60) | general_info: 0.175 (n=40) | long_tail: 0.759 (n=83) | news: 0.033 (n=60) |
 | r5_planck_template_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
 
-| paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
-|---|---|---|---|---|---|---|
-| r5_planck_hertz vs r5_gemma_gemma | 243 | 0.387 | 0.531 | 11 | 46 | 3.31e-06 |
-| r5_planck_hertz vs r5_heuristic_template | 243 | 0.387 | 0.391 | 24 | 25 | 1 |
-| r5_planck_hertz vs r5_planck_planck | 243 | 0.387 | 0.391 | 0 | 1 | 1 |
-| r5_planck_hertz vs r5_planck_template | 243 | 0.387 | 0.383 | 1 | 0 | 1 |
-| r5_planck_hertz_brave vs r5_planck_hertz | 243 | 0.514 | 0.387 | 54 | 23 | 0.000539 |
-| r5_planck_hertz_brave_quick vs r5_planck_hertz | 12 | 0.667 | 0.583 | 3 | 2 | 1 |
-| r5_planck_hertz_contrarian vs r5_planck_hertz | 243 | 0.391 | 0.387 | 6 | 5 | 1 |
-| r5_planck_hertz_contrarian_quick vs r5_planck_hertz | 12 | 0.583 | 0.583 | 1 | 1 | 1 |
-| r5_planck_hertz_cpu vs r5_planck_hertz | 10 | 0.300 | 0.300 | 0 | 0 | 1 |
-| r5_planck_hertz_cpu_quick vs r5_planck_hertz | 12 | 0.500 | 0.583 | 0 | 1 | 1 |
-| r5_planck_hertz_quick vs r5_planck_hertz | 12 | 0.583 | 0.583 | 0 | 0 | 1 |
-
-- writer_hertz: 410 training examples (369 train / 41 val), best val loss 0.963, 641M params
-- writer_planck: 410 training examples (369 train / 41 val), best val loss 0.988, 101M params
 
 ## G2 v2 heads (choice head + calibrated answerability gate)
 
@@ -477,3 +760,5 @@ head:planck-rank: paired ratio vs teacher 0.71 (per seed 0.67, 0.80, 0.66)
 
 **Verdict (seeds):** FAIL. mean paired head:planck-rank/teacher = 0.71 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
 
+[planck3 10:18:54] round5_quick finished in 13 min
+[planck3 10:18:54] -NoPush: results left uncommitted

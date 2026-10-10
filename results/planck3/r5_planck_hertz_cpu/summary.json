@@ -1,0 +1,83 @@
+{
+  "n": 10,
+  "accuracy": 0.3,
+  "bands": {
+    "high": {
+      "n": 2,
+      "share": 0.2,
+      "precision": 0.5
+    },
+    "good": {
+      "n": 2,
+      "share": 0.2,
+      "precision": 0.5
+    },
+    "low": {
+      "n": 3,
+      "share": 0.3,
+      "precision": 0.3333333333333333
+    },
+    "sceptical": {
+      "n": 3,
+      "share": 0.3,
+      "precision": 0.0
+    },
+    "none": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 3,
+      "accuracy": 0.0
+    },
+    "general_info": {
+      "n": 1,
+      "accuracy": 0.0
+    },
+    "long_tail": {
+      "n": 3,
+      "accuracy": 1.0
+    },
+    "news": {
+      "n": 3,
+      "accuracy": 0.0
+    }
+  },
+  "qtype_accuracy": 0.9,
+  "writer_faithful": 0.5,
+  "writer_fallback": 0.5,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 1.0,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 0.21000000000000002,
+    "fetch_ms": 3.46,
+    "read_ms": 934.11,
+    "write_ms": 27765.45,
+    "total_ms": 28909.77
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.4,
+  "reader": "planck",
+  "writer": "hertz-writer",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json",
+  "search": "ddgs",
+  "search_health": {
+    "searches": 10,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "ddgs": 10
+    },
+    "primary_share": 1.0,
+    "valid": true
+  },
+  "wall_s": 289.1,
+  "llm_usd_per_task_as_haiku": 0.0
+}
