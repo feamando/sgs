@@ -1,0 +1,8 @@
+{
+  "prompts": 10,
+  "identical": 1.0,
+  "ms_cached": 2727.5424300227314,
+  "ms_uncached": 22209.008769970387,
+  "speedup": 8.142497995818637,
+  "device": "cpu"
+}

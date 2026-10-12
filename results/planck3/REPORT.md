@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-10 13:12)
+# Planck 3.0 results (2026-10-12 18:18)
 
 ## G0 (seed benchmark)
 
@@ -216,6 +216,64 @@
 
 - writer_hertz: 410 training examples (369 train / 41 val), best val loss 0.963, 641M params
 - writer_planck: 410 training examples (369 train / 41 val), best val loss 0.988, 101M params
+
+## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)
+
+| reader | params | train / val / test pools | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |
+|---|---|---|---|---|---|---|---|
+| x-planck | 101M | 5310 / 592 / 654 | 0.538 | 0.401 | 0.753 | 0.059 | stable 0.655 vs 0.460 (n=226); recent 0.398 vs 0.229 (n=83); news 0.388 vs 0.418 (n=67); info 0.455 vs 0.400 (n=55) |
+| x-hertz | 641M | 5310 / 592 / 654 | 0.568 | 0.401 | 0.789 | 0.05 | stable 0.699 vs 0.460 (n=226); recent 0.458 vs 0.229 (n=83); news 0.328 vs 0.418 (n=67); info 0.491 vs 0.400 (n=55) |
+
+## Round 6: read -> weigh -> write on Brave, relevance-checked (SETUP_planck_20261012.md)
+
+| run | n | value shown is right | 143 fresh + long-tail | 100 news + info | high: n / precision | good | low | sceptical | none | monotone | search on topic | writer faithful (any try) | first try | tries | read ms | write ms | changed by personal |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| r6_gemma_gemma | 243 | 0.634 | 0.657 (n=143) | 0.600 (n=100) | 44 / 0.705 | 128 / 0.695 | 38 / 0.632 | 16 / 0.625 | 17 | True | 0.984 | 0.957 | 0.957 | 1.000 | 2566 | 2747 | 0.000 |
+| r6_gemma_gemma_quick | 12 | 0.667 | 0.750 (n=8) | 0.500 (n=4) | 3 / 1.000 | 6 / 0.500 | 2 / 1.000 | 0 /  | 1 | True | 1.000 | 1.000 | 1.000 | 1.000 | 1873 | 2666 | 0.000 |
+| r6_gemma_template | 243 | 0.634 | 0.657 (n=143) | 0.600 (n=100) | 44 / 0.705 | 128 / 0.695 | 38 / 0.632 | 16 / 0.625 | 17 | True | 0.984 | 1.000 |  |  | 2874 | 0 | 0.000 |
+| r6_gemma_template_quick | 12 | 0.667 | 0.750 (n=8) | 0.500 (n=4) | 3 / 1.000 | 6 / 0.500 | 2 / 1.000 | 0 /  | 1 | True | 1.000 | 1.000 |  |  | 2006 | 0 | 0.000 |
+| r6_heuristic_template | 243 | 0.498 | 0.413 (n=143) | 0.620 (n=100) | 33 / 0.758 | 72 / 0.667 | 80 / 0.375 | 57 / 0.316 | 1 | True | 0.984 | 1.000 |  |  | 0 | 0 | 0.000 |
+| r6_heuristic_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 3 / 1.000 | 3 / 0.333 | 5 / 0.400 | 1 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 0 | 0 | 0.000 |
+| r6_planck_template | 243 | 0.514 | 0.552 (n=143) | 0.460 (n=100) | 39 / 0.641 | 66 / 0.621 | 71 / 0.535 | 66 / 0.318 | 1 | True | 0.984 | 1.000 |  |  | 39 | 0 | 0.000 |
+| r6_planck_template_quick | 12 | 0.667 | 0.625 (n=8) | 0.750 (n=4) | 2 / 1.000 | 2 / 0.500 | 7 / 0.714 | 1 / 0.000 | 0 | True | 1.000 | 1.000 |  |  | 51 | 0 | 0.000 |
+| r6_x-hertz_hertz | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 0.858 | 0.690 | 1.492 | 46 | 169 | 0.000 |
+| r6_x-hertz_hertz_contrarian_quick | 12 | 0.167 | 0.250 (n=8) | 0.000 (n=4) | 0 /  | 0 /  | 0 /  | 9 / 0.222 | 3 | True | 1.000 | 0.400 | 0.300 | 2.300 | 89 | 258 | 0.750 |
+| r6_x-hertz_hertz_cpu_quick | 12 | 0.167 | 0.250 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 6 / 0.167 | 1 / 0.000 | 3 | True | 1.000 | 1.000 | 0.600 | 1.600 | 11355 | 3759 | 0.000 |
+| r6_x-hertz_hertz_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 1.000 | 0.600 | 1.600 | 73 | 123 | 0.000 |
+| r6_x-hertz_planck | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 0.883 | 0.746 | 1.421 | 66 | 107 | 0.000 |
+| r6_x-hertz_planck_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 0.900 | 0.800 | 1.300 | 68 | 77 | 0.000 |
+| r6_x-hertz_template | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 1.000 |  |  | 63 | 0 | 0.000 |
+| r6_x-hertz_template_contrarian | 243 | 0.399 | 0.503 (n=143) | 0.250 (n=100) | 0 /  | 0 /  | 43 / 0.814 | 146 / 0.425 | 54 | True | 0.984 | 1.000 |  |  | 76 | 0 | 0.634 |
+| r6_x-hertz_template_cpu | 20 | 0.450 | 0.500 (n=12) | 0.375 (n=8) | 1 / 1.000 | 8 / 0.625 | 6 / 0.500 | 0 /  | 5 | True | 1.000 | 1.000 |  |  | 10608 | 0 | 0.000 |
+| r6_x-hertz_template_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 1.000 |  |  | 71 | 0 | 0.000 |
+| r6_x-planck_template | 243 | 0.424 | 0.503 (n=143) | 0.310 (n=100) | 15 / 0.667 | 69 / 0.754 | 82 / 0.390 | 38 / 0.237 | 39 | False | 0.984 | 1.000 |  |  | 47 | 0 | 0.000 |
+| r6_x-planck_template_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 68 | 0 | 0.000 |
+
+| paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
+|---|---|---|---|---|---|---|
+| r6_x-hertz_template vs r6_planck_template | 243 | 0.391 | 0.514 | 18 | 48 | 0.000287 |
+| r6_x-hertz_template vs r6_gemma_template | 243 | 0.391 | 0.634 | 22 | 81 | 4.07e-09 |
+| r6_x-hertz_template vs r6_gemma_gemma | 243 | 0.391 | 0.634 | 22 | 81 | 4.07e-09 |
+| r6_x-hertz_template vs r6_heuristic_template | 243 | 0.391 | 0.498 | 24 | 50 | 0.00337 |
+| r6_x-hertz_template_contrarian vs r6_x-hertz_template | 243 | 0.399 | 0.391 | 2 | 0 | 0.5 |
+| r6_x-hertz_template_cpu vs r6_x-hertz_template | 20 | 0.450 | 0.450 | 0 | 0 | 1 |
+| r6_x-hertz_template_quick vs r6_x-hertz_template | 12 | 0.250 | 0.500 | 1 | 4 | 0.375 |
+| r6_x-planck_template vs r6_planck_template | 243 | 0.424 | 0.514 | 27 | 49 | 0.0154 |
+| r6_x-hertz_template vs r6_x-planck_template | 243 | 0.391 | 0.424 | 22 | 30 | 0.332 |
+| r6_x-planck_template vs r6_gemma_template | 243 | 0.424 | 0.634 | 21 | 72 | 1.04e-07 |
+
+- product (pre-registered choice): reader x-hertz (Hertz reads >= 3 points better on held-out questions); writer template (no small writer passes rule W: the template writes)
+- writer judge (r6_x-hertz_hertz_quick, Gemma, blind): small writer preferred 3, template 6, tie 1 of 10
+- KV cache (writer_hertz6_cpu): 100% of 10 greedy answers identical; 4195 ms cached vs 41492 ms uncached (cpu)
+- KV cache (writer_hertz6_cuda): 100% of 20 greedy answers identical; 175 ms cached vs 370 ms uncached (cuda)
+- KV cache (writer_hertz6_quick_cpu): 100% of 10 greedy answers identical; 2728 ms cached vs 22209 ms uncached (cpu)
+- KV cache (writer_hertz6_quick_cuda): 100% of 20 greedy answers identical; 138 ms cached vs 230 ms uncached (cuda)
+- KV cache (writer_planck6_cpu): 100% of 10 greedy answers identical; 555 ms cached vs 5034 ms uncached (cpu)
+- KV cache (writer_planck6_cuda): 100% of 20 greedy answers identical; 98 ms cached vs 100 ms uncached (cuda)
+- KV cache (writer_planck6_quick_cpu): 100% of 10 greedy answers identical; 324 ms cached vs 2021 ms uncached (cpu)
+- KV cache (writer_planck6_quick_cuda): 100% of 20 greedy answers identical; 71 ms cached vs 69 ms uncached (cuda)
+- writer_hertz6: 1412 training examples (1271 train / 141 val), best val loss 0.734, 641M params
+- writer_planck6: 1412 training examples (1271 train / 141 val), best val loss 0.755, 101M params
 
 ## G2 v2 heads (choice head + calibrated answerability gate)
 

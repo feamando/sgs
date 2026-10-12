@@ -1,0 +1,36 @@
+{
+  "name": "planck",
+  "base": "checkpoints/planck13/best.pt",
+  "examples": 266,
+  "require_lead": true,
+  "train": 240,
+  "val": 26,
+  "best_val_loss": 1.0524683594703674,
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.1961596469084421,
+      "val_loss": 1.1078365296125412,
+      "s": 1.4
+    },
+    {
+      "epoch": 1,
+      "train_loss": 0.4780144602060318,
+      "val_loss": 1.0735069066286087,
+      "s": 0.8
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.25995486179987587,
+      "val_loss": 1.0820652544498444,
+      "s": 0.9
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.16528885985414188,
+      "val_loss": 1.0524683594703674,
+      "s": 0.9
+    }
+  ],
+  "params": 100892843
+}

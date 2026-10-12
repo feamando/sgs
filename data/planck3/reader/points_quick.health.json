@@ -1,0 +1,19 @@
+{
+  "searches": 60,
+  "primary_empty_rate": 0.0,
+  "fallback_rate": 0.36666666666666664,
+  "secondary_rate": 0.6,
+  "final_empty_rate": 0.0,
+  "served": {
+    "brave": 1,
+    "ddgs": 36,
+    "wikipedia": 23
+  },
+  "primary_share": 0.016666666666666666,
+  "primary_offtopic_rate": 0.0,
+  "on_topic_rate": 0.9833333333333333,
+  "relevance_checked": true,
+  "brave_remaining": 0,
+  "brave_quota_skips": 59,
+  "valid": true
+}

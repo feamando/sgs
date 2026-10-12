@@ -1,0 +1,521 @@
+{
+  "tasks": [
+    {
+      "id": "news_2025-01-01_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In January 2025, where did a vehicle-ramming attack occur that resulted in one police officer's death and four injuries?",
+      "answer_type": "entity",
+      "gold": [
+        "Nelson, New Zealand"
+      ],
+      "source": "Portal:Current events 2025-01-01",
+      "evidence": "A police officer is killed and four other people are injured in a vehicle-ramming attack during a patrol in Nelson, New Zealand. A 32-year-old suspect is arrested.",
+      "gold_as_of": "2025-01-01"
+    },
+    {
+      "id": "news_2025-01-01_business",
+      "family": "fact",
+      "regime": "news",
+      "template": "business",
+      "question": "Which company halted its gas supplies to Moldova and the self-proclaimed Transnistrian Republic in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Gazprom"
+      ],
+      "source": "Portal:Current events 2025-01-01",
+      "evidence": "As announced, Russia's Gazprom halts its gas supplies both to Moldova and the self-proclaimed Transnistrian Republic alleging non-compliance with payment obligations. ,",
+      "gold_as_of": "2025-01-01"
+    },
+    {
+      "id": "news_2025-01-02_diplomacy",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "Who announced that Ukraine will pledge support to the Syrian transitional government in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Volodymyr Zelenskyy"
+      ],
+      "source": "Portal:Current events 2025-01-02",
+      "evidence": "Ukrainian president Volodymyr Zelenskyy says that Ukraine will pledge support to the Syrian transitional government.",
+      "gold_as_of": "2025-01-02"
+    },
+    {
+      "id": "news_2025-01-02_conflict",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What organization reported that U.S. forces are deploying a new convoy to areas controlled by the Syrian Democratic Forces in Kobani in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Syrian Observatory for Human Rights"
+      ],
+      "source": "Portal:Current events 2025-01-02",
+      "evidence": "According to the Syrian Observatory for Human Rights, U.S. forces are deploying a new convoy to areas controlled by the Syrian Democratic Forces in Kobani, Aleppo Governorate, as part of operations to establish a new US military base in north-eastern Syria.",
+      "gold_as_of": "2025-01-02"
+    },
+    {
+      "id": "news_2025-01-02_science",
+      "family": "fact",
+      "regime": "news",
+      "template": "science",
+      "question": "Where was the largest site of dinosaur footprints of the Cetiosaurus and Megalosaurus, dating back to the Middle Jurassic Bathonian stage 166 million years ago, discovered in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Oxfordshire, England, United Kingdom"
+      ],
+      "source": "Portal:Current events 2025-01-02",
+      "evidence": "The largest site of dinosaur footprints of the Cetiosaurus and Megalosaurus dating back to the Middle Jurassic Bathonian stage 166 million years ago is discovered at a quarry in Oxfordshire, England, United Kingdom.",
+      "gold_as_of": "2025-01-02"
+    },
+    {
+      "id": "news_2025-01-03_health",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "According to IQAir in January 2025, which city was reported to have the worst air pollution on Earth?",
+      "answer_type": "entity",
+      "gold": [
+        "Hanoi"
+      ],
+      "source": "Portal:Current events 2025-01-03",
+      "evidence": "Air quality technology company IQAir reports that Hanoi, Vietnam, has the worst air pollution of any city on Earth, with levels of hazardous small particles, known as PM2.5, measured at 266 micrograms per cubic metre.",
+      "gold_as_of": "2025-01-03"
+    },
+    {
+      "id": "news_2025-01-03_sport",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Who defeated Michael van Gerwen 7–3 in the final at Alexandra Palace in London, England, to claim his first World Darts Championship title in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Luke Littler"
+      ],
+      "source": "Portal:Current events 2025-01-03",
+      "evidence": "Luke Littler defeats Michael van Gerwen 7–3 in the final at Alexandra Palace in London, England, to claim his first World Darts Championship title, becoming the youngest player to win a world title at the age of 17 years.",
+      "gold_as_of": "2025-01-03"
+    },
+    {
+      "id": "news_2025-01-03_business",
+      "family": "fact",
+      "regime": "news",
+      "template": "business",
+      "question": "Which airline announced the resumption of flights to Damascus International Airport in Syria beginning in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Qatar Airways"
+      ],
+      "source": "Portal:Current events 2025-01-03",
+      "evidence": "Qatar Airways announces the resumption of flights to Damascus International Airport in Syria beginning on January 7, becoming the first major international airline to resume scheduled service to Syria since the Syrian civil war began in 2011.",
+      "gold_as_of": "2025-01-03"
+    },
+    {
+      "id": "news_2025-01-04_conflict",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In January 2025, the Nigerian Army repelled an ambush in which state and killed 34 Islamist militants?",
+      "answer_type": "entity",
+      "gold": [
+        "Borno State"
+      ],
+      "source": "Portal:Current events 2025-01-04",
+      "evidence": "The Nigerian Army repels an ambush in Borno State and kills 34 Islamist militants in a gun battle in which six soldiers also die.",
+      "gold_as_of": "2025-01-04"
+    },
+    {
+      "id": "news_2025-01-04_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who announced his resignation as Austrian Chancellor after coalition talks collapsed in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Karl Nehammer"
+      ],
+      "source": "Portal:Current events 2025-01-04",
+      "evidence": "Austrian Chancellor Karl Nehammer announces his resignation after talks on forming the new post-election coalition government between his Austrian People's Party, the Social Democratic Party and NEOS collapsed.",
+      "gold_as_of": "2025-01-04"
+    },
+    {
+      "id": "news_2025-01-04_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "How many prisoners, including foreigners, will the ruling military junta in Myanmar release under an amnesty in January 2025?",
+      "answer_type": "number",
+      "gold": [
+        "5,864"
+      ],
+      "source": "Portal:Current events 2025-01-04",
+      "evidence": "Myanmar state media reports that the ruling military junta will release 5,864 prisoners, including 180 foreigners, under an amnesty marking the country's national independence day.",
+      "gold_as_of": "2025-01-04"
+    },
+    {
+      "id": "news_2025-01-05_diplomacy",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "What is the planned amount of the arms sale to Israel, as notified by the U.S. State Department in January 2025?",
+      "answer_type": "number",
+      "gold": [
+        "$8 billion"
+      ],
+      "source": "Portal:Current events 2025-01-05",
+      "evidence": "The U.S. State Department notifies Congress of a planned $8 billion arms sale to Israel consisting of air-to-air and Hellfire missiles, artillery shells, and other ammunitions.",
+      "gold_as_of": "2025-01-05"
+    },
+    {
+      "id": "news_2025-01-05_culture",
+      "family": "fact",
+      "regime": "news",
+      "template": "culture",
+      "question": "Who became the first Brazilian actress to win the award for Best Actress in a Motion Picture – Drama in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Fernanda Torres"
+      ],
+      "source": "Portal:Current events 2025-01-05",
+      "evidence": "Fernanda Torres becomes the first Brazilian actress to win the award for Best Actress in a Motion Picture – Drama for her performance in I'm Still Here.",
+      "gold_as_of": "2025-01-05"
+    },
+    {
+      "id": "news_2025-01-05_disaster",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "In January 2025, which organization's HAL Dhruv helicopter crashed during a training flight in Porbandar, Gujarat, India?",
+      "answer_type": "entity",
+      "gold": [
+        "Indian Coast Guard"
+      ],
+      "source": "Portal:Current events 2025-01-05",
+      "evidence": "A HAL Dhruv helicopter of the Indian Coast Guard crashes during a training flight in Porbandar, Gujarat, India, killing all the three crew members.",
+      "gold_as_of": "2025-01-05"
+    },
+    {
+      "id": "news_2025-01-06_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "How many Haredi Jews joined the Israel Defense Forces to form the Haredi Hasmonean Brigade in January 2025?",
+      "answer_type": "number",
+      "gold": [
+        "50"
+      ],
+      "source": "Portal:Current events 2025-01-06",
+      "evidence": "More than 50 Haredi Jews join the Israel Defense Forces for the first time since the start of the Gaza war, forming the Haredi Hasmonean Brigade, after repeated protests against the conscription of yeshiva students.",
+      "gold_as_of": "2025-01-06"
+    },
+    {
+      "id": "news_2025-01-06_diplomacy",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "What organization announced plans to expand its operations in Syria beyond an initial US$100 million program in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "International Committee of the Red Cross"
+      ],
+      "source": "Portal:Current events 2025-01-06",
+      "evidence": "The International Committee of the Red Cross announces plans to expand its operations in Syria beyond an initial US$100 million program, citing urgent needs in the health, water, and power sectors.",
+      "gold_as_of": "2025-01-06"
+    },
+    {
+      "id": "news_2025-01-06_health",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "In January 2025, which US state reported its first death from H5N1 bird flu?",
+      "answer_type": "entity",
+      "gold": [
+        "Louisiana"
+      ],
+      "source": "Portal:Current events 2025-01-06",
+      "evidence": "The United States reports its first death from H5N1 bird flu after a man died in the hospital in Louisiana.",
+      "gold_as_of": "2025-01-06"
+    },
+    {
+      "id": "news_2025-01-07_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In January 2025, a mass shooting occurred at which location in Bad Friedrichshall, Baden-Württemberg, Germany?",
+      "answer_type": "entity",
+      "gold": [
+        "Zahnradfabrik Hanel"
+      ],
+      "source": "Portal:Current events 2025-01-07",
+      "evidence": "Two people are killed and one is injured in a mass shooting at Zahnradfabrik Hanel in Bad Friedrichshall, Baden-Württemberg, Germany. The perpetrator is arrested.",
+      "gold_as_of": "2025-01-07"
+    },
+    {
+      "id": "news_2025-01-07_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was sworn in for a second term as President of Ghana in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "John Mahama"
+      ],
+      "source": "Portal:Current events 2025-01-07",
+      "evidence": "John Mahama is sworn in for a second term as President of Ghana, having previously served as president from 2012 to 2017.",
+      "gold_as_of": "2025-01-07"
+    },
+    {
+      "id": "news_2025-01-08_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who did the Independent Democratic Action propose as Prime Minister in São Tomé and Príncipe in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Hélio Vaz de Almeida"
+      ],
+      "source": "Portal:Current events 2025-01-08",
+      "evidence": "The ruling party in São Tomé and Príncipe, Independent Democratic Action, proposes Hélio Vaz de Almeida as Prime Minister to replace Patrice Trovoada, who was fired by President Carlos Vila Nova two days ago.",
+      "gold_as_of": "2025-01-08"
+    },
+    {
+      "id": "news_2025-01-08_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Which far-right group did the British government freeze assets of in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Blood & Honour"
+      ],
+      "source": "Portal:Current events 2025-01-08",
+      "evidence": "The British government freezes the assets of neo-Nazi music network Blood & Honour, becoming the first far-right group in the UK to be sanctioned by the government.",
+      "gold_as_of": "2025-01-08"
+    },
+    {
+      "id": "news_2025-01-09_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was elected as President of Lebanon in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Joseph Aoun"
+      ],
+      "source": "Portal:Current events 2025-01-09",
+      "evidence": "Military commander Joseph Aoun is elected as President of Lebanon, ending the power vacuum that began in October 2022.",
+      "gold_as_of": "2025-01-09"
+    },
+    {
+      "id": "news_2025-01-10_diplomacy",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "Who did the Prime Minister of Greenland, Mute Bourup Egede, say he was ready to speak with in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Donald Trump"
+      ],
+      "source": "Portal:Current events 2025-01-10",
+      "evidence": "The Prime Minister of Greenland, Mute Bourup Egede, says that his country \"has a desire for independence\" and he, in particular, is ready to speak with US President-elect Donald Trump.",
+      "gold_as_of": "2025-01-10"
+    },
+    {
+      "id": "news_2025-01-10_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Which financial watchdog rejected requests to remove Alexei Navalny from their state sponsor of terrorism list in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Rosfinmonitoring"
+      ],
+      "source": "Portal:Current events 2025-01-10",
+      "evidence": "Russia financial watchdog Rosfinmonitoring rejects requests to remove former opposition leader Alexei Navalny from their state sponsor of terrorism list despite his death a year ago.",
+      "gold_as_of": "2025-01-10"
+    },
+    {
+      "id": "news_2025-01-10_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was sworn in for a third six-year term as President of Venezuela in Caracas in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Nicolás Maduro"
+      ],
+      "source": "Portal:Current events 2025-01-10",
+      "evidence": "Nicolás Maduro is sworn in for a third six-year term as President of Venezuela in Caracas. The ceremony takes place under heavy security measures with the opposition boycotting and protesting the ceremony while continuing to insist that the legitimate president-elect is Edmundo González Urrutia. Many countries and international organizations also consider the election to be fraudulent.",
+      "gold_as_of": "2025-01-10"
+    },
+    {
+      "id": "news_2025-01-11_diplomacy",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "Who met with Lebanese prime minister Najib Mikati in Damascus, Syria, in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Ahmed al-Sharaa"
+      ],
+      "source": "Portal:Current events 2025-01-11",
+      "evidence": "Lebanese prime minister Najib Mikati and Syrian de facto leader Ahmed al-Sharaa hold a meeting in Damascus, Syria, the first time that the two countries have met since the Syrian civil war began in 2011.",
+      "gold_as_of": "2025-01-11"
+    },
+    {
+      "id": "news_2025-01-11_disaster",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "How many people were killed and injured when a propane-butane cylinder exploded in a restaurant in Most, Czech Republic, in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Six people are killed and eleven injured"
+      ],
+      "source": "Portal:Current events 2025-01-11",
+      "evidence": "Six people are killed and eleven injured when a propane-butane cylinder explodes in a restaurant in Most, Czech Republic.",
+      "gold_as_of": "2025-01-11"
+    },
+    {
+      "id": "news_2025-01-11_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Where did thousands of people demonstrate in January 2025 to protest against President Yoon Suk Yeol?",
+      "answer_type": "entity",
+      "gold": [
+        "Seoul, South Korea"
+      ],
+      "source": "Portal:Current events 2025-01-11",
+      "evidence": "Thousands of people demonstrate in Seoul, South Korea, to protest against President Yoon Suk Yeol as he defies an arrest warrant from his attempt to institute martial law in December 2024.",
+      "gold_as_of": "2025-01-11"
+    },
+    {
+      "id": "news_2025-01-12_conflict",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Which army claimed to have recaptured several towns from M23 rebels and other armed groups in North Kivu and South Kivu provinces in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Army of the Democratic Republic of the Congo"
+      ],
+      "source": "Portal:Current events 2025-01-12",
+      "evidence": "The Army of the Democratic Republic of the Congo says that over the days it has recaptured several towns that fell to M23 rebels and other armed groups in North Kivu and South Kivu provinces.",
+      "gold_as_of": "2025-01-12"
+    },
+    {
+      "id": "news_2025-01-12_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "How many members of the Assembly of the Union were elected by voters in Comoros in January 2025?",
+      "answer_type": "number",
+      "gold": [
+        "33"
+      ],
+      "source": "Portal:Current events 2025-01-12",
+      "evidence": "Voters in Comoros elect the 33 members of the Assembly of the Union.",
+      "gold_as_of": "2025-01-12"
+    },
+    {
+      "id": "news_2025-01-12_health",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "Where was the first case of HMPV reported in Bangladesh in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Bhairab"
+      ],
+      "source": "Portal:Current events 2025-01-12",
+      "evidence": "The Bangladeshi IEDCR reports the country's first case of HMPV in Bhairab, Dhaka Division, Bangladesh.",
+      "gold_as_of": "2025-01-12"
+    },
+    {
+      "id": "news_2025-01-13_law",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In January 2025, a judge in which country dismissed charges of money laundering against Popular Force leader Keiko Fujimori?",
+      "answer_type": "entity",
+      "gold": [
+        "Peru"
+      ],
+      "source": "Portal:Current events 2025-01-13",
+      "evidence": "A judge in Peru dismisses charges of money laundering against Popular Force leader and former presidential candidate Keiko Fujimori.",
+      "gold_as_of": "2025-01-13"
+    },
+    {
+      "id": "news_2025-01-13_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who became the prime minister-designate of Lebanon after winning an absolute majority of votes from parliament in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Nawaf Salam"
+      ],
+      "source": "Portal:Current events 2025-01-13",
+      "evidence": "International Court of Justice President Nawaf Salam becomes the prime minister-designate of Lebanon after winning an absolute majority of votes from parliament, while stepping down from the ICJ.",
+      "gold_as_of": "2025-01-13"
+    },
+    {
+      "id": "news_2025-01-13_disaster",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "According to AccuWeather's preliminary estimate in January 2025, what is the range of total physical and economic losses caused by the wildfires in Southern California?",
+      "answer_type": "number",
+      "gold": [
+        "$250–275 billion"
+      ],
+      "source": "Portal:Current events 2025-01-13",
+      "evidence": "AccuWeather releases a preliminary estimate of the total physical and economic losses caused by the ongoing wildfires in Southern California of between $250–275 billion, a figure attributed to exceptionally high property values in and near Santa Monica, which would surpass their estimates of the costs of the entire 2020 United States wildfire season as well as Hurricane Helene in 2024.",
+      "gold_as_of": "2025-01-13"
+    },
+    {
+      "id": "news_2025-01-14_election",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was sworn in as the new Prime Minister in São Tomé and Príncipe in January 2025?",
+      "answer_type": "entity",
+      "gold": [
+        "Américo Ramos"
+      ],
+      "source": "Portal:Current events 2025-01-14",
+      "evidence": "The new Government of Prime Minister Américo Ramos is sworn in São Tomé and Príncipe.",
+      "gold_as_of": "2025-01-14"
+    }
+  ],
+  "rejected": [
+    {
+      "id": "2025-01-01_disaster",
+      "why": "number without a number",
+      "raw": "{\"question\": \"How many people were killed in the fireworks explosion in Honolulu, Hawaii, in January 2025?\", \"answer\": \"Three\", \"answer_type\": \"number\"}"
+    },
+    {
+      "id": "2025-01-07_business",
+      "why": "answer not in the item",
+      "raw": "{\"question\": \"When did international flights resume from Damascus International Airport in Syria?\", \"answer\": \"January 2025\", \"answer_type\": \"date\"}"
+    },
+    {
+      "id": "2025-01-08_disaster",
+      "why": "number without a number",
+      "raw": "{\"question\": \"How many people were killed in the stampede at the Hindu Venkateswara Temple in Tirupati, Andhra Pradesh, India, in January 2025?\", \"answer\": \"Six\", \"answer_type\": \"number\"}"
+    },
+    {
+      "id": "2025-01-09_diplomacy",
+      "why": "answer named in a benchmark question",
+      "raw": "{\"question\": \"In January 2025, which country declined to confirm whether its forces accidentally shot down Azerbaijan Airlines Flight 8243?\", \"answer\": \"Russia\", \"answer_type\": \"entity\"}"
+    },
+    {
+      "id": "2025-01-09_disaster",
+      "why": "number without a number",
+      "raw": "{\"question\": \"How many people were killed due to spreading wildfires in Los Angeles County, United States, in January 2025?\", \"answer\": \"six\", \"answer_type\": \"number\"}"
+    }
+  ]
+}

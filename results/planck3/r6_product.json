@@ -1,0 +1,12 @@
+{
+  "reader": "x-hertz",
+  "reader_why": "Hertz reads >= 3 points better on held-out questions",
+  "test_choice_acc": {
+    "planck": 0.5382830626450116,
+    "hertz": 0.568445475638051
+  },
+  "writer": "template",
+  "writer_why": "no small writer passes rule W: the template writes",
+  "run": "r6_x-hertz_template",
+  "tag": ""
+}

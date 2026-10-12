@@ -1,0 +1,92 @@
+{
+  "n": 20,
+  "accuracy": 0.45,
+  "bands": {
+    "high": {
+      "n": 1,
+      "share": 0.05,
+      "precision": 1.0
+    },
+    "good": {
+      "n": 8,
+      "share": 0.4,
+      "precision": 0.625
+    },
+    "low": {
+      "n": 6,
+      "share": 0.3,
+      "precision": 0.5
+    },
+    "sceptical": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    },
+    "none": {
+      "n": 5,
+      "share": 0.25,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 5,
+      "accuracy": 0.2
+    },
+    "general_info": {
+      "n": 3,
+      "accuracy": 0.0
+    },
+    "long_tail": {
+      "n": 7,
+      "accuracy": 0.7142857142857143
+    },
+    "news": {
+      "n": 5,
+      "accuracy": 0.6
+    }
+  },
+  "qtype_accuracy": 0.95,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 1.0,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 1.0,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 0.5549999999999999,
+    "fetch_ms": 3.475,
+    "read_ms": 10607.51,
+    "write_ms": 0.0,
+    "total_ms": 10838.27
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.5,
+  "reader": "x-hertz",
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 20,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 20
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.0,
+    "on_topic_rate": 1.0,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "valid": true
+  },
+  "wall_s": 216.8,
+  "llm_usd_per_task_as_haiku": 0.0
+}

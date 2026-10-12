@@ -1,0 +1,10 @@
+{
+  "run": "r6_x-hertz_hertz_quick",
+  "pairs": 10,
+  "model": 3,
+  "template": 6,
+  "tie": 1,
+  "model_share": 0.3,
+  "template_share": 0.6,
+  "tie_share": 0.1
+}
