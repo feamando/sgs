@@ -1,0 +1,421 @@
+"""
+The round 6 reader (SETUP_planck_20261012.md): Planck 1.3 (100M) or Hertz 1.2 (640M) fine-tuned ONCE
+as a cross-encoder that reads the question and each candidate's evidence TOGETHER.
+
+Round 5's reader scored frozen Planck embeddings of the question and of the candidate separately
+(they met only in a small MLP) and lost 20 points to Gemma, mostly on news-style questions. Here the
+whole SGS model is trained, on the question + candidate text, to answer "does this candidate answer
+this question, according to this evidence?". It is still a reading SKILL: labels come from known
+answers (Wikidata, the portal item's words), never from a model, and nothing about 2026 is in the data.
+
+    input     "QUESTION ... ANSWER TYPE ..." (shared prefix) + "CANDIDATE ... FROM ... EVIDENCE ... ?"
+              per candidate (top 16 of a pool); the hidden state at the last token + the round 4
+              lexical features (score, lead, aboutness, agreement, ...) -> two logits:
+    choice    softmax over the pool's candidates: WHICH one answers (trained where one does)
+    answer    per candidate: DOES it answer (trained on every candidate, right or not)
+    output    r_k = choice_k x g, g = Platt(answer logit of the chosen candidate), both calibrated
+              on held-out QUESTIONS; r feeds consolidate.py unchanged
+    years     training pools get every year shifted by the same random k (p 0.5), so "2025"
+              vs "2026" carries no information about answerability: the reader must read
+
+On a phone the shared question prefix is computed once and each candidate continues from the
+KV cache (SGSLanguageModel.forward_cached), so a pool of 16 is one batched step.
+"""
+
+import hashlib
+import math
+import random
+import re
+import time
+from pathlib import Path
+
+import numpy as np
+
+from .g2 import N_FEAT, features
+from .util import REPO_ROOT, read_json, read_jsonl, write_json
+
+READER_DIR = REPO_ROOT / "data" / "planck3" / "reader"
+MAX_CANDS = 16
+PREFIX_TOKENS = 64
+CAND_TOKENS = 112
+EVIDENCE_CHARS = 320
+YEAR_SHIFT_P = 0.5
+GROUPS = ("stable", "recent", "news", "info")
+
+
+def prefix_text(question: str, answer_type: str) -> str:
+    return f"QUESTION: {question}\nANSWER TYPE: {answer_type}\n"
+
+
+def cand_text(c: dict, from_snippet: bool) -> str:
+    return (f"CANDIDATE: {c['value']}\nFROM: {'a search result snippet' if from_snippet else 'a page'}\n"
+            f"EVIDENCE: {(c.get('context') or '')[:EVIDENCE_CHARS]}\nDOES THE CANDIDATE ANSWER THE QUESTION?")
+
+
+_YEAR = re.compile(r"(?<!\d)(19\d\d|20[0-3]\d)(?!\d)")
+
+
+def shift_years(s: str, k: int) -> str:
+    return _YEAR.sub(lambda m: str(int(m.group(1)) + k), s or "")
+
+
+def group_of(task_id: str) -> str:
+    g = task_id.split("_", 1)[0]
+    return g if g in GROUPS else "stable"
+
+
+def split_of(task_id: str) -> str:
+    """By QUESTION (hash of the task id): 80% train, 10% validation (calibration), 10% test."""
+    h = int(hashlib.sha1(task_id.encode("utf-8")).hexdigest()[:8], 16) % 10
+    return "test" if h == 0 else "val" if h == 1 else "train"
+
+
+def pool_cands(p: dict) -> tuple[list[dict], list[bool]]:
+    """Top MAX_CANDS candidates in ranker order; a right one beyond the cut replaces the last."""
+    cands, labels = list(p["cands"]), list(p["labels"])
+    keep = list(range(min(len(cands), MAX_CANDS)))
+    if not any(labels[i] for i in keep):
+        extra = [i for i in range(len(cands)) if labels[i]]
+        if extra and keep:
+            keep[-1] = extra[0]
+    return [cands[i] for i in keep], [bool(labels[i]) for i in keep]
+
+
+# ── model ────────────────────────────────────────────────────────────────
+def load_backbone(checkpoint: str, use_checkpoint: bool = False):
+    import torch
+    from scripts.generate import infer_arch
+    from src.sgs_lm import SGSLanguageModel, migrate_state_dict
+    ck = torch.load(checkpoint, map_location="cpu", weights_only=False)
+    state = migrate_state_dict(ck["model"] if "model" in ck else ck)
+    arch = infer_arch(state)
+    lm = SGSLanguageModel(**arch, return_hidden=True, use_checkpoint=use_checkpoint)
+    lm.load_state_dict(state)
+    return lm, arch
+
+
+def make_head(d_f: int):
+    import torch.nn as nn
+    return nn.Sequential(nn.Linear(d_f + N_FEAT, 256), nn.GELU(), nn.Linear(256, 2))
+
+
+class Encoded:
+    """One pool as token ids: a shared prefix + one continuation per candidate."""
+
+    def __init__(self, sp, p: dict, shift: int = 0):
+        q = shift_years(p["question"], shift) if shift else p["question"]
+        cands, self.labels = pool_cands(p)
+        snip = p.get("source") == "snippet" or p.get("snippet", False)
+        if shift:
+            cands = [dict(c, value=shift_years(c["value"], shift), context=shift_years(c.get("context", ""), shift))
+                     for c in cands]
+        self.prefix = sp.encode(prefix_text(q, p["answer_type"]), out_type=int)[:PREFIX_TOKENS]
+        self.conts = [sp.encode(cand_text(c, snip), out_type=int)[:CAND_TOKENS] or [sp.unk_id()] for c in cands]
+        self.feats = [features(c, q, p["answer_type"], i, len(cands), snip) for i, c in enumerate(cands)]
+
+
+def _forward(lm, head, batch: list[Encoded], device, pad: int):
+    """Full sequences (prefix + continuation), right-padded: the hidden at each last real token."""
+    import torch
+    seqs = [e.prefix + c for e in batch for c in e.conts]
+    L = max(len(s) for s in seqs)
+    ids = torch.full((len(seqs), L), pad, dtype=torch.long)
+    for i, s in enumerate(seqs):
+        ids[i, :len(s)] = torch.tensor(s)
+    last = torch.tensor([len(s) - 1 for s in seqs])
+    ft = torch.tensor([f for e in batch for f in e.feats], dtype=torch.float32)
+    ids, last, ft = ids.to(device), last.to(device), ft.to(device)
+    with torch.autocast("cuda", dtype=torch.bfloat16, enabled=str(device).startswith("cuda")):
+        h = lm(ids)
+    h = h.float()[torch.arange(len(seqs), device=device), last]
+    return head(torch.cat([h, ft], -1))                       # [N, 2]: choice logit, answer logit
+
+
+def _losses(logits, batch: list[Encoded]):
+    import torch
+    import torch.nn.functional as F
+    choice, bce, n_choice, k = 0.0, [], 0, 0
+    for e in batch:
+        n = len(e.conts)
+        lg = logits[k:k + n]
+        k += n
+        y = torch.tensor(e.labels, device=lg.device)
+        if y.any():
+            s = lg[:, 0]
+            choice = choice + (torch.logsumexp(s, 0) - torch.logsumexp(s.masked_fill(~y, -1e4), 0))
+            n_choice += 1
+        bce.append(F.binary_cross_entropy_with_logits(lg[:, 1], y.float(), reduction="sum"))
+    n_c = sum(len(e.conts) for e in batch)
+    return choice / max(n_choice, 1) + torch.stack(bce).sum() / max(n_c, 1)
+
+
+def _batches(encs: list[Encoded], cands_per_step: int):
+    b, n = [], 0
+    for e in encs:
+        if b and n + len(e.conts) > cands_per_step:
+            yield b
+            b, n = [], 0
+        b.append(e)
+        n += len(e.conts)
+    if b:
+        yield b
+
+
+def _scores(lm, head, encs, device, pad, cands_per_step):
+    import torch
+    lm.eval()
+    head.eval()
+    out = []
+    with torch.no_grad():
+        for b in _batches(encs, cands_per_step):
+            lg = _forward(lm, head, b, device, pad).float().cpu().numpy()
+            k = 0
+            for e in b:
+                out.append(lg[k:k + len(e.conts)])
+                k += len(e.conts)
+    return out
+
+
+def _softmax(x, T=1.0):
+    z = np.asarray(x, dtype=np.float64) / T
+    z = np.exp(z - z.max())
+    return z / z.sum()
+
+
+def fit_temperature(scores, encs) -> float:
+    best_t, best = 1.0, math.inf
+    pos = [(s[:, 0], e.labels) for s, e in zip(scores, encs) if any(e.labels)]
+    for t in [0.3 * 1.12 ** i for i in range(40)]:
+        nll = 0.0
+        for s, y in pos:
+            p = _softmax(s, t)
+            nll -= math.log(max(sum(pi for pi, yi in zip(p, y) if yi), 1e-12))
+        if nll < best:
+            best_t, best = t, nll
+    return best_t
+
+
+def gate_data(scores, encs, T):
+    """Per pool: (answer logit of the chosen candidate, is the chosen candidate right)."""
+    x, y = [], []
+    for s, e in zip(scores, encs):
+        k = int(np.argmax(_softmax(s[:, 0], T)))
+        x.append(float(s[k, 1]))
+        y.append(bool(e.labels[k]))
+    return np.array(x), np.array(y)
+
+
+def fit_platt(x, y, iters: int = 200) -> tuple[float, float]:
+    """1-D logistic regression by Newton's method (no sklearn on the phone path)."""
+    a, b = 1.0, 0.0
+    if len(set(y.tolist())) < 2:
+        return 0.0, float(np.log((y.mean() + 1e-3) / (1 - y.mean() + 1e-3)))
+    for _ in range(iters):
+        p = 1 / (1 + np.exp(-(a * x + b)))
+        g = np.array([((p - y) * x).sum(), (p - y).sum()])
+        w = p * (1 - p) + 1e-9
+        H = np.array([[(w * x * x).sum(), (w * x).sum()], [(w * x).sum(), w.sum()]]) + 1e-6 * np.eye(2)
+        step = np.linalg.solve(H, g)
+        a, b = a - step[0], b - step[1]
+        if np.abs(step).max() < 1e-8:
+            break
+    return float(a), float(b)
+
+
+def evaluate(scores, encs, T, a, b) -> dict:
+    from .metrics import ece
+    has = [(s, e) for s, e in zip(scores, encs) if any(e.labels)]
+    choice = sum(bool(e.labels[int(np.argmax(s[:, 0]))]) for s, e in has) / max(len(has), 1)
+    ranker = sum(bool(e.labels[0]) for _, e in has) / max(len(has), 1)
+    x, y = gate_data(scores, encs, T)
+    g = 1 / (1 + np.exp(-(a * x + b))) if len(x) else np.array([])
+    try:
+        from sklearn.metrics import roc_auc_score
+        auc = float(roc_auc_score(y, g)) if len(set(y.tolist())) > 1 else None
+    except Exception:
+        auc = None
+    return {"pools": len(encs), "pools_with_a_right_candidate": len(has), "choice_acc": choice, "ranker_acc": ranker,
+            "gate_auc": auc, "gate_ece": ece(g.tolist(), y.tolist()) if len(g) else None,
+            "base_rate": float(y.mean()) if len(y) else None}
+
+
+# ── train once ───────────────────────────────────────────────────────────
+def load_points(paths: list[Path]) -> list[dict]:
+    pts = []
+    for path in paths:
+        if Path(path).exists():
+            pts += [p for p in read_jsonl(path) if p.get("cands")]
+    return pts
+
+
+def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, name: str, epochs: int = 3,
+          lr: float = 5e-5, cands_per_step: int = 64, seed: int = 0, grad_checkpoint: bool = False,
+          max_points: int = 0) -> dict:
+    import sentencepiece as spm
+    import torch
+    torch.manual_seed(seed)
+    rng = random.Random(seed)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    sp = spm.SentencePieceProcessor(model_file=str(tokenizer))
+    lm, arch = load_backbone(base_ckpt, use_checkpoint=grad_checkpoint)
+    if arch["vocab_size"] != sp.get_piece_size():
+        raise SystemExit(f"tokenizer vocab {sp.get_piece_size()} != checkpoint vocab {arch['vocab_size']} ({tokenizer})")
+    head = make_head(arch["d_f"])
+    lm.to(device)
+    head.to(device)
+    pts = load_points(points)
+    if max_points:
+        rng.shuffle(pts)
+        pts = pts[:max_points]
+    by = {s: [p for p in pts if split_of(p["task_id"]) == s] for s in ("train", "val", "test")}
+    pad = sp.pad_id() if sp.pad_id() >= 0 else 0
+    val = [Encoded(sp, p) for p in by["val"]]
+    test = [Encoded(sp, p) for p in by["test"]]
+    opt = torch.optim.AdamW([{"params": lm.parameters(), "lr": lr}, {"params": head.parameters(), "lr": 1e-3}],
+                            weight_decay=0.01)
+    n_cands = sum(min(len(p["cands"]), MAX_CANDS) for p in by["train"])
+    steps = max(1, epochs * (n_cands // cands_per_step + 1))
+    warm = min(100, steps // 10 + 1)
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(s, steps) / steps)))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    best, log = -1.0, []
+    print(f"[xreader:{name}] {len(by['train'])} train / {len(val)} val / {len(test)} test pools "
+          f"({n_cands:,} train candidates), {arch['d_f']}-d backbone, {steps} steps", flush=True)
+    for ep in range(epochs):
+        lm.train()
+        head.train()
+        tr = [Encoded(sp, p, shift=rng.randint(-4, 4) if rng.random() < YEAR_SHIFT_P else 0) for p in by["train"]]
+        rng.shuffle(tr)
+        t0, tot, nb = time.time(), 0.0, 0
+        for b in _batches(tr, cands_per_step):
+            loss = _losses(_forward(lm, head, b, device, pad), b)
+            opt.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(list(lm.parameters()) + list(head.parameters()), 1.0)
+            opt.step()
+            sched.step()
+            tot, nb = tot + loss.item(), nb + 1
+        sv = _scores(lm, head, val, device, pad, cands_per_step)
+        acc = evaluate(sv, val, 1.0, 1.0, 0.0)["choice_acc"]
+        log.append({"epoch": ep, "train_loss": tot / max(nb, 1), "val_choice_acc": acc, "s": round(time.time() - t0, 1)})
+        print(f"  [xreader:{name}] epoch {ep}: loss {tot / max(nb, 1):.4f} val choice {acc:.3f} ({time.time() - t0:.0f}s)", flush=True)
+        if acc > best:
+            best = acc
+            torch.save({"lm": lm.state_dict(), "head": head.state_dict()}, out_dir / "weights.pt")
+    w = torch.load(out_dir / "weights.pt", map_location=device)
+    lm.load_state_dict(w["lm"])
+    head.load_state_dict(w["head"])
+    sv = _scores(lm, head, val, device, pad, cands_per_step)
+    T = fit_temperature(sv, val)
+    a, b = fit_platt(*gate_data(sv, val, T))
+    st = _scores(lm, head, test, device, pad, cands_per_step)
+    metrics = {"name": name, "base": str(base_ckpt), "tokenizer": str(tokenizer), "params": sum(p.numel() for p in lm.parameters()),
+               "temperature": T, "platt": [a, b], "epochs": log, "best_val_choice_acc": best,
+               "points": [str(p) for p in points], "n_points": {k: len(v) for k, v in by.items()},
+               "test": evaluate(st, test, T, a, b),
+               "test_by_group": {g: evaluate([s for s, p in zip(st, by["test"]) if group_of(p["task_id"]) == g],
+                                             [e for e, p in zip(test, by["test"]) if group_of(p["task_id"]) == g], T, a, b)
+                                 for g in GROUPS if any(group_of(p["task_id"]) == g for p in by["test"])}}
+    torch.save({"version": 6, "lm": lm.state_dict(), "head": head.state_dict(), "arch": arch, "tokenizer": str(tokenizer),
+                "temperature": T, "platt": [a, b], "name": name, "base": str(base_ckpt)}, out_dir / "reader.pt")
+    (out_dir / "weights.pt").unlink(missing_ok=True)
+    write_json(out_dir / "train_log.json", metrics)
+    t = metrics["test"]
+    print(f"[xreader:{name}] test: choice {t['choice_acc']:.3f} vs ranker {t['ranker_acc']:.3f} on "
+          f"{t['pools_with_a_right_candidate']} pools with a right one; gate AUC {t['gate_auc']}, ECE {t['gate_ece']}")
+    for g, m in metrics["test_by_group"].items():
+        print(f"    {g:<7} choice {m['choice_acc']:.3f} vs ranker {m['ranker_acc']:.3f} (n={m['pools_with_a_right_candidate']})")
+    return metrics
+
+
+# ── the reader (readers.py interface) ─────────────────────────────────────
+class CrossReader:
+    kind = "local"
+
+    def __init__(self, checkpoint: str, device: str | None = None, prefix_cache: bool | None = None):
+        import sentencepiece as spm
+        import torch
+        from src.sgs_lm import SGSLanguageModel
+        self.torch = torch
+        ck = torch.load(checkpoint, map_location="cpu", weights_only=False)
+        self.lm = SGSLanguageModel(**ck["arch"], return_hidden=True)
+        self.lm.load_state_dict(ck["lm"])
+        self.head = make_head(ck["arch"]["d_f"])
+        self.head.load_state_dict(ck["head"])
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.lm.to(self.device).eval()
+        self.head.to(self.device).eval()
+        self.sp = spm.SentencePieceProcessor(model_file=ck["tokenizer"])
+        self.pad = self.sp.pad_id() if self.sp.pad_id() >= 0 else 0
+        self.T, (self.a, self.b) = float(ck["temperature"]), ck["platt"]
+        self.name = f"x-{ck.get('name', 'reader')}"
+        # the shared-prefix KV cache pays off on CPU; on a GPU one padded batch is as fast
+        self.prefix_cache = (self.device == "cpu") if prefix_cache is None else prefix_cache
+        self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
+
+    def logits(self, question: str, answer_type: str, pool: dict) -> np.ndarray:
+        torch = self.torch
+        e = Encoded(self.sp, {"question": question, "answer_type": answer_type, "cands": pool["cands"],
+                              "labels": [False] * len(pool["cands"]), "snippet": pool.get("snippet", False)})
+        if not self.prefix_cache:
+            with torch.no_grad():
+                return _forward(self.lm, self.head, [e], self.device, self.pad).float().cpu().numpy()
+        with torch.no_grad():
+            _, cache = self.lm.forward_cached(torch.tensor([e.prefix], device=self.device), hidden=True)
+            n, L = len(e.conts), max(len(c) for c in e.conts)
+            ids = torch.full((n, L), self.pad, dtype=torch.long)
+            for i, c in enumerate(e.conts):
+                ids[i, :len(c)] = torch.tensor(c)
+            h, _ = self.lm.forward_cached(ids.to(self.device), self.lm.expand_cache(cache, n), hidden=True)
+            h = h[torch.arange(n, device=h.device), torch.tensor([len(c) - 1 for c in e.conts], device=h.device)]
+            ft = torch.tensor(e.feats, dtype=torch.float32, device=self.device)
+            return self.head(torch.cat([h.float(), ft], -1)).cpu().numpy()
+
+    def read(self, question: str, answer_type: str, pool: dict) -> list[float]:
+        if not pool["cands"]:
+            return []
+        lg = self.logits(question, answer_type, pool)
+        choice = _softmax(lg[:, 0], self.T)
+        k = int(np.argmax(choice))
+        g = 1 / (1 + math.exp(-(self.a * float(lg[k, 1]) + self.b)))
+        r = [float(c * g) for c in choice]
+        # pool_cands may swap a deep right candidate into the last slot only when LABELS exist (training)
+        return r + [0.0] * (len(pool["cands"]) - len(r))
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────
+def add_cli(sub, add_web_args, build_web):
+    p = sub.add_parser("xreader", help="round 6 reader: collect (search + label) | train once (planck|hertz)")
+    p.add_argument("stage", choices=["collect", "train"])
+    p.add_argument("--tasks", default=None, help="comma list (default: the Wikidata tasks + Gemma's news tasks)")
+    p.add_argument("--points", default=str(READER_DIR / "points.jsonl"))
+    p.add_argument("--stable-points", default=str(REPO_ROOT / "data" / "planck3" / "g2" / "points_ddgs.jsonl"),
+                   help="round 4's labelled pools for the 1,455 round 3 training questions (reused, no search)")
+    p.add_argument("--limit", type=int, default=0)
+    p.add_argument("--base", default="planck", choices=["planck", "hertz"])
+    p.add_argument("--base-checkpoint", default=None)
+    p.add_argument("--base-tokenizer", default=None)
+    p.add_argument("--epochs", type=int, default=3)
+    p.add_argument("--lr", type=float, default=None)
+    p.add_argument("--cands-per-step", type=int, default=None)
+    p.add_argument("--max-points", type=int, default=0, help="quick runs: train on a sample")
+    p.add_argument("--tag", default="")
+    add_web_args(p)
+
+    def run(a):
+        if a.stage == "collect":
+            from .g2 import collect
+            from .readtasks import NEWS_TASKS, READ_TASKS
+            files = a.tasks.split(",") if a.tasks else [str(READ_TASKS), str(NEWS_TASKS)]
+            tasks = [t for f in files if Path(f).exists() for t in read_json(f)["tasks"]]
+            collect(tasks, build_web(a), Path(a.points), a.limit)
+            return
+        hertz = a.base == "hertz"
+        ck = a.base_checkpoint or ("checkpoints/hertz/best.pt" if hertz else "checkpoints/planck13/best.pt")
+        tok = a.base_tokenizer or ("data/hertz12_data/tokenizer.model" if hertz else "data/wikipedia/tokenizer.model")
+        out = REPO_ROOT / "checkpoints" / f"xreader_{a.base}{a.tag}"
+        meta = train([Path(a.stable_points), Path(a.points)], ck, tok, out, a.base, epochs=a.epochs,
+                     lr=a.lr or (3e-5 if hertz else 5e-5), cands_per_step=a.cands_per_step or (32 if hertz else 64),
+                     grad_checkpoint=hertz, max_points=a.max_points)
+        write_json(REPO_ROOT / "results" / "planck3" / f"xreader_{a.base}{a.tag}" / "train_log.json", meta)
+    p.set_defaults(fn=run)

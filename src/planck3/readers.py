@@ -7,6 +7,8 @@ weighing in consolidate.py does that, so a user's source preferences cannot leak
     planck      the G2 v2 choice head on frozen Planck 1.3 features (trained once on known answers;
                 its answerability gate is NOT used: confidence is the itemized arithmetic now)
     gemma       Gemma 4 E4B picks the candidate (reference / teacher; too big for a phone)
+    x-planck    round 6: Planck 1.3 fine-tuned once as a cross-encoder (xreader.py), question and
+    x-hertz     evidence read together; same for Hertz 1.2
 """
 
 import math
@@ -96,9 +98,19 @@ class LLMReader:
         return r
 
 
+XREADER_CKPT = {"x-planck": "checkpoints/xreader_planck/reader.pt", "x-hertz": "checkpoints/xreader_hertz/reader.pt"}
+
+
 def make_reader(name: str, **kw):
     if name == "heuristic":
         return HeuristicReader()
+    if name in XREADER_CKPT:
+        from pathlib import Path
+        from .xreader import CrossReader
+        path = kw.get("reader_checkpoint") or XREADER_CKPT[name]
+        if not Path(path).exists():
+            raise SystemExit(f"no {name} reader at {path}: run `planck3.py xreader train --base {name[2:]}` first")
+        return CrossReader(path)
     if name == "planck":
         return PlanckReader(kw["head"], kw.get("checkpoint"), kw.get("tokenizer"))
     if name in ("gemma", "bedrock"):

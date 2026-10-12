@@ -13,8 +13,14 @@ trained once and does not need retraining as the world changes: the world arrive
 Every model answer passes `faithful()`: it must contain the chosen value, cite only listed sources,
 and every number and name in it must appear in the question or the sources. A failing answer is
 replaced by the template answer and the fallback is counted, so the card never shows an invention.
+
+Round 6: citation groups ("[1, 2]", "[1-3]") are citations, not numbers (round 5 dropped 790 of
+1,200 Gemma examples on that bug); every writer starts from a forced LEAD (the value, "Possibly
+<value>" or "Unclear:") so it cannot leave the answer out; the small writers decode with the SGS
+KV cache and get up to 3 tries (greedy, then 2 samples), the first faithful one is shown.
 """
 
+import hashlib
 import json
 import re
 import time
@@ -68,6 +74,24 @@ def writer_prompt(question: str, cons: dict, sources: list[dict]) -> str:
     return "\n".join(lines)
 
 
+# "[1]", "[1, 2]", "[1-3]", "[1 and 2]" (en dash too): citation groups, never numbers in the text
+CITE = re.compile(r"\[(\d+(?:\s*(?:,|-|\u2013|and)\s*\d+)*)\]")
+
+
+def cited(text: str) -> list[int]:
+    out = []
+    for m in CITE.finditer(text or ""):
+        for part in re.split(r"\s*(?:,|and)\s*", m.group(1)):
+            ends = [int(x) for x in re.split(r"\s*(?:-|\u2013)\s*", part)]
+            out += list(range(ends[0], min(ends[-1], ends[0] + 20) + 1))
+    return out
+
+
+def lead(band: str, value: str) -> str:
+    """The forced first words of every model answer: the answer itself, or the band's hedge."""
+    return {"low": f"Possibly {value}", "sceptical": "Unclear:"}.get(band, str(value))
+
+
 def faithful(text: str, question: str, value: str, sources: list[dict], answer_type: str) -> tuple[bool, list[str]]:
     problems = []
     t = (text or "").strip()
@@ -76,10 +100,10 @@ def faithful(text: str, question: str, value: str, sources: list[dict], answer_t
     hay_raw = " ".join([question, value] + [f"{s['name']} {s['domain']} {s['context']} {s.get('says') or ''}" for s in sources])
     if not (norm_text(value) in norm_text(t) or is_correct(t, [value], answer_type)):
         problems.append(f"does not state the answer {value!r}")
-    cites = [int(x) for x in re.findall(r"\[(\d+)\]", t)]
+    cites = cited(t)
     if any(c < 1 or c > len(sources) for c in cites):
         problems.append("cites a source that is not listed")
-    body = re.sub(r"\[\d+\]", " ", t)
+    body = CITE.sub(" ", t)
     have_nums = set(re.findall(r"\d+", hay_raw))
     for n in re.findall(r"\d+", body):
         if n not in have_nums:
@@ -114,24 +138,33 @@ def template_text(cons: dict, sources: list[dict]) -> str:
 
 class TemplateWriter:
     name = "template"
+    tries = 0                         # model writers: how many answers to try before the template
 
     def __init__(self):
         self.usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
 
-    def generate(self, prompt: str) -> str | None:
-        return None
+    def candidates(self, prompt: str, lead_text: str):
+        """Model answers to check, best first (a generator, so later tries cost nothing if one passes)."""
+        return iter(())
 
     def write(self, question: str, answer_type: str, cons: dict, snippets: dict[str, str]) -> dict:
         t0 = time.perf_counter()
         sources = writer_sources(cons, snippets)
         templ = template_text(cons, sources)
         out = {"writer": self.name, "sources": sources, "template": templ}
-        gen = self.generate(writer_prompt(question, cons, sources))
-        if gen is None:
-            out.update(text=templ, faithful=True, problems=[], fallback=False)
-        else:
+        tries = []
+        for gen in self.candidates(writer_prompt(question, cons, sources), lead(cons["band"], cons["value"])):
             ok, probs = faithful(gen, question, cons["value"], sources, answer_type)
-            out.update(text=gen if ok else templ, generated=gen, faithful=ok, problems=probs, fallback=not ok)
+            tries.append({"text": gen, "faithful": ok, "problems": probs})
+            if ok:
+                break
+        if not tries:
+            out.update(text=templ, faithful=True, problems=[], fallback=False, tries=0)
+        else:
+            win = next((t for t in tries if t["faithful"]), None)
+            out.update(text=win["text"] if win else templ, generated=tries[0]["text"], faithful=win is not None,
+                       first_try_faithful=tries[0]["faithful"], problems=[] if win else tries[0]["problems"],
+                       fallback=win is None, tries=len(tries), attempts=[t["text"] for t in tries])
         out["ms"] = round((time.perf_counter() - t0) * 1000, 1)
         return out
 
@@ -144,20 +177,38 @@ something else, mention it briefly. Never add any fact, number or name that is n
 
 
 class LLMWriter(TemplateWriter):
+    tries = 1
+
     def __init__(self, policy):
         super().__init__()
         self.policy = policy
         self.name = policy.name
         self.usage = policy.usage
 
-    def generate(self, prompt: str) -> str | None:
-        return self.policy._complete(WRITER_SYSTEM, prompt.rsplit("\nANSWER TEXT:", 1)[0]).strip().split("\n")[0]
+    def candidates(self, prompt: str, lead_text: str):
+        user = prompt.rsplit("\nANSWER TEXT:", 1)[0] + f"\nBegin your answer with exactly: {lead_text}"
+        old = getattr(self.policy, "max_new", None)
+        if old is not None:          # round 5's 48 tokens could cut a 45-word answer short
+            self.policy.max_new = max(old, 80)
+        try:
+            text = self.policy._complete(WRITER_SYSTEM, user).strip().split("\n")[0]
+        finally:
+            if old is not None:
+                self.policy.max_new = old
+        yield text
 
 
 class SGSWriter(TemplateWriter):
-    """A fine-tuned SGSLanguageModel (Planck 1.3 / Hertz 1.2): greedy decoding, stops at the end token."""
+    """
+    A fine-tuned SGSLanguageModel (Planck 1.3 / Hertz 1.2). Decoding starts after the forced lead and
+    uses the KV cache (SGSLanguageModel.forward_cached, exact); try 1 is greedy, tries 2-3 sample
+    (T 0.7, top-k 20, seeded by the prompt so a run is reproducible), stopping at the end token.
+    """
+    tries = 3
+    temperature, top_k = 0.7, 20
 
-    def __init__(self, checkpoint: str, tokenizer: str | None = None, device: str | None = None, max_new: int = 48):
+    def __init__(self, checkpoint: str, tokenizer: str | None = None, device: str | None = None, max_new: int = 48,
+                 tries: int | None = None, use_cache: bool = True):
         super().__init__()
         import sentencepiece as spm
         import torch
@@ -177,25 +228,52 @@ class SGSWriter(TemplateWriter):
         self.max_new = min(max_new, self.max_len // 3)
         self.name = ck.get("writer_name", "sgs-writer")
         self.eos = END_MARK
+        self.tries = self.tries if tries is None else tries
+        self.use_cache = use_cache
 
-    def generate(self, prompt: str) -> str | None:
+    def _ids(self, prompt: str, lead_text: str) -> tuple[list[int], list[int]]:
+        lead_ids = self.sp.encode(" " + lead_text, out_type=int) if lead_text else []
+        return fit_prompt(self.sp, prompt, self.max_len - self.max_new - len(lead_ids)), lead_ids
+
+    def decode(self, ids: list[int], sample: bool = False, seed: int = 0, cached: bool | None = None) -> list[int]:
         torch = self.torch
-        ids = fit_prompt(self.sp, prompt, self.max_len - self.max_new)
-        x = torch.tensor([ids], dtype=torch.long, device=self.device)
+        cached = self.use_cache if cached is None else cached
+        gen = torch.Generator().manual_seed(seed) if sample else None
         out = []
         with torch.no_grad():
+            x = torch.tensor([ids], dtype=torch.long, device=self.device)
+            logits, cache = self.model.forward_cached(x) if cached else (self.model(x), None)
             for _ in range(self.max_new):
-                logits = self.model(x[:, -self.max_len:])[0, -1]
-                nid = int(logits.argmax())
+                lg = logits[0, -1].float()
+                if sample:
+                    v, i = torch.topk(lg / self.temperature, self.top_k)
+                    nid = int(i[torch.multinomial(torch.softmax(v, -1).cpu(), 1, generator=gen)])
+                else:
+                    nid = int(lg.argmax())
                 if nid == self.sp.eos_id():
                     break
                 out.append(nid)
-                x = torch.cat([x, torch.tensor([[nid]], device=self.device)], dim=1)
-                text = self.sp.decode(out)
-                if END_MARK in text:
+                if END_MARK in self.sp.decode(out):
                     break
-        text = self.sp.decode(out)
-        return text.split(END_MARK)[0].strip()
+                nxt = torch.tensor([[nid]], device=self.device)
+                if cached:
+                    logits, cache = self.model.forward_cached(nxt, cache)
+                else:
+                    x = torch.cat([x, nxt], dim=1)
+                    logits = self.model(x[:, -self.max_len:])
+        return out
+
+    def candidates(self, prompt: str, lead_text: str):
+        ids, lead_ids = self._ids(prompt, lead_text)
+        seed = int(hashlib.sha1(prompt.encode("utf-8")).hexdigest()[:8], 16)
+        for k in range(max(self.tries, 1)):
+            out = self.decode(ids + lead_ids, sample=k > 0, seed=seed + k)
+            yield self.sp.decode(lead_ids + out).split(END_MARK)[0].strip()
+
+    def generate(self, prompt: str, lead_text: str = "") -> str:
+        """One greedy answer (kept for callers of the round 5 interface)."""
+        ids, lead_ids = self._ids(prompt, lead_text)
+        return self.sp.decode(lead_ids + self.decode(ids + lead_ids)).split(END_MARK)[0].strip()
 
 
 END_MARK = "<END>"
@@ -225,18 +303,78 @@ def make_writer(name: str, **kw):
         path = kw.get("checkpoint") or f"checkpoints/writer_{name}/best.pt"
         if not Path(path).exists():
             raise SystemExit(f"no fine-tuned {name} writer at {path}: run `planck3.py writer train --base {name}` first")
-        w = SGSWriter(path)
+        w = SGSWriter(path, tries=kw.get("tries"))
         w.name = f"{name}-writer"
         return w
     raise ValueError(f"unknown writer {name}")
 
 
+# ── writer data: re-judge with the current checker, lead check, KV-cache check ──
+def row_value(r: dict) -> str | None:
+    if r.get("value") is not None:
+        return str(r["value"])
+    m = re.search(r"^ANSWER: (.*)$", r.get("prompt", ""), re.M)
+    return m.group(1).strip() if m else None
+
+
+def lead_ok(r: dict) -> bool:
+    """The example starts with the lead the small writer will be forced to start from."""
+    v = row_value(r)
+    return v is not None and norm_text(r.get("target", "")).startswith(norm_text(lead(r.get("band", "good"), v)))
+
+
+def rescore_data(path: Path) -> dict:
+    """Re-judge collected writer examples with the current faithful() (round 5's flag kept as faithful_r5)."""
+    rows = read_jsonl(path)
+    n_ok = n_lead = n = 0
+    for r in rows:
+        if "prompt" not in r:
+            continue
+        n += 1
+        srcs = []
+        for line in r["prompt"].split("\n"):
+            m = re.match(r"^\[(\d+)\] (.+?) \((\d+)/10\)(?: says (.+?))?: (.*)$", line)
+            if m:
+                srcs.append({"name": m.group(2), "domain": m.group(2), "trust": float(m.group(3)),
+                             "says": m.group(4), "context": m.group(5)})
+        r.setdefault("faithful_r5", r.get("faithful"))
+        q = re.search(r"^QUESTION: (.*)$", r["prompt"], re.M)
+        ok, probs = faithful(r.get("target", ""), q.group(1) if q else "", row_value(r) or "", srcs,
+                             r.get("answer_type") or "entity")
+        r["faithful"], r["problems"], r["lead_ok"] = ok, probs, lead_ok(r)
+        n_ok += ok
+        n_lead += ok and r["lead_ok"]
+    with open(path, "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    return {"examples": n, "faithful": n_ok, "faithful_and_lead": n_lead}
+
+
+def kv_check(checkpoint: str, prompts: list[tuple[str, str]], device: str | None = None) -> dict:
+    """Greedy answers with and without the KV cache must be token-identical; timing for both."""
+    w = SGSWriter(checkpoint, device=device, tries=1)
+    same, t_c, t_u = 0, 0.0, 0.0
+    for prompt, lead_text in prompts:
+        ids, lead_ids = w._ids(prompt, lead_text)
+        t0 = time.perf_counter()
+        a = w.decode(ids + lead_ids, cached=True)
+        t1 = time.perf_counter()
+        b = w.decode(ids + lead_ids, cached=False)
+        t2 = time.perf_counter()
+        same += a == b
+        t_c, t_u = t_c + t1 - t0, t_u + t2 - t1
+    n = max(len(prompts), 1)
+    return {"prompts": len(prompts), "identical": same / n, "ms_cached": 1000 * t_c / n, "ms_uncached": 1000 * t_u / n,
+            "speedup": (t_u / t_c) if t_c else None, "device": w.device}
+
+
 # ── one-time training of the small writers ────────────────────────────────
 def train_writer(data: Path, base_ckpt: str, tokenizer: str, out_dir: Path, name: str, epochs: int = 4,
-                 lr: float = 5e-5, batch_size: int = 8, seed: int = 0) -> dict:
+                 lr: float = 5e-5, batch_size: int = 8, seed: int = 0, require_lead: bool = False) -> dict:
     """
     Full fine-tune of an SGSLanguageModel on (prompt, answer) pairs; the loss covers the answer
-    tokens only (the prompt is context). Best checkpoint by validation loss.
+    tokens only (the prompt is context). Best checkpoint by validation loss. require_lead (round 6):
+    keep only examples that start with the forced lead, so training matches decoding.
     """
     import random
     import sentencepiece as spm
@@ -257,7 +395,10 @@ def train_writer(data: Path, base_ckpt: str, tokenizer: str, out_dir: Path, name
     model = SGSLanguageModel(**arch)
     model.load_state_dict(state)
     model.to(device)
-    rows = [r for r in read_jsonl(data) if r.get("faithful")]
+    rows = [r for path in str(data).split(",") for r in read_jsonl(path)
+            if r.get("faithful") and (not require_lead or lead_ok(r))]
+    if not rows:
+        raise SystemExit(f"no usable writer examples in {data}")
     rng.shuffle(rows)
     n_val = max(1, len(rows) // 10)
     pad = sp.pad_id() if sp.pad_id() >= 0 else 0
@@ -309,7 +450,7 @@ def train_writer(data: Path, base_ckpt: str, tokenizer: str, out_dir: Path, name
             best = vl
             torch.save({"model": model.state_dict(), "tokenizer": str(tokenizer), "writer_name": f"{name}-writer",
                         "base": str(base_ckpt), "val_loss": vl}, out_dir / "best.pt")
-    meta = {"name": name, "base": str(base_ckpt), "examples": len(rows), "train": len(tr), "val": len(val),
+    meta = {"name": name, "base": str(base_ckpt), "examples": len(rows), "require_lead": require_lead, "train": len(tr), "val": len(val),
             "best_val_loss": best, "epochs": log, "params": sum(p.numel() for p in model.parameters())}
     write_json(out_dir / "train_log.json", meta)
     return meta

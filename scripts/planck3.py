@@ -38,14 +38,25 @@ G0_PASS, G0_KILL = 0.60, 0.40
 
 
 def build_web(args, log_path=None):
-    """auto (round 4): ddgs if installed and answering, else SearXNG if up, else Wikipedia search."""
+    """
+    auto (round 6): the Brave Search API if the key is set and it answers (ddgs behind it), else ddgs,
+    else SearXNG, else Wikipedia search. Every answer is relevance-checked (web.on_topic).
+    """
+    from src.planck3.util import load_env
     from src.planck3.web import SCRAPED_BACKENDS, Web, WebCache
+    load_env()
     cache = WebCache(args.cache_dir, mode=args.net)
     backend = args.search
     web = Web(cache, search_backend="ddgs" if backend == "auto" else backend,
               searxng_url=args.searxng_url, log_path=log_path)
+    web.secondary = [b for b in (getattr(args, "secondary", "") or "").split(",") if b]
+    web.brave_reserve = getattr(args, "brave_reserve", 0) or 0
+    web.relevance = not getattr(args, "no_relevance", False)
     if backend == "auto" and args.net != "replay":
-        if web.ddgs_alive():
+        if web.brave_alive():
+            web.backend = "brave"
+            web.secondary = web.secondary or ["ddgs"]
+        elif web.ddgs_alive():
             web.backend = "ddgs"
         elif web.searxng_alive():
             print("[planck3] ddgs not answering (not installed or rate-limited); using SearXNG")
@@ -53,15 +64,19 @@ def build_web(args, log_path=None):
         else:
             print("[planck3] neither ddgs nor SearXNG answers; using Wikipedia search")
             web.backend = "wikipedia"
-    print(f"[planck3] search={web.backend} net={args.net} cache={args.cache_dir}")
-    if web.backend in SCRAPED_BACKENDS and args.net != "replay":
-        print(f"[planck3] empty {web.backend} results are retried once, then fall back to Wikipedia per query")
+    web.secondary = [b for b in web.secondary if b != web.backend]
+    chain = " -> ".join([web.backend] + web.secondary + (["wikipedia"] if web.backend in SCRAPED_BACKENDS else []))
+    print(f"[planck3] search={chain} net={args.net} relevance check={'on' if web.relevance else 'off'} cache={args.cache_dir}")
     return web
 
 
 def add_web_args(p):
     p.add_argument("--search", default="auto", choices=["auto", "ddgs", "searxng", "brave", "wikipedia"],
-                   help="auto = ddgs -> SearXNG -> Wikipedia; brave = Brave Search API (BRAVE_API_KEY in .env), opt-in")
+                   help="auto = Brave (BRAVE_API_KEY in .env) -> ddgs -> SearXNG -> Wikipedia")
+    p.add_argument("--secondary", default="", help="comma list of backends tried after --search, before Wikipedia")
+    p.add_argument("--brave-reserve", type=int, default=0,
+                   help="stop calling Brave once this many searches are left in the month (training data collection)")
+    p.add_argument("--no-relevance", action="store_true", help="serve off-topic results like round 5 did")
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--net", default="live", choices=["live", "replay", "refresh"],
                    help="live: cache-then-network (default); replay: cache only; refresh: network only")
@@ -123,15 +138,22 @@ def _chat_harness_factory(args):
     from src.planck3.answer import Answerer
     from src.planck3.readers import make_reader
     from src.planck3.writer import make_writer
-    rd = args.reader
+    # auto = what round 6 chose to ship (results/planck3/r6_product.json), else the best that is present
+    prod = read_json(RESULTS / "r6_product.json") if (RESULTS / "r6_product.json").exists() else {}
+    rd, wr, wck = args.reader, args.writer, None
     if rd == "auto":
-        rd = "planck" if args.g2_head and Path(args.g2_head).exists() else "heuristic"
-    wr = args.writer
+        from src.planck3.readers import XREADER_CKPT
+        have = [r for r in (prod.get("reader"), "x-planck", "x-hertz") if r in XREADER_CKPT and (REPO_ROOT / XREADER_CKPT[r]).exists()]
+        rd = have[0] if have else ("planck" if args.g2_head and Path(args.g2_head).exists() else "heuristic")
     if wr == "auto":
-        wr = next((w for w in ("hertz", "planck") if (REPO_ROOT / "checkpoints" / f"writer_{w}" / "best.pt").exists()), "template")
+        if prod.get("writer") and (prod["writer"] == "template" or (REPO_ROOT / "checkpoints" / f"writer_{prod['writer']}6" / "best.pt").exists()):
+            wr = prod["writer"]
+            wck = None if wr == "template" else str(REPO_ROOT / "checkpoints" / f"writer_{wr}6" / "best.pt")
+        else:
+            wr = next((w for w in ("hertz", "planck") if (REPO_ROOT / "checkpoints" / f"writer_{w}" / "best.pt").exists()), "template")
     reader = make_reader(rd, head=args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer,
                          gemma_path=args.gemma_path)
-    writer = make_writer(wr, gemma_path=args.gemma_path)
+    writer = make_writer(wr, gemma_path=args.gemma_path, checkpoint=wck)
     print(f"[planck3] answer pipeline: reader={reader.name} writer={writer.name} (trust: config/planck3/source_registry.json)")
     return lambda: Answerer(web, store, reader, writer)
 
@@ -673,6 +695,8 @@ def cmd_report(args):
                       "| run | per regime: success (n, wrong when answered) |", "|---|---|", *reg_lines, ""]
     from src.planck3.round5 import report_lines as r5_lines
     lines += r5_lines(RESULTS)
+    from src.planck3.round6 import report_lines as r6_lines
+    lines += r6_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -937,10 +961,13 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import g2, round5, wikirace
+    from src.planck3 import g2, readtasks, round5, round6, wikirace, xreader
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
     round5.add_cli(sub, add_web_args, build_web)
+    readtasks.add_cli(sub)
+    xreader.add_cli(sub, add_web_args, build_web)
+    round6.add_cli(sub)
 
     args = ap.parse_args()
     args.fn(args)

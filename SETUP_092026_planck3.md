@@ -333,13 +333,34 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **W:** writer faithful ≥ 95%.
     - **E:** worst-case personal profile ≤ 10 pts drop.
     - **B:** Brave vs ddgs.
+- **ROUND 5 RESULTS OF RECORD (2026-10-10, b0b02c9; SETUP_planck_20261009.md section 10):**
+  - **The design works with a good reader:** Gemma reader + the itemized 0-10 weighing gets **79.0%** of the 143 fresh + long-tail questions right (round 4 Gemma-on-tools 67.8%, p = 0.0015), with honest bands (9-10 band right 93-94%, 7-8 band 77-79%).
+  - **The small-model product fails C1/C2/C3/W:** Planck reader 58.7% vs Gemma 79.0% (p = 2.5e-5); bands miscalibrated (79% / 58%); the Hertz writer's own answers faithful 46% (partly a checker bug on "[1, 2]" citations). The template writer is as accurate as any model writer.
+  - **E PASS:** the 30% cap holds; the worst-case profile costs 0 pts and every changed answer is flagged.
+  - **Search:** ddgs returned junk for the 100 new questions (relevance not checked); Brave 46% vs 10% there (38 vs 2) and n.s. on the 143, so it is adopted.
+  - **CPU:** Hertz writing 27.8 s per question without a KV cache.
+- **Round 6 built + pre-registered (2026-10-12, `SETUP_planck_20261012.md`, `planck3.ps1 round6`):** fix what held the small product back, still without training on the world.
+  - **Search:** Brave is the product search (`auto` = Brave → ddgs → SearXNG → Wikipedia). Every search is relevance-checked: off-topic results count as a failed search and the chain moves on. Training collection keeps a 400-search monthly Brave reserve, read from the API headers.
+  - **Read:** Planck 1.3 and Hertz 1.2 are fine-tuned once as cross-encoders that read the question and the evidence together (choice + answer logits, calibrated on held-out questions, year-shift augmentation). They train on 1,455 round 3 questions + 557 Wikidata 2025 events + 500 general-information facts + ~700 Gemma-written questions from Wikipedia's 2025 Current Events portal. Labels come from known answers; nothing is from 2026.
+  - **Write:** the checker fix for "[1, 2]" citations; a forced lead (value / "Possibly" / "Unclear:"); 3 tries; writers retrained on the fixed data.
+  - **KV cache:** `SGSLanguageModel.forward_cached`, exact (diff 0.0 vs the full forward). On the Mac CPU, Planck-size writing is ~12x faster (0.31 s for 48 tokens) and a 16-candidate reader pool takes 0.18 s.
+  - **Rules:**
+    - **R (primary):** the new reader with the template writer reaches the midpoint between round 5's reader and Gemma, p < 0.05 vs round 5's reader.
+    - **C1:** bands 90% / 70%, monotone.
+    - **C3:** not worse than Gemma (stretch).
+    - **W:** writer faithful ≥ 95% within 3 tries.
+    - **K:** the KV cache gives 100% identical answers.
+    - **L:** ≤ 5 s CPU reading + writing per question.
+    - **E:** worst-case personal profile ≤ 10 pts drop.
+    - **S:** search validity.
+  - **Product choice:** x-planck unless x-hertz is ≥ 3 points better on held-out questions; the smallest writer passing W, else the template.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
 ## 10. Open decisions (recommendation first)
 
 1. **Encoder base:** Planck 1.3 (100M) first. It serves "runs on anything" and the task is choosing, not generating. Hertz 1.2 (640M) only as the G1 fallback ablation.
-2. **Search backend:** **ddgs** from round 4 (free, no Docker; scraping, so research only), SearXNG and Wikipedia as fallbacks. A licensed API (Brave Search API or similar) for anything user-facing, through the same S2 rule.
+2. **Search backend:** **the Brave Search API** from round 6 (licensed; adopted on round 5's paired result), relevance-checked, with ddgs, SearXNG and Wikipedia behind it.
 3. **Teacher:** **Gemma 4 E4B** for bulk trajectories ($0, local), with **Haiku** on a 10% sample to measure the teacher gap.
 4. **Name the consumer surface:** fold it into **Satz** (next minor) rather than a new product swimlane. Your call when G1 passes.
 

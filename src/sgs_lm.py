@@ -572,6 +572,79 @@ class SGSLanguageModel(nn.Module):
         return logits
 
     # ────────────────────────────────────────────────────────────
+    # Incremental decoding (Planck 3.0 round 6): a cache of past Gaussians
+    # ────────────────────────────────────────────────────────────
+
+    def forward_cached(self, token_ids: torch.Tensor, cache: dict | None = None,
+                       hidden: bool = False) -> tuple[torch.Tensor, dict]:
+        """
+        forward() for NEW tokens only, given the state of every earlier token.
+
+        Exact, not an approximation: a token's Gaussian at every pass (μ, α, features)
+        depends only on tokens at or before it, so earlier tokens never change when a
+        token is appended. The cache keeps, per pass, the Gaussians of all tokens so far
+        (log-variance is never updated, so it is stored once). A step then costs
+        O(t) instead of O(t²) per pass.
+
+        Args:
+            token_ids: [B, n] new tokens (n = prompt length for the first call)
+            cache:     None, or the dict returned by the previous call
+            hidden:    return the post-LN hidden state instead of logits
+        Returns:
+            (logits or hidden [B, n, ·], cache covering all tokens so far)
+        """
+        if self.sparse_k or self.shared_kernel:
+            raise NotImplementedError("forward_cached supports the dense, per-pass kernel only")
+        B, n = token_ids.shape
+        S = cache["n"] if cache is not None else 0
+        if S + n > self.max_len:
+            raise ValueError(f"{S + n} tokens exceed the {self.max_len}-token context")
+        device = token_ids.device
+        mu = self.tok_mu(token_ids) + self.pos_mu(torch.arange(S, S + n, device=device)).unsqueeze(0)
+        log_var = self.tok_log_var(token_ids)
+        alpha = torch.sigmoid(self.tok_raw_alpha(token_ids).squeeze(-1))
+        features = self.tok_features(token_ids)
+        lv_all = log_var if cache is None else torch.cat([cache["lv"], log_var], 1)
+        # new query i sits at position S + i and sees keys 0 .. S + i
+        mask = torch.ones(n, S + n, device=device).tril(diagonal=S)
+        new = {"n": S + n, "lv": lv_all, "mu": [], "alpha": [], "feat": []}
+        H, d_s, d_f = self.n_heads, self.d_s, self.d_f
+        meaning = None
+        for p in range(self.n_passes):
+            if cache is None:
+                mu_all, al_all, ft_all = mu, alpha, features
+            else:
+                mu_all = torch.cat([cache["mu"][p], mu], 1)
+                al_all = torch.cat([cache["alpha"][p], alpha], 1)
+                ft_all = torch.cat([cache["feat"][p], features], 1)
+            new["mu"].append(mu_all)
+            new["alpha"].append(al_all)
+            new["feat"].append(ft_all)
+            T_ = S + n
+            q = self.query_proj(mu).view(B, n, H, d_s).permute(0, 2, 1, 3).reshape(B * H, n, d_s)
+            mu_h = mu_all.unsqueeze(1).expand(B, H, T_, d_s).reshape(B * H, T_, d_s)
+            lv_h = lv_all.unsqueeze(1).expand(B, H, T_, d_s).reshape(B * H, T_, d_s)
+            al_h = al_all.unsqueeze(1).expand(B, H, T_).reshape(B * H, T_)
+            ft_h = ft_all.unsqueeze(1).expand(B, H, T_, d_f).reshape(B * H, T_, d_f)
+            K = self._pairwise_kernel(q, mu_h, lv_h)                       # [B*H, n, S+n]
+            m_all, _ = self._causal_render(ft_h, al_h, K, mask)            # [B*H, n, d_f]
+            meaning = self.head_proj(m_all.view(B, H, n, d_f).permute(0, 2, 1, 3).reshape(B, n, H * d_f))
+            if p < self.n_passes - 1:
+                ctx = torch.cat([features, meaning], dim=-1)
+                mu = mu + self.mu_update[p](ctx)
+                alpha = alpha * self.alpha_gate[p](ctx).squeeze(-1)
+                features = features + self.pass_ffn[p](ctx)
+        h = self.ln_f(meaning)
+        return (h if hidden else self.lm_head(h)), new
+
+    @staticmethod
+    def expand_cache(cache: dict, k: int) -> dict:
+        """One prefix, k continuations: repeat a batch-1 cache k times (shared question, many candidates)."""
+        rep = lambda t: t.expand(k, *t.shape[1:])  # noqa: E731
+        return {"n": cache["n"], "lv": rep(cache["lv"]), "mu": [rep(t) for t in cache["mu"]],
+                "alpha": [rep(t) for t in cache["alpha"]], "feat": [rep(t) for t in cache["feat"]]}
+
+    # ────────────────────────────────────────────────────────────
     # Generation
     # ────────────────────────────────────────────────────────────
 
