@@ -71,14 +71,20 @@ def split_of(task_id: str) -> str:
 
 
 def pool_cands(p: dict) -> tuple[list[dict], list[bool]]:
-    """Top MAX_CANDS candidates in ranker order; a right one beyond the cut replaces the last."""
-    cands, labels = list(p["cands"]), list(p["labels"])
-    keep = list(range(min(len(cands), MAX_CANDS)))
-    if not any(labels[i] for i in keep):
-        extra = [i for i in range(len(cands)) if labels[i]]
-        if extra and keep:
-            keep[-1] = extra[0]
-    return [cands[i] for i in keep], [bool(labels[i]) for i in keep]
+    """Top MAX_CANDS candidates in ranker order, exactly what the reader sees when it answers.
+
+    Round 6 swapped a right candidate from beyond the cut into the LAST slot at training time. With
+    "position in the ranking" among the features, that taught the reader that the 16th candidate is
+    often right, which is never true at answer time (no labels, no swap). Round 6b: no swap; a pool
+    whose only right candidate is beyond the cut is a pool with no right candidate, as served."""
+    k = min(len(p["cands"]), MAX_CANDS)
+    return list(p["cands"][:k]), [bool(x) for x in p["labels"][:k]]
+
+
+def right_beyond_cut(p: dict) -> bool:
+    """A right candidate exists, but only beyond the top MAX_CANDS (unreachable for the reader)."""
+    labels = p.get("labels") or []
+    return any(labels[MAX_CANDS:]) and not any(labels[:MAX_CANDS])
 
 
 # ── model ────────────────────────────────────────────────────────────────
@@ -312,11 +318,13 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     metrics = {"name": name, "base": str(base_ckpt), "tokenizer": str(tokenizer), "params": sum(p.numel() for p in lm.parameters()),
                "temperature": T, "platt": [a, b], "epochs": log, "best_val_choice_acc": best,
                "points": [str(p) for p in points], "n_points": {k: len(v) for k, v in by.items()},
+               "pool_rule": "top16_as_served",
+               "right_beyond_cut": {k: sum(right_beyond_cut(p) for p in v) for k, v in by.items()},
                "test": evaluate(st, test, T, a, b),
                "test_by_group": {g: evaluate([s for s, p in zip(st, by["test"]) if group_of(p["task_id"]) == g],
                                              [e for e, p in zip(test, by["test"]) if group_of(p["task_id"]) == g], T, a, b)
                                  for g in GROUPS if any(group_of(p["task_id"]) == g for p in by["test"])}}
-    torch.save({"version": 6, "lm": lm.state_dict(), "head": head.state_dict(), "arch": arch, "tokenizer": str(tokenizer),
+    torch.save({"version": 7, "lm": lm.state_dict(), "head": head.state_dict(), "arch": arch, "tokenizer": str(tokenizer),
                 "temperature": T, "platt": [a, b], "name": name, "base": str(base_ckpt)}, out_dir / "reader.pt")
     (out_dir / "weights.pt").unlink(missing_ok=True)
     write_json(out_dir / "train_log.json", metrics)
@@ -379,8 +387,7 @@ class CrossReader:
         k = int(np.argmax(choice))
         g = 1 / (1 + math.exp(-(self.a * float(lg[k, 1]) + self.b)))
         r = [float(c * g) for c in choice]
-        # pool_cands may swap a deep right candidate into the last slot only when LABELS exist (training)
-        return r + [0.0] * (len(pool["cands"]) - len(r))
+        return r + [0.0] * (len(pool["cands"]) - len(r))       # beyond the top 16: not read
 
 
 # ── CLI ──────────────────────────────────────────────────────────────────

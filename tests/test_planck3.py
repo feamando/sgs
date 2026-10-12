@@ -1294,3 +1294,29 @@ def test_round6_product_rules(tmp_path):
     assert d["writer"] == "hertz" and d["run"] == "r6_x-hertz_hertz"            # smallest writer that passes W
     write_json(tmp_path / "r6_x-hertz_hertz" / "summary.json", {"writer_faithful": 0.90})
     assert R6.product_decision(tmp_path)["writer"] == "template"
+
+
+def test_round6b_pools_as_served_and_rule_r(tmp_path):
+    import json
+    from src.planck3 import round6 as R6
+    from src.planck3 import xreader as X
+    # a right candidate beyond the top 16 is NOT moved into the last slot (round 6's last-slot leak)
+    p = {"cands": [{"value": str(i)} for i in range(20)], "labels": [False] * 18 + [True, False]}
+    cands, labels = X.pool_cands(p)
+    assert [c["value"] for c in cands] == [str(i) for i in range(16)] and not any(labels)
+    assert X.right_beyond_cut(p) and not X.right_beyond_cut(dict(p, labels=[True] + [False] * 19))
+
+    def run(name, right):
+        (tmp_path / name).mkdir()
+        with open(tmp_path / name / "results.jsonl", "w") as f:
+            for i, ok in enumerate(right):
+                f.write(json.dumps({"task_id": f"t{i}", "shown_correct": ok}) + "\n")
+    n = 100
+    run("r6_planck_template", [i < 50 for i in range(n)])
+    run("r6_gemma_template", [i < 70 for i in range(n)])
+    run("r6b_x-planck_template", [i < 62 for i in range(n)])               # 0.62 >= midpoint 0.60, +12 only-right
+    r = R6.rule_r(tmp_path, "r6b_x-planck_template")
+    assert r["pass"] and abs(r["midpoint"] - 0.60) < 1e-9 and r["p"] < 0.05
+    run("r6b_x-hertz_template", [i < 55 for i in range(n)])                 # better, below the midpoint
+    assert not R6.rule_r(tmp_path, "r6b_x-hertz_template")["pass"]
+    assert R6.rule_r(tmp_path, "missing")["pass"] is False

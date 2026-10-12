@@ -354,6 +354,21 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **E:** worst-case personal profile ≤ 10 pts drop.
     - **S:** search validity.
   - **Product choice:** x-planck unless x-hertz is ≥ 3 points better on held-out questions; the smallest writer passing W, else the template.
+- **ROUND 6 RESULTS OF RECORD (2026-10-12, caede37; SETUP_planck_20261012.md section 10):**
+  - **R FAILS, in the wrong direction:** the new readers are significantly worse than round 5's reader on the 243 questions on Brave.
+    - x-hertz (chosen by +3.0 points) 39.1%, x-planck 42.4%, round 5's reader 51.4%, Gemma 63.4%.
+    - Paired p 0.0003 (x-hertz) and 0.015 (x-planck).
+    - The new readers abstain on 39-54 questions (round 5's reader on 1).
+    - Round 5's reader is itself not distinguishable from the no-model floor on Brave (51.4% vs 49.8%, p 0.72).
+  - **Other verdicts:** C1, C3 and L FAIL. W FAIL but much improved: small writers 88% / 86% faithful (round 5: 47% / 46%), and Gemma's writer 96% (round 5: 37%). K PASS (100% identical, ~9-10x CPU speed-up). E PASS. S PASS.
+  - **Confounds:**
+    - A last-slot label leak in the reader's training code (a deep right candidate was swapped into slot 16, and position is a feature).
+    - The training pools came from ddgs and Wikipedia, not Brave: the monthly quota was at 0, so Brave served 3 of 1,914 searches.
+  - **Real limit:** even in distribution, neither reader beats the lexical ranker on news.
+  - **Shipping:** round 5's Planck reader + the template writer. `serve` loads a new reader only if its product passed R.
+- **Round 6b pre-registered (2026-10-12, section 11, `planck3.ps1 round6b`, ~1.5 h, no new searches):**
+  - The same readers retrained with only the leak fixed (top 16 as served), under the same rules.
+  - If R fails again, the next lever is Gemma as teacher (soft labels on the same pools), then Brave re-collection after the quota resets.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
