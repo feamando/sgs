@@ -33,13 +33,15 @@ def build_answerer(args, build_web, store_path=None, personal_override=None, sto
     web = build_web(args)
     store = Store(store_path or args.store)
     reader = make_reader(args.reader, head=args.g2_head, checkpoint=args.planck_checkpoint,
-                         tokenizer=args.planck_tokenizer, gemma_path=args.gemma_path)
+                         tokenizer=args.planck_tokenizer, gemma_path=args.gemma_path,
+                         reader_checkpoint=getattr(args, "reader_checkpoint", None))
     shared = getattr(reader, "policy", None) if args.reader == args.writer == "gemma" else None
     if shared is not None:  # one Gemma in memory for both roles
         from .writer import LLMWriter
         writer = LLMWriter(shared)
     else:
-        writer = make_writer(args.writer, checkpoint=args.writer_checkpoint, gemma_path=args.gemma_path)
+        writer = make_writer(args.writer, checkpoint=args.writer_checkpoint, gemma_path=args.gemma_path,
+                             tries=getattr(args, "tries", None))
     return Answerer(web, store, reader, writer, personal_override=personal_override, store_answer=store_answer), web
 
 
@@ -96,6 +98,9 @@ def run_eval(args, build_web):
                           "correct": is_correct(r["value"], gold, at), "text": r["answer_text"],
                           "faithful": ex["writer_faithful"], "fallback": ex["writer_fallback"],
                           "problems": ex["writer_problems"], "qtype": ex["qtype"], "timing": r["timing"],
+                          "generated": ex.get("writer_generated"), "tries": ex.get("writer_tries", 0),
+                          "first_try_faithful": ex.get("writer_first_try_faithful"), "template": ex.get("writer_template"),
+                          "on_topic": ex.get("search_on_topic"), "reader_p": ex.get("reader_p"),
                           "tokens": toks, "divergence": ex["divergence"], "conflicts": len(ex["conflicts"]),
                           "search_calls": r["search_calls"], "fetch_calls": r["fetch_calls"],
                           "items": ex["items"], "sources": [s["domain"] for s in ex["sources"]],
@@ -152,6 +157,13 @@ def summarize_r5(records: list[dict]) -> dict:
             "qtype_accuracy": (sum(r["qtype"] == r["qtype_gold"] for r in with_gold_qt) / len(with_gold_qt)) if with_gold_qt else None,
             "writer_faithful": (sum(p["faithful"] for p in model_written) / len(model_written)) if model_written else None,
             "writer_fallback": (sum(p["fallback"] for p in model_written) / len(model_written)) if model_written else None,
+            # round 6: the writer's FIRST answer (greedy) vs any of its tries; how many tries it needed
+            "writer_first_try_faithful": (lambda ws: sum(bool(p["first_try_faithful"]) for p in ws) / len(ws) if ws else None)(
+                [p for p in model_written if p.get("tries")]),
+            "writer_mean_tries": (lambda ws: sum(p["tries"] for p in ws) / len(ws) if ws else None)(
+                [p for p in model_written if p.get("tries")]),
+            "search_on_topic": (lambda xs: sum(xs) / len(xs) if xs else None)(
+                [bool(p["on_topic"]) for r in records for p in r["parts"] if p.get("on_topic") is not None]),
             "changed_by_personal": sum(r["changed_by_personal"] for r in records) / n,
             # registry coverage: how often the source an answer rests on was scored by hand (else 5, "unscored")
             "registry_coverage": (lambda ps: sum(ps) / len(ps) if ps else None)(
@@ -181,9 +193,9 @@ def collect_writer_data(args, build_web):
     from .answer import Answerer
     from .readers import make_reader
     from .store import Store
-    from .writer import LLMWriter, TemplateWriter, faithful, writer_prompt, writer_sources
+    from .writer import LLMWriter, TemplateWriter, faithful, lead, writer_prompt
     from .policies import make_policy
-    tasks = [t for t in read_json(args.tasks)["tasks"] if t["family"] == "fact"]
+    tasks = [t for f in args.tasks.split(",") if Path(f).exists() for t in read_json(f)["tasks"] if t["family"] == "fact"]
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     done = {r["task_id"] for r in read_jsonl(out)} if out.exists() else set()
@@ -191,7 +203,8 @@ def collect_writer_data(args, build_web):
     print(f"[writer] collecting {len(todo)} examples ({len(done)} done) -> {out}")
     web = build_web(args)
     reader = make_reader(args.reader, head=args.g2_head, checkpoint=args.planck_checkpoint,
-                         tokenizer=args.planck_tokenizer, gemma_path=args.gemma_path)
+                         tokenizer=args.planck_tokenizer, gemma_path=args.gemma_path,
+                         reader_checkpoint=getattr(args, "reader_checkpoint", None))
     gem = LLMWriter(make_policy("gemma", gemma_path=args.gemma_path))
     ans = Answerer(web, Store(out.parent / "collect_store.sqlite"), reader, TemplateWriter(), store_answer=False)
     kept = 0
@@ -204,10 +217,12 @@ def collect_writer_data(args, build_web):
             continue
         sources = r["writer_sources"]
         prompt = writer_prompt(t["question"], cons, sources)
-        text = gem.generate(prompt) or ""
+        ld = lead(cons["band"], cons["value"])
+        text = next(gem.candidates(prompt, ld), "") or ""
         ok, probs = faithful(text, t["question"], cons["value"], sources, t["answer_type"])
         kept += ok
         append_jsonl(out, {"task_id": t["id"], "question": t["question"], "band": cons["band"], "prompt": prompt,
+                           "value": cons["value"], "answer_type": t["answer_type"], "lead": ld,
                            "target": text, "faithful": ok, "problems": probs,
                            "value_correct": is_correct(cons["value"], t["gold"], t["answer_type"])})
         if i % 50 == 0:
@@ -293,9 +308,11 @@ def add_cli(sub, add_web_args, build_web):
     p = sub.add_parser("r5", help="round 5: read -> weigh -> write pipeline evaluation")
     p.add_argument("--tasks", default=str(REPO_ROOT / "scripts" / "assets" / "planck3_tasks_fresh.json"),
                    help="comma-separated task files")
-    p.add_argument("--reader", default="heuristic", choices=["heuristic", "planck", "gemma", "bedrock"])
+    p.add_argument("--reader", default="heuristic", choices=["heuristic", "planck", "x-planck", "x-hertz", "gemma", "bedrock"])
+    p.add_argument("--reader-checkpoint", default=None, help="x-planck / x-hertz: checkpoints/xreader_<base>/reader.pt")
     p.add_argument("--writer", default="template", choices=["template", "hertz", "planck", "gemma", "bedrock"])
     p.add_argument("--writer-checkpoint", default=None)
+    p.add_argument("--tries", type=int, default=None, help="small writers: answers tried before the template (round 6: 3)")
     p.add_argument("--personal", default="none", choices=["none", "contrarian"])
     p.add_argument("--out", required=True)
     p.add_argument("--limit", type=int, default=0)
@@ -306,11 +323,16 @@ def add_cli(sub, add_web_args, build_web):
     p.add_argument("--rescore", action="store_true", help="re-judge --out against --tasks gold (no search, no model)")
     p.set_defaults(fn=lambda a: rescore(Path(a.out), a.tasks) if a.rescore else run_eval(a, build_web))
 
-    p = sub.add_parser("writer", help="the small writers: collect training text (Gemma) | train once")
-    p.add_argument("stage", choices=["collect", "train"])
-    p.add_argument("--tasks", default=str(REPO_ROOT / "scripts" / "assets" / "planck3_g2_train_tasks.json"))
-    p.add_argument("--out", default=str(WRITER_DATA))
-    p.add_argument("--reader", default="planck", choices=["heuristic", "planck"])
+    p = sub.add_parser("writer", help="the small writers: collect (Gemma) | rescore | train once | kvcheck | judge")
+    p.add_argument("stage", choices=["collect", "train", "rescore", "kvcheck", "judge"])
+    p.add_argument("--tasks", default=str(REPO_ROOT / "scripts" / "assets" / "planck3_g2_train_tasks.json"),
+                   help="comma-separated task files (never a benchmark)")
+    p.add_argument("--out", default=str(WRITER_DATA), help="writer data (comma list for train)")
+    p.add_argument("--reader", default="planck", choices=["heuristic", "planck", "x-planck", "x-hertz"])
+    p.add_argument("--reader-checkpoint", default=None)
+    p.add_argument("--require-lead", action="store_true", help="train only on examples that start with the forced lead")
+    p.add_argument("--checkpoint", default=None, help="kvcheck: the writer checkpoint")
+    p.add_argument("--run", default=None, help="judge: an r6 run directory")
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--base", default="hertz", choices=["hertz", "planck"])
     p.add_argument("--base-checkpoint", default=None)
@@ -323,11 +345,33 @@ def add_cli(sub, add_web_args, build_web):
     def run_writer(a):
         if a.stage == "collect":
             return collect_writer_data(a, build_web)
+        if a.stage == "rescore":
+            from .writer import rescore_data
+            for f in a.out.split(","):
+                print(f"[writer] rescored {f}: {rescore_data(Path(f))}")
+            return
+        if a.stage == "kvcheck":
+            return kv_check_cli(a)
+        if a.stage == "judge":
+            from .round6 import judge
+            return judge(Path(a.run), a.gemma_path, a.limit or 120)
         from .writer import train_writer
         ck = a.base_checkpoint or ("checkpoints/hertz/best.pt" if a.base == "hertz" else "checkpoints/planck13/best.pt")
         tok = a.base_tokenizer or ("data/hertz12_data/tokenizer.model" if a.base == "hertz" else "data/wikipedia/tokenizer.model")
-        meta = train_writer(Path(a.out), ck, tok, REPO_ROOT / "checkpoints" / f"writer_{a.base}{a.tag}", a.base,
-                            epochs=a.epochs, batch_size=a.batch_size)
+        meta = train_writer(a.out, ck, tok, REPO_ROOT / "checkpoints" / f"writer_{a.base}{a.tag}", a.base,
+                            epochs=a.epochs, batch_size=a.batch_size, require_lead=a.require_lead)
         write_json(RESULTS / f"writer_{a.base}{a.tag}" / "train_log.json", meta)
         print(f"[writer] {a.base}: {meta['examples']} examples, best val loss {meta['best_val_loss']:.3f}")
     p.set_defaults(fn=run_writer)
+
+
+def kv_check_cli(a):
+    """The KV cache must not change a single token: greedy answers with and without it, on collected prompts."""
+    from .writer import kv_check, lead, row_value
+    rows = [r for f in a.out.split(",") if Path(f).exists() for r in read_jsonl(f) if r.get("prompt")]
+    rows = rows[-(a.limit or 20):]
+    res = kv_check(a.checkpoint, [(r["prompt"], lead(r.get("band", "good"), row_value(r) or "")) for r in rows])
+    out = RESULTS / f"kvcheck_{Path(a.checkpoint).parent.name}_{res['device'].split(':')[0]}"
+    write_json(out / "summary.json", res)
+    print(f"[kvcheck] {Path(a.checkpoint).parent.name}: {res['identical']:.0%} identical over {res['prompts']} prompts; "
+          f"{res['ms_cached']:.0f} ms cached vs {res['ms_uncached']:.0f} ms uncached ({res['device']})")

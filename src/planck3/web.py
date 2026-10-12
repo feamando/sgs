@@ -41,6 +41,43 @@ SCRAPED_BACKENDS = ("ddgs", "searxng", "brave")  # general web search: empty -> 
 # round 4's pre-registered runs stay on ddgs. Its own pacing: the API meters requests per second.
 BRAVE_URL = "https://api.search.brave.com/res/v1/web/search"
 MIN_SECONDS_BRAVE = 1.1
+# Relevance (round 6): round 5's search check counted only EMPTY searches, so ddgs answers about
+# xhamster.com and calculator.net passed as valid evidence for election questions. A search is now
+# ON TOPIC when at least 2 of its top 5 results (1 if fewer come back) mention enough of the
+# question's key words in title + snippet. Off-topic results are treated like an empty search: the
+# next backend in the chain is tried, and only if nothing is on topic is the first answer served
+# (counted as off topic). A run is valid only if most of its searches were on topic.
+RELEVANCE_TOP = 5
+ON_TOPIC_RUN_MIN = 0.6
+_REL_SKIP = {"year", "years", "many", "much", "number", "exactly", "approximately", "roughly", "did", "does",
+             "january", "february", "march", "april", "may", "june", "july", "august", "september", "october",
+             "november", "december", "new", "first", "last", "current", "currently", "which", "name", "called"}
+
+
+def query_keys(question: str) -> list[str]:
+    """The words a result must mention to be about the question (no question-form, month or year words)."""
+    from .util import content_words
+    out = []
+    for w in content_words(question):
+        if len(w) > 2 and w not in _REL_SKIP and not re.fullmatch(r"\d{4}s?", w) and w not in out:
+            out.append(w)
+    return out
+
+
+def result_on_topic(keys: list[str], result: dict) -> bool:
+    from .util import norm_text
+    if not keys:
+        return True
+    words = set(norm_text(f"{result.get('title', '')} {result.get('snippet', '')}").split())
+    need = 1 if len(keys) <= 2 else 2 if len(keys) <= 5 else 3
+    hits = sum(1 for k in keys if k in words or (len(k) >= 6 and any(w.startswith(k[:5]) for w in words)))
+    return hits >= need
+
+
+def on_topic(question: str, results: list[dict]) -> bool:
+    keys = query_keys(question)
+    top = results[:RELEVANCE_TOP]
+    return bool(top) and sum(result_on_topic(keys, r) for r in top) >= min(2, len(top))
 
 
 class SearchUnavailable(RuntimeError):
@@ -99,48 +136,70 @@ class Web:
         self._last_hit: dict[str, float] = {}
         self.calls = {"search": 0, "fetch": 0, "search_net": 0, "fetch_net": 0,
                       "search_empty_primary": 0, "search_fallback": 0, "search_empty_final": 0,
-                      "search_ratelimited": 0}
+                      "search_ratelimited": 0, "search_secondary": 0, "search_offtopic_primary": 0,
+                      "search_offtopic_final": 0, "search_quota_skips": 0}
         self.ddgs_engines = DDGS_ENGINES
         self.fallback = True          # scraped backend empty -> retry once -> Wikipedia for that query
+        self.secondary: list[str] = []  # general backends tried after the primary, before Wikipedia (round 6)
+        self.relevance = True         # off-topic results count as a failed search (round 6)
+        self.brave_reserve = 0        # stop calling Brave when the plan's monthly remainder is this low
+        self.brave_remaining = None   # from the API's X-RateLimit-Remaining header (monthly part)
+        self._brave_paused = False
         self._consecutive_empty = 0
         self._last_search = 0.0
         self.last_backend = None      # which backend actually answered the last search
+        self.last_on_topic = None
 
     # ── search ───────────────────────────────────────────────────────────
     def search(self, query: str) -> list[dict]:
         """
         Return [{url, title, snippet, domain}] (at most n_results).
 
-        Order: cache(primary) -> network(primary) -> one retry -> [fallback only] cache(wikipedia)
-        -> network(wikipedia). The fallback cache is read ONLY after the primary failed now:
-        reading it first silently served old Wikipedia results to "SearXNG" runs (round 3b).
+        Chain: primary (cache, then network, one retry if empty) -> secondary backends -> [fallback]
+        Wikipedia. A backend's cache is read only when the chain reaches it: reading the fallback
+        cache first silently served old Wikipedia results to "SearXNG" runs (round 3b). The first
+        ON-TOPIC answer is served; if none is on topic, the first non-empty one (counted off topic).
         """
         self.calls["search"] += 1
-        hit = self.cache.get("search", f"{self.backend}|{query}")
+        chain = [self.backend] + [b for b in self.secondary if b != self.backend]
+        if self.backend in SCRAPED_BACKENDS and self.fallback and "wikipedia" not in chain:
+            chain.append("wikipedia")
+        first = None
+        for i, b in enumerate(chain):
+            results = self._lookup(b, query, primary=i == 0)
+            if not results:
+                continue
+            if not self.relevance or on_topic(query, results):
+                if i > 0:
+                    self.calls["search_fallback" if b == "wikipedia" else "search_secondary"] += 1
+                return self._served(b, results, topical=True)
+            if i == 0:
+                self.calls["search_offtopic_primary"] += 1
+            first = first or (b, results)
+        if first:
+            self.calls["search_offtopic_final"] += 1
+            return self._served(first[0], first[1], topical=False)
+        return self._served(None, [], count_empty=self.cache.online)
+
+    def _lookup(self, backend: str, query: str, primary: bool) -> list[dict]:
+        hit = self.cache.get("search", f"{backend}|{query}")
         if hit is not None and hit.get("results"):
-            return self._served(self.backend, hit["results"])
-        if not self.cache.online:
-            return self._served(None, [], count_empty=False)
-        results = self._search_net(self.backend, query)
-        if results:
-            return self._served(self.backend, results)
-        if self.backend in SCRAPED_BACKENDS:
+            return hit["results"]
+        if not self.cache.online or (backend == "brave" and self._brave_paused):
+            if backend == "brave" and self._brave_paused:
+                self.calls["search_quota_skips"] += 1
+            return []
+        results = self._search_net(backend, query)
+        if not results and primary and backend in SCRAPED_BACKENDS and not self._brave_paused:
             self.calls["search_empty_primary"] += 1
             time.sleep(2.0)
-            results = self._search_net(self.backend, query)        # one retry: blocks are often transient
-            if results:
-                return self._served(self.backend, results)
-            if self.fallback:
-                hit = self.cache.get("search", f"wikipedia|{query}")
-                results = hit["results"] if hit and hit.get("results") else self._search_net("wikipedia", query)
-                if results:
-                    self.calls["search_fallback"] += 1
-                    return self._served("wikipedia", results)
-        return self._served(None, [])
+            results = self._search_net(backend, query)              # one retry: blocks are often transient
+        return results
 
-    def _served(self, backend, results, count_empty: bool = True):
+    def _served(self, backend, results, count_empty: bool = True, topical: bool | None = None):
         """Book-keeping for every outcome: which backend served it (cache hits included) + the breaker."""
         self.last_backend = backend or "none"
+        self.last_on_topic = topical
         if results:
             self._consecutive_empty = 0
             self.calls[f"served_{backend}"] = self.calls.get(f"served_{backend}", 0) + 1
@@ -193,10 +252,15 @@ class Web:
         final = c["search_empty_final"] / n
         served = {k[len("served_"):]: v for k, v in c.items() if k.startswith("served_")}
         primary = served.get(self.backend, 0) / n
+        answered = max(sum(served.values()), 1)
+        topical = 1 - c["search_offtopic_final"] / answered
         return {"searches": c["search"], "primary_empty_rate": c["search_empty_primary"] / n,
-                "fallback_rate": c["search_fallback"] / n, "final_empty_rate": final,
-                "served": served, "primary_share": primary,   # who actually answered, cache hits included
-                "valid": final <= 0.2}
+                "fallback_rate": c["search_fallback"] / n, "secondary_rate": c["search_secondary"] / n,
+                "final_empty_rate": final, "served": served, "primary_share": primary,   # cache hits included
+                "primary_offtopic_rate": c["search_offtopic_primary"] / n, "on_topic_rate": topical,
+                "relevance_checked": self.relevance, "brave_remaining": self.brave_remaining,
+                "brave_quota_skips": c["search_quota_skips"],
+                "valid": final <= 0.2 and (topical >= ON_TOPIC_RUN_MIN or not self.relevance)}
 
     def search_site(self, domain: str, query: str) -> list[dict]:
         """'More results from here': the same question restricted to one source (no fallback)."""
@@ -239,9 +303,13 @@ class Web:
         r = self.session.get(BRAVE_URL, params={"q": query, "count": 10},
                              headers={"Accept": "application/json", "X-Subscription-Token": key},
                              timeout=FETCH_TIMEOUT)
+        self._brave_quota(getattr(r, "headers", None) or {})
         if r.status_code == 429:  # over the plan's rate or quota: back off, count it, fall back
             self.calls["search_ratelimited"] += 1
             self._log({"event": "search_ratelimited", "backend": "brave", "query": query})
+            if self.brave_remaining == 0:          # the month is used up: stop asking for this run
+                self._brave_paused = True
+                return []
             time.sleep(RATE_LIMIT_BACKOFF)
             return []
         r.raise_for_status()
@@ -255,11 +323,34 @@ class Web:
                         "snippet": _inline_text(item.get("description", "") or ""), "domain": domain_of(url)})
         return out[:20]
 
-    def brave_alive(self) -> bool:
+    def _brave_quota(self, headers):
+        """X-RateLimit-Remaining is '<per second>, <per month>': keep the monthly part; pause at the reserve."""
+        rem = headers.get("X-RateLimit-Remaining") or headers.get("x-ratelimit-remaining")
         try:
-            return len(self._search_brave("Wikipedia")) > 0
+            self.brave_remaining = int(str(rem).split(",")[-1].strip()) if rem is not None else self.brave_remaining
+        except ValueError:
+            return
+        if self.brave_remaining is not None and self.brave_reserve and self.brave_remaining <= self.brave_reserve \
+                and not self._brave_paused:
+            self._brave_paused = True
+            print(f"[web] Brave: {self.brave_remaining} searches left this month (reserve {self.brave_reserve}); "
+                  f"the rest of this run uses the next backend in the chain", flush=True)
+
+    def brave_alive(self) -> bool:
+        """Key set AND answering; a cached answer counts (no quota spent on a probe every start)."""
+        import os
+        if not os.environ.get("BRAVE_API_KEY"):
+            return False
+        hit = self.cache.get("search", "brave|Wikipedia")
+        if hit and hit.get("results"):
+            return True
+        try:
+            res = self._search_brave("Wikipedia")
         except Exception:
             return False
+        if res:
+            self.cache.put("search", "brave|Wikipedia", {"query": "Wikipedia", "backend": "brave", "at": now_iso(), "results": res})
+        return bool(res)
 
     def ddgs_alive(self) -> bool:
         """Installed AND answering (a rate-limited client returns nothing)."""

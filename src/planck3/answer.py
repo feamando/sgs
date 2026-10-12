@@ -61,6 +61,7 @@ class Answerer:
         steps = []
         t0 = time.perf_counter()
         results = self.web.search(question)
+        on_topic = getattr(self.web, "last_on_topic", None)
         for dom in self.session_more[-1:]:
             if hasattr(self.web, "search_site") and not any(r["domain"] == dom for r in results):
                 results = results + [dict(r, session=True) for r in self.web.search_site(dom, question)[:2]]
@@ -137,7 +138,10 @@ class Answerer:
                    "conflicts": cons["conflicts"], "candidates": cons["candidates"], "steps": steps,
                    "reader": self.reader.name, "reader_p": cons.get("reader_p"), "writer": wr["writer"],
                    "writer_faithful": wr["faithful"], "writer_problems": wr.get("problems", []),
-                   "writer_fallback": wr.get("fallback", False), "divergence": div,
+                   "writer_fallback": wr.get("fallback", False), "writer_generated": wr.get("generated"),
+                   "writer_tries": wr.get("tries", 0), "writer_first_try_faithful": wr.get("first_try_faithful"),
+                   "writer_template": wr.get("template"), "search_on_topic": on_topic,
+                   "divergence": div,
                    "sources": [{"role": "states it" if i == 0 else "agrees", "domain": f["domain"], "url": f["url"],
                                 "trust": f["trust"]} for i, f in enumerate(cons["families"])]
                    + [{"role": "says " + str(c["value"]), "domain": c["domain"], "url": c["url"], "trust": c["trust"]}

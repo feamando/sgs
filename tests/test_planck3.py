@@ -1070,3 +1070,227 @@ def test_sgs_writer_trains_and_generates_on_a_tiny_checkpoint(tmp_path):
     out = w.write("When was IKEA founded?", "year", {"value": "1943", "confidence": 8.0, "band": "good",
                                                     "families": [], "conflicts": []}, {})
     assert out["text"] and (out["faithful"] or out["fallback"])                        # either faithful or the template
+
+
+# ── round 6: KV cache, relevance-checked search, writer fixes, the cross-encoder reader ──
+def test_kv_cache_is_exact_and_expands_for_a_shared_prefix():
+    import torch
+    from src.sgs_lm import SGSLanguageModel
+    torch.manual_seed(0)
+    m = SGSLanguageModel(vocab_size=97, d_s=8, d_f=24, n_passes=3, n_heads=2, max_len=48).eval()
+    x = torch.randint(0, 97, (2, 20))
+    with torch.no_grad():
+        full = m(x)
+        out, cache = m.forward_cached(x[:, :7])
+        parts = [out]
+        for t in range(7, 20):                                   # one token at a time, as in decoding
+            o, cache = m.forward_cached(x[:, t:t + 1], cache)
+            parts.append(o)
+        assert torch.allclose(full, torch.cat(parts, 1), atol=1e-5) and cache["n"] == 20
+        _, c1 = m.forward_cached(x[:1, :7], hidden=True)
+        y = torch.randint(0, 97, (3, 5))
+        h, _ = m.forward_cached(y, SGSLanguageModel.expand_cache(c1, 3), hidden=True)
+        m.return_hidden = True
+        ref = m(torch.cat([x[:1, :7].expand(3, 7), y], 1))[:, 7:]
+        assert torch.allclose(h, ref, atol=1e-5)
+    with pytest.raises(ValueError):
+        m.forward_cached(torch.zeros(1, 49, dtype=torch.long))
+
+
+def test_relevance_check_rejects_off_topic_results_and_walks_the_chain(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    q = "How many Riksdag seats did the left-wing opposition bloc win in Sweden's September 2026 general election?"
+    junk = [{"url": f"https://junk{i}.com/x", "title": "Free videos", "snippet": "Calculator and deals", "domain": f"junk{i}.com"}
+            for i in range(5)]
+    good = [{"url": "https://dw.com/a", "title": "Sweden election: left-wing bloc wins Riksdag majority",
+             "snippet": "The opposition bloc won 176 seats in the general election.", "domain": "dw.com"},
+            {"url": "https://bbc.com/b", "title": "Swedish general election results", "snippet": "Left bloc 176 seats, Sweden.",
+             "domain": "bbc.com"}]
+    assert not W.on_topic(q, junk) and W.on_topic(q, good)
+    assert "september" not in W.query_keys(q) and "2026" not in W.query_keys(q)
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="ddgs")
+    w.secondary = ["brave"]
+    monkeypatch.setattr(w, "_search_ddgs", lambda qq: junk)
+    monkeypatch.setattr(w, "_search_brave", lambda qq: good)
+    monkeypatch.setattr(w, "_search_wikipedia", lambda qq: [])
+    assert w.search(q) == good and w.last_backend == "brave" and w.last_on_topic
+    h = w.search_health()
+    assert h["primary_offtopic_rate"] == 1.0 and h["secondary_rate"] == 1.0 and h["on_topic_rate"] == 1.0
+    w2 = W.Web(W.WebCache(tmp_path / "d"), search_backend="ddgs")
+    monkeypatch.setattr(w2, "_search_ddgs", lambda qq: junk)
+    monkeypatch.setattr(w2, "_search_wikipedia", lambda qq: [])
+    assert w2.search(q) == junk and w2.last_on_topic is False                 # nothing on topic: served, but counted
+    assert w2.search_health()["on_topic_rate"] == 0.0 and not w2.search_health()["valid"]
+    w3 = W.Web(W.WebCache(tmp_path / "e"), search_backend="ddgs")
+    w3.relevance = False                                                       # round 5 behaviour stays available
+    monkeypatch.setattr(w3, "_search_ddgs", lambda qq: junk)
+    assert w3.search(q) == junk and w3.search_health()["valid"]
+
+
+def test_brave_quota_header_pauses_at_the_reserve(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w.brave_reserve = 100
+    w.secondary = ["ddgs"]
+    other = [{"url": "https://ikea.com/a", "title": "IKEA history", "snippet": "IKEA was founded in 1943.", "domain": "ikea.com"}]
+    monkeypatch.setattr(w, "_search_ddgs", lambda q: other)
+
+    class R:
+        status_code = 200
+        headers = {"X-RateLimit-Remaining": "1, 100"}
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"web": {"results": [{"url": "https://www.ikea.com/b", "title": "IKEA", "description": "Founded 1943."}]}}
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R())
+    assert w.search("When was IKEA founded?")[0]["domain"] == "ikea.com" and w.brave_remaining == 100
+    assert w._brave_paused                                                     # at the reserve: Brave is left alone
+    assert w.search("Who founded IKEA?") == other and w.calls["search_quota_skips"] == 1
+
+
+def test_writer_citation_groups_lead_and_tries(tmp_path):
+    import json as _json
+    from src.planck3.writer import TemplateWriter, cited, faithful, lead, lead_ok, rescore_data
+    src = [{"domain": "bbc.com", "name": "BBC", "context": "IKEA was founded in 1943 by Ingvar Kamprad.", "says": None, "trust": 7},
+           {"domain": "meduza.io", "name": "Meduza", "context": "Founded in 1943 in Sweden.", "says": None, "trust": 10}]
+    assert cited("a [1, 2] b [1-2] c [2 and 1]") == [1, 2, 1, 2, 2, 1]
+    assert faithful("1943, according to BBC and Meduza [1, 2].", "When was IKEA founded?", "1943", src, "year")[0]
+    assert not faithful("1943 [1, 3].", "When was IKEA founded?", "1943", src, "year")[0]
+    assert lead("low", "1943") == "Possibly 1943" and lead("high", "1943") == "1943" and lead("sceptical", "x") == "Unclear:"
+
+    class Scripted(TemplateWriter):
+        name, tries = "scripted", 3
+
+        def __init__(self, outs):
+            super().__init__()
+            self.outs, self.seen = outs, []
+
+        def candidates(self, prompt, lead_text):
+            for o in self.outs:
+                self.seen.append(lead_text)
+                yield o
+    cons = {"value": "1943", "confidence": 8.0, "band": "good", "families": [
+        {"domain": "bbc.com", "url": "https://bbc.com/a", "context": src[0]["context"], "trust": {"effective": 7}}], "conflicts": []}
+    w = Scripted(["1943, says Norway [1].", "1943, according to BBC [1].", "never reached"])
+    out = w.write("When was IKEA founded?", "year", cons, {})
+    assert out["text"] == "1943, according to BBC [1]." and out["tries"] == 2 and not out["first_try_faithful"]
+    assert out["faithful"] and not out["fallback"] and w.seen == ["1943", "1943"]       # stops at the first faithful
+    bad = Scripted(["It is old [1]."]).write("When was IKEA founded?", "year", cons, {})
+    assert bad["fallback"] and bad["text"] == bad["template"]
+    data = tmp_path / "w.jsonl"
+    prompt = "QUESTION: When was IKEA founded?\nANSWER: 1943\nCONFIDENCE: 8/10 good\nSOURCES:\n[1] BBC (7/10): IKEA was founded in 1943.\n[2] Meduza (10/10): Founded 1943.\nANSWER TEXT:"
+    data.write_text(_json.dumps({"prompt": prompt, "band": "good", "target": "1943, according to BBC and Meduza [1, 2].",
+                                 "faithful": False}) + "\n", encoding="utf-8")
+    assert rescore_data(data) == {"examples": 1, "faithful": 1, "faithful_and_lead": 1}       # round 5's checker bug undone
+    row = _json.loads(data.read_text(encoding="utf-8"))
+    assert row["faithful"] and row["faithful_r5"] is False and lead_ok(row)
+
+
+def test_sgs_writer_decodes_with_the_cache_identically(tmp_path):
+    import json as _json
+    import sentencepiece as spm
+    import torch
+    from src.planck3.writer import SGSWriter, kv_check
+    from src.sgs_lm import SGSLanguageModel
+    corpus = tmp_path / "corpus.txt"
+    corpus.write_text("\n".join(["QUESTION: When was IKEA founded? ANSWER: 1943 SOURCES: BBC says founded in 1943",
+                                 "1943, according to BBC [1]. <END>", "Possibly 1943 the quick brown fox"] * 40), encoding="utf-8")
+    spm.SentencePieceTrainer.train(input=str(corpus), model_prefix=str(tmp_path / "tok"), vocab_size=80,
+                                   model_type="unigram", hard_vocab_limit=False, user_defined_symbols=["<END>"])
+    torch.manual_seed(0)
+    model = SGSLanguageModel(vocab_size=spm.SentencePieceProcessor(model_file=str(tmp_path / "tok.model")).get_piece_size(),
+                             d_s=8, d_f=16, n_passes=2, n_heads=2, max_len=128)
+    torch.save({"model": model.state_dict(), "tokenizer": str(tmp_path / "tok.model")}, tmp_path / "w.pt")
+    prompts = [("QUESTION: When was IKEA founded?\nANSWER: 1943\nANSWER TEXT:", "1943"),
+               ("QUESTION: When was IKEA founded?\nANSWER: 1943\nANSWER TEXT:", "Possibly 1943")]
+    res = kv_check(str(tmp_path / "w.pt"), prompts, device="cpu")
+    assert res["identical"] == 1.0 and res["prompts"] == 2
+    w = SGSWriter(str(tmp_path / "w.pt"), device="cpu", max_new=6)
+    outs = list(w.candidates(prompts[1][0], prompts[1][1]))
+    assert len(outs) == 3 and all(o.startswith("Possibly 1943") for o in outs)        # every try starts from the lead
+    assert outs == list(w.candidates(prompts[1][0], prompts[1][1]))                     # seeded: reproducible
+
+
+def test_portal_parsing_and_news_question_checks():
+    from src.planck3.readtasks import check_news_question, named_in_bench, parse_portal, strip_wiki
+    wt = ("'''Disasters and accidents'''\n*[[2025 floods]]\n**At least 31 people are killed when a [[bus]] falls into a ravine "
+          "in southern [[Bolivia]]. [https://reuters.com/x (Reuters)]\n'''Sports'''\n*[[Tadej Pogačar]] wins the [[2025 Tour de France]], "
+          "his fourth title in the race.<ref>x</ref>\n'''Unknown section'''\n*Ignored item that is long enough to be kept otherwise ok.")
+    items = parse_portal(wt)
+    assert [i["section"] for i in items] == ["disaster", "sport"] and "Reuters" not in items[0]["text"]
+    assert strip_wiki("[[Kalat, Balochistan|Kalat]] ''x''") == "Kalat x"
+    it = {"id": "2025-07-27_sport", "date": "2025-07-27", "section": "sport", "text": items[1]["text"]}
+    ok, why = check_news_question({"question": "Who won the Tour de France in July 2025?", "answer": "Tadej Pogačar",
+                                   "answer_type": "entity"}, it)
+    assert ok and ok["gold"] == ["Tadej Pogačar"] and ok["id"] == "news_2025-07-27_sport" and why == "ok"
+    for obj, reason in (({"question": "Who won the Tour de France?", "answer": "Tadej Pogačar", "answer_type": "entity"}, "no year"),
+                        ({"question": "Did Tadej Pogačar win the 2025 Tour de France race?", "answer": "Tadej Pogačar",
+                          "answer_type": "entity"}, "answer in the question"),
+                        ({"question": "Who won the 2025 Tour de France race in July?", "answer": "Jonas Vingegaard",
+                          "answer_type": "entity"}, "not in the item")):
+        task, why = check_news_question(obj, it)
+        assert task is None and reason in why
+    assert named_in_bench("Dubai International Airport", ["which terminal does emirates use at dubai international airport dxb"])
+    assert not named_in_bench("Heathrow Airport", ["which terminal does emirates use at dubai international airport dxb"])
+
+
+def _tiny_lm(tmp_path, texts):
+    import sentencepiece as spm
+    import torch
+    from src.sgs_lm import SGSLanguageModel
+    corpus = tmp_path / "corpus.txt"
+    corpus.write_text("\n".join(texts * 20), encoding="utf-8")
+    spm.SentencePieceTrainer.train(input=str(corpus), model_prefix=str(tmp_path / "tok"), vocab_size=120,
+                                   model_type="unigram", hard_vocab_limit=False)
+    torch.manual_seed(0)
+    m = SGSLanguageModel(vocab_size=spm.SentencePieceProcessor(model_file=str(tmp_path / "tok.model")).get_piece_size(),
+                         d_s=8, d_f=16, n_passes=2, n_heads=2, max_len=256)
+    torch.save({"model": m.state_dict()}, tmp_path / "base.pt")
+    return str(tmp_path / "base.pt"), str(tmp_path / "tok.model")
+
+
+def test_cross_reader_trains_once_calibrates_and_reads_with_the_prefix_cache(tmp_path):
+    import json as _json
+    from src.planck3 import xreader as X
+    pts = _synthetic_points(n=120)
+    for i, p in enumerate(pts):
+        p["task_id"] = ("news_" if i % 3 == 0 else "recent_" if i % 3 == 1 else "t") + str(i)
+    path = tmp_path / "points.jsonl"
+    path.write_text("\n".join(_json.dumps(p) for p in pts), encoding="utf-8")
+    base, tok = _tiny_lm(tmp_path, [X.prefix_text(p["question"], "year") + X.cand_text(c, True) for p in pts[:30] for c in p["cands"]])
+    meta = X.train([path], base, tok, tmp_path / "xr", "tiny", epochs=1, cands_per_step=16)
+    assert meta["n_points"]["test"] > 0 and 0 <= meta["test"]["choice_acc"] <= 1 and meta["temperature"] > 0
+    assert set(meta["test_by_group"]) <= set(X.GROUPS) and (tmp_path / "xr" / "reader.pt").exists()
+    pool = {"cands": pts[0]["cands"] * 5, "snippet": True}                     # 20 candidates: top 16 read, rest 0
+    rd_cache = X.CrossReader(str(tmp_path / "xr" / "reader.pt"), device="cpu", prefix_cache=True)
+    rd_full = X.CrossReader(str(tmp_path / "xr" / "reader.pt"), device="cpu", prefix_cache=False)
+    a = rd_cache.logits(pts[0]["question"], "year", pool)
+    b = rd_full.logits(pts[0]["question"], "year", pool)
+    assert np.allclose(a, b, atol=1e-4)                                         # prefix cache = full forward
+    r = rd_cache.read(pts[0]["question"], "year", pool)
+    assert len(r) == 20 and r[16:] == [0.0] * 4 and 0 < sum(r) <= 1 + 1e-6
+    assert X.shift_years("In 2025 (not 1999) and 20255", 1) == "In 2026 (not 2000) and 20255"
+    assert X.split_of("news_x") == X.split_of("news_x") and X.group_of("info_iata001") == "info" and X.group_of("twinner1") == "stable"
+
+
+def test_round6_product_rules(tmp_path):
+    from src.planck3 import round6 as R6
+    from src.planck3.util import write_json
+    def log(b, acc):
+        write_json(tmp_path / f"xreader_{b}" / "train_log.json", {"test": {"choice_acc": acc}})
+    log("planck", 0.70)
+    log("hertz", 0.72)
+    assert R6.choose_reader(tmp_path)["reader"] == "x-planck"                  # +2 points does not justify 6x the size
+    log("hertz", 0.74)
+    assert R6.choose_reader(tmp_path)["reader"] == "x-hertz"
+    write_json(tmp_path / "r6_x-hertz_planck" / "summary.json", {"writer_faithful": 0.93})
+    write_json(tmp_path / "r6_x-hertz_hertz" / "summary.json", {"writer_faithful": 0.96})
+    d = R6.product_decision(tmp_path)
+    assert d["writer"] == "hertz" and d["run"] == "r6_x-hertz_hertz"            # smallest writer that passes W
+    write_json(tmp_path / "r6_x-hertz_hertz" / "summary.json", {"writer_faithful": 0.90})
+    assert R6.product_decision(tmp_path)["writer"] == "template"

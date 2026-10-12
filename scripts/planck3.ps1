@@ -2,7 +2,7 @@
  .SYNOPSIS
    Planck 3.0 one-stop runner for the Windows 4090 box.
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
-   SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5)
+   SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -32,6 +32,9 @@
      round5    round 5 (SETUP_planck_20261009.md): read -> weigh -> write on 3 benchmarks (fresh, news,
                general info); hand-scored 0-10 source trust; writers trained once (Hertz / Planck, from Gemma);
                worst-case personal profile; Brave vs ddgs; CPU latency (phone proxy)
+     round6    round 6 (SETUP_planck_20261012.md): Brave + relevance check as the product search; the reader
+               trained once as a cross-encoder (Planck and Hertz) on 2025 news, recent events and general
+               information; writers retrained on fixed data with a forced lead, 3 tries and the KV cache
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -596,6 +599,121 @@ function Do-Round5 {
     finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
 }
 
+# ── round 6 (SETUP_planck_20261012.md) ────────────────────────────────────
+$READ_TASKS = "scripts/assets/planck3_read_train_tasks.json"
+$BRAVE_RESERVE = "400"     # training-data collection leaves this many Brave searches in the month for the product
+
+# A round 6 run is valid if Brave served >= 60% of its searches, <= 20% came back empty and >= 60% were on topic
+# (web.search_health "valid"). A miss is set aside ONCE as <dir>_degraded and redone; a second miss is kept.
+function Test-R6Run([string]$dir) {
+    if (-not (Test-Path "$dir/summary.json")) { return $false }
+    $j = Get-Content "$dir/summary.json" -Raw | ConvertFrom-Json
+    $h = $j.search_health
+    $ok = ($null -ne $h) -and [bool]$h.valid -and ($j.search -eq "brave") -and ($null -ne $h.primary_share) -and ($h.primary_share -ge 0.6)
+    if ($ok) { return $true }
+    if (Test-Path "${dir}_degraded") { Warn "$dir is below the search bar again; keeping it (reported as is)"; return $true }
+    Move-Item $dir "${dir}_degraded"; Log "kept $dir as ${dir}_degraded (search below the bar); redoing it"
+    return $false
+}
+
+function Invoke-R6([string]$name, [string[]]$a, [string]$what, [int]$sample = 0) {
+    $out = "$RES/$name$Tag"
+    if (Test-R6Run $out) { Log "SKIP $name (valid)"; return }
+    Log $what
+    $smp = if ($Quick) { @("--sample", "12") } elseif ($sample -gt 0) { @("--sample", "$sample") } else { @() }
+    P3 (@("r5") + $a + @("--tasks", "$FRESH,$NEWS,$INFO", "--search", "brave", "--out", $out, "--gemma-path", $GEMMA,
+          "--g2-head", $V2HEAD, "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) + $smp)
+}
+
+function Do-Round6 {
+    foreach ($f in @($NEWS, $INFO, $READ_TASKS, $V2HEAD, $PLANCK_CKPT)) { if (-not (Test-Path $f)) { throw "missing $f (git pull)" } }
+    if (-not $env:BRAVE_API_KEY) { throw "no BRAVE_API_KEY: round 6 runs on the Brave Search API (.\scripts\planck3.ps1 setkey)" }
+    if ((Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave")).Code -ne 0) {
+        throw "the Brave API does not answer (key, quota or network): check with .\scripts\planck3.ps1 setkey"
+    }
+    $haveGemma = Test-Path $GEMMA
+    $haveHertz = (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    if (-not $haveGemma) { throw "round 6 needs Gemma at $GEMMA (it writes the news training questions and is the reference)" }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $newsTasks = "data/planck3/reader/news_tasks$Tag.json"
+    $points = "data/planck3/reader/points$Tag.jsonl"
+    # 1. reader-training questions: Gemma turns 2025 Current Events items into questions (resumable)
+    $lim = if ($Quick) { @("--limit", "40") } else { @() }
+    Log "reader data 1/2: Gemma writes news questions from the 2025 Current Events items (resumable; ~1 h first time)"
+    P3 (@("readtasks", "newsq", "--out", $newsTasks, "--gemma-path", $GEMMA) + $lim)
+    # 2. labelled pools from known answers: Brave while the month allows, then ddgs (relevance-checked)
+    $lim = if ($Quick) { @("--limit", "60") } else { @() }
+    Log "reader data 2/2: search + label pools for the Wikidata and news questions (resumable; ~1.5-2 h first time)"
+    P3 (@("xreader", "collect", "--tasks", "$READ_TASKS,$newsTasks", "--points", $points, "--search", "brave",
+          "--secondary", "ddgs", "--brave-reserve", $BRAVE_RESERVE) + $lim)
+    # 3. the readers, trained ONCE (round 4's labelled pools for the 1,455 round 3 questions are reused)
+    $q = if ($Quick) { @("--max-points", "300", "--epochs", "1") } else { @() }
+    if (Test-Newer $points "checkpoints/xreader_planck$Tag/reader.pt") {
+        Log "train the Planck 1.3 reader (100M, cross-encoder), once"
+        P3 (@("xreader", "train", "--base", "planck", "--points", $points, "--base-checkpoint", $PLANCK_CKPT, "--base-tokenizer", $PLANCK_TOK) + $ttag + $q)
+    }
+    if ($haveHertz -and (Test-Newer $points "checkpoints/xreader_hertz$Tag/reader.pt")) {
+        Log "train the Hertz 1.2 reader (640M, cross-encoder), once"
+        P3 (@("xreader", "train", "--base", "hertz", "--points", $points, "--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK) + $ttag + $q)
+    } elseif (-not $haveHertz) { Warn "no Hertz checkpoint: the Hertz reader arm is skipped" }
+    # 4. reading only (template writer), all on Brave: floor, round 5's reader, the new readers, Gemma
+    Invoke-R6 "r6_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 6: no-model floor"
+    Invoke-R6 "r6_planck_template" @("--reader", "planck", "--writer", "template") "round 6: round 5's Planck reader (frozen features), template writer"
+    Invoke-R6 "r6_x-planck_template" @("--reader", "x-planck", "--reader-checkpoint", "checkpoints/xreader_planck$Tag/reader.pt", "--writer", "template") "round 6: the new Planck reader, template writer"
+    if (Test-Path "checkpoints/xreader_hertz$Tag/reader.pt") {
+        Invoke-R6 "r6_x-hertz_template" @("--reader", "x-hertz", "--reader-checkpoint", "checkpoints/xreader_hertz$Tag/reader.pt", "--writer", "template") "round 6: the new Hertz reader, template writer"
+    }
+    Invoke-R6 "r6_gemma_template" @("--reader", "gemma", "--writer", "template") "round 6: Gemma reader, template writer (reading reference)"
+    $reader = @((Invoke-Quiet $PY (@("scripts/planck3.py", "r6", "reader") + $ttag)).Out | Where-Object { $_ })[-1]
+    if (-not $reader) { $reader = "x-planck" }
+    $rbase = $reader.Substring(2)
+    $rck = @("--reader", $reader, "--reader-checkpoint", "checkpoints/xreader_$rbase$Tag/reader.pt")
+    Log "reader that ships (pre-registered rule): $reader"
+    # 5. writers: round 5's data re-judged (checker fix), new Gemma answers with the forced lead, retrain once
+    $w5 = "data/planck3/writer/train.jsonl"
+    $w6 = "data/planck3/writer/train6$Tag.jsonl"
+    if (Test-Path $w5) { Log "writer data: re-judge round 5's examples with the fixed checker"; P3 @("writer", "rescore", "--out", $w5) }
+    $lim = if ($Quick) { @("--limit", "40") } else { @("--limit", "1500") }
+    Log "writer data: Gemma writes answers (forced lead) for the reader-training questions (resumable; ~1-1.5 h)"
+    P3 (@("writer", "collect", "--tasks", "$READ_TASKS,$newsTasks", "--out", $w6, "--search", "brave", "--secondary", "ddgs",
+          "--brave-reserve", $BRAVE_RESERVE, "--gemma-path", $GEMMA) + $rck + $lim)
+    $wdata = if (Test-Path $w5) { "$w5,$w6" } else { $w6 }
+    $writers = @("planck"); if ($haveHertz) { $writers += "hertz" }
+    foreach ($w in $writers) {
+        if (Test-Newer $w6 "checkpoints/writer_${w}6$Tag/best.pt") {
+            Log "train the $w writer once more (round 6 data, forced lead)"
+            $wa = @("writer", "train", "--base", $w, "--out", $wdata, "--require-lead", "--tag", "6$Tag")
+            if ($w -eq "hertz") { $wa += @("--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK, "--batch-size", "4") }
+            else { $wa += @("--base-checkpoint", $PLANCK_CKPT, "--base-tokenizer", $PLANCK_TOK) }
+            P3 $wa
+        }
+        Log "KV cache check: $w writer (cached vs uncached greedy answers must be identical)"
+        P3 @("writer", "kvcheck", "--checkpoint", "checkpoints/writer_${w}6$Tag/best.pt", "--out", $w6, "--limit", "20")
+    }
+    # 6. the product candidates and the full Gemma reference
+    foreach ($w in $writers) {
+        Invoke-R6 "r6_${reader}_$w" ($rck + @("--writer", $w, "--writer-checkpoint", "checkpoints/writer_${w}6$Tag/best.pt", "--tries", "3")) "round 6: $reader reader + $w writer (product candidate)"
+    }
+    Invoke-R6 "r6_gemma_gemma" @("--reader", "gemma", "--writer", "gemma") "round 6: Gemma reader + Gemma writer (reference)"
+    # 7. what ships (pre-registered), then the checks around it
+    P3 (@("r6", "product") + $ttag)
+    $prod = Get-Content "$RES/r6_product$Tag.json" -Raw | ConvertFrom-Json
+    $pa = $rck + @("--writer", $prod.writer)
+    if ($prod.writer -ne "template") { $pa += @("--writer-checkpoint", "checkpoints/writer_$($prod.writer)6$Tag/best.pt", "--tries", "3") }
+    Invoke-R6 "$($prod.run)_contrarian" ($pa + @("--personal", "contrarian")) "round 6: worst-case personal profile on the product (rule E)"
+    if ($prod.writer -ne "template" -and -not (Test-Path "$RES/$($prod.run)$Tag/judge.json")) {
+        Log "writer judge: Gemma compares the small writer's answers with the template, blind"
+        P3 @("writer", "judge", "--run", "$RES/$($prod.run)$Tag", "--gemma-path", $GEMMA)
+    }
+    # 8. CPU only, 4 threads: the phone proxy, now with the KV cache (searches and pages are cached by now)
+    $old = $env:CUDA_VISIBLE_DEVICES; $env:CUDA_VISIBLE_DEVICES = "-1"; $env:OMP_NUM_THREADS = "4"
+    try {
+        Invoke-R6 "$($prod.run)_cpu" $pa "round 6: the product on CPU only, 4 threads, 20 questions (phone proxy, KV cache)" 20
+        foreach ($w in $writers) { P3 @("writer", "kvcheck", "--checkpoint", "checkpoints/writer_${w}6$Tag/best.pt", "--out", $w6, "--limit", "10") }
+    }
+    finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -619,13 +737,19 @@ function Do-Push {
     if ($NoPush) { Log "-NoPush: results left uncommitted"; return }
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
-                       "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log")) {
+                       "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log", "judge.json", "judge_pairs.jsonl",
+                       "r6_product*.json")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
     # the system trust layer is shared with every user: it ships in git
     if (Test-Path "config/planck3/source_trust.json") { Invoke-Quiet git @("add", "--", "config/planck3/source_trust.json") | Out-Null }
     Get-ChildItem -Path "data/planck3/g2" -Filter "points_*.health.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    # round 6: Gemma's news questions (and the rejected ones, with reasons) are training data: keep them auditable
+    Get-ChildItem -Path "data/planck3/reader" -Filter "news_tasks*.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    Get-ChildItem -Path "data/planck3/reader" -Filter "points*.health.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null   # belt and braces: the repo is public
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
@@ -698,6 +822,17 @@ switch ($Command.ToLower()) {
         Do-Round5
         P3 @("report")
         Log ("round5$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round6"     {
+        Start-RunLog "round6"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Doctor $true
+        Do-Round6
+        P3 @("report")
+        Log ("round6$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round4"     {
