@@ -197,3 +197,34 @@ The product is the Planck reader + Hertz writer (the Planck writer if Hertz is m
 | Benchmark gold wrong (drafted this round) | 2 sources + verbatim quotes per answer, your spot-check, `--rescore` without re-running |
 | Hertz is slow on CPU without a KV cache | latency measured (rule L); a KV cache is the next engineering step if the product passes |
 | Gemma's writing style leaks Gemma's mistakes into the small writers | only faithful examples are kept; the writer only sees the sources, so it learns phrasing, not facts |
+
+## 10. Results of record (round 5, 2026-10-10, b0b02c9)
+
+The search problem first. For the 100 new questions, ddgs returned off-topic results: xhamster.com, kaskus.co.id, amazon.com, linkedin.com and calculator.net among the "sources" for election and appointment questions. The run's search check counts only empty searches, so it passed these as valid. On those 100 questions the ddgs runs mostly measure a search failure, not the pipeline. The 143 fresh + long-tail questions reuse the ddgs results cached in round 4, which were good. **Read the 143 column as the pipeline and the Brave row as the search fix.**
+
+| Run | 143 fresh + long-tail | 100 new (news + general info) | 9-10 band: n / right | 7-8 band: n / right | Writer's own answers faithful |
+|---|---|---|---|---|---|
+| no model (heuristic + template) | 56.6% | 14.0% | 27 / 81% | 70 / 61% | n/a |
+| Planck reader + template | 58.7% | 9.0% | 28 / 79% | 73 / 58% | n/a |
+| **Planck reader + Hertz writer (product)** | **58.7%** | 10.0% | 28 / 79% | 74 / 58% | 46% |
+| Planck reader + Planck writer | 58.7% | 11.0% | 29 / 79% | 73 / 59% | 47% |
+| **Gemma reader + Gemma writer** | **79.0%** | 16.0% | **41 / 93%** | **92 / 77%** | 37% (checker bug, below) |
+| product on **Brave** | 55.2% | **46.0%** | 39 / 64% | 66 / 62% | 54% |
+| product, worst-case personal profile | 58.7% | 11.0% | 0 / n/a | 4 / 75% | 48% |
+
+On the 143 questions with good search, Gemma's 9-10 band was right 94% of the time (n = 33), its 7-8 band 79% (n = 85), and precision fell band by band. Round 4's Gemma-on-tools got 67.8% of these right; round 5's Gemma reader + weighing gets 79.0% (20 vs 4 discordant, p = 0.0015).
+
+**Verdicts (section 5 rules, product = Planck reader + Hertz writer):**
+- **C1 FAIL:** 9-10 band right 79% (bar 90%), 7-8 band 58% (bar 70%); the bands do fall in order. The same arithmetic **passes with the Gemma reader** (93% / 77%), so the weighing works and the Planck reader's probabilities are what miscalibrate it.
+- **C2 FAIL:** 58.7% on the 143 (bar 62.9%; round 4's Planck v2 harness, 13 vs 19, p = 0.38, not significant).
+- **C3 FAIL:** Gemma 79.0% vs product 58.7% on the 143 (38 vs 9, p = 2.5e-5). The gap is reading; the writer never changes the value (Planck + template = Planck + Hertz).
+- **W FAIL:** the Hertz writer's own answers pass the check 46% of the time (bar 95%). Part of this is real: it invents names ("Sébastien Grosjean", "Olympic Games") and years ("2024"), and 84 times it does not state the answer. Part is a checker bug: Gemma's failures are almost all "number 1 / 2 / 3 is not in the sources", which means citation lists like "[1, 2]" are read as unsupported numbers. So only 410 of 1,200 Gemma examples survived, and Hertz was trained on 410.
+- **E PASS:** the worst-case personal profile (every source scored 10 − system) changes accuracy by +0.4 pts (6 vs 5, p = 1). It moves 47% of answers to a lower band, and every one of those is flagged on the card.
+- **B, adopt Brave:** on the 100 new questions 46.0% vs 10.0% (38 vs 2); on the 143 cached ones 55.2% vs 58.7% (16 vs 21, p = 0.51, n.s.). Brave is not worse, so it becomes the product search.
+- **L (reported):** CPU only, 4 threads: reading 0.9 s per question, Hertz writing **27.8 s** (no KV cache), so not phone-ready yet. On the GPU: 17 ms reading, 99 ms (Planck) / 267 ms (Hertz) writing.
+- **Reported:** registry coverage 78% (the answer's top source was hand-scored); question type right 97.9% (tuned, disclosed); gold answers in the 100 new questions not yet spot-checked by the owner.
+
+**What it means:**
+1. **The design works when the reader is good.** Hand-scored trust, independent agreement, conflicts and the question-type penalty give honest bands with Gemma reading: 9-10 is 93-94% right, 7-8 is 77-79%. It is also the best accuracy of the project on these questions (79.0%).
+2. **Reading, not writing, separates small from big.** A 100M reader trained on 1,455 encyclopedic questions loses 20 points to Gemma, mostly on 2026 news-style facts (35% vs 75%). The template writes an answer as accurate as any model writer, faithful by construction and instant.
+3. **Search has to be checked for relevance, not only emptiness.** The search check needs a relevance check (do the results mention the question's subject?) before any more ddgs runs. Brave fixes the new questions.

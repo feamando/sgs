@@ -333,6 +333,12 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **W:** writer faithful ≥ 95%.
     - **E:** worst-case personal profile ≤ 10 pts drop.
     - **B:** Brave vs ddgs.
+- **ROUND 5 RESULTS OF RECORD (2026-10-10, b0b02c9; SETUP_planck_20261009.md section 10):**
+  - **The design works with a good reader:** Gemma reader + the itemized 0-10 weighing gets **79.0%** of the 143 fresh + long-tail questions right (round 4 Gemma-on-tools 67.8%, p = 0.0015), with honest bands (9-10 band right 93-94%, 7-8 band 77-79%).
+  - **The small-model product fails C1/C2/C3/W:** Planck reader 58.7% vs Gemma 79.0% (p = 2.5e-5); bands miscalibrated (79% / 58%); the Hertz writer's own answers faithful 46% (partly a checker bug on "[1, 2]" citations). The template writer is as accurate as any model writer.
+  - **E PASS:** the 30% cap holds; the worst-case profile costs 0 pts and every changed answer is flagged.
+  - **Search:** ddgs returned junk for the 100 new questions (relevance not checked); Brave 46% vs 10% there (38 vs 2) and n.s. on the 143, so it is adopted.
+  - **CPU:** Hertz writing 27.8 s per question without a KV cache.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
