@@ -1,0 +1,36 @@
+{
+  "name": "hertz",
+  "base": "checkpoints/hertz12/best.pt",
+  "examples": 1412,
+  "require_lead": true,
+  "train": 1271,
+  "val": 141,
+  "best_val_loss": 0.7341474923822615,
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_loss": 0.965272715069213,
+      "val_loss": 0.7646511188811727,
+      "s": 36.4
+    },
+    {
+      "epoch": 1,
+      "train_loss": 0.4040269990387203,
+      "val_loss": 0.7432656602727042,
+      "s": 36.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.16360770015385728,
+      "val_loss": 0.7341474923822615,
+      "s": 35.9
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.052357818928412486,
+      "val_loss": 0.7400372193919288,
+      "s": 36.0
+    }
+  ],
+  "params": 640812055
+}
