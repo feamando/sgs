@@ -1,0 +1,21 @@
+{
+  "reader": "x-hertz",
+  "reader_why": "Hertz reads >= 3 points better on held-out questions",
+  "test_choice_acc": {
+    "planck": 0.44611528822055135,
+    "hertz": 0.6090225563909775
+  },
+  "reader_checkpoint": "checkpoints/xreader_hertz_v2/reader.pt",
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r6b_x-hertz_template",
+  "tag": "",
+  "rule_r": {
+    "pass": false,
+    "acc": 0.4732510288065844,
+    "midpoint": 0.5740740740740741,
+    "vs_round5_reader": 0.51440329218107,
+    "p": 0.2528543941881108,
+    "n": 243
+  }
+}

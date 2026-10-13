@@ -1,0 +1,92 @@
+{
+  "n": 243,
+  "accuracy": 0.4732510288065844,
+  "bands": {
+    "high": {
+      "n": 14,
+      "share": 0.05761316872427984,
+      "precision": 0.8571428571428571
+    },
+    "good": {
+      "n": 84,
+      "share": 0.345679012345679,
+      "precision": 0.7142857142857143
+    },
+    "low": {
+      "n": 74,
+      "share": 0.3045267489711934,
+      "precision": 0.35135135135135137
+    },
+    "sceptical": {
+      "n": 40,
+      "share": 0.1646090534979424,
+      "precision": 0.425
+    },
+    "none": {
+      "n": 31,
+      "share": 0.12757201646090535,
+      "precision": null
+    }
+  },
+  "bands_monotone": false,
+  "by_regime": {
+    "fresh": {
+      "n": 60,
+      "accuracy": 0.31666666666666665
+    },
+    "general_info": {
+      "n": 40,
+      "accuracy": 0.45
+    },
+    "long_tail": {
+      "n": 83,
+      "accuracy": 0.6987951807228916
+    },
+    "news": {
+      "n": 60,
+      "accuracy": 0.3333333333333333
+    }
+  },
+  "qtype_accuracy": 0.9794238683127572,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 0.9840637450199203,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.9045454545454545,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 0.6189300411522634,
+    "fetch_ms": 29.648559670781893,
+    "read_ms": 63.14855967078189,
+    "write_ms": 0.0,
+    "total_ms": 264.3670781893004
+  },
+  "mean_search_calls": 1.0329218106995885,
+  "mean_fetch_calls": 1.522633744855967,
+  "reader": "x-hertz",
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 251,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 251
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.01593625498007968,
+    "on_topic_rate": 0.9840637450199203,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "valid": true
+  },
+  "wall_s": 64.5,
+  "llm_usd_per_task_as_haiku": 0.0
+}

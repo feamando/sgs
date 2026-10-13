@@ -1,0 +1,1410 @@
+[planck3 23:21:06] logging to C:\Users\feama\sgs\results\planck3\logs\round6b_20261013_2321.log
+[planck3 23:21:06] installing Planck 3.0 deps into .venv
+[planck3 23:21:10] offline smoke tests
+[planck3 23:21:44] round 6b: train the planck reader once more, on the top 16 candidates as served
+> python scripts/planck3.py xreader train --base planck --points data/planck3/reader/points.jsonl --tag _v2 --base-checkpoint checkpoints/planck13/best.pt --base-tokenizer data/wikipedia/tokenizer.model
+[xreader:planck] 5310 train / 592 val / 654 test pools (72,472 train candidates), 1000-d backbone, 3399 steps
+  [xreader:planck] epoch 0: loss 1.9868 val choice 0.468 (61s)
+  [xreader:planck] epoch 1: loss 1.8731 val choice 0.477 (56s)
+C:\Users\feama\sgs\src\planck3\xreader.py:311: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  w = torch.load(out_dir / "weights.pt", map_location=device)
+  [xreader:planck] epoch 2: loss 1.8486 val choice 0.474 (56s)
+[xreader:planck] test: choice 0.446 vs ranker 0.434 on 399 pools with a right one; gate AUC 0.7039231422906241, ECE 0.04729825795768341
+    stable  choice 0.512 vs ranker 0.479 (n=217)
+    recent  choice 0.324 vs ranker 0.268 (n=71)
+    news    choice 0.407 vs ranker 0.475 (n=59)
+    info    choice 0.385 vs ranker 0.423 (n=52)
+[planck3 23:25:04] round 6b: the planck reader (as served), template writer
+> python scripts/planck3.py r5 --reader x-planck --reader-checkpoint checkpoints/xreader_planck_v2/reader.pt --writer template --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search brave --out results/planck3/r6b_x-planck_template --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/243] XX  bwinner000   Anna Pushkareva                low       5.0/10  
+[  2/243] OK  bwinner001   Spain                          high      9.0/10  
+[  3/243] XX  bwinner002   Jakub Menšík                   sceptical 3.0/10  
+[  4/243] XX  bwinner003   WTA                            low       6.0/10  
+[  5/243] XX  bwinner004   Anna Bondár                    low       5.0/10  
+[  6/243] XX  bwinner005   JPN                            low       5.0/10  
+[  7/243] XX  bwinner006   IndyCar OnlyBulls Grand Prix o sceptical 3.0/10  
+[  8/243] XX  bwinner007   Tri-City Raceway               low       5.0/10  
+[  9/243] XX  bwinner008   Results Men Elite              low       5.0/10  
+[ 10/243] OK  bwinner009   Paul Magnier                   sceptical 4.0/10  
+[ 11/243] XX  bwinner010   Challenger Men                 sceptical 1.0/10  
+[ 12/243] XX  bwinner011   Winter Olympics                low       6.0/10  
+[ 13/243] XX  bwinner012   Glasgow                        low       6.0/10  
+[ 14/243] OK  bwinner013   Paul Seixas                    good      8.0/10  
+[ 15/243] OK  bwinner014   Southend United                low       5.0/10  
+[ 16/243] XX  bwinner015   Beijing                        low       6.0/10  
+[ 17/243] XX  bwinner016   Montreal                       low       5.0/10  
+[ 18/243] XX  bwinner017   Budapest                       low       6.0/10  
+[ 19/243] XX  bwinner018   Butterfly Final Results PDF    low       6.0/10  
+[ 20/243] OK  bwinner019   Johannes Liebmann              good      7.0/10  
+[ 21/243] XX  bwinner020   Milan                          low       6.0/10  
+[ 22/243] XX  bwinner021   Kansas Speedway                low       5.0/10  
+[ 23/243] XX  bwinner022   Demi Vollering                 good      8.0/10  
+[ 24/243] XX  bwinner023   Accra                          good      7.0/10  
+[ 25/243] OK  bwinner024   Jamie Mackenzie                low       5.0/10  
+[ 26/243] XX  bwinner025   WTA                            low       6.0/10  
+[ 27/243] XX  bwinner026   Birmingham                     good      7.0/10  
+[ 28/243] XX  bwinner027   NASCAR O'Reilly Auto Parts Ser sceptical 3.0/10  
+[ 29/243] XX  bwinner028   Watkins Glen                   good      7.0/10  
+[ 30/243] XX  bwinner029   Americas                       low       6.0/10  
+[ 31/243] XX  belection000 Prime Minister Nikol Pashinyan good      7.0/10  
+[ 32/243] OK  belection001 Daniel Ennis                   low       5.0/10  
+[ 33/243] XX  belection002 Prince Edward Island           low       5.0/10  
+[ 34/243] XX  belection003 Osaka Prefecture               good      7.0/10  
+[ 35/243] XX  belection004 Croydon London Borough Council good      7.0/10  
+[ 36/243] OK  belection005 Marsh                          good      7.0/10  
+[ 37/243] OK  belection006 Tatiana Auguste                sceptical 4.0/10  
+[ 38/243] XX  belection007 House of Representatives       high      10.0/10  
+[ 39/243] XX  belection008 Ontario                        low       5.0/10  
+[ 40/243] XX  belection009 London Borough of Bexley       good      7.0/10  
+[ 41/243] XX  bseason000   Four Days of Dunkirk           low       5.0/10  
+[ 42/243] OK  bseason001   Prairie View A&M               low       5.0/10  
+[ 43/243] XX  bseason002   France                         low       6.0/10  
+[ 44/243] XX  bseason003   Season                         sceptical 1.0/10  
+[ 45/243] OK  bseason004   Anna                           low       5.0/10  
+[ 46/243] XX  bseason005   Serie C                        good      7.0/10  
+[ 47/243] XX  bseason006   Inter                          good      7.0/10  
+[ 48/243] XX  bseason007   Dublin                         low       5.0/10  
+[ 49/243] OK  bseason008   Aubry Bracco                   good      7.0/10  
+[ 50/243] XX  bseason009   Table                          low       5.0/10  
+[ 51/243] --  bheadgov000  None                           none      -/10  
+[ 52/243] XX  bheadgov001  Rhein                          low       5.0/10  
+[ 53/243] XX  bheadgov002  Santa Perpetua de Moguda       low       5.0/10  
+[ 54/243] OK  bheadgov003  Alexis Chaussalet              low       6.0/10  
+[ 55/243] XX  bheadgov004  Guinea                         low       5.0/10  
+[ 56/243] XX  bheadgov005  Germany                        low       5.0/10  
+[ 57/243] OK  bheadgov006  Guillaume GUERIN               sceptical 1.0/10  
+[ 58/243] XX  bheadgov007  Sébastien Miossec              low       5.0/10  
+[ 59/243] XX  bheadgov008  Mette Frederiksen              good      8.0/10  
+[ 60/243] OK  bheadgov009  Cyril Samson                   low       6.0/10  
+[ 61/243] OK  bfounded000  2000                           high      10.0/10  
+[ 62/243] OK  bfounded001  2000                           low       6.0/10  
+[ 63/243] OK  bfounded002  2000                           high      9.0/10  
+[ 64/243] OK  bfounded003  1999                           high      10.0/10  
+[ 65/243] XX  bfounded004  2001                           sceptical 2.0/10  
+[ 66/243] OK  bfounded005  1930                           good      7.0/10  
+[ 67/243] OK  bfounded006  1982                           good      7.0/10  
+[ 68/243] XX  bfounded007  2008                           low       5.0/10  
+[ 69/243] OK  bfounded008  2015                           good      8.0/10  
+[ 70/243] XX  bfounded009  2005                           sceptical 4.0/10  
+[ 71/243] OK  bfounded010  2003                           good      8.0/10  
+[ 72/243] OK  bfounded011  2009                           good      8.0/10  
+[ 73/243] OK  bfounded012  1951                           good      8.0/10  
+[ 74/243] OK  bfounded013  1893                           low       6.0/10  
+[ 75/243] XX  bfounded014  1857                           low       6.0/10  
+[ 76/243] OK  bfounded015  1987                           good      7.0/10  
+[ 77/243] OK  bfounded016  1984                           high      9.0/10  
+[ 78/243] OK  bfounded017  1936                           good      8.0/10  
+[ 79/243] XX  bfounded018  2008                           low       5.0/10  
+[ 80/243] OK  bfounded019  1876                           good      7.0/10  
+[ 81/243] OK  bborn000     1992                           high      9.0/10  
+[ 82/243] OK  bborn001     1951                           good      8.0/10  
+[ 83/243] OK  bborn002     1978                           good      8.0/10  
+[ 84/243] OK  bborn003     1985                           high      9.0/10  
+[ 85/243] OK  bborn004     1965                           good      7.0/10  
+[ 86/243] OK  bborn005     1992                           good      8.0/10  
+[ 87/243] XX  bborn006     1977                           low       6.0/10  
+[ 88/243] XX  bborn007     1997                           low       6.0/10  
+[ 89/243] OK  bborn008     1992                           high      9.0/10  
+[ 90/243] OK  bborn009     1951                           good      7.0/10  
+[ 91/243] OK  bborn010     1958                           good      7.0/10  
+[ 92/243] XX  bborn011     1932                           low       6.0/10  
+[ 93/243] OK  bborn012     1985                           good      8.0/10  
+[ 94/243] OK  bborn013     1951                           good      7.0/10  
+[ 95/243] OK  bborn014     1978                           good      8.0/10  
+[ 96/243] OK  bborn015     1992                           good      7.0/10  
+[ 97/243] OK  bborn016     1999                           high      9.0/10  
+[ 98/243] XX  bborn017     1984                           good      8.0/10  
+[ 99/243] OK  bborn018     1978                           good      7.0/10  
+[100/243] OK  bborn019     1999                           low       6.0/10  
+[101/243] OK  belevation000 774 metre                      low       6.0/10  
+[102/243] XX  belevation001 800 metres                     low       6.0/10  
+[103/243] OK  belevation002 1453 m                         good      7.0/10  
+[104/243] OK  belevation003 2,829 m                        good      7.0/10  
+[105/243] OK  belevation004 2,760 m                        low       6.0/10  
+[106/243] XX  belevation005 3,237 metres                   low       6.0/10  
+[107/243] XX  belevation006 861 m                          sceptical 4.0/10  
+[108/243] OK  belevation007 585.2 m                        low       6.0/10  
+[109/243] XX  belevation008 1,493 metres                   good      7.0/10  
+[110/243] XX  belevation009 520 metres                     low       6.0/10  
+[111/243] XX  belevation010 108 metres                     low       6.0/10  
+[112/243] XX  belevation011 1134 metres                    good      7.0/10  
+[113/243] XX  belevation012 1,190 metres                   sceptical 4.0/10  
+[114/243] OK  belevation013 630 m                          good      7.0/10  
+[115/243] XX  belevation014 1,713 metres                   good      7.0/10  
+[116/243] XX  bfounder000  Société Belge de Banque        low       6.0/10  
+[117/243] XX  bfounder001  Czech Republic                 low       6.0/10  
+[118/243] XX  bfounder002  Finland                        good      8.0/10  
+[119/243] XX  bfounder003  Fenno-Filmi Oy                 low       6.0/10  
+[120/243] XX  bfounder004  Belgium                        good      7.0/10  
+[121/243] OK  bfounder005  Abel Adams                     low       6.0/10  
+[122/243] OK  bfounder006  Yellow Claw                    good      7.0/10  
+[123/243] XX  bfounder007  Luxo ASA                       low       6.0/10  
+[124/243] XX  bfounder008  Comvik                         low       5.0/10  
+[125/243] XX  bfounder009  IVHQ                           low       6.0/10  
+[126/243] OK  bauthor000   O'Flaherty                     high      9.0/10  
+[127/243] OK  bauthor001   Petterson                      good      8.0/10  
+[128/243] OK  bauthor002   Roddy Doyle                    high      10.0/10  
+[129/243] XX  bauthor003   Athena-Artemis Helsinki        low       6.0/10  
+[130/243] XX  bauthor004   Varian Johnson                 sceptical 3.0/10  
+[131/243] OK  bauthor005   Kaari Utrio                    good      7.0/10  
+[132/243] XX  bauthor006   Judge Dee                      good      7.0/10  
+[133/243] --  bauthor007   None                           none      -/10  
+[134/243] OK  bauthor008   Dag Schjelderup-Ebbe           good      7.0/10  
+[135/243] XX  bauthor009   Bruce Springsteen              good      7.0/10  
+[136/243] OK  bchat_born00 ['1958', '1951']               good      8.0/10  
+[137/243] OK  bchat_born01 ['1992', '1978']               good      8.0/10  
+[138/243] OK  bchat_born02 ['1951', '1965']               good      8.0/10  
+[139/243] XX  bchat_born03 ['1989', '1992']               sceptical 2.0/10  
+[140/243] OK  bchat_founded00 ['1968', '2001']               good      7.0/10  
+[141/243] XX  bchat_founded01 ['2005', '1911']               high      9.0/10  
+[142/243] OK  bchat_founded02 ['1996', '2002']               good      7.0/10  
+[143/243] XX  bchat_founded03 ['1987', '1989']               good      7.0/10  
+[144/243] XX  news001      349                            good      8.0/10  
+[145/243] OK  news002      Yuliia Mendel                  low       6.0/10  
+[146/243] OK  news003      Marat Kambolov                 low       5.0/10  
+[147/243] XX  news004      355                            low       6.0/10  
+[148/243] XX  news005      AfD                            good      8.0/10  
+[149/243] OK  news006      Ana Brnabić                    high      9.0/10  
+[150/243] OK  news007      Fatima Ezzahra El Mansouri     good      7.0/10  
+[151/243] OK  news008      United List                    low       5.0/10  
+[152/243] OK  news009      Flavio Bolsonaro               good      8.0/10  
+[153/243] XX  news010      October 5, 2026                low       5.0/10  
+[154/243] OK  news011      Parti Quebecois                low       6.0/10  
+[155/243] OK  news012      Justina Shiroka Pula           sceptical 2.0/10  
+[156/243] XX  news013      Ben Shelton                    high      9.0/10  
+[157/243] OK  news014      Kimi Antonelli                 good      7.0/10  
+[158/243] OK  news015      Team Europe                    low       5.0/10  
+[159/243] OK  news016      France                         good      8.0/10  
+[160/243] OK  news017      Nairobi                        good      7.0/10  
+[161/243] XX  news018      Fiji                           low       6.0/10  
+[162/243] XX  news019      Montreal                       sceptical 4.0/10  
+[163/243] XX  news020      Fremantle                      low       6.0/10  
+[164/243] OK  news021      Czechia                        low       5.0/10  
+[165/243] OK  news022      Brandon McNulty                good      8.0/10  
+[166/243] OK  news023      Guye Adola                     low       6.0/10  
+[167/243] XX  news024      Newcastle Knights              good      7.0/10  
+[168/243] OK  news025      2.50 %                         low       6.0/10  
+[169/243] OK  news026      525                            sceptical 1.0/10  
+[170/243] OK  news027      Clearlake Capital              low       6.0/10  
+[171/243] OK  news028      1.25 %                         sceptical 1.0/10  
+[172/243] OK  news029      4.60 %                         good      7.0/10  
+[173/243] OK  news030      Skydance                       low       6.0/10  
+[174/243] XX  news031      7                              sceptical 1.0/10  
+[175/243] OK  news032      87.22 billion                  sceptical 3.0/10  
+[176/243] XX  news033      World Health Organization      sceptical 3.0/10  
+[177/243] OK  news034      107,677                        good      7.0/10  
+[178/243] OK  news035      Leopardus                      sceptical 4.0/10  
+[179/243] OK  news036      74                             good      7.0/10  
+[180/243] OK  news037      14                             good      7.0/10  
+[181/243] OK  news038      Karl Deisseroth                good      8.0/10  
+[182/243] OK  news039      Francis Halzen                 high      9.0/10  
+[183/243] OK  news040      Kenso Soai                     low       6.0/10  
+[184/243] XX  news041      8                              sceptical 3.0/10  
+[185/243] XX  news042      52                             low       5.0/10  
+[186/243] XX  news043      22                             low       6.0/10  
+[187/243] XX  news044      35                             sceptical 1.0/10  
+[188/243] XX  news045      26                             low       5.0/10  
+[189/243] XX  news046      43                             sceptical 4.0/10  
+[190/243] XX  news047      05                             sceptical 3.0/10  
+[191/243] XX  news048      5                              low       6.0/10  
+[192/243] OK  news049      Woman Unknown                  sceptical 2.0/10  
+[193/243] XX  news050      Widow Bay                      sceptical 3.0/10  
+[194/243] XX  news051      Year                           low       6.0/10  
+[195/243] OK  news052      St                             sceptical 4.0/10  
+[196/243] OK  news053      Fate of Ophelia                low       5.0/10  
+[197/243] OK  news054      Anne Carson                    high      9.0/10  
+[198/243] OK  news055      2031                           sceptical 4.0/10  
+[199/243] XX  news056      22                             sceptical 3.0/10  
+[200/243] OK  news057      Belgium                        sceptical 1.0/10  
+[201/243] OK  news058      2                              sceptical 3.0/10  
+[202/243] OK  news059      12                             good      7.0/10  
+[203/243] OK  news060      Eritrea                        low       5.0/10  
+[204/243] XX  info001      Emirates Airlines              high      10.0/10  
+[205/243] OK  info002      3                              high      9.0/10  
+[206/243] XX  info003      StarFlyer                      sceptical 3.0/10  
+[207/243] XX  info004      4                              good      8.0/10  
+[208/243] --  info005      None                           none      -/10  
+[209/243] XX  info006      Ciudad de México               high      9.0/10  
+[210/243] XX  info007      Dublin Airport DUB             high      9.0/10  
+[211/243] XX  info008      Lufthansa Group                good      8.0/10  
+[212/243] --  info009      None                           none      -/10  
+[213/243] OK  info010      3                              good      8.0/10  
+[214/243] OK  info011      London Paddington              good      7.0/10  
+[215/243] OK  info012      35 minutes                     high      9.0/10  
+[216/243] OK  info013      25 minutes                     good      7.0/10  
+[217/243] OK  info014      24 minutes                     high      10.0/10  
+[218/243] OK  info015      Caledonian MacBrayne           high      9.0/10  
+[219/243] OK  info016      V&A Waterfront                 sceptical 4.0/10  
+[220/243] OK  info017      102                            good      8.0/10  
+[221/243] OK  info018      100                            low       5.0/10  
+[222/243] XX  info019      110 km/h                       good      7.0/10  
+[223/243] OK  info020      90                             low       5.0/10  
+[224/243] OK  info021      6                              high      10.0/10  
+[225/243] OK  info022      10111                          good      8.0/10  
+[226/243] OK  info023      000                            high      10.0/10  
+[227/243] OK  info024      911                            good      8.0/10  
+[228/243] OK  info025      25 October 2026                sceptical 3.0/10  
+[229/243] --  info026      None                           none      -/10  
+[230/243] OK  info027      28 December 2026               sceptical 3.0/10  
+[231/243] OK  info028      November 26, 2026              sceptical 3.0/10  
+[232/243] OK  info029      October 12, 2026               sceptical 3.0/10  
+[233/243] XX  info030      08 November 2026               sceptical 3.0/10  
+[234/243] OK  info031      November 3, 2026               sceptical 4.0/10  
+[235/243] OK  info032      November 20, 2026              good      7.0/10  
+[236/243] OK  info033      Dec 16, 2026                   sceptical 3.0/10  
+[237/243] OK  info034      32                             high      10.0/10  
+[238/243] OK  info035      Wednesdays                     high      9.0/10  
+[239/243] OK  info036      25                             high      9.0/10  
+[240/243] OK  info037      Mondays                        low       6.0/10  
+[241/243] OK  info038      Mondays                        good      7.0/10  
+[242/243] OK  info039      Sundays                        high      10.0/10  
+[243/243] XX  info040      18                             sceptical 4.0/10  
+
+==== r5 summary: reader=x-planck writer=template personal=none search=brave ====
+  n 243  accuracy (value shown is right) 0.535  bands monotone False
+  band high       0.123 (n=30) precision 0.800
+  band good       0.337 (n=82) precision 0.683
+  band low        0.342 (n=83) precision 0.361
+  band sceptical  0.177 (n=43) precision 0.465
+  band none       0.021 (n=5)
+  regime fresh         accuracy 0.250 (n=60)
+  regime general_info  accuracy 0.700 (n=40)
+  regime long_tail     accuracy 0.590 (n=83)
+  regime news          accuracy 0.633 (n=60)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9794238683127572
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 7, "fetch_ms": 84, "read_ms": 64, "write_ms": 0, "total_ms": 276}
+[planck3 23:26:15] round 6b: train the hertz reader once more, on the top 16 candidates as served
+> python scripts/planck3.py xreader train --base hertz --points data/planck3/reader/points.jsonl --tag _v2 --base-checkpoint checkpoints/hertz12/best.pt --base-tokenizer data/hertz12_data/tokenizer.model
+[xreader:hertz] 5310 train / 592 val / 654 test pools (72,472 train candidates), 3700-d backbone, 6795 steps
+  [xreader:hertz] epoch 0: loss 1.5053 val choice 0.622 (428s)
+  [xreader:hertz] epoch 1: loss 0.6943 val choice 0.663 (425s)
+C:\Users\feama\sgs\src\planck3\xreader.py:311: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  w = torch.load(out_dir / "weights.pt", map_location=device)
+  [xreader:hertz] epoch 2: loss 0.2145 val choice 0.631 (423s)
+[xreader:hertz] test: choice 0.609 vs ranker 0.434 on 399 pools with a right one; gate AUC 0.8035104582820181, ECE 0.05192856144599413
+    stable  choice 0.737 vs ranker 0.479 (n=217)
+    recent  choice 0.423 vs ranker 0.268 (n=71)
+    news    choice 0.458 vs ranker 0.475 (n=59)
+    info    choice 0.500 vs ranker 0.423 (n=52)
+[planck3 23:48:37] round 6b: the hertz reader (as served), template writer
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_v2/reader.pt --writer template --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search brave --out results/planck3/r6b_x-hertz_template --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/243] XX  bwinner000   Anna Pushkareva                low       6.0/10  
+[  2/243] OK  bwinner001   Spain                          good      8.0/10  
+[  3/243] XX  bwinner002   Loïs Boisson                   low       6.0/10  
+[  4/243] XX  bwinner003   Sara Sorribes Tormo            low       6.0/10  
+[  5/243] XX  bwinner004   Anna Bondár                    sceptical 4.0/10  
+[  6/243] XX  bwinner005   Catherine Debrunner            low       6.0/10  
+[  7/243] OK  bwinner006   Chip Ganassi Alex Palou        low       5.0/10  
+[  8/243] XX  bwinner007   Ford                           low       5.0/10  
+[  9/243] XX  bwinner008   Katie Archibald of Great Brita low       5.0/10  
+[ 10/243] OK  bwinner009   Paul Magnier                   sceptical 4.0/10  
+[ 11/243] --  bwinner010   None                           none      -/10  
+[ 12/243] XX  bwinner011   Miho Takagi                    low       5.0/10  
+[ 13/243] --  bwinner012   None                           none      -/10  
+[ 14/243] OK  bwinner013   Paul Seixas                    good      8.0/10  
+[ 15/243] XX  bwinner014   Manchester City                sceptical 1.0/10  
+[ 16/243] XX  bwinner015   GLU                            low       5.0/10  
+[ 17/243] OK  bwinner016   Remco Evenepoel                good      7.0/10  
+[ 18/243] XX  bwinner017   Arsenal                        low       6.0/10  
+[ 19/243] XX  bwinner018   Summer McIntosh                sceptical 0.0/10  
+[ 20/243] OK  bwinner019   Johannes Liebmann              good      8.0/10  
+[ 21/243] XX  bwinner020   Hwang Dae-heon                 low       5.0/10  
+[ 22/243] XX  bwinner021   Toyota                         low       5.0/10  
+[ 23/243] XX  bwinner022   Mathieu                        sceptical 0.0/10  
+[ 24/243] XX  bwinner023   Frederic MENDY                 low       5.0/10  
+[ 25/243] XX  bwinner024   Valentín González-Galiño       low       5.0/10  
+[ 26/243] XX  bwinner025   Tatjana Maria                  good      7.0/10  
+[ 27/243] --  bwinner026   None                           none      -/10  
+[ 28/243] OK  bwinner027   Jones                          low       5.0/10  
+[ 29/243] OK  bwinner028   Connor Zilisch                 good      8.0/10  
+[ 30/243] XX  bwinner029   Shane Van Gisbergen            good      8.0/10  
+[ 31/243] XX  belection000 Pashinyan                      good      8.0/10  
+[ 32/243] OK  belection001 Daniel Ennis                   low       6.0/10  
+[ 33/243] OK  belection002 Tayte Willows                  good      7.0/10  
+[ 34/243] XX  belection003 Osaka                          low       6.0/10  
+[ 35/243] XX  belection004 Conservative Party             low       6.0/10  
+[ 36/243] XX  belection005 Labor                          good      7.0/10  
+[ 37/243] OK  belection006 Tatiana Auguste                low       5.0/10  
+[ 38/243] XX  belection007 Maria Luisa Flores             sceptical 4.0/10  
+[ 39/243] OK  belection008 Jeff Beattie                   low       6.0/10  
+[ 40/243] OK  belection009 United Kingdom                 low       5.0/10  
+[ 41/243] OK  bseason000   Laurence Pithie                low       6.0/10  
+[ 42/243] XX  bseason001   Skip                           sceptical 1.0/10  
+[ 43/243] OK  bseason002   Monaco                         low       6.0/10  
+[ 44/243] XX  bseason003   Borac Mozzart                  low       5.0/10  
+[ 45/243] XX  bseason004   Demi Vollering                 low       5.0/10  
+[ 46/243] --  bseason005   None                           none      -/10  
+[ 47/243] XX  bseason006   Inter Milan                    low       6.0/10  
+[ 48/243] XX  bseason007   Martin                         low       5.0/10  
+[ 49/243] XX  bseason008   Kalo                           low       6.0/10  
+[ 50/243] --  bseason009   None                           none      -/10  
+[ 51/243] XX  bheadgov000  Denny Tamaki                   low       6.0/10  
+[ 52/243] OK  bheadgov001  Klaus Blettner CDU             sceptical 4.0/10  
+[ 53/243] OK  bheadgov002  Juan Carlos Mingueza Las Heras low       5.0/10  
+[ 54/243] OK  bheadgov003  Alexis Chaussalet              good      7.0/10  
+[ 55/243] XX  bheadgov004  John Swinney                   low       5.0/10  
+[ 56/243] XX  bheadgov005  Gebiet Große Kreisstadt Günzbu sceptical 1.0/10  
+[ 57/243] XX  bheadgov006  Émile Roger Lombertie          low       5.0/10  
+[ 58/243] OK  bheadgov007  Christophe Le Roux             sceptical 1.0/10  
+[ 59/243] XX  bheadgov008  Mette Frederiksen              high      9.0/10  
+[ 60/243] XX  bheadgov009  Délégué                        sceptical 2.0/10  
+[ 61/243] OK  bfounded000  2000                           high      9.0/10  
+[ 62/243] OK  bfounded001  2000                           good      7.0/10  
+[ 63/243] OK  bfounded002  2000                           high      9.0/10  
+[ 64/243] OK  bfounded003  1999                           high      9.0/10  
+[ 65/243] XX  bfounded004  2001                           sceptical 1.0/10  
+[ 66/243] OK  bfounded005  1930                           good      8.0/10  
+[ 67/243] OK  bfounded006  1982                           good      7.0/10  
+[ 68/243] XX  bfounded007  2008                           low       5.0/10  
+[ 69/243] OK  bfounded008  2015                           low       6.0/10  
+[ 70/243] XX  bfounded009  2005                           low       5.0/10  
+[ 71/243] OK  bfounded010  2003                           good      7.0/10  
+[ 72/243] OK  bfounded011  2009                           good      7.0/10  
+[ 73/243] OK  bfounded012  1951                           good      7.0/10  
+[ 74/243] XX  bfounded013  1872                           good      7.0/10  
+[ 75/243] OK  bfounded014  1919                           low       5.0/10  
+[ 76/243] OK  bfounded015  1987                           good      8.0/10  
+[ 77/243] OK  bfounded016  1984                           high      9.0/10  
+[ 78/243] OK  bfounded017  1936                           good      8.0/10  
+[ 79/243] XX  bfounded018  2008                           low       6.0/10  
+[ 80/243] OK  bfounded019  1876                           good      7.0/10  
+[ 81/243] OK  bborn000     1992                           good      7.0/10  
+[ 82/243] OK  bborn001     1951                           good      8.0/10  
+[ 83/243] OK  bborn002     1978                           good      8.0/10  
+[ 84/243] OK  bborn003     1985                           high      9.0/10  
+[ 85/243] OK  bborn004     1965                           good      7.0/10  
+[ 86/243] OK  bborn005     1992                           high      9.0/10  
+[ 87/243] XX  bborn006     1977                           good      8.0/10  
+[ 88/243] XX  bborn007     1989                           low       5.0/10  
+[ 89/243] OK  bborn008     1992                           high      9.0/10  
+[ 90/243] OK  bborn009     1951                           good      8.0/10  
+[ 91/243] OK  bborn010     1958                           good      8.0/10  
+[ 92/243] XX  bborn011     1963                           good      8.0/10  
+[ 93/243] OK  bborn012     1985                           good      7.0/10  
+[ 94/243] OK  bborn013     1951                           good      8.0/10  
+[ 95/243] OK  bborn014     1978                           low       6.0/10  
+[ 96/243] OK  bborn015     1992                           good      8.0/10  
+[ 97/243] OK  bborn016     1999                           high      9.0/10  
+[ 98/243] XX  bborn017     1984                           good      7.0/10  
+[ 99/243] OK  bborn018     1978                           good      8.0/10  
+[100/243] OK  bborn019     1999                           good      8.0/10  
+[101/243] XX  belevation000 1,713 metres                   good      8.0/10  
+[102/243] OK  belevation001 820 m                          good      8.0/10  
+[103/243] OK  belevation002 1,455 m                        high      9.0/10  
+[104/243] OK  belevation003 2,829 m                        good      7.0/10  
+[105/243] OK  belevation004 2,760 m                        good      8.0/10  
+[106/243] OK  belevation005 3,270 metre                    low       6.0/10  
+[107/243] OK  belevation006 2,860 metre                    good      8.0/10  
+[108/243] OK  belevation007 585.2 m                        low       6.0/10  
+[109/243] XX  belevation008 1,494 metres                   good      7.0/10  
+[110/243] XX  belevation009 878 m                          good      8.0/10  
+[111/243] OK  belevation010 2,974                          good      7.0/10  
+[112/243] OK  belevation011 2,653 m                        low       6.0/10  
+[113/243] OK  belevation012 3,176 m                        low       6.0/10  
+[114/243] OK  belevation013 630 m                          good      7.0/10  
+[115/243] XX  belevation014 1,713 metres                   high      9.0/10  
+[116/243] XX  bfounder000  Banque Générale Belge BGB      good      7.0/10  
+[117/243] XX  bfounder001  Martin Palán                   sceptical 2.0/10  
+[118/243] XX  bfounder002  Tietoevry                      low       6.0/10  
+[119/243] XX  bfounder003  Erkki Karu                     good      7.0/10  
+[120/243] --  bfounder004  None                           none      -/10  
+[121/243] OK  bfounder005  Abel Adams                     low       6.0/10  
+[122/243] OK  bfounder006  Yellow Claw                    good      7.0/10  
+[123/243] OK  bfounder007  Jac Jacobsen                   good      8.0/10  
+[124/243] XX  bfounder008  Comvik                         low       6.0/10  
+[125/243] XX  bfounder009  IVHQ                           good      7.0/10  
+[126/243] --  bauthor000   None                           none      -/10  
+[127/243] OK  bauthor001   Petterson                      good      7.0/10  
+[128/243] OK  bauthor002   Doyle                          high      9.0/10  
+[129/243] XX  bauthor003   Athene(Athena                  low       6.0/10  
+[130/243] XX  bauthor004   Shannon Wright                 sceptical 1.0/10  
+[131/243] OK  bauthor005   Kaari Utrio                    low       6.0/10  
+[132/243] OK  bauthor006   Robert Van Gulik               good      8.0/10  
+[133/243] OK  bauthor007   Marianne Fredriksson           low       6.0/10  
+[134/243] OK  bauthor008   Dag Schjelderup-Ebbe           good      7.0/10  
+[135/243] XX  bauthor009   Robert Gordon                  low       6.0/10  
+[136/243] OK  bchat_born00 ['1958', '1951']               good      7.0/10  
+[137/243] OK  bchat_born01 ['1992', '1978']               low       6.0/10  
+[138/243] OK  bchat_born02 ['1951', '1965']               good      8.0/10  
+[139/243] OK  bchat_born03 ['1978', '1992']               good      7.0/10  
+[140/243] OK  bchat_founded00 ['1968', '2001']               sceptical 4.0/10  
+[141/243] OK  bchat_founded01 ['2005', '1990']               low       6.0/10  
+[142/243] OK  bchat_founded02 ['1996', '2002']               good      8.0/10  
+[143/243] XX  bchat_founded03 ['1984', '1989']               good      8.0/10  
+[144/243] XX  news001      349                            good      7.0/10  
+[145/243] OK  news002      Yuliia Mendel                  good      7.0/10  
+[146/243] OK  news003      Marat Kambolov                 low       6.0/10  
+[147/243] XX  news004      355                            low       5.0/10  
+[148/243] XX  news005      Mecklenburg-Western Pomerania  sceptical 4.0/10  
+[149/243] XX  news006      Vučić                          good      7.0/10  
+[150/243] OK  news007      Fatima Ezzahra El Mansouri     good      7.0/10  
+[151/243] XX  news008      Saeima                         low       5.0/10  
+[152/243] OK  news009      Flavio Bolsonaro               good      7.0/10  
+[153/243] XX  news010      October 5, 2026                low       5.0/10  
+[154/243] XX  news011      François Legault               sceptical 3.0/10  
+[155/243] XX  news012      Haxhiu                         low       5.0/10  
+[156/243] XX  news013      Ben Shelton                    good      8.0/10  
+[157/243] OK  news014      Kimi Antonelli                 good      7.0/10  
+[158/243] OK  news015      Team Europe                    sceptical 4.0/10  
+[159/243] OK  news016      France                         good      7.0/10  
+[160/243] XX  news017      Sebastian Coe                  sceptical 1.0/10  
+[161/243] XX  news018      Fiji                           low       6.0/10  
+[162/243] OK  news019      Remco Evenepoel                good      8.0/10  
+[163/243] OK  news020      Brisbane Lions                 good      7.0/10  
+[164/243] XX  news021      Elina Svitolina                sceptical 2.0/10  
+[165/243] XX  news022      Mathieu                        good      8.0/10  
+[166/243] OK  news023      Guye Adola                     good      7.0/10  
+[167/243] XX  news024      Daly Cherry-Evans              good      7.0/10  
+[168/243] XX  news025      25                             sceptical 1.0/10  
+[169/243] --  news026      None                           none      -/10  
+[170/243] XX  news027      Mark Walter                    low       5.0/10  
+[171/243] --  news028      None                           none      -/10  
+[172/243] --  news029      None                           none      -/10  
+[173/243] XX  news030      Trump                          low       5.0/10  
+[174/243] --  news031      None                           none      -/10  
+[175/243] OK  news032      87.2 billion                   sceptical 2.0/10  
+[176/243] XX  news033      World Health Organization      low       5.0/10  
+[177/243] OK  news034      107,677                        low       6.0/10  
+[178/243] --  news035      None                           none      -/10  
+[179/243] OK  news036      74                             good      7.0/10  
+[180/243] OK  news037      14                             low       5.0/10  
+[181/243] OK  news038      Karl Deisseroth                good      8.0/10  
+[182/243] OK  news039      Francis Halzen                 good      8.0/10  
+[183/243] XX  news040      Henri B                        low       6.0/10  
+[184/243] XX  news041      8                              sceptical 1.0/10  
+[185/243] XX  news042      52                             low       5.0/10  
+[186/243] XX  news043      22                             low       5.0/10  
+[187/243] XX  news044      35                             sceptical 1.0/10  
+[188/243] XX  news045      26                             sceptical 4.0/10  
+[189/243] XX  news046      43                             sceptical 4.0/10  
+[190/243] --  news047      None                           none      -/10  
+[191/243] XX  news048      32                             low       6.0/10  
+[192/243] XX  news049      Ang Lee                        low       5.0/10  
+[193/243] XX  news050      Carl Reiner                    low       5.0/10  
+[194/243] XX  news051      Chatham Islands                low       5.0/10  
+[195/243] OK  news052      St                             sceptical 3.0/10  
+[196/243] XX  news053      Bad Blood                      low       5.0/10  
+[197/243] XX  news054      Ingrid Carlberg                sceptical 4.0/10  
+[198/243] OK  news055      2031                           low       6.0/10  
+[199/243] --  news056      None                           none      -/10  
+[200/243] --  news057      None                           none      -/10  
+[201/243] OK  news058      2                              sceptical 3.0/10  
+[202/243] OK  news059      12                             good      7.0/10  
+[203/243] XX  news060      ASMARA                         low       5.0/10  
+[204/243] XX  info001      Proudly                        good      8.0/10  
+[205/243] --  info002      None                           none      -/10  
+[206/243] --  info003      None                           none      -/10  
+[207/243] --  info004      None                           none      -/10  
+[208/243] --  info005      None                           none      -/10  
+[209/243] XX  info006      Toluca International Airport   good      7.0/10  
+[210/243] --  info007      None                           none      -/10  
+[211/243] --  info008      None                           none      -/10  
+[212/243] --  info009      None                           none      -/10  
+[213/243] XX  info010      43.6 million                   sceptical 3.0/10  
+[214/243] --  info011      None                           none      -/10  
+[215/243] --  info012      None                           none      -/10  
+[216/243] OK  info013      25 minutes                     low       6.0/10  
+[217/243] OK  info014      24 minutes                     good      8.0/10  
+[218/243] XX  info015      Stornoway Lewis Ferry Terminal good      8.0/10  
+[219/243] OK  info016      Nelson Mandela Gateway         sceptical 3.0/10  
+[220/243] OK  info017      102                            good      7.0/10  
+[221/243] OK  info018      100                            sceptical 3.0/10  
+[222/243] --  info019      None                           none      -/10  
+[223/243] OK  info020      90                             sceptical 3.0/10  
+[224/243] OK  info021      6                              good      8.0/10  
+[225/243] OK  info022      10111                          good      7.0/10  
+[226/243] OK  info023      000                            high      9.0/10  
+[227/243] OK  info024      911                            good      7.0/10  
+[228/243] OK  info025      25 October 2026                sceptical 3.0/10  
+[229/243] --  info026      None                           none      -/10  
+[230/243] OK  info027      28 December 2026               sceptical 3.0/10  
+[231/243] OK  info028      November 26, 2026              sceptical 3.0/10  
+[232/243] OK  info029      October 12, 2026               sceptical 3.0/10  
+[233/243] XX  info030      08 November 2026               sceptical 3.0/10  
+[234/243] OK  info031      November 3, 2026               sceptical 3.0/10  
+[235/243] OK  info032      November 20, 2026              good      7.0/10  
+[236/243] OK  info033      Dec 16, 2026                   sceptical 3.0/10  
+[237/243] OK  info034      32                             high      10.0/10  
+[238/243] --  info035      None                           none      -/10  
+[239/243] --  info036      None                           none      -/10  
+[240/243] --  info037      None                           none      -/10  
+[241/243] --  info038      None                           none      -/10  
+[242/243] XX  info039      Midday                         good      8.0/10  
+[243/243] --  info040      None                           none      -/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=none search=brave ====
+  n 243  accuracy (value shown is right) 0.473  bands monotone False
+  band high       0.058 (n=14) precision 0.857
+  band good       0.346 (n=84) precision 0.714
+  band low        0.305 (n=74) precision 0.351
+  band sceptical  0.165 (n=40) precision 0.425
+  band none       0.128 (n=31)
+  regime fresh         accuracy 0.317 (n=60)
+  regime general_info  accuracy 0.450 (n=40)
+  regime long_tail     accuracy 0.699 (n=83)
+  regime news          accuracy 0.333 (n=60)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9794238683127572
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 30, "read_ms": 63, "write_ms": 0, "total_ms": 264}
+> python scripts/planck3.py r6 productb
+[r6b] product: reader x-hertz (Hertz reads >= 3 points better on held-out questions); rule R FAIL
+[planck3 23:49:50] round 6b: worst-case personal profile on the product (rule E)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_v2/reader.pt --writer template --personal contrarian --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search brave --out results/planck3/r6b_x-hertz_template_contrarian --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/243] XX  bwinner000   Anna Pushkareva                sceptical 3.6/10  
+[  2/243] OK  bwinner001   Spain                          sceptical 3.6/10  
+[  3/243] XX  bwinner002   Loïs Boisson                   sceptical 3.6/10  
+[  4/243] XX  bwinner003   Sara Sorribes Tormo            sceptical 3.6/10  
+[  5/243] XX  bwinner004   Anna Bondár                    sceptical 3.6/10  
+[  6/243] XX  bwinner005   Catherine Debrunner            sceptical 2.6/10  
+[  7/243] OK  bwinner006   Chip Ganassi Alex Palou        sceptical 3.8/10  
+[  8/243] XX  bwinner007   Ford                           sceptical 2.6/10  
+[  9/243] XX  bwinner008   Katie Archibald of Great Brita sceptical 2.6/10  
+[ 10/243] OK  bwinner009   Paul Magnier                   sceptical 2.8/10  
+[ 11/243] --  bwinner010   None                           none      -/10  
+[ 12/243] XX  bwinner011   Miho Takagi                    sceptical 2.6/10  
+[ 13/243] --  bwinner012   None                           none      -/10  
+[ 14/243] OK  bwinner013   Paul Seixas                    sceptical 3.6/10  
+[ 15/243] XX  bwinner014   Manchester City                sceptical 1.0/10  
+[ 16/243] XX  bwinner015   GLU                            sceptical 2.6/10  
+[ 17/243] OK  bwinner016   Remco Evenepoel                sceptical 3.6/10  
+[ 18/243] XX  bwinner017   Arsenal                        sceptical 3.6/10  
+[ 19/243] XX  bwinner018   Summer McIntosh                sceptical 0.2/10  
+[ 20/243] OK  bwinner019   Johannes Liebmann              sceptical 4.6/10  
+[ 21/243] XX  bwinner020   Hwang Dae-heon                 sceptical 2.6/10  
+[ 22/243] XX  bwinner021   Toyota                         sceptical 2.6/10  
+[ 23/243] XX  bwinner022   Mathieu                        sceptical 2.0/10  
+[ 24/243] XX  bwinner023   Frederic MENDY                 sceptical 2.6/10  
+[ 25/243] XX  bwinner024   Valentín González-Galiño       sceptical 2.6/10  
+[ 26/243] XX  bwinner025   Tatjana Maria                  sceptical 4.6/10  
+[ 27/243] --  bwinner026   None                           none      -/10  
+[ 28/243] OK  bwinner027   Jones                          sceptical 2.6/10  
+[ 29/243] OK  bwinner028   Connor Zilisch                 sceptical 4.6/10  
+[ 30/243] XX  bwinner029   Shane Van Gisbergen            sceptical 4.6/10  
+[ 31/243] XX  belection000 Pashinyan                      sceptical 3.0/10  
+[ 32/243] OK  belection001 Daniel Ennis                   sceptical 3.6/10  
+[ 33/243] OK  belection002 Tayte Willows                  sceptical 2.6/10  
+[ 34/243] XX  belection003 Osaka                          sceptical 2.6/10  
+[ 35/243] XX  belection004 Conservative Party             sceptical 3.6/10  
+[ 36/243] XX  belection005 Labor                          sceptical 2.6/10  
+[ 37/243] OK  belection006 Tatiana Auguste                sceptical 2.6/10  
+[ 38/243] XX  belection007 Maria Luisa Flores             sceptical 2.8/10  
+[ 39/243] OK  belection008 Jeff Beattie                   sceptical 2.6/10  
+[ 40/243] OK  belection009 United Kingdom                 sceptical 2.6/10  
+[ 41/243] OK  bseason000   Laurence Pithie                sceptical 2.6/10  
+[ 42/243] XX  bseason001   Skip                           sceptical 1.0/10  
+[ 43/243] OK  bseason002   Monaco                         sceptical 3.6/10  
+[ 44/243] XX  bseason003   Borac Mozzart                  sceptical 2.6/10  
+[ 45/243] XX  bseason004   Elisa Longo Borghini           sceptical 1.8/10  
+[ 46/243] --  bseason005   None                           none      -/10  
+[ 47/243] XX  bseason006   Inter Milan                    sceptical 4.6/10  
+[ 48/243] XX  bseason007   Martin                         sceptical 2.6/10  
+[ 49/243] XX  bseason008   Kalo                           sceptical 3.6/10  
+[ 50/243] --  bseason009   None                           none      -/10  
+[ 51/243] XX  bheadgov000  Denny Tamaki                   sceptical 3.6/10  
+[ 52/243] OK  bheadgov001  Klaus Blettner CDU             sceptical 3.6/10  
+[ 53/243] OK  bheadgov002  Juan Carlos Mingueza Las Heras sceptical 2.6/10  
+[ 54/243] OK  bheadgov003  Alexis Chaussalet              sceptical 4.6/10  
+[ 55/243] XX  bheadgov004  John Swinney                   sceptical 2.6/10  
+[ 56/243] XX  bheadgov005  Gebiet Große Kreisstadt Günzbu sceptical 1.0/10  
+[ 57/243] XX  bheadgov006  Émile Roger Lombertie          sceptical 2.6/10  
+[ 58/243] OK  bheadgov007  Christophe Le Roux             sceptical 1.0/10  
+[ 59/243] XX  bheadgov008  Mette Frederiksen              sceptical 4.6/10  
+[ 60/243] XX  bheadgov009  Délégué                        sceptical 2.0/10  
+[ 61/243] OK  bfounded000  2000                           low       5.6/10  
+[ 62/243] OK  bfounded001  2000                           sceptical 4.6/10  
+[ 63/243] OK  bfounded002  2000                           low       5.6/10  
+[ 64/243] OK  bfounded003  1999                           low       5.6/10  
+[ 65/243] XX  bfounded004  2001                           sceptical 3.0/10  
+[ 66/243] OK  bfounded005  1930                           low       5.6/10  
+[ 67/243] OK  bfounded006  1982                           sceptical 4.6/10  
+[ 68/243] XX  bfounded007  2008                           sceptical 3.8/10  
+[ 69/243] OK  bfounded008  2015                           sceptical 3.6/10  
+[ 70/243] XX  bfounded009  2005                           sceptical 3.8/10  
+[ 71/243] OK  bfounded010  2003                           low       5.6/10  
+[ 72/243] OK  bfounded011  2009                           sceptical 4.6/10  
+[ 73/243] OK  bfounded012  1951                           low       5.6/10  
+[ 74/243] OK  bfounded013  1893                           sceptical 4.6/10  
+[ 75/243] OK  bfounded014  1919                           sceptical 4.6/10  
+[ 76/243] OK  bfounded015  1987                           low       5.6/10  
+[ 77/243] OK  bfounded016  1984                           low       5.6/10  
+[ 78/243] OK  bfounded017  1936                           low       5.6/10  
+[ 79/243] XX  bfounded018  2008                           low       5.6/10  
+[ 80/243] OK  bfounded019  1876                           sceptical 4.6/10  
+[ 81/243] OK  bborn000     1992                           low       5.6/10  
+[ 82/243] OK  bborn001     1951                           low       5.6/10  
+[ 83/243] OK  bborn002     1978                           sceptical 4.6/10  
+[ 84/243] OK  bborn003     1985                           low       5.6/10  
+[ 85/243] OK  bborn004     1965                           sceptical 4.6/10  
+[ 86/243] OK  bborn005     1992                           low       5.6/10  
+[ 87/243] XX  bborn006     1977                           low       5.6/10  
+[ 88/243] XX  bborn007     1989                           sceptical 4.6/10  
+[ 89/243] OK  bborn008     1992                           low       5.6/10  
+[ 90/243] OK  bborn009     1951                           low       5.6/10  
+[ 91/243] OK  bborn010     1958                           low       5.6/10  
+[ 92/243] XX  bborn011     1963                           low       5.6/10  
+[ 93/243] OK  bborn012     1985                           low       5.6/10  
+[ 94/243] OK  bborn013     1951                           low       5.6/10  
+[ 95/243] OK  bborn014     1978                           sceptical 4.6/10  
+[ 96/243] OK  bborn015     1992                           low       5.6/10  
+[ 97/243] OK  bborn016     1999                           low       5.6/10  
+[ 98/243] XX  bborn017     1984                           sceptical 3.6/10  
+[ 99/243] OK  bborn018     1978                           low       5.6/10  
+[100/243] OK  bborn019     1999                           low       5.6/10  
+[101/243] XX  belevation000 1,713 metres                   sceptical 4.6/10  
+[102/243] OK  belevation001 820 m                          low       5.6/10  
+[103/243] OK  belevation002 1,454 m                        low       5.6/10  
+[104/243] OK  belevation003 2,829 metre                    low       5.6/10  
+[105/243] OK  belevation004 2,760 m                        low       5.6/10  
+[106/243] OK  belevation005 3,270 metre                    low       5.6/10  
+[107/243] OK  belevation006 2,860 metre                    low       5.6/10  
+[108/243] OK  belevation007 585.2 m                        low       5.6/10  
+[109/243] XX  belevation008 1,494 metres                   low       5.6/10  
+[110/243] XX  belevation009 878 m                          low       5.6/10  
+[111/243] OK  belevation010 2,974 metre                    low       5.6/10  
+[112/243] OK  belevation011 2,653 m                        low       5.6/10  
+[113/243] OK  belevation012 3,176 m                        low       5.6/10  
+[114/243] OK  belevation013 630 m                          sceptical 4.6/10  
+[115/243] XX  belevation014 1,713 m                        low       5.6/10  
+[116/243] XX  bfounder000  Banque Générale Belge BGB      sceptical 4.6/10  
+[117/243] XX  bfounder001  Martin Palán                   sceptical 2.0/10  
+[118/243] XX  bfounder002  Tietoevry                      sceptical 3.6/10  
+[119/243] XX  bfounder003  Erkki Karu                     sceptical 4.6/10  
+[120/243] --  bfounder004  None                           none      -/10  
+[121/243] OK  bfounder005  Abel Adams                     sceptical 3.6/10  
+[122/243] OK  bfounder006  Yellow Claw                    sceptical 4.6/10  
+[123/243] OK  bfounder007  Jac Jacobsen                   low       5.6/10  
+[124/243] XX  bfounder008  Comvik                         sceptical 3.6/10  
+[125/243] XX  bfounder009  IVHQ                           sceptical 4.6/10  
+[126/243] --  bauthor000   None                           none      -/10  
+[127/243] OK  bauthor001   Petterson                      sceptical 3.6/10  
+[128/243] OK  bauthor002   Doyle                          sceptical 4.0/10  
+[129/243] XX  bauthor003   Athene(Athena                  sceptical 3.6/10  
+[130/243] XX  bauthor004   Shannon Wright                 sceptical 2.4/10  
+[131/243] OK  bauthor005   Kaari Utrio                    sceptical 3.6/10  
+[132/243] OK  bauthor006   Robert Van Gulik               low       5.6/10  
+[133/243] OK  bauthor007   Marianne Fredriksson           sceptical 3.6/10  
+[134/243] OK  bauthor008   Dag Schjelderup-Ebbe           sceptical 4.6/10  
+[135/243] XX  bauthor009   Robert Gordon                  sceptical 3.6/10  
+[136/243] OK  bchat_born00 ['1958', '1951']               sceptical 4.6/10  
+[137/243] OK  bchat_born01 ['1992', '1978']               low       5.6/10  
+[138/243] OK  bchat_born02 ['1951', '1965']               sceptical 4.6/10  
+[139/243] OK  bchat_born03 ['1978', '1992']               sceptical 4.6/10  
+[140/243] OK  bchat_founded00 ['1968', '2001']               sceptical 3.6/10  
+[141/243] OK  bchat_founded01 ['2005', '1990']               low       5.6/10  
+[142/243] OK  bchat_founded02 ['1996', '2002']               low       5.6/10  
+[143/243] XX  bchat_founded03 ['1984', '1989']               sceptical 4.6/10  
+[144/243] XX  news001      349                            sceptical 2.6/10  
+[145/243] OK  news002      Yuliia Mendel                  sceptical 4.0/10  
+[146/243] OK  news003      Marat Kambolov                 sceptical 3.6/10  
+[147/243] XX  news004      355                            sceptical 2.2/10  
+[148/243] XX  news005      Mecklenburg-Western Pomerania  sceptical 2.2/10  
+[149/243] XX  news006      Vučić                          sceptical 2.6/10  
+[150/243] OK  news007      Fatima Ezzahra El Mansouri     sceptical 3.2/10  
+[151/243] XX  news008      Saeima                         sceptical 2.6/10  
+[152/243] OK  news009      Flavio Bolsonaro               sceptical 4.6/10  
+[153/243] XX  news010      October 5, 2026                sceptical 2.6/10  
+[154/243] XX  news011      François Legault               sceptical 2.6/10  
+[155/243] XX  news012      Haxhiu                         sceptical 2.6/10  
+[156/243] XX  news013      Elena Rybakina                 sceptical 2.6/10  
+[157/243] OK  news014      Kimi Antonelli                 sceptical 3.6/10  
+[158/243] OK  news015      Team Europe                    sceptical 1.8/10  
+[159/243] OK  news016      France                         sceptical 2.6/10  
+[160/243] XX  news017      Sebastian Coe                  sceptical 1.0/10  
+[161/243] XX  news018      Fiji                           sceptical 3.6/10  
+[162/243] OK  news019      Remco Evenepoel                sceptical 3.6/10  
+[163/243] OK  news020      Brisbane Lions                 sceptical 3.6/10  
+[164/243] XX  news021      Elina Svitolina                sceptical 1.4/10  
+[165/243] XX  news022      Mathieu                        sceptical 4.6/10  
+[166/243] OK  news023      Guye Adola                     sceptical 4.6/10  
+[167/243] XX  news024      Daly Cherry-Evans              sceptical 3.6/10  
+[168/243] XX  news025      25                             sceptical 1.0/10  
+[169/243] --  news026      None                           none      -/10  
+[170/243] XX  news027      Mark Walter                    sceptical 2.6/10  
+[171/243] --  news028      None                           none      -/10  
+[172/243] --  news029      None                           none      -/10  
+[173/243] XX  news030      Trump                          sceptical 2.6/10  
+[174/243] --  news031      None                           none      -/10  
+[175/243] OK  news032      87.2 billion                   sceptical 1.4/10  
+[176/243] XX  news033      World Health Organization      sceptical 2.6/10  
+[177/243] OK  news034      107,677                        sceptical 2.6/10  
+[178/243] --  news035      None                           none      -/10  
+[179/243] OK  news036      74                             sceptical 3.6/10  
+[180/243] OK  news037      14                             sceptical 3.8/10  
+[181/243] OK  news038      Karl Deisseroth                sceptical 4.0/10  
+[182/243] OK  news039      Francis Halzen                 sceptical 4.0/10  
+[183/243] XX  news040      Henri B                        sceptical 3.2/10  
+[184/243] XX  news041      8                              sceptical 1.0/10  
+[185/243] XX  news042      52                             sceptical 2.6/10  
+[186/243] XX  news043      22                             sceptical 2.6/10  
+[187/243] XX  news044      35                             sceptical 1.0/10  
+[188/243] XX  news045      26                             sceptical 1.8/10  
+[189/243] XX  news046      43                             sceptical 2.8/10  
+[190/243] --  news047      None                           none      -/10  
+[191/243] XX  news048      32                             sceptical 2.6/10  
+[192/243] XX  news049      Ang Lee                        sceptical 2.6/10  
+[193/243] XX  news050      Carl Reiner                    sceptical 2.6/10  
+[194/243] XX  news051      Chatham Islands                sceptical 2.8/10  
+[195/243] OK  news052      St                             sceptical 1.8/10  
+[196/243] XX  news053      Bad Blood                      sceptical 2.6/10  
+[197/243] XX  news054      Ingrid Carlberg                sceptical 2.8/10  
+[198/243] OK  news055      2031                           sceptical 3.6/10  
+[199/243] --  news056      None                           none      -/10  
+[200/243] --  news057      None                           none      -/10  
+[201/243] OK  news058      2                              sceptical 1.8/10  
+[202/243] OK  news059      12                             sceptical 3.6/10  
+[203/243] XX  news060      ASMARA                         sceptical 2.6/10  
+[204/243] XX  info001      Proudly                        low       5.0/10  
+[205/243] --  info002      None                           none      -/10  
+[206/243] --  info003      None                           none      -/10  
+[207/243] --  info004      None                           none      -/10  
+[208/243] --  info005      None                           none      -/10  
+[209/243] XX  info006      Toluca International Airport   sceptical 4.6/10  
+[210/243] --  info007      None                           none      -/10  
+[211/243] --  info008      None                           none      -/10  
+[212/243] --  info009      None                           none      -/10  
+[213/243] XX  info010      43.6 million                   sceptical 3.0/10  
+[214/243] --  info011      None                           none      -/10  
+[215/243] --  info012      None                           none      -/10  
+[216/243] OK  info013      25 minutes                     sceptical 4.2/10  
+[217/243] OK  info014      24 minutes                     low       5.0/10  
+[218/243] XX  info015      Stornoway Lewis Ferry Terminal low       5.0/10  
+[219/243] OK  info016      Nelson Mandela Gateway         sceptical 3.0/10  
+[220/243] OK  info017      102                            sceptical 4.6/10  
+[221/243] OK  info018      100                            sceptical 3.0/10  
+[222/243] --  info019      None                           none      -/10  
+[223/243] OK  info020      90                             sceptical 3.0/10  
+[224/243] OK  info021      6                              sceptical 4.6/10  
+[225/243] OK  info022      10111                          sceptical 4.2/10  
+[226/243] OK  info023      000                            sceptical 4.6/10  
+[227/243] OK  info024      911                            low       5.2/10  
+[228/243] OK  info025      25 October 2026                sceptical 3.0/10  
+[229/243] --  info026      None                           none      -/10  
+[230/243] OK  info027      28 December 2026               sceptical 3.0/10  
+[231/243] OK  info028      November 26, 2026              sceptical 3.0/10  
+[232/243] OK  info029      October 12, 2026               sceptical 3.0/10  
+[233/243] XX  info030      08 November 2026               sceptical 3.0/10  
+[234/243] OK  info031      November 3, 2026               sceptical 1.8/10  
+[235/243] OK  info032      November 20, 2026              sceptical 4.6/10  
+[236/243] OK  info033      Dec 16, 2026                   sceptical 3.0/10  
+[237/243] OK  info034      32                             low       5.0/10  
+[238/243] --  info035      None                           none      -/10  
+[239/243] --  info036      None                           none      -/10  
+[240/243] --  info037      None                           none      -/10  
+[241/243] --  info038      None                           none      -/10  
+[242/243] XX  info039      Peter                          sceptical 3.0/10  
+[243/243] --  info040      None                           none      -/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=contrarian search=brave ====
+  n 243  accuracy (value shown is right) 0.477  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.000 (n=0)
+  band low        0.198 (n=48) precision 0.833
+  band sceptical  0.675 (n=164) precision 0.463
+  band none       0.128 (n=31)
+  regime fresh         accuracy 0.317 (n=60)
+  regime general_info  accuracy 0.450 (n=40)
+  regime long_tail     accuracy 0.711 (n=83)
+  regime news          accuracy 0.333 (n=60)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9794238683127572
+  changed by personal profile 0.691  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 27, "read_ms": 76, "write_ms": 0, "total_ms": 307}
+[planck3 23:51:13] round 6b: the product on CPU only, 4 threads, 20 questions (phone proxy)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_v2/reader.pt --writer template --tasks scripts/assets/planck3_tasks_fresh.json,scripts/assets/planck3_tasks_news.json,scripts/assets/planck3_tasks_geninfo.json --search brave --out results/planck3/r6b_x-hertz_template_cpu --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model --sample 20
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/20] XX  bwinner000   Anna Pushkareva                low       6.0/10  
+[  2/20] --  bwinner012   None                           none      -/10  
+[  3/20] XX  bwinner024   Valentín González-Galiño       low       5.0/10  
+[  4/20] OK  belection006 Tatiana Auguste                low       5.0/10  
+[  5/20] XX  bseason008   Kalo                           low       6.0/10  
+[  6/20] OK  bfounded000  2000                           high      9.0/10  
+[  7/20] OK  bfounded012  1951                           good      7.0/10  
+[  8/20] OK  bborn004     1965                           good      7.0/10  
+[  9/20] OK  bborn016     1999                           high      9.0/10  
+[ 10/20] XX  belevation008 1,494 metres                   good      7.0/10  
+[ 11/20] OK  bfounder005  Abel Adams                     low       6.0/10  
+[ 12/20] OK  bauthor007   Marianne Fredriksson           low       6.0/10  
+[ 13/20] OK  news002      Yuliia Mendel                  good      7.0/10  
+[ 14/20] OK  news014      Kimi Antonelli                 low       6.0/10  
+[ 15/20] --  news026      None                           none      -/10  
+[ 16/20] OK  news038      Karl Deisseroth                good      8.0/10  
+[ 17/20] XX  news050      Carl Reiner                    low       5.0/10  
+[ 18/20] --  info002      None                           none      -/10  
+[ 19/20] OK  info014      24 minutes                     good      8.0/10  
+[ 20/20] --  info026      None                           none      -/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=none search=brave ====
+  n 20  accuracy (value shown is right) 0.550  bands monotone True
+  band high       0.100 (n=2) precision 1.000
+  band good       0.300 (n=6) precision 0.833
+  band low        0.400 (n=8) precision 0.500
+  band sceptical  0.000 (n=0)
+  band none       0.200 (n=4)
+  regime fresh         accuracy 0.200 (n=5)
+  regime general_info  accuracy 0.333 (n=3)
+  regime long_tail     accuracy 0.857 (n=7)
+  regime news          accuracy 0.600 (n=5)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.95
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 4, "read_ms": 11385, "write_ms": 0, "total_ms": 11638}
+> python scripts/planck3.py report
+# Planck 3.0 results (2026-10-13 23:55)
+
+## G0 (seed benchmark)
+
+| run | n | success | answered | wrong when answered | ECE | depth evidence | search-only @3 | answer fetches/task | from snippet | gated | $/correct | LLM tok/task | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| g0_gemma | 47 | 0.681 | 0.915 | 0.256 | 0.137 | 1.000 | 0.957 | 2.809 |  |  | 0.008738 | 5486 | PASS |
+| g0_gemma_closedbook | 47 | 0.957 | 1.000 | 0.043 | 0.043 |  |  | 0.000 |  |  | 0.000110 | 82 | COMPARATOR |
+| g0_gemma_closedbook_quick | 12 | 1.000 | 1.000 | 0.000 | 0.000 |  |  | 0.000 |  |  | 0.000173 | 136 | COMPARATOR |
+| g0_gemma_quick | 12 | 0.667 | 1.000 | 0.333 | 0.183 | 0.667 | 0.417 | 4.333 |  |  | 0.015154 | 9337 | PASS |
+| g0_gemma_snip | 47 | 0.851 | 0.936 | 0.091 | 0.039 | 0.957 | 0.957 | 0.000 | 0.894 | 0.000 | 0.005360 | 4206 | PASS |
+| g0_heuristic | 47 | 0.617 | 0.979 | 0.370 | 0.132 | 1.000 | 0.851 | 2.702 |  |  | 0.000000 | 0 | BASELINE |
+| g0_heuristic_quick | 12 | 0.250 | 0.833 | 0.700 | 0.278 | 0.667 | 0.417 | 3.917 |  |  | 0.000000 | 0 | BASELINE |
+| g0_heuristic_snip | 47 | 0.936 | 1.000 | 0.064 | 0.057 | 0.957 | 0.851 | 0.021 | 0.830 | 0.000 | 0.000000 | 0 | BASELINE |
+| g0_planck-g2-hash | 47 | 0.021 | 0.021 | 0.000 | 0.507 | 0.851 | 0.553 | 2.617 | 0.000 | 0.000 | 0.000006 | 0 | G2 (rule B) |
+| g0_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-hash_wikipedia | 47 | 0.000 | 0.021 | 1.000 | 0.843 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck | 47 | 0.021 | 0.106 | 0.800 | 0.431 | 0.851 | 0.574 | 2.574 | 0.043 | 0.000 | 0.000128 | 0 | G2 (rule B) |
+| g0_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 1.000 | 5.667 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2-planck_wikipedia | 47 | 0.021 | 0.021 | 0.000 | 0.286 | 0.851 | 0.574 | 2.681 | 0.000 | 0.000 | 0.000098 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash | 47 | 0.617 | 0.745 | 0.171 | 0.161 | 0.979 | 0.851 | 0.830 | 0.660 | 0.000 | 0.000000 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash_ddgs | 47 | 0.426 | 0.489 | 0.130 | 0.109 | 0.979 | 0.830 | 1.191 | 0.404 | 0.000 | 0.000000 | 0 | G2 (rule B) |
+| g0_planck-g2v2-hash_ddgs_quick | 12 | 0.000 | 0.333 | 1.000 | 0.739 | 1.000 | 0.667 | 1.750 | 0.250 | 0.000 |  | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck | 47 | 0.638 | 0.787 | 0.189 | 0.182 | 1.000 | 0.872 | 0.660 | 0.702 | 0.000 | 0.000002 | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck_ddgs | 47 | 0.298 | 0.340 | 0.125 | 0.109 | 0.979 | 0.872 | 1.596 | 0.298 | 0.000 | 0.000005 | 0 | G2 (rule B) |
+| g0_planck-g2v2-planck_ddgs_quick | 12 | 0.000 | 0.000 | 0.000 |  | 1.000 | 0.917 | 4.083 | 0.000 | 0.000 |  | 0 | G2 (rule B) |
+| g0f_gemma_closedbook | 143 | 0.049 | 0.986 | 0.950 | 0.950 |  |  | 0.000 |  |  | 0.002297 | 75 | COMPARATOR |
+| g0f_gemma_closedbook_quick | 12 | 0.000 | 1.000 | 1.000 | 1.000 |  |  | 0.000 |  |  |  | 110 | COMPARATOR |
+| g0f_gemma_snip | 143 | 0.196 | 0.294 | 0.333 | 0.257 | 0.322 | 0.273 | 0.042 | 0.294 | 0.014 | 0.015155 | 2737 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip_ddgs | 143 | 0.601 | 0.797 | 0.246 | 0.177 | 0.839 | 0.846 | 0.063 | 0.797 | 0.007 | 0.006522 | 3635 | ROUND 4 (rules S/P) |
+| g0f_gemma_snip_ddgs_quick | 12 | 0.833 | 0.917 | 0.091 | 0.036 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.005969 | 4576 | ROUND 4 (rules S/P) |
+| g0f_gemma_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.267 | 0.750 | 0.917 | 0.000 | 1.000 | 0.000 | 0.007831 | 4830 | ROUND 3 (rules A/B) |
+| g0f_gemma_snip_wikipedia | 143 | 0.140 | 0.210 | 0.333 | 0.253 | 0.252 | 0.189 | 0.056 | 0.210 | 0.014 | 0.020229 | 2607 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip | 143 | 0.210 | 0.818 | 0.744 | 0.471 | 0.336 | 0.273 | 0.699 | 0.308 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip_ddgs | 143 | 0.510 | 0.958 | 0.467 | 0.319 | 0.734 | 0.734 | 0.133 | 0.860 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_quick | 12 | 0.333 | 1.000 | 0.667 | 0.414 | 0.667 | 0.667 | 0.250 | 0.750 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_trust | 143 | 0.566 | 1.000 | 0.434 | 0.297 | 0.832 | 0.846 | 0.077 | 0.944 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_ddgs_trust_quick | 12 | 0.583 | 1.000 | 0.417 | 0.300 | 0.917 | 0.917 | 0.083 | 0.917 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_heuristic_snip_quick | 12 | 0.667 | 1.000 | 0.333 | 0.302 | 0.750 | 0.917 | 0.250 | 0.833 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_heuristic_snip_wikipedia | 143 | 0.154 | 0.797 | 0.807 | 0.510 | 0.273 | 0.189 | 0.755 | 0.259 | 0.000 | 0.000000 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash | 143 | 0.021 | 0.063 | 0.667 | 0.358 | 0.287 | 0.189 | 1.951 | 0.028 | 0.000 | 0.000005 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-hash_wikipedia | 143 | 0.007 | 0.042 | 0.833 | 0.377 | 0.287 | 0.189 | 1.958 | 0.014 | 0.000 | 0.000016 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck | 143 | 0.091 | 0.189 | 0.519 | 0.287 | 0.287 | 0.189 | 1.706 | 0.133 | 0.000 | 0.000020 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck_quick | 12 | 0.000 | 0.000 | 0.000 |  | 0.750 | 0.917 | 3.250 | 0.000 | 0.000 |  | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2-planck_wikipedia | 143 | 0.098 | 0.182 | 0.462 | 0.241 | 0.287 | 0.189 | 1.734 | 0.112 | 0.000 | 0.000015 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-hash | 143 | 0.035 | 0.056 | 0.375 | 0.345 | 0.343 | 0.273 | 1.916 | 0.042 | 0.000 | 0.000003 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-hash_ddgs | 143 | 0.245 | 0.294 | 0.167 | 0.102 | 0.839 | 0.853 | 1.580 | 0.217 | 0.000 | 0.000000 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-hash_ddgs_quick | 12 | 0.167 | 0.500 | 0.667 | 0.382 | 0.917 | 0.917 | 2.083 | 0.250 | 0.000 | 0.000001 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-planck | 143 | 0.084 | 0.119 | 0.294 | 0.094 | 0.343 | 0.273 | 1.783 | 0.084 | 0.000 | 0.000024 | 0 | ROUND 3 (rules A/B) |
+| g0f_planck-g2v2-planck_ddgs | 143 | 0.294 | 0.322 | 0.087 | 0.022 | 0.839 | 0.853 | 1.580 | 0.245 | 0.000 | 0.000004 | 0 | ROUND 4 (rules S/P) |
+| g0f_planck-g2v2-planck_ddgs_quick | 12 | 0.083 | 0.167 | 0.500 | 0.351 | 0.917 | 0.917 | 3.333 | 0.167 | 0.000 | 0.000027 | 0 | ROUND 4 (rules S/P) |
+
+**g0_gemma vs base chat:** success 0.681 vs 0.957 (0.71x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 79.8x MORE expensive (5486 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_gemma_quick vs base chat:** success 0.667 vs 1.000 (0.67x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 87.7x MORE expensive (9337 vs 136 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_gemma_snip vs base chat:** success 0.851 vs 0.957 (0.89x); depth evidence 0.957 vs none (base chat shows no sources); cost per correct 48.9x MORE expensive (4206 vs 82 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0_heuristic vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 8567.8x cheaper.
+**g0_heuristic_quick vs base chat:** success 0.250 vs 1.000 (0.25x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct 3112.9x cheaper.
+**g0_heuristic_snip vs base chat:** success 0.936 vs 0.957 (0.98x); depth evidence 0.957 vs none (base chat shows no sources); cost per correct 113295.6x cheaper.
+**g0_planck-g2-hash vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 17.2x cheaper.
+**g0_planck-g2-hash_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-hash_wikipedia vs base chat:** success 0.000 vs 0.957 (0.00x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-planck vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.2x MORE expensive (0 vs 82 LLM tokens/task).
+**g0_planck-g2-planck_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2-planck_wikipedia vs base chat:** success 0.021 vs 0.957 (0.02x); depth evidence 0.851 vs none (base chat shows no sources); cost per correct 1.1x cheaper.
+**g0_planck-g2v2-hash vs base chat:** success 0.617 vs 0.957 (0.64x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 1282.3x cheaper.
+**g0_planck-g2v2-hash_ddgs vs base chat:** success 0.426 vs 0.957 (0.44x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 564.9x cheaper.
+**g0_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0_planck-g2v2-planck vs base chat:** success 0.638 vs 0.957 (0.67x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct 72.8x cheaper.
+**g0_planck-g2v2-planck_ddgs vs base chat:** success 0.298 vs 0.957 (0.31x); depth evidence 0.979 vs none (base chat shows no sources); cost per correct 23.8x cheaper.
+**g0_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.000 vs 1.000 (0.00x); depth evidence 1.000 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_gemma_snip vs base chat:** success 0.196 vs 0.049 (4.00x); depth evidence 0.322 vs none (base chat shows no sources); cost per correct 6.6x MORE expensive (2737 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_ddgs vs base chat:** success 0.601 vs 0.049 (12.29x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 2.8x MORE expensive (3635 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_ddgs_quick vs base chat:** success 0.833 vs 0.000 (833333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a. An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_gemma_snip_wikipedia vs base chat:** success 0.140 vs 0.049 (2.86x); depth evidence 0.252 vs none (base chat shows no sources); cost per correct 8.8x MORE expensive (2607 vs 75 LLM tokens/task). An LLM driving the tools is the expensive path by design; the cheap path is the distilled Planck policy (G2), which this run does not include.
+**g0f_heuristic_snip vs base chat:** success 0.210 vs 0.049 (4.29x); depth evidence 0.336 vs none (base chat shows no sources); cost per correct 136268.0x cheaper.
+**g0f_heuristic_snip_ddgs vs base chat:** success 0.510 vs 0.049 (10.43x); depth evidence 0.734 vs none (base chat shows no sources); cost per correct 530110.6x cheaper.
+**g0f_heuristic_snip_ddgs_quick vs base chat:** success 0.333 vs 0.000 (333333333.33x); depth evidence 0.667 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_ddgs_trust vs base chat:** success 0.566 vs 0.049 (11.57x); depth evidence 0.832 vs none (base chat shows no sources); cost per correct 915042.4x cheaper.
+**g0f_heuristic_snip_ddgs_trust_quick vs base chat:** success 0.583 vs 0.000 (583333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_quick vs base chat:** success 0.667 vs 0.000 (666666666.67x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_heuristic_snip_wikipedia vs base chat:** success 0.154 vs 0.049 (3.14x); depth evidence 0.273 vs none (base chat shows no sources); cost per correct 69225.3x cheaper.
+**g0f_planck-g2-hash vs base chat:** success 0.021 vs 0.049 (0.43x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 440.8x cheaper.
+**g0f_planck-g2-hash_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2-hash_wikipedia vs base chat:** success 0.007 vs 0.049 (0.14x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 146.9x cheaper.
+**g0f_planck-g2-planck vs base chat:** success 0.091 vs 0.049 (1.86x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 112.8x cheaper.
+**g0f_planck-g2-planck_quick vs base chat:** success 0.000 vs 0.000 (0.00x); depth evidence 0.750 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2-planck_wikipedia vs base chat:** success 0.098 vs 0.049 (2.00x); depth evidence 0.287 vs none (base chat shows no sources); cost per correct 151.3x cheaper.
+**g0f_planck-g2v2-hash vs base chat:** success 0.035 vs 0.049 (0.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 738.7x cheaper.
+**g0f_planck-g2v2-hash_ddgs vs base chat:** success 0.245 vs 0.049 (5.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 6108.9x cheaper.
+**g0f_planck-g2v2-hash_ddgs_quick vs base chat:** success 0.167 vs 0.000 (166666666.67x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+**g0f_planck-g2v2-planck vs base chat:** success 0.084 vs 0.049 (1.71x); depth evidence 0.343 vs none (base chat shows no sources); cost per correct 94.2x cheaper.
+**g0f_planck-g2v2-planck_ddgs vs base chat:** success 0.294 vs 0.049 (6.00x); depth evidence 0.839 vs none (base chat shows no sources); cost per correct 537.5x cheaper.
+**g0f_planck-g2v2-planck_ddgs_quick vs base chat:** success 0.083 vs 0.000 (83333333.33x); depth evidence 0.917 vs none (base chat shows no sources); cost per correct n/a.
+
+### Round 4 paired comparisons (same questions; exact McNemar)
+
+| rule | run | vs | metric | run | vs | only run | only vs | p |
+|---|---|---|---|---|---|---|---|---|
+| v2 ddgs head vs 3b head | g0_planck-g2v2-hash_ddgs | g0_planck-g2v2-hash | correct | 0.426 | 0.617 | 2 | 11 | 0.0225 |
+| v2 ddgs head vs 3b head | g0_planck-g2v2-planck_ddgs | g0_planck-g2v2-planck | correct | 0.298 | 0.638 | 4 | 20 | 0.00154 |
+| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | serp_visible | 0.846 | 0.189 | 94 | 0 | 1.01e-28 |
+| S2 | g0f_gemma_snip_ddgs | g0f_gemma_snip_wikipedia | correct | 0.601 | 0.140 | 70 | 4 | 1.29e-16 |
+| A1 | g0f_gemma_snip_ddgs | g0f_gemma_closedbook | correct | 0.601 | 0.049 | 83 | 4 | 3.02e-20 |
+| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | serp_visible | 0.734 | 0.189 | 78 | 0 | 6.62e-24 |
+| S2 | g0f_heuristic_snip_ddgs | g0f_heuristic_snip_wikipedia | correct | 0.510 | 0.154 | 53 | 2 | 8.55e-14 |
+| T | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.566 | 0.510 | 9 | 1 | 0.0215 |
+| T (both web-served) | g0f_heuristic_snip_ddgs_trust | g0f_heuristic_snip_ddgs | correct | 0.575 | 0.575 | 0 | 0 | 1 |
+| v2 ddgs head vs 3b head | g0f_planck-g2v2-hash_ddgs | g0f_planck-g2v2-hash | correct | 0.245 | 0.035 | 31 | 1 | 1.54e-08 |
+| v2 ddgs head vs 3b head | g0f_planck-g2v2-planck_ddgs | g0f_planck-g2v2-planck | correct | 0.294 | 0.084 | 32 | 2 | 6.94e-08 |
+
+### Answer tiers (what the card shows: confident / low confidence / evidence only)
+
+| run | confident: share | precision | low confidence: share | precision | none: share | its evidence has the answer |
+|---|---|---|---|---|---|---|
+| g0_planck-g2v2-hash_ddgs | 0.489 | 0.870 | 0.511 | 0.500 | 0.000 |  |
+| g0_planck-g2v2-hash_ddgs_quick | 0.333 | 0.000 | 0.667 | 0.250 | 0.000 |  |
+| g0_planck-g2v2-planck_ddgs | 0.340 | 0.875 | 0.660 | 0.710 | 0.000 |  |
+| g0_planck-g2v2-planck_ddgs_quick | 0.000 |  | 1.000 | 0.083 | 0.000 |  |
+| g0f_gemma_snip_ddgs | 0.797 | 0.754 | 0.203 | 0.379 | 0.000 |  |
+| g0f_gemma_snip_ddgs_quick | 0.917 | 0.909 | 0.083 | 1.000 | 0.000 |  |
+| g0f_heuristic_snip_ddgs | 0.909 | 0.562 | 0.084 | 0.000 | 0.007 | 0.000 |
+| g0f_heuristic_snip_ddgs_quick | 0.833 | 0.400 | 0.167 | 0.000 | 0.000 |  |
+| g0f_heuristic_snip_ddgs_trust | 0.979 | 0.571 | 0.021 | 0.333 | 0.000 |  |
+| g0f_heuristic_snip_ddgs_trust_quick | 1.000 | 0.583 | 0.000 |  | 0.000 |  |
+| g0f_planck-g2v2-hash_ddgs | 0.294 | 0.833 | 0.706 | 0.287 | 0.000 |  |
+| g0f_planck-g2v2-hash_ddgs_quick | 0.333 | 0.250 | 0.667 | 0.250 | 0.000 |  |
+| g0f_planck-g2v2-planck_ddgs | 0.322 | 0.913 | 0.678 | 0.495 | 0.000 |  |
+| g0f_planck-g2v2-planck_ddgs_quick | 0.167 | 0.500 | 0.833 | 0.400 | 0.000 |  |
+
+### By regime (fresh = 2026 facts; long_tail = <= 3 Wikipedia editions)
+
+| run | per regime: success (n, wrong when answered) |
+|---|---|
+| g0f_gemma_closedbook | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.084 (n=83, wrong 0.915) |
+| g0f_gemma_closedbook_quick | fresh: 0.000 (n=6, wrong 1.000) | long_tail: 0.000 (n=6, wrong 1.000) |
+| g0f_gemma_snip | fresh: 0.083 (n=60, wrong 0.545) | long_tail: 0.277 (n=83, wrong 0.258) |
+| g0f_gemma_snip_ddgs | fresh: 0.567 (n=60, wrong 0.244) | long_tail: 0.627 (n=83, wrong 0.246) |
+| g0f_gemma_snip_ddgs_quick | fresh: 1.000 (n=6, wrong 0.000) | long_tail: 0.667 (n=6, wrong 0.200) |
+| g0f_gemma_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_gemma_snip_wikipedia | fresh: 0.033 (n=60, wrong 0.600) | long_tail: 0.217 (n=83, wrong 0.280) |
+| g0f_heuristic_snip | fresh: 0.133 (n=60, wrong 0.855) | long_tail: 0.265 (n=83, wrong 0.645) |
+| g0f_heuristic_snip_ddgs | fresh: 0.250 (n=60, wrong 0.737) | long_tail: 0.699 (n=83, wrong 0.275) |
+| g0f_heuristic_snip_ddgs_quick | fresh: 0.167 (n=6, wrong 0.833) | long_tail: 0.500 (n=6, wrong 0.500) |
+| g0f_heuristic_snip_ddgs_trust | fresh: 0.333 (n=60, wrong 0.667) | long_tail: 0.735 (n=83, wrong 0.265) |
+| g0f_heuristic_snip_ddgs_trust_quick | fresh: 0.333 (n=6, wrong 0.667) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_heuristic_snip_quick | fresh: 0.500 (n=6, wrong 0.500) | long_tail: 0.833 (n=6, wrong 0.167) |
+| g0f_heuristic_snip_wikipedia | fresh: 0.083 (n=60, wrong 0.909) | long_tail: 0.205 (n=83, wrong 0.712) |
+| g0f_planck-g2-hash | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.036 (n=83, wrong 0.667) |
+| g0f_planck-g2-hash_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
+| g0f_planck-g2-hash_wikipedia | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.012 (n=83, wrong 0.800) |
+| g0f_planck-g2-planck | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.157 (n=83, wrong 0.480) |
+| g0f_planck-g2-planck_quick | fresh: 0.000 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 0.000) |
+| g0f_planck-g2-planck_wikipedia | fresh: 0.017 (n=60, wrong 0.900) | long_tail: 0.157 (n=83, wrong 0.188) |
+| g0f_planck-g2v2-hash | fresh: 0.000 (n=60, wrong 1.000) | long_tail: 0.060 (n=83, wrong 0.167) |
+| g0f_planck-g2v2-hash_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.422 (n=83, wrong 0.167) |
+| g0f_planck-g2v2-hash_ddgs_quick | fresh: 0.333 (n=6, wrong 0.000) | long_tail: 0.000 (n=6, wrong 1.000) |
+| g0f_planck-g2v2-planck | fresh: 0.017 (n=60, wrong 0.500) | long_tail: 0.133 (n=83, wrong 0.267) |
+| g0f_planck-g2v2-planck_ddgs | fresh: 0.000 (n=60, wrong 0.000) | long_tail: 0.506 (n=83, wrong 0.087) |
+| g0f_planck-g2v2-planck_ddgs_quick | fresh: 0.167 (n=6, wrong 0.500) | long_tail: 0.000 (n=6, wrong 0.000) |
+
+## Round 5: read -> weigh -> write (SETUP_planck_20261009.md)
+
+| run | n | value shown is right | high: n / precision | good | low | sceptical | none | monotone | writer faithful | fallback | LLM tok/task | read ms | write ms | changed by personal | question type acc |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| r5_gemma_gemma | 243 | 0.531 | 41 / 0.927 | 92 / 0.772 | 25 / 0.560 | 12 / 0.500 | 73 | True | 0.371 | 0.629 | 1898 | 2663 | 1977 | 0.000 | 0.979 |
+| r5_gemma_gemma_quick | 12 | 0.750 | 4 / 1.000 | 6 / 0.667 | 1 / 1.000 | 0 /  | 1 | True | 0.333 | 0.667 | 1811 | 2160 | 2233 | 0.000 | 1.000 |
+| r5_heuristic_template | 243 | 0.391 | 27 / 0.815 | 70 / 0.614 | 61 / 0.295 | 59 / 0.203 | 26 | True | 1.000 | 0.000 | 0 | 0 | 0 | 0.000 | 0.979 |
+| r5_heuristic_template_quick | 12 | 0.500 | 1 / 1.000 | 4 / 0.750 | 4 / 0.250 | 2 / 0.500 | 1 | True | 1.000 | 0.000 | 0 | 0 | 0 | 0.000 | 1.000 |
+| r5_planck_hertz | 243 | 0.387 | 28 / 0.786 | 74 / 0.581 | 59 / 0.339 | 81 / 0.111 | 1 | True | 0.460 | 0.540 | 0 | 17 | 267 | 0.000 | 0.979 |
+| r5_planck_hertz_brave | 243 | 0.514 | 39 / 0.641 | 66 / 0.621 | 71 / 0.535 | 66 / 0.318 | 1 | True | 0.540 | 0.460 | 0 | 22 | 344 | 0.000 | 0.979 |
+| r5_planck_hertz_brave_quick | 12 | 0.667 | 2 / 1.000 | 2 / 0.500 | 7 / 0.714 | 1 / 0.000 | 0 | True | 0.385 | 0.615 | 0 | 55 | 329 | 0.000 | 1.000 |
+| r5_planck_hertz_contrarian | 243 | 0.391 | 0 /  | 4 / 0.750 | 96 / 0.635 | 142 / 0.218 | 1 | True | 0.480 | 0.520 | 0 | 23 | 251 | 0.473 | 0.979 |
+| r5_planck_hertz_contrarian_quick | 12 | 0.583 | 0 /  | 0 /  | 5 / 1.000 | 7 / 0.286 | 0 | True | 0.538 | 0.462 | 0 | 63 | 333 | 0.500 | 1.000 |
+| r5_planck_hertz_cpu | 10 | 0.300 | 2 / 0.500 | 2 / 0.500 | 3 / 0.333 | 3 / 0.000 | 0 | True | 0.500 | 0.500 | 0 | 934 | 27765 | 0.000 | 0.900 |
+| r5_planck_hertz_cpu_quick | 12 | 0.500 | 0 /  | 5 / 0.600 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.231 | 0.769 | 0 | 499 | 20399 | 0.000 | 1.000 |
+| r5_planck_hertz_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.308 | 0.692 | 0 | 44 | 294 | 0.000 | 1.000 |
+| r5_planck_planck | 243 | 0.391 | 29 / 0.793 | 73 / 0.589 | 59 / 0.339 | 81 / 0.111 | 1 | True | 0.472 | 0.528 | 0 | 16 | 99 | 0.000 | 0.979 |
+| r5_planck_planck_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 0.385 | 0.615 | 0 | 36 | 83 | 0.000 | 1.000 |
+| r5_planck_template | 243 | 0.383 | 28 / 0.786 | 73 / 0.575 | 59 / 0.339 | 82 / 0.110 | 1 | True | 1.000 | 0.000 | 0 | 68 | 0 | 0.000 | 0.979 |
+| r5_planck_template_quick | 12 | 0.583 | 0 /  | 5 / 0.800 | 5 / 0.600 | 2 / 0.000 | 0 | True | 1.000 | 0.000 | 0 | 53 | 0 | 0.000 | 1.000 |
+
+| run | accuracy per benchmark regime |
+|---|---|
+| r5_gemma_gemma | fresh: 0.750 (n=60) | general_info: 0.250 (n=40) | long_tail: 0.819 (n=83) | news: 0.100 (n=60) |
+| r5_gemma_gemma_quick | fresh: 1.000 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.000 (n=3) |
+| r5_heuristic_template | fresh: 0.350 (n=60) | general_info: 0.225 (n=40) | long_tail: 0.723 (n=83) | news: 0.083 (n=60) |
+| r5_heuristic_template_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.600 (n=5) | news: 0.000 (n=3) |
+| r5_planck_hertz | fresh: 0.350 (n=60) | general_info: 0.175 (n=40) | long_tail: 0.759 (n=83) | news: 0.050 (n=60) |
+| r5_planck_hertz_brave | fresh: 0.400 (n=60) | general_info: 0.550 (n=40) | long_tail: 0.663 (n=83) | news: 0.400 (n=60) |
+| r5_planck_hertz_brave_quick | fresh: 0.000 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.667 (n=3) |
+| r5_planck_hertz_contrarian | fresh: 0.333 (n=60) | general_info: 0.200 (n=40) | long_tail: 0.771 (n=83) | news: 0.050 (n=60) |
+| r5_planck_hertz_contrarian_quick | fresh: 0.333 (n=3) | general_info: 1.000 (n=1) | long_tail: 1.000 (n=5) | news: 0.000 (n=3) |
+| r5_planck_hertz_cpu | fresh: 0.000 (n=3) | general_info: 0.000 (n=1) | long_tail: 1.000 (n=3) | news: 0.000 (n=3) |
+| r5_planck_hertz_cpu_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.600 (n=5) | news: 0.000 (n=3) |
+| r5_planck_hertz_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
+| r5_planck_planck | fresh: 0.350 (n=60) | general_info: 0.200 (n=40) | long_tail: 0.759 (n=83) | news: 0.050 (n=60) |
+| r5_planck_planck_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
+| r5_planck_template | fresh: 0.350 (n=60) | general_info: 0.175 (n=40) | long_tail: 0.759 (n=83) | news: 0.033 (n=60) |
+| r5_planck_template_quick | fresh: 0.667 (n=3) | general_info: 1.000 (n=1) | long_tail: 0.800 (n=5) | news: 0.000 (n=3) |
+
+| paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
+|---|---|---|---|---|---|---|
+| r5_planck_hertz vs r5_gemma_gemma | 243 | 0.387 | 0.531 | 11 | 46 | 3.31e-06 |
+| r5_planck_hertz vs r5_heuristic_template | 243 | 0.387 | 0.391 | 24 | 25 | 1 |
+| r5_planck_hertz vs r5_planck_planck | 243 | 0.387 | 0.391 | 0 | 1 | 1 |
+| r5_planck_hertz vs r5_planck_template | 243 | 0.387 | 0.383 | 1 | 0 | 1 |
+| r5_planck_hertz_brave vs r5_planck_hertz | 243 | 0.514 | 0.387 | 54 | 23 | 0.000539 |
+| r5_planck_hertz_brave_quick vs r5_planck_hertz | 12 | 0.667 | 0.583 | 3 | 2 | 1 |
+| r5_planck_hertz_contrarian vs r5_planck_hertz | 243 | 0.391 | 0.387 | 6 | 5 | 1 |
+| r5_planck_hertz_contrarian_quick vs r5_planck_hertz | 12 | 0.583 | 0.583 | 1 | 1 | 1 |
+| r5_planck_hertz_cpu vs r5_planck_hertz | 10 | 0.300 | 0.300 | 0 | 0 | 1 |
+| r5_planck_hertz_cpu_quick vs r5_planck_hertz | 12 | 0.500 | 0.583 | 0 | 1 | 1 |
+| r5_planck_hertz_quick vs r5_planck_hertz | 12 | 0.583 | 0.583 | 0 | 0 | 1 |
+
+- writer_hertz: 410 training examples (369 train / 41 val), best val loss 0.963, 641M params
+- writer_planck: 410 training examples (369 train / 41 val), best val loss 0.988, 101M params
+
+## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)
+
+_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot)
+
+| reader | params | train / val / test pools | right only beyond top 16 (test) | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |
+|---|---|---|---|---|---|---|---|---|
+| x-planck | 101M | 5310 / 592 / 654 |  | 0.538 | 0.401 | 0.753 | 0.059 | stable 0.655 vs 0.460 (n=226); recent 0.398 vs 0.229 (n=83); news 0.388 vs 0.418 (n=67); info 0.455 vs 0.400 (n=55) |
+| x-hertz | 641M | 5310 / 592 / 654 |  | 0.568 | 0.401 | 0.789 | 0.05 | stable 0.699 vs 0.460 (n=226); recent 0.458 vs 0.229 (n=83); news 0.328 vs 0.418 (n=67); info 0.491 vs 0.400 (n=55) |
+| x-planck_v2 | 101M | 5310 / 592 / 654 | 32 | 0.446 | 0.434 | 0.704 | 0.047 | stable 0.512 vs 0.479 (n=217); recent 0.324 vs 0.268 (n=71); news 0.407 vs 0.475 (n=59); info 0.385 vs 0.423 (n=52) |
+| x-hertz_v2 | 641M | 5310 / 592 / 654 | 32 | 0.609 | 0.434 | 0.804 | 0.052 | stable 0.737 vs 0.479 (n=217); recent 0.423 vs 0.268 (n=71); news 0.458 vs 0.475 (n=59); info 0.500 vs 0.423 (n=52) |
+
+## Round 6: read -> weigh -> write on Brave, relevance-checked (SETUP_planck_20261012.md)
+
+| run | n | value shown is right | 143 fresh + long-tail | 100 news + info | high: n / precision | good | low | sceptical | none | monotone | search on topic | writer faithful (any try) | first try | tries | read ms | write ms | changed by personal |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| r6_gemma_gemma | 243 | 0.634 | 0.657 (n=143) | 0.600 (n=100) | 44 / 0.705 | 128 / 0.695 | 38 / 0.632 | 16 / 0.625 | 17 | True | 0.984 | 0.957 | 0.957 | 1.000 | 2566 | 2747 | 0.000 |
+| r6_gemma_gemma_quick | 12 | 0.667 | 0.750 (n=8) | 0.500 (n=4) | 3 / 1.000 | 6 / 0.500 | 2 / 1.000 | 0 /  | 1 | True | 1.000 | 1.000 | 1.000 | 1.000 | 1873 | 2666 | 0.000 |
+| r6_gemma_template | 243 | 0.634 | 0.657 (n=143) | 0.600 (n=100) | 44 / 0.705 | 128 / 0.695 | 38 / 0.632 | 16 / 0.625 | 17 | True | 0.984 | 1.000 |  |  | 2874 | 0 | 0.000 |
+| r6_gemma_template_quick | 12 | 0.667 | 0.750 (n=8) | 0.500 (n=4) | 3 / 1.000 | 6 / 0.500 | 2 / 1.000 | 0 /  | 1 | True | 1.000 | 1.000 |  |  | 2006 | 0 | 0.000 |
+| r6_heuristic_template | 243 | 0.498 | 0.413 (n=143) | 0.620 (n=100) | 33 / 0.758 | 72 / 0.667 | 80 / 0.375 | 57 / 0.316 | 1 | True | 0.984 | 1.000 |  |  | 0 | 0 | 0.000 |
+| r6_heuristic_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 3 / 1.000 | 3 / 0.333 | 5 / 0.400 | 1 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 0 | 0 | 0.000 |
+| r6_planck_template | 243 | 0.514 | 0.552 (n=143) | 0.460 (n=100) | 39 / 0.641 | 66 / 0.621 | 71 / 0.535 | 66 / 0.318 | 1 | True | 0.984 | 1.000 |  |  | 39 | 0 | 0.000 |
+| r6_planck_template_quick | 12 | 0.667 | 0.625 (n=8) | 0.750 (n=4) | 2 / 1.000 | 2 / 0.500 | 7 / 0.714 | 1 / 0.000 | 0 | True | 1.000 | 1.000 |  |  | 51 | 0 | 0.000 |
+| r6_x-hertz_hertz | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 0.858 | 0.690 | 1.492 | 46 | 169 | 0.000 |
+| r6_x-hertz_hertz_contrarian_quick | 12 | 0.167 | 0.250 (n=8) | 0.000 (n=4) | 0 /  | 0 /  | 0 /  | 9 / 0.222 | 3 | True | 1.000 | 0.400 | 0.300 | 2.300 | 89 | 258 | 0.750 |
+| r6_x-hertz_hertz_cpu_quick | 12 | 0.167 | 0.250 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 6 / 0.167 | 1 / 0.000 | 3 | True | 1.000 | 1.000 | 0.600 | 1.600 | 11355 | 3759 | 0.000 |
+| r6_x-hertz_hertz_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 1.000 | 0.600 | 1.600 | 73 | 123 | 0.000 |
+| r6_x-hertz_planck | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 0.883 | 0.746 | 1.421 | 66 | 107 | 0.000 |
+| r6_x-hertz_planck_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 0.900 | 0.800 | 1.300 | 68 | 77 | 0.000 |
+| r6_x-hertz_template | 243 | 0.391 | 0.497 (n=143) | 0.240 (n=100) | 12 / 0.750 | 67 / 0.687 | 82 / 0.415 | 28 / 0.214 | 54 | True | 0.984 | 1.000 |  |  | 63 | 0 | 0.000 |
+| r6_x-hertz_template_contrarian | 243 | 0.399 | 0.503 (n=143) | 0.250 (n=100) | 0 /  | 0 /  | 43 / 0.814 | 146 / 0.425 | 54 | True | 0.984 | 1.000 |  |  | 76 | 0 | 0.634 |
+| r6_x-hertz_template_cpu | 20 | 0.450 | 0.500 (n=12) | 0.375 (n=8) | 1 / 1.000 | 8 / 0.625 | 6 / 0.500 | 0 /  | 5 | True | 1.000 | 1.000 |  |  | 10608 | 0 | 0.000 |
+| r6_x-hertz_template_quick | 12 | 0.250 | 0.375 (n=8) | 0.000 (n=4) | 0 /  | 2 / 0.500 | 7 / 0.286 | 0 /  | 3 | True | 1.000 | 1.000 |  |  | 71 | 0 | 0.000 |
+| r6_x-planck_template | 243 | 0.424 | 0.503 (n=143) | 0.310 (n=100) | 15 / 0.667 | 69 / 0.754 | 82 / 0.390 | 38 / 0.237 | 39 | False | 0.984 | 1.000 |  |  | 47 | 0 | 0.000 |
+| r6_x-planck_template_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 68 | 0 | 0.000 |
+| r6b_x-hertz_template | 243 | 0.473 | 0.538 (n=143) | 0.380 (n=100) | 14 / 0.857 | 84 / 0.714 | 74 / 0.351 | 40 / 0.425 | 31 | False | 0.984 | 1.000 |  |  | 63 | 0 | 0.000 |
+| r6b_x-hertz_template_contrarian | 243 | 0.477 | 0.545 (n=143) | 0.380 (n=100) | 0 /  | 0 /  | 48 / 0.833 | 164 / 0.463 | 31 | True | 0.984 | 1.000 |  |  | 76 | 0 | 0.691 |
+| r6b_x-hertz_template_cpu | 20 | 0.550 | 0.583 (n=12) | 0.500 (n=8) | 2 / 1.000 | 6 / 0.833 | 8 / 0.500 | 0 /  | 4 | True | 1.000 | 1.000 |  |  | 11385 | 0 | 0.000 |
+| r6b_x-planck_template | 243 | 0.535 | 0.448 (n=143) | 0.660 (n=100) | 30 / 0.800 | 82 / 0.683 | 83 / 0.361 | 43 / 0.465 | 5 | False | 0.984 | 1.000 |  |  | 64 | 0 | 0.000 |
+
+| paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
+|---|---|---|---|---|---|---|
+| r6_x-hertz_template vs r6_planck_template | 243 | 0.391 | 0.514 | 18 | 48 | 0.000287 |
+| r6_x-hertz_template vs r6_gemma_template | 243 | 0.391 | 0.634 | 22 | 81 | 4.07e-09 |
+| r6_x-hertz_template vs r6_gemma_gemma | 243 | 0.391 | 0.634 | 22 | 81 | 4.07e-09 |
+| r6_x-hertz_template vs r6_heuristic_template | 243 | 0.391 | 0.498 | 24 | 50 | 0.00337 |
+| r6_x-hertz_template_contrarian vs r6_x-hertz_template | 243 | 0.399 | 0.391 | 2 | 0 | 0.5 |
+| r6_x-hertz_template_cpu vs r6_x-hertz_template | 20 | 0.450 | 0.450 | 0 | 0 | 1 |
+| r6_x-hertz_template_quick vs r6_x-hertz_template | 12 | 0.250 | 0.500 | 1 | 4 | 0.375 |
+| r6b_x-hertz_template vs r6_planck_template | 243 | 0.473 | 0.514 | 26 | 36 | 0.253 |
+| r6b_x-hertz_template vs r6_gemma_template | 243 | 0.473 | 0.634 | 24 | 63 | 3.48e-05 |
+| r6b_x-hertz_template vs r6_gemma_gemma | 243 | 0.473 | 0.634 | 24 | 63 | 3.48e-05 |
+| r6b_x-hertz_template vs r6_heuristic_template | 243 | 0.473 | 0.498 | 30 | 36 | 0.539 |
+| r6b_x-hertz_template vs r6_x-hertz_template | 243 | 0.473 | 0.391 | 25 | 5 | 0.000325 |
+| r6b_x-hertz_template_contrarian vs r6b_x-hertz_template | 243 | 0.477 | 0.473 | 1 | 0 | 1 |
+| r6b_x-hertz_template_cpu vs r6b_x-hertz_template | 20 | 0.550 | 0.550 | 0 | 0 | 1 |
+| r6_x-planck_template vs r6_planck_template | 243 | 0.424 | 0.514 | 27 | 49 | 0.0154 |
+| r6_x-hertz_template vs r6_x-planck_template | 243 | 0.391 | 0.424 | 22 | 30 | 0.332 |
+| r6_x-planck_template vs r6_gemma_template | 243 | 0.424 | 0.634 | 21 | 72 | 1.04e-07 |
+| r6b_x-planck_template vs r6_x-planck_template | 243 | 0.535 | 0.424 | 52 | 25 | 0.0028 |
+| r6b_x-hertz_template vs r6b_x-planck_template | 243 | 0.473 | 0.535 | 26 | 41 | 0.0864 |
+
+- r6_product (pre-registered choice): reader x-hertz (Hertz reads >= 3 points better on held-out questions); writer template (no small writer passes rule W: the template writes); rule R FAIL (0.391 vs midpoint 0.574, round 5's reader 0.514, p 0.000287)
+- r6b_product (pre-registered choice): reader x-hertz (Hertz reads >= 3 points better on held-out questions); writer template (round 6: no small writer passes rule W); rule R FAIL (0.473 vs midpoint 0.574, round 5's reader 0.514, p 0.253)
+- writer judge (r6_x-hertz_hertz_quick, Gemma, blind): small writer preferred 3, template 6, tie 1 of 10
+- KV cache (writer_hertz6_cpu): 100% of 10 greedy answers identical; 4195 ms cached vs 41492 ms uncached (cpu)
+- KV cache (writer_hertz6_cuda): 100% of 20 greedy answers identical; 175 ms cached vs 370 ms uncached (cuda)
+- KV cache (writer_hertz6_quick_cpu): 100% of 10 greedy answers identical; 2728 ms cached vs 22209 ms uncached (cpu)
+- KV cache (writer_hertz6_quick_cuda): 100% of 20 greedy answers identical; 138 ms cached vs 230 ms uncached (cuda)
+- KV cache (writer_planck6_cpu): 100% of 10 greedy answers identical; 555 ms cached vs 5034 ms uncached (cpu)
+- KV cache (writer_planck6_cuda): 100% of 20 greedy answers identical; 98 ms cached vs 100 ms uncached (cuda)
+- KV cache (writer_planck6_quick_cpu): 100% of 10 greedy answers identical; 324 ms cached vs 2021 ms uncached (cpu)
+- KV cache (writer_planck6_quick_cuda): 100% of 20 greedy answers identical; 71 ms cached vs 69 ms uncached (cuda)
+- writer_hertz6: 1412 training examples (1271 train / 141 val), best val loss 0.734, 641M params
+- writer_planck6: 1412 training examples (1271 train / 141 val), best val loss 0.755, 101M params
+
+## G2 v2 heads (choice head + calibrated answerability gate)
+
+| head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
+|---|---|---|---|---|---|---|---|---|---|
+| g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
+| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
+| g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.438 | 0.312 | 0.753 | 0.204 | 0.528 | 0.325 | 0.462 (0.9) |
+| g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
+| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
+| g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.531 | 0.312 | 0.875 | 0.184 | 0.911 | 0.150 | 1.000 (0.9) |
+
+## G2 heads (learned from known answers)
+
+| head | train points | val points with a right candidate | learned choice accuracy | deterministic ranker | 'none' correct (points without one) | val ECE | answer accuracy when p >= 0.5 |
+|---|---|---|---|---|---|---|---|
+| g2_head_hash_s0 | 2546 | 126 | 0.476 | 0.365 | 0.856 (153) | 0.050 | 0.724 |
+| g2_head_planck_s0 | 2546 | 126 | 0.603 | 0.365 | 0.837 (153) | 0.057 | 0.708 |
+
+## G1 Wikiracing (g1_eval_s0)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.015 |
+| head:hash | 1192 | 0.146 | 1.251 | 0.580 | 0.085 | 0.632 |
+| head:planck-rank | 1192 | 0.271 | 1.282 | 0.635 | 0.112 | 0.458 |
+| head:planck | 1192 | 0.211 | 1.272 | 0.624 | 0.095 | 0.445 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 226.268 |
+
+Cold CPU latency (encode target + all candidate titles): median 95 ms, p90 553 ms, 50 candidates on average
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.163 | 0.337 | 0.49 | 21 | 73 | 6.65e-08 |
+| head:hash vs lexical | 1192 | 0.146 | 0.153 |  | 112 | 120 | 0.646 |
+| head:planck-rank vs gemma | 300 | 0.267 | 0.337 | 0.79 | 39 | 60 | 0.0439 |
+| head:planck-rank vs head:hash | 1192 | 0.271 | 0.146 |  | 222 | 73 | 1.21e-18 |
+| head:planck-rank vs lexical | 1192 | 0.271 | 0.153 |  | 227 | 86 | 8.04e-16 |
+| head:planck vs gemma | 300 | 0.177 | 0.337 | 0.52 | 24 | 72 | 9.7e-07 |
+| head:planck vs head:hash | 1192 | 0.211 | 0.146 |  | 161 | 84 | 9.88e-07 |
+| head:planck vs lexical | 1192 | 0.211 | 0.153 |  | 171 | 102 | 3.53e-05 |
+| head:planck-rank vs head:planck | 1192 | 0.271 | 0.211 |  | 174 | 102 | 1.73e-05 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.065 (McNemar p=9.88e-07); paired head/teacher = 0.52 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.49, head:planck-rank 0.79
+
+## G1 Wikiracing (g1_eval_s0_quick)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 100 | 0.000 |  | 0.190 | 0.105 | 0.000 |
+| lexical | 100 | 0.160 | 1.403 | 0.460 | 0.136 | 0.015 |
+| head:hash | 100 | 0.040 | 1.000 | 0.490 | 0.069 | 0.553 |
+| head:planck | 100 | 0.110 | 1.358 | 0.517 | 0.105 | 0.426 |
+| gemma | 20 | 0.200 | 1.250 |  |  | 272.297 |
+
+Cold CPU latency (encode target + all candidate titles): median 101 ms, p90 584 ms, 50 candidates on average
+
+**Verdict:** FAIL (try the Hertz encoder). planck-vs-hash head delta +0.070 (<=0 means Planck features add nothing); head/teacher = 0.55 (pass >= 0.8); warm decision 0.4 ms (pass < 100.0)
+
+## G1 Wikiracing (g1_eval_s1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.013 |
+| head:hash | 1192 | 0.146 | 1.227 | 0.584 | 0.106 | 0.636 |
+| head:planck-rank | 1192 | 0.277 | 1.287 | 0.636 | 0.113 | 0.445 |
+| head:planck | 1192 | 0.247 | 1.299 | 0.628 | 0.102 | 0.426 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 238.269 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.127 | 0.337 | 0.38 | 14 | 77 | 1.05e-11 |
+| head:hash vs lexical | 1192 | 0.146 | 0.153 |  | 120 | 128 | 0.657 |
+| head:planck-rank vs gemma | 300 | 0.283 | 0.337 | 0.84 | 38 | 54 | 0.117 |
+| head:planck-rank vs head:hash | 1192 | 0.277 | 0.146 |  | 234 | 78 | 2.93e-19 |
+| head:planck-rank vs lexical | 1192 | 0.277 | 0.153 |  | 246 | 98 | 8.08e-16 |
+| head:planck vs gemma | 300 | 0.200 | 0.337 | 0.59 | 28 | 69 | 3.8e-05 |
+| head:planck vs head:hash | 1192 | 0.247 | 0.146 |  | 204 | 83 | 6.41e-13 |
+| head:planck vs lexical | 1192 | 0.247 | 0.153 |  | 218 | 105 | 3.06e-10 |
+| head:planck-rank vs head:planck | 1192 | 0.277 | 0.247 |  | 152 | 117 | 0.038 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.102 (McNemar p=6.41e-13); paired head/teacher = 0.59 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.38, head:planck-rank 0.84
+
+## G1 Wikiracing (g1_eval_s2)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1192 | 0.001 | 1.000 | 0.202 | 0.111 | 0.000 |
+| lexical | 1192 | 0.153 | 1.226 | 0.459 | 0.128 | 0.013 |
+| head:hash | 1192 | 0.138 | 1.283 | 0.580 | 0.082 | 0.620 |
+| head:planck-rank | 1192 | 0.270 | 1.310 | 0.632 | 0.104 | 0.431 |
+| head:planck | 1192 | 0.231 | 1.292 | 0.622 | 0.084 | 0.414 |
+| gemma | 300 | 0.337 | 1.348 |  |  | 238.269 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.133 | 0.337 | 0.40 | 13 | 74 | 1.59e-11 |
+| head:hash vs lexical | 1192 | 0.138 | 0.153 |  | 103 | 121 | 0.256 |
+| head:planck-rank vs gemma | 300 | 0.240 | 0.337 | 0.71 | 34 | 63 | 0.00423 |
+| head:planck-rank vs head:hash | 1192 | 0.270 | 0.138 |  | 231 | 73 | 2.85e-20 |
+| head:planck-rank vs lexical | 1192 | 0.270 | 0.153 |  | 234 | 94 | 6.39e-15 |
+| head:planck vs gemma | 300 | 0.213 | 0.337 | 0.63 | 30 | 67 | 0.000219 |
+| head:planck vs head:hash | 1192 | 0.231 | 0.138 |  | 200 | 89 | 5.71e-11 |
+| head:planck vs lexical | 1192 | 0.231 | 0.153 |  | 196 | 103 | 8.21e-08 |
+| head:planck-rank vs head:planck | 1192 | 0.270 | 0.231 |  | 141 | 94 | 0.00262 |
+
+**Verdict:** FAIL. head:planck-vs-hash +0.093 (McNemar p=5.71e-11); paired head/teacher = 0.63 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.40, head:planck-rank 0.71
+
+## G1 Wikiracing (g1_eval_s3_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.016 |
+| head:hash | 1200 | 0.108 | 1.208 | 0.580 | 0.105 | 0.560 |
+| head:hertz-rank | 1200 | 0.247 | 1.296 | 0.642 | 0.118 | 0.712 |
+| head:hertz | 1200 | 0.190 | 1.312 | 0.626 | 0.094 | 0.688 |
+| head:planck-rank | 1200 | 0.235 | 1.275 | 0.636 | 0.104 | 0.434 |
+| head:planck | 1200 | 0.224 | 1.288 | 0.635 | 0.112 | 0.417 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+Cold CPU latency (encode target + all candidate titles): median 83 ms, p90 286 ms, 20 candidates on average
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.093 | 0.337 | 0.28 | 11 | 84 | 4.52e-15 |
+| head:hash vs lexical | 1200 | 0.108 | 0.144 |  | 80 | 123 | 0.0031 |
+| head:hertz-rank vs gemma | 300 | 0.237 | 0.337 | 0.70 | 28 | 58 | 0.00161 |
+| head:hertz-rank vs head:hash | 1200 | 0.247 | 0.108 |  | 236 | 69 | 1.57e-22 |
+| head:hertz-rank vs lexical | 1200 | 0.247 | 0.144 |  | 213 | 89 | 6.97e-13 |
+| head:hertz vs gemma | 300 | 0.133 | 0.337 | 0.40 | 17 | 78 | 1.64e-10 |
+| head:hertz vs head:hash | 1200 | 0.190 | 0.108 |  | 176 | 78 | 7.17e-10 |
+| head:hertz vs lexical | 1200 | 0.190 | 0.144 |  | 156 | 101 | 0.000725 |
+| head:planck-rank vs gemma | 300 | 0.227 | 0.337 | 0.67 | 23 | 56 | 0.000264 |
+| head:planck-rank vs head:hash | 1200 | 0.235 | 0.108 |  | 215 | 63 | 1.35e-20 |
+| head:planck-rank vs lexical | 1200 | 0.235 | 0.144 |  | 198 | 89 | 1.1e-10 |
+| head:planck vs gemma | 300 | 0.220 | 0.337 | 0.65 | 25 | 60 | 0.000187 |
+| head:planck vs head:hash | 1200 | 0.224 | 0.108 |  | 198 | 59 | 9.81e-19 |
+| head:planck vs lexical | 1200 | 0.224 | 0.144 |  | 180 | 84 | 3.4e-09 |
+| head:planck-rank vs head:planck | 1200 | 0.235 | 0.224 |  | 134 | 121 | 0.452 |
+| head:hertz vs head:planck | 1200 | 0.190 | 0.224 |  | 89 | 130 | 0.00674 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.247 | 0.235 |  | 140 | 125 | 0.39 |
+
+**Verdict:** FAIL. head:planck-rank-vs-hash +0.127 (McNemar p=1.35e-20); paired head/teacher = 0.67 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.28, head:hertz-rank 0.70, head:hertz 0.40, head:planck 0.65
+
+## G1 Wikiracing (g1_eval_s4_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
+| head:hash | 1200 | 0.111 | 1.239 | 0.587 | 0.120 | 0.624 |
+| head:hertz-rank | 1200 | 0.239 | 1.288 | 0.644 | 0.103 | 0.686 |
+| head:hertz | 1200 | 0.208 | 1.305 | 0.621 | 0.096 | 0.659 |
+| head:planck-rank | 1200 | 0.230 | 1.296 | 0.633 | 0.102 | 0.393 |
+| head:planck | 1200 | 0.207 | 1.253 | 0.632 | 0.090 | 0.395 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.080 | 0.337 | 0.24 | 8 | 85 | 2.26e-17 |
+| head:hash vs lexical | 1200 | 0.111 | 0.144 |  | 83 | 123 | 0.00644 |
+| head:hertz-rank vs gemma | 300 | 0.243 | 0.337 | 0.72 | 33 | 61 | 0.00508 |
+| head:hertz-rank vs head:hash | 1200 | 0.239 | 0.111 |  | 214 | 60 | 1.86e-21 |
+| head:hertz-rank vs lexical | 1200 | 0.239 | 0.144 |  | 198 | 84 | 8.94e-12 |
+| head:hertz vs gemma | 300 | 0.163 | 0.337 | 0.49 | 25 | 77 | 2.45e-07 |
+| head:hertz vs head:hash | 1200 | 0.208 | 0.111 |  | 189 | 72 | 2.77e-13 |
+| head:hertz vs lexical | 1200 | 0.208 | 0.144 |  | 178 | 101 | 4.71e-06 |
+| head:planck-rank vs gemma | 300 | 0.270 | 0.337 | 0.80 | 34 | 54 | 0.0422 |
+| head:planck-rank vs head:hash | 1200 | 0.230 | 0.111 |  | 208 | 65 | 1.28e-18 |
+| head:planck-rank vs lexical | 1200 | 0.230 | 0.144 |  | 187 | 84 | 3.58e-10 |
+| head:planck vs gemma | 300 | 0.230 | 0.337 | 0.68 | 21 | 53 | 0.000256 |
+| head:planck vs head:hash | 1200 | 0.207 | 0.111 |  | 185 | 69 | 2.03e-13 |
+| head:planck vs lexical | 1200 | 0.207 | 0.144 |  | 173 | 97 | 4.37e-06 |
+| head:planck-rank vs head:planck | 1200 | 0.230 | 0.207 |  | 111 | 84 | 0.0623 |
+| head:hertz vs head:planck | 1200 | 0.208 | 0.207 |  | 124 | 123 | 1 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.239 | 0.230 |  | 122 | 111 | 0.512 |
+
+**Verdict:** PASS. head:planck-rank-vs-hash +0.119 (McNemar p=1.28e-18); paired head/teacher = 0.80 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.72, head:hertz 0.49, head:planck 0.68
+
+## G1 Wikiracing (g1_eval_s5_t1)
+
+| policy | pairs | rollout success | steps / optimal | step top-1 | step ECE | ms / decision |
+|---|---|---|---|---|---|---|
+| random | 1200 | 0.001 | 1.500 | 0.197 | 0.103 | 0.000 |
+| lexical | 1200 | 0.144 | 1.231 | 0.463 | 0.128 | 0.014 |
+| head:hash | 1200 | 0.102 | 1.221 | 0.580 | 0.118 | 0.520 |
+| head:hertz-rank | 1200 | 0.225 | 1.270 | 0.641 | 0.126 | 0.658 |
+| head:hertz | 1200 | 0.196 | 1.248 | 0.634 | 0.088 | 0.653 |
+| head:planck-rank | 1200 | 0.241 | 1.322 | 0.635 | 0.099 | 0.414 |
+| head:planck | 1200 | 0.223 | 1.306 | 0.629 | 0.095 | 0.406 |
+| gemma | 300 | 0.337 | 1.335 |  |  | 251.616 |
+
+| paired comparison (same races) | n | head | other | ratio | only head wins | only other wins | McNemar p |
+|---|---|---|---|---|---|---|---|
+| head:hash vs gemma | 300 | 0.080 | 0.337 | 0.24 | 8 | 85 | 2.26e-17 |
+| head:hash vs lexical | 1200 | 0.102 | 0.144 |  | 64 | 115 | 0.00017 |
+| head:hertz-rank vs gemma | 300 | 0.230 | 0.337 | 0.68 | 33 | 65 | 0.0016 |
+| head:hertz-rank vs head:hash | 1200 | 0.225 | 0.102 |  | 209 | 61 | 3.86e-20 |
+| head:hertz-rank vs lexical | 1200 | 0.225 | 0.144 |  | 187 | 90 | 5.65e-09 |
+| head:hertz vs gemma | 300 | 0.173 | 0.337 | 0.51 | 27 | 76 | 1.45e-06 |
+| head:hertz vs head:hash | 1200 | 0.196 | 0.102 |  | 182 | 69 | 6.31e-13 |
+| head:hertz vs lexical | 1200 | 0.196 | 0.144 |  | 161 | 99 | 0.000145 |
+| head:planck-rank vs gemma | 300 | 0.223 | 0.337 | 0.66 | 34 | 68 | 0.000987 |
+| head:planck-rank vs head:hash | 1200 | 0.241 | 0.102 |  | 224 | 57 | 1.43e-24 |
+| head:planck-rank vs lexical | 1200 | 0.241 | 0.144 |  | 206 | 90 | 1.28e-11 |
+| head:planck vs gemma | 300 | 0.183 | 0.337 | 0.54 | 24 | 70 | 2.2e-06 |
+| head:planck vs head:hash | 1200 | 0.223 | 0.102 |  | 213 | 67 | 6.81e-19 |
+| head:planck vs lexical | 1200 | 0.223 | 0.144 |  | 193 | 98 | 2.72e-08 |
+| head:planck-rank vs head:planck | 1200 | 0.241 | 0.223 |  | 126 | 105 | 0.188 |
+| head:hertz vs head:planck | 1200 | 0.196 | 0.223 |  | 112 | 145 | 0.0457 |
+| head:hertz-rank vs head:planck-rank | 1200 | 0.225 | 0.241 |  | 124 | 143 | 0.271 |
+
+**Verdict:** FAIL. head:planck-rank-vs-hash +0.139 (McNemar p=1.43e-24); paired head/teacher = 0.66 on 300 shared races (pass >= 0.8); warm decision 0.4 ms (pass < 100.0); secondary arms (exploratory): head:hash 0.24, head:hertz-rank 0.68, head:hertz 0.51, head:planck 0.54
+
+## G1 across seeds (g1_aggregate: seeds [0, 1, 2])
+
+| policy | mean rollout success | sd | 95% CI | per seed |
+|---|---|---|---|---|
+| gemma | 0.337 | 0.000 | [0.337, 0.337] | 0.337, 0.337, 0.337 |
+| head:hash | 0.143 | 0.005 | [0.131, 0.155] | 0.146, 0.146, 0.138 |
+| head:planck | 0.230 | 0.018 | [0.184, 0.276] | 0.211, 0.247, 0.231 |
+| head:planck-rank | 0.273 | 0.004 | [0.264, 0.282] | 0.271, 0.277, 0.270 |
+| lexical | 0.153 | 0.000 | [0.153, 0.153] | 0.153, 0.153, 0.153 |
+| random | 0.001 | 0.000 | [0.001, 0.001] | 0.001, 0.001, 0.001 |
+
+head:hash: paired ratio vs teacher 0.42 (per seed 0.49, 0.38, 0.40)
+
+head:planck: paired ratio vs teacher 0.58 (per seed 0.52, 0.59, 0.63)
+
+head:planck-rank: paired ratio vs teacher 0.78 (per seed 0.79, 0.84, 0.71)
+
+**Verdict (seeds):** FAIL. mean paired head:planck/teacher = 0.58 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
+
+## G1 across seeds (g1_aggregate_t1: seeds [3, 4, 5])
+
+| policy | mean rollout success | sd | 95% CI | per seed |
+|---|---|---|---|---|
+| gemma | 0.337 | 0.000 | [0.337, 0.337] | 0.337, 0.337, 0.337 |
+| head:hash | 0.107 | 0.005 | [0.095, 0.119] | 0.108, 0.111, 0.102 |
+| head:hertz | 0.198 | 0.009 | [0.175, 0.221] | 0.190, 0.208, 0.196 |
+| head:hertz-rank | 0.237 | 0.011 | [0.209, 0.265] | 0.247, 0.239, 0.225 |
+| head:planck | 0.218 | 0.009 | [0.195, 0.242] | 0.224, 0.207, 0.223 |
+| head:planck-rank | 0.235 | 0.005 | [0.222, 0.249] | 0.235, 0.230, 0.241 |
+| lexical | 0.144 | 0.000 | [0.144, 0.144] | 0.144, 0.144, 0.144 |
+| random | 0.001 | 0.000 | [0.001, 0.001] | 0.001, 0.001, 0.001 |
+
+head:hash: paired ratio vs teacher 0.25 (per seed 0.28, 0.24, 0.24)
+
+head:hertz: paired ratio vs teacher 0.47 (per seed 0.40, 0.49, 0.51)
+
+head:hertz-rank: paired ratio vs teacher 0.70 (per seed 0.70, 0.72, 0.68)
+
+head:planck: paired ratio vs teacher 0.63 (per seed 0.65, 0.68, 0.54)
+
+head:planck-rank: paired ratio vs teacher 0.71 (per seed 0.67, 0.80, 0.66)
+
+**Verdict (seeds):** FAIL. mean paired head:planck-rank/teacher = 0.71 over 3 seeds (pass >= 0.8); beats head:hash in every seed: True
+
+[planck3 23:55:17] round6b finished in 34 min
+[planck3 23:55:17] committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)
