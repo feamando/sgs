@@ -35,6 +35,8 @@
      round6    round 6 (SETUP_planck_20261012.md): Brave + relevance check as the product search; the reader
                trained once as a cross-encoder (Planck and Hertz) on 2025 news, recent events and general
                information; writers retrained on fixed data with a forced lead, 3 tries and the KV cache
+     round6b   round 6b (SETUP_planck_20261012.md section 10): the round 6 readers retrained on the top 16
+               candidates as served (fixes the last-slot leak), same points, no new searches; ~1.5 h
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -714,6 +716,36 @@ function Do-Round6 {
     finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
 }
 
+# Round 6b (SETUP_planck_20261012.md section 10): the same readers retrained on the pools AS SERVED
+# (round 6 swapped a deep right candidate into the last slot). Same points, same settings, no new
+# searches (the 243 questions are cached); the template writes. Comparators are round 6's runs.
+function Do-Round6b {
+    $points = "data/planck3/reader/points$Tag.jsonl"
+    foreach ($f in @($NEWS, $INFO, $V2HEAD, $PLANCK_CKPT, $points, "$RES/r6_planck_template$Tag/summary.json", "$RES/r6_gemma_template$Tag/summary.json")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 6b reuses round 6: run .\scripts\planck3.ps1 round6 first)" }
+    }
+    $haveHertz = (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $q = if ($Quick) { @("--max-points", "300", "--epochs", "1") } else { @() }
+    $bases = @("planck"); if ($haveHertz) { $bases += "hertz" }
+    foreach ($b in $bases) {
+        $ck = "checkpoints/xreader_${b}_v2$Tag/reader.pt"
+        if (-not (Test-Path $ck)) {
+            Log "round 6b: train the $b reader once more, on the top 16 candidates as served"
+            $bc = if ($b -eq "hertz") { @("--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK) } else { @("--base-checkpoint", $PLANCK_CKPT, "--base-tokenizer", $PLANCK_TOK) }
+            P3 (@("xreader", "train", "--base", $b, "--points", $points, "--tag", "_v2$Tag") + $bc + $q)
+        }
+        Invoke-R6 "r6b_x-${b}_template" @("--reader", "x-$b", "--reader-checkpoint", $ck, "--writer", "template") "round 6b: the $b reader (as served), template writer"
+    }
+    P3 (@("r6", "productb") + $ttag)
+    $prod = Get-Content "$RES/r6b_product$Tag.json" -Raw | ConvertFrom-Json
+    $pa = @("--reader", $prod.reader, "--reader-checkpoint", $prod.reader_checkpoint, "--writer", "template")
+    Invoke-R6 "$($prod.run)_contrarian" ($pa + @("--personal", "contrarian")) "round 6b: worst-case personal profile on the product (rule E)"
+    $old = $env:CUDA_VISIBLE_DEVICES; $env:CUDA_VISIBLE_DEVICES = "-1"; $env:OMP_NUM_THREADS = "4"
+    try { Invoke-R6 "$($prod.run)_cpu" $pa "round 6b: the product on CPU only, 4 threads, 20 questions (phone proxy)" 20 }
+    finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -738,7 +770,7 @@ function Do-Push {
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
                        "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log", "judge.json", "judge_pairs.jsonl",
-                       "r6_product*.json")) {
+                       "r6*_product*.json")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
@@ -833,6 +865,16 @@ switch ($Command.ToLower()) {
         Do-Round6
         P3 @("report")
         Log ("round6$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round6b"    {
+        Start-RunLog "round6b"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Round6b
+        P3 @("report")
+        Log ("round6b$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round4"     {

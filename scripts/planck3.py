@@ -138,13 +138,18 @@ def _chat_harness_factory(args):
     from src.planck3.answer import Answerer
     from src.planck3.readers import make_reader
     from src.planck3.writer import make_writer
-    # auto = what round 6 chose to ship (results/planck3/r6_product.json), else the best that is present
-    prod = read_json(RESULTS / "r6_product.json") if (RESULTS / "r6_product.json").exists() else {}
-    rd, wr, wck = args.reader, args.writer, None
+    # auto = what round 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
+    # reader); otherwise round 5's Planck reader, the best small reader measured so far
+    prods = [read_json(RESULTS / f) for f in ("r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
+    prod = next((p for p in prods if (p.get("rule_r") or {}).get("pass")), prods[0] if prods else {})
+    rd, wr, wck, rck = args.reader, args.writer, None, None
     if rd == "auto":
         from src.planck3.readers import XREADER_CKPT
-        have = [r for r in (prod.get("reader"), "x-planck", "x-hertz") if r in XREADER_CKPT and (REPO_ROOT / XREADER_CKPT[r]).exists()]
-        rd = have[0] if have else ("planck" if args.g2_head and Path(args.g2_head).exists() else "heuristic")
+        rck = prod.get("reader_checkpoint") or XREADER_CKPT.get(prod.get("reader"), "")
+        if (prod.get("rule_r") or {}).get("pass") and rck and (REPO_ROOT / rck).exists():
+            rd, rck = prod["reader"], str(REPO_ROOT / rck)
+        else:
+            rd, rck = ("planck" if args.g2_head and Path(args.g2_head).exists() else "heuristic"), None
     if wr == "auto":
         if prod.get("writer") and (prod["writer"] == "template" or (REPO_ROOT / "checkpoints" / f"writer_{prod['writer']}6" / "best.pt").exists()):
             wr = prod["writer"]
@@ -152,7 +157,7 @@ def _chat_harness_factory(args):
         else:
             wr = next((w for w in ("hertz", "planck") if (REPO_ROOT / "checkpoints" / f"writer_{w}" / "best.pt").exists()), "template")
     reader = make_reader(rd, head=args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer,
-                         gemma_path=args.gemma_path)
+                         gemma_path=args.gemma_path, reader_checkpoint=rck)
     writer = make_writer(wr, gemma_path=args.gemma_path, checkpoint=wck)
     print(f"[planck3] answer pipeline: reader={reader.name} writer={writer.name} (trust: config/planck3/source_registry.json)")
     return lambda: Answerer(web, store, reader, writer)

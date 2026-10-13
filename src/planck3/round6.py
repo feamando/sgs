@@ -72,20 +72,43 @@ def choose_reader(results: Path, tag: str = "") -> dict:
     return {"reader": "x-planck", "test_choice_acc": acc, "why": "Planck reads within 3 points of Hertz (or Hertz missing)"}
 
 
+def _accs(results: Path, run: str) -> dict:
+    return {r["task_id"]: r["shown_correct"] for r in read_jsonl(results / run / "results.jsonl")}
+
+
+def rule_r(results: Path, run: str, tag: str = "") -> dict:
+    """Pre-registered rule R: the reader (template writer) reaches the midpoint between round 5's Planck
+    reader and the Gemma reader, AND beats round 5's Planck reader (exact McNemar, p < 0.05)."""
+    from .wikirace import mcnemar
+    base, ref = results / f"r6_planck_template{tag}", results / f"r6_gemma_template{tag}"
+    if not all((d / "results.jsonl").exists() for d in (results / run, base, ref)):
+        return {"pass": False, "why": "a run is missing"}
+    a, b, g = _accs(results, run), _accs(results, base.name), _accs(results, ref.name)
+    ids = sorted(set(a) & set(b) & set(g))
+    acc = lambda d: sum(d[i] for i in ids) / max(len(ids), 1)  # noqa: E731
+    mid = (acc(b) + acc(g)) / 2
+    m = mcnemar([a[i] for i in ids], [b[i] for i in ids])
+    ok = acc(a) >= mid and acc(a) > acc(b) and m["p"] < 0.05
+    return {"pass": ok, "acc": acc(a), "midpoint": mid, "vs_round5_reader": acc(b), "p": m["p"], "n": len(ids)}
+
+
 def report_lines(results: Path) -> list[str]:
     from .wikirace import mcnemar
-    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r6_*/summary.json"))}
+    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r6*_*/summary.json"))}
     lines = []
-    xr = {b: read_json(p) for b in ("planck", "hertz") if (p := results / f"xreader_{b}" / "train_log.json").exists()}
+    xr = {f"x-{b}{t}": read_json(p) for t in ("", "_v2") for b in ("planck", "hertz")
+          if (p := results / f"xreader_{b}{t}" / "train_log.json").exists()}
     if xr:
         lines += ["## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)", "",
-                  "| reader | params | train / val / test pools | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |",
-                  "|---|---|---|---|---|---|---|---|"]
-        for b, t in xr.items():
+                  "_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot)", "",
+                  "| reader | params | train / val / test pools | right only beyond top 16 (test) | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |",
+                  "|---|---|---|---|---|---|---|---|---|"]
+        for name, t in xr.items():
             n, te = t["n_points"], t["test"]
             grp = "; ".join(f"{g} {m['choice_acc']:.3f} vs {m['ranker_acc']:.3f} (n={m['pools_with_a_right_candidate']})"
                             for g, m in t["test_by_group"].items())
-            lines.append(f"| x-{b} | {t['params'] / 1e6:.0f}M | {n['train']} / {n['val']} / {n['test']} | {te['choice_acc']:.3f} | "
+            beyond = (t.get("right_beyond_cut") or {}).get("test", "")
+            lines.append(f"| {name} | {t['params'] / 1e6:.0f}M | {n['train']} / {n['val']} / {n['test']} | {beyond} | {te['choice_acc']:.3f} | "
                          f"{te['ranker_acc']:.3f} | {te['gate_auc'] if te['gate_auc'] is None else round(te['gate_auc'], 3)} | "
                          f"{te['gate_ece'] if te['gate_ece'] is None else round(te['gate_ece'], 3)} | {grp} |")
         lines.append("")
@@ -111,18 +134,21 @@ def report_lines(results: Path) -> list[str]:
                      f"{f3(s.get('writer_first_try_faithful'))} | {f3(s.get('writer_mean_tries'))} | {t.get('read_ms', 0):.0f} | "
                      f"{t.get('write_ms', 0):.0f} | {s['changed_by_personal']:.3f} |")
     lines.append("")
-    prod = read_json(results / "r6_product.json") if (results / "r6_product.json").exists() else {}
-    pname = prod.get("run")
+    prods = {f: read_json(results / f) for f in ("r6_product.json", "r6b_product.json") if (results / f).exists()}
     pairs = []
-    if pname in runs:
-        for other in ("r6_planck_template", "r6_gemma_template", "r6_gemma_gemma", "r6_heuristic_template"):
-            if other in runs:
+    for prod in prods.values():
+        pname = prod.get("run")
+        if pname not in runs:
+            continue
+        for other in ("r6_planck_template", "r6_gemma_template", "r6_gemma_gemma", "r6_heuristic_template", "r6_x-hertz_template"):
+            if other in runs and other != pname:
                 pairs.append((pname, other))
         for name in runs:
             if name.startswith(pname + "_"):
                 pairs.append((name, pname))
     for a, b in (("r6_x-planck_template", "r6_planck_template"), ("r6_x-hertz_template", "r6_x-planck_template"),
-                 ("r6_x-planck_template", "r6_gemma_template")):
+                 ("r6_x-planck_template", "r6_gemma_template"), ("r6b_x-planck_template", "r6_x-planck_template"),
+                 ("r6b_x-hertz_template", "r6_x-hertz_template"), ("r6b_x-hertz_template", "r6b_x-planck_template")):
         if a in runs and b in runs and (a, b) not in pairs:
             pairs.append((a, b))
     if pairs:
@@ -136,9 +162,13 @@ def report_lines(results: Path) -> list[str]:
             m = mcnemar(xa, xb)
             lines.append(f"| {a} vs {b} | {len(ids)} | {sum(xa) / len(ids):.3f} | {sum(xb) / len(ids):.3f} | {m['a_only']} | {m['b_only']} | {m['p']:.3g} |")
         lines.append("")
-    if prod:
-        lines.append(f"- product (pre-registered choice): reader {prod.get('reader')} ({prod.get('reader_why')}); "
-                     f"writer {prod.get('writer')} ({prod.get('writer_why')})")
+    for f, prod in prods.items():
+        r = prod.get("rule_r") or rule_r(results, prod.get("run", ""))
+        verdict = "PASS" if r.get("pass") else "FAIL"
+        detail = (f"{r['acc']:.3f} vs midpoint {r['midpoint']:.3f}, round 5's reader {r['vs_round5_reader']:.3f}, p {r['p']:.3g}"
+                  if "acc" in r else r.get("why", ""))
+        lines.append(f"- {f[:-5]} (pre-registered choice): reader {prod.get('reader')} ({prod.get('reader_why')}); "
+                     f"writer {prod.get('writer')} ({prod.get('writer_why')}); rule R {verdict} ({detail})")
     for name in runs:
         j = results / name / "judge.json"
         if j.exists():
@@ -171,20 +201,38 @@ def product_decision(results: Path, tag: str = "") -> dict:
         choice.update(writer="template", writer_why="no small writer passes rule W: the template writes")
     choice["run"] = f"r6_{choice['reader']}_{choice['writer']}"
     choice["tag"] = tag
+    choice["rule_r"] = rule_r(results, f"r6_{choice['reader']}_template{tag}", tag)
     write_json(results / f"r6_product{tag}.json", choice)
-    print(f"[r6] product: reader {choice['reader']} ({choice['reader_why']}); writer {choice['writer']} ({choice['writer_why']})")
+    print(f"[r6] product: reader {choice['reader']} ({choice['reader_why']}); writer {choice['writer']} ({choice['writer_why']}); "
+          f"rule R {'PASS' if choice['rule_r']['pass'] else 'FAIL'}")
+    return choice
+
+
+def product_decision_b(results: Path, tag: str = "") -> dict:
+    """Round 6b (section 10): the readers retrained on the pools as served; the writer stays the template
+    (no small writer passed W in round 6). Same reader rule, same rule R."""
+    rd = choose_reader(results, "_v2" + tag)
+    run = f"r6b_{rd['reader']}_template"
+    choice = {"reader": rd["reader"], "reader_why": rd["why"], "test_choice_acc": rd["test_choice_acc"],
+              "reader_checkpoint": f"checkpoints/xreader_{rd['reader'][2:]}_v2{tag}/reader.pt",
+              "writer": "template", "writer_why": "round 6: no small writer passes rule W", "run": run, "tag": tag,
+              "rule_r": rule_r(results, run + tag, tag)}
+    write_json(results / f"r6b_product{tag}.json", choice)
+    print(f"[r6b] product: reader {choice['reader']} ({choice['reader_why']}); rule R {'PASS' if choice['rule_r']['pass'] else 'FAIL'}")
     return choice
 
 
 def add_cli(sub):
-    p = sub.add_parser("r6", help="round 6 helpers: product (pre-registered choice) | reader (which reader ships)")
-    p.add_argument("stage", choices=["product", "reader"])
+    p = sub.add_parser("r6", help="round 6 helpers: product | productb (pre-registered choice) | reader (which reader ships)")
+    p.add_argument("stage", choices=["product", "productb", "reader"])
     p.add_argument("--tag", default="")
 
     def run(a):
         from .round5 import RESULTS
         if a.stage == "reader":
             print(choose_reader(RESULTS, a.tag)["reader"])
+        elif a.stage == "productb":
+            product_decision_b(RESULTS, a.tag)
         else:
             product_decision(RESULTS, a.tag)
     p.set_defaults(fn=run)
