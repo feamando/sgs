@@ -1,0 +1,56 @@
+{
+  "sets": {
+    "squad": {
+      "rows": 900,
+      "dropped_untyped_or_empty": 315,
+      "dropped_benchmark": 65,
+      "kept": 275,
+      "with_right_in_top16": 180,
+      "without": 95
+    },
+    "newsqa": {
+      "rows": 900,
+      "dropped_benchmark": 54,
+      "dropped_untyped_or_empty": 322,
+      "kept": 280,
+      "with_right_in_top16": 180,
+      "without": 100
+    },
+    "triviaqa": {
+      "rows": 900,
+      "dropped_untyped_or_empty": 603,
+      "dropped_benchmark": 67,
+      "kept": 221,
+      "with_right_in_top16": 180,
+      "without": 41
+    },
+    "searchqa": {
+      "rows": 900,
+      "dropped_untyped_or_empty": 210,
+      "dropped_benchmark": 67,
+      "kept": 280,
+      "with_right_in_top16": 180,
+      "without": 100
+    },
+    "nq": {
+      "rows": 900,
+      "dropped_untyped_or_empty": 107,
+      "dropped_benchmark": 2,
+      "kept": 300,
+      "with_right_in_top16": 180,
+      "without": 120
+    },
+    "squad2neg": {
+      "rows": 450,
+      "dropped_untyped_or_empty": 296,
+      "dropped_benchmark": 23,
+      "kept": 131,
+      "with_right_in_top16": 0,
+      "without": 131
+    }
+  },
+  "per_set": 300,
+  "neg": 150,
+  "seed": 0,
+  "total": 1487
+}

@@ -1,0 +1,77 @@
+{
+  "reader": "x-planck",
+  "reader_why": "fixed before the run: the phone-size model (no selection)",
+  "reader_checkpoint": "checkpoints/xreader_planck_r7_quick/reader.pt",
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r7_x-planck_template",
+  "tag": "_quick",
+  "rule_r": {
+    "pass": false,
+    "acc": 0.5833333333333334,
+    "midpoint": 0.6666666666666666,
+    "vs_round5_reader": 0.6666666666666666,
+    "p": 1.0,
+    "n": 12
+  },
+  "rule_n": {
+    "pass": false,
+    "group": "newsqa",
+    "choice_acc": 0.4444444444444444,
+    "ranker_acc": 0.4444444444444444,
+    "delta": 0.0,
+    "p": 1.0,
+    "pools": 18
+  },
+  "rule_n_searchqa": {
+    "pass": false,
+    "group": "searchqa",
+    "choice_acc": 0.5384615384615384,
+    "ranker_acc": 0.5384615384615384,
+    "delta": 0.0,
+    "p": 1.0,
+    "pools": 13
+  },
+  "rule_n_hertz": {
+    "pass": false,
+    "group": "newsqa",
+    "choice_acc": 0.4444444444444444,
+    "ranker_acc": 0.4444444444444444,
+    "delta": 0.0,
+    "p": 1.0,
+    "pools": 18
+  },
+  "rule_h": {
+    "flag": false,
+    "delta": -0.25,
+    "p": 0.375,
+    "n": 12
+  },
+  "rule_c1": {
+    "pass": true,
+    "monotone": true,
+    "high": {
+      "n": 1,
+      "precision": 1.0,
+      "bar": 0.9,
+      "judged": false
+    },
+    "good": {
+      "n": 3,
+      "precision": 0.6666666666666666,
+      "bar": 0.7,
+      "judged": false
+    }
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 892.0749999999999
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": 0.0,
+    "changed": 10,
+    "flagged": 10
+  },
+  "outcome": "rebuild: Planck does not read news even after reading training (round 8 rebuilds the base)"
+}

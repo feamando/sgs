@@ -1,0 +1,77 @@
+{
+  "reader": "x-planck",
+  "reader_why": "fixed before the run: the phone-size model (no selection)",
+  "reader_checkpoint": "checkpoints/xreader_planck_r7/reader.pt",
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r7_x-planck_template",
+  "tag": "",
+  "rule_r": {
+    "pass": false,
+    "acc": 0.5432098765432098,
+    "midpoint": 0.5740740740740741,
+    "vs_round5_reader": 0.51440329218107,
+    "p": 0.4703685318581444,
+    "n": 243
+  },
+  "rule_n": {
+    "pass": false,
+    "group": "newsqa",
+    "choice_acc": 0.46449359720605354,
+    "ranker_acc": 0.47729918509895225,
+    "delta": -0.012805587892898707,
+    "p": 0.3672967393938882,
+    "pools": 859
+  },
+  "rule_n_searchqa": {
+    "pass": false,
+    "group": "searchqa",
+    "choice_acc": 0.5222088835534213,
+    "ranker_acc": 0.46218487394957986,
+    "delta": 0.060024009603841466,
+    "p": 4.26634580070168e-05,
+    "pools": 833
+  },
+  "rule_n_hertz": {
+    "pass": true,
+    "group": "newsqa",
+    "choice_acc": 0.5797438882421421,
+    "ranker_acc": 0.47729918509895225,
+    "delta": 0.10244470314318982,
+    "p": 2.73492113556604e-11,
+    "pools": 859
+  },
+  "rule_h": {
+    "flag": false,
+    "delta": 0.01646090534979424,
+    "p": 0.6654658120766186,
+    "n": 243
+  },
+  "rule_c1": {
+    "pass": false,
+    "monotone": false,
+    "high": {
+      "n": 26,
+      "precision": 0.8076923076923077,
+      "bar": 0.9,
+      "judged": true
+    },
+    "good": {
+      "n": 80,
+      "precision": 0.675,
+      "bar": 0.7,
+      "judged": true
+    }
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 1051.35
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": 0.0,
+    "changed": 197,
+    "flagged": 197
+  },
+  "outcome": "rebuild: Planck does not read news even after reading training (round 8 rebuilds the base)"
+}

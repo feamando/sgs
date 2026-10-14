@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-13 23:55)
+# Planck 3.0 results (2026-10-15 01:57)
 
 ## G0 (seed benchmark)
 
@@ -219,7 +219,7 @@
 
 ## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)
 
-_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot)
+_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot); _rc = round 7 stage A (public reading sets only); _r7 = round 7 (stage A, then our pools)
 
 | reader | params | train / val / test pools | right only beyond top 16 (test) | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |
 |---|---|---|---|---|---|---|---|---|
@@ -227,6 +227,10 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | x-hertz | 641M | 5310 / 592 / 654 |  | 0.568 | 0.401 | 0.789 | 0.05 | stable 0.699 vs 0.460 (n=226); recent 0.458 vs 0.229 (n=83); news 0.328 vs 0.418 (n=67); info 0.491 vs 0.400 (n=55) |
 | x-planck_v2 | 101M | 5310 / 592 / 654 | 32 | 0.446 | 0.434 | 0.704 | 0.047 | stable 0.512 vs 0.479 (n=217); recent 0.324 vs 0.268 (n=71); news 0.407 vs 0.475 (n=59); info 0.385 vs 0.423 (n=52) |
 | x-hertz_v2 | 641M | 5310 / 592 / 654 | 32 | 0.609 | 0.434 | 0.804 | 0.052 | stable 0.737 vs 0.479 (n=217); recent 0.423 vs 0.268 (n=71); news 0.458 vs 0.475 (n=59); info 0.500 vs 0.423 (n=52) |
+| x-planck_rc | 101M | 137581 / 6000 / 6000 | 229 | 0.487 | 0.474 | 0.647 | 0.025 | squad 0.560 vs 0.601 (n=813); newsqa 0.464 vs 0.477 (n=859); triviaqa 0.508 vs 0.422 (n=417); searchqa 0.522 vs 0.462 (n=833); nq 0.399 vs 0.389 (n=884); squad2neg 0.000 vs 0.000 (n=0) |
+| x-hertz_rc | 641M | 137581 / 6000 / 6000 | 229 | 0.643 | 0.474 | 0.778 | 0.025 | squad 0.654 vs 0.601 (n=813); newsqa 0.580 vs 0.477 (n=859); triviaqa 0.717 vs 0.422 (n=417); searchqa 0.677 vs 0.462 (n=833); nq 0.628 vs 0.389 (n=884); squad2neg 0.000 vs 0.000 (n=0) |
+| x-planck_r7 | 101M | 5310 / 592 / 654 | 32 | 0.456 | 0.434 | 0.687 | 0.064 | stable 0.525 vs 0.479 (n=217); recent 0.338 vs 0.268 (n=71); news 0.407 vs 0.475 (n=59); info 0.385 vs 0.423 (n=52) |
+| x-hertz_r7 | 641M | 5310 / 592 / 654 | 32 | 0.667 | 0.434 | 0.79 | 0.047 | stable 0.710 vs 0.479 (n=217); recent 0.577 vs 0.268 (n=71); news 0.593 vs 0.475 (n=59); info 0.692 vs 0.423 (n=52) |
 
 ## Round 6: read -> weigh -> write on Brave, relevance-checked (SETUP_planck_20261012.md)
 
@@ -256,6 +260,18 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r6b_x-hertz_template_contrarian | 243 | 0.477 | 0.545 (n=143) | 0.380 (n=100) | 0 /  | 0 /  | 48 / 0.833 | 164 / 0.463 | 31 | True | 0.984 | 1.000 |  |  | 76 | 0 | 0.691 |
 | r6b_x-hertz_template_cpu | 20 | 0.550 | 0.583 (n=12) | 0.500 (n=8) | 2 / 1.000 | 6 / 0.833 | 8 / 0.500 | 0 /  | 4 | True | 1.000 | 1.000 |  |  | 11385 | 0 | 0.000 |
 | r6b_x-planck_template | 243 | 0.535 | 0.448 (n=143) | 0.660 (n=100) | 30 / 0.800 | 82 / 0.683 | 83 / 0.361 | 43 / 0.465 | 5 | False | 0.984 | 1.000 |  |  | 64 | 0 | 0.000 |
+| r7_x-hertz-rc_template | 243 | 0.601 | 0.580 (n=143) | 0.630 (n=100) | 29 / 0.724 | 88 / 0.739 | 77 / 0.506 | 43 / 0.488 | 6 | False | 0.984 | 1.000 |  |  | 71 | 0 | 0.000 |
+| r7_x-hertz-rc_template_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 78 | 0 | 0.000 |
+| r7_x-hertz_template | 243 | 0.560 | 0.552 (n=143) | 0.570 (n=100) | 33 / 0.758 | 77 / 0.727 | 72 / 0.486 | 44 / 0.455 | 17 | True | 0.984 | 1.000 |  |  | 52 | 0 | 0.000 |
+| r7_x-hertz_template_quick | 12 | 0.333 | 0.375 (n=8) | 0.250 (n=4) | 1 / 1.000 | 3 / 0.667 | 4 / 0.250 | 1 / 0.000 | 3 | True | 1.000 | 1.000 |  |  | 78 | 0 | 0.000 |
+| r7_x-planck-rc_template | 243 | 0.531 | 0.455 (n=143) | 0.640 (n=100) | 14 / 0.714 | 77 / 0.662 | 106 / 0.443 | 41 / 0.512 | 5 | False | 0.984 | 1.000 |  |  | 54 | 0 | 0.000 |
+| r7_x-planck-rc_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 40 | 0 | 0.000 |
+| r7_x-planck_template | 243 | 0.543 | 0.462 (n=143) | 0.660 (n=100) | 26 / 0.808 | 80 / 0.675 | 91 / 0.396 | 40 / 0.525 | 6 | False | 0.984 | 1.000 |  |  | 42 | 0 | 0.000 |
+| r7_x-planck_template_contrarian | 243 | 0.543 | 0.469 (n=143) | 0.650 (n=100) | 0 /  | 3 / 0.667 | 32 / 0.781 | 202 / 0.520 | 6 | True | 0.984 | 1.000 |  |  | 96 | 0 | 0.811 |
+| r7_x-planck_template_contrarian_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 0 /  | 0 /  | 0 /  | 12 / 0.583 | 0 | True | 1.000 | 1.000 |  |  | 37 | 0 | 0.833 |
+| r7_x-planck_template_cpu | 20 | 0.700 | 0.667 (n=12) | 0.750 (n=8) | 5 / 1.000 | 3 / 1.000 | 7 / 0.571 | 3 / 0.667 | 2 | True | 1.000 | 1.000 |  |  | 1051 | 0 | 0.000 |
+| r7_x-planck_template_cpu_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 892 | 0 | 0.000 |
+| r7_x-planck_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 34 | 0 | 0.000 |
 
 | paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
 |---|---|---|---|---|---|---|
@@ -273,14 +289,29 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r6b_x-hertz_template vs r6_x-hertz_template | 243 | 0.473 | 0.391 | 25 | 5 | 0.000325 |
 | r6b_x-hertz_template_contrarian vs r6b_x-hertz_template | 243 | 0.477 | 0.473 | 1 | 0 | 1 |
 | r6b_x-hertz_template_cpu vs r6b_x-hertz_template | 20 | 0.550 | 0.550 | 0 | 0 | 1 |
+| r7_x-planck_template vs r6_planck_template | 243 | 0.543 | 0.514 | 38 | 31 | 0.47 |
+| r7_x-planck_template vs r6_gemma_template | 243 | 0.543 | 0.634 | 28 | 50 | 0.0169 |
+| r7_x-planck_template vs r6_gemma_gemma | 243 | 0.543 | 0.634 | 28 | 50 | 0.0169 |
+| r7_x-planck_template vs r6_heuristic_template | 243 | 0.543 | 0.498 | 16 | 5 | 0.0266 |
+| r7_x-planck_template vs r6_x-hertz_template | 243 | 0.543 | 0.391 | 63 | 26 | 0.00011 |
+| r7_x-planck_template_contrarian vs r7_x-planck_template | 243 | 0.543 | 0.543 | 1 | 1 | 1 |
+| r7_x-planck_template_contrarian_quick vs r7_x-planck_template | 12 | 0.583 | 0.583 | 1 | 1 | 1 |
+| r7_x-planck_template_cpu vs r7_x-planck_template | 20 | 0.700 | 0.700 | 0 | 0 | 1 |
+| r7_x-planck_template_cpu_quick vs r7_x-planck_template | 12 | 0.583 | 0.583 | 1 | 1 | 1 |
+| r7_x-planck_template_quick vs r7_x-planck_template | 12 | 0.583 | 0.583 | 1 | 1 | 1 |
 | r6_x-planck_template vs r6_planck_template | 243 | 0.424 | 0.514 | 27 | 49 | 0.0154 |
 | r6_x-hertz_template vs r6_x-planck_template | 243 | 0.391 | 0.424 | 22 | 30 | 0.332 |
 | r6_x-planck_template vs r6_gemma_template | 243 | 0.424 | 0.634 | 21 | 72 | 1.04e-07 |
 | r6b_x-planck_template vs r6_x-planck_template | 243 | 0.535 | 0.424 | 52 | 25 | 0.0028 |
 | r6b_x-hertz_template vs r6b_x-planck_template | 243 | 0.473 | 0.535 | 26 | 41 | 0.0864 |
+| r7_x-planck_template vs r6b_x-planck_template | 243 | 0.543 | 0.535 | 8 | 6 | 0.791 |
+| r7_x-planck-rc_template vs r7_x-planck_template | 243 | 0.531 | 0.543 | 4 | 7 | 0.549 |
+| r7_x-hertz_template vs r7_x-planck_template | 243 | 0.560 | 0.543 | 26 | 22 | 0.665 |
+| r7_x-hertz_template vs r6b_x-hertz_template | 243 | 0.560 | 0.473 | 35 | 14 | 0.0038 |
 
 - r6_product (pre-registered choice): reader x-hertz (Hertz reads >= 3 points better on held-out questions); writer template (no small writer passes rule W: the template writes); rule R FAIL (0.391 vs midpoint 0.574, round 5's reader 0.514, p 0.000287)
 - r6b_product (pre-registered choice): reader x-hertz (Hertz reads >= 3 points better on held-out questions); writer template (round 6: no small writer passes rule W); rule R FAIL (0.473 vs midpoint 0.574, round 5's reader 0.514, p 0.253)
+- r7_product (pre-registered choice): reader x-planck (fixed before the run: the phone-size model (no selection)); writer template (round 6: no small writer passes rule W); rule R FAIL (0.543 vs midpoint 0.574, round 5's reader 0.514, p 0.47)
 - writer judge (r6_x-hertz_hertz_quick, Gemma, blind): small writer preferred 3, template 6, tie 1 of 10
 - KV cache (writer_hertz6_cpu): 100% of 10 greedy answers identical; 4195 ms cached vs 41492 ms uncached (cpu)
 - KV cache (writer_hertz6_cuda): 100% of 20 greedy answers identical; 175 ms cached vs 370 ms uncached (cuda)
@@ -292,6 +323,18 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 - KV cache (writer_planck6_quick_cuda): 100% of 20 greedy answers identical; 71 ms cached vs 69 ms uncached (cuda)
 - writer_hertz6: 1412 training examples (1271 train / 141 val), best val loss 0.734, 641M params
 - writer_planck6: 1412 training examples (1271 train / 141 val), best val loss 0.755, 101M params
+
+## Round 7: reading taught as a skill (SETUP_planck_20261014.md)
+
+- **R** FAIL: x-planck r7 0.543 vs midpoint 0.574; round 5's reader 0.514, p 0.47
+- **N (rebuild gate, NewsQA)** FAIL: choice 0.464 vs ranker 0.477 (+-1.3 pts, p 0.367, 859 pools)
+- **N on SearchQA (reported)** FAIL: choice 0.522 vs ranker 0.462 (+6.0 pts, p 4.27e-05, 833 pools)
+- **N for Hertz (reported)** PASS: choice 0.580 vs ranker 0.477 (+10.2 pts, p 2.73e-11, 859 pools)
+- **H** (reported): Hertz r7 minus Planck r7 +1.6 pts, p 0.665 -> no clear Hertz advantage
+- **C1** FAIL: monotone False, high {'n': 26, 'precision': 0.8076923076923077, 'bar': 0.9, 'judged': True}, good {'n': 80, 'precision': 0.675, 'bar': 0.7, 'judged': True}
+- **L** PASS: ms 1051.35
+- **E** PASS: drop 0.0, changed 197, flagged 197
+- **Outcome (pre-registered):** rebuild: Planck does not read news even after reading training (round 8 rebuilds the base)
 
 ## G2 v2 heads (choice head + calibrated answerability gate)
 
