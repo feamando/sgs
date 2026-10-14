@@ -369,6 +369,12 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 - **Round 6b pre-registered (2026-10-12, section 11, `planck3.ps1 round6b`, ~1.5 h, no new searches):**
   - The same readers retrained with only the leak fixed (top 16 as served), under the same rules.
   - If R fails again, the next lever is Gemma as teacher (soft labels on the same pools), then Brave re-collection after the quota resets.
+- **ROUND 6b RESULTS OF RECORD (2026-10-13, acec333; SETUP_planck_20261012.md section 12):**
+  - **R FAILS again:** x-hertz v2 + template 47.3% (midpoint 57.4%; vs round 5's reader p 0.25). C1 FAIL (bands not monotone), L FAIL (11.4 s on CPU), E and S PASS.
+  - **The leak was real:** x-planck +11 points (p 0.003), x-hertz +8 (p 0.0003).
+  - **The size rule picked the worse reader:** Hertz +16 on held-out test, but Planck v2 leads on the benchmark (53.5% vs 47.3%, p 0.086). x-planck v2 equals the heuristic's answer on 78% of the questions.
+  - **Across three small-reader designs,** none beats the no-model floor significantly on Brave; Gemma leads by 10-16 points. Ships: round 5 reader + template (unchanged).
+  - **Next (recommended, not built):** Brave-collected pools with Gemma soft labels; a non-SGS small cross-encoder as a diagnostic control; select the reader on a benchmark-like held-out slice.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
