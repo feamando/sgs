@@ -374,13 +374,19 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **The leak was real:** x-planck +11 points (p 0.003), x-hertz +8 (p 0.0003).
   - **The size rule picked the worse reader:** Hertz +16 on held-out test, but Planck v2 leads on the benchmark (53.5% vs 47.3%, p 0.086). x-planck v2 equals the heuristic's answer on 78% of the questions.
   - **Across three small-reader designs,** none beats the no-model floor significantly on Brave; Gemma leads by 10-16 points. Ships: round 5 reader + template (unchanged).
-  - **Next (recommended, not built):** Brave-collected pools with Gemma soft labels; a non-SGS small cross-encoder as a diagnostic control; select the reader on a benchmark-like held-out slice.
+  - **Next (recommended, not built):** Brave-collected pools with Gemma soft labels; a non-SGS small cross-encoder as a diagnostic control; select the reader on a benchmark-like held-out slice. (The non-SGS control was dropped on 2026-10-14: SGS only, owner's decision.)
 - **Round 7 built + pre-registered (2026-10-14, `SETUP_planck_20261014.md`, `planck3.ps1 round7`, ~4-6 h, no new searches; SGS only, owner's decision):**
   - **Stage A:** Planck 1.3 and Hertz 1.2 learn reading as a skill on ~150k public reading-comprehension pools (SQuAD, NewsQA, TriviaQA, SearchQA, NQ, SQuAD 2.0 unanswerable), turned into the reader's own pool format by the same extractors.
   - **Stage B:** round 6b's training on our pools.
   - **Product fixed:** x-planck r7 + template.
   - **Rules:** R as round 6. **N (rebuild gate):** Planck beats its lexical ranker on held-out NewsQA by >= 10 points, p < 0.05.
   - **Outcome:** R pass -> ship; N fail -> rebuild Planck (round 8); N pass -> Brave pools + Gemma soft labels.
+- **Round 8 (planned, not built; branch fixed by round 7's outcome table):**
+  - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
+  - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.
+  - **R fails, N passes:** Brave-collected pools (after the quota resets) with Gemma soft labels; select the reader on a benchmark-like held-out slice; no rebuild.
+  - **Before any new Brave collection:** fix the runner's Brave check, which passes on a cached answer at 0 quota.
+  - The round 8 plan and rules are written after round 7's results of record. Roadmap rows: `1-planck-3-0-round-8`, `1-planck-3-0-open-items`.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
