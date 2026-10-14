@@ -1,0 +1,94 @@
+{
+  "name": "hertz",
+  "base": "checkpoints/hertz12/best.pt",
+  "tokenizer": "data/hertz12_data/tokenizer.model",
+  "params": 640812055,
+  "temperature": 3.6300930168612306,
+  "platt": [
+    0.5055896238267645,
+    0.2911158403165825
+  ],
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.5052865787553766,
+      "val_choice_acc": 0.622093023255814,
+      "s": 427.9
+    },
+    {
+      "epoch": 1,
+      "train_loss": 0.6942842959011327,
+      "val_choice_acc": 0.6627906976744186,
+      "s": 424.7
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.21445381625396134,
+      "val_choice_acc": 0.6308139534883721,
+      "s": 423.2
+    }
+  ],
+  "best_val_choice_acc": 0.6627906976744186,
+  "points": [
+    "C:\\Users\\feama\\sgs\\data\\planck3\\g2\\points_ddgs.jsonl",
+    "data\\planck3\\reader\\points.jsonl"
+  ],
+  "n_points": {
+    "train": 5310,
+    "val": 592,
+    "test": 654
+  },
+  "pool_rule": "top16_as_served",
+  "right_beyond_cut": {
+    "train": 196,
+    "val": 24,
+    "test": 32
+  },
+  "test": {
+    "pools": 654,
+    "pools_with_a_right_candidate": 399,
+    "choice_acc": 0.6090225563909775,
+    "ranker_acc": 0.43358395989974935,
+    "gate_auc": 0.8035104582820181,
+    "gate_ece": 0.05192856144599413,
+    "base_rate": 0.37155963302752293
+  },
+  "test_by_group": {
+    "stable": {
+      "pools": 283,
+      "pools_with_a_right_candidate": 217,
+      "choice_acc": 0.7373271889400922,
+      "ranker_acc": 0.4792626728110599,
+      "gate_auc": 0.7766768292682927,
+      "gate_ece": 0.06766794116877163,
+      "base_rate": 0.5653710247349824
+    },
+    "recent": {
+      "pools": 115,
+      "pools_with_a_right_candidate": 71,
+      "choice_acc": 0.4225352112676056,
+      "ranker_acc": 0.2676056338028169,
+      "gate_auc": 0.6654901960784314,
+      "gate_ece": 0.1421040440277568,
+      "base_rate": 0.2608695652173913
+    },
+    "news": {
+      "pools": 159,
+      "pools_with_a_right_candidate": 59,
+      "choice_acc": 0.4576271186440678,
+      "ranker_acc": 0.4745762711864407,
+      "gate_auc": 0.7783389450056116,
+      "gate_ece": 0.10858013510760359,
+      "base_rate": 0.16981132075471697
+    },
+    "info": {
+      "pools": 97,
+      "pools_with_a_right_candidate": 52,
+      "choice_acc": 0.5,
+      "ranker_acc": 0.4230769230769231,
+      "gate_auc": 0.8347778981581798,
+      "gate_ece": 0.08363866023704908,
+      "base_rate": 0.26804123711340205
+    }
+  }
+}
