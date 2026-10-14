@@ -40,7 +40,7 @@ PREFIX_TOKENS = 64
 CAND_TOKENS = 112
 EVIDENCE_CHARS = 320
 YEAR_SHIFT_P = 0.5
-GROUPS = ("stable", "recent", "news", "info")
+GROUPS = ("stable", "recent", "news", "info", "squad", "newsqa", "triviaqa", "searchqa", "nq", "squad2neg")  # + round 7 reading sets
 
 
 def prefix_text(question: str, answer_type: str) -> str:
@@ -230,9 +230,13 @@ def fit_platt(x, y, iters: int = 200) -> tuple[float, float]:
 
 def evaluate(scores, encs, T, a, b) -> dict:
     from .metrics import ece
+    from .wikirace import mcnemar
     has = [(s, e) for s, e in zip(scores, encs) if any(e.labels)]
-    choice = sum(bool(e.labels[int(np.argmax(s[:, 0]))]) for s, e in has) / max(len(has), 1)
-    ranker = sum(bool(e.labels[0]) for _, e in has) / max(len(has), 1)
+    hit_c = [bool(e.labels[int(np.argmax(s[:, 0]))]) for s, e in has]
+    hit_r = [bool(e.labels[0]) for _, e in has]
+    choice = sum(hit_c) / max(len(has), 1)
+    ranker = sum(hit_r) / max(len(has), 1)
+    vs = mcnemar(hit_c, hit_r)          # paired: does the reader beat its own lexical ranker on these pools?
     x, y = gate_data(scores, encs, T)
     g = 1 / (1 + np.exp(-(a * x + b))) if len(x) else np.array([])
     try:
@@ -241,22 +245,31 @@ def evaluate(scores, encs, T, a, b) -> dict:
     except Exception:
         auc = None
     return {"pools": len(encs), "pools_with_a_right_candidate": len(has), "choice_acc": choice, "ranker_acc": ranker,
+            "only_choice_right": vs["a_only"], "only_ranker_right": vs["b_only"], "vs_ranker_p": vs["p"],
             "gate_auc": auc, "gate_ece": ece(g.tolist(), y.tolist()) if len(g) else None,
             "base_rate": float(y.mean()) if len(y) else None}
 
 
 # ── train once ───────────────────────────────────────────────────────────
 def load_points(paths: list[Path]) -> list[dict]:
+    """Pools trimmed to the top MAX_CANDS as they are read (round 7's 150k reading pools would not
+    fit in memory with every candidate); `beyond` keeps whether a right one was only past the cut."""
     pts = []
     for path in paths:
-        if Path(path).exists():
-            pts += [p for p in read_jsonl(path) if p.get("cands")]
+        if path and Path(path).is_file():
+            for p in read_jsonl(path):
+                if p.get("cands"):
+                    p["beyond"] = right_beyond_cut(p)
+                    p["cands"], p["labels"] = p["cands"][:MAX_CANDS], p["labels"][:MAX_CANDS]
+                    pts.append(p)
     return pts
 
 
 def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, name: str, epochs: int = 3,
           lr: float = 5e-5, cands_per_step: int = 64, seed: int = 0, grad_checkpoint: bool = False,
-          max_points: int = 0) -> dict:
+          max_points: int = 0, init: str | None = None, max_eval: int = 0) -> dict:
+    """init: start from a trained reader (round 7: the reading-skill reader, then our own pools).
+    max_eval: cap the validation and test pools (a seeded sample) when a points set is very large."""
     import sentencepiece as spm
     import torch
     torch.manual_seed(seed)
@@ -267,6 +280,11 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     if arch["vocab_size"] != sp.get_piece_size():
         raise SystemExit(f"tokenizer vocab {sp.get_piece_size()} != checkpoint vocab {arch['vocab_size']} ({tokenizer})")
     head = make_head(arch["d_f"])
+    if init:
+        w0 = torch.load(init, map_location="cpu", weights_only=False)
+        lm.load_state_dict(w0["lm"])
+        head.load_state_dict(w0["head"])
+        print(f"[xreader:{name}] starting from {init}", flush=True)
     lm.to(device)
     head.to(device)
     pts = load_points(points)
@@ -274,6 +292,11 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
         rng.shuffle(pts)
         pts = pts[:max_points]
     by = {s: [p for p in pts if split_of(p["task_id"]) == s] for s in ("train", "val", "test")}
+    if max_eval:
+        er = random.Random(seed + 1)
+        for s in ("val", "test"):
+            if len(by[s]) > max_eval:
+                by[s] = er.sample(by[s], max_eval)
     pad = sp.pad_id() if sp.pad_id() >= 0 else 0
     val = [Encoded(sp, p) for p in by["val"]]
     test = [Encoded(sp, p) for p in by["test"]]
@@ -290,8 +313,11 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     for ep in range(epochs):
         lm.train()
         head.train()
-        tr = [Encoded(sp, p, shift=rng.randint(-4, 4) if rng.random() < YEAR_SHIFT_P else 0) for p in by["train"]]
-        rng.shuffle(tr)
+        # same random draws as round 6b (a shift per pool, then a shuffle); pools are encoded lazily
+        shifts = [rng.randint(-4, 4) if rng.random() < YEAR_SHIFT_P else 0 for _ in by["train"]]
+        order = list(range(len(by["train"])))
+        rng.shuffle(order)
+        tr = (Encoded(sp, by["train"][i], shift=shifts[i]) for i in order)
         t0, tot, nb = time.time(), 0.0, 0
         for b in _batches(tr, cands_per_step):
             loss = _losses(_forward(lm, head, b, device, pad), b)
@@ -301,6 +327,8 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
             opt.step()
             sched.step()
             tot, nb = tot + loss.item(), nb + 1
+            if nb % 2000 == 0:
+                print(f"    [xreader:{name}] epoch {ep} step {nb} loss {tot / nb:.4f} ({time.time() - t0:.0f}s)", flush=True)
         sv = _scores(lm, head, val, device, pad, cands_per_step)
         acc = evaluate(sv, val, 1.0, 1.0, 0.0)["choice_acc"]
         log.append({"epoch": ep, "train_loss": tot / max(nb, 1), "val_choice_acc": acc, "s": round(time.time() - t0, 1)})
@@ -315,11 +343,11 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     T = fit_temperature(sv, val)
     a, b = fit_platt(*gate_data(sv, val, T))
     st = _scores(lm, head, test, device, pad, cands_per_step)
-    metrics = {"name": name, "base": str(base_ckpt), "tokenizer": str(tokenizer), "params": sum(p.numel() for p in lm.parameters()),
+    metrics = {"name": name, "base": str(base_ckpt), "init": init, "tokenizer": str(tokenizer), "params": sum(p.numel() for p in lm.parameters()),
                "temperature": T, "platt": [a, b], "epochs": log, "best_val_choice_acc": best,
                "points": [str(p) for p in points], "n_points": {k: len(v) for k, v in by.items()},
                "pool_rule": "top16_as_served",
-               "right_beyond_cut": {k: sum(right_beyond_cut(p) for p in v) for k, v in by.items()},
+               "right_beyond_cut": {k: sum(bool(p.get("beyond")) for p in v) for k, v in by.items()},
                "test": evaluate(st, test, T, a, b),
                "test_by_group": {g: evaluate([s for s, p in zip(st, by["test"]) if group_of(p["task_id"]) == g],
                                              [e for e, p in zip(test, by["test"]) if group_of(p["task_id"]) == g], T, a, b)
@@ -392,12 +420,16 @@ class CrossReader:
 
 # ── CLI ──────────────────────────────────────────────────────────────────
 def add_cli(sub, add_web_args, build_web):
-    p = sub.add_parser("xreader", help="round 6 reader: collect (search + label) | train once (planck|hertz)")
-    p.add_argument("stage", choices=["collect", "train"])
+    p = sub.add_parser("xreader", help="round 6/7 reader: collect (search + label) | rcdata (round 7 reading sets) | train (planck|hertz)")
+    p.add_argument("stage", choices=["collect", "rcdata", "train"])
     p.add_argument("--tasks", default=None, help="comma list (default: the Wikidata tasks + Gemma's news tasks)")
     p.add_argument("--points", default=str(READER_DIR / "points.jsonl"))
     p.add_argument("--stable-points", default=str(REPO_ROOT / "data" / "planck3" / "g2" / "points_ddgs.jsonl"),
-                   help="round 4's labelled pools for the 1,455 round 3 training questions (reused, no search)")
+                   help="round 4's labelled pools for the 1,455 round 3 training questions (reused, no search); 'none' to skip")
+    p.add_argument("--init", default=None, help="start from a trained reader (round 7: the reading-skill reader)")
+    p.add_argument("--max-eval", type=int, default=0, help="cap validation and test pools (large reading sets)")
+    p.add_argument("--per-set", type=int, default=40000, help="rcdata: pools per reading set")
+    p.add_argument("--neg", type=int, default=20000, help="rcdata: SQuAD 2.0 unanswerable pools")
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--base", default="planck", choices=["planck", "hertz"])
     p.add_argument("--base-checkpoint", default=None)
@@ -417,12 +449,16 @@ def add_cli(sub, add_web_args, build_web):
             tasks = [t for f in files if Path(f).exists() for t in read_json(f)["tasks"]]
             collect(tasks, build_web(a), Path(a.points), a.limit)
             return
+        if a.stage == "rcdata":
+            from .rcdata import build
+            build(Path(a.points), per_set=a.per_set, neg=a.neg)
+            return
         hertz = a.base == "hertz"
         ck = a.base_checkpoint or ("checkpoints/hertz/best.pt" if hertz else "checkpoints/planck13/best.pt")
         tok = a.base_tokenizer or ("data/hertz12_data/tokenizer.model" if hertz else "data/wikipedia/tokenizer.model")
         out = REPO_ROOT / "checkpoints" / f"xreader_{a.base}{a.tag}"
         meta = train([Path(a.stable_points), Path(a.points)], ck, tok, out, a.base, epochs=a.epochs,
                      lr=a.lr or (3e-5 if hertz else 5e-5), cands_per_step=a.cands_per_step or (32 if hertz else 64),
-                     grad_checkpoint=hertz, max_points=a.max_points)
+                     grad_checkpoint=hertz, max_points=a.max_points, init=a.init, max_eval=a.max_eval)
         write_json(REPO_ROOT / "results" / "planck3" / f"xreader_{a.base}{a.tag}" / "train_log.json", meta)
     p.set_defaults(fn=run)

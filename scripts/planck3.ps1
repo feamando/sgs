@@ -37,6 +37,9 @@
                information; writers retrained on fixed data with a forced lead, 3 tries and the KV cache
      round6b   round 6b (SETUP_planck_20261012.md section 10): the round 6 readers retrained on the top 16
                candidates as served (fixes the last-slot leak), same points, no new searches; ~1.5 h
+     round7    round 7 (SETUP_planck_20261014.md): reading taught as a skill (SQuAD, NewsQA, TriviaQA,
+               SearchQA, NQ, SQuAD 2.0 unanswerable -> reader pools), then our pools; Planck + Hertz;
+               rebuild gate N (does Planck read news?); no new searches; ~4-6 h
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -184,7 +187,7 @@ function Do-Setup {
     # lxml_html_clean: lxml >= 5.2 split html.clean out; without it trafilatura/justext fail with
     # ImportError and extraction silently falls back to the crude tag stripper (first box run)
     # ddgs: round 4 search (metasearch library, no Docker); scikit-learn: the G2 v2 gate
-    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "lxml_html_clean", "requests", "scipy", "pytest", "sentencepiece", "ddgs", "scikit-learn")
+    Invoke-Checked $PY @("-m", "pip", "install", "--quiet", "trafilatura", "lxml_html_clean", "requests", "scipy", "pytest", "sentencepiece", "ddgs", "scikit-learn", "pyarrow", "huggingface_hub")
 }
 
 function Do-Doctor([bool]$DeepRun) {
@@ -746,6 +749,50 @@ function Do-Round6b {
     finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
 }
 
+# Round 7 (SETUP_planck_20261014.md): reading taught as a SKILL first (public reading-comprehension sets
+# turned into the reader's own pools), then round 6b's training on our pools. SGS only (Planck, Hertz).
+# No new searches: the 243 questions are cached on Brave. The product reader is fixed: x-planck.
+function Do-Round7 {
+    $points = "data/planck3/reader/points$Tag.jsonl"
+    foreach ($f in @($NEWS, $INFO, $V2HEAD, $PLANCK_CKPT, $points, "$RES/r6_planck_template$Tag/summary.json", "$RES/r6_gemma_template$Tag/summary.json")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 7 reuses round 6: run .\scripts\planck3.ps1 round6 first)" }
+    }
+    $haveHertz = (Test-Path $HERTZ_CKPT) -and (Test-Path $HERTZ_TOK)
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    # 1. the reading sets -> pools (downloads ~390 MB of parquet once; ~15-30 min)
+    $rc = "data/planck3/reader/rc_points$Tag.jsonl"
+    $sz = if ($Quick) { @("--per-set", "300", "--neg", "150") } else { @() }
+    Log "round 7 data: public reading-comprehension sets -> reader pools (SQuAD, NewsQA, TriviaQA, SearchQA, NQ, SQuAD 2.0 unanswerable)"
+    P3 (@("xreader", "rcdata", "--points", $rc) + $sz)
+    $bases = @("planck"); if ($haveHertz) { $bases += "hertz" }
+    foreach ($b in $bases) {
+        $bc = if ($b -eq "hertz") { @("--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK) } else { @("--base-checkpoint", $PLANCK_CKPT, "--base-tokenizer", $PLANCK_TOK) }
+        # 2. stage A: reading as a skill (1 epoch; Planck ~30 min, Hertz ~3-4 h)
+        $ckA = "checkpoints/xreader_${b}_rc$Tag/reader.pt"
+        if (-not (Test-Path $ckA)) {
+            Log "round 7 stage A: the $b reader learns to read (public reading sets, 1 epoch)"
+            $qa = if ($Quick) { @("--max-points", "1500") } else { @() }
+            P3 (@("xreader", "train", "--base", $b, "--points", $rc, "--stable-points", "none", "--epochs", "1", "--max-eval", "6000", "--tag", "_rc$Tag") + $bc + $qa)
+        }
+        # 3. stage B: stage A, then round 6b's training on our pools (same points and settings)
+        $ckB = "checkpoints/xreader_${b}_r7$Tag/reader.pt"
+        if (-not (Test-Path $ckB)) {
+            Log "round 7 stage B: the $b reader, from stage A, on our pools (as round 6b)"
+            $qb = if ($Quick) { @("--max-points", "300", "--epochs", "1") } else { @() }
+            P3 (@("xreader", "train", "--base", $b, "--points", $points, "--init", $ckA, "--tag", "_r7$Tag") + $bc + $qb)
+        }
+        Invoke-R6 "r7_x-${b}-rc_template" @("--reader", "x-$b", "--reader-checkpoint", $ckA, "--writer", "template") "round 7: the $b reader after stage A only (reading sets), template writer"
+        Invoke-R6 "r7_x-${b}_template" @("--reader", "x-$b", "--reader-checkpoint", $ckB, "--writer", "template") "round 7: the $b reader (stage A + B), template writer"
+    }
+    # 4. the product (fixed: x-planck r7 + template) under the worst-case profile and on CPU, then the rules
+    $pa = @("--reader", "x-planck", "--reader-checkpoint", "checkpoints/xreader_planck_r7$Tag/reader.pt", "--writer", "template")
+    Invoke-R6 "r7_x-planck_template_contrarian" ($pa + @("--personal", "contrarian")) "round 7: worst-case personal profile on the product (rule E)"
+    $old = $env:CUDA_VISIBLE_DEVICES; $env:CUDA_VISIBLE_DEVICES = "-1"; $env:OMP_NUM_THREADS = "4"
+    try { Invoke-R6 "r7_x-planck_template_cpu" $pa "round 7: the product on CPU only, 4 threads, 20 questions (phone proxy)" 20 }
+    finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
+    P3 (@("r7", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -770,7 +817,7 @@ function Do-Push {
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
                        "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log", "judge.json", "judge_pairs.jsonl",
-                       "r6*_product*.json")) {
+                       "r*_product*.json")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
@@ -781,7 +828,7 @@ function Do-Push {
     # round 6: Gemma's news questions (and the rejected ones, with reasons) are training data: keep them auditable
     Get-ChildItem -Path "data/planck3/reader" -Filter "news_tasks*.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
-    Get-ChildItem -Path "data/planck3/reader" -Filter "points*.health.json" -ErrorAction SilentlyContinue |
+    Get-ChildItem -Path "data/planck3/reader" -Filter "*points*.health.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null   # belt and braces: the repo is public
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
@@ -865,6 +912,16 @@ switch ($Command.ToLower()) {
         Do-Round6
         P3 @("report")
         Log ("round6$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round7"     {
+        Start-RunLog "round7"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Round7
+        P3 @("report")
+        Log ("round7$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {
