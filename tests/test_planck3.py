@@ -1320,3 +1320,66 @@ def test_round6b_pools_as_served_and_rule_r(tmp_path):
     run("r6b_x-hertz_template", [i < 55 for i in range(n)])                 # better, below the midpoint
     assert not R6.rule_r(tmp_path, "r6b_x-hertz_template")["pass"]
     assert R6.rule_r(tmp_path, "missing")["pass"] is False
+
+
+def test_round7_reading_sets_become_reader_pools(tmp_path, monkeypatch):
+    from src.planck3 import rcdata as RC
+    assert RC.gold_type("1858") == "year" and RC.gold_type("740,000") == "number" and RC.gold_type("Botswana") == "entity"
+    assert RC.gold_type("soprano") is None and RC.answer_type_of("As a vocal range in opera", ["soprano"]) is None
+    docs = RC.parse_docs("[DOC] [TLE] Vocal range - Wikipedia [PAR] Soprano is the highest range. [DOC] [TLE] Opera [PAR] A <b>tenor</b> sings.")
+    assert [d["title"] for d in docs] == ["Vocal range - Wikipedia", "Opera"] and docs[1]["text"] == "A tenor sings."
+    page = {"qid": "q1", "question": "Who founded the Acme Rocket Company?",
+            "context": "The Acme Rocket Company was founded by Jane Holloway in 1931. Its rival was set up by Tom Baker.",
+            "answers": ["Jane Holloway"]}
+    p = RC.pool_of(page, "squad")
+    assert p["answer_type"] == "entity" and p["source"] == "page" and p["task_id"].startswith("squad_")
+    assert any(p["labels"]) and p["cands"][p["labels"].index(True)]["value"] == "Jane Holloway"
+    snip = {"qid": "q2", "question": "Who founded the Acme Rocket Company?", "answers": ["Jane Holloway"],
+            "context": "[DOC] [TLE] Acme Rocket Company [PAR] Founded by Jane Holloway. [DOC] [TLE] Acme history [PAR] Jane Holloway set it up."}
+    q = RC.pool_of(snip, "searchqa")
+    assert q["source"] == "snippet" and any(q["labels"])
+    neg = RC.pool_of(dict(page, answers=[]), RC.NEG_GROUP)
+    assert neg is not None and not any(neg["labels"])                           # SQuAD 2.0: the answer is not in here
+    assert RC.pool_of(dict(page, answers=[]), "squad") is None
+    # benchmark subjects are dropped: "Heathrow Express" is a general-information benchmark question
+    bench = RC.bench_index()
+    assert RC.in_bench("Where does the Heathrow Express terminate?", ["Paddington"], bench)
+    assert not RC.in_bench("Who founded the Acme Rocket Company?", ["Jane Holloway"], bench)
+    rows = {g: [] for g in RC.GROUPS}
+    rows["squad"] = [dict(page, qid=f"s{i}") for i in range(10)] + [dict(page, qid=f"n{i}", answers=["Nobody Here"]) for i in range(10)]
+    rows[RC.NEG_GROUP] = [dict(page, qid=f"x{i}", answers=[]) for i in range(5)]
+    monkeypatch.setattr(RC, "_rows_by_set", lambda seed, take: rows)
+    h = RC.build(tmp_path / "rc.jsonl", per_set=10, neg=3)
+    s = h["sets"]["squad"]
+    assert s["with_right_in_top16"] == 6 and s["without"] == 4                  # at most 40% without a right one
+    assert h["sets"][RC.NEG_GROUP]["kept"] == 3 and (tmp_path / "rc.health.json").exists()
+
+
+def test_round7_two_stage_reader_and_rules(tmp_path):
+    import json as _json
+    from src.planck3 import round7 as R7
+    from src.planck3 import xreader as X
+    from src.planck3.util import write_json
+    pts = _synthetic_points(n=90)
+    for i, p in enumerate(pts):
+        p["task_id"] = f"newsqa_{i}"
+    path = tmp_path / "rc.jsonl"
+    path.write_text("\n".join(_json.dumps(p) for p in pts), encoding="utf-8")
+    base, tok = _tiny_lm(tmp_path, [X.prefix_text(p["question"], "year") + X.cand_text(c, True) for p in pts[:30] for c in p["cands"]])
+    a = X.train([tmp_path / "none", path], base, tok, tmp_path / "xa", "tiny", epochs=1, cands_per_step=16, max_eval=5)
+    assert a["n_points"]["val"] <= 5 and a["n_points"]["test"] <= 5 and "vs_ranker_p" in a["test"]
+    b = X.train([path], base, tok, tmp_path / "xb", "tiny", epochs=1, cands_per_step=16, init=str(tmp_path / "xa" / "reader.pt"))
+    assert b["init"].endswith("reader.pt")
+    # rules: N needs +10 points over the ranker on NewsQA with p < 0.05
+    write_json(tmp_path / "xreader_planck_rc" / "train_log.json", {"test_by_group": {"newsqa": {
+        "choice_acc": 0.62, "ranker_acc": 0.45, "vs_ranker_p": 0.001, "only_choice_right": 60, "only_ranker_right": 20,
+        "pools_with_a_right_candidate": 400}}})
+    assert R7.rule_n(tmp_path)["pass"]
+    write_json(tmp_path / "xreader_planck_rc" / "train_log.json", {"test_by_group": {"newsqa": {
+        "choice_acc": 0.50, "ranker_acc": 0.45, "vs_ranker_p": 0.04, "only_choice_right": 40, "only_ranker_right": 20,
+        "pools_with_a_right_candidate": 400}}})
+    assert not R7.rule_n(tmp_path)["pass"]                                      # +5 points is not "reads news"
+    c1 = R7.rule_c1({"bands_monotone": True, "bands": {"high": {"n": 25, "precision": 0.92}, "good": {"n": 10, "precision": 0.5}}})
+    assert c1["pass"] and not c1["good"]["judged"]                               # under 20 answers: not judged
+    d = R7.decide(tmp_path)
+    assert d["reader"] == "x-planck" and d["outcome"].startswith("rebuild") and (tmp_path / "r7_product.json").exists()

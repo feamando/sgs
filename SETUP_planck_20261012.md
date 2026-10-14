@@ -1,6 +1,6 @@
 # Planck 3.0 round 6: a reader trained once, Brave with a relevance check, writers with a KV cache
 
-Nikita Gorshkov · 2026-10-12 · Status: run 2026-10-12 (results in section 10: R FAILS); round 6b pre-registered (section 11) · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261009.md` · Plan and results of record: `SETUP_092026_planck3.md`
+Nikita Gorshkov · 2026-10-12 · Status: round 6 run 2026-10-12 (section 10: R FAILS); round 6b run 2026-10-13 (section 12: R FAILS, the leak cost 8-11 points) · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261009.md` · Plan and results of record: `SETUP_092026_planck3.md`
 
 **TL;DR.** One command, `.\scripts\planck3.ps1 round6` (about 8-10 h, idempotent, pushes results). Round 5 showed the weighing works when the reader is good: with Gemma reading, the 9-10 band was right 93-94% of the time and the 7-8 band 77-79%. The small product lost 20 points to Gemma, and the loss was in **reading**, not writing. Round 6 fixes the three things that held it back:
 1. **Search:** Brave becomes the product search, and every search is checked for relevance before its results count. Round 5's ddgs results for the 100 new questions included xhamster.com and calculator.net.
@@ -17,7 +17,11 @@ Nothing is trained on the world: facts still arrive through search, and nothing 
 - **Two confounds:**
   - A bug in the reader's training code: the last candidate slot was right far more often than it ever is when answering.
   - The month's Brave quota was already used up, so the reader trained on ddgs and Wikipedia pools (3 of 1,914 searches were Brave).
-- **Round 6b** (section 11) retrains the readers with only the leak fixed, under the same rules.
+- **Round 6b** (section 11) retrained the readers with only the leak fixed, under the same rules.
+- **Round 6b result (section 12): R still FAILS.**
+  - **The leak was real:** fixing it gave the Planck reader +11 points (42.4% → 53.5%, p 0.003) and the Hertz reader +8 (39.1% → 47.3%, p 0.0003).
+  - **But no small reader beats round 5's reader** (51.4%) or the no-model floor (49.8%) significantly, and the gap to Gemma (63.4%) stays 10-16 points.
+  - **The fixed Planck reader mostly copies the lexical ranker:** its value equals the heuristic's on 78% of the questions.
 
 ## 0. Why this round
 
@@ -284,3 +288,74 @@ Round 6's runs are the comparators: `r6_planck_template`, `r6_gemma_template`, `
 The small writers need a cleaner writer set (no "2025" in the targets) before another W attempt.
 
 **New risk, with its mitigation:** the Brave check passes on a cached answer even at 0 quota. Next runner change: fail the check, or warn, when `brave_remaining` is 0 and collection needs new searches.
+
+## 12. Round 6b results of record (run 2026-10-13 23:21, acec333)
+
+**TL;DR.**
+- **The leak fix worked as a fix: +8 to +11 points.**
+- **It did not make a small reader that reads.** The chosen product (x-hertz v2 + template) gets 47.3%, against round 5's reader at 51.4% (p 0.25) and a midpoint bar of 57.4%: **R FAILS**.
+- **The pre-registered size rule picked the wrong model for the benchmark.**
+  - On the readers' own held-out questions, Hertz beats Planck by 16 points (60.9% vs 44.6%).
+  - On the benchmark, Planck beats Hertz (53.5% vs 47.3%, p 0.086).
+- **The best small reader, x-planck v2 at 53.5%,** is not significantly better than round 5's reader (p 0.63) or the no-model floor (p 0.064), and gives the heuristic's answer 78% of the time.
+- **What ships is unchanged:** round 5's Planck reader + the template writer.
+
+**The readers, retrained** (held-out questions; 32 of 654 test pools had their only right candidate beyond the top 16, which is the leak round 6 exploited):
+
+| reader | test choice acc | lexical ranker | gate AUC | stable | recent | news | info |
+|---|---|---|---|---|---|---|---|
+| x-planck v2 | 0.446 | 0.434 | 0.704 | 0.512 | 0.324 | 0.407 (ranker 0.475) | 0.385 |
+| x-hertz v2 | 0.609 | 0.434 | 0.804 | 0.737 | 0.423 | 0.458 (ranker 0.475) | 0.500 |
+
+On news, neither reader beats the lexical ranker even on its own training distribution, as in round 6.
+
+**Reading only, template writer, 243 questions on Brave (cached):**
+
+| reader | right | fresh (60) | long tail (83) | news (60) | general info (40) | no answer |
+|---|---|---|---|---|---|---|
+| heuristic (no model) | 0.498 | 0.22 | 0.55 | 0.60 | 0.65 | 1 |
+| round 5 Planck reader | 0.514 | 0.40 | 0.66 | 0.40 | 0.55 | 1 |
+| x-planck (round 6) | 0.424 | 0.35 | 0.61 | 0.30 | 0.33 | 39 |
+| **x-planck v2** | **0.535** | 0.25 | 0.59 | 0.63 | 0.70 | 5 |
+| x-hertz (round 6) | 0.391 | 0.28 | 0.65 | 0.33 | 0.10 | 54 |
+| **x-hertz v2** (chosen) | 0.473 | 0.32 | 0.70 | 0.33 | 0.45 | 31 |
+| Gemma 4 E4B | 0.634 | 0.58 | 0.71 | 0.57 | 0.65 | 17 |
+
+Paired, same 243 questions (exact McNemar):
+- **What the leak cost:**
+  - x-planck v2 vs round 6: 52 vs 25 only-right, p 0.003;
+  - x-hertz v2 vs round 6: 25 vs 5, p 0.0003.
+- **x-hertz v2 (the product):**
+  - vs round 5's reader: 26 vs 36, p 0.25;
+  - vs the heuristic: 30 vs 36, p 0.54;
+  - vs Gemma: 24 vs 63, p 3e-5.
+- **x-planck v2 (exploratory, not the pre-registered choice):**
+  - vs round 5's reader: 37 vs 32, p 0.63;
+  - vs the heuristic: 14 vs 5, p 0.064;
+  - vs Gemma: 27 vs 51, p 0.009.
+- **The two v2 readers against each other:** 26 vs 41, p 0.086 (Planck ahead).
+
+**The verdicts (product = x-hertz v2 + template):**
+
+| rule | result | verdict |
+|---|---|---|
+| **R** | 0.473 vs midpoint 0.574; vs round 5's reader p 0.25 (lower) | **FAIL** |
+| C1 | 9-10: 14 answers, 85.7% (too few to judge); 7-8: 84, 71.4% (passes 70%); not monotone (sceptical 42.5% > low 35.1%) | **FAIL** (ordering) |
+| L | reading 11.4 s per question on CPU (20 questions) | **FAIL** |
+| E | 0.477 vs 0.473 under the worst-case profile; 168 of 168 changed answers flagged | **PASS** |
+| S | Brave served 100%, on topic 98.4%, empty 0% | **PASS** |
+
+**What rounds 5, 6 and 6b show together.** Three small-reader designs have now been measured on the same 243 questions on Brave:
+- round 5's frozen Planck features + a head;
+- the round 6 cross-encoder, which had the leak;
+- the fixed cross-encoder.
+
+None is significantly better than the no-model heuristic, and Gemma is 10-16 points ahead of all of them. Two more findings:
+- **Accuracy on the training distribution's held-out questions does not predict benchmark accuracy.** Hertz +16 on test came out −6 on the benchmark. This is consistent with the search shift: training pools from ddgs and Wikipedia, the benchmark on Brave.
+- **About 5,300 known-answer pools teach a 100M SGS model mostly to follow the lexical features,** and a 640M one to fit its training distribution. Neither learns to read news.
+
+**Recommendations (for the next round, not built):**
+1. **Gemma as teacher, with Brave pools.** Collect the reader pools on Brave once the monthly quota resets (this removes the search shift). Gemma reads them and its choices become soft labels: more and denser supervision on exactly what the reader must do, with no world data in the weights.
+2. **A diagnostic control arm, not for shipping:** an off-the-shelf small cross-encoder of similar size on the same data. If it reads and SGS does not, the backbone is the limit; if neither reads, the data is.
+3. **Choose the reader on a held-out benchmark-like slice, not on the training distribution's test split.** Round 6b's size rule chose the worse model.
+4. **Fix the Brave check** so it fails (or warns) at 0 remaining quota when new searches are needed.

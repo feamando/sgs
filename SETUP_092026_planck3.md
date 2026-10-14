@@ -369,6 +369,18 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
 - **Round 6b pre-registered (2026-10-12, section 11, `planck3.ps1 round6b`, ~1.5 h, no new searches):**
   - The same readers retrained with only the leak fixed (top 16 as served), under the same rules.
   - If R fails again, the next lever is Gemma as teacher (soft labels on the same pools), then Brave re-collection after the quota resets.
+- **ROUND 6b RESULTS OF RECORD (2026-10-13, acec333; SETUP_planck_20261012.md section 12):**
+  - **R FAILS again:** x-hertz v2 + template 47.3% (midpoint 57.4%; vs round 5's reader p 0.25). C1 FAIL (bands not monotone), L FAIL (11.4 s on CPU), E and S PASS.
+  - **The leak was real:** x-planck +11 points (p 0.003), x-hertz +8 (p 0.0003).
+  - **The size rule picked the worse reader:** Hertz +16 on held-out test, but Planck v2 leads on the benchmark (53.5% vs 47.3%, p 0.086). x-planck v2 equals the heuristic's answer on 78% of the questions.
+  - **Across three small-reader designs,** none beats the no-model floor significantly on Brave; Gemma leads by 10-16 points. Ships: round 5 reader + template (unchanged).
+  - **Next (recommended, not built):** Brave-collected pools with Gemma soft labels; a non-SGS small cross-encoder as a diagnostic control; select the reader on a benchmark-like held-out slice.
+- **Round 7 built + pre-registered (2026-10-14, `SETUP_planck_20261014.md`, `planck3.ps1 round7`, ~4-6 h, no new searches; SGS only, owner's decision):**
+  - **Stage A:** Planck 1.3 and Hertz 1.2 learn reading as a skill on ~150k public reading-comprehension pools (SQuAD, NewsQA, TriviaQA, SearchQA, NQ, SQuAD 2.0 unanswerable), turned into the reader's own pool format by the same extractors.
+  - **Stage B:** round 6b's training on our pools.
+  - **Product fixed:** x-planck r7 + template.
+  - **Rules:** R as round 6. **N (rebuild gate):** Planck beats its lexical ranker on held-out NewsQA by >= 10 points, p < 0.05.
+  - **Outcome:** R pass -> ship; N fail -> rebuild Planck (round 8); N pass -> Brave pools + Gemma soft labels.
 - **G3/G4:** after a search-layer decision.
 - PowerShell on the box: backtick continuations, not `^`. No `--wandb`.
 
