@@ -389,7 +389,19 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **Exploratory:** Hertz with stage A only gets 60.1% (above the bar; p 0.015 vs round 5's reader; vs Gemma p 0.38; vs the heuristic p 0.0002). It was one of four arms, so it needs confirmation. Stage B costs Hertz 4 points (overfitting).
   - **Ships unchanged:** round 5's reader + template.
   - **Recommended before the rebuild:** a 30-45 min Planck recipe check (overfit + learning-rate sweep). If the rebuild stands, separate size from data (100M on Hertz's corpus mix, with reading in the training goal).
-- **Round 8 (planned, not built; branch fixed by round 7's outcome table):**
+- **Round 8 built + pre-registered (2026-10-15, `SETUP_planck_20261015.md`, `planck3.ps1 round8`, no new searches; owner skipped the recipe check):**
+  - **Hertz on a phone proxy first (~1 h, pushed at once):** round 7's Hertz reading reader on CPU with 4 threads, in fp32 and int8, reading the top 16 or the top 8 candidates.
+  - **Planck 1.5** (working name): Planck 1.3's 100M architecture pretrained on Hertz 1.2's corpus (FineWeb-Edu + 30% Wikipedia, 9.69B tokens, reused), with Hertz's settings (~2-3 days). Then round 7's stage A, with no stage B.
+  - **Product fixed:** x-planck15 rc + template.
+  - **Rules:**
+    - R and N as in round 7.
+    - **M:** an int8 Hertz configuration reads in ≤ 5 s on CPU, loses ≤ 2 points vs its GPU run (≥ 200 questions judged), and needs ≤ 1.5 GB of weights.
+    - Reported: size at equal data, and data at equal size.
+  - **Outcome:**
+    - R passes → ship.
+    - R fails, N passes → Brave pools + Gemma soft labels on Planck 1.5.
+    - R fails, N fails → size is the lever (Hertz if M passes).
+- *Round 8 options as planned on 2026-10-14 (superseded by the build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.
   - **R fails, N passes:** Brave-collected pools (after the quota resets) with Gemma soft labels; select the reader on a benchmark-like held-out slice; no rebuild.

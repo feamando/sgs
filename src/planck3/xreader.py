@@ -167,6 +167,18 @@ def _batches(encs: list[Encoded], cands_per_step: int):
         yield b
 
 
+def _n_batches(sizes: list[int], cands_per_step: int) -> int:
+    """How many batches _batches packs these pools into (pools are never split across batches)."""
+    nb, n = 0, 0
+    for k in sizes:
+        if nb and n + k > cands_per_step:
+            nb, n = nb + 1, 0
+        elif not nb:
+            nb = 1
+        n += k
+    return nb
+
+
 def _scores(lm, head, encs, device, pad, cands_per_step):
     import torch
     lm.eval()
@@ -302,8 +314,12 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     test = [Encoded(sp, p) for p in by["test"]]
     opt = torch.optim.AdamW([{"params": lm.parameters(), "lr": lr}, {"params": head.parameters(), "lr": 1e-3}],
                             weight_decay=0.01)
-    n_cands = sum(min(len(p["cands"]), MAX_CANDS) for p in by["train"])
-    steps = max(1, epochs * (n_cands // cands_per_step + 1))
+    sizes = [min(len(p["cands"]), MAX_CANDS) for p in by["train"]]
+    n_cands = sum(sizes)
+    # round 8: the cosine schedule is sized in BATCHES. Rounds 6-7 sized it in candidates / cands_per_step,
+    # which undercounts (a pool is never split across batches), so the last 9-15% of round 7's
+    # reading epoch ran at learning rate 0.
+    steps = max(1, epochs * _n_batches(sizes, cands_per_step))
     warm = min(100, steps // 10 + 1)
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(s, steps) / steps)))
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -347,6 +363,7 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
                "temperature": T, "platt": [a, b], "epochs": log, "best_val_choice_acc": best,
                "points": [str(p) for p in points], "n_points": {k: len(v) for k, v in by.items()},
                "pool_rule": "top16_as_served",
+               "schedule": {"unit": "batches", "steps": steps},
                "right_beyond_cut": {k: sum(bool(p.get("beyond")) for p in v) for k, v in by.items()},
                "test": evaluate(st, test, T, a, b),
                "test_by_group": {g: evaluate([s for s, p in zip(st, by["test"]) if group_of(p["task_id"]) == g],
@@ -368,7 +385,10 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
 class CrossReader:
     kind = "local"
 
-    def __init__(self, checkpoint: str, device: str | None = None, prefix_cache: bool | None = None):
+    def __init__(self, checkpoint: str, device: str | None = None, prefix_cache: bool | None = None,
+                 quant: str | None = None, max_cands: int = 0):
+        """quant='int8': dynamic int8 weights for every Linear layer (CPU only; the phone proxy).
+        max_cands: read only the top k candidates (default MAX_CANDS), the rest score 0."""
         import sentencepiece as spm
         import torch
         from src.sgs_lm import SGSLanguageModel
@@ -381,6 +401,20 @@ class CrossReader:
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.lm.to(self.device).eval()
         self.head.to(self.device).eval()
+        self.max_cands = min(max_cands or MAX_CANDS, MAX_CANDS)
+        if quant == "int8":
+            if self.device != "cpu":
+                raise SystemExit("--reader-quant int8 runs on CPU only (set CUDA_VISIBLE_DEVICES=-1)")
+            eng = torch.backends.quantized.supported_engines           # x86: fbgemm; ARM (phones, Macs): qnnpack
+            torch.backends.quantized.engine = next(e for e in ("fbgemm", "x86", "qnnpack") if e in eng)
+            self.lm = torch.ao.quantization.quantize_dynamic(self.lm, {torch.nn.Linear}, dtype=torch.qint8)
+        elif quant:
+            raise SystemExit(f"unknown reader quantization {quant!r} (int8)")
+        self.config = {"quant": quant or "none", "max_cands": self.max_cands, "device": self.device,
+                       "qengine": torch.backends.quantized.engine if quant else None,
+                       "threads": torch.get_num_threads(), "params": sum(p.numel() for p in self.lm.parameters())}
+        if self.device == "cpu":
+            self.config["size_mb"] = reader_size_mb(self.lm, self.head)
         self.sp = spm.SentencePieceProcessor(model_file=ck["tokenizer"])
         self.pad = self.sp.pad_id() if self.sp.pad_id() >= 0 else 0
         self.T, (self.a, self.b) = float(ck["temperature"]), ck["platt"]
@@ -391,7 +425,7 @@ class CrossReader:
 
     def logits(self, question: str, answer_type: str, pool: dict) -> np.ndarray:
         torch = self.torch
-        e = Encoded(self.sp, {"question": question, "answer_type": answer_type, "cands": pool["cands"],
+        e = Encoded(self.sp, {"question": question, "answer_type": answer_type, "cands": pool["cands"][:self.max_cands],
                               "labels": [False] * len(pool["cands"]), "snippet": pool.get("snippet", False)})
         if not self.prefix_cache:
             with torch.no_grad():
@@ -416,6 +450,16 @@ class CrossReader:
         g = 1 / (1 + math.exp(-(self.a * float(lg[k, 1]) + self.b)))
         r = [float(c * g) for c in choice]
         return r + [0.0] * (len(pool["cands"]) - len(r))       # beyond the top 16: not read
+
+
+def reader_size_mb(lm, head) -> float:
+    """Bytes the reader needs on the device: its weights as saved, without the LM head (the reader
+    reads the hidden state and never predicts tokens)."""
+    import io
+    import torch
+    buf = io.BytesIO()
+    torch.save({"lm": {k: v for k, v in lm.state_dict().items() if not k.startswith("lm_head.")}, "head": head.state_dict()}, buf)
+    return round(buf.tell() / 2 ** 20, 1)
 
 
 # ── CLI ──────────────────────────────────────────────────────────────────

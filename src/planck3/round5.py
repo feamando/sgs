@@ -34,7 +34,8 @@ def build_answerer(args, build_web, store_path=None, personal_override=None, sto
     store = Store(store_path or args.store)
     reader = make_reader(args.reader, head=args.g2_head, checkpoint=args.planck_checkpoint,
                          tokenizer=args.planck_tokenizer, gemma_path=args.gemma_path,
-                         reader_checkpoint=getattr(args, "reader_checkpoint", None))
+                         reader_checkpoint=getattr(args, "reader_checkpoint", None),
+                         reader_quant=getattr(args, "reader_quant", None), reader_cands=getattr(args, "reader_cands", 0))
     shared = getattr(reader, "policy", None) if args.reader == args.writer == "gemma" else None
     if shared is not None:  # one Gemma in memory for both roles
         from .writer import LLMWriter
@@ -128,7 +129,7 @@ def run_eval(args, build_web):
               flush=True)
     summ = summarize_r5(records)
     rate = prices["llm_per_mtok"][prices["llm_equivalent"]]
-    summ.update({"reader": args.reader, "writer": ans.writer.name, "personal": args.personal, "tasks": args.tasks,
+    summ.update({"reader": args.reader, "reader_config": getattr(ans.reader, "config", None), "writer": ans.writer.name, "personal": args.personal, "tasks": args.tasks,
                  "search": web.backend, "search_health": web.search_health() if hasattr(web, "search_health") else None,
                  "wall_s": round(time.time() - t_start, 1),
                  "llm_usd_per_task_as_haiku": sum(r["tokens"]["in"] * rate["input"] + r["tokens"]["out"] * rate["output"]
@@ -310,6 +311,8 @@ def add_cli(sub, add_web_args, build_web):
                    help="comma-separated task files")
     p.add_argument("--reader", default="heuristic", choices=["heuristic", "planck", "x-planck", "x-hertz", "gemma", "bedrock"])
     p.add_argument("--reader-checkpoint", default=None, help="x-planck / x-hertz: checkpoints/xreader_<base>/reader.pt")
+    p.add_argument("--reader-quant", default=None, choices=["int8"], help="x-readers on CPU: dynamic int8 weights (round 8 phone proxy)")
+    p.add_argument("--reader-cands", type=int, default=0, help="x-readers: read only the top k candidates (default 16)")
     p.add_argument("--writer", default="template", choices=["template", "hertz", "planck", "gemma", "bedrock"])
     p.add_argument("--writer-checkpoint", default=None)
     p.add_argument("--tries", type=int, default=None, help="small writers: answers tried before the template (round 6: 3)")

@@ -110,7 +110,7 @@ def make_reader(name: str, **kw):
         path = kw.get("reader_checkpoint") or XREADER_CKPT[name]
         if not Path(path).exists():
             raise SystemExit(f"no {name} reader at {path}: run `planck3.py xreader train --base {name[2:]}` first")
-        return CrossReader(path)
+        return CrossReader(path, quant=kw.get("reader_quant"), max_cands=kw.get("reader_cands") or 0)
     if name == "planck":
         return PlanckReader(kw["head"], kw.get("checkpoint"), kw.get("tokenizer"))
     if name in ("gemma", "bedrock"):

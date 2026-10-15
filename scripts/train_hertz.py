@@ -88,6 +88,9 @@ def parse_args():
     p.add_argument("--warmup-steps", type=int, default=2000)
     p.add_argument("--mixed-precision", default="bf16",
                    choices=["bf16", "fp16", "fp32"])
+    p.add_argument("--max-opt-steps", type=int, default=0,
+                   help="Cap the optimizer steps (0 = the whole corpus x epochs). The cosine "
+                        "schedule is sized to the cap, so a short run decays fully (smoke runs).")
 
     # Logging & checkpointing
     p.add_argument("--wandb", action="store_true")
@@ -311,6 +314,9 @@ def main():
 
     # ── LR Schedule (based on optimizer steps, not micro-steps) ──
     opt_steps = total_steps // args.grad_accum
+    if args.max_opt_steps:
+        opt_steps = min(opt_steps, args.max_opt_steps)
+        print(f"  Optimizer steps capped at {opt_steps:,} (--max-opt-steps)")
     warmup = LinearLR(optimizer, start_factor=0.01, end_factor=1.0,
                       total_iters=args.warmup_steps)
     cosine = CosineAnnealingLR(optimizer, T_max=max(opt_steps - args.warmup_steps, 1))
@@ -604,6 +610,15 @@ def main():
         model, val_loader, len(val_loader), device, amp_dtype)
     print(f"  Final val loss: {val_loss:.4f}")
     print(f"  Final val ppl:  {val_ppl:.1f}")
+    # machine-readable record of the run (Planck 3.0 round 8 reads it into its decision file)
+    import json as _json
+    with open(save_dir / "final_metrics.json", "w") as _f:
+        _json.dump({"val_loss": val_loss, "val_ppl": val_ppl, "params": n_params, "data_dir": str(args.data_dir),
+                    "n_train_tokens": int(os.path.getsize(train_bin) // 2), "opt_steps": opt_step,
+                    "tokens_seen": opt_step * effective_batch * args.context_len,
+                    "arch": {"d_s": args.d_s, "d_f": args.d_f, "n_passes": args.n_passes, "n_heads": args.n_heads,
+                             "context_len": args.context_len, "ffn_mult": args.ffn_mult},
+                    "lr": args.lr, "effective_batch": effective_batch}, _f, indent=2)
     _save(model, optimizer, scheduler, scaler,
           args.epochs, global_step, opt_step, save_dir / "final.pt")
     print(f"\nDone. Checkpoints in {save_dir}")

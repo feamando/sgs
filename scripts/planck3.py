@@ -138,9 +138,9 @@ def _chat_harness_factory(args):
     from src.planck3.answer import Answerer
     from src.planck3.readers import make_reader
     from src.planck3.writer import make_writer
-    # auto = what round 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
+    # auto = what round 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
     # reader); otherwise round 5's Planck reader, the best small reader measured so far
-    prods = [read_json(RESULTS / f) for f in ("r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
+    prods = [read_json(RESULTS / f) for f in ("r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
     prod = next((p for p in prods if (p.get("rule_r") or {}).get("pass")), prods[0] if prods else {})
     rd, wr, wck, rck = args.reader, args.writer, None, None
     if rd == "auto":
@@ -704,6 +704,8 @@ def cmd_report(args):
     lines += r6_lines(RESULTS)
     from src.planck3.round7 import report_lines as r7_lines
     lines += r7_lines(RESULTS)
+    from src.planck3.round8 import report_lines as r8_lines
+    lines += r8_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -968,7 +970,7 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import g2, readtasks, round5, round6, round7, wikirace, xreader
+    from src.planck3 import g2, readtasks, round5, round6, round7, round8, wikirace, xreader
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
     round5.add_cli(sub, add_web_args, build_web)
@@ -976,6 +978,7 @@ def main():
     xreader.add_cli(sub, add_web_args, build_web)
     round6.add_cli(sub)
     round7.add_cli(sub)
+    round8.add_cli(sub)
 
     args = ap.parse_args()
     args.fn(args)
