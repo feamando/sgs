@@ -31,8 +31,9 @@ def _log(results: Path, name: str) -> dict:
     return read_json(p) if p.exists() else {}
 
 
-def rule_n(results: Path, base: str = "planck", tag: str = "", group: str = "newsqa") -> dict:
-    t = _log(results, f"xreader_{base}_rc{tag}")
+def rule_n(results: Path, base: str = "planck", tag: str = "", group: str = "newsqa", stage: str = "rc") -> dict:
+    """stage: the reader's tag ("rc" = round 7 stage A; round 8 passes "p15rc", Planck 1.5's reading run)."""
+    t = _log(results, f"xreader_{base}_{stage}{tag}")
     g = (t.get("test_by_group") or {}).get(group)
     if not g:
         return {"pass": False, "why": f"no stage A test pools for {group}"}
@@ -67,16 +68,9 @@ def rule_c1(summary: dict) -> dict:
     return {"pass": ok, "monotone": bool(summary.get("bands_monotone")), **out}
 
 
-def decide(results: Path, tag: str = "") -> dict:
-    from .round6 import rule_r
-    run0 = "r7_x-planck_template"
-    r = rule_r(results, run0 + tag, tag)
-    n, n_snip = rule_n(results, "planck", tag), rule_n(results, "planck", tag, "searchqa")
-    out = {"reader": "x-planck", "reader_why": "fixed before the run: the phone-size model (no selection)",
-           "reader_checkpoint": f"checkpoints/xreader_planck_r7{tag}/reader.pt", "writer": "template",
-           "writer_why": "round 6: no small writer passes rule W", "run": "r7_x-planck_template", "tag": tag,
-           "rule_r": r, "rule_n": n, "rule_n_searchqa": n_snip, "rule_n_hertz": rule_n(results, "hertz", tag),
-           "rule_h": rule_h(results, tag)}
+def product_checks(results: Path, run0: str, tag: str = "") -> dict:
+    """C1 on the product run, L on its CPU run, E on its worst-case personal profile run (round 6 rules)."""
+    out = {}
     s = results / (run0 + tag) / "summary.json"
     if s.exists():
         out["rule_c1"] = rule_c1(read_json(s))
@@ -92,6 +86,20 @@ def decide(results: Path, tag: str = "") -> dict:
         flagged = sum(any(p.get("divergence") for p in x["parts"]) for x in changed)
         drop = read_json(s)["accuracy"] - read_json(con / "summary.json")["accuracy"]
         out["rule_e"] = {"pass": drop <= 0.10 and flagged == len(changed), "drop": drop, "changed": len(changed), "flagged": flagged}
+    return out
+
+
+def decide(results: Path, tag: str = "") -> dict:
+    from .round6 import rule_r
+    run0 = "r7_x-planck_template"
+    r = rule_r(results, run0 + tag, tag)
+    n, n_snip = rule_n(results, "planck", tag), rule_n(results, "planck", tag, "searchqa")
+    out = {"reader": "x-planck", "reader_why": "fixed before the run: the phone-size model (no selection)",
+           "reader_checkpoint": f"checkpoints/xreader_planck_r7{tag}/reader.pt", "writer": "template",
+           "writer_why": "round 6: no small writer passes rule W", "run": "r7_x-planck_template", "tag": tag,
+           "rule_r": r, "rule_n": n, "rule_n_searchqa": n_snip, "rule_n_hertz": rule_n(results, "hertz", tag),
+           "rule_h": rule_h(results, tag)}
+    out.update(product_checks(results, run0, tag))
     out["outcome"] = ("ship: the product passed R" if r.get("pass") else
                       "rebuild: Planck does not read news even after reading training (round 8 rebuilds the base)" if not n.get("pass") else
                       "shift: Planck reads news but not our Brave benchmark (round 8: Brave pools + Gemma soft labels; no rebuild)")

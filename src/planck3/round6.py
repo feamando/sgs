@@ -94,14 +94,15 @@ def rule_r(results: Path, run: str, tag: str = "") -> dict:
 
 def report_lines(results: Path) -> list[str]:
     from .wikirace import mcnemar
-    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r[67]*_*/summary.json"))}
+    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r[678]*_*/summary.json"))}
     lines = []
-    xr = {f"x-{b}{t}": read_json(p) for t in ("", "_v2", "_rc", "_r7") for b in ("planck", "hertz")
+    xr = {f"x-{b}{t}": read_json(p) for t in ("", "_v2", "_rc", "_r7", "_p15rc") for b in ("planck", "hertz")
           if (p := results / f"xreader_{b}{t}" / "train_log.json").exists()}
     if xr:
         lines += ["## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)", "",
                   "_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot); "
-                  "_rc = round 7 stage A (public reading sets only); _r7 = round 7 (stage A, then our pools)", "",
+                  "_rc = round 7 stage A (public reading sets only); _r7 = round 7 (stage A, then our pools); "
+                  "_p15rc = round 8, Planck 1.5 (Planck's size, Hertz's data) after stage A", "",
                   "| reader | params | train / val / test pools | right only beyond top 16 (test) | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |",
                   "|---|---|---|---|---|---|---|---|---|"]
         for name, t in xr.items():
@@ -135,7 +136,7 @@ def report_lines(results: Path) -> list[str]:
                      f"{f3(s.get('writer_first_try_faithful'))} | {f3(s.get('writer_mean_tries'))} | {t.get('read_ms', 0):.0f} | "
                      f"{t.get('write_ms', 0):.0f} | {s['changed_by_personal']:.3f} |")
     lines.append("")
-    prods = {f: read_json(results / f) for f in ("r6_product.json", "r6b_product.json", "r7_product.json") if (results / f).exists()}
+    prods = {f: read_json(results / f) for f in ("r6_product.json", "r6b_product.json", "r7_product.json", "r8_product.json") if (results / f).exists()}
     pairs = []
     for prod in prods.values():
         pname = prod.get("run")
@@ -151,7 +152,10 @@ def report_lines(results: Path) -> list[str]:
                  ("r6_x-planck_template", "r6_gemma_template"), ("r6b_x-planck_template", "r6_x-planck_template"),
                  ("r6b_x-hertz_template", "r6_x-hertz_template"), ("r6b_x-hertz_template", "r6b_x-planck_template"),
                  ("r7_x-planck_template", "r6b_x-planck_template"), ("r7_x-planck-rc_template", "r7_x-planck_template"),
-                 ("r7_x-hertz_template", "r7_x-planck_template"), ("r7_x-hertz_template", "r6b_x-hertz_template")):
+                 ("r7_x-hertz_template", "r7_x-planck_template"), ("r7_x-hertz_template", "r6b_x-hertz_template"),
+                 ("r8_x-planck15-rc_template", "r7_x-planck-rc_template"), ("r8_x-planck15-rc_template", "r7_x-hertz-rc_template"),
+                 ("r8_x-hertz-rc_cpu-int8-top16", "r7_x-hertz-rc_template"), ("r8_x-hertz-rc_cpu-int8-top8", "r7_x-hertz-rc_template"),
+                 ("r8_x-hertz-rc_cpu-fp32-top16", "r7_x-hertz-rc_template")):
         if a in runs and b in runs and (a, b) not in pairs:
             pairs.append((a, b))
     if pairs:

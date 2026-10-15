@@ -1383,3 +1383,43 @@ def test_round7_two_stage_reader_and_rules(tmp_path):
     assert c1["pass"] and not c1["good"]["judged"]                               # under 20 answers: not judged
     d = R7.decide(tmp_path)
     assert d["reader"] == "x-planck" and d["outcome"].startswith("rebuild") and (tmp_path / "r7_product.json").exists()
+
+
+def test_round8_schedule_mobile_reader_and_rules(tmp_path):
+    import json as _json
+    from src.planck3 import round8 as R8
+    from src.planck3 import xreader as X
+    from src.planck3.util import write_json
+    # the cosine schedule is sized in batches, exactly as _batches packs them (round 7 undercounted)
+    sizes = [16, 16, 16, 16, 5, 16, 3, 16, 16, 16, 16, 16]
+    fake = [type("E", (), {"conts": [0] * k})() for k in sizes]
+    assert X._n_batches(sizes, 64) == len(list(X._batches(fake, 64))) == 3
+    assert X._n_batches([], 64) == 0
+    # the reader on the phone proxy: int8 weights, top-k candidates, its size on the device
+    pts = _synthetic_points(n=60)
+    path = tmp_path / "rc.jsonl"
+    path.write_text("\n".join(_json.dumps(p) for p in pts), encoding="utf-8")
+    base, tok = _tiny_lm(tmp_path, [X.prefix_text(p["question"], "year") + X.cand_text(c, True) for p in pts[:20] for c in p["cands"]])
+    X.train([path], base, tok, tmp_path / "xa", "tiny", epochs=1, cands_per_step=16)
+    rd = X.CrossReader(str(tmp_path / "xa" / "reader.pt"), device="cpu", quant="int8", max_cands=2)
+    p0 = pts[0]
+    r = rd.read(p0["question"], "year", {"cands": p0["cands"], "snippet": True})
+    assert len(r) == len(p0["cands"]) and r[2:] == [0.0, 0.0] and rd.config["quant"] == "int8" and rd.config["size_mb"] > 0
+    # rule M: an int8 configuration within 5 s, 1 GB and 2 points of the GPU run on >= 200 questions
+    def run(name, right, extra=None):
+        d = tmp_path / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "results.jsonl").write_text("\n".join(_json.dumps({"task_id": f"t{i}", "shown_correct": i < right}) for i in range(243)), encoding="utf-8")
+        write_json(d / "summary.json", {"accuracy": right / 243, **(extra or {})})
+    run("r7_x-hertz-rc_template", 146)
+    run("r8_x-hertz-rc_cpu-int8-top16", 145, {"timing_ms_per_task": {"read_ms": 3100}, "reader_config": {"quant": "int8", "size_mb": 690, "max_cands": 16}})
+    run("r8_x-hertz-rc_cpu-int8-top8", 120, {"timing_ms_per_task": {"read_ms": 1500}, "reader_config": {"quant": "int8", "size_mb": 690, "max_cands": 8}})
+    m = R8.rule_m(tmp_path)
+    assert m["pass"] and m["passing"] == ["cpu-int8-top16"] and not m["configs"]["cpu-int8-top8"]["pass"]   # top 8 loses 10 points
+    assert m["configs"]["cpu-fp32-top16"]["why"] == "not run"
+    d = R8.decide(tmp_path, ckpts=tmp_path / "ck")
+    assert d["outcome"].startswith("pending") and d["rule_m"]["pass"]           # mid-run: only the mobile check exists
+    run(R8.RUN0, 130)
+    d = R8.decide(tmp_path, ckpts=tmp_path / "ck")
+    assert d["outcome"].startswith("size") and "M passes" in d["outcome"] and (tmp_path / "r8_product.json").exists()
+    assert d["reader_checkpoint"].endswith("xreader_planck_p15rc/reader.pt") and "why" in d["base"]

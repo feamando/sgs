@@ -2,7 +2,8 @@
  .SYNOPSIS
    Planck 3.0 one-stop runner for the Windows 4090 box.
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
-   SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6)
+   SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6),
+   SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -40,6 +41,9 @@
      round7    round 7 (SETUP_planck_20261014.md): reading taught as a skill (SQuAD, NewsQA, TriviaQA,
                SearchQA, NQ, SQuAD 2.0 unanswerable -> reader pools), then our pools; Planck + Hertz;
                rebuild gate N (does Planck read news?); no new searches; ~4-6 h
+     round8    round 8 (SETUP_planck_20261015.md): Hertz's reader on a phone proxy first (CPU, 4 threads,
+               fp32 / int8, top 16 / top 8; ~1 h, pushed at once), then Planck 1.5 = Planck's size pretrained
+               on Hertz's corpus (~2-3 days, resumable), round 7's reading stage on it, the benchmark; no new searches
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -162,7 +166,12 @@ $PY = Get-Python
 # log is active, stdout+stderr are teed into it (UTF-8; Tee-Object would write UTF-16).
 function P3 {
     param([string[]]$A)
-    $argv = @("scripts/planck3.py") + @($A | Where-Object { $_ })
+    Invoke-PyLogged (@("scripts/planck3.py") + @($A | Where-Object { $_ }))
+}
+
+# Any python script, teed into the run log like P3 (round 8: the multi-day pretraining run).
+function Invoke-PyLogged {
+    param([string[]]$argv)
     if ($script:LogFile) {
         Write-Log "> python $($argv -join ' ')"
         $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
@@ -793,6 +802,77 @@ function Do-Round7 {
     P3 (@("r7", "decide") + $ttag)
 }
 
+# CPU only, 4 threads: the phone proxy (rule L, rule M). Restores the GPU afterwards.
+function Invoke-OnCpu([scriptblock]$Body) {
+    $old = $env:CUDA_VISIBLE_DEVICES; $env:CUDA_VISIBLE_DEVICES = "-1"; $env:OMP_NUM_THREADS = "4"
+    try { & $Body }
+    finally { if ($old) { $env:CUDA_VISIBLE_DEVICES = $old } else { Remove-Item Env:CUDA_VISIBLE_DEVICES -ErrorAction SilentlyContinue }; Remove-Item Env:OMP_NUM_THREADS -ErrorAction SilentlyContinue }
+}
+
+# Round 8 (SETUP_planck_20261015.md): (1) round 7's Hertz reader on a phone proxy; (2) Planck 1.5 =
+# Planck 1.3's architecture pretrained on Hertz 1.2's corpus; (3) round 7's reading stage on it; (4) the
+# benchmark and the pre-registered rules. No new searches: the 243 questions are cached on Brave.
+function Do-Round8 {
+    $rc = "data/planck3/reader/rc_points$Tag.jsonl"
+    foreach ($f in @($NEWS, $INFO, $V2HEAD, $PLANCK_CKPT, $rc, "$RES/r6_planck_template$Tag/summary.json",
+                     "$RES/r6_gemma_template$Tag/summary.json", "$RES/r7_x-planck-rc_template$Tag/summary.json")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 8 reuses rounds 6 and 7: run .\scripts\planck3.ps1 round7$(if ($Quick) { ' -Quick' }) first)" }
+    }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    # 1. Hertz on the phone proxy (~1 h): CPU, 4 threads; fp32 for the latency reference, int8 for the rule
+    $ckH = "checkpoints/xreader_hertz_rc$Tag/reader.pt"
+    if (Test-Path $ckH) {
+        $ha = @("--reader", "x-hertz", "--reader-checkpoint", $ckH, "--writer", "template")
+        Invoke-OnCpu {
+            Invoke-R6 "r8_x-hertz-rc_cpu-fp32-top16" $ha "round 8 mobile: Hertz's reader on CPU, fp32, top 16 candidates, 20 questions (latency reference)" 20
+            Invoke-R6 "r8_x-hertz-rc_cpu-int8-top16" ($ha + @("--reader-quant", "int8")) "round 8 mobile: Hertz's reader on CPU, int8, top 16 candidates, all questions"
+            Invoke-R6 "r8_x-hertz-rc_cpu-int8-top8" ($ha + @("--reader-quant", "int8", "--reader-cands", "8")) "round 8 mobile: Hertz's reader on CPU, int8, top 8 candidates, all questions"
+        }
+        P3 (@("r8", "decide") + $ttag)
+        P3 @("report")
+        Do-Push   # the mobile result lands before the multi-day pretraining starts
+    } else { Warn "no Hertz reading reader at $ckH (round 7): the mobile check is skipped" }
+
+    # 2. Planck 1.5: Planck 1.3's architecture (100M) on Hertz 1.2's corpus, its tokenizer, 1 epoch
+    $data = "data/hertz12_data"
+    foreach ($f in @("train.bin", "val.bin", "tokenizer.model")) {
+        if (-not (Test-Path "$data/$f")) { throw "Hertz 1.2's corpus is missing ($data/$f). Round 8 reuses it as is; preparing a new 10B corpus would change the data (see SETUP_hertz_202606_1.md)" }
+    }
+    $gb = (Get-Item "$data/train.bin").Length / 2e9
+    if ($gb -lt 9) { throw ("$data/train.bin holds {0:N2}B tokens, not Hertz's ~9.7B: a stale or partial corpus" -f $gb) }
+    $save = "checkpoints/planck15$Tag"
+    if (-not (Test-Path "$save/final_metrics.json")) {
+        Log ("round 8: pretraining Planck 1.5 on {0:N2}B tokens of Hertz's corpus (~2-3 days; keep the box awake; re-run resumes)" -f $gb)
+        $pa = @("-u", "scripts/train_hertz.py", "--dataset", "fineweb-wiki-mix", "--data-dir", $data,
+                "--d-s", "128", "--d-f", "1000", "--n-passes", "3", "--n-heads", "4", "--context-len", "512",
+                "--epochs", "1", "--batch-size", "16", "--grad-accum", "4", "--mixed-precision", "bf16",
+                "--lr", "3e-4", "--warmup-steps", "2000", "--save-interval", "2000", "--keep-last", "3",
+                "--bf16-milestone-interval", "0", "--eval-interval", "2000", "--save-dir", $save)
+        if ($Quick) { $pa += @("--max-opt-steps", "300", "--warmup-steps", "30", "--eval-interval", "100", "--save-interval", "100") }
+        $last = Get-ChildItem -Path $save -Filter "step_*.pt" -ErrorAction SilentlyContinue |
+            Sort-Object { [int]($_.BaseName -replace '\D', '') } -Descending | Select-Object -First 1
+        if ($last) { Log "resuming from $($last.Name)"; $pa += @("--resume", $last.FullName) }
+        Invoke-PyLogged $pa
+    }
+    $baseCk = if (Test-Path "$save/best.pt") { "$save/best.pt" } else { "$save/final.pt" }
+
+    # 3. round 7's stage A (the reading sets, 1 epoch) on Planck 1.5; no stage B
+    $ckP = "checkpoints/xreader_planck_p15rc$Tag/reader.pt"
+    if (-not (Test-Path $ckP)) {
+        Log "round 8: Planck 1.5's reader learns to read (round 7's reading sets, 1 epoch)"
+        $qa = if ($Quick) { @("--max-points", "1500") } else { @() }
+        P3 (@("xreader", "train", "--base", "planck", "--points", $rc, "--stable-points", "none", "--epochs", "1",
+              "--max-eval", "6000", "--tag", "_p15rc$Tag", "--base-checkpoint", $baseCk, "--base-tokenizer", "$data/tokenizer.model") + $qa)
+    }
+
+    # 4. the product (fixed: x-planck15 rc + template), its worst-case profile and CPU runs, then the rules
+    $pa = @("--reader", "x-planck", "--reader-checkpoint", $ckP, "--writer", "template")
+    Invoke-R6 "r8_x-planck15-rc_template" $pa "round 8: Planck 1.5's reader, template writer"
+    Invoke-R6 "r8_x-planck15-rc_template_contrarian" ($pa + @("--personal", "contrarian")) "round 8: worst-case personal profile on the product (rule E)"
+    Invoke-OnCpu { Invoke-R6 "r8_x-planck15-rc_template_cpu" $pa "round 8: the product on CPU only, 4 threads, 20 questions (phone proxy)" 20 }
+    P3 (@("r8", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -829,6 +909,9 @@ function Do-Push {
     Get-ChildItem -Path "data/planck3/reader" -Filter "news_tasks*.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Get-ChildItem -Path "data/planck3/reader" -Filter "*points*.health.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    # round 8: the rebuilt base's metrics (weights stay local)
+    Get-ChildItem -Path "checkpoints" -Filter "final_metrics.json" -Recurse -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null   # belt and braces: the repo is public
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
@@ -922,6 +1005,16 @@ switch ($Command.ToLower()) {
         Do-Round7
         P3 @("report")
         Log ("round7$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round8"     {
+        Start-RunLog "round8"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Round8
+        P3 @("report")
+        Log ("round8$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {
