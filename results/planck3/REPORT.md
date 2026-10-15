@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-15 01:57)
+# Planck 3.0 results (2026-10-15 21:34)
 
 ## G0 (seed benchmark)
 
@@ -219,7 +219,7 @@
 
 ## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)
 
-_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot); _rc = round 7 stage A (public reading sets only); _r7 = round 7 (stage A, then our pools)
+_v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a deep right candidate into the last slot); _rc = round 7 stage A (public reading sets only); _r7 = round 7 (stage A, then our pools); _p15rc = round 8, Planck 1.5 (Planck's size, Hertz's data) after stage A
 
 | reader | params | train / val / test pools | right only beyond top 16 (test) | test choice acc | ranker | gate AUC | gate ECE | by group (choice vs ranker) |
 |---|---|---|---|---|---|---|---|---|
@@ -272,6 +272,9 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r7_x-planck_template_cpu | 20 | 0.700 | 0.667 (n=12) | 0.750 (n=8) | 5 / 1.000 | 3 / 1.000 | 7 / 0.571 | 3 / 0.667 | 2 | True | 1.000 | 1.000 |  |  | 1051 | 0 | 0.000 |
 | r7_x-planck_template_cpu_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 892 | 0 | 0.000 |
 | r7_x-planck_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 34 | 0 | 0.000 |
+| r8_x-hertz-rc_cpu-fp32-top16_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 11102 | 0 | 0.000 |
+| r8_x-hertz-rc_cpu-int8-top16_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 2458 | 0 | 0.000 |
+| r8_x-hertz-rc_cpu-int8-top8_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 1414 | 0 | 0.000 |
 
 | paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
 |---|---|---|---|---|---|---|

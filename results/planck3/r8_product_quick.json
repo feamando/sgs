@@ -1,0 +1,108 @@
+{
+  "reader": "x-planck",
+  "reader_why": "fixed before the run: Planck 1.5, the phone-size model",
+  "reader_checkpoint": "checkpoints/xreader_planck_p15rc_quick/reader.pt",
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r8_x-planck15-rc_template",
+  "tag": "_quick",
+  "base": {
+    "why": "Planck 1.5 not trained yet"
+  },
+  "rule_r": {
+    "pass": false,
+    "why": "a run is missing"
+  },
+  "rule_n": {
+    "pass": false,
+    "why": "no stage A test pools for newsqa"
+  },
+  "rule_n_searchqa": {
+    "pass": false,
+    "why": "no stage A test pools for searchqa"
+  },
+  "size_at_equal_data": {
+    "benchmark": {
+      "why": "a run is missing"
+    },
+    "newsqa_hertz": {
+      "pass": false,
+      "group": "newsqa",
+      "choice_acc": 0.4444444444444444,
+      "ranker_acc": 0.4444444444444444,
+      "delta": 0.0,
+      "p": 1.0,
+      "pools": 18
+    }
+  },
+  "data_at_equal_size": {
+    "benchmark": {
+      "why": "a run is missing"
+    },
+    "newsqa_planck13": {
+      "pass": false,
+      "group": "newsqa",
+      "choice_acc": 0.4444444444444444,
+      "ranker_acc": 0.4444444444444444,
+      "delta": 0.0,
+      "p": 1.0,
+      "pools": 18
+    }
+  },
+  "rule_m": {
+    "pass": false,
+    "passing": [],
+    "configs": {
+      "cpu-fp32-top16": {
+        "run": "r8_x-hertz-rc_cpu-fp32-top16_quick",
+        "pass": false,
+        "judged": false,
+        "ms": 11101.941666666666,
+        "size_mb": 1996.5,
+        "quant": "none",
+        "max_cands": 16,
+        "threads": 4,
+        "n": 12,
+        "acc": 0.5,
+        "acc_gpu_same_questions": 0.5,
+        "drop": 0.0
+      },
+      "cpu-int8-top16": {
+        "run": "r8_x-hertz-rc_cpu-int8-top16_quick",
+        "pass": false,
+        "judged": false,
+        "ms": 2458.2166666666667,
+        "size_mb": 888.2,
+        "quant": "int8",
+        "max_cands": 16,
+        "threads": 4,
+        "n": 12,
+        "acc": 0.5833333333333334,
+        "acc_gpu_same_questions": 0.5,
+        "drop": -0.08333333333333337
+      },
+      "cpu-int8-top8": {
+        "run": "r8_x-hertz-rc_cpu-int8-top8_quick",
+        "pass": false,
+        "judged": false,
+        "ms": 1413.6083333333333,
+        "size_mb": 888.2,
+        "quant": "int8",
+        "max_cands": 8,
+        "threads": 4,
+        "n": 12,
+        "acc": 0.5,
+        "acc_gpu_same_questions": 0.5,
+        "drop": 0.0
+      }
+    },
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "bars": {
+      "ms": 5000,
+      "drop": 0.02,
+      "size_mb": 1536,
+      "judged_at": 200
+    }
+  },
+  "outcome": "pending: Planck 1.5 is not evaluated yet (this decision covers the mobile check only)"
+}
