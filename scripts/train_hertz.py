@@ -28,6 +28,7 @@ for _stream in (sys.stdout, sys.stderr):
 
 import numpy as np
 import torch
+import torch._dynamo  # module level: an import inside main() would make `torch` a local name there
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 
@@ -390,7 +391,6 @@ def main():
             optimizer.zero_grad(set_to_none=True)
             print("  torch.compile: ON (mode=default, kernel fusion, no CUDA graphs)")
         except Exception as e:
-            import torch._dynamo
             model = eager
             optimizer.zero_grad(set_to_none=True)
             torch._dynamo.reset()
