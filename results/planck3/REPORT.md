@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-16 17:03)
+# Planck 3.0 results (2026-10-16 18:38)
 
 ## G0 (seed benchmark)
 
@@ -275,6 +275,9 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r8_x-hertz-rc_cpu-fp32-top16_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 11102 | 0 | 0.000 |
 | r8_x-hertz-rc_cpu-int8-top16_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 2458 | 0 | 0.000 |
 | r8_x-hertz-rc_cpu-int8-top8_quick | 12 | 0.500 | 0.375 (n=8) | 0.750 (n=4) | 0 /  | 4 / 0.750 | 6 / 0.167 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 1414 | 0 | 0.000 |
+| r8_x-planck15-rc_template_contrarian_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 0 /  | 0 /  | 0 /  | 12 / 0.583 | 0 | True | 1.000 | 1.000 |  |  | 38 | 0 | 0.833 |
+| r8_x-planck15-rc_template_cpu_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 838 | 0 | 0.000 |
+| r8_x-planck15-rc_template_quick | 12 | 0.583 | 0.500 (n=8) | 0.750 (n=4) | 1 / 1.000 | 3 / 0.667 | 6 / 0.333 | 2 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 36 | 0 | 0.000 |
 
 | paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
 |---|---|---|---|---|---|---|

@@ -1,0 +1,19 @@
+{
+  "val_loss": 6.9820087530569355,
+  "val_ppl": 1077.0797826998403,
+  "params": 100892843,
+  "data_dir": "data/hertz12_data",
+  "n_train_tokens": 9690152306,
+  "opt_steps": 300,
+  "tokens_seen": 9830400,
+  "arch": {
+    "d_s": 128,
+    "d_f": 1000,
+    "n_passes": 3,
+    "n_heads": 4,
+    "context_len": 512,
+    "ffn_mult": 4
+  },
+  "lr": 0.0003,
+  "effective_batch": 64
+}
