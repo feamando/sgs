@@ -43,7 +43,7 @@
                rebuild gate N (does Planck read news?); no new searches; ~4-6 h
      round8    round 8 (SETUP_planck_20261015.md): Hertz's reader on a phone proxy first (CPU, 4 threads,
                fp32 / int8, top 16 / top 8; ~1 h, pushed at once), then Planck 1.5 = Planck's size pretrained
-               on Hertz's corpus (~2-3 days, resumable), round 7's reading stage on it, the benchmark; no new searches
+               on Hertz's corpus (~25 h, resumable), round 7's reading stage on it, the benchmark; no new searches
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -842,7 +842,7 @@ function Do-Round8 {
     if ($gb -lt 9) { throw ("$data/train.bin holds {0:N2}B tokens, not Hertz's ~9.7B: a stale or partial corpus" -f $gb) }
     $save = "checkpoints/planck15$Tag"
     if (-not (Test-Path "$save/final_metrics.json")) {
-        Log ("round 8: pretraining Planck 1.5 on {0:N2}B tokens of Hertz's corpus (~2-3 days; keep the box awake; re-run resumes)" -f $gb)
+        Log ("round 8: pretraining Planck 1.5 on {0:N2}B tokens of Hertz's corpus (~25 h at the measured ~110k tok/s; keep the box awake; re-run resumes)" -f $gb)
         $pa = @("-u", "scripts/train_hertz.py", "--dataset", "fineweb-wiki-mix", "--data-dir", $data,
                 "--d-s", "128", "--d-f", "1000", "--n-passes", "3", "--n-heads", "4", "--context-len", "512",
                 "--epochs", "1", "--batch-size", "16", "--grad-accum", "4", "--mixed-precision", "bf16",

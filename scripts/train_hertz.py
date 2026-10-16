@@ -541,7 +541,9 @@ def main():
                     # Throughput sanity: ETA to finish the token budget at the
                     # current rate. Surfaces a too-slow run early (the d_f=5000
                     # regression risk) so the budget can be cut before vacation.
-                    tokens_remaining = max(max_tokens - epoch_tokens, 0)
+                    # Sized from the optimizer-step budget (what the loop actually runs), not --max-tokens,
+                    # which only sizes data prep and is ignored when the data dir already exists.
+                    tokens_remaining = max(opt_steps - opt_step, 0) * effective_batch * args.context_len
                     eta_hours = tokens_remaining / max(tok_per_sec, 1e-9) / 3600.0
 
                     epoch_avg = epoch_loss_sum / max(epoch_tokens, 1)

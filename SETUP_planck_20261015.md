@@ -1,6 +1,6 @@
 # Planck 3.0 round 8: Planck rebuilt on the right data (Planck 1.5), and Hertz on a phone proxy
 
-Nikita Gorshkov · 2026-10-15 · Status: ready to run · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261014.md` (round 7: R and N fail → the pre-registered rebuild) · Plan and results of record: `SETUP_092026_planck3.md`
+Nikita Gorshkov · 2026-10-15 · Status: shakedown clean 2026-10-16 (pretraining 92-118k tok/s, ~25 h); ready for the real run · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261014.md` (round 7: R and N fail → the pre-registered rebuild) · Plan and results of record: `SETUP_092026_planck3.md`
 
 **TL;DR.** One command, `.\scripts\planck3.ps1 round8`. It is resumable, pushes results, and makes no new searches. It does two things.
 
@@ -10,7 +10,7 @@ Nikita Gorshkov · 2026-10-15 · Status: ready to run · Swimlane 1 (Planck) · 
 - **Why this design:** Round 7 showed that Planck 1.3 does not read at all, while Hertz reads every set. The owner's diagnosis is that Planck 1.3 was trained on the wrong data (Wikipedia only).
   - Giving Planck Hertz's data at Planck's size tests that directly.
   - It also separates size from data, which round 7 could not do.
-- **Time:** about 2-3 days on the 4090 (an estimate; the `-Quick` run prints the measured speed and ETA).
+- **Time:** about **1 day** on the 4090. The shakedown measured 92-118k tokens/s (eager mode; compile fails on the box's triton-windows), so 9.69B tokens take about 25 h.
 
 **2. Hertz on a phone proxy, first** (about 1 hour, pushed before the pretraining starts).
 - **What it checks:** round 7's best small reader, Hertz with reading training (60.1% on the benchmark, exploratory). It runs on CPU with 4 threads, in fp32 and int8, reading the top 16 or the top 8 candidates.
@@ -35,7 +35,7 @@ Nikita Gorshkov · 2026-10-15 · Status: ready to run · Swimlane 1 (Planck) · 
 | corpus | Wikipedia (20231101), ~4B tokens | **Hertz's: FineWeb-Edu sample-10BT + 30% Wikipedia, 9.69B tokens** (`data/hertz12_data`, reused) | the same as Planck 1.5 |
 | tokenizer | `data/wikipedia/tokenizer.model` | **Hertz's** 32K (`data/hertz12_data/tokenizer.model`) | Hertz's |
 | training | | **Hertz's settings:** 1 epoch, AdamW 3e-4 (betas 0.9/0.95, weight decay 0.1), warmup 2,000, cosine, bf16, 64 × 512 tokens per step | the same |
-| run time on the 4090 | | **~2-3 days (estimate)** | ~5 days |
+| run time on the 4090 | | **~25 h (measured 92-118k tok/s)** | ~5 days (~20k tok/s) |
 
 **The reader:** round 7's stage A on Planck 1.5.
 - The same 137,581 reading pools, split and settings: 1 epoch, calibrated on held-out reading questions.
@@ -57,7 +57,7 @@ The reader's weight size is measured as it sits in memory, without the LM head, 
 |---|---|---|---|
 | setup + smoke | 83 offline tests | | ~2 min |
 | 1. Hertz phone proxy | 3 CPU runs (above), then `r8 decide` (the outcome reads "pending"), report, **push** | `r8_x-hertz-rc_cpu-*`, `r8_product.json` | ~1 h |
-| 2. Planck 1.5 pretraining | 1 epoch over Hertz's corpus | `checkpoints/planck15/` (best.pt, final.pt, `final_metrics.json`, pushed) | ~2-3 days |
+| 2. Planck 1.5 pretraining | 1 epoch over Hertz's corpus | `checkpoints/planck15/` (best.pt, final.pt, `final_metrics.json`, pushed) | ~25 h |
 | 3. reading stage | round 7's stage A on Planck 1.5 | `checkpoints/xreader_planck_p15rc`, `results/planck3/xreader_planck_p15rc/train_log.json` | ~25 min |
 | 4. the product | benchmark; worst-case personal profile; CPU (20 questions) | `r8_x-planck15-rc_template`, `_contrarian`, `_cpu` | ~10 min |
 | 5. decide + report + push | the rules below → `r8_product.json`; REPORT.md gains a "Round 8" section | git | 1 min |
@@ -70,7 +70,7 @@ The reader's weight size is measured as it sits in memory, without the LM head, 
    .\scripts\planck3.ps1 round8 -Quick -NoPush
    ```
    Read the `tok/s` and ETA lines from the pretraining shakedown. If the ETA is far beyond 3 days, stop and tell me before the real run.
-3. Keep the box awake: Settings → System → Power → Sleep: Never, for the next 3 days.
+3. Keep the box awake: Settings → System → Power → Sleep: Never, for the next 2 days.
 4. The real run:
    ```powershell
    .\scripts\planck3.ps1 round8
@@ -78,7 +78,7 @@ The reader's weight size is measured as it sits in memory, without the LM head, 
    - The Hertz phone result is pushed after about an hour; the pretraining then starts.
    - If anything stops, re-run the same command.
      - Finished stages are skipped.
-     - The pretraining resumes from its last `step_*.pt` (saved every 2,000 steps, about every 20-40 minutes at the estimated speed).
+     - The pretraining resumes from its last `step_*.pt` (saved every 2,000 steps, about every 10 minutes at the measured speed).
      - On resume the data restarts at its first batch while the step count and the schedule carry on (see disclosure 5).
 
 ## 4. Pre-registered rules (2026-10-15, before the run)
@@ -153,7 +153,7 @@ The reader's weight size is measured as it sits in memory, without the LM head, 
 
 | Risk | Mitigation |
 |---|---|
-| Pretraining is much slower than estimated | the shakedown prints the measured speed and ETA before the real run; stop and re-plan if it is far beyond 3 days |
+| Pretraining is much slower than measured | the shakedown measured 92-118k tok/s (~25 h); the log prints the speed and ETA every 50 steps |
 | The box sleeps, or Windows updates and restarts | keep-awake step; resumable from `step_*.pt` every 2,000 steps; re-run the same command |
 | A training collapse (SGS history: Planck 1.2.x) | Hertz's proven settings and plain AdamW (no SGS-native acceleration); validation loss every 2,000 steps in the log |
 | `data/hertz12_data` is missing or partial | the runner checks the files and that train.bin holds ≥ 9B tokens, and stops rather than preparing a different corpus |

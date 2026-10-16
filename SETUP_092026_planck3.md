@@ -391,7 +391,7 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **Recommended before the rebuild:** a 30-45 min Planck recipe check (overfit + learning-rate sweep). If the rebuild stands, separate size from data (100M on Hertz's corpus mix, with reading in the training goal).
 - **Round 8 built + pre-registered (2026-10-15, `SETUP_planck_20261015.md`, `planck3.ps1 round8`, no new searches; owner skipped the recipe check):**
   - **Hertz on a phone proxy first (~1 h, pushed at once):** round 7's Hertz reading reader on CPU with 4 threads, in fp32 and int8, reading the top 16 or the top 8 candidates.
-  - **Planck 1.5** (working name): Planck 1.3's 100M architecture pretrained on Hertz 1.2's corpus (FineWeb-Edu + 30% Wikipedia, 9.69B tokens, reused), with Hertz's settings (~2-3 days). Then round 7's stage A, with no stage B.
+  - **Planck 1.5** (working name): Planck 1.3's 100M architecture pretrained on Hertz 1.2's corpus (FineWeb-Edu + 30% Wikipedia, 9.69B tokens, reused), with Hertz's settings (~25 h measured). Then round 7's stage A, with no stage B.
   - **Product fixed:** x-planck15 rc + template.
   - **Rules:**
     - R and N as in round 7.
