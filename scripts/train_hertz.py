@@ -373,15 +373,28 @@ def main():
     if use_compile:
         try:
             import triton  # noqa: F401
+            print(f"  torch {torch.__version__}, triton {getattr(triton, '__version__', '?')}")
         except ImportError:
             use_compile = False
             print("  torch.compile: OFF (Triton not available)")
     if use_compile:
+        # torch.compile is lazy: a broken backend (e.g. a triton-windows build that does not match
+        # torch, "cannot import name 'triton_key'") only fails at the first forward, mid-training.
+        # Probe one forward + backward here and fall back to eager if it fails.
+        eager = model
         try:
             model = torch.compile(model, mode="default")
+            probe = torch.zeros((args.batch_size, args.context_len), dtype=torch.long, device=device)  # the training shape
+            with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=amp_dtype != torch.float32):
+                model(probe).float().mean().backward()
+            optimizer.zero_grad(set_to_none=True)
             print("  torch.compile: ON (mode=default, kernel fusion, no CUDA graphs)")
         except Exception as e:
-            print(f"  torch.compile: FAILED ({e}), continuing without")
+            import torch._dynamo
+            model = eager
+            optimizer.zero_grad(set_to_none=True)
+            torch._dynamo.reset()
+            print(f"  torch.compile: FAILED ({type(e).__name__}: {str(e).splitlines()[0][:160]}), continuing in eager mode")
 
     # ── Wandb ──
     # We do NOT call wandb.watch(): it registers per-submodule forward/backward
