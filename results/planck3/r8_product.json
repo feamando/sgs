@@ -7,23 +7,60 @@
   "run": "r8_x-planck15-rc_template",
   "tag": "",
   "base": {
-    "why": "Planck 1.5 not trained yet"
+    "val_loss": 3.4492854264545945,
+    "val_ppl": 31.477891002110894,
+    "params": 100892843,
+    "data_dir": "data/hertz12_data",
+    "n_train_tokens": 9690152306,
+    "opt_steps": 295143,
+    "tokens_seen": 9671245824,
+    "arch": {
+      "d_s": 128,
+      "d_f": 1000,
+      "n_passes": 3,
+      "n_heads": 4,
+      "context_len": 512,
+      "ffn_mult": 4
+    },
+    "lr": 0.0003,
+    "effective_batch": 64
   },
   "rule_r": {
     "pass": false,
-    "why": "a run is missing"
+    "acc": 0.522633744855967,
+    "midpoint": 0.5740740740740741,
+    "vs_round5_reader": 0.51440329218107,
+    "p": 0.9021585000966993,
+    "n": 243
   },
   "rule_n": {
     "pass": false,
-    "why": "no stage A test pools for newsqa"
+    "group": "newsqa",
+    "choice_acc": 0.4610011641443539,
+    "ranker_acc": 0.47729918509895225,
+    "delta": -0.01629802095459837,
+    "p": 0.24292283198051134,
+    "pools": 859
   },
   "rule_n_searchqa": {
     "pass": false,
-    "why": "no stage A test pools for searchqa"
+    "group": "searchqa",
+    "choice_acc": 0.5330132052821128,
+    "ranker_acc": 0.46218487394957986,
+    "delta": 0.07082833133253297,
+    "p": 2.436717986367547e-06,
+    "pools": 833
   },
   "size_at_equal_data": {
     "benchmark": {
-      "why": "a run is missing"
+      "a": "r8_x-planck15-rc_template",
+      "b": "r7_x-hertz-rc_template",
+      "n": 243,
+      "acc_a": 0.522633744855967,
+      "acc_b": 0.6008230452674898,
+      "a_only": 8,
+      "b_only": 27,
+      "p": 0.001878225477412343
     },
     "newsqa_hertz": {
       "pass": true,
@@ -37,7 +74,14 @@
   },
   "data_at_equal_size": {
     "benchmark": {
-      "why": "a run is missing"
+      "a": "r8_x-planck15-rc_template",
+      "b": "r7_x-planck-rc_template",
+      "n": 243,
+      "acc_a": 0.522633744855967,
+      "acc_b": 0.5308641975308642,
+      "a_only": 0,
+      "b_only": 2,
+      "p": 0.5
     },
     "newsqa_planck13": {
       "pass": false,
@@ -107,5 +151,31 @@
       "judged_at": 200
     }
   },
-  "outcome": "pending: Planck 1.5 is not evaluated yet (this decision covers the mobile check only)"
+  "rule_c1": {
+    "pass": false,
+    "monotone": false,
+    "high": {
+      "n": 14,
+      "precision": 0.7142857142857143,
+      "bar": 0.9,
+      "judged": false
+    },
+    "good": {
+      "n": 77,
+      "precision": 0.6493506493506493,
+      "bar": 0.7,
+      "judged": true
+    }
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 908.75
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": -0.004115226337448652,
+    "changed": 199,
+    "flagged": 199
+  },
+  "outcome": "size: a 100M SGS base does not read even on Hertz's data; the reader path is Hertz (M passes: confirm it on fresh questions)"
 }
