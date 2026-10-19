@@ -407,6 +407,18 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **It is the same reader as Planck 1.3's:** the same answer on 235 of 243 questions, and within 1 point on every reading set. So the base data is not what limits Planck's reader. The recipe vs size question stays open.
   - **Pre-registered outcome "size":** the reader path is Hertz, to be confirmed on fresh questions.
   - **Ships unchanged:** round 5's reader + template.
+- **Round 9 built + pre-registered (2026-10-19, `SETUP_planck_20261019.md`, `planck3.ps1 round9`, ~2 h, ~300 live Brave searches):**
+  - **A fresh benchmark,** built once and committed before any reader runs: ~140 Wikidata 2026 items unused by any benchmark or training set, plus up to 80 Gemma-written questions from the Current Events portal for 9-18 October 2026.
+  - **Product fixed:** Hertz rc, int8 on CPU (4 threads), top 16 + template.
+  - **Rules:**
+    - **R9:** rule R on the fresh questions.
+    - **Q:** int8 loses ≤ 2 points vs the GPU.
+    - **L:** over every question.
+    - **E.**
+    - **C1:** reported, and recalibrated on round 8's answers.
+  - **Brave check fixed:** a live search plus a quota read; it no longer passes on a cache hit.
+  - **Outcome:** R9 passes → ship (`serve` reads int8 on CPU); else → round 10, Brave pools + Gemma soft labels.
+- *Round 8 options as planned on 2026-10-14 (superseded by the round 8 build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.
   - **R fails, N passes:** Brave-collected pools (after the quota resets) with Gemma soft labels; select the reader on a benchmark-like held-out slice; no rebuild.

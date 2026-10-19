@@ -337,20 +337,28 @@ class Web:
                   f"the rest of this run uses the next backend in the chain", flush=True)
 
     def brave_alive(self) -> bool:
-        """Key set AND answering; a cached answer counts (no quota spent on a probe every start)."""
+        """Key set AND the live API answers with quota left. Round 9 fix: this used to accept a CACHED
+        answer, so with the month's quota at 0 a run still chose Brave (round 6 collected 3 of 1,914
+        searches on Brave and the rest on ddgs/Wikipedia). One live search per start is the price."""
         import os
         if not os.environ.get("BRAVE_API_KEY"):
             return False
-        hit = self.cache.get("search", "brave|Wikipedia")
-        if hit and hit.get("results"):
-            return True
+        if not self.cache.online:            # replay: no network, the cache is all there is
+            hit = self.cache.get("search", "brave|Wikipedia")
+            return bool(hit and hit.get("results"))
+        return self.brave_quota()["ok"]
+
+    def brave_quota(self) -> dict:
+        """One live search: is the key valid, and how many searches are left this month (from the headers)?"""
         try:
             res = self._search_brave("Wikipedia")
-        except Exception:
-            return False
+        except Exception as e:
+            return {"ok": False, "remaining": self.brave_remaining, "why": f"{type(e).__name__}: {str(e)[:120]}"}
         if res:
             self.cache.put("search", "brave|Wikipedia", {"query": "Wikipedia", "backend": "brave", "at": now_iso(), "results": res})
-        return bool(res)
+        ok = bool(res) and self.brave_remaining != 0
+        return {"ok": ok, "remaining": self.brave_remaining,
+                "why": "" if ok else ("quota used up this month" if self.brave_remaining == 0 else "no results (key invalid or rate-limited)")}
 
     def ddgs_alive(self) -> bool:
         """Installed AND answering (a rate-limited client returns nothing)."""

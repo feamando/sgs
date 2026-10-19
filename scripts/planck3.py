@@ -138,9 +138,9 @@ def _chat_harness_factory(args):
     from src.planck3.answer import Answerer
     from src.planck3.readers import make_reader
     from src.planck3.writer import make_writer
-    # auto = what round 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
+    # auto = what round 9 / 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
     # reader); otherwise round 5's Planck reader, the best small reader measured so far
-    prods = [read_json(RESULTS / f) for f in ("r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
+    prods = [read_json(RESULTS / f) for f in ("r9_product.json", "r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
     prod = next((p for p in prods if (p.get("rule_r") or {}).get("pass")), prods[0] if prods else {})
     rd, wr, wck, rck = args.reader, args.writer, None, None
     if rd == "auto":
@@ -156,8 +156,12 @@ def _chat_harness_factory(args):
             wck = None if wr == "template" else str(REPO_ROOT / "checkpoints" / f"writer_{wr}6" / "best.pt")
         else:
             wr = next((w for w in ("hertz", "planck") if (REPO_ROOT / "checkpoints" / f"writer_{w}" / "best.pt").exists()), "template")
+    # round 9's product reads with int8 weights on CPU (the phone configuration); on a GPU box it reads in fp32
+    import torch
+    rq = prod.get("reader_quant") if rck and not torch.cuda.is_available() else None
     reader = make_reader(rd, head=args.g2_head, checkpoint=args.planck_checkpoint, tokenizer=args.planck_tokenizer,
-                         gemma_path=args.gemma_path, reader_checkpoint=rck)
+                         gemma_path=args.gemma_path, reader_checkpoint=rck, reader_quant=rq,
+                         reader_cands=prod.get("reader_cands", 0) if rck else 0)
     writer = make_writer(wr, gemma_path=args.gemma_path, checkpoint=wck)
     print(f"[planck3] answer pipeline: reader={reader.name} writer={writer.name} (trust: config/planck3/source_registry.json)")
     return lambda: Answerer(web, store, reader, writer)
@@ -628,8 +632,16 @@ def cmd_search_check(args):
     web = Web(WebCache(args.cache_dir, mode="refresh"), searxng_url=args.searxng_url)
     if args.backend == "brave":
         import os
-        ok = bool(os.environ.get("BRAVE_API_KEY")) and web.brave_alive()
-        print(f"Brave Search API: {'UP' if ok else 'DOWN (BRAVE_API_KEY missing from .env, invalid, or over quota)'}")
+        from src.planck3.util import load_env
+        load_env()
+        if not os.environ.get("BRAVE_API_KEY"):
+            print("Brave Search API: DOWN (BRAVE_API_KEY missing from .env)")
+            sys.exit(1)
+        q = web.brave_quota()
+        ok = q["ok"] and (q["remaining"] is None or q["remaining"] >= args.need)
+        left = "unknown" if q["remaining"] is None else f"{q['remaining']:,}"
+        print(f"Brave Search API: {'UP' if ok else 'DOWN'}; searches left this month: {left}"
+              + (f" (this run needs {args.need:,})" if args.need else "") + (f"; {q['why']}" if q["why"] else ""))
     elif args.backend == "ddgs":
         ok = web.ddgs_alive()
         print(f"ddgs ({web.ddgs_engines}): {'UP' if ok else 'DOWN (pip install ddgs, or rate-limited: wait and retry)'}")
@@ -706,6 +718,8 @@ def cmd_report(args):
     lines += r7_lines(RESULTS)
     from src.planck3.round8 import report_lines as r8_lines
     lines += r8_lines(RESULTS)
+    from src.planck3.round9 import report_lines as r9_lines
+    lines += r9_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -949,6 +963,7 @@ def main():
 
     p = sub.add_parser("search-check")
     p.add_argument("--backend", default="searxng", choices=["searxng", "ddgs", "brave"])
+    p.add_argument("--need", type=int, default=0, help="brave: fail unless at least this many searches are left this month")
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--cache-dir", default=str(CACHE))
     p.set_defaults(fn=cmd_search_check)
@@ -970,7 +985,7 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import g2, readtasks, round5, round6, round7, round8, wikirace, xreader
+    from src.planck3 import freshbench, g2, readtasks, round5, round6, round7, round8, round9, wikirace, xreader
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
     round5.add_cli(sub, add_web_args, build_web)
@@ -979,6 +994,8 @@ def main():
     round6.add_cli(sub)
     round7.add_cli(sub)
     round8.add_cli(sub)
+    round9.add_cli(sub)
+    freshbench.add_cli(sub)
 
     args = ap.parse_args()
     args.fn(args)
