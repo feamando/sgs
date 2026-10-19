@@ -126,8 +126,9 @@ Q, L and E are product checks. If R9 passes but one of them fails, the result is
 7. **The Brave check change affects every later run:** each run now spends 1 search to confirm the API is live with quota left.
 8. **Found in the shakedown (2026-10-19):** the check failed with "searches left this month: 0" while the Brave dashboard showed $1.91 of $5 credit used.
    - The likely cause: a credit-based plan has no monthly search quota, so the rate-limit header's monthly part reads 0 even while searches succeed.
+   - **Confirmed by the headers** (2026-10-19 shakedown): `X-RateLimit-Limit: 50, 0`, `X-RateLimit-Remaining: 49, 0`, `X-RateLimit-Policy: 50;w=1, 0;w=2678400`. The monthly limit is 0: there is no monthly quota on this plan.
    - The fix: a monthly remainder is believed only when the plan reports a monthly limit, and never on an HTTP 200 with results. The check now prints the raw rate-limit headers, so the cause is confirmed on the next run, not assumed.
-   - **This probably also explains round 6.** Round 6's training collection paused Brave at once ("0 searches left this month (reserve 400)") and gathered its pools on ddgs and Wikipedia. That was recorded as "the Brave quota was 0". It was more likely the same header misread, while the benchmark runs (no reserve) were served by Brave.
+   - **This very likely also explains round 6.** Round 6's training collection paused Brave at once ("0 searches left this month (reserve 400)") and gathered its pools on ddgs and Wikipedia. That was recorded as "the Brave quota was 0". It was more likely the same header misread, while the benchmark runs (no reserve) were served by Brave.
 
 ## 6. Effort shape (reuse, don't rebuild)
 

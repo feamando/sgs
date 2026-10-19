@@ -897,7 +897,7 @@ function Do-Round9 {
             Invoke-Checked git @("add", "-f", "--", $f9)
             Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null
             Invoke-Checked git @("commit", "-m", "data(planck3): round 9 fresh benchmark, built before any reader ran on it")
-            Invoke-Checked git @("pull", "--rebase", "origin", "main")
+            Invoke-Checked git @("pull", "--rebase", "--autostash", "origin", "main")
             Invoke-Checked git @("push", "origin", "main")
         }
     } else { Log "round 9: fresh benchmark $f9 exists (kept as built)" }
@@ -966,7 +966,7 @@ function Do-Push {
     Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null   # belt and braces: the repo is public
     if ((Invoke-Quiet git @("diff", "--cached", "--quiet")).Code -eq 0) { Log "nothing new to commit"; return }
     Invoke-Checked git @("commit", "-m", "results(planck3): run$Tag $(Get-Date -Format yyyy-MM-dd_HHmm)")
-    Invoke-Checked git @("pull", "--rebase", "origin", "main")
+    Invoke-Checked git @("pull", "--rebase", "--autostash", "origin", "main")
     Invoke-Checked git @("push", "origin", "main")
 }
 
