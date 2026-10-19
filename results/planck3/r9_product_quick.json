@@ -1,0 +1,144 @@
+{
+  "reader": "x-hertz",
+  "reader_why": "fixed before the run: round 7's Hertz reading reader, int8 on CPU (passed round 8's M)",
+  "reader_checkpoint": "checkpoints/xreader_hertz_rc/reader.pt",
+  "reader_quant": "int8",
+  "reader_cands": 16,
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r9_x-hertz-rc_cpu-int8-top16",
+  "tag": "_quick",
+  "benchmark": "scripts/assets/planck3_tasks_fresh9.json",
+  "rule_r": {
+    "pass": false,
+    "acc": 0.4166666666666667,
+    "midpoint": 0.5416666666666667,
+    "vs_round5_reader": 0.25,
+    "gemma": 0.8333333333333334,
+    "a_only": 3,
+    "b_only": 1,
+    "p": 0.625,
+    "n": 12
+  },
+  "rule_q": {
+    "pass": true,
+    "a": "r9_x-hertz-rc_cpu-int8-top16_quick",
+    "b": "r9_x-hertz-rc_template_quick",
+    "n": 12,
+    "acc_a": 0.4166666666666667,
+    "acc_b": 0.4166666666666667,
+    "a_only": 0,
+    "b_only": 0,
+    "p": 1.0
+  },
+  "vs_heuristic": {
+    "a": "r9_x-hertz-rc_cpu-int8-top16_quick",
+    "b": "r9_heuristic_template_quick",
+    "n": 12,
+    "acc_a": 0.4166666666666667,
+    "acc_b": 0.4166666666666667,
+    "a_only": 2,
+    "b_only": 2,
+    "p": 1.0
+  },
+  "vs_gemma": {
+    "a": "r9_x-hertz-rc_cpu-int8-top16_quick",
+    "b": "r9_gemma_template_quick",
+    "n": 12,
+    "acc_a": 0.4166666666666667,
+    "acc_b": 0.8333333333333334,
+    "a_only": 1,
+    "b_only": 6,
+    "p": 0.125
+  },
+  "planck15": {
+    "a": "r9_x-planck15-rc_template_quick",
+    "b": "r9_planck_template_quick",
+    "n": 12,
+    "acc_a": 0.5833333333333334,
+    "acc_b": 0.25,
+    "a_only": 4,
+    "b_only": 0,
+    "p": 0.125
+  },
+  "by_regime": {
+    "r9_heuristic_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.4166666666666667
+      }
+    },
+    "r9_planck_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.25
+      }
+    },
+    "r9_x-hertz-rc_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.4166666666666667
+      }
+    },
+    "r9_x-hertz-rc_cpu-int8-top16": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.4166666666666667
+      }
+    },
+    "r9_gemma_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.8333333333333334
+      }
+    },
+    "r9_x-planck15-rc_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.5833333333333334
+      }
+    }
+  },
+  "rule_c1_recal": {
+    "pass": true,
+    "thresholds_fit_on": "r8_x-hertz-rc_cpu-int8-top16 (243 old questions)",
+    "high_from": null,
+    "good_from": 6.0,
+    "high": {
+      "n": 0,
+      "precision": null
+    },
+    "good": {
+      "n": 5,
+      "precision": 0.6
+    }
+  },
+  "rule_c1": {
+    "pass": true,
+    "monotone": true,
+    "high": {
+      "n": 0,
+      "precision": null,
+      "bar": 0.9,
+      "judged": false
+    },
+    "good": {
+      "n": 3,
+      "precision": 1.0,
+      "bar": 0.7,
+      "judged": false
+    }
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": 0.0,
+    "changed": 9,
+    "flagged": 9
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 3995.633333333333,
+    "measured_on": "every fresh question, CPU, 4 threads"
+  },
+  "outcome": "no ship: round 10 trains Hertz's reader on Brave-collected pools with Gemma soft labels"
+}

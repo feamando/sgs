@@ -1,0 +1,81 @@
+{
+  "n": 12,
+  "accuracy": 0.4166666666666667,
+  "bands": {
+    "high": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    },
+    "good": {
+      "n": 1,
+      "share": 0.08333333333333333,
+      "precision": 1.0
+    },
+    "low": {
+      "n": 8,
+      "share": 0.6666666666666666,
+      "precision": 0.25
+    },
+    "sceptical": {
+      "n": 3,
+      "share": 0.25,
+      "precision": 0.6666666666666666
+    },
+    "none": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 12,
+      "accuracy": 0.4166666666666667
+    }
+  },
+  "qtype_accuracy": 1.0,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 1.0,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.9166666666666666,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 7.95,
+    "fetch_ms": 344.34999999999997,
+    "read_ms": 0.0,
+    "write_ms": 0.0,
+    "total_ms": 789.8583333333332
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.8333333333333333,
+  "reader": "heuristic",
+  "reader_config": null,
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh9_quick.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 12,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 12
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.0,
+    "on_topic_rate": 1.0,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "valid": true
+  },
+  "wall_s": 9.5,
+  "llm_usd_per_task_as_haiku": 0.0
+}

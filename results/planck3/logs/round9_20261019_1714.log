@@ -1,0 +1,16 @@
+[planck3 17:14:34] logging to C:\Users\feama\sgs\results\planck3\logs\round9_20261019_1714.log
+[planck3 17:14:34] installing Planck 3.0 deps into .venv
+[planck3 17:14:37] offline smoke tests
+[planck3 17:14:58] round 9: building the fresh benchmark once (Wikidata + Gemma on the Current Events portal; ~30-60 min)
+> python scripts/planck3.py fresh9 --gemma-path models/gemma-4-e4b-it --out scripts/assets/planck3_tasks_fresh9.json
+  [fresh9] wikidata winner    kept  60 (pool 840; {'pool': 840, 'no proper-name answer': 1, 'named in a benchmark question': 4, 'kept': 60})
+  [fresh9] wikidata election  kept  20 (pool 65; {'pool': 65, 'used before': 4, 'no proper-name answer': 2, 'kept': 20})
+  [fresh9] wikidata season    kept  30 (pool 436; {'pool': 436, 'used before': 2, 'named in a benchmark question': 1, 'kept': 30})
+  [fresh9] wikidata headgov   kept  30 (pool 239; {'pool': 239, 'used before': 4, 'no proper-name answer': 16, 'not a place': 4, 'named in a benchmark question': 1, 'kept': 30})
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [fresh9] portal: 126 items, 2026-10-09 to 2026-10-18
+[readtasks] Gemma writes questions for 126 portal items (0 done) -> C:\Users\feama\sgs\data\planck3\fresh9_news_raw.json
+  50/126: 41 questions kept, 9 rejected
+  100/126: 80 questions kept, 20 rejected
+  126/126: 100 questions kept, 26 rejected
+[fresh9] 220 questions {'fresh': 140, 'news': 80} -> scripts\assets\planck3_tasks_fresh9.json
