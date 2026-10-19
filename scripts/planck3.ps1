@@ -885,7 +885,7 @@ function Do-Round9 {
     foreach ($f in @($V2HEAD, $PLANCK_CKPT, "checkpoints/xreader_hertz_rc/reader.pt", "$RES/r8_x-hertz-rc_cpu-int8-top16/results.jsonl")) {
         if (-not (Test-Path $f)) { throw "missing $f (round 9 reuses rounds 7-8)" }
     }
-    if (-not (Test-Path $GEMMA)) { throw "missing $GEMMA: Gemma writes the fresh news questions and is the reference reader" }
+    if (-not (Test-Path $GEMMA)) { throw "missing ${GEMMA}: Gemma writes the fresh news questions and is the reference reader" }
     $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
     $f9 = "scripts/assets/planck3_tasks_fresh9$Tag.json"
     # 1. the fresh benchmark, once (Wikidata 2026 items unused before + portal news after 2026-10-08)
