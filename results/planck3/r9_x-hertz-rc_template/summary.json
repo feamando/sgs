@@ -1,0 +1,93 @@
+{
+  "n": 220,
+  "accuracy": 0.5,
+  "bands": {
+    "high": {
+      "n": 12,
+      "share": 0.05454545454545454,
+      "precision": 0.9166666666666666
+    },
+    "good": {
+      "n": 51,
+      "share": 0.2318181818181818,
+      "precision": 0.7254901960784313
+    },
+    "low": {
+      "n": 89,
+      "share": 0.40454545454545454,
+      "precision": 0.3707865168539326
+    },
+    "sceptical": {
+      "n": 66,
+      "share": 0.3,
+      "precision": 0.4393939393939394
+    },
+    "none": {
+      "n": 2,
+      "share": 0.00909090909090909,
+      "precision": null
+    }
+  },
+  "bands_monotone": false,
+  "by_regime": {
+    "fresh": {
+      "n": 140,
+      "accuracy": 0.4928571428571429
+    },
+    "news": {
+      "n": 80,
+      "accuracy": 0.5125
+    }
+  },
+  "qtype_accuracy": 0.9818181818181818,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 0.9772727272727273,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.8715596330275229,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 0.6027272727272727,
+    "fetch_ms": 4.445,
+    "read_ms": 71.94181818181819,
+    "write_ms": 0.0,
+    "total_ms": 267.55045454545456
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.6181818181818182,
+  "reader": "x-hertz",
+  "reader_config": {
+    "quant": "none",
+    "max_cands": 16,
+    "device": "cuda",
+    "qengine": null,
+    "threads": 16,
+    "params": 640812055
+  },
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh9.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 220,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.00909090909090909,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 218,
+      "wikipedia": 2
+    },
+    "primary_share": 0.990909090909091,
+    "primary_offtopic_rate": 0.031818181818181815,
+    "on_topic_rate": 0.9772727272727273,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "valid": true
+  },
+  "wall_s": 59.1,
+  "llm_usd_per_task_as_haiku": 0.0
+}

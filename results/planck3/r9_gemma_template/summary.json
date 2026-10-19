@@ -1,0 +1,86 @@
+{
+  "n": 220,
+  "accuracy": 0.6090909090909091,
+  "bands": {
+    "high": {
+      "n": 17,
+      "share": 0.07727272727272727,
+      "precision": 0.9411764705882353
+    },
+    "good": {
+      "n": 107,
+      "share": 0.4863636363636364,
+      "precision": 0.7009345794392523
+    },
+    "low": {
+      "n": 33,
+      "share": 0.15,
+      "precision": 0.5757575757575758
+    },
+    "sceptical": {
+      "n": 44,
+      "share": 0.2,
+      "precision": 0.5454545454545454
+    },
+    "none": {
+      "n": 19,
+      "share": 0.08636363636363636,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 140,
+      "accuracy": 0.65
+    },
+    "news": {
+      "n": 80,
+      "accuracy": 0.5375
+    }
+  },
+  "qtype_accuracy": 0.9818181818181818,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 0.9772727272727273,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.8656716417910447,
+  "tokens_per_task": 2320.2454545454543,
+  "timing_ms_per_task": {
+    "search_ms": 0.6304545454545454,
+    "fetch_ms": 46.78,
+    "read_ms": 2680.7954545454545,
+    "write_ms": 0.0009090909090909091,
+    "total_ms": 2887.936818181818
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.3181818181818181,
+  "reader": "gemma",
+  "reader_config": null,
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh9.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 220,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.00909090909090909,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 218,
+      "wikipedia": 2
+    },
+    "primary_share": 0.990909090909091,
+    "primary_offtopic_rate": 0.031818181818181815,
+    "on_topic_rate": 0.9772727272727273,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "valid": true
+  },
+  "wall_s": 635.6,
+  "llm_usd_per_task_as_haiku": 0.002456609090909091
+}

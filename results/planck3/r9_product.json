@@ -1,0 +1,168 @@
+{
+  "reader": "x-hertz",
+  "reader_why": "fixed before the run: round 7's Hertz reading reader, int8 on CPU (passed round 8's M)",
+  "reader_checkpoint": "checkpoints/xreader_hertz_rc/reader.pt",
+  "reader_quant": "int8",
+  "reader_cands": 16,
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r9_x-hertz-rc_cpu-int8-top16",
+  "tag": "",
+  "benchmark": "scripts/assets/planck3_tasks_fresh9.json",
+  "rule_r": {
+    "pass": true,
+    "acc": 0.4909090909090909,
+    "midpoint": 0.4613636363636364,
+    "vs_round5_reader": 0.31363636363636366,
+    "gemma": 0.6090909090909091,
+    "a_only": 53,
+    "b_only": 14,
+    "p": 1.772867877551979e-06,
+    "n": 220
+  },
+  "rule_q": {
+    "pass": true,
+    "a": "r9_x-hertz-rc_cpu-int8-top16",
+    "b": "r9_x-hertz-rc_template",
+    "n": 220,
+    "acc_a": 0.4909090909090909,
+    "acc_b": 0.5,
+    "a_only": 1,
+    "b_only": 3,
+    "p": 0.625
+  },
+  "vs_heuristic": {
+    "a": "r9_x-hertz-rc_cpu-int8-top16",
+    "b": "r9_heuristic_template",
+    "n": 220,
+    "acc_a": 0.4909090909090909,
+    "acc_b": 0.35454545454545455,
+    "a_only": 46,
+    "b_only": 16,
+    "p": 0.00017632711255144299
+  },
+  "vs_gemma": {
+    "a": "r9_x-hertz-rc_cpu-int8-top16",
+    "b": "r9_gemma_template",
+    "n": 220,
+    "acc_a": 0.4909090909090909,
+    "acc_b": 0.6090909090909091,
+    "a_only": 23,
+    "b_only": 49,
+    "p": 0.002942760530124976
+  },
+  "planck15": {
+    "a": "r9_x-planck15-rc_template",
+    "b": "r9_planck_template",
+    "n": 220,
+    "acc_a": 0.38636363636363635,
+    "acc_b": 0.31363636363636366,
+    "a_only": 38,
+    "b_only": 22,
+    "p": 0.051893895928921435
+  },
+  "by_regime": {
+    "r9_heuristic_template": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.2857142857142857
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.475
+      }
+    },
+    "r9_planck_template": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.2785714285714286
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.375
+      }
+    },
+    "r9_x-hertz-rc_template": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.4928571428571429
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.5125
+      }
+    },
+    "r9_x-hertz-rc_cpu-int8-top16": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.4785714285714286
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.5125
+      }
+    },
+    "r9_gemma_template": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.65
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.5375
+      }
+    },
+    "r9_x-planck15-rc_template": {
+      "fresh": {
+        "n": 140,
+        "acc": 0.3357142857142857
+      },
+      "news": {
+        "n": 80,
+        "acc": 0.475
+      }
+    }
+  },
+  "rule_c1_recal": {
+    "pass": false,
+    "thresholds_fit_on": "r8_x-hertz-rc_cpu-int8-top16 (243 old questions)",
+    "high_from": null,
+    "good_from": 6.0,
+    "high": {
+      "n": 0,
+      "precision": null
+    },
+    "good": {
+      "n": 102,
+      "precision": 0.5882352941176471
+    }
+  },
+  "rule_c1": {
+    "pass": false,
+    "monotone": false,
+    "high": {
+      "n": 13,
+      "precision": 0.9230769230769231,
+      "bar": 0.9,
+      "judged": false
+    },
+    "good": {
+      "n": 49,
+      "precision": 0.673469387755102,
+      "bar": 0.7,
+      "judged": true
+    }
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": 0.0,
+    "changed": 152,
+    "flagged": 152
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 3352.7227272727273,
+    "measured_on": "every fresh question, CPU, 4 threads"
+  },
+  "outcome": "ship: Hertz's reader (int8, CPU) passed R9 on fresh questions"
+}
