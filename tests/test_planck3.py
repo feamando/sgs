@@ -1503,3 +1503,31 @@ def test_round9_fresh_benchmark_and_rules(tmp_path, monkeypatch):
     assert d["reader_quant"] == "int8" and d["by_regime"][R9.PRODUCT]["fresh"]["n"] == 75
     run(R9.PRODUCT, 80)
     assert R9.decide(tmp_path)["outcome"].startswith("no ship")      # 80 < midpoint 85
+
+
+def test_round9_brave_credit_plan_reports_no_monthly_quota(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+
+    class R:
+        def __init__(self, code, lim, rem):
+            self.status_code, self.headers = code, {"X-RateLimit-Limit": lim, "X-RateLimit-Remaining": rem}
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"web": {"results": [{"url": "https://w.org/x", "title": "W", "description": "W"}]}}
+    # a credit-based plan: monthly limit 0, monthly remaining 0, and the search succeeds
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w.brave_reserve = 400
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R(200, "1, 0", "1, 0"))
+    q = w.brave_quota()
+    assert q["ok"] and q["remaining"] is None and q["headers"]["X-RateLimit-Limit"] == "1, 0"
+    assert not w._brave_paused                          # round 6 paused here and collected on ddgs instead
+    # a plan with a real monthly quota that is used up: still read as used up
+    w2 = W.Web(W.WebCache(tmp_path / "c2"), search_backend="brave")
+    monkeypatch.setattr(w2.session, "get", lambda *a, **k: R(429, "1, 2000", "1, 0"))
+    q2 = w2.brave_quota()
+    assert not q2["ok"] and q2["remaining"] == 0 and q2["why"] == "quota used up this month"

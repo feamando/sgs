@@ -144,6 +144,8 @@ class Web:
         self.relevance = True         # off-topic results count as a failed search (round 6)
         self.brave_reserve = 0        # stop calling Brave when the plan's monthly remainder is this low
         self.brave_remaining = None   # from the API's X-RateLimit-Remaining header (monthly part)
+        self.brave_headers: dict = {}  # the last response's rate-limit headers, as sent (diagnostics)
+        self.brave_status = None
         self._brave_paused = False
         self._consecutive_empty = 0
         self._last_search = 0.0
@@ -303,7 +305,8 @@ class Web:
         r = self.session.get(BRAVE_URL, params={"q": query, "count": 10},
                              headers={"Accept": "application/json", "X-Subscription-Token": key},
                              timeout=FETCH_TIMEOUT)
-        self._brave_quota(getattr(r, "headers", None) or {})
+        self.brave_status = r.status_code
+        self._brave_quota(getattr(r, "headers", None) or {}, r.status_code)
         if r.status_code == 429:  # over the plan's rate or quota: back off, count it, fall back
             self.calls["search_ratelimited"] += 1
             self._log({"event": "search_ratelimited", "backend": "brave", "query": query})
@@ -323,13 +326,25 @@ class Web:
                         "snippet": _inline_text(item.get("description", "") or ""), "domain": domain_of(url)})
         return out[:20]
 
-    def _brave_quota(self, headers):
-        """X-RateLimit-Remaining is '<per second>, <per month>': keep the monthly part; pause at the reserve."""
-        rem = headers.get("X-RateLimit-Remaining") or headers.get("x-ratelimit-remaining")
+    def _brave_quota(self, headers, status: int | None = None):
+        """X-RateLimit-Remaining is '<per second>, <per month>': keep the monthly part; pause at the reserve.
+
+        Round 9 fix: a plan without a monthly search quota (credit-based billing) reports a monthly
+        limit of 0, so its monthly 'remaining' is 0 even while every search succeeds. That was read as
+        "the month is used up", which paused Brave for round 6's whole training collection. A monthly
+        remainder is now believed only when the plan reports a monthly limit, and never on a 200."""
+        get = lambda k: headers.get(k) or headers.get(k.lower())  # noqa: E731
+        rem, lim = get("X-RateLimit-Remaining"), get("X-RateLimit-Limit")
+        self.brave_headers = {k: get(k) for k in ("X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset",
+                                                   "X-RateLimit-Policy") if get(k) is not None}
         try:
-            self.brave_remaining = int(str(rem).split(",")[-1].strip()) if rem is not None else self.brave_remaining
+            monthly = int(str(rem).split(",")[-1].strip()) if rem is not None else None
+            monthly_limit = int(str(lim).split(",")[-1].strip()) if lim is not None and "," in str(lim) else None
         except ValueError:
             return
+        if monthly is not None and (monthly_limit == 0 or (monthly == 0 and status == 200)):
+            monthly = None                       # no monthly quota on this plan: the header says nothing
+        self.brave_remaining = monthly if monthly is not None else (None if rem is not None else self.brave_remaining)
         if self.brave_remaining is not None and self.brave_reserve and self.brave_remaining <= self.brave_reserve \
                 and not self._brave_paused:
             self._brave_paused = True
@@ -356,9 +371,10 @@ class Web:
             return {"ok": False, "remaining": self.brave_remaining, "why": f"{type(e).__name__}: {str(e)[:120]}"}
         if res:
             self.cache.put("search", "brave|Wikipedia", {"query": "Wikipedia", "backend": "brave", "at": now_iso(), "results": res})
-        ok = bool(res) and self.brave_remaining != 0
-        return {"ok": ok, "remaining": self.brave_remaining,
-                "why": "" if ok else ("quota used up this month" if self.brave_remaining == 0 else "no results (key invalid or rate-limited)")}
+        ok = bool(res)                       # a 200 with results is the API serving; nothing else is proof
+        why = "" if ok else ("quota used up this month" if self.brave_remaining == 0 else
+                             f"no results (HTTP {self.brave_status}: key invalid, out of credit, or rate-limited)")
+        return {"ok": ok, "remaining": self.brave_remaining, "status": self.brave_status, "headers": self.brave_headers, "why": why}
 
     def ddgs_alive(self) -> bool:
         """Installed AND answering (a rate-limited client returns nothing)."""

@@ -639,9 +639,11 @@ def cmd_search_check(args):
             sys.exit(1)
         q = web.brave_quota()
         ok = q["ok"] and (q["remaining"] is None or q["remaining"] >= args.need)
-        left = "unknown" if q["remaining"] is None else f"{q['remaining']:,}"
-        print(f"Brave Search API: {'UP' if ok else 'DOWN'}; searches left this month: {left}"
+        left = ("not reported (no monthly quota on this plan: check the spend in the Brave dashboard)"
+                if q["remaining"] is None else f"{q['remaining']:,}")
+        print(f"Brave Search API: {'UP' if ok else 'DOWN'} (HTTP {q['status']}); searches left this month: {left}"
               + (f" (this run needs {args.need:,})" if args.need else "") + (f"; {q['why']}" if q["why"] else ""))
+        print(f"  rate-limit headers: {q['headers'] or 'none'}")
     elif args.backend == "ddgs":
         ok = web.ddgs_alive()
         print(f"ddgs ({web.ddgs_engines}): {'UP' if ok else 'DOWN (pip install ddgs, or rate-limited: wait and retry)'}")
