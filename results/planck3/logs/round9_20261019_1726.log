@@ -1,0 +1,27 @@
+[planck3 17:26:22] logging to C:\Users\feama\sgs\results\planck3\logs\round9_20261019_1726.log
+[planck3 17:26:22] installing Planck 3.0 deps into .venv
+[planck3 17:26:25] offline smoke tests
+[planck3 17:26:44] round 9: fresh benchmark scripts/assets/planck3_tasks_fresh9.json exists (kept as built)
+[planck3 17:26:46] Brave Search API: UP (HTTP 200); searches left this month: not reported (no monthly quota on this plan: check the spend in the Brave dashboard) (this run needs 306)
+[planck3 17:26:46]   rate-limit headers: {'X-RateLimit-Limit': '50, 0', 'X-RateLimit-Remaining': '49, 0', 'X-RateLimit-Reset': '1, 1067593', 'X-RateLimit-Policy': '50;w=1, 0;w=2678400'}
+[planck3 17:26:46] round 9: THE PRODUCT, Hertz's reader, int8, CPU 4 threads, top 16 (fresh questions; searches live)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_rc/reader.pt --writer template --reader-quant int8 --tasks scripts/assets/planck3_tasks_fresh9.json --search brave --out results/planck3/r9_x-hertz-rc_cpu-int8-top16 --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] OK  f9winner000  Turkey                         good      7.0/10  
+[  2/220] XX  f9winner001  Lucie Šafářová                 low       5.0/10  
+[  3/220] XX  f9winner002  Jaizkibel                      low       6.0/10  
+[  4/220] OK  f9winner003  Aryna Sabalenka                good      8.0/10  
+[  5/220] OK  f9winner004  Alfie Hewett                   low       5.0/10  
+[  6/220] OK  f9winner005  Tyler Reddick                  low       6.0/10  
+[  7/220] OK  f9winner006  Devynne Charlton               low       5.0/10  
+[  8/220] OK  f9winner007  Ty Gibbs                       good      7.0/10  
+[  9/220] OK  f9winner008  Carlos Alcaraz                 high      9.0/10  
+[ 10/220] OK  f9winner009  China Zhang Zhanshuo           low       5.0/10  
+[ 11/220] XX  f9winner010  Jeļena Ostapenko               low       5.0/10  
+[ 12/220] XX  f9winner011  Elkhart Lake                   low       5.0/10  
+[ 13/220] XX  f9winner012  Metres Steeplechase            low       5.0/10  
+[ 14/220] OK  f9winner013  Paula Blasi                    high      9.0/10  
+[ 15/220] OK  f9winner014  Emma Navarro                   good      7.0/10  
+[ 16/220] XX  f9winner015  Ugo Humbert                    low       5.0/10  
+[ 17/220] XX  f9winner016  Ksenia Chasteau                low       6.0/10  
+[ 18/220] XX  f9winner017  Kazda                          low       5.0/10  
