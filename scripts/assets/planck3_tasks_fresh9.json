@@ -1,0 +1,3529 @@
+{
+  "version": 1,
+  "created": "2026-10-19",
+  "split": "bench-fresh9",
+  "seed": 9,
+  "source": "Wikidata SPARQL 2026 items unused by any earlier benchmark or training set (gold = Wikidata); Wikipedia Current Events portal after 2026-10-08, questions by Gemma, round 6 checks (gold = the item's words)",
+  "note": "built before any round 9 reader ran on it; never used to train or choose a reader",
+  "counts": {
+    "fresh": 140,
+    "news": 80
+  },
+  "build": {
+    "wikidata": {
+      "winner": {
+        "pool": 840,
+        "no proper-name answer": 1,
+        "named in a benchmark question": 4,
+        "kept": 60
+      },
+      "election": {
+        "pool": 65,
+        "used before": 4,
+        "no proper-name answer": 2,
+        "kept": 20
+      },
+      "season": {
+        "pool": 436,
+        "used before": 2,
+        "named in a benchmark question": 1,
+        "kept": 30
+      },
+      "headgov": {
+        "pool": 239,
+        "used before": 4,
+        "no proper-name answer": 16,
+        "not a place": 4,
+        "named in a benchmark question": 1,
+        "kept": 30
+      }
+    },
+    "news": {
+      "portal_items": 126,
+      "from": "2026-10-09",
+      "until": "2026-10-18",
+      "questions_written": 100,
+      "kept": 100,
+      "rejected": {
+        "number without a number": 12,
+        "date without a date": 2,
+        "answer type": 1,
+        "answer not in the item": 4,
+        "answer in the question": 1,
+        "no year in the question": 1,
+        "answer named in a benchmark question": 4,
+        "answer length": 1
+      }
+    }
+  },
+  "tasks": [
+    {
+      "id": "f9winner000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Women's European Volleyball Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Turkey women's national volleyball team",
+        "Women's national volleyball team of Turkey",
+        "Turkish women's national volleyball team"
+      ],
+      "qid": "Q123913893",
+      "entity": "2026 Women's European Volleyball Championship",
+      "source": "https://www.wikidata.org/wiki/Q123913893",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Wimbledon Championships – Women's doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Kristina Mladenovic",
+        "Kiki Mladenovic",
+        "Guo Hanyu"
+      ],
+      "qid": "Q140337275",
+      "entity": "2026 Wimbledon Championships – Women's doubles",
+      "source": "https://www.wikidata.org/wiki/Q140337275",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Clásica de San Sebastián?",
+      "answer_type": "entity",
+      "gold": [
+        "Richard Carapaz",
+        "Richard António Carapaz Montenegro",
+        "Richard Antonio Carapaz Montenegro",
+        "Remco Evenepoel",
+        "R.EV",
+        "REV",
+        "Ben Tulett",
+        "Ben Samuel Tulett"
+      ],
+      "qid": "Q136756647",
+      "entity": "2026 Clásica de San Sebastián",
+      "source": "https://www.wikidata.org/wiki/Q136756647",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Brisbane International – Women's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Aryna Sabalenka",
+        "Aryna Siarhiejeŭna Sabalenka",
+        "Sabalenka"
+      ],
+      "qid": "Q137655279",
+      "entity": "2026 Brisbane International – Women's singles",
+      "source": "https://www.wikidata.org/wiki/Q137655279",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 US Open – Wheelchair men's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Alfie Hewett"
+      ],
+      "qid": "Q141084060",
+      "entity": "2026 US Open – Wheelchair men's singles",
+      "source": "https://www.wikidata.org/wiki/Q141084060",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 DuraMAX Grand Prix?",
+      "answer_type": "entity",
+      "gold": [
+        "Tyler Reddick",
+        "Tyler George Reddick"
+      ],
+      "qid": "Q138018967",
+      "entity": "2026 DuraMAX Grand Prix",
+      "source": "https://www.wikidata.org/wiki/Q138018967",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 World Athletics Indoor Championships – Women's 60 metres hurdles?",
+      "answer_type": "entity",
+      "gold": [
+        "Devynne Charlton"
+      ],
+      "qid": "Q138776106",
+      "entity": "2026 World Athletics Indoor Championships – Women's 60 metres hurdles",
+      "source": "https://www.wikidata.org/wiki/Q138776106",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Iowa Corn 350?",
+      "answer_type": "entity",
+      "gold": [
+        "Ty Gibbs"
+      ],
+      "qid": "Q140244224",
+      "entity": "2026 Iowa Corn 350",
+      "source": "https://www.wikidata.org/wiki/Q140244224",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Australian Open – Men's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Carlos Alcaraz",
+        "Carlos Alcaraz Garfia"
+      ],
+      "qid": "Q131933133",
+      "entity": "2026 Australian Open – Men's singles",
+      "source": "https://www.wikidata.org/wiki/Q131933133",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Swimming at the 2026 Asian Games – Men's 1500 metre freestyle?",
+      "answer_type": "entity",
+      "gold": [
+        "Zhang Zhanshuo"
+      ],
+      "qid": "Q141564139",
+      "entity": "Swimming at the 2026 Asian Games – Men's 1500 metre freestyle",
+      "source": "https://www.wikidata.org/wiki/Q141564139",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner010",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Qatar TotalEnergies Open – Doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Aleksandra Krunić",
+        "Anna Danilina",
+        "Anna Sergeyevna Danilina"
+      ],
+      "qid": "Q138026467",
+      "entity": "2026 Qatar TotalEnergies Open – Doubles",
+      "source": "https://www.wikidata.org/wiki/Q138026467",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner011",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 XPEL Grand Prix at Road America?",
+      "answer_type": "entity",
+      "gold": [
+        "Christian Lundgaard"
+      ],
+      "qid": "Q140193102",
+      "entity": "2026 XPEL Grand Prix at Road America",
+      "source": "https://www.wikidata.org/wiki/Q140193102",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner012",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 African Championships in Athletics – Men's 110 metres hurdles?",
+      "answer_type": "entity",
+      "gold": [
+        "Badamassi Saguirou",
+        "Saguirou Badamassi"
+      ],
+      "qid": "Q140068520",
+      "entity": "2026 African Championships in Athletics – Men's 110 metres hurdles",
+      "source": "https://www.wikidata.org/wiki/Q140068520",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner013",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Amstel Gold Race (women's race)?",
+      "answer_type": "entity",
+      "gold": [
+        "Katarzyna Niewiadoma",
+        "Kasia Niewiadoma",
+        "Demi Vollering",
+        "Adriana Geertruida Vollering",
+        "Paula Blasi"
+      ],
+      "qid": "Q136455168",
+      "entity": "2026 Amstel Gold Race (women's race)",
+      "source": "https://www.wikidata.org/wiki/Q136455168",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner014",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Internationaux de Strasbourg – Singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Emma Navarro"
+      ],
+      "qid": "Q139815703",
+      "entity": "2026 Internationaux de Strasbourg – Singles",
+      "source": "https://www.wikidata.org/wiki/Q139815703",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner015",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Eastbourne Open – Men's doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Édouard Roger-Vasselin",
+        "Eduard Roger-Vasselin",
+        "Edouard Roger-Vasselin",
+        "Hugo Nys"
+      ],
+      "qid": "Q140301723",
+      "entity": "2026 Eastbourne Open – Men's doubles",
+      "source": "https://www.wikidata.org/wiki/Q140301723",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner016",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 French Open – Wheelchair women's doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Yui Kamiji",
+        "Kamiji Yui",
+        "Zhu Zhenzhen"
+      ],
+      "qid": "Q139987639",
+      "entity": "2026 French Open – Wheelchair women's doubles",
+      "source": "https://www.wikidata.org/wiki/Q139987639",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner017",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 IIHF World U18 Championship Division I?",
+      "answer_type": "entity",
+      "gold": [
+        "Switzerland men's national under-18 ice hockey team",
+        "Austria men's national under-18 ice hockey team"
+      ],
+      "qid": "Q136706765",
+      "entity": "2026 IIHF World U18 Championship Division I",
+      "source": "https://www.wikidata.org/wiki/Q136706765",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner018",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 US Open – Wheelchair quad doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Sam Schröder",
+        "Jin Woodman"
+      ],
+      "qid": "Q141084065",
+      "entity": "2026 US Open – Wheelchair quad doubles",
+      "source": "https://www.wikidata.org/wiki/Q141084065",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner019",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Fresh From Florida 250?",
+      "answer_type": "entity",
+      "gold": [
+        "Chandler Smith"
+      ],
+      "qid": "Q138423519",
+      "entity": "2026 Fresh From Florida 250",
+      "source": "https://www.wikidata.org/wiki/Q138423519",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner020",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Sunset Hill Shooting Range 150?",
+      "answer_type": "entity",
+      "gold": [
+        "Gio Ruggiero",
+        "Giovanni Ruggiero"
+      ],
+      "qid": "Q140332485",
+      "entity": "2026 Sunset Hill Shooting Range 150",
+      "source": "https://www.wikidata.org/wiki/Q140332485",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner021",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Athletics at the 2026 Asian Games – Women's long jump?",
+      "answer_type": "entity",
+      "gold": [
+        "Huang Yingying"
+      ],
+      "qid": "Q141601470",
+      "entity": "Athletics at the 2026 Asian Games – Women's long jump",
+      "source": "https://www.wikidata.org/wiki/Q141601470",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner022",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Wimbledon Championships – Girls' doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Jana Kovačková",
+        "Kateřina Zajíčková"
+      ],
+      "qid": "Q140136936",
+      "entity": "2026 Wimbledon Championships – Girls' doubles",
+      "source": "https://www.wikidata.org/wiki/Q140136936",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner023",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Food City 500?",
+      "answer_type": "entity",
+      "gold": [
+        "Ty Gibbs"
+      ],
+      "qid": "Q138756858",
+      "entity": "2026 Food City 500",
+      "source": "https://www.wikidata.org/wiki/Q138756858",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner024",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Memorial Marco Pantani?",
+      "answer_type": "entity",
+      "gold": [
+        "Ion Izagirre",
+        "Jon Izaguirre Insausti",
+        "Jon Izagirre Insausti",
+        "Jon Insausti",
+        "Ion Izaguirre Insausti",
+        "Mikkel Frølich Honoré",
+        "Mikkel Honoré",
+        "Mikkel Frolich Honore"
+      ],
+      "qid": "Q137821561",
+      "entity": "2026 Memorial Marco Pantani",
+      "source": "https://www.wikidata.org/wiki/Q137821561",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner025",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 European Athletics Championships – Mixed 4 × 400 metres relay?",
+      "answer_type": "entity",
+      "gold": [
+        "Norway at the 2026 European Athletics Championships"
+      ],
+      "qid": "Q140967399",
+      "entity": "2026 European Athletics Championships – Mixed 4 × 400 metres relay",
+      "source": "https://www.wikidata.org/wiki/Q140967399",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner026",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Athletics at the 2026 Asian Games – Men's 1500 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Kazuto Iizawa"
+      ],
+      "qid": "Q141595420",
+      "entity": "Athletics at the 2026 Asian Games – Men's 1500 metres",
+      "source": "https://www.wikidata.org/wiki/Q141595420",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner027",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Trofeo Laigueglia?",
+      "answer_type": "entity",
+      "gold": [
+        "Santiago Buitrago",
+        "Antonio Tiberi",
+        "Romain Grégoire"
+      ],
+      "qid": "Q130755401",
+      "entity": "2026 Trofeo Laigueglia",
+      "source": "https://www.wikidata.org/wiki/Q130755401",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner028",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Men's European Volleyball Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Poland men's national volleyball team"
+      ],
+      "qid": "Q121143346",
+      "entity": "2026 Men's European Volleyball Championship",
+      "source": "https://www.wikidata.org/wiki/Q121143346",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner029",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Țiriac Open – Doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Sadio Doumbia"
+      ],
+      "qid": "Q138819877",
+      "entity": "2026 Țiriac Open – Doubles",
+      "source": "https://www.wikidata.org/wiki/Q138819877",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner030",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Greek Basketball Supercup?",
+      "answer_type": "entity",
+      "gold": [
+        "Olympiacos B.C.",
+        "Olympiacos BC",
+        "Olympiacos Basketball"
+      ],
+      "qid": "Q141307059",
+      "entity": "2026 Greek Basketball Supercup",
+      "source": "https://www.wikidata.org/wiki/Q141307059",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner031",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Swimming at the 2026 Mediterranean Games – Men's 100 metre freestyle?",
+      "answer_type": "entity",
+      "gold": [
+        "Toni Dragoja"
+      ],
+      "qid": "Q141182820",
+      "entity": "Swimming at the 2026 Mediterranean Games – Men's 100 metre freestyle",
+      "source": "https://www.wikidata.org/wiki/Q141182820",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner032",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Muscat Classic?",
+      "answer_type": "entity",
+      "gold": [
+        "Adam Yates",
+        "Adam Richard Yates",
+        "Mauro Schmid",
+        "Lucas Plapp",
+        "Luke Plapp"
+      ],
+      "qid": "Q137424814",
+      "entity": "2026 Muscat Classic",
+      "source": "https://www.wikidata.org/wiki/Q137424814",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner033",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Rally Islas Canarias?",
+      "answer_type": "entity",
+      "gold": [
+        "Sébastien Ogier",
+        "Sebastien Ogier",
+        "Ogier, Sebastien"
+      ],
+      "qid": "Q138836199",
+      "entity": "2026 Rally Islas Canarias",
+      "source": "https://www.wikidata.org/wiki/Q138836199",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner034",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Cycling at the 2026 Mediterranean Games – Women's road race?",
+      "answer_type": "entity",
+      "gold": [
+        "Rachele Barbieri"
+      ],
+      "qid": "Q141404676",
+      "entity": "Cycling at the 2026 Mediterranean Games – Women's road race",
+      "source": "https://www.wikidata.org/wiki/Q141404676",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner035",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Straight Talk Wireless 500?",
+      "answer_type": "entity",
+      "gold": [
+        "Ryan Blaney",
+        "Ryan Michael Blaney"
+      ],
+      "qid": "Q138515623",
+      "entity": "2026 Straight Talk Wireless 500",
+      "source": "https://www.wikidata.org/wiki/Q138515623",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner036",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Mubadala DC Open – Men's singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Taylor Fritz",
+        "Taylor Harry Fritz"
+      ],
+      "qid": "Q140692624",
+      "entity": "2026 Mubadala DC Open – Men's singles",
+      "source": "https://www.wikidata.org/wiki/Q140692624",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner037",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 New Zealand Derby?",
+      "answer_type": "entity",
+      "gold": [
+        "Road To Paris"
+      ],
+      "qid": "Q138775843",
+      "entity": "2026 New Zealand Derby",
+      "source": "https://www.wikidata.org/wiki/Q138775843",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner038",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Australian Open – Men's doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Christian Harrison",
+        "Neal Skupski"
+      ],
+      "qid": "Q137732976",
+      "entity": "2026 Australian Open – Men's doubles",
+      "source": "https://www.wikidata.org/wiki/Q137732976",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner039",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 In Flanders Fields. From Middelkerke to Wevelgem?",
+      "answer_type": "entity",
+      "gold": [
+        "Christophe Laporte",
+        "Jasper Philipsen",
+        "Tobias Lund Andresen"
+      ],
+      "qid": "Q136735256",
+      "entity": "2026 In Flanders Fields. From Middelkerke to Wevelgem",
+      "source": "https://www.wikidata.org/wiki/Q136735256",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner040",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Italian Basketball Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Olimpia Milano",
+        "Tracer Milano",
+        "Pallacanestro Olimpia Milano",
+        "EA7 Emporio Armani Milano"
+      ],
+      "qid": "Q138499091",
+      "entity": "2026 Italian Basketball Cup",
+      "source": "https://www.wikidata.org/wiki/Q138499091",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner041",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Tennessee Army National Guard 250?",
+      "answer_type": "entity",
+      "gold": [
+        "Christopher Bell",
+        "Christopher David Bell"
+      ],
+      "qid": "Q138827476",
+      "entity": "2026 Tennessee Army National Guard 250",
+      "source": "https://www.wikidata.org/wiki/Q138827476",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner042",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Flandrien 0.0 Classic?",
+      "answer_type": "entity",
+      "gold": [
+        "Florian Vermeersch",
+        "Laurence Pithie",
+        "Henrik Breiner Pedersen",
+        "Henrik Pedersen"
+      ],
+      "qid": "Q137426559",
+      "entity": "2026 Flandrien 0.0 Classic",
+      "source": "https://www.wikidata.org/wiki/Q137426559",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner043",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Barcelona Open Banc Sabadell – Singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Arthur Fils"
+      ],
+      "qid": "Q139146122",
+      "entity": "2026 Barcelona Open Banc Sabadell – Singles",
+      "source": "https://www.wikidata.org/wiki/Q139146122",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner044",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Mallorca Championships – Singles?",
+      "answer_type": "entity",
+      "gold": [
+        "Alejandro Davidovich Fokina",
+        "Davidovich Fokina",
+        "Cobra Kai",
+        "Alejandro Davidovich-Fokina",
+        "Foki",
+        "Fokina",
+        "ADF"
+      ],
+      "qid": "Q140298944",
+      "entity": "2026 Mallorca Championships – Singles",
+      "source": "https://www.wikidata.org/wiki/Q140298944",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner045",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 African Championships in Athletics – Women's javelin throw?",
+      "answer_type": "entity",
+      "gold": [
+        "Aseel Osama Abdel Hamid"
+      ],
+      "qid": "Q140243560",
+      "entity": "2026 African Championships in Athletics – Women's javelin throw",
+      "source": "https://www.wikidata.org/wiki/Q140243560",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner046",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 UEC European Track Championships – Women's individual pursuit?",
+      "answer_type": "entity",
+      "gold": [
+        "Josie Knight"
+      ],
+      "qid": "Q138539342",
+      "entity": "2026 UEC European Track Championships – Women's individual pursuit",
+      "source": "https://www.wikidata.org/wiki/Q138539342",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner047",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Asian Netball Championships?",
+      "answer_type": "entity",
+      "gold": [
+        "Singapore national netball team"
+      ],
+      "qid": "Q141305868",
+      "entity": "2026 Asian Netball Championships",
+      "source": "https://www.wikidata.org/wiki/Q141305868",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner048",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 World Athletics Indoor Championships – Men's 3000 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Josh Kerr"
+      ],
+      "qid": "Q138755159",
+      "entity": "2026 World Athletics Indoor Championships – Men's 3000 metres",
+      "source": "https://www.wikidata.org/wiki/Q138755159",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner049",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 IIHF World Championship Division I?",
+      "answer_type": "entity",
+      "gold": [
+        "Kazakhstan men's national ice hockey team",
+        "Estonia men's national ice hockey team"
+      ],
+      "qid": "Q134591214",
+      "entity": "2026 IIHF World Championship Division I",
+      "source": "https://www.wikidata.org/wiki/Q134591214",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner050",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Billie Jean King Cup finals?",
+      "answer_type": "entity",
+      "gold": [
+        "Czech Republic Billie Jean King Cup team",
+        "Czech Republic Fed Cup team",
+        "Czech Fed Cup team",
+        "Czech Billie Jean King Cup team"
+      ],
+      "qid": "Q141488465",
+      "entity": "2026 Billie Jean King Cup finals",
+      "source": "https://www.wikidata.org/wiki/Q141488465",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner051",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Liège–Bastogne–Liège Femmes?",
+      "answer_type": "entity",
+      "gold": [
+        "Katarzyna Niewiadoma",
+        "Kasia Niewiadoma",
+        "Demi Vollering",
+        "Adriana Geertruida Vollering",
+        "Puck Pieterse"
+      ],
+      "qid": "Q136455170",
+      "entity": "2026 Liège–Bastogne–Liège Femmes",
+      "source": "https://www.wikidata.org/wiki/Q136455170",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner052",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 World Athletics Indoor Championships – Men's pole vault?",
+      "answer_type": "entity",
+      "gold": [
+        "Armand Duplantis",
+        "Mondo Duplantis"
+      ],
+      "qid": "Q138764308",
+      "entity": "2026 World Athletics Indoor Championships – Men's pole vault",
+      "source": "https://www.wikidata.org/wiki/Q138764308",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner053",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Shooting at the 2026 Asian Games – Women's 10 metre air pistol?",
+      "answer_type": "entity",
+      "gold": [
+        "Choo Ga-eun"
+      ],
+      "qid": "Q141758395",
+      "entity": "Shooting at the 2026 Asian Games – Women's 10 metre air pistol",
+      "source": "https://www.wikidata.org/wiki/Q141758395",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner054",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 FaithFest 250?",
+      "answer_type": "entity",
+      "gold": [
+        "Chandler Smith"
+      ],
+      "qid": "Q140142442",
+      "entity": "2026 FaithFest 250",
+      "source": "https://www.wikidata.org/wiki/Q140142442",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner055",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Spruce 212?",
+      "answer_type": "entity",
+      "gold": [
+        "Max Reaves"
+      ],
+      "qid": "Q141438861",
+      "entity": "2026 Spruce 212",
+      "source": "https://www.wikidata.org/wiki/Q141438861",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner056",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Rose Bowl?",
+      "answer_type": "entity",
+      "gold": [
+        "Indiana Hoosiers football"
+      ],
+      "qid": "Q135427944",
+      "entity": "2026 Rose Bowl",
+      "source": "https://www.wikidata.org/wiki/Q135427944",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner057",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Lime Rock Park ARCA 100?",
+      "answer_type": "entity",
+      "gold": [
+        "Thomas Annunziata"
+      ],
+      "qid": "Q140658995",
+      "entity": "2026 Lime Rock Park ARCA 100",
+      "source": "https://www.wikidata.org/wiki/Q140658995",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner058",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the Melodifestivalen 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Felicia Eriksson",
+        "FELICIA"
+      ],
+      "qid": "Q134074182",
+      "entity": "Melodifestivalen 2026",
+      "source": "https://www.wikidata.org/wiki/Q134074182",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner059",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 African Championships in Athletics – Men's 1500 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Luan Munnik"
+      ],
+      "qid": "Q140157502",
+      "entity": "2026 African Championships in Athletics – Men's 1500 metres",
+      "source": "https://www.wikidata.org/wiki/Q140157502",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Scottish Parliament general election?",
+      "answer_type": "entity",
+      "gold": [
+        "Scottish Greens",
+        "Scottish Green Party",
+        "Scots Green Pairtie",
+        "Scottish National Party",
+        "SNP",
+        "Scottish National party (SNP)",
+        "Scottish Labour Party",
+        "Scottish Labour"
+      ],
+      "qid": "Q106809112",
+      "entity": "2026 Scottish Parliament general election",
+      "source": "https://www.wikidata.org/wiki/Q106809112",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 New Democratic Party leadership election?",
+      "answer_type": "entity",
+      "gold": [
+        "Avi Lewis"
+      ],
+      "qid": "Q134463334",
+      "entity": "2026 New Democratic Party leadership election",
+      "source": "https://www.wikidata.org/wiki/Q134463334",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Progressive Conservative Party of New Brunswick leadership election?",
+      "answer_type": "entity",
+      "gold": [
+        "Daniel Allain"
+      ],
+      "qid": "Q136547712",
+      "entity": "2026 Progressive Conservative Party of New Brunswick leadership election",
+      "source": "https://www.wikidata.org/wiki/Q136547712",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Ishikawa gubernatorial election?",
+      "answer_type": "entity",
+      "gold": [
+        "Yukiyoshi Yamano",
+        "Yamano Yukiyoshi"
+      ],
+      "qid": "Q138479848",
+      "entity": "2026 Ishikawa gubernatorial election",
+      "source": "https://www.wikidata.org/wiki/Q138479848",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Scarborough Southwest provincial by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Fatima Shaban"
+      ],
+      "qid": "Q138542366",
+      "entity": "2026 Scarborough Southwest provincial by-election",
+      "source": "https://www.wikidata.org/wiki/Q138542366",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Galway West by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Seán Kyne",
+        "Sean Kyne"
+      ],
+      "qid": "Q136735853",
+      "entity": "2026 Galway West by-election",
+      "source": "https://www.wikidata.org/wiki/Q136735853",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the August 2026 New Zealand National Party leadership election?",
+      "answer_type": "entity",
+      "gold": [
+        "Christopher Luxon",
+        "Chris Luxon"
+      ],
+      "qid": "Q141042332",
+      "entity": "August 2026 New Zealand National Party leadership election",
+      "source": "https://www.wikidata.org/wiki/Q141042332",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Arbroath and Broughty Ferry by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Lara Bird"
+      ],
+      "qid": "Q139796799",
+      "entity": "2026 Arbroath and Broughty Ferry by-election",
+      "source": "https://www.wikidata.org/wiki/Q139796799",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Newham mayoral election?",
+      "answer_type": "entity",
+      "gold": [
+        "Forhad Hussain"
+      ],
+      "qid": "Q139407023",
+      "entity": "2026 Newham mayoral election",
+      "source": "https://www.wikidata.org/wiki/Q139407023",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 FC Barcelona presidential election?",
+      "answer_type": "entity",
+      "gold": [
+        "Joan Laporta",
+        "Joan Laporta i Estruch"
+      ],
+      "qid": "Q137848695",
+      "entity": "2026 FC Barcelona presidential election",
+      "source": "https://www.wikidata.org/wiki/Q137848695",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election010",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Okinawa gubernatorial election?",
+      "answer_type": "entity",
+      "gold": [
+        "Genta Koja",
+        "Koja Genta"
+      ],
+      "qid": "Q140196360",
+      "entity": "2026 Okinawa gubernatorial election",
+      "source": "https://www.wikidata.org/wiki/Q140196360",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election011",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Greater Manchester mayoral by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Bev Craig",
+        "Beverley Craig",
+        "Beverley Anne Craig"
+      ],
+      "qid": "Q140287241",
+      "entity": "2026 Greater Manchester mayoral by-election",
+      "source": "https://www.wikidata.org/wiki/Q140287241",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election012",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Bangladeshi general election?",
+      "answer_type": "entity",
+      "gold": [
+        "Tarique Rahman",
+        "Tarique Zia",
+        "Tarique"
+      ],
+      "qid": "Q128797880",
+      "entity": "2026 Bangladeshi general election",
+      "source": "https://www.wikidata.org/wiki/Q128797880",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election013",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Tower Hamlets mayoral election?",
+      "answer_type": "entity",
+      "gold": [
+        "Lutfur Rahman",
+        "Mohammad Lutfur Rahman"
+      ],
+      "qid": "Q139714034",
+      "entity": "2026 Tower Hamlets mayoral election",
+      "source": "https://www.wikidata.org/wiki/Q139714034",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election014",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Aberdeen South by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Douglas Lumsden",
+        "Douglas Aaron Lumsden"
+      ],
+      "qid": "Q139796830",
+      "entity": "2026 Aberdeen South by-election",
+      "source": "https://www.wikidata.org/wiki/Q139796830",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election015",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Republic of the Congo presidential election?",
+      "answer_type": "entity",
+      "gold": [
+        "Denis Sassou-Nguesso",
+        "Denis Sassou Nguesso"
+      ],
+      "qid": "Q106750293",
+      "entity": "2026 Republic of the Congo presidential election",
+      "source": "https://www.wikidata.org/wiki/Q106750293",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election016",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Thai general election?",
+      "answer_type": "entity",
+      "gold": [
+        "Bhumjaithai Party",
+        "Thai Pride Party",
+        "BJT",
+        "Pheu Thai Party",
+        "For Thais Party",
+        "PTP",
+        "Democrat Party",
+        "Democratic Party (Thailand)"
+      ],
+      "qid": "Q124632455",
+      "entity": "2026 Thai general election",
+      "source": "https://www.wikidata.org/wiki/Q124632455",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election017",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Holborn and St Pancras by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Sagal Abdi-Wali"
+      ],
+      "qid": "Q141247453",
+      "entity": "2026 Holborn and St Pancras by-election",
+      "source": "https://www.wikidata.org/wiki/Q141247453",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election018",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Swedish general election?",
+      "answer_type": "entity",
+      "gold": [
+        "Swedish Social Democratic Party",
+        "Sveriges socialdemokratiska arbetareparti",
+        "Socialdemokraterna",
+        "Centre Party",
+        "Centerpartiet",
+        "C",
+        "Left Party",
+        "Vänsterpartiet"
+      ],
+      "qid": "Q113639313",
+      "entity": "2026 Swedish general election",
+      "source": "https://www.wikidata.org/wiki/Q113639313",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election019",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Bangladeshi presidential election?",
+      "answer_type": "entity",
+      "gold": [
+        "Mirza Fakhrul Islam Alamgir",
+        "Mirza Fakhrul"
+      ],
+      "qid": "Q140685300",
+      "entity": "2026 Bangladeshi presidential election",
+      "source": "https://www.wikidata.org/wiki/Q140685300",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Tour de Romandie?",
+      "answer_type": "entity",
+      "gold": [
+        "Roland Thalmann",
+        "Tadej Pogačar",
+        "Tadej Pogacar",
+        "Pogi",
+        "Florian Lipowitz",
+        "Lenny Martinez",
+        "2026 Red Bull-Bora-Hansgrohe"
+      ],
+      "qid": "Q136745849",
+      "entity": "2026 Tour de Romandie",
+      "source": "https://www.wikidata.org/wiki/Q136745849",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 United Rugby Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Leinster Rugby",
+        "Leinster"
+      ],
+      "qid": "Q134544768",
+      "entity": "2025–26 United Rugby Championship",
+      "source": "https://www.wikidata.org/wiki/Q134544768",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 Northern Ireland Football League Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Linfield F.C.",
+        "Linfield Football Club",
+        "Linfield FC",
+        "Linfield"
+      ],
+      "qid": "Q136302788",
+      "entity": "2025–26 Northern Ireland Football League Cup",
+      "source": "https://www.wikidata.org/wiki/Q136302788",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 All-Ireland Senior Club Hurling Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Ballygunner GAA"
+      ],
+      "qid": "Q136312594",
+      "entity": "2025–26 All-Ireland Senior Club Hurling Championship",
+      "source": "https://www.wikidata.org/wiki/Q136312594",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 SEC softball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Texas Longhorns softball"
+      ],
+      "qid": "Q139329131",
+      "entity": "2026 SEC softball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139329131",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 IIHF Women's World Championship Division III?",
+      "answer_type": "entity",
+      "gold": [
+        "Estonia women's national ice hockey team",
+        "Romania women's national ice hockey team"
+      ],
+      "qid": "Q136716696",
+      "entity": "2026 IIHF Women's World Championship Division III",
+      "source": "https://www.wikidata.org/wiki/Q136716696",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Under-20 International Series?",
+      "answer_type": "entity",
+      "gold": [
+        "South Africa national under-20 rugby union team"
+      ],
+      "qid": "Q140077458",
+      "entity": "2026 Under-20 International Series",
+      "source": "https://www.wikidata.org/wiki/Q140077458",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 Turkish Basketball League?",
+      "answer_type": "entity",
+      "gold": [
+        "Çayirova Belediyesi Basketball Team",
+        "Çayırova Belediyespor"
+      ],
+      "qid": "Q136140419",
+      "entity": "2025–26 Turkish Basketball League",
+      "source": "https://www.wikidata.org/wiki/Q136140419",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 Greek Basketball Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Panathinaikos B.C.",
+        "Panathinaikos Basketball Club"
+      ],
+      "qid": "Q139966783",
+      "entity": "2025–26 Greek Basketball Cup",
+      "source": "https://www.wikidata.org/wiki/Q139966783",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 BAL playoffs?",
+      "answer_type": "entity",
+      "gold": [
+        "RSSB Tigers",
+        "Tigers BBC"
+      ],
+      "qid": "Q141457578",
+      "entity": "2026 BAL playoffs",
+      "source": "https://www.wikidata.org/wiki/Q141457578",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season010",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Players Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Cameron Young"
+      ],
+      "qid": "Q138632122",
+      "entity": "2026 Players Championship",
+      "source": "https://www.wikidata.org/wiki/Q138632122",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season011",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Asia Rugby Women's Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Japan women's national rugby union team"
+      ],
+      "qid": "Q138891548",
+      "entity": "2026 Asia Rugby Women's Championship",
+      "source": "https://www.wikidata.org/wiki/Q138891548",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season012",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Ivy League baseball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Yale Bulldogs baseball"
+      ],
+      "qid": "Q139940280",
+      "entity": "2026 Ivy League baseball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139940280",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season013",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 ECAC Hockey men's tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Dartmouth Big Green men's ice hockey",
+        "Dartmouth men's ice hockey",
+        "Dartmouth Indians men's ice hockey"
+      ],
+      "qid": "Q138716771",
+      "entity": "2026 ECAC Hockey men's tournament",
+      "source": "https://www.wikidata.org/wiki/Q138716771",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season014",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 DHB-Pokal?",
+      "answer_type": "entity",
+      "gold": [
+        "Füchse Berlin",
+        "Berlin Foxes",
+        "Füchse Berlin Reinickendorf HBC",
+        "Füchse Berlin (handball)"
+      ],
+      "qid": "Q135217976",
+      "entity": "2025–26 DHB-Pokal",
+      "source": "https://www.wikidata.org/wiki/Q135217976",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season015",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Women's British Open?",
+      "answer_type": "entity",
+      "gold": [
+        "Shiho Kuwaki"
+      ],
+      "qid": "Q141274131",
+      "entity": "2026 Women's British Open",
+      "source": "https://www.wikidata.org/wiki/Q141274131",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season016",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Southeastern Conference baseball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Georgia Bulldogs baseball"
+      ],
+      "qid": "Q139965100",
+      "entity": "2026 Southeastern Conference baseball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139965100",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season017",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Horizon League women's basketball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Green Bay Phoenix women's basketball"
+      ],
+      "qid": "Q138691665",
+      "entity": "2026 Horizon League women's basketball tournament",
+      "source": "https://www.wikidata.org/wiki/Q138691665",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season018",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 World Athletics Indoor Championships – Women's 800 metres?",
+      "answer_type": "entity",
+      "gold": [
+        "Keely Hodgkinson"
+      ],
+      "qid": "Q138736732",
+      "entity": "2026 World Athletics Indoor Championships – Women's 800 metres",
+      "source": "https://www.wikidata.org/wiki/Q138736732",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season019",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Danmark Rundt?",
+      "answer_type": "entity",
+      "gold": [
+        "Wout van Aert",
+        "Aksel Bech Skot-Hansen",
+        "Aksel Skot-Hansen",
+        "Lukáš Kubiš",
+        "Lukas Kubis",
+        "Henrik Breiner Pedersen",
+        "Henrik Pedersen",
+        "2026 Unibet Rose Rockets"
+      ],
+      "qid": "Q135747961",
+      "entity": "2026 Danmark Rundt",
+      "source": "https://www.wikidata.org/wiki/Q135747961",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season020",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Women's Tour Down Under?",
+      "answer_type": "entity",
+      "gold": [
+        "Margarita Victoria García",
+        "Mavi García",
+        "Noemi Rüegg",
+        "Ally Wollaston",
+        "Allyson Wollaston",
+        "Justyna Czapla",
+        "Paula Blasi",
+        "2026 UAE Team ADQ"
+      ],
+      "qid": "Q136455156",
+      "entity": "2026 Women's Tour Down Under",
+      "source": "https://www.wikidata.org/wiki/Q136455156",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season021",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Serie A Women's Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Juventus F.C. Women",
+        "JWFC",
+        "Juventus Women",
+        "Juventus Femminile",
+        "Juventus Football Club",
+        "Juve"
+      ],
+      "qid": "Q140450594",
+      "entity": "2026 Serie A Women's Cup",
+      "source": "https://www.wikidata.org/wiki/Q140450594",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season022",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Women's PGA Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Ryu Hae-ran"
+      ],
+      "qid": "Q140436243",
+      "entity": "2026 Women's PGA Championship",
+      "source": "https://www.wikidata.org/wiki/Q140436243",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season023",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Southland Conference softball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "McNeese Cowgirls softball",
+        "McNeese State Cowgirls softball"
+      ],
+      "qid": "Q139856029",
+      "entity": "2026 Southland Conference softball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139856029",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season024",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 British Open?",
+      "answer_type": "entity",
+      "gold": [
+        "Jak Jones"
+      ],
+      "qid": "Q136514019",
+      "entity": "2026 British Open",
+      "source": "https://www.wikidata.org/wiki/Q136514019",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season025",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the Candidates Tournament 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Javokhir Sindarov",
+        "Javohir Sindarov"
+      ],
+      "qid": "Q131331403",
+      "entity": "Candidates Tournament 2026",
+      "source": "https://www.wikidata.org/wiki/Q131331403",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season026",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Summit League baseball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "South Dakota State Jackrabbits baseball"
+      ],
+      "qid": "Q139026201",
+      "entity": "2026 Summit League baseball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139026201",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season027",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 UEFA Europa League?",
+      "answer_type": "entity",
+      "gold": [
+        "Aston Villa F.C.",
+        "The Villans",
+        "AVFC",
+        "Aston Villa Football Club",
+        "Aston Villa FC",
+        "Aston Villa",
+        "The Villa",
+        "Villa"
+      ],
+      "qid": "Q124261543",
+      "entity": "2025–26 UEFA Europa League",
+      "source": "https://www.wikidata.org/wiki/Q124261543",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season028",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Atlantic Coast Conference baseball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Georgia Tech Yellow Jackets baseball"
+      ],
+      "qid": "Q139761763",
+      "entity": "2026 Atlantic Coast Conference baseball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139761763",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season029",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 ASUN women's basketball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "Jacksonville Dolphins women's basketball"
+      ],
+      "qid": "Q138690853",
+      "entity": "2026 ASUN women's basketball tournament",
+      "source": "https://www.wikidata.org/wiki/Q138690853",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bornholm regional municipality in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Frederik Tolstrup"
+      ],
+      "qid": "Q2598329",
+      "entity": "Bornholm regional municipality",
+      "source": "https://www.wikidata.org/wiki/Q2598329",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Kampala in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Balimwezo Ronald Nsubuga",
+        "Ronald Nsubuga Balimwezo",
+        "Eng. Balimwezo"
+      ],
+      "qid": "Q3894",
+      "entity": "Kampala",
+      "source": "https://www.wikidata.org/wiki/Q3894",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Laroque-des-Albères in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Gérard Pujol"
+      ],
+      "qid": "Q8895",
+      "entity": "Laroque-des-Albères",
+      "source": "https://www.wikidata.org/wiki/Q8895",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov003",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Metropolitan City of Venice in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Simone Venturini"
+      ],
+      "qid": "Q3678587",
+      "entity": "Metropolitan City of Venice",
+      "source": "https://www.wikidata.org/wiki/Q3678587",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov004",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Viborg Municipality in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Katrine Fusager Rohde"
+      ],
+      "qid": "Q502962",
+      "entity": "Viborg Municipality",
+      "source": "https://www.wikidata.org/wiki/Q502962",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov005",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Tortosa in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Maria del Mar Lleixà Fortuño",
+        "Mar Lleixà Fortuño"
+      ],
+      "qid": "Q12812",
+      "entity": "Tortosa",
+      "source": "https://www.wikidata.org/wiki/Q12812",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov006",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Metropolitan Brest in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Stéphane Roudaut"
+      ],
+      "qid": "Q12194",
+      "entity": "Metropolitan Brest",
+      "source": "https://www.wikidata.org/wiki/Q12194",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov007",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Hungary in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Péter Magyar"
+      ],
+      "qid": "Q28",
+      "entity": "Hungary",
+      "source": "https://www.wikidata.org/wiki/Q28",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov008",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Gröbenzell in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Daniel Holmer"
+      ],
+      "qid": "Q278609",
+      "entity": "Gröbenzell",
+      "source": "https://www.wikidata.org/wiki/Q278609",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov009",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bihar in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Samrat Choudhary",
+        "Samrat Chaudhary"
+      ],
+      "qid": "Q1165",
+      "entity": "Bihar",
+      "source": "https://www.wikidata.org/wiki/Q1165",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov010",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Argelès-sur-Mer in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Julie Sanz"
+      ],
+      "qid": "Q644728",
+      "entity": "Argelès-sur-Mer",
+      "source": "https://www.wikidata.org/wiki/Q644728",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov011",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Honduras in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Nasry Asfura"
+      ],
+      "qid": "Q783",
+      "entity": "Honduras",
+      "source": "https://www.wikidata.org/wiki/Q783",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov012",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Lengenwang in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Peter Hartl"
+      ],
+      "qid": "Q529416",
+      "entity": "Lengenwang",
+      "source": "https://www.wikidata.org/wiki/Q529416",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov013",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Thizy-les-Bourgs in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Rémi Berthoux"
+      ],
+      "qid": "Q2679306",
+      "entity": "Thizy-les-Bourgs",
+      "source": "https://www.wikidata.org/wiki/Q2679306",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov014",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bad Alexandersbad in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Ronald Ledermüller"
+      ],
+      "qid": "Q513780",
+      "entity": "Bad Alexandersbad",
+      "source": "https://www.wikidata.org/wiki/Q513780",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov015",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Turku in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Piia Elo"
+      ],
+      "qid": "Q38511",
+      "entity": "Turku",
+      "source": "https://www.wikidata.org/wiki/Q38511",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov016",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Mont-Saint-Michel-Normandie in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Catherine Brunaud-Rhyn"
+      ],
+      "qid": "Q28494352",
+      "entity": "Mont-Saint-Michel-Normandie",
+      "source": "https://www.wikidata.org/wiki/Q28494352",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov017",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Seattle in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Katie Wilson",
+        "Katherine Barrett Wilson"
+      ],
+      "qid": "Q5083",
+      "entity": "Seattle",
+      "source": "https://www.wikidata.org/wiki/Q5083",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov018",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bangladesh in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Tarique Rahman",
+        "Tarique Zia",
+        "Tarique"
+      ],
+      "qid": "Q902",
+      "entity": "Bangladesh",
+      "source": "https://www.wikidata.org/wiki/Q902",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov019",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Besançon in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Ludovic Fagaut"
+      ],
+      "qid": "Q37776",
+      "entity": "Besançon",
+      "source": "https://www.wikidata.org/wiki/Q37776",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov020",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of New York City in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Zohran Mamdani",
+        "Mayor Mamdani",
+        "Zohran Kwame Mamdani",
+        "Mamdani"
+      ],
+      "qid": "Q60",
+      "entity": "New York City",
+      "source": "https://www.wikidata.org/wiki/Q60",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov021",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Clermont-Ferrand in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Julien Bony"
+      ],
+      "qid": "Q42168",
+      "entity": "Clermont-Ferrand",
+      "source": "https://www.wikidata.org/wiki/Q42168",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov022",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Communauté d'agglomération Grand Châtellerault in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Cyril Cibert"
+      ],
+      "qid": "Q2987009",
+      "entity": "Communauté d'agglomération Grand Châtellerault",
+      "source": "https://www.wikidata.org/wiki/Q2987009",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov023",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Santa Cruz de la Sierra in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Carlos Manuel Saavedra",
+        "Mamen Saavedra"
+      ],
+      "qid": "Q170688",
+      "entity": "Santa Cruz de la Sierra",
+      "source": "https://www.wikidata.org/wiki/Q170688",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov024",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Freising in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Monika Schwind"
+      ],
+      "qid": "Q6998",
+      "entity": "Freising",
+      "source": "https://www.wikidata.org/wiki/Q6998",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov025",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bettembourg in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Jean-Marie Jans"
+      ],
+      "qid": "Q832342",
+      "entity": "Bettembourg",
+      "source": "https://www.wikidata.org/wiki/Q832342",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov026",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Eisenberg in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Eva Schabel"
+      ],
+      "qid": "Q532072",
+      "entity": "Eisenberg",
+      "source": "https://www.wikidata.org/wiki/Q532072",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov027",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of La Celle-Saint-Cloud in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Richard Lejeune"
+      ],
+      "qid": "Q367553",
+      "entity": "La Celle-Saint-Cloud",
+      "source": "https://www.wikidata.org/wiki/Q367553",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov028",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Forchheim in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Martina Hebendanz"
+      ],
+      "qid": "Q16116",
+      "entity": "Forchheim",
+      "source": "https://www.wikidata.org/wiki/Q16116",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov029",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Apulia in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Antonio Decaro"
+      ],
+      "qid": "Q1447",
+      "entity": "Apulia",
+      "source": "https://www.wikidata.org/wiki/Q1447",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9news_2026-10-13_conflict2",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What is the maximum amount of aid Hezbollah spokesperson Ali Damoush announced for families whose homes in Lebanon were destroyed or rendered uninhabitable during its war with Israel in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "US$14,000"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "Hezbollah spokesperson Ali Damoush announces that the group will pay up to US$14,000 in aid to families whose homes in Lebanon were destroyed or rendered uninhabitable during its war with Israel. Families in Beirut and its suburbs will receive $14,000, while those elsewhere in the country will receive $12,000.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "Which country declared a severe drought in Cornwall, Devon, Dorset, Somerset, East Sussex, and West Sussex in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "United Kingdom"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "The United Kingdom declares a severe drought in Cornwall, Devon, Dorset, Somerset, East Sussex, and West Sussex after prolonged low rainfall left more than 80% of England in drought and major reservoirs below 20% capacity.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_sport0",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Which team swept the Los Angeles Dodgers in the NLCS to advance to the 2026 World Series in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Milwaukee Brewers"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "In baseball, the Milwaukee Brewers sweep the Los Angeles Dodgers in the NLCS to advance to the 2026 World Series, their first since 1982.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Which group claimed to have attacked King Khalid International Airport in Riyadh, Saudi Arabia, with a ballistic missile in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Houthis"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "The Houthis claim to have attacked King Khalid International Airport in Riyadh, Saudi Arabia, with a ballistic missile for a third consecutive day.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-16_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, who was attacked and beaten by Israeli settlers?",
+      "answer_type": "entity",
+      "gold": [
+        "an American journalist from The Washington Post"
+      ],
+      "source": "Portal:Current events 2026-10-16",
+      "evidence": "Israeli settlers attack and beat a group of Palestinians and an American journalist from The Washington Post.",
+      "gold_as_of": "2026-10-16",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, which court in New Delhi, India, ordered the release of Cockroach Janta Party founder Abhijeet Dipke and two other leaders?",
+      "answer_type": "entity",
+      "gold": [
+        "An executive magistrate's court"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "An executive magistrate's court in New Delhi, India, orders the release of Cockroach Janta Party founder Abhijeet Dipke and two other leaders, requiring them to avoid breaches of the peace for one year after their detention.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-18_election0",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was appointed as Minister of Defence by the Iranian parliament in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Mehrdad Akhlaghi"
+      ],
+      "source": "Portal:Current events 2026-10-18",
+      "evidence": "The Iranian parliament appoints Mehrdad Akhlaghi as Minister of Defence, replacing acting minister Majid Ebn-e-Reza.",
+      "gold_as_of": "2026-10-18",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_business0",
+      "family": "fact",
+      "regime": "news",
+      "template": "business",
+      "question": "What bridge connecting Dandong, China, and Sinuiju, North Korea, opened after a 12-year delay in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "New Yalu River Bridge"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "The New Yalu River Bridge connecting Dandong, China, and Sinuiju, North Korea, opens following a 12-year delay.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_business0",
+      "family": "fact",
+      "regime": "news",
+      "template": "business",
+      "question": "Which American visual images company announced it would file for Chapter 11 bankruptcy in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Getty Images"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "American visual images company Getty Images announces that it will file for Chapter 11 bankruptcy.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_health1",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "How many protected green sea turtles were released back into the oceans off Bali in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "20"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "Indonesian authorities release 20 protected green sea turtles back into the oceans off Bali after they were seized from an empty boat abandoned by wildlife smugglers last week.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_disaster3",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "Where did Hurricane Isaias make landfall as a post-tropical cyclone in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Destin, Florida"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "The National Hurricane Center reports that Hurricane Isaias has weakened to a post-tropical cyclone after making landfall near Destin, Florida, United States.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_business1",
+      "family": "fact",
+      "regime": "news",
+      "template": "business",
+      "question": "Who was jointly awarded the Nobel Memorial Prize in Economic Sciences for their work on \"microeconomic foundations of macroeconomic stabilisation\" in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Robert Ernest Hall and Michael Dean Woodford"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "American economists Robert Ernest Hall and Michael Dean Woodford are jointly awarded the Nobel Memorial Prize in Economic Sciences for their work on \"microeconomic foundations of macroeconomic stabilisation\".",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster2",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "What province in Panama was struck by a magnitude 7.7 earthquake in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Herrera Province"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "A magnitude 7.7 earthquake strikes Herrera Province, Panama. A nationwide tsunami warning is issued.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, a court in New Delhi, India, ordered the release of which founder and activist on a peace bond?",
+      "answer_type": "entity",
+      "gold": [
+        "Abhijeet Dipke"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "A court in New Delhi, India, orders the release of Cockroach Janta Party founder and activist Abhijeet Dipke on a peace bond, one day after police detained him while he was heading to a protest against the Election Commission of India.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_conflict2",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, airstrikes targeting an artisanal gold mine at the Egypt–Sudan border resulted in the deaths of at least how many people?",
+      "answer_type": "number",
+      "gold": [
+        "72"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "Airstrikes are launched at the Egypt–Sudan border targeting an artisanal gold mine in a mountainous area, killing at least 72 people.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_conflict2",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What organization called the route near the Strait of Hormuz an \"illegal and dangerous route\" in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Iran's Islamic Revolutionary Guard Corps"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Two cargo ships, the Singapore-flagged container ship GFS Pride and the Antigua and Barbuda-flagged dry bulk carrier Cape Dao, sink after both are attacked by projectiles near the Strait of Hormuz while trying to navigate through what Iran's Islamic Revolutionary Guard Corps called an \"illegal and dangerous route.\" At least one crew member is killed in the attacks.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_conflict4",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which Albanian President condemned the violence during anti-government protests in Tirana?",
+      "answer_type": "entity",
+      "gold": [
+        "Bajram Begaj"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Rioters attack government buildings, banks, businesses and other sites as anti-government protests erupt in Tirana, Albania. At least 23 police officers and six others are injured during the unrest, while 35 people are detained. President Bajram Begaj condemns the violence and appeals for calm across the nation.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_diplomacy0",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "In October 2026, which body approved the 22nd package of sanctions against Russia, targeting 1,569 individuals and entities?",
+      "answer_type": "entity",
+      "gold": [
+        "Council of the European Union"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "The Council of the European Union approves the 22nd package of sanctions against Russia, targeting 1,569 individuals and entities of the country's military and industrial complex.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_disaster0",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "In October 2026, an explosion and wildfire occurred at which Canadian Armed Forces base in Alberta?",
+      "answer_type": "entity",
+      "gold": [
+        "CFB Wainwright"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "An explosion and wildfire occurs at the CFB Wainwright, a Canadian Armed Forces base in Alberta. Four people are killed and dozens more injured.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "According to the Pentagon in October 2026, what is the updated U.S. military death toll in the Iran war?",
+      "answer_type": "number",
+      "gold": [
+        "21"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "The Pentagon raises the U.S. military death toll in the Iran war to 21 after reporting two noncombat deaths.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which group launched missiles against Al-Maashiq Palace in Aden, Yemen?",
+      "answer_type": "entity",
+      "gold": [
+        "The Houthis"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "The Houthis launch missiles against Al-Maashiq Palace, headquarters of the Presidential Leadership Council and official residence of President Rashad al-Alimi, in Aden, Yemen, killing five people and injuring 16. No member of the council is harmed in the attack.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_law1",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Which news channel was raided by police and had new administrators appointed by the government in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Halk TV"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Turkish opposition-leaning and independent news channel Halk TV goes offline as it is raided by police and new administrators are appointed by the government.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which Egyptian president stated that Egypt would take necessary steps to protect and defend Saudi Arabia?",
+      "answer_type": "entity",
+      "gold": [
+        "Abdel Fattah El-Sisi"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "Egyptian president Abdel Fattah El-Sisi states that Egypt will take all necessary steps to protect and defend Saudi Arabia should the latter so desire.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-16_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "What was the level of deforestation in Brazil's Amazon rainforest through July 2026, according to the Brazilian environment minister in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "the lowest level since 1988 except for 2012"
+      ],
+      "source": "Portal:Current events 2026-10-16",
+      "evidence": "Brazilian environment minister reports that deforestation in Brazil's Amazon rainforest fell to in the year through July 2026, the lowest level since 1988 except for 2012.",
+      "gold_as_of": "2026-10-16",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_disaster2",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "How many people were killed in the crowd crush at a pandal in Kolkata, West Bengal, India in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "17"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "At least 17 people are killed and 25 others are injured in a crowd crush at a pandal in Kolkata, West Bengal, India.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_science0",
+      "family": "fact",
+      "regime": "news",
+      "template": "science",
+      "question": "Where was the oldest known shipwreck in the world excavated in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Kekova, Turkey"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "The oldest known shipwreck in the world ( 2700–2400 BC) is excavated in Kekova, Turkey.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which city in Ukraine was struck by a Russian ballistic missile attack that left over 1,000 residential buildings without heating?",
+      "answer_type": "entity",
+      "gold": [
+        "Kyiv"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "A Russian ballistic missile attack strikes a power station in the Dniprovskyi District, Kyiv, Ukraine, leaving more than 1,000 residential buildings without heating.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_law1",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, how many children and a teacher were killed in a mass school shooting at the Silver Rail Elementary School in Bend, Oregon, United States?",
+      "answer_type": "entity",
+      "gold": [
+        "Three children and a teacher"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "Three children and a teacher are killed in a mass school shooting at the Silver Rail Elementary School in Bend, Oregon, United States. Two other people are wounded. The perpetrator, a 16-year-old male, is shot and killed by a bystander.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_disaster1",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "Where did a Piper Tomahawk II aircraft crash, killing the two people on board, in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Drymen, Stirling, Scotland"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "A Piper Tomahawk II aircraft crashes near Drymen, Stirling, Scotland, killing the two people on board.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Which country's prime minister blamed Russia after two merchant ships were hit by unknown drones off its Black Sea coast in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Bulgaria"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "Two merchant ships are hit by unknown drones off Bulgaria's Black Sea coast, with one sinking. Eleven crew members are missing and 20 in total are rescued. Bulgarian prime minister Rumen Radev has blamed Russia and summoned its ambassador. It is the second such attack in six days.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_sport2",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Who won the 120th edition of the Giro di Lombardia in Italy in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Paul Seixas"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "In cycling, French cyclist Paul Seixas wins the 120th edition of the Giro di Lombardia in Italy, becoming the youngest person to do so.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Which former Khyber Pakhtunkhwa chief minister was detained along with other PTI members after the suspension of the PTI-led provincial administration in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Sohail Afridi"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "Pakistan's federal government detains hundreds of Pakistan Tehreek-e-Insaf (PTI) members, including former Khyber Pakhtunkhwa chief minister Sohail Afridi and other provincial officials, after suspending the PTI-led provincial administration and imposing emergency rule.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_conflict3",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which air force launched an airstrike in Sanaa, Yemen, resulting in a child's death and seven injuries?",
+      "answer_type": "entity",
+      "gold": [
+        "Royal Saudi Air Force"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "The Royal Saudi Air Force launches an airstrike in Sanaa, Yemen, killing a child and wounding seven other people.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-18_diplomacy0",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "In October 2026, which group drove away 16 Chinese coast guard, research, and fishing vessels operating near Taiwan and the Pratas Island?",
+      "answer_type": "entity",
+      "gold": [
+        "Taiwanese coast guard"
+      ],
+      "source": "Portal:Current events 2026-10-18",
+      "evidence": "The Taiwanese coast guard drives away 16 Chinese coast guard, research, and fishing vessels operating near Taiwan and the Pratas Island, including some that entered restricted waters.",
+      "gold_as_of": "2026-10-18",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-16_election1",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was named Prime Minister by King Mohammed VI in September 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Fatima Ezzahra El Mansouri"
+      ],
+      "source": "Portal:Current events 2026-10-16",
+      "evidence": "Fatima Ezzahra El Mansouri, who was named Prime Minister by King Mohammed VI on 29 September, takes office as her four-party coalition Government is formally appointed.",
+      "gold_as_of": "2026-10-16",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_sport0",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Which team became the first in the National Hockey League to record a natural hat trick in three consecutive games in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Florida Panthers"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "In ice hockey, the Florida Panthers become the first team in the National Hockey League to record a natural hat trick in three consecutive games.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_law3",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "According to the national trade union confederation, how many people took part in protests across France in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "500,000"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "Over 500,000 people take part in protests across France, according to the national trade union confederation, while clashes and riots erupt in large cities.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_law2",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "What is the name of the maximum-security prison Costa Rica inaugurated in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "CECOT"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Costa Rica inaugurates , a maximum-security prison modeled after El Salvador's CECOT mega-prison, aimed at holding 20% of the country's current prison population, as the homicide rate reached a record high in 2023.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_law1",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, a 14-year-old student opened fire at a middle school in which French city?",
+      "answer_type": "entity",
+      "gold": [
+        "Aubagne"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "A 14-year-old student opens fire at a middle school in Aubagne, France, injuring two staff members, before being detained.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "What country suspended in-person classes nationwide from October 15 to 17 due to worsening air quality from wildfire smoke in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Timor-Leste"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Timor-Leste suspends in-person classes nationwide from October 15 to 17 due to worsening air quality from wildfire smoke and pollutant particles across Southeast Asia.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, which Northern Irish politician and former Democratic Unionist Party leader was sentenced to 15 years in prison for child sexual abuse and rape?",
+      "answer_type": "entity",
+      "gold": [
+        "Jeffrey Donaldson"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "Northern Irish politician and former Democratic Unionist Party leader Jeffrey Donaldson is sentenced to 15 years in prison for child sexual abuse and rape. The offences occurred between 1985 and 2008.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_sport0",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "In October 2026, which city in Rwanda was announced as the location for a new Formula 1 grand prix?",
+      "answer_type": "entity",
+      "gold": [
+        "Kigali"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "In auto racing, Formula 1 announces a new grand prix in Kigali, Rwanda, to run for at least 10 years starting in the early 2030s with a new track. This would be the first F1 grand prix in Africa since South Africa in 1993.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_conflict3",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "How many homes were damaged by debris from intercepted Houthi cruise missiles in Riyadh, Saudi Arabia, in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "15"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "The Saudi Civil Defense reports that debris from intercepted Houthi cruise missiles injured four people, including a child, in Riyadh, Saudi Arabia, and damaged 15 homes.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_science0",
+      "family": "fact",
+      "regime": "news",
+      "template": "science",
+      "question": "Which generative AI chatbot company filed for Chapter 11 bankruptcy in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Character.ai"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "Generative AI chatbot company Character.ai files for Chapter 11 bankruptcy, citing costs and litigations including those linked to teen suicides.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_election1",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who was approved by Pope Leo XIV for his election as dean of the College of Cardinals in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Luis Antonio Tagle"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "Pope Leo XIV approves Filipino cardinal Luis Antonio Tagle's election as dean of the College of Cardinals, making him the first Asian to lead the body that elects a new pope.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_disaster2",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "How many people were killed when a boat carrying migrants shipwrecked off the coast of Djibouti in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "139"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "At least 139 people are killed, 84 more are missing, and over 80 are rescued when a boat carrying migrants shipwrecks off the coast of Djibouti.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_sport1",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Which team defeated the LSU Tigers 35–34 in overtime on a 2-point conversion in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Kentucky Wildcats"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "In American college football, the Kentucky Wildcats football team defeats the LSU Tigers 35–34 on a 2-point conversion in overtime, becoming the first team in FBS history to win consecutive overtime games by one point since overtime was introduced in 1996.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_diplomacy0",
+      "family": "fact",
+      "regime": "news",
+      "template": "diplomacy",
+      "question": "Who did Montenegro expel on national security grounds in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Mikhail Zvinchuk"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "Montenegro expels Russian military blogger Mikhail Zvinchuk and four other Russian nationals on national security grounds after detaining them in Risan.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_election0",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who did the Riksdag vote against appointing as Prime Minister of Sweden in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Magdalena Andersson"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "The Riksdag votes against the appointment of Social Democratic leader Magdalena Andersson to repeat as Prime Minister of Sweden. Last 28 September, Andersson already returned her mandate to explore forming a new government.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_election3",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who won the Kraków mayoral election in Poland in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Łukasz Gibała"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "Independent candidate Łukasz Gibała wins the Kraków mayoral election in Poland against government-backed Civic Platform senator Monika Piątkowska.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, a drone strike killed a soldier in which Colombian department?",
+      "answer_type": "entity",
+      "gold": [
+        "Cauca Department"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "A drone strike kills a soldier in La Vega, Cauca Department, Colombia.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "What is the name of the national park declared in South Africa in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Grassland National Park"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "South Africa declares the Grassland National Park, which covers 10,225.9242 hectares across 18 properties, as a national park.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_conflict5",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Who announced that the Sudanese Armed Forces re-captured the Bir Kelekel area of West Darfur from Rapid Support Forces in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Bahr al-Din Adam Karama"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "The Sudanese Armed Forces announces that they have re-captured the Bir Kelekel area of West Darfur, Sudan, from Rapid Support Forces, according to West Darfur state governor Bahr al-Din Adam Karama.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_law2",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Where did protesters storm the city hall and damage the premises in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Lille"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "In Lille, protesters storm the city hall and damage the premises prior to being removed by security forces.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, which federal agency announced the arrests of two men in Ohio and Pennsylvania regarding an alleged North Korean remote-work scheme?",
+      "answer_type": "entity",
+      "gold": [
+        "United States Federal Bureau of Investigation"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "The United States Federal Bureau of Investigation announces the arrests of two men in Ohio and Pennsylvania over an alleged North Korean remote-work scheme and the seizures of about 187 computers and related devices from more than 40 suspected laptop farms in Texas.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_sport0",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Who abandoned the match between Rayo Vallecano and Athletic Bilbao in October 2026 due to fan protests?",
+      "answer_type": "entity",
+      "gold": [
+        "José María Sánchez Martínez"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "In association football, the match between Rayo Vallecano and Athletic Bilbao is abandoned by referee José María Sánchez Martínez due to fans throwing objects at the pitch to protest against Rayo president Raúl Martín Presa.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster0",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "In October 2026, how many people were killed in the bus and truck collision in Mkambarani, Morogoro Region, Tanzania?",
+      "answer_type": "number",
+      "gold": [
+        "28"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "A passenger bus collides with a truck on a road in Mkambarani, Morogoro Region, Tanzania, and catches fire, killing 28 people.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_law2",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "What body passed an amendment in October 2026 to repeal most provisions of the anti-LGBTQ child protection law from 2021?",
+      "answer_type": "entity",
+      "gold": [
+        "Hungarian National Assembly"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "The Hungarian National Assembly passes an amendment repealing most provisions of the anti-LGBTQ child protection law that was previously passed during former prime minister Viktor Orbán's tenure in 2021.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Which location was the site of the attack by masked Israeli settlers on European diplomats in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Taybeh"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "Masked Israeli settlers attack a group of European diplomats, including the Belgian consul general, French and Polish diplomats, and Catholic representatives visiting Taybeh in the occupied West Bank, Palestine.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-18_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What organization reported that an oil tanker caught on fire and exploded in the southern part of the Strait of Hormuz after striking a naval mine in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Islamic Revolutionary Guard Corps"
+      ],
+      "source": "Portal:Current events 2026-10-18",
+      "evidence": "Iran's Islamic Revolutionary Guard Corps reports that an oil tanker has caught on fire and exploded in the southern part of the Strait of Hormuz after striking a naval mine.",
+      "gold_as_of": "2026-10-18",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_election1",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "In October 2026, what percentage of Slovenians voted against overturning the Law on Parliamentary Investigation in the referendum?",
+      "answer_type": "number",
+      "gold": [
+        "49%"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "Slovenians vote in a referendum to decide whether to overturn the Law on Parliamentary Investigation that was adopted by the National Assembly in May 2026. Voters holded this law by a 49% to 51% vote.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-15_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What country claimed to have intercepted a missile intended for Medina in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Saudi Arabia"
+      ],
+      "source": "Portal:Current events 2026-10-15",
+      "evidence": "Saudi Arabia says that it has intercepted a missile intended for Medina. However, the Houthis denied launching a missile at the city.",
+      "gold_as_of": "2026-10-15",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-14_election0",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "In October 2026, how many public sector workers in Ireland started a general strike to protest pay negotiations?",
+      "answer_type": "number",
+      "gold": [
+        "300,000"
+      ],
+      "source": "Portal:Current events 2026-10-14",
+      "evidence": "Over 300,000 public sector workers in Ireland, including teachers, health workers, and other civil servants, start a general strike, the first in the country since 2009, to protest against a deadlock in pay negotiations.",
+      "gold_as_of": "2026-10-14",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-18_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "In October 2026, which country announced it would expand its malaria program to the mainland and Annobón?",
+      "answer_type": "entity",
+      "gold": [
+        "Equatorial Guinea"
+      ],
+      "source": "Portal:Current events 2026-10-18",
+      "evidence": "Equatorial Guinea announces that it will expand its program against malaria to the mainland and Annobón. The program has already heavily reduced malaria cases on Bioko Island.",
+      "gold_as_of": "2026-10-18",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Which city was placed under a security lockdown by Indian authorities in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "New Delhi"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "Indian authorities are placing New Delhi under a security lockdown and have been detaining thousands of demonstrators to block a rally organized by the Gen Z-led Cockroach Janta Party.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_law3",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, which body approved the move by Philippine prosecutors to drop three of the four impeachment charges against vice president Sara Duterte?",
+      "answer_type": "entity",
+      "gold": [
+        "The Senate"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "Philippine prosecutors in the impeachment trial of vice president Sara Duterte drop three of the four impeachment charges in an attempt to speed up the trial. The Senate, sitting as an impeachment court, approves the move.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_election2",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Who declared a state of emergency in Khyber Pakhtunkhwa in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Asif Ali Zardari"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "Pakistani president Asif Ali Zardari declares a state of emergency in Khyber Pakhtunkhwa and suspends its provincial government amid disputes over the province's response to Islamist militancy.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "How many total deaths were reported after an Indian national injured in an attack on King Khalid International Airport died from his injuries in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "13"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "An Indian national injured in yesterday's attack on King Khalid International Airport dies from his injuries, raising the total death toll to 13.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-12_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "Which airline postponed direct flights from Atlanta's Hartsfield–Jackson Atlanta International Airport to Riyadh following attacks by the Houthis in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Delta Air Lines"
+      ],
+      "source": "Portal:Current events 2026-10-12",
+      "evidence": "Delta Air Lines postpones direct flights from Atlanta's Hartsfield–Jackson Atlanta International Airport to Riyadh following attacks by the Houthis on the country.",
+      "gold_as_of": "2026-10-12",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_disaster1",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "What was the wind speed of Tropical storm Simon as it strengthened into a category 4 Pacific hurricane heading towards Mexico's coast in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "150 mph"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "Tropical storm Simon strengthens into a category 4 Pacific hurricane with 150 mph (240 kph) winds as it heads towards Mexico's coast.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "In October 2026, which air force struck a fuel depot near Sanaa, Yemen?",
+      "answer_type": "entity",
+      "gold": [
+        "Royal Saudi Air Force"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "The Royal Saudi Air Force strikes a fuel depot near Sanaa, Yemen. The Houthis launch missiles upon multiple Saudi Arabian cities, including Riyadh and Dammam, in response.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_law2",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, clashes erupted in which city after a Dominican Republic national with a criminal conviction was shot by ICE agents?",
+      "answer_type": "entity",
+      "gold": [
+        "New York City"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "Clashes erupt in New York City, United States, between protestors and police after the shooting of a Dominican Republic national with a criminal conviction by ICE agents. The man, who was in a car alongside a child, was then detained while being wounded.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-17_law1",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "What building in Limoges was partially destroyed by fire in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Hôtel de Ville"
+      ],
+      "source": "Portal:Current events 2026-10-17",
+      "evidence": "The Hôtel de Ville in Limoges is partially destroyed by fire.",
+      "gold_as_of": "2026-10-17",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_disaster2",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "Where was a man killed after jumping into a tiger enclosure and being attacked in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Yorkshire Wildlife Park"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "A man is killed after jumping into a tiger enclosure and being attacked at Yorkshire Wildlife Park in South Yorkshire, England. The tiger was uninjured.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "How many people were injured in a Russian glide bomb airstrike on a five-story residential building in Zaporizhzhia, Ukraine, in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "32"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "At least 20 people are killed and 32 others are injured in a Russian glide bomb airstrike on a five-story residential building in Zaporizhzhia, Ukraine.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster1",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "What was the name of the hurricane that made landfall near Destin, Florida, in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Isaias"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "Isaias makes landfall near Destin, Florida, and weakens to a category 1 hurricane.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_disaster3",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "How many people were injured when a tour bus collided with a truck at a toll road of Otoyol 5 in Akhisar, Manisa Province, Turkey in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "27"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "Eleven people are killed and 27 others are injured when a tour bus collides with a truck at a toll road of Otoyol 5 in Akhisar, Manisa Province, Turkey.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-16_conflict1",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "How many people were injured in the drone strike on a cattle market in Nyala, South Darfur, Sudan in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "47"
+      ],
+      "source": "Portal:Current events 2026-10-16",
+      "evidence": "Thirty people are killed and 47 people are injured in a drone strike on a cattle market in Nyala, South Darfur, Sudan.",
+      "gold_as_of": "2026-10-16",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-11_disaster0",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "How many people were injured, including four critically, when a passenger bus crashed into a residential complex in Valparaíso, Chile, in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "around 19"
+      ],
+      "source": "Portal:Current events 2026-10-11",
+      "evidence": "One person is killed and around 19 others are injured, including four critically, when a passenger bus plunges down a slope and crashes into a residential complex in Valparaíso, Chile.",
+      "gold_as_of": "2026-10-11",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-13_conflict3",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "What organization's administrative building in Dhahran, Saudi Arabia, was partially consumed by a fire after a Houthi missile was intercepted by Saudi forces in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Saudi Aramco"
+      ],
+      "source": "Portal:Current events 2026-10-13",
+      "evidence": "An administrative building belonging to Saudi Aramco in Dhahran, Eastern Province, Saudi Arabia, is partially consumed by a fire after a Houthi missile is intercepted over the city by Saudi forces.",
+      "gold_as_of": "2026-10-13",
+      "qtype": "news"
+    }
+  ]
+}
