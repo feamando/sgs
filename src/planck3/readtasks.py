@@ -33,7 +33,7 @@ READ_TASKS = ASSETS / "planck3_read_train_tasks.json"
 PORTAL_ITEMS = ASSETS / "planck3_portal_items_2025.json"
 NEWS_TASKS = REPO_ROOT / "data" / "planck3" / "reader" / "news_tasks.json"
 BENCH_FILES = ("planck3_tasks_fresh.json", "planck3_tasks_news.json", "planck3_tasks_geninfo.json",
-               "planck3_tasks.json")
+               "planck3_tasks.json", "planck3_tasks_fresh9.json")   # round 9's fresh benchmark: never train on it
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 SECTIONS = {"Armed conflicts and attacks": "conflict", "Disasters and accidents": "disaster",
             "Sports": "sport", "Politics and elections": "election", "Business and economy": "business",

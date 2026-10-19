@@ -3,7 +3,7 @@
    Planck 3.0 one-stop runner for the Windows 4090 box.
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
    SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6),
-   SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8)
+   SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8), SETUP_planck_20261019.md (round 9)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -44,6 +44,9 @@
      round8    round 8 (SETUP_planck_20261015.md): Hertz's reader on a phone proxy first (CPU, 4 threads,
                fp32 / int8, top 16 / top 8; ~1 h, pushed at once), then Planck 1.5 = Planck's size pretrained
                on Hertz's corpus (~25 h, resumable), round 7's reading stage on it, the benchmark; no new searches
+     round9    round 9 (SETUP_planck_20261019.md): builds a FRESH benchmark once (2026 Wikidata items + news
+               after 2026-10-08, Gemma-written), checks the Brave quota, then confirms Hertz's reader (int8, CPU)
+               on it against round 5's reader, Gemma and the heuristic; ~300 live Brave searches; ~2 h
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -630,12 +633,13 @@ function Test-R6Run([string]$dir) {
     return $false
 }
 
-function Invoke-R6([string]$name, [string[]]$a, [string]$what, [int]$sample = 0) {
+function Invoke-R6([string]$name, [string[]]$a, [string]$what, [int]$sample = 0, [string]$tasks = "") {
     $out = "$RES/$name$Tag"
     if (Test-R6Run $out) { Log "SKIP $name (valid)"; return }
     Log $what
     $smp = if ($Quick) { @("--sample", "12") } elseif ($sample -gt 0) { @("--sample", "$sample") } else { @() }
-    P3 (@("r5") + $a + @("--tasks", "$FRESH,$NEWS,$INFO", "--search", "brave", "--out", $out, "--gemma-path", $GEMMA,
+    $tk = if ($tasks) { $tasks } else { "$FRESH,$NEWS,$INFO" }
+    P3 (@("r5") + $a + @("--tasks", $tk, "--search", "brave", "--out", $out, "--gemma-path", $GEMMA,
           "--g2-head", $V2HEAD, "--planck-checkpoint", $PLANCK_CKPT, "--planck-tokenizer", $PLANCK_TOK) + $smp)
 }
 
@@ -873,6 +877,50 @@ function Do-Round8 {
     P3 (@("r8", "decide") + $ttag)
 }
 
+# Round 9 (SETUP_planck_20261019.md): Hertz's reading reader confirmed on FRESH questions, int8 on CPU
+# (the configuration that passed round 8's rule M). The fresh benchmark is built once, committed and pushed
+# before any reader runs on it. Every arm reads the same Brave results: the first arm searches live,
+# the rest read the cache (one Brave search per question).
+function Do-Round9 {
+    foreach ($f in @($V2HEAD, $PLANCK_CKPT, "checkpoints/xreader_hertz_rc/reader.pt", "$RES/r8_x-hertz-rc_cpu-int8-top16/results.jsonl")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 9 reuses rounds 7-8)" }
+    }
+    if (-not (Test-Path $GEMMA)) { throw "missing $GEMMA: Gemma writes the fresh news questions and is the reference reader" }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $f9 = "scripts/assets/planck3_tasks_fresh9$Tag.json"
+    # 1. the fresh benchmark, once (Wikidata 2026 items unused before + portal news after 2026-10-08)
+    if (-not (Test-Path $f9)) {
+        Log "round 9: building the fresh benchmark once (Wikidata + Gemma on the Current Events portal; ~30-60 min)"
+        $q = if ($Quick) { @("--quick") } else { @() }
+        P3 (@("fresh9", "--gemma-path", $GEMMA, "--out", $f9) + $q)
+        if (-not $Quick -and -not $NoPush) {   # fixed in git before any reader runs on it
+            Invoke-Checked git @("add", "-f", "--", $f9)
+            Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null
+            Invoke-Checked git @("commit", "-m", "data(planck3): round 9 fresh benchmark, built before any reader ran on it")
+            Invoke-Checked git @("pull", "--rebase", "origin", "main")
+            Invoke-Checked git @("push", "origin", "main")
+        }
+    } else { Log "round 9: fresh benchmark $f9 exists (kept as built)" }
+    $n = (Get-Content $f9 -Raw | ConvertFrom-Json).tasks.Count
+    # 2. Brave: one live search per question (+ a few retries), checked BEFORE the first run
+    $need = if ($Quick) { 20 } else { [int]($n * 1.3) + 20 }
+    $chk = Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave", "--need", "$need")
+    $chk.Out | ForEach-Object { Log "$_" }
+    if ($chk.Code -ne 0) { throw "Brave cannot serve round 9 ($need searches needed): check the key and the month's quota (.\scripts\planck3.ps1 setkey)" }
+    # 3. the arms on the fresh questions. The product on CPU first: it reads live and fills the cache
+    $hz = @("--reader", "x-hertz", "--reader-checkpoint", "checkpoints/xreader_hertz_rc/reader.pt", "--writer", "template")
+    $pa = $hz + @("--reader-quant", "int8")
+    Invoke-OnCpu { Invoke-R6 "r9_x-hertz-rc_cpu-int8-top16" $pa "round 9: THE PRODUCT, Hertz's reader, int8, CPU 4 threads, top 16 (fresh questions; searches live)" 0 $f9 }
+    Invoke-R6 "r9_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 9: no-model floor (fresh questions)" 0 $f9
+    Invoke-R6 "r9_planck_template" @("--reader", "planck", "--writer", "template") "round 9: round 5's Planck reader, the shipped reader (fresh questions)" 0 $f9
+    Invoke-R6 "r9_x-hertz-rc_template" $hz "round 9: Hertz's reader on the GPU, fp32 (the int8 check, rule Q)" 0 $f9
+    Invoke-R6 "r9_gemma_template" @("--reader", "gemma", "--writer", "template") "round 9: Gemma reader (reference)" 0 $f9
+    $p15 = "checkpoints/xreader_planck_p15rc/reader.pt"
+    if (Test-Path $p15) { Invoke-R6 "r9_x-planck15-rc_template" @("--reader", "x-planck", "--reader-checkpoint", $p15, "--writer", "template") "round 9: Planck 1.5's reader (reported)" 0 $f9 }
+    Invoke-OnCpu { Invoke-R6 "r9_x-hertz-rc_cpu-int8-top16_contrarian" ($pa + @("--personal", "contrarian")) "round 9: worst-case personal profile on the product (rule E)" 0 $f9 }
+    P3 (@("r9", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -907,6 +955,8 @@ function Do-Push {
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     # round 6: Gemma's news questions (and the rejected ones, with reasons) are training data: keep them auditable
     Get-ChildItem -Path "data/planck3/reader" -Filter "news_tasks*.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    Get-ChildItem -Path "scripts/assets" -Filter "planck3_tasks_fresh9*.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Get-ChildItem -Path "data/planck3/reader" -Filter "*points*.health.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
@@ -1015,6 +1065,16 @@ switch ($Command.ToLower()) {
         Do-Round8
         P3 @("report")
         Log ("round8$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round9"     {
+        Start-RunLog "round9"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Round9
+        P3 @("report")
+        Log ("round9$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {

@@ -1423,3 +1423,83 @@ def test_round8_schedule_mobile_reader_and_rules(tmp_path):
     d = R8.decide(tmp_path, ckpts=tmp_path / "ck")
     assert d["outcome"].startswith("size") and "M passes" in d["outcome"] and (tmp_path / "r8_product.json").exists()
     assert d["reader_checkpoint"].endswith("xreader_planck_p15rc/reader.pt") and "why" in d["base"]
+
+
+def test_round9_brave_check_needs_the_live_api(tmp_path, monkeypatch):
+    from src.planck3 import web as W
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w.cache.put("search", "brave|Wikipedia", {"results": [{"url": "https://w.org", "title": "W", "snippet": "W", "domain": "w.org"}]})
+
+    class R:
+        def __init__(self, code, rem):
+            self.status_code, self.headers = code, {"X-RateLimit-Remaining": f"1, {rem}"}
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"web": {"results": [{"url": "https://w.org/x", "title": "W", "description": "W"}]}}
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R(429, 0))
+    assert not w.brave_alive()                          # a cached answer no longer passes at 0 quota (round 6's bug)
+    assert w.brave_quota()["why"] == "quota used up this month"
+    w2 = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    monkeypatch.setattr(w2.session, "get", lambda *a, **k: R(200, 1500))
+    q = w2.brave_quota()
+    assert q["ok"] and q["remaining"] == 1500 and w2.brave_alive()
+    w3 = W.Web(W.WebCache(tmp_path / "c", mode="replay"), search_backend="brave")
+    assert w3.brave_alive()                             # replay: the cache is all there is
+
+
+def test_round9_fresh_benchmark_and_rules(tmp_path, monkeypatch):
+    import json as _json
+    from datetime import date
+    from src.planck3 import benchgen as bg
+    from src.planck3 import freshbench as FB
+    from src.planck3 import readtasks as RT
+    from src.planck3 import round9 as R9
+    from src.planck3.util import write_json
+    # Wikidata: 2026 items unused before; an item already in a benchmark is dropped by QID
+    used = sorted(FB.used_qids_and_texts()[0])[0]
+    rows = [{"item": f"http://www.wikidata.org/entity/{q}", "itemLabel": lab, "ans": "x", "ansLabel": "Team A", "aliases": ""}
+            for q, lab in ((used, "2026 Old Cup"), ("Q999000001", "2026 Zebra Cup"), ("Q999000002", "Quokkaville Zither Invitational"))]
+    monkeypatch.setattr(bg, "sparql", lambda q: rows if "P1346" in q and "P585" in q else [])
+    monkeypatch.setattr(FB, "WD_PER", {"winner": 5, "election": 1, "season": 1, "headgov": 1})
+    tasks, st = FB.wikidata_fresh()
+    assert {t["qid"] for t in tasks} == {"Q999000001", "Q999000002"} and st["winner"]["used before"] == 1
+    assert all(t["regime"] == "fresh" and t["id"].startswith("f9winner") for t in tasks)
+    # the portal: several items a day, round-robin across sections
+    text = "\n".join(["'''Sports'''", "* Team Alpha wins the 2026 Northern Cup final in Oslo, Norway, beating Team Beta 2-1.",
+                      "* Runner Carla Dee sets a 2026 world record of 2:01:03 in the Berlin Marathon in Germany.",
+                      "'''Law and crime'''", "* A court in Lima, Peru, sentences former mayor Juan Ruiz to 12 years in prison in 2026."])
+    monkeypatch.setattr(RT, "_wikitext", lambda title: text)
+    items = FB.portal_items_after(date(2026, 10, 8), date(2026, 10, 9), per_day=3)
+    assert len(items) == 3 and {i["section"] for i in items} == {"sport", "law"} and items[0]["date"] == "2026-10-09"
+    # the file is the benchmark of record: never rebuilt once it exists
+    out = tmp_path / "f9.json"
+    write_json(out, {"created": "2026-10-19", "tasks": [{"id": "a"}]})
+    assert FB.build("none", out)["tasks"] == [{"id": "a"}]
+    # recalibrated bands: thresholds fitted on old answers
+    old = [{"confidence": c, "shown_correct": ok} for c, ok in [(9, True)] * 19 + [(9, False)] + [(7, True)] * 15 + [(7, False)] * 5 + [(5, False)] * 10]
+    th = R9.fit_thresholds(old)
+    assert th["high"] == 9 and th["good"] == 7
+    # R9 on fresh questions: the product vs round 5's reader and Gemma; Q vs its own GPU run
+    def run(name, right, n=150):
+        d = tmp_path / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "results.jsonl").write_text("\n".join(_json.dumps({"task_id": f"t{i}", "regime": "fresh" if i % 2 else "news",
+                                                                "shown_correct": i < right, "confidence": 9 if i < right else 6})
+                                                   for i in range(n)), encoding="utf-8")
+        write_json(d / "summary.json", {"accuracy": right / n, "timing_ms_per_task": {"read_ms": 1400}, "bands": {}, "bands_monotone": True})
+    run(R9.PRODUCT, 95)
+    run(R9.BASE, 70)
+    run(R9.REF, 100)
+    run(R9.GPU, 96)
+    run(R9.FLOOR, 60)
+    run(R9.OLD_PRODUCT, 140, 243)
+    d = R9.decide(tmp_path)
+    assert d["rule_r"]["pass"] and d["rule_q"]["pass"] and d["rule_l"]["pass"] and d["outcome"].startswith("ship")
+    assert d["reader_quant"] == "int8" and d["by_regime"][R9.PRODUCT]["fresh"]["n"] == 75
+    run(R9.PRODUCT, 80)
+    assert R9.decide(tmp_path)["outcome"].startswith("no ship")      # 80 < midpoint 85
