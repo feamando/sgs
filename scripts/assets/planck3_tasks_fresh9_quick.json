@@ -1,0 +1,348 @@
+{
+  "version": 1,
+  "created": "2026-10-19",
+  "split": "bench-fresh9",
+  "seed": 9,
+  "source": "Wikidata SPARQL 2026 items unused by any earlier benchmark or training set (gold = Wikidata); Wikipedia Current Events portal after 2026-10-08, questions by Gemma, round 6 checks (gold = the item's words)",
+  "note": "built before any round 9 reader ran on it; never used to train or choose a reader",
+  "counts": {
+    "fresh": 12,
+    "news": 6
+  },
+  "build": {
+    "wikidata": {
+      "winner": {
+        "pool": 840,
+        "kept": 3
+      },
+      "election": {
+        "pool": 65,
+        "used before": 2,
+        "no proper-name answer": 2,
+        "kept": 3
+      },
+      "season": {
+        "pool": 436,
+        "kept": 3
+      },
+      "headgov": {
+        "pool": 239,
+        "kept": 3
+      }
+    },
+    "news": {
+      "portal_items": 26,
+      "from": "2026-10-09",
+      "until": "2026-10-10",
+      "questions_written": 20,
+      "kept": 20,
+      "rejected": {
+        "number without a number": 4,
+        "date without a date": 1,
+        "answer type": 1
+      }
+    }
+  },
+  "tasks": [
+    {
+      "id": "f9winner000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Women's European Volleyball Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Turkey women's national volleyball team",
+        "Women's national volleyball team of Turkey",
+        "Turkish women's national volleyball team"
+      ],
+      "qid": "Q123913893",
+      "entity": "2026 Women's European Volleyball Championship",
+      "source": "https://www.wikidata.org/wiki/Q123913893",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Wimbledon Championships – Women's doubles?",
+      "answer_type": "entity",
+      "gold": [
+        "Kristina Mladenovic",
+        "Kiki Mladenovic",
+        "Guo Hanyu"
+      ],
+      "qid": "Q140337275",
+      "entity": "2026 Wimbledon Championships – Women's doubles",
+      "source": "https://www.wikidata.org/wiki/Q140337275",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9winner002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Clásica de San Sebastián?",
+      "answer_type": "entity",
+      "gold": [
+        "Richard Carapaz",
+        "Richard António Carapaz Montenegro",
+        "Richard Antonio Carapaz Montenegro",
+        "Remco Evenepoel",
+        "R.EV",
+        "REV",
+        "Ben Tulett",
+        "Ben Samuel Tulett"
+      ],
+      "qid": "Q136756647",
+      "entity": "2026 Clásica de San Sebastián",
+      "source": "https://www.wikidata.org/wiki/Q136756647",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Scottish Parliament general election?",
+      "answer_type": "entity",
+      "gold": [
+        "Scottish Greens",
+        "Scottish Green Party",
+        "Scots Green Pairtie",
+        "Scottish National Party",
+        "SNP",
+        "Scottish National party (SNP)",
+        "Scottish Labour Party",
+        "Scottish Labour"
+      ],
+      "qid": "Q106809112",
+      "entity": "2026 Scottish Parliament general election",
+      "source": "https://www.wikidata.org/wiki/Q106809112",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 New Democratic Party leadership election?",
+      "answer_type": "entity",
+      "gold": [
+        "Avi Lewis"
+      ],
+      "qid": "Q134463334",
+      "entity": "2026 New Democratic Party leadership election",
+      "source": "https://www.wikidata.org/wiki/Q134463334",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9election002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Progressive Conservative Party of New Brunswick leadership election?",
+      "answer_type": "entity",
+      "gold": [
+        "Daniel Allain"
+      ],
+      "qid": "Q136547712",
+      "entity": "2026 Progressive Conservative Party of New Brunswick leadership election",
+      "source": "https://www.wikidata.org/wiki/Q136547712",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Tour de Romandie?",
+      "answer_type": "entity",
+      "gold": [
+        "Roland Thalmann",
+        "Tadej Pogačar",
+        "Tadej Pogacar",
+        "Pogi",
+        "Florian Lipowitz",
+        "Lenny Martinez",
+        "2026 Red Bull-Bora-Hansgrohe"
+      ],
+      "qid": "Q136745849",
+      "entity": "2026 Tour de Romandie",
+      "source": "https://www.wikidata.org/wiki/Q136745849",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 United Rugby Championship?",
+      "answer_type": "entity",
+      "gold": [
+        "Leinster Rugby",
+        "Leinster"
+      ],
+      "qid": "Q134544768",
+      "entity": "2025–26 United Rugby Championship",
+      "source": "https://www.wikidata.org/wiki/Q134544768",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9season002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2025–26 Northern Ireland Football League Cup?",
+      "answer_type": "entity",
+      "gold": [
+        "Linfield F.C.",
+        "Linfield Football Club",
+        "Linfield FC",
+        "Linfield"
+      ],
+      "qid": "Q136302788",
+      "entity": "2025–26 Northern Ireland Football League Cup",
+      "source": "https://www.wikidata.org/wiki/Q136302788",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Bornholm regional municipality in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Frederik Tolstrup"
+      ],
+      "qid": "Q2598329",
+      "entity": "Bornholm regional municipality",
+      "source": "https://www.wikidata.org/wiki/Q2598329",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Kampala in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Balimwezo Ronald Nsubuga",
+        "Ronald Nsubuga Balimwezo",
+        "Eng. Balimwezo"
+      ],
+      "qid": "Q3894",
+      "entity": "Kampala",
+      "source": "https://www.wikidata.org/wiki/Q3894",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9headgov002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Laroque-des-Albères in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Gérard Pujol"
+      ],
+      "qid": "Q8895",
+      "entity": "Laroque-des-Albères",
+      "source": "https://www.wikidata.org/wiki/Q8895",
+      "gold_as_of": "2026-10-19"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster0",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "In October 2026, how many people were killed in the bus and truck collision in Mkambarani, Morogoro Region, Tanzania?",
+      "answer_type": "number",
+      "gold": [
+        "28"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "A passenger bus collides with a truck on a road in Mkambarani, Morogoro Region, Tanzania, and catches fire, killing 28 people.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_disaster3",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "Where did Hurricane Isaias make landfall as a post-tropical cyclone in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Destin, Florida"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "The National Hurricane Center reports that Hurricane Isaias has weakened to a post-tropical cyclone after making landfall near Destin, Florida, United States.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster2",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "What province in Panama was struck by a magnitude 7.7 earthquake in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Herrera Province"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "A magnitude 7.7 earthquake strikes Herrera Province, Panama. A nationwide tsunami warning is issued.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_health0",
+      "family": "fact",
+      "regime": "news",
+      "template": "health",
+      "question": "What is the name of the national park declared in South Africa in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Grassland National Park"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "South Africa declares the Grassland National Park, which covers 10,225.9242 hectares across 18 properties, as a national park.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-10_sport0",
+      "family": "fact",
+      "regime": "news",
+      "template": "sport",
+      "question": "Who abandoned the match between Rayo Vallecano and Athletic Bilbao in October 2026 due to fan protests?",
+      "answer_type": "entity",
+      "gold": [
+        "José María Sánchez Martínez"
+      ],
+      "source": "Portal:Current events 2026-10-10",
+      "evidence": "In association football, the match between Rayo Vallecano and Athletic Bilbao is abandoned by referee José María Sánchez Martínez due to fans throwing objects at the pitch to protest against Rayo president Raúl Martín Presa.",
+      "gold_as_of": "2026-10-10",
+      "qtype": "news"
+    },
+    {
+      "id": "f9news_2026-10-09_disaster1",
+      "family": "fact",
+      "regime": "news",
+      "template": "disaster",
+      "question": "What was the name of the hurricane that made landfall near Destin, Florida, in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Isaias"
+      ],
+      "source": "Portal:Current events 2026-10-09",
+      "evidence": "Isaias makes landfall near Destin, Florida, and weakens to a category 1 hurricane.",
+      "gold_as_of": "2026-10-09",
+      "qtype": "news"
+    }
+  ]
+}
