@@ -1531,3 +1531,74 @@ def test_round9_brave_credit_plan_reports_no_monthly_quota(tmp_path, monkeypatch
     monkeypatch.setattr(w2.session, "get", lambda *a, **k: R(429, "1, 2000", "1, 0"))
     q2 = w2.brave_quota()
     assert not q2["ok"] and q2["remaining"] == 0 and q2["why"] == "quota used up this month"
+
+
+def test_round10_brave_budget_soft_labels_and_rules(tmp_path, monkeypatch):
+    import json as _json
+    from src.planck3 import g2 as G
+    from src.planck3 import round10 as R10
+    from src.planck3 import web as W
+    from src.planck3 import xreader as X
+    from src.planck3.util import write_json
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    # a runner-wide ledger caps live Brave calls; collection stops (never falls back) and resumes
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(_json.dumps({"budget": 4, "used": 0}), encoding="utf-8-sig")
+    monkeypatch.setenv("PLANCK3_BRAVE_LEDGER", str(ledger))
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w.fallback, w.relevance = False, False
+    w.attach_ledger()
+    res = [{"url": "https://a.org/x", "title": "Zed Cup", "snippet": "Team Alpha won the 2025 Zed Cup.", "domain": "a.org"}]
+    monkeypatch.setattr(w, "_search_brave", lambda q: (setattr(w, "brave_used", w.brave_used + 1), w._ledger_write(), res)[2])
+    monkeypatch.setattr(w, "fetch", lambda url: {})
+    tasks = [{"id": f"recent_t{i}", "family": "fact", "question": f"Who won the 2025 Zed Cup {i}?", "answer_type": "entity",
+              "gold": ["Team Alpha"], "regime": "recent"} for i in range(6)]
+    out = tmp_path / "pb.jsonl"
+    G.collect(tasks, w, out)
+    prog = _json.loads(out.with_suffix(".progress.json").read_text(encoding="utf-8"))
+    assert prog["stopped_for_credit"] and not prog["complete"] and prog["through"] == 3      # stops with 1 call left
+    assert _json.loads(ledger.read_text(encoding="utf-8"))["used"] == 3
+    ledger.write_text(_json.dumps({"budget": 100, "used": 0}), encoding="utf-8")
+    w2 = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w2.fallback, w2.relevance = False, False
+    w2.attach_ledger()
+    monkeypatch.setattr(w2, "_search_brave", lambda q: res)
+    monkeypatch.setattr(w2, "fetch", lambda url: {})
+    G.collect(tasks, w2, out)
+    prog = _json.loads(out.with_suffix(".progress.json").read_text(encoding="utf-8"))
+    assert prog["complete"] and prog["through"] == 6 and len({p["task_id"] for p in map(_json.loads, out.read_text().splitlines())}) == 6
+    # Gemma's soft labels: stored on each pool, then used by the loss
+    class FakeGemma:
+        name = "gemma"
+        usage = {"calls": 0, "input_tokens": 0, "output_tokens": 0}
+
+        def _complete(self, system, user):
+            return '{"k": 0, "p": 0.8}'
+    info = X.teach(out, FakeGemma())
+    pts = [_json.loads(x) for x in out.read_text().splitlines()]
+    assert info["taught"] == len(pts) and all(p["teacher"]["k"] == 0 and p["teacher"]["p"] == 0.8 for p in pts)
+    assert X.teach(out, FakeGemma())["taught"] == len(pts)                   # resumable: nothing re-read
+    import torch
+    e = type("E", (), {})()
+    e.conts, e.labels, e.teacher = [[1], [2], [3]], [False, True, False], (0, 0.8)
+    lg = torch.zeros(3, 2, requires_grad=True)
+    assert X._losses(lg, [e], 0.5).item() > X._losses(lg, [e], 0.0).item()   # the soft term is added
+    # rule G: >= 5 points over the shipped reader on the new fresh questions, p < 0.05
+    def run(name, right, n=200):
+        d = tmp_path / "res" / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "results.jsonl").write_text("\n".join(_json.dumps({"task_id": f"t{i}", "regime": "fresh", "shown_correct": i < right,
+                                                                "confidence": 7, "changed_by_personal": False, "parts": []})
+                                                   for i in range(n)), encoding="utf-8")
+        write_json(d / "summary.json", {"accuracy": right / n, "timing_ms_per_task": {"read_ms": 3000}, "bands": {}, "bands_monotone": True})
+    R = tmp_path / "res"
+    run(R10.SHIPPED, 100)
+    run(R10.PRODUCT, 125)
+    run(R10.GPU, 126)
+    run(R10.REF, 125)
+    run(R10.PRODUCT + "_contrarian", 125)
+    d = R10.decide(R)
+    assert d["rule_g"]["pass"] and d["gap_closed"]["share"] == 1.0 and d["rule_r"]["pass"] and d["outcome"].startswith("ship")
+    run(R10.PRODUCT, 108)
+    assert not R10.decide(R)["rule_g"]["pass"]                               # +4 points is not enough

@@ -68,12 +68,25 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
     """Two labelled decision points per question. Resumable: skips task ids already collected."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
     done = {r["task_id"] for r in read_jsonl(out_path)} if out_path.exists() else set()
-    todo = [t for t in tasks if t["family"] == "fact" and t["id"] not in done][: limit or None]
+    # attempted = searched, even if no pool came back (round 10: a re-run after a credit stop must not
+    # search those again, and must know when the whole set is through)
+    att_path = out_path.with_suffix(".attempted.txt")
+    attempted = set(att_path.read_text(encoding="utf-8").split()) if att_path.exists() else set()
+    facts = [t for t in tasks if t["family"] == "fact"]
+    todo = [t for t in facts if t["id"] not in done | attempted][: limit or None]
+    stopped = False
     print(f"[g2] collecting {len(todo)} questions ({len(done)} already done) -> {out_path}")
     t0, empty = time.time(), 0
     with open(out_path, "a", encoding="utf-8") as f:
         for i, t in enumerate(todo, 1):
             q, at, gold = t["question"], t["answer_type"], t["gold"]
+            left = web.brave_left() if hasattr(web, "brave_left") else None
+            if left is not None and left < 2 and not (web.cache.get("search", f"brave|{q}") or {}).get("results"):
+                # round 10: the run's Brave credit is spent. Stop rather than collect this question on
+                # another backend (it would be marked done with a non-Brave pool); a re-run resumes here
+                print(f"[g2] Brave credit for this run is spent after {i - 1} questions; re-run to resume", flush=True)
+                stopped = True
+                break
             results = web.search(q)
             if not results:
                 empty += 1
@@ -99,10 +112,19 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
                                     "cands": [{k: c.get(k) for k in ("value", "context", "score", "margin", "about",
                                                                      "domains", "support", "url")} for c in cands],
                                     "labels": labels}, ensure_ascii=False) + "\n")
+            f.flush()
+            with open(att_path, "a", encoding="utf-8") as fa:
+                fa.write(t["id"] + "\n")
+            attempted.add(t["id"])
             if i % 50 == 0:
                 rate = (time.time() - t0) / i
                 print(f"  {i}/{len(todo)} ({rate:.1f}s/question, ~{rate * (len(todo) - i) / 60:.0f} min left; "
                       f"{empty} empty searches)", flush=True)
+    through = sum(t["id"] in done | attempted for t in facts)
+    write_json(out_path.with_suffix(".progress.json"),
+               {"target": len(facts), "through": through, "complete": through >= len(facts) and not stopped,
+                "stopped_for_credit": stopped, "brave_live_calls": getattr(web, "brave_used", None)})
+    print(f"[g2] {through}/{len(facts)} questions through" + (" (stopped: Brave credit spent)" if stopped else ""), flush=True)
     health = web.search_health() if hasattr(web, "search_health") else {}
     if health:
         write_json(out_path.with_suffix(".health.json"), health)

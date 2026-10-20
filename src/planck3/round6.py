@@ -94,9 +94,9 @@ def rule_r(results: Path, run: str, tag: str = "") -> dict:
 
 def report_lines(results: Path) -> list[str]:
     from .wikirace import mcnemar
-    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r[6789]*_*/summary.json"))}
+    runs = {p.parent.name: read_json(p) for p in sorted(results.glob("r[6789]*_*/summary.json")) + sorted(results.glob("r1[0-9]_*/summary.json"))}
     lines = []
-    xr = {f"x-{b}{t}": read_json(p) for t in ("", "_v2", "_rc", "_r7", "_p15rc") for b in ("planck", "hertz")
+    xr = {f"x-{b}{t}": read_json(p) for t in ("", "_v2", "_rc", "_r7", "_p15rc", "_r10") for b in ("planck", "hertz")
           if (p := results / f"xreader_{b}{t}" / "train_log.json").exists()}
     if xr:
         lines += ["## Round 6: the reader trained once (cross-encoder) (SETUP_planck_20261012.md)", "",
@@ -136,7 +136,7 @@ def report_lines(results: Path) -> list[str]:
                      f"{f3(s.get('writer_first_try_faithful'))} | {f3(s.get('writer_mean_tries'))} | {t.get('read_ms', 0):.0f} | "
                      f"{t.get('write_ms', 0):.0f} | {s['changed_by_personal']:.3f} |")
     lines.append("")
-    prods = {f: read_json(results / f) for f in ("r6_product.json", "r6b_product.json", "r7_product.json", "r8_product.json", "r9_product.json") if (results / f).exists()}
+    prods = {f: read_json(results / f) for f in ("r6_product.json", "r6b_product.json", "r7_product.json", "r8_product.json", "r9_product.json", "r10_product.json") if (results / f).exists()}
     pairs = []
     for prod in prods.values():
         pname = prod.get("run")

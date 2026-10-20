@@ -44,7 +44,7 @@ def used_qids_and_texts() -> tuple[set, list[str]]:
     return qids - {None}, texts
 
 
-def wikidata_fresh(seed: int = 9) -> tuple[list[dict], dict]:
+def wikidata_fresh(seed: int = 9, prefix: str = "f9") -> tuple[list[dict], dict]:
     from .readtasks import named_in_bench
     rng = random.Random(seed)
     used, texts = used_qids_and_texts()
@@ -79,7 +79,7 @@ def wikidata_fresh(seed: int = 9) -> tuple[list[dict], dict]:
             if not gold or not gold[0][:1].isupper():
                 st["no proper-name answer"] += 1
                 continue
-            tasks.append(bg._task(f"f9{name}{k:03d}", "fresh", name, qfn(label, rs), "entity", gold, rs))
+            tasks.append(bg._task(f"{prefix}{name}{k:03d}", "fresh", name, qfn(label, rs), "entity", gold, rs))
             k += 1
         st["kept"] = k
         stats[name] = dict(st)
@@ -117,43 +117,49 @@ def portal_items_after(after: date, until: date, per_day: int = 15, seed: int = 
     return out
 
 
-def news_fresh(policy, until: date | None = None, seed: int = 9) -> tuple[list[dict], dict]:
+def news_fresh(policy, until: date | None = None, seed: int = 9, prefix: str = "f9", after: date = NEWS_AFTER,
+               raw: Path | None = None) -> tuple[list[dict], dict]:
     """Gemma writes the questions (resumable raw file); round 6's checks decide what is kept."""
     from .readtasks import write_news_questions
     until = until or date.today() - timedelta(days=1)
-    items = portal_items_after(NEWS_AFTER, until, seed=seed)
-    print(f"  [fresh9] portal: {len(items)} items, {NEWS_AFTER + timedelta(days=1)} to {until}", flush=True)
-    stats = write_news_questions(items, policy, NEWS9_RAW)
-    raw = read_json(NEWS9_RAW)["tasks"]
+    raw_path = raw or NEWS9_RAW
+    items = portal_items_after(after, until, seed=seed)
+    print(f"  [fresh9] portal: {len(items)} items, {after + timedelta(days=1)} to {until}", flush=True)
+    stats = write_news_questions(items, policy, raw_path)
+    raw = read_json(raw_path)["tasks"]
     rng = random.Random(seed)
     rng.shuffle(raw)
     kept = []
     for t in raw:
         if len(kept) >= NEWS_TARGET:
             break
-        kept.append(dict(t, id=f"f9{t['id']}", regime="news", qtype="news"))
-    return kept, {"portal_items": len(items), "from": str(NEWS_AFTER + timedelta(days=1)), "until": str(until),
+        kept.append(dict(t, id=f"{prefix}{t['id']}", regime="news", qtype="news"))
+    return kept, {"portal_items": len(items), "from": str(after + timedelta(days=1)), "until": str(until),
                   "questions_written": len(raw), "kept": len(kept), **stats}
 
 
-def build(gemma_path: str, out: Path = FRESH9, seed: int = 9, until: str | None = None, quick: bool = False) -> dict:
+def build(gemma_path: str, out: Path = FRESH9, seed: int = 9, until: str | None = None, quick: bool = False,
+          prefix: str = "f9", after: str | None = None) -> dict:
+    """prefix / after: round 10 builds its own benchmark the same way (f10, news after round 9's window)."""
     """Once: if the file exists it is the benchmark of record and is never rebuilt."""
     if out.exists():
         d = read_json(out)
         print(f"[fresh9] {out.name} exists ({len(d['tasks'])} questions, built {d['created']}): kept as the benchmark of record")
         return d
     from .policies import make_policy
-    global WD_PER, NEWS_TARGET, NEWS9_RAW
+    global WD_PER, NEWS_TARGET
+    after_d = date.fromisoformat(after) if after else NEWS_AFTER
+    raw = NEWS9_RAW.with_name(f"fresh{prefix[1:]}_news_raw{'_quick' if quick else ''}.json")
     if quick:                                  # shakedown: a handful of each, separate raw file
         WD_PER, NEWS_TARGET = {k: 3 for k in WD_PER}, 6
-        NEWS9_RAW = NEWS9_RAW.with_name("fresh9_news_raw_quick.json")
-        until = until or str(NEWS_AFTER + timedelta(days=2))
-    wd, wst = wikidata_fresh(seed)
-    news, nst = news_fresh(make_policy("gemma", gemma_path=gemma_path), date.fromisoformat(until) if until else None, seed)
+        until = until or str(after_d + timedelta(days=2))
+    wd, wst = wikidata_fresh(seed, prefix)
+    news, nst = news_fresh(make_policy("gemma", gemma_path=gemma_path), date.fromisoformat(until) if until else None, seed,
+                           prefix, after_d, raw)
     tasks = wd + news
-    d = {"version": 1, "created": date.today().isoformat(), "split": "bench-fresh9", "seed": seed,
+    d = {"version": 1, "created": date.today().isoformat(), "split": f"bench-fresh{prefix[1:]}", "seed": seed,
          "source": ("Wikidata SPARQL 2026 items unused by any earlier benchmark or training set (gold = Wikidata); "
-                    "Wikipedia Current Events portal after 2026-10-08, questions by Gemma, round 6 checks (gold = the item's words)"),
+                    f"Wikipedia Current Events portal after {after_d}, questions by Gemma, round 6 checks (gold = the item's words)"),
          "note": "built before any round 9 reader ran on it; never used to train or choose a reader",
          "counts": dict(Counter(t["regime"] for t in tasks)), "build": {"wikidata": wst, "news": nst}, "tasks": tasks}
     write_json(out, d)
@@ -162,10 +168,12 @@ def build(gemma_path: str, out: Path = FRESH9, seed: int = 9, until: str | None 
 
 
 def add_cli(sub):
-    p = sub.add_parser("fresh9", help="round 9: build the fresh benchmark once (Wikidata 2026 + portal news via Gemma)")
+    p = sub.add_parser("fresh9", help="rounds 9-10: build a fresh benchmark once (Wikidata 2026 + portal news via Gemma)")
     p.add_argument("--gemma-path", default="models/gemma-4-e4b-it")
     p.add_argument("--seed", type=int, default=9)
     p.add_argument("--until", default=None, help="last portal day (default: yesterday)")
     p.add_argument("--out", default=str(FRESH9))
     p.add_argument("--quick", action="store_true", help="shakedown: 3 per template, 6 news questions from 2 days")
-    p.set_defaults(fn=lambda a: build(a.gemma_path, Path(a.out), a.seed, a.until, a.quick))
+    p.add_argument("--prefix", default="f9", help="task id prefix (round 10: f10)")
+    p.add_argument("--after", default=None, help="portal news strictly after this day (default 2026-10-08; round 10: 2026-10-18)")
+    p.set_defaults(fn=lambda a: build(a.gemma_path, Path(a.out), a.seed, a.until, a.quick, a.prefix, a.after))

@@ -23,6 +23,7 @@ KV cache (SGSLanguageModel.forward_cached), so a pool of 16 is one batched step.
 """
 
 import hashlib
+import json
 import math
 import random
 import re
@@ -111,6 +112,9 @@ class Encoded:
     def __init__(self, sp, p: dict, shift: int = 0):
         q = shift_years(p["question"], shift) if shift else p["question"]
         cands, self.labels = pool_cands(p)
+        t = p.get("teacher")                     # round 10: Gemma's reading of the same pool, if labelled
+        self.teacher = None if not t else (int(t["k"]) if t.get("k") is not None and int(t["k"]) < len(cands) else -1,
+                                           float(t.get("p", 0.5)))
         snip = p.get("source") == "snippet" or p.get("snippet", False)
         if shift:
             cands = [dict(c, value=shift_years(c["value"], shift), context=shift_years(c.get("context", ""), shift))
@@ -137,10 +141,14 @@ def _forward(lm, head, batch: list[Encoded], device, pad: int):
     return head(torch.cat([h, ft], -1))                       # [N, 2]: choice logit, answer logit
 
 
-def _losses(logits, batch: list[Encoded]):
+def _losses(logits, batch: list[Encoded], teacher_w: float = 0.0):
+    """Known-answer labels (choice: the right candidates' share; answer: per-candidate BCE). Round 10 adds,
+    with weight teacher_w, Gemma's reading of the same pool as a soft target: its chosen candidate gets
+    its stated probability p, the rest share 1 - p; "none of these" (k = -1) pushes every answer logit down."""
     import torch
     import torch.nn.functional as F
     choice, bce, n_choice, k = 0.0, [], 0, 0
+    soft, n_soft = 0.0, 0
     for e in batch:
         n = len(e.conts)
         lg = logits[k:k + n]
@@ -151,8 +159,18 @@ def _losses(logits, batch: list[Encoded]):
             choice = choice + (torch.logsumexp(s, 0) - torch.logsumexp(s.masked_fill(~y, -1e4), 0))
             n_choice += 1
         bce.append(F.binary_cross_entropy_with_logits(lg[:, 1], y.float(), reduction="sum"))
+        if teacher_w and e.teacher is not None:
+            tk, tp = e.teacher
+            if tk >= 0:
+                q = torch.full((n,), (1 - tp) / max(n - 1, 1), device=lg.device)
+                q[tk] = tp if n > 1 else 1.0
+                soft = soft - (q * F.log_softmax(lg[:, 0], 0)).sum()
+            else:
+                soft = soft + F.binary_cross_entropy_with_logits(lg[:, 1], torch.zeros(n, device=lg.device))
+            n_soft += 1
     n_c = sum(len(e.conts) for e in batch)
-    return choice / max(n_choice, 1) + torch.stack(bce).sum() / max(n_c, 1)
+    loss = choice / max(n_choice, 1) + torch.stack(bce).sum() / max(n_c, 1)
+    return loss + teacher_w * soft / n_soft if n_soft else loss
 
 
 def _batches(encs: list[Encoded], cands_per_step: int):
@@ -279,9 +297,12 @@ def load_points(paths: list[Path]) -> list[dict]:
 
 def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, name: str, epochs: int = 3,
           lr: float = 5e-5, cands_per_step: int = 64, seed: int = 0, grad_checkpoint: bool = False,
-          max_points: int = 0, init: str | None = None, max_eval: int = 0) -> dict:
+          max_points: int = 0, init: str | None = None, max_eval: int = 0, teacher_w: float = 0.0,
+          early_stop: int = 0) -> dict:
     """init: start from a trained reader (round 7: the reading-skill reader, then our own pools).
-    max_eval: cap the validation and test pools (a seeded sample) when a points set is very large."""
+    max_eval: cap the validation and test pools (a seeded sample) when a points set is very large.
+    teacher_w: weight of Gemma's soft labels (round 10). early_stop: stop after this many epochs without a
+    better validation choice accuracy (round 10: Hertz overfit our pools in round 7, loss 0.18)."""
     import sentencepiece as spm
     import torch
     torch.manual_seed(seed)
@@ -323,7 +344,7 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     warm = min(100, steps // 10 + 1)
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: min(1.0, (s + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(s, steps) / steps)))
     out_dir.mkdir(parents=True, exist_ok=True)
-    best, log = -1.0, []
+    best, log, since = -1.0, [], 0
     print(f"[xreader:{name}] {len(by['train'])} train / {len(val)} val / {len(test)} test pools "
           f"({n_cands:,} train candidates), {arch['d_f']}-d backbone, {steps} steps", flush=True)
     for ep in range(epochs):
@@ -336,7 +357,7 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
         tr = (Encoded(sp, by["train"][i], shift=shifts[i]) for i in order)
         t0, tot, nb = time.time(), 0.0, 0
         for b in _batches(tr, cands_per_step):
-            loss = _losses(_forward(lm, head, b, device, pad), b)
+            loss = _losses(_forward(lm, head, b, device, pad), b, teacher_w)
             opt.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(list(lm.parameters()) + list(head.parameters()), 1.0)
@@ -350,8 +371,13 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
         log.append({"epoch": ep, "train_loss": tot / max(nb, 1), "val_choice_acc": acc, "s": round(time.time() - t0, 1)})
         print(f"  [xreader:{name}] epoch {ep}: loss {tot / max(nb, 1):.4f} val choice {acc:.3f} ({time.time() - t0:.0f}s)", flush=True)
         if acc > best:
-            best = acc
+            best, since = acc, 0
             torch.save({"lm": lm.state_dict(), "head": head.state_dict()}, out_dir / "weights.pt")
+        else:
+            since += 1
+            if early_stop and since >= early_stop:
+                print(f"  [xreader:{name}] early stop: no better validation in {since} epoch(s)", flush=True)
+                break
     w = torch.load(out_dir / "weights.pt", map_location=device)
     lm.load_state_dict(w["lm"])
     head.load_state_dict(w["head"])
@@ -362,7 +388,8 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
     metrics = {"name": name, "base": str(base_ckpt), "init": init, "tokenizer": str(tokenizer), "params": sum(p.numel() for p in lm.parameters()),
                "temperature": T, "platt": [a, b], "epochs": log, "best_val_choice_acc": best,
                "points": [str(p) for p in points], "n_points": {k: len(v) for k, v in by.items()},
-               "pool_rule": "top16_as_served",
+               "pool_rule": "top16_as_served", "teacher_w": teacher_w, "early_stop": early_stop,
+               "teacher_labelled": {k: sum(p.get("teacher") is not None for p in v) for k, v in by.items()},
                "schedule": {"unit": "batches", "steps": steps},
                "right_beyond_cut": {k: sum(bool(p.get("beyond")) for p in v) for k, v in by.items()},
                "test": evaluate(st, test, T, a, b),
@@ -462,10 +489,44 @@ def reader_size_mb(lm, head) -> float:
     return round(buf.tell() / 2 ** 20, 1)
 
 
+def teach(points: Path, policy, limit: int = 0) -> dict:
+    """Round 10: Gemma reads every pool of a points file once (the same READER_SYSTEM prompt and top-20
+    view as the Gemma reader on the benchmark) and its pick is stored on the pool as {"k", "p"}. The file
+    is rewritten in place; pools already taught are skipped, so an interrupted run resumes."""
+    from .readers import LLMReader
+    rd = LLMReader(policy)
+    pts = read_jsonl(points)
+    todo = [i for i, p in enumerate(pts) if p.get("teacher") is None and p.get("cands")][: limit or None]
+    print(f"[xreader] Gemma reads {len(todo)} pools ({len(pts) - len(todo)} done or empty) -> {points}", flush=True)
+    t0 = time.time()
+    for n, i in enumerate(todo, 1):
+        p = pts[i]
+        r = rd.read(p["question"], p["answer_type"], {"cands": p["cands"][:MAX_CANDS], "snippet": p.get("source") == "snippet"})
+        k = int(np.argmax(r)) if r and max(r) > 0 else None
+        p["teacher"] = {"k": k, "p": float(r[k]) if k is not None else 0.0, "by": policy.name}
+        if n % 200 == 0 or n == len(todo):
+            _write_jsonl(points, pts)
+            print(f"  {n}/{len(todo)} pools ({(time.time() - t0) / n:.2f}s/pool)", flush=True)
+    _write_jsonl(points, pts)
+    taught = [p for p in pts if p.get("teacher")]
+    agree = [bool(p["labels"][p["teacher"]["k"]]) for p in taught if p["teacher"]["k"] is not None and p["teacher"]["k"] < len(p["labels"]) and any(p["labels"])]
+    out = {"pools": len(pts), "taught": len(taught), "teacher_right_when_a_right_one_exists": sum(agree) / max(len(agree), 1)}
+    print(f"[xreader] teacher: {out}", flush=True)
+    return out
+
+
+def _write_jsonl(path: Path, rows: list[dict]):
+    tmp = Path(path).with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    tmp.replace(path)
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 def add_cli(sub, add_web_args, build_web):
     p = sub.add_parser("xreader", help="round 6/7 reader: collect (search + label) | rcdata (round 7 reading sets) | train (planck|hertz)")
-    p.add_argument("stage", choices=["collect", "rcdata", "train"])
+    p.add_argument("stage", choices=["collect", "rcdata", "train", "teach"])
     p.add_argument("--tasks", default=None, help="comma list (default: the Wikidata tasks + Gemma's news tasks)")
     p.add_argument("--points", default=str(READER_DIR / "points.jsonl"))
     p.add_argument("--stable-points", default=str(REPO_ROOT / "data" / "planck3" / "g2" / "points_ddgs.jsonl"),
@@ -483,14 +544,24 @@ def add_cli(sub, add_web_args, build_web):
     p.add_argument("--cands-per-step", type=int, default=None)
     p.add_argument("--max-points", type=int, default=0, help="quick runs: train on a sample")
     p.add_argument("--tag", default="")
-    add_web_args(p)
+    p.add_argument("--teacher-w", type=float, default=0.0, help="round 10: weight of Gemma's soft labels (pools with a 'teacher')")
+    p.add_argument("--early-stop", type=int, default=0, help="stop after this many epochs without a better validation score")
+    p.add_argument("--extra-points", default="", help="comma list of more pool files to train on (round 10: the Brave pools)")
+    p.add_argument("--regimes", default="", help="collect: only these task regimes (round 10: recent,news)")
+    add_web_args(p)                              # brings --gemma-path (round 10 teach)
 
     def run(a):
+        if a.stage == "teach":
+            from .policies import make_policy
+            teach(Path(a.points), make_policy("gemma", gemma_path=a.gemma_path), a.limit)
+            return
         if a.stage == "collect":
             from .g2 import collect
             from .readtasks import NEWS_TASKS, READ_TASKS
             files = a.tasks.split(",") if a.tasks else [str(READ_TASKS), str(NEWS_TASKS)]
             tasks = [t for f in files if Path(f).exists() for t in read_json(f)["tasks"]]
+            if a.regimes:
+                tasks = [t for t in tasks if t.get("regime") in a.regimes.split(",")]
             collect(tasks, build_web(a), Path(a.points), a.limit)
             return
         if a.stage == "rcdata":
@@ -501,8 +572,10 @@ def add_cli(sub, add_web_args, build_web):
         ck = a.base_checkpoint or ("checkpoints/hertz/best.pt" if hertz else "checkpoints/planck13/best.pt")
         tok = a.base_tokenizer or ("data/hertz12_data/tokenizer.model" if hertz else "data/wikipedia/tokenizer.model")
         out = REPO_ROOT / "checkpoints" / f"xreader_{a.base}{a.tag}"
-        meta = train([Path(a.stable_points), Path(a.points)], ck, tok, out, a.base, epochs=a.epochs,
+        extra = [Path(x) for x in a.extra_points.split(",") if x]
+        meta = train([Path(a.stable_points), Path(a.points)] + extra, ck, tok, out, a.base, epochs=a.epochs,
                      lr=a.lr or (3e-5 if hertz else 5e-5), cands_per_step=a.cands_per_step or (32 if hertz else 64),
-                     grad_checkpoint=hertz, max_points=a.max_points, init=a.init, max_eval=a.max_eval)
+                     grad_checkpoint=hertz, max_points=a.max_points, init=a.init, max_eval=a.max_eval,
+                     teacher_w=a.teacher_w, early_stop=a.early_stop)
         write_json(REPO_ROOT / "results" / "planck3" / f"xreader_{a.base}{a.tag}" / "train_log.json", meta)
     p.set_defaults(fn=run)

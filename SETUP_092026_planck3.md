@@ -425,6 +425,16 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
   - **Level with Gemma on news** (p 0.82); 17 points behind on Wikidata questions.
   - **Ships:** `serve` / `chat` load it from `r9_product.json`.
   - **Next (not built):** handset timing (top 16 vs top 8), C1 calibration, round 10 = Brave pools + Gemma soft labels, judged on a new fresh benchmark.
+- **Round 10 built + pre-registered (2026-10-20, `SETUP_planck_20261020.md`, `planck3.ps1 round10`, free Brave credit only: ≤ 950 live searches a month, run once in November and once in December):**
+  - **Collect:** round 6's training questions on Brave (557 Wikidata 2025 items, then 857 portal news), Brave only, resumable across months.
+  - **Teach:** Gemma soft labels on every Brave pool.
+  - **Train:** retrain Hertz's reader from the shipped one (soft-label weight 0.5, early stopping).
+  - **Judge:** on a NEW fresh benchmark (`fresh10`), committed before any reader runs.
+  - **Product fixed:** x-hertz r10, int8 on CPU, top 16.
+  - **Rules:**
+    - **G:** ≥ 5 points over the shipped reader on the new questions, p < 0.05.
+    - **GAP:** the share of the Gemma gap closed (reported).
+    - **Q, L, E** as round 9.
 - *Round 8 options as planned on 2026-10-14 (superseded by the round 8 build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.

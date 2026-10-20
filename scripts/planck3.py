@@ -49,8 +49,13 @@ def build_web(args, log_path=None):
     backend = args.search
     web = Web(cache, search_backend="ddgs" if backend == "auto" else backend,
               searxng_url=args.searxng_url, log_path=log_path)
-    web.secondary = [b for b in (getattr(args, "secondary", "") or "").split(",") if b]
+    sec = getattr(args, "secondary", "") or ""
+    web.secondary = [b for b in sec.split(",") if b and b != "none"]
+    if sec == "none":                       # round 10: Brave only; an empty Brave answer stays empty
+        web.fallback = False
     web.brave_reserve = getattr(args, "brave_reserve", 0) or 0
+    web.brave_budget = getattr(args, "brave_budget", 0) or 0
+    web.attach_ledger()                     # the runner's per-invocation Brave credit, if it set one
     web.relevance = not getattr(args, "no_relevance", False)
     if backend == "auto" and args.net != "replay":
         if web.brave_alive():
@@ -76,6 +81,8 @@ def add_web_args(p):
     p.add_argument("--secondary", default="", help="comma list of backends tried after --search, before Wikipedia")
     p.add_argument("--brave-reserve", type=int, default=0,
                    help="stop calling Brave once this many searches are left in the month (training data collection)")
+    p.add_argument("--brave-budget", type=int, default=0,
+                   help="at most this many live Brave calls this run, then the next backend (0 = no cap; round 10: the free credit)")
     p.add_argument("--no-relevance", action="store_true", help="serve off-topic results like round 5 did")
     p.add_argument("--searxng-url", default="http://localhost:8888")
     p.add_argument("--net", default="live", choices=["live", "replay", "refresh"],
@@ -138,9 +145,9 @@ def _chat_harness_factory(args):
     from src.planck3.answer import Answerer
     from src.planck3.readers import make_reader
     from src.planck3.writer import make_writer
-    # auto = what round 9 / 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
+    # auto = what round 10 / 9 / 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
     # reader); otherwise round 5's Planck reader, the best small reader measured so far
-    prods = [read_json(RESULTS / f) for f in ("r9_product.json", "r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
+    prods = [read_json(RESULTS / f) for f in ("r10_product.json", "r9_product.json", "r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
     prod = next((p for p in prods if (p.get("rule_r") or {}).get("pass")), prods[0] if prods else {})
     rd, wr, wck, rck = args.reader, args.writer, None, None
     if rd == "auto":
@@ -630,6 +637,7 @@ def cmd_watch(args):
 def cmd_search_check(args):
     from src.planck3.web import Web, WebCache
     web = Web(WebCache(args.cache_dir, mode="refresh"), searxng_url=args.searxng_url)
+    web.attach_ledger()
     if args.backend == "brave":
         import os
         from src.planck3.util import load_env
@@ -639,6 +647,10 @@ def cmd_search_check(args):
             sys.exit(1)
         q = web.brave_quota()
         ok = q["ok"] and (q["remaining"] is None or q["remaining"] >= args.need)
+        budget_left = web.brave_left()          # round 10: this month's credit, from the runner's ledger
+        if budget_left is not None:
+            print(f"  this month's runner budget: {budget_left:,} live searches left")
+            ok = ok and budget_left >= args.need
         left = ("not reported (no monthly quota on this plan: check the spend in the Brave dashboard)"
                 if q["remaining"] is None else f"{q['remaining']:,}")
         print(f"Brave Search API: {'UP' if ok else 'DOWN'} (HTTP {q['status']}); searches left this month: {left}"
@@ -722,6 +734,8 @@ def cmd_report(args):
     lines += r8_lines(RESULTS)
     from src.planck3.round9 import report_lines as r9_lines
     lines += r9_lines(RESULTS)
+    from src.planck3.round10 import report_lines as r10_lines
+    lines += r10_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -987,7 +1001,7 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import freshbench, g2, readtasks, round5, round6, round7, round8, round9, wikirace, xreader
+    from src.planck3 import freshbench, g2, readtasks, round5, round6, round7, round8, round9, round10, wikirace, xreader
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
     round5.add_cli(sub, add_web_args, build_web)
@@ -997,6 +1011,7 @@ def main():
     round7.add_cli(sub)
     round8.add_cli(sub)
     round9.add_cli(sub)
+    round10.add_cli(sub)
     freshbench.add_cli(sub)
 
     args = ap.parse_args()

@@ -144,6 +144,8 @@ class Web:
         self.relevance = True         # off-topic results count as a failed search (round 6)
         self.brave_reserve = 0        # stop calling Brave when the plan's monthly remainder is this low
         self.brave_remaining = None   # from the API's X-RateLimit-Remaining header (monthly part)
+        self.brave_budget = 0         # round 10: at most this many LIVE Brave calls this run (0 = no cap)
+        self.brave_used = 0
         self.brave_headers: dict = {}  # the last response's rate-limit headers, as sent (diagnostics)
         self.brave_status = None
         self._brave_paused = False
@@ -187,6 +189,9 @@ class Web:
         hit = self.cache.get("search", f"{backend}|{query}")
         if hit is not None and hit.get("results"):
             return hit["results"]
+        if backend == "brave" and self.brave_budget and self.brave_used >= self.brave_budget and not self._brave_paused:
+            self._brave_paused = True             # the run's credit cap: never spend past it
+            print(f"[web] Brave: {self.brave_used} live searches used, the run's budget; no more Brave calls this run", flush=True)
         if not self.cache.online or (backend == "brave" and self._brave_paused):
             if backend == "brave" and self._brave_paused:
                 self.calls["search_quota_skips"] += 1
@@ -261,7 +266,7 @@ class Web:
                 "final_empty_rate": final, "served": served, "primary_share": primary,   # cache hits included
                 "primary_offtopic_rate": c["search_offtopic_primary"] / n, "on_topic_rate": topical,
                 "relevance_checked": self.relevance, "brave_remaining": self.brave_remaining,
-                "brave_quota_skips": c["search_quota_skips"],
+                "brave_quota_skips": c["search_quota_skips"], "brave_live_calls": self.brave_used,
                 "valid": final <= 0.2 and (topical >= ON_TOPIC_RUN_MIN or not self.relevance)}
 
     def search_site(self, domain: str, query: str) -> list[dict]:
@@ -302,6 +307,8 @@ class Web:
         if not key:
             raise ValueError("BRAVE_API_KEY is not set: put it in .env (template .env.example; on the box: "
                              ".\\scripts\\planck3.ps1 setkey)")
+        self.brave_used += 1
+        self._ledger_write()
         r = self.session.get(BRAVE_URL, params={"q": query, "count": 10},
                              headers={"Accept": "application/json", "X-Subscription-Token": key},
                              timeout=FETCH_TIMEOUT)
@@ -350,6 +357,39 @@ class Web:
             self._brave_paused = True
             print(f"[web] Brave: {self.brave_remaining} searches left this month (reserve {self.brave_reserve}); "
                   f"the rest of this run uses the next backend in the chain", flush=True)
+
+    # ── the run's Brave credit (round 10: free credit only, spread over months) ──
+    def attach_ledger(self, path: str | Path | None = None):
+        """A runner-wide budget shared by every process of one runner invocation: the runner writes
+        {"budget": B, "used": 0}; each process caps its live Brave calls at what is left and adds its own."""
+        import os
+        path = path or os.environ.get("PLANCK3_BRAVE_LEDGER")
+        if not path or not Path(path).exists():
+            return
+        self._ledger = Path(path)
+        with open(self._ledger, encoding="utf-8-sig") as f:     # PowerShell 5.1 writes a BOM
+            d = json.load(f)
+        self._ledger_used0 = int(d.get("used", 0))
+        left = int(d["budget"]) - self._ledger_used0
+        self.brave_budget = max(left, 0)
+        if left <= 0:
+            self._brave_paused = True
+            print(f"[web] Brave: this run's credit is spent ({d['used']} of {d['budget']}); no Brave calls", flush=True)
+
+    def _ledger_write(self):
+        if getattr(self, "_ledger", None) is None:
+            return
+        with open(self._ledger, encoding="utf-8-sig") as f:
+            d = json.load(f)
+        d["used"] = self._ledger_used0 + self.brave_used
+        with open(self._ledger, "w", encoding="utf-8") as f:
+            json.dump(d, f)
+
+    def brave_left(self) -> int | None:
+        """Live Brave calls this process may still make (None = no cap)."""
+        if not self.brave_budget:
+            return None
+        return max(self.brave_budget - self.brave_used, 0)
 
     def brave_alive(self) -> bool:
         """Key set AND the live API answers with quota left. Round 9 fix: this used to accept a CACHED

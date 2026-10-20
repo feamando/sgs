@@ -3,7 +3,8 @@
    Planck 3.0 one-stop runner for the Windows 4090 box.
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
    SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6),
-   SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8), SETUP_planck_20261019.md (round 9)
+   SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8), SETUP_planck_20261019.md (round 9),
+   SETUP_planck_20261020.md (round 10)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -47,6 +48,9 @@
      round9    round 9 (SETUP_planck_20261019.md): builds a FRESH benchmark once (2026 Wikidata items + news
                after 2026-10-08, Gemma-written), checks the Brave quota, then confirms Hertz's reader (int8, CPU)
                on it against round 5's reader, Gemma and the heuristic; ~300 live Brave searches; ~2 h
+     round10   round 10 (SETUP_planck_20261020.md): close the Gemma gap on FREE Brave credit, once a month:
+               collect round 6's training questions on Brave (<= 950 live searches a month, -Limit overrides),
+               Gemma soft labels, retrain Hertz's reader, then a NEW fresh benchmark and the judging
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -921,6 +925,93 @@ function Do-Round9 {
     P3 (@("r9", "decide") + $ttag)
 }
 
+# Round 10 (SETUP_planck_20261020.md): close the Gemma gap on FREE Brave credit only (owner's call,
+# 2026-10-20). Each calendar month spends at most 950 live Brave searches ($4.75 of the monthly $5
+# credit; -Limit overrides), recorded in a ledger shared by the run's steps. Run it once a month: it
+# carries on where it stopped. Phase 1 collects the Brave pools (November); phase 2 has Gemma label them and trains, no
+# searches; phase 3 builds a NEW fresh benchmark and judges (December).
+function Do-Round10 {
+    foreach ($f in @($V2HEAD, $PLANCK_CKPT, $GEMMA, "checkpoints/xreader_hertz_rc/reader.pt", "data/planck3/reader/points.jsonl",
+                     "$RES/r9_product.json", $READ_TASKS, "data/planck3/reader/news_tasks.json")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 10 reuses rounds 6-9)" }
+    }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    # one budget per calendar month (the free credit resets on the 1st): a second run in the same month
+    # spends only what is left. Before November the October credit is mostly spent: pass -Limit to start
+    $month = Get-Date -Format "yyyy-MM"
+    if ($Limit -gt 0) { $budget = $Limit } elseif ($Quick) { $budget = 80 }
+    elseif ($month -lt "2026-11") { throw "round 10 spends the free Brave credit from 1 November (owner's call). To start earlier, pass -Limit N (live searches this month)" }
+    else { $budget = 950 }
+    $ledger = Join-Path $Root "$RES/r10_brave_ledger$Tag.json"
+    $used = 0
+    if (Test-Path $ledger) {
+        $l = Get-Content $ledger -Raw | ConvertFrom-Json
+        if ($l.month -eq $month) { $used = [int]$l.used }
+    }
+    Set-Content -Path $ledger -Value (@{ budget = $budget; used = $used; month = $month } | ConvertTo-Json) -Encoding UTF8
+    $env:PLANCK3_BRAVE_LEDGER = $ledger
+    Log "round 10: Brave budget for $month = $budget live searches, $used already used (ledger $ledger)"
+    $bp = "data/planck3/reader/points_brave$Tag.jsonl"
+    $prog = "data/planck3/reader/points_brave$Tag.progress.json"
+    $complete = (Test-Path $prog) -and [bool](Get-Content $prog -Raw | ConvertFrom-Json).complete
+    # 1. the Brave pools: round 6's 2025 Wikidata recent items first, then the 2025 portal news
+    if (-not $complete) {
+        $chk = Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave", "--need", "20")
+        $chk.Out | ForEach-Object { Log "$_" }
+        if ($chk.Code -ne 0) { Warn "Brave is not serving: the collection waits for the next run"; return }
+        $lim = if ($Quick) { @("--limit", "12") } else { @() }
+        foreach ($set in @(@($READ_TASKS, "recent"), @("data/planck3/reader/news_tasks.json", "news"))) {
+            Log "round 10 collect: $($set[1]) questions on Brave (resumable; stops when this run's credit is spent)"
+            P3 (@("xreader", "collect", "--tasks", $set[0], "--regimes", $set[1], "--points", $bp, "--search", "brave",
+                  "--secondary", "none") + $lim)
+        }
+        $complete = (Test-Path $prog) -and [bool](Get-Content $prog -Raw | ConvertFrom-Json).complete
+        if (-not $complete -and -not $Quick) {
+            $p = Get-Content $prog -Raw | ConvertFrom-Json
+            Log "round 10: $($p.through) of $($p.target) collection questions through; re-run after the monthly credit resets"
+            return
+        }
+    } else { Log "round 10: Brave pools complete ($bp)" }
+    # 2. Gemma labels every Brave pool, then the reader trains (no searches)
+    Log "round 10 teach: Gemma reads every Brave pool once (soft labels)"
+    P3 (@("xreader", "teach", "--points", $bp, "--gemma-path", $GEMMA) + $(if ($Quick) { @("--limit", "40") } else { @() }))
+    $ck = "checkpoints/xreader_hertz_r10$Tag/reader.pt"
+    if (-not (Test-Path $ck)) {
+        Log "round 10 train: from round 7's Hertz reading reader, our pools + the Brave pools, Gemma soft labels at 0.5, early stopping"
+        $q = if ($Quick) { @("--max-points", "300", "--epochs", "1") } else { @("--epochs", "3", "--early-stop", "1") }
+        P3 (@("xreader", "train", "--base", "hertz", "--points", "data/planck3/reader/points.jsonl", "--extra-points", $bp,
+              "--init", "checkpoints/xreader_hertz_rc/reader.pt", "--teacher-w", "0.5", "--tag", "_r10$Tag",
+              "--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK) + $q)
+    }
+    # 3. a NEW fresh benchmark (built once, committed before any reader runs), then the arms
+    $f10 = "scripts/assets/planck3_tasks_fresh10$Tag.json"
+    if (-not (Test-Path $f10)) {
+        Log "round 10: building the round 10 fresh benchmark once (Wikidata 2026 unused + portal news after 2026-10-18)"
+        P3 (@("fresh9", "--gemma-path", $GEMMA, "--out", $f10, "--prefix", "f10", "--after", "2026-10-18", "--seed", "10") + $(if ($Quick) { @("--quick") } else { @() }))
+        if (-not $Quick -and -not $NoPush) {
+            Invoke-Checked git @("add", "-f", "--", $f10)
+            Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null
+            Invoke-Checked git @("commit", "-m", "data(planck3): round 10 fresh benchmark, built before any reader ran on it")
+            Invoke-Checked git @("pull", "--rebase", "--autostash", "origin", "main")
+            Invoke-Checked git @("push", "origin", "main")
+        }
+    }
+    $n = (Get-Content $f10 -Raw | ConvertFrom-Json).tasks.Count
+    $need = if ($Quick) { 20 } else { [int]($n * 1.3) + 10 }
+    $chk = Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave", "--need", "$need")
+    $chk.Out | ForEach-Object { Log "$_" }
+    if ($chk.Code -ne 0) { Log "round 10: the judging needs $need live Brave searches; re-run after the monthly credit resets"; return }
+    $r10 = @("--reader", "x-hertz", "--reader-checkpoint", $ck, "--writer", "template")
+    $r9 = @("--reader", "x-hertz", "--reader-checkpoint", "checkpoints/xreader_hertz_rc/reader.pt", "--writer", "template", "--reader-quant", "int8")
+    Invoke-OnCpu { Invoke-R6 "r10_x-hertz-r10_cpu-int8-top16" ($r10 + @("--reader-quant", "int8")) "round 10: THE PRODUCT, x-hertz r10, int8, CPU 4 threads (new fresh questions; searches live)" 0 $f10 }
+    Invoke-OnCpu { Invoke-R6 "r10_x-hertz-rc_cpu-int8-top16" $r9 "round 10: the shipped reader (round 9's product), same configuration" 0 $f10 }
+    Invoke-R6 "r10_x-hertz-r10_template" $r10 "round 10: x-hertz r10 on the GPU (rule Q)" 0 $f10
+    Invoke-R6 "r10_gemma_template" @("--reader", "gemma", "--writer", "template") "round 10: Gemma reader (the gap)" 0 $f10
+    Invoke-R6 "r10_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 10: no-model floor" 0 $f10
+    Invoke-OnCpu { Invoke-R6 "r10_x-hertz-r10_cpu-int8-top16_contrarian" ($r10 + @("--reader-quant", "int8", "--personal", "contrarian")) "round 10: worst-case personal profile (rule E)" 0 $f10 }
+    P3 (@("r10", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -955,6 +1046,10 @@ function Do-Push {
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     # round 6: Gemma's news questions (and the rejected ones, with reasons) are training data: keep them auditable
     Get-ChildItem -Path "data/planck3/reader" -Filter "news_tasks*.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    Get-ChildItem -Path "scripts/assets" -Filter "planck3_tasks_fresh1*.json" -ErrorAction SilentlyContinue |
+        ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
+    Get-ChildItem -Path "data/planck3/reader" -Filter "points_brave*.progress.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     Get-ChildItem -Path "scripts/assets" -Filter "planck3_tasks_fresh9*.json" -ErrorAction SilentlyContinue |
         ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
@@ -1075,6 +1170,16 @@ switch ($Command.ToLower()) {
         Do-Round9
         P3 @("report")
         Log ("round9$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round10"    {
+        Start-RunLog "round10"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        try { Do-Round10 } finally { Remove-Item Env:PLANCK3_BRAVE_LEDGER -ErrorAction SilentlyContinue }
+        P3 @("report")
+        Log ("round10$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {
