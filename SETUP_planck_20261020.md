@@ -1,6 +1,6 @@
 # Planck 3.0 round 10: closing the Gemma gap (Hertz's reader on Brave pools, Gemma soft labels)
 
-Nikita Gorshkov · 2026-10-20 · Status: built, waiting for the 1 November credit reset · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261019.md` (round 9: Hertz's int8 reader ships, 49.1% vs Gemma 60.9%) · Plan and results of record: `SETUP_092026_planck3.md`
+Nikita Gorshkov · 2026-10-20 · Status: built; owner bought credit (2026-10-20, $11.81): run now with `-Limit 2000`, judge from 29 October · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261019.md` (round 9: Hertz's int8 reader ships, 49.1% vs Gemma 60.9%) · Plan and results of record: `SETUP_092026_planck3.md`
 
 **TL;DR.** One command, `.\scripts\planck3.ps1 round10`, run once in November and once in December. It uses free Brave credit only (owner's call, 2026-10-20): at most 950 live searches a month, $4.75 of the $5 credit. It resumes where it stopped.
 
@@ -62,6 +62,12 @@ Nikita Gorshkov · 2026-10-20 · Status: built, waiting for the 1 November credi
 | December (from the 1st) | finish collecting (~500); Gemma labels every Brave pool (~2,500 pools, ~1 h); train (~30-45 min); build the new benchmark (~30 min); judge the five arms (~1.5 h) | ~800 | ~4 h |
 
 If December's credit runs short before the judging, the run stops before the first reader and judges in January.
+
+**Update 2026-10-20: the owner bought credit ($11.81 ≈ 2,360 searches),** so the monthly wait is gone. Round 10 needs about 1,750: ~1,450 for the collection, ~300 for the judging, and a few for checks.
+- **Now:** `round10 -Limit 2000` collects, teaches and trains in one run (~3 h), then stops.
+  - The new benchmark's news half needs the same 10-day portal window as round 9 (19-28 October). Built today, it would hold about 2 days of news.
+- **On or after 29 October:** `round10 -Limit 2000` again builds the benchmark (pushed before any reader runs) and judges (~1.5 h).
+  - Both runs share October's ledger, so the cap of 2,000 searches ($10) covers both.
 
 ## 3. Step by step
 
