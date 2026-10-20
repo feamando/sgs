@@ -1,0 +1,334 @@
+{
+  "version": 1,
+  "created": "2026-10-20",
+  "split": "bench-fresh10",
+  "seed": 10,
+  "source": "Wikidata SPARQL 2026 items unused by any earlier benchmark or training set (gold = Wikidata); Wikipedia Current Events portal after 2026-10-18, questions by Gemma, round 6 checks (gold = the item's words)",
+  "note": "built before any round 9 reader ran on it; never used to train or choose a reader",
+  "counts": {
+    "fresh": 12,
+    "news": 6
+  },
+  "build": {
+    "wikidata": {
+      "winner": {
+        "pool": 840,
+        "kept": 3
+      },
+      "election": {
+        "pool": 65,
+        "used before": 2,
+        "kept": 3
+      },
+      "season": {
+        "pool": 436,
+        "kept": 3
+      },
+      "headgov": {
+        "pool": 239,
+        "no proper-name answer": 1,
+        "used before": 1,
+        "kept": 3
+      }
+    },
+    "news": {
+      "portal_items": 13,
+      "from": "2026-10-19",
+      "until": "2026-10-20",
+      "questions_written": 10,
+      "kept": 10,
+      "rejected": {
+        "answer in the question": 1,
+        "number without a number": 1,
+        "answer named in a benchmark question": 1
+      }
+    }
+  },
+  "tasks": [
+    {
+      "id": "f10winner000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 TSport 200?",
+      "answer_type": "entity",
+      "gold": [
+        "Layne Riggs"
+      ],
+      "qid": "Q140244215",
+      "entity": "2026 TSport 200",
+      "source": "https://www.wikidata.org/wiki/Q140244215",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10winner001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Bank of America 400?",
+      "answer_type": "entity",
+      "gold": [
+        "Chase Briscoe",
+        "Chase David Wayne Briscoe"
+      ],
+      "qid": "Q140244275",
+      "entity": "2026 Bank of America 400",
+      "source": "https://www.wikidata.org/wiki/Q140244275",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10winner002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "winner",
+      "question": "Who won the 2026 Go Bowling at The Glen?",
+      "answer_type": "entity",
+      "gold": [
+        "Shane van Gisbergen",
+        "Shane Robert van Gisbergen"
+      ],
+      "qid": "Q138857895",
+      "entity": "2026 Go Bowling at The Glen",
+      "source": "https://www.wikidata.org/wiki/Q138857895",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10election000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Hungarian parliamentary election?",
+      "answer_type": "entity",
+      "gold": [
+        "Hungarian Two-tailed Dog Party",
+        "Democratic Coalition",
+        "Fidesz–KDNP",
+        "Fidesz-KDNP",
+        "Alliance of Hungarian Solidarity",
+        "Our Homeland Movement",
+        "Our Home Movement",
+        "Respect and Freedom Party"
+      ],
+      "qid": "Q125627220",
+      "entity": "2026 Hungarian parliamentary election",
+      "source": "https://www.wikidata.org/wiki/Q125627220",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10election001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Gorton and Denton by-election?",
+      "answer_type": "entity",
+      "gold": [
+        "Hannah Spencer",
+        "Hannah Kathrine Spencer"
+      ],
+      "qid": "Q137850844",
+      "entity": "2026 Gorton and Denton by-election",
+      "source": "https://www.wikidata.org/wiki/Q137850844",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10election002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "election",
+      "question": "Who won the 2026 Portuguese presidential election?",
+      "answer_type": "entity",
+      "gold": [
+        "António José Seguro",
+        "Antonio Jose Seguro"
+      ],
+      "qid": "Q106752620",
+      "entity": "2026 Portuguese presidential election",
+      "source": "https://www.wikidata.org/wiki/Q106752620",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10season000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 FIBA 3x3 Asia Cup – Men's tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "New Zealand men's national 3x3 team"
+      ],
+      "qid": "Q138967267",
+      "entity": "2026 FIBA 3x3 Asia Cup – Men's tournament",
+      "source": "https://www.wikidata.org/wiki/Q138967267",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10season001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Big East Conference softball tournament?",
+      "answer_type": "entity",
+      "gold": [
+        "UConn Huskies softball"
+      ],
+      "qid": "Q139855182",
+      "entity": "2026 Big East Conference softball tournament",
+      "source": "https://www.wikidata.org/wiki/Q139855182",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10season002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "season",
+      "question": "Who won the 2026 Czech Hockey Games?",
+      "answer_type": "entity",
+      "gold": [
+        "Sweden men's national ice hockey team",
+        "Team Sweden",
+        "Three Crowns"
+      ],
+      "qid": "Q124709724",
+      "entity": "2026 Czech Hockey Games",
+      "source": "https://www.wikidata.org/wiki/Q124709724",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10headgov000",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Ufa in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Sharipov Rustam Dinislamovich",
+        "Şәripov Röstәm Dinislam ulı"
+      ],
+      "qid": "Q911",
+      "entity": "Ufa",
+      "source": "https://www.wikidata.org/wiki/Q911",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10headgov001",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of Virginia in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Abigail Spanberger",
+        "Abigail Anne Spanberger"
+      ],
+      "qid": "Q1370",
+      "entity": "Virginia",
+      "source": "https://www.wikidata.org/wiki/Q1370",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10headgov002",
+      "family": "fact",
+      "regime": "fresh",
+      "template": "headgov",
+      "question": "Who became head of government of West Union in 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Kent Halverson"
+      ],
+      "qid": "Q662047",
+      "entity": "West Union",
+      "source": "https://www.wikidata.org/wiki/Q662047",
+      "gold_as_of": "2026-10-20"
+    },
+    {
+      "id": "f10news_2026-10-19_law2",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, where did a stabbing attack injure a teacher and a student, leading to the arrest of a 13-year-old suspect?",
+      "answer_type": "entity",
+      "gold": [
+        "Bistrița"
+      ],
+      "source": "Portal:Current events 2026-10-19",
+      "evidence": "A teacher and a student are injured in a stabbing attack at a school in Bistrița, Romania. The 13-year-old suspect is arrested.",
+      "gold_as_of": "2026-10-19",
+      "qtype": "news"
+    },
+    {
+      "id": "f10news_2026-10-19_law0",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "In October 2026, which Florida attorney general charged former Cuban president Raúl Castro with conspiracy to commit first-degree murder?",
+      "answer_type": "entity",
+      "gold": [
+        "James Uthmeier"
+      ],
+      "source": "Portal:Current events 2026-10-19",
+      "evidence": "A judge in Miami-Dade County, Florida, United States, issues a no-bail bond arrest warrant for former Cuban president Raúl Castro after Florida attorney general James Uthmeier charged Castro with conspiracy to commit first-degree murder by directing spies to infiltrate Brothers to the Rescue and ordering the attack on their planes in 1996.",
+      "gold_as_of": "2026-10-19",
+      "qtype": "news"
+    },
+    {
+      "id": "f10news_2026-10-19_law4",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "How many people were arrested by Israel Police in the occupied West Bank in October 2026 following attacks on American photojournalist Heidi Levine and the mayor of Aulnoye-Aymeries, France?",
+      "answer_type": "number",
+      "gold": [
+        "10"
+      ],
+      "source": "Portal:Current events 2026-10-19",
+      "evidence": "Israel Police arrest 10 people in the occupied West Bank over attacks on American photojournalist Heidi Levine and the mayor of Aulnoye-Aymeries, France, who were travelling with European diplomats, and seize vehicles and other evidence during raids.",
+      "gold_as_of": "2026-10-19",
+      "qtype": "news"
+    },
+    {
+      "id": "f10news_2026-10-19_conflict0",
+      "family": "fact",
+      "regime": "news",
+      "template": "conflict",
+      "question": "How many soldiers were killed in a missile attack by the Houthis at a training center in Shabwah Governorate, Yemen, in October 2026?",
+      "answer_type": "number",
+      "gold": [
+        "58"
+      ],
+      "source": "Portal:Current events 2026-10-19",
+      "evidence": "A missile attack by the Houthis kills 58 soldiers and injure over 200 at a training center in Shabwah Governorate, Yemen. There are 14 missing.",
+      "gold_as_of": "2026-10-19",
+      "qtype": "news"
+    },
+    {
+      "id": "f10news_2026-10-20_election0",
+      "family": "fact",
+      "regime": "news",
+      "template": "election",
+      "question": "Which opposition coalition was deregistered by Malaysia in October 2026?",
+      "answer_type": "entity",
+      "gold": [
+        "Perikatan Nasional"
+      ],
+      "source": "Portal:Current events 2026-10-20",
+      "evidence": "Malaysia's deregisters the opposition coalition Perikatan Nasional, citing internal disputes and breaches of the constitution, preventing its component parties from contesting forthcoming elections under a common coalition banner.",
+      "gold_as_of": "2026-10-20",
+      "qtype": "news"
+    },
+    {
+      "id": "f10news_2026-10-19_law1",
+      "family": "fact",
+      "regime": "news",
+      "template": "law",
+      "question": "Who was convicted by a Kenyan court in October 2026 for the deaths of 190 children and an adult linked to starvation in Shakahola Forest?",
+      "answer_type": "entity",
+      "gold": [
+        "Paul Nthenge Mackenzie"
+      ],
+      "source": "Portal:Current events 2026-10-19",
+      "evidence": "A Kenyan court convicts Good News International Ministries leader Paul Nthenge Mackenzie of murdering 190 children and an adult whose deaths were linked to starvation in Shakahola Forest.",
+      "gold_as_of": "2026-10-19",
+      "qtype": "news"
+    }
+  ]
+}

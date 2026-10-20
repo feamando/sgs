@@ -1,0 +1,110 @@
+{
+  "name": "hertz",
+  "base": "checkpoints/hertz12/best.pt",
+  "init": "checkpoints/xreader_hertz_rc/reader.pt",
+  "tokenizer": "data/hertz12_data/tokenizer.model",
+  "params": 640812055,
+  "temperature": 1.46613368551528,
+  "platt": [
+    0.69196390589668,
+    0.6824652797979125
+  ],
+  "epochs": [
+    {
+      "epoch": 0,
+      "train_loss": 1.4440422935691555,
+      "val_choice_acc": 0.6923076923076923,
+      "s": 25.9
+    }
+  ],
+  "best_val_choice_acc": 0.6923076923076923,
+  "points": [
+    "C:\\Users\\feama\\sgs\\data\\planck3\\g2\\points_ddgs.jsonl",
+    "data\\planck3\\reader\\points.jsonl",
+    "data\\planck3\\reader\\points_brave_quick.jsonl"
+  ],
+  "n_points": {
+    "train": 247,
+    "val": 24,
+    "test": 29
+  },
+  "pool_rule": "top16_as_served",
+  "teacher_w": 0.5,
+  "early_stop": 0,
+  "teacher_labelled": {
+    "train": 1,
+    "val": 0,
+    "test": 1
+  },
+  "schedule": {
+    "unit": "batches",
+    "steps": 114
+  },
+  "right_beyond_cut": {
+    "train": 3,
+    "val": 1,
+    "test": 1
+  },
+  "test": {
+    "pools": 29,
+    "pools_with_a_right_candidate": 16,
+    "choice_acc": 0.6875,
+    "ranker_acc": 0.3125,
+    "only_choice_right": 6,
+    "only_ranker_right": 0,
+    "vs_ranker_p": 0.03125,
+    "gate_auc": 0.7575757575757576,
+    "gate_ece": 0.13279264757727402,
+    "base_rate": 0.3793103448275862
+  },
+  "test_by_group": {
+    "stable": {
+      "pools": 12,
+      "pools_with_a_right_candidate": 8,
+      "choice_acc": 0.75,
+      "ranker_acc": 0.375,
+      "only_choice_right": 3,
+      "only_ranker_right": 0,
+      "vs_ranker_p": 0.25,
+      "gate_auc": 0.9444444444444444,
+      "gate_ece": 0.17773649049661033,
+      "base_rate": 0.5
+    },
+    "recent": {
+      "pools": 6,
+      "pools_with_a_right_candidate": 2,
+      "choice_acc": 0.0,
+      "ranker_acc": 0.0,
+      "only_choice_right": 0,
+      "only_ranker_right": 0,
+      "vs_ranker_p": 1.0,
+      "gate_auc": null,
+      "gate_ece": 0.4884544879019599,
+      "base_rate": 0.0
+    },
+    "news": {
+      "pools": 8,
+      "pools_with_a_right_candidate": 4,
+      "choice_acc": 0.75,
+      "ranker_acc": 0.25,
+      "only_choice_right": 2,
+      "only_ranker_right": 0,
+      "vs_ranker_p": 0.5,
+      "gate_auc": 0.9333333333333333,
+      "gate_ece": 0.30869664666195606,
+      "base_rate": 0.375
+    },
+    "info": {
+      "pools": 3,
+      "pools_with_a_right_candidate": 2,
+      "choice_acc": 1.0,
+      "ranker_acc": 0.5,
+      "only_choice_right": 1,
+      "only_ranker_right": 0,
+      "vs_ranker_p": 1.0,
+      "gate_auc": 1.0,
+      "gate_ece": 0.5471891868790104,
+      "base_rate": 0.6666666666666666
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "n": 12,
+  "accuracy": 0.5833333333333334,
+  "bands": {
+    "high": {
+      "n": 3,
+      "share": 0.25,
+      "precision": 0.6666666666666666
+    },
+    "good": {
+      "n": 6,
+      "share": 0.5,
+      "precision": 0.8333333333333334
+    },
+    "low": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    },
+    "sceptical": {
+      "n": 2,
+      "share": 0.16666666666666666,
+      "precision": 0.0
+    },
+    "none": {
+      "n": 1,
+      "share": 0.08333333333333333,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 12,
+      "accuracy": 0.5833333333333334
+    }
+  },
+  "qtype_accuracy": 1.0,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 1.0,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.8181818181818182,
+  "tokens_per_task": 1807.5,
+  "timing_ms_per_task": {
+    "search_ms": 0.5666666666666667,
+    "fetch_ms": 141.46666666666667,
+    "read_ms": 2551.5416666666665,
+    "write_ms": 0.0,
+    "total_ms": 2896.7166666666667
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 0.6666666666666666,
+  "reader": "gemma",
+  "reader_config": null,
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh10_quick.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 12,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 12
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.0,
+    "on_topic_rate": 1.0,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "brave_live_calls": 0,
+    "valid": true
+  },
+  "wall_s": 34.8,
+  "llm_usd_per_task_as_haiku": 0.0019045
+}

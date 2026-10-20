@@ -1,0 +1,133 @@
+{
+  "reader": "x-hertz",
+  "reader_why": "fixed before the run: Hertz's reader trained on Brave pools with Gemma soft labels",
+  "reader_checkpoint": "checkpoints/xreader_hertz_r10/reader.pt",
+  "reader_quant": "int8",
+  "reader_cands": 16,
+  "writer": "template",
+  "writer_why": "round 6: no small writer passes rule W",
+  "run": "r10_x-hertz-r10_cpu-int8-top16",
+  "tag": "_quick",
+  "benchmark": "scripts/assets/planck3_tasks_fresh10.json",
+  "rule_g": {
+    "pass": false,
+    "margin": 0.05,
+    "a": "r10_x-hertz-r10_cpu-int8-top16_quick",
+    "b": "r10_x-hertz-rc_cpu-int8-top16_quick",
+    "n": 12,
+    "acc_a": 0.6666666666666666,
+    "acc_b": 0.5833333333333334,
+    "a_only": 1,
+    "b_only": 0,
+    "p": 1.0
+  },
+  "gap_closed": {
+    "share": null,
+    "gemma_vs_shipped": {
+      "a": "r10_gemma_template_quick",
+      "b": "r10_x-hertz-rc_cpu-int8-top16_quick",
+      "n": 12,
+      "acc_a": 0.5833333333333334,
+      "acc_b": 0.5833333333333334,
+      "a_only": 0,
+      "b_only": 0,
+      "p": 1.0
+    }
+  },
+  "rule_q": {
+    "pass": true,
+    "a": "r10_x-hertz-r10_cpu-int8-top16_quick",
+    "b": "r10_x-hertz-r10_template_quick",
+    "n": 12,
+    "acc_a": 0.6666666666666666,
+    "acc_b": 0.6666666666666666,
+    "a_only": 0,
+    "b_only": 0,
+    "p": 1.0
+  },
+  "vs_gemma": {
+    "a": "r10_x-hertz-r10_cpu-int8-top16_quick",
+    "b": "r10_gemma_template_quick",
+    "n": 12,
+    "acc_a": 0.6666666666666666,
+    "acc_b": 0.5833333333333334,
+    "a_only": 1,
+    "b_only": 0,
+    "p": 1.0
+  },
+  "vs_heuristic": {
+    "a": "r10_x-hertz-r10_cpu-int8-top16_quick",
+    "b": "r10_heuristic_template_quick",
+    "n": 12,
+    "acc_a": 0.6666666666666666,
+    "acc_b": 0.3333333333333333,
+    "a_only": 4,
+    "b_only": 0,
+    "p": 0.125
+  },
+  "by_regime": {
+    "r10_heuristic_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.3333333333333333
+      }
+    },
+    "r10_x-hertz-rc_cpu-int8-top16": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.5833333333333334
+      }
+    },
+    "r10_x-hertz-r10_cpu-int8-top16": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.6666666666666666
+      }
+    },
+    "r10_x-hertz-r10_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.6666666666666666
+      }
+    },
+    "r10_gemma_template": {
+      "fresh": {
+        "n": 12,
+        "acc": 0.5833333333333334
+      }
+    }
+  },
+  "rule_c1": {
+    "pass": true,
+    "monotone": true,
+    "high": {
+      "n": 1,
+      "precision": 1.0,
+      "bar": 0.9,
+      "judged": false
+    },
+    "good": {
+      "n": 6,
+      "precision": 0.8333333333333334,
+      "bar": 0.7,
+      "judged": false
+    }
+  },
+  "rule_e": {
+    "pass": true,
+    "drop": 0.0,
+    "changed": 10,
+    "flagged": 10
+  },
+  "rule_l": {
+    "pass": true,
+    "ms": 2800.816666666667,
+    "measured_on": "every fresh question, CPU, 4 threads"
+  },
+  "rule_r": {
+    "pass": false,
+    "acc": 0.6666666666666666,
+    "why": "round 10: rule G and the product checks"
+  },
+  "outcome": "keep round 9's reader: Brave pools + Gemma soft labels did not beat it by 5 points"
+}
