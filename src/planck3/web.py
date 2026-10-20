@@ -147,6 +147,8 @@ class Web:
         self.brave_budget = 0         # round 10: at most this many LIVE Brave calls this run (0 = no cap)
         self.brave_used = 0
         self.brave_headers: dict = {}  # the last response's rate-limit headers, as sent (diagnostics)
+        self.last_error = None        # the last search's failure, if it failed (HTTP status + body), else None
+        self._errors_shown: set = set()
         self.brave_status = None
         self._brave_paused = False
         self._consecutive_empty = 0
@@ -165,6 +167,7 @@ class Web:
         ON-TOPIC answer is served; if none is on topic, the first non-empty one (counted off topic).
         """
         self.calls["search"] += 1
+        self.last_error = None
         chain = [self.backend] + [b for b in self.secondary if b != self.backend]
         if self.backend in SCRAPED_BACKENDS and self.fallback and "wikipedia" not in chain:
             chain.append("wikipedia")
@@ -218,7 +221,8 @@ class Web:
                 raise SearchUnavailable(
                     f"{self._consecutive_empty} searches in a row came back empty (backend {self.backend}, "
                     f"fallback {'on' if self.fallback else 'off'}). The search engine is blocked or down: "
-                    f"stopping instead of producing results with no evidence. Wait, check `docker logs "
+                    f"stopping instead of producing results with no evidence. Last error: "
+                    f"{self.last_error or 'none (the engine answered with no results)'}. Wait, check `docker logs "
                     f"planck3-searxng` (SearXNG) or try again later (ddgs rate limit), then re-run "
                 f"(finished work is kept).")
         return []
@@ -245,7 +249,8 @@ class Web:
         except ValueError:
             raise
         except Exception as e:  # network errors must not kill a benchmark run (the breaker handles streaks)
-            self._log({"event": "search_error", "backend": backend, "query": query, "error": repr(e)})
+            if not (self.last_error or "").startswith(f"{backend}: HTTP"):     # keep the HTTP status + body
+                self._error(backend, query, repr(e)[:300])
             return []
         if results:  # never cache "nothing": a rate-limited engine would poison every later run
             self.cache.put("search", f"{backend}|{query}", {"query": query, "backend": backend,
@@ -314,9 +319,11 @@ class Web:
                              timeout=FETCH_TIMEOUT)
         self.brave_status = r.status_code
         self._brave_quota(getattr(r, "headers", None) or {}, r.status_code)
+        if r.status_code != 200:
+            body = (getattr(r, "text", "") or "")[:300].replace("\n", " ")
+            self._error("brave", query, f"HTTP {r.status_code}: {body}")
         if r.status_code == 429:  # over the plan's rate or quota: back off, count it, fall back
             self.calls["search_ratelimited"] += 1
-            self._log({"event": "search_ratelimited", "backend": "brave", "query": query})
             if self.brave_remaining == 0:          # the month is used up: stop asking for this run
                 self._brave_paused = True
                 return []
@@ -522,6 +529,15 @@ class Web:
         if wait > 0:
             time.sleep(wait)
         self._last_hit[host] = time.time()
+
+    def _error(self, backend: str, query: str, msg: str):
+        """A failed search: remembered (the breaker reports it), logged, and printed once per kind."""
+        self.last_error = f"{backend}: {msg}"
+        self._log({"event": "search_error", "backend": backend, "query": query, "error": msg})
+        kind = msg.split(":")[0] if msg.startswith("HTTP") else msg[:40]
+        if kind not in self._errors_shown:
+            self._errors_shown.add(kind)
+            print(f"[web] search error ({backend}): {msg}", flush=True)
 
     def _log(self, obj):
         if self.log_path:

@@ -70,8 +70,15 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
     done = {r["task_id"] for r in read_jsonl(out_path)} if out_path.exists() else set()
     # attempted = searched, even if no pool came back (round 10: a re-run after a credit stop must not
     # search those again, and must know when the whole set is through)
+    # Lines are "id<TAB>ok|empty". A search that FAILED (an error, not an empty answer) is never recorded,
+    # so it is retried; a bare id (the first version) counts only if the question has a pool.
     att_path = out_path.with_suffix(".attempted.txt")
-    attempted = set(att_path.read_text(encoding="utf-8").split()) if att_path.exists() else set()
+    attempted = set()
+    if att_path.exists():
+        for line in att_path.read_text(encoding="utf-8").splitlines():
+            tid, _, how = line.partition("\t")
+            if tid and (how or tid in done):
+                attempted.add(tid)
     facts = [t for t in tasks if t["family"] == "fact"]
     todo = [t for t in facts if t["id"] not in done | attempted][: limit or None]
     stopped = False
@@ -113,9 +120,10 @@ def collect(tasks: list[dict], web, out_path: Path, limit: int = 0):
                                                                      "domains", "support", "url")} for c in cands],
                                     "labels": labels}, ensure_ascii=False) + "\n")
             f.flush()
-            with open(att_path, "a", encoding="utf-8") as fa:
-                fa.write(t["id"] + "\n")
-            attempted.add(t["id"])
+            if results or not getattr(web, "last_error", None):     # an outage is not an answer: retry it
+                with open(att_path, "a", encoding="utf-8") as fa:
+                    fa.write(f"{t['id']}\t{'ok' if results else 'empty'}\n")
+                attempted.add(t["id"])
             if i % 50 == 0:
                 rate = (time.time() - t0) / i
                 print(f"  {i}/{len(todo)} ({rate:.1f}s/question, ~{rate * (len(todo) - i) / 60:.0f} min left; "

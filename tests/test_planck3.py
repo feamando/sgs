@@ -1602,3 +1602,31 @@ def test_round10_brave_budget_soft_labels_and_rules(tmp_path, monkeypatch):
     assert d["rule_g"]["pass"] and d["gap_closed"]["share"] == 1.0 and d["rule_r"]["pass"] and d["outcome"].startswith("ship")
     run(R10.PRODUCT, 108)
     assert not R10.decide(R)["rule_g"]["pass"]                               # +4 points is not enough
+
+
+def test_round10_search_errors_are_reported_and_retried(tmp_path, monkeypatch):
+    from src.planck3 import g2 as G
+    from src.planck3 import web as W
+    monkeypatch.setenv("BRAVE_API_KEY", "k")
+    monkeypatch.setattr(W.time, "sleep", lambda s: None)
+    w = W.Web(W.WebCache(tmp_path / "c"), search_backend="brave")
+    w.fallback, w.relevance = False, False
+
+    class R:
+        status_code, headers, text = 402, {}, '{"error": {"code": "PAYMENT_REQUIRED"}}'
+
+        def raise_for_status(self):
+            raise RuntimeError("402 Client Error")
+    monkeypatch.setattr(w.session, "get", lambda *a, **k: R())
+    monkeypatch.setattr(w, "fetch", lambda url: {})
+    tasks = [{"id": f"recent_e{i}", "family": "fact", "question": f"Who won the 2025 Ex Cup {i}?", "answer_type": "entity",
+              "gold": ["X"], "regime": "recent"} for i in range(3)]
+    out = tmp_path / "pb.jsonl"
+    G.collect(tasks, w, out)
+    assert w.last_error.startswith("brave: HTTP 402") and "PAYMENT_REQUIRED" in w.last_error
+    assert not out.with_suffix(".attempted.txt").exists()                     # failed searches are retried, not "done"
+    try:
+        for i in range(W.MAX_CONSECUTIVE_EMPTY + 1):
+            w.search(f"q{i}")
+    except W.SearchUnavailable as e:
+        assert "HTTP 402" in str(e)                                           # the breaker names the cause

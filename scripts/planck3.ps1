@@ -960,10 +960,17 @@ function Do-Round10 {
         $chk.Out | ForEach-Object { Log "$_" }
         if ($chk.Code -ne 0) { Warn "Brave is not serving: the collection waits for the next run"; return }
         $lim = if ($Quick) { @("--limit", "12") } else { @() }
-        foreach ($set in @(@($READ_TASKS, "recent"), @("data/planck3/reader/news_tasks.json", "news"))) {
-            Log "round 10 collect: $($set[1]) questions on Brave (resumable; stops when this run's credit is spent)"
-            P3 (@("xreader", "collect", "--tasks", $set[0], "--regimes", $set[1], "--points", $bp, "--search", "brave",
-                  "--secondary", "none") + $lim)
+        try {
+            foreach ($set in @(@($READ_TASKS, "recent"), @("data/planck3/reader/news_tasks.json", "news"))) {
+                Log "round 10 collect: $($set[1]) questions on Brave (resumable; stops when this run's credit is spent)"
+                P3 (@("xreader", "collect", "--tasks", $set[0], "--regimes", $set[1], "--points", $bp, "--search", "brave",
+                      "--secondary", "none") + $lim)
+            }
+        } catch {
+            # push the log so the cause can be read from any machine (the collection is resumable)
+            Warn "round 10 collection stopped: $($_.Exception.Message)"
+            Do-Push
+            throw
         }
         $complete = (Test-Path $prog) -and [bool](Get-Content $prog -Raw | ConvertFrom-Json).complete
         if (-not $complete -and -not $Quick) {
