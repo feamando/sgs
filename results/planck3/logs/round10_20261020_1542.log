@@ -1,0 +1,35 @@
+[planck3 15:42:25] logging to C:\Users\feama\sgs\results\planck3\logs\round10_20261020_1542.log
+[planck3 15:42:25] installing Planck 3.0 deps into .venv
+[planck3 15:42:30] offline smoke tests
+[planck3 15:42:57] round 10: Brave budget for 2026-10 = 2000 live searches, 0 already used (ledger C:\Users\feama\sgs\results\planck3\r10_brave_ledger.json)
+[planck3 15:42:59]   this month's runner budget: 1,999 live searches left
+[planck3 15:42:59] Brave Search API: UP (HTTP 200); searches left this month: not reported (no monthly quota on this plan: check the spend in the Brave dashboard) (this run needs 20)
+[planck3 15:42:59]   rate-limit headers: {'X-RateLimit-Limit': '50, 0', 'X-RateLimit-Remaining': '49, 0', 'X-RateLimit-Reset': '1, 987420', 'X-RateLimit-Policy': '50;w=1, 0;w=2678400'}
+[planck3 15:42:59] round 10 collect: recent questions on Brave (resumable; stops when this run's credit is spent)
+> python scripts/planck3.py xreader collect --tasks scripts/assets/planck3_read_train_tasks.json --regimes recent --points data/planck3/reader/points_brave.jsonl --search brave --secondary none
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[g2] collecting 557 questions (0 already done) -> data\planck3\reader\points_brave.jsonl
+  50/557 (1.1s/question, ~9 min left; 0 empty searches)
+  100/557 (1.2s/question, ~9 min left; 0 empty searches)
+  150/557 (1.3s/question, ~9 min left; 0 empty searches)
+  200/557 (1.3s/question, ~8 min left; 0 empty searches)
+  250/557 (1.3s/question, ~7 min left; 0 empty searches)
+  300/557 (1.3s/question, ~6 min left; 0 empty searches)
+  350/557 (1.3s/question, ~4 min left; 0 empty searches)
+  400/557 (1.4s/question, ~4 min left; 23 empty searches)
+Traceback (most recent call last):
+  File "C:\Users\feama\sgs\scripts\planck3.py", line 1022, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\planck3.py", line 1018, in main
+    args.fn(args)
+  File "C:\Users\feama\sgs\src\planck3\xreader.py", line 565, in run
+    collect(tasks, build_web(a), Path(a.points), a.limit)
+  File "C:\Users\feama\sgs\src\planck3\g2.py", line 90, in collect
+    results = web.search(q)
+              ^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\src\planck3\web.py", line 186, in search
+    return self._served(None, [], count_empty=self.cache.online)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\src\planck3\web.py", line 218, in _served
+    raise SearchUnavailable(
+src.planck3.web.SearchUnavailable: 15 searches in a row came back empty (backend brave, fallback off). The search engine is blocked or down: stopping instead of producing results with no evidence. Wait, check `docker logs planck3-searxng` (SearXNG) or try again later (ddgs rate limit), then re-run (finished work is kept).
