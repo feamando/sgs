@@ -985,6 +985,11 @@ function Do-Round10 {
     }
     # 3. a NEW fresh benchmark (built once, committed before any reader runs), then the arms
     $f10 = "scripts/assets/planck3_tasks_fresh10$Tag.json"
+    # the news half needs the same 10-day portal window as round 9's (19-28 October): built from the 29th
+    if (-not (Test-Path $f10) -and -not $Quick -and (Get-Date) -lt [datetime]"2026-10-29") {
+        Log "round 10: collected, taught and trained. The new fresh benchmark needs 10 days of portal news after 18 October: re-run on or after 29 October to build it and judge (~1.5 h, ~300 searches)"
+        return
+    }
     if (-not (Test-Path $f10)) {
         Log "round 10: building the round 10 fresh benchmark once (Wikidata 2026 unused + portal news after 2026-10-18)"
         P3 (@("fresh9", "--gemma-path", $GEMMA, "--out", $f10, "--prefix", "f10", "--after", "2026-10-18", "--seed", "10") + $(if ($Quick) { @("--quick") } else { @() }))
