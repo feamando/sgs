@@ -2,7 +2,7 @@
 
 Nikita Gorshkov · 2026-10-20 · Status: built; owner bought credit (2026-10-20, $11.81): run now with `-Limit 2000`, judge from 29 October · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261019.md` (round 9: Hertz's int8 reader ships, 49.1% vs Gemma 60.9%) · Plan and results of record: `SETUP_092026_planck3.md`
 
-**TL;DR.** One command, `.\scripts\planck3.ps1 round10`, run once in November and once in December. It uses free Brave credit only (owner's call, 2026-10-20): at most 950 live searches a month, $4.75 of the $5 credit. It resumes where it stopped.
+**TL;DR.** One command, `.\scripts\planck3.ps1 round10 -Limit 2000`, run twice: now (collect, teach, train, ~3 h) and on or after 29 October (new benchmark + judging, ~1.5 h). The owner bought credit on 2026-10-20 ($11.81); the original plan below ran on free credit only, 950 searches a month, in November and December. It resumes where it stopped.
 
 **The gap.** On round 9's fresh questions, Gemma beat the shipped reader by 12 points. All of the gap is on Wikidata-style questions; on news they were level.
 
