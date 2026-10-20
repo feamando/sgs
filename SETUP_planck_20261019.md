@@ -1,6 +1,6 @@
 # Planck 3.0 round 9: Hertz's reader confirmed on fresh questions, as it would run on a phone
 
-Nikita Gorshkov · 2026-10-19 · Status: ready to run · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261015.md` (round 8: Hertz int8 passes the phone proxy; Planck 1.5 reads like Planck 1.3) · Plan and results of record: `SETUP_092026_planck3.md`
+Nikita Gorshkov · 2026-10-19 · Status: run 2026-10-19 (section 9: **R9 PASSES → Hertz's int8 reader ships**; Q, L, E pass; C1 fails) · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261015.md` (round 8: Hertz int8 passes the phone proxy; Planck 1.5 reads like Planck 1.3) · Plan and results of record: `SETUP_092026_planck3.md`
 
 **TL;DR.** One command, `.\scripts\planck3.ps1 round9` (about 2 h). It is resumable and pushes results.
 
@@ -156,3 +156,91 @@ Q, L and E are product checks. If R9 passes but one of them fails, the result is
 | The fresh benchmark leaks into training later | the file is in the benchmark list every training-set builder filters against |
 | A Wikidata answer is wrong or out of date | the Wikidata label and aliases are the gold, as for the old fresh benchmark; the file records the date |
 | Re-running rebuilds a different benchmark | built once: an existing file is never rebuilt, and the full run commits it before any reader runs |
+
+## 9. Round 9 results of record (run 2026-10-19, benchmark 58b6a74, results f32deb0)
+
+**TL;DR.**
+- **R9 PASSES, so Hertz's reader ships** (int8 on CPU, top 16, template writer). On 220 fresh questions:
+  - it is right **49.1%** of the time, against **31.4%** for round 5's reader (53 vs 14 only-right, **p 2e-6**) and 35.5% for the no-model heuristic (p 0.0002);
+  - the bar was the midpoint to Gemma, 46.1%.
+- **Q, L and E pass:**
+  - int8 on CPU is within 1 point of the same reader on the GPU (49.1% vs 50.0%, 1 vs 3 only-right);
+  - it reads in 3.35 s per question on CPU;
+  - the worst-case personal profile costs nothing, with all 152 changes flagged.
+- **Gemma is still 12 points ahead** (60.9%, 23 vs 49 only-right, p 0.003). The gap is all on the Wikidata questions; on the news questions they are level (51% vs 54%, p 0.82).
+- **The bar is relative, and it fell.**
+  - The midpoint is lower than round 6's (46.1% vs 57.4%) because round 5's reader does much worse on fresh questions (31.4%, vs 51.4% on the old 243).
+  - Hertz's own accuracy also fell, from 60.5% to 49.1%: these questions are harder.
+  - It passes because the gap to the shipped reader held (+18 points, vs +9 on the old set), not because it got better.
+- **Confidence bands still fail C1.** The recalibration, fitted on the old questions, did not carry over to the new ones.
+- **What ships changes:** `serve` and `chat` now load Hertz's reader from `r9_product.json` (int8 on a machine without a GPU).
+
+**The fresh benchmark** (built and committed at 17:23, before any reader ran; unchanged since):
+- **140 Wikidata 2026 items:** winners 60, elections 20, seasons 30, heads of government 30. Drops: 10 used before, 6 named in a benchmark question, 19 without a proper-name answer, 4 not a place.
+- **80 portal news questions,** 9-18 October 2026: Gemma wrote 100 usable from 126 items, and 80 were drawn by seed.
+- **Search:** 218 of 220 questions served by Brave and 2 by Wikipedia, 97.7% on topic, no empty searches. Every arm read the same results.
+
+**The benchmark (220 fresh questions; reading only, template writer):**
+
+| reader | right | Wikidata (140) | news (80) | 9-10: n / right | 7-8: n / right | no answer |
+|---|---|---|---|---|---|---|
+| heuristic (no model) | 0.355 | 0.29 | 0.48 | 5 / 0.60 | 35 / 0.46 | 0 |
+| round 5 Planck reader (shipped until now) | 0.314 | 0.28 | 0.38 | 6 / 0.83 | 37 / 0.59 | 0 |
+| Planck 1.5 rc (reported) | 0.386 | 0.34 | 0.48 | 1 / 1.00 | 38 / 0.55 | 5 |
+| Hertz rc, GPU fp32 | 0.500 | 0.49 | 0.51 | 12 / 0.92 | 51 / 0.73 | 2 |
+| **Hertz rc, CPU int8, top 16 (the product)** | **0.491** | 0.48 | 0.51 | 13 / 0.92 | 49 / 0.67 | 1 |
+| Gemma 4 E4B | 0.609 | 0.65 | 0.54 | 17 / 0.94 | 107 / 0.70 | 19 |
+
+**By template (Wikidata), right out of n:**
+
+| template | n | product | Gemma | round 5's reader |
+|---|---|---|---|---|
+| event winners | 60 | 32 | 42 | 17 |
+| elections | 20 | 14 | 16 | 5 |
+| season champions | 30 | 12 | 14 | 12 |
+| new heads of government | 30 | 9 | 19 | 5 |
+
+Paired, the same 220 questions (exact McNemar, only-product-right vs only-other-right):
+- vs round 5's reader: 53 vs 14, p 2e-6. By part:
+  - Wikidata: 40 vs 12, p 0.0001;
+  - news: 13 vs 2, p 0.007.
+- vs the heuristic: 46 vs 16, p 0.0002. By part:
+  - Wikidata: p 0.0001;
+  - news: 9 vs 6, p 0.61.
+- vs Gemma: 23 vs 49, p 0.003. By part:
+  - Wikidata: 14 vs 38, p 0.001;
+  - news: 9 vs 11, p 0.82.
+- vs itself on the GPU (Q): 1 vs 3, p 0.63.
+- Planck 1.5 rc vs round 5's reader (reported): 38 vs 22, p 0.052.
+
+**The verdicts (product = Hertz rc, int8, CPU, top 16 + template):**
+
+| rule | result | verdict |
+|---|---|---|
+| **R9** | 0.491 vs midpoint 0.461 (round 5's reader 0.314, Gemma 0.609); 53 vs 14, p 2e-6 | **PASS** |
+| Q | 0.491 vs 0.500 on the GPU (-0.9 points; bar 2) | **PASS** |
+| L | 3,353 ms reading per question, over all 220 questions (median 3.7 s, p90 4.7 s, max 5.5 s) | **PASS** |
+| E | no drop; 152 of 152 changed answers flagged | **PASS** |
+| C1 (as before) | 9-10: 13 answers (too few to judge), 92% right; 7-8: 49, 67.3% (bar 70%); not monotone | **FAIL** |
+| C1 (recalibrated) | on the old answers no threshold reaches 90% (the high band is never shown); "good" from 6: 102 answers, 58.8% right | **FAIL** |
+
+**Outcome (pre-registered, `r9_product.json`):** "ship: Hertz's reader (int8, CPU) passed R9 on fresh questions".
+
+**What the run says beyond the rules.**
+1. **A real, confirmed improvement over what shipped, not Gemma-level reading.**
+   - The product beats round 5's reader by 18 points on questions nobody chose it on.
+   - It matches Gemma on news, but trails it by 17 points on the Wikidata questions, mostly new heads of government (9 vs 19 of 30) and event winners (32 vs 42 of 60).
+2. **Reading got slower than in round 8: 3.35 s vs 1.33 s per question,** on the same machine and settings.
+   - The worst-case profile run read from the cache and took 3.7 s, so live searching is not the cause.
+   - It is not diagnosed. The likely cause is fuller candidate pools on fresh pages: reading time grows with the number of candidates, capped at 16.
+   - **On a phone 2-4× slower this is about 7-13 s per question,** so the top-8 configuration (round 8: half the time, -1.2 points) becomes the phone default unless the handset measurement says otherwise.
+3. **Confidence is informative but mislabelled.** On the fresh questions the product's answers at 8 or above are right 22 of 24 times (92%), and at 7 or above 45 of 62 (73%). The bands are cut at 9 and 7. Thresholds fitted on the old questions do not transfer, because the score's meaning shifts with the question mix. C1 needs a calibrator that does not depend on one question set.
+4. **The heuristic and round 5's reader collapse on fresh Wikidata questions** (28-29%), while the readers trained to read hold up (Hertz 48-49%). Reading, not ranking, is what carries to new questions.
+5. **Planck 1.5's reader is ahead of Planck 1.3's lineage on fresh questions** (38.6% vs 31.4% for round 5's reader, p 0.052), not significant. Reported only.
+
+**Recommendations (owner's call; not built):**
+1. **Measure on a handset now.** Export the int8 reader (ONNX Runtime Mobile or ExecuTorch), and time top 16 and top 8 on a real phone. The desktop proxy says 3.35 s; a phone decides.
+2. **Calibration (C1) as its own small round:** fit the bands on a held-out slice of fresh-style questions (or isotonic on reader_p + features), and judge on a separate fresh set. Today's 9-10 label overstates certainty on 7-8 answers.
+3. **Round 10 (the Gemma gap):** train Hertz's reader on Brave-collected pools with Gemma soft labels. Brave now works (the quota misread is fixed), so round 6's planned training data can finally be collected on Brave. Judge it on a new fresh benchmark; this one is now used.
+4. **Retire this benchmark for selection.** It decided this round; a later round needs its own.
+

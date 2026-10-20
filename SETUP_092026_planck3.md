@@ -418,6 +418,13 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **C1:** reported, and recalibrated on round 8's answers.
   - **Brave check fixed:** a live search plus a quota read; it no longer passes on a cache hit.
   - **Outcome:** R9 passes → ship (`serve` reads int8 on CPU); else → round 10, Brave pools + Gemma soft labels.
+- **ROUND 9 RESULTS OF RECORD (2026-10-19, results f32deb0; SETUP_planck_20261019.md section 9): R9 PASSES → Hertz's int8 reader SHIPS.**
+  - **On 220 fresh questions:** 49.1%, against round 5's reader 31.4% (53 vs 14 only-right, p 2e-6), the heuristic 35.5% and Gemma 60.9% (p 0.003). The midpoint bar was 46.1%.
+  - **Q, L, E pass:** int8 within 1 point of the GPU; 3.35 s per question on CPU (round 8: 1.33 s, not diagnosed); E no drop.
+  - **C1 fails,** including the recalibration.
+  - **Level with Gemma on news** (p 0.82); 17 points behind on Wikidata questions.
+  - **Ships:** `serve` / `chat` load it from `r9_product.json`.
+  - **Next (not built):** handset timing (top 16 vs top 8), C1 calibration, round 10 = Brave pools + Gemma soft labels, judged on a new fresh benchmark.
 - *Round 8 options as planned on 2026-10-14 (superseded by the round 8 build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.
