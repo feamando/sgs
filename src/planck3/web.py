@@ -415,13 +415,26 @@ class Web:
         try:
             res = self._search_brave("Wikipedia")
         except Exception as e:
-            return {"ok": False, "remaining": self.brave_remaining, "why": f"{type(e).__name__}: {str(e)[:120]}"}
+            return {"ok": False, "remaining": self.brave_remaining, "status": self.brave_status, "headers": self.brave_headers,
+                    "why": self._brave_limit_why() or f"{type(e).__name__}: {str(e)[:120]}"}
         if res:
             self.cache.put("search", "brave|Wikipedia", {"query": "Wikipedia", "backend": "brave", "at": now_iso(), "results": res})
         ok = bool(res)                       # a 200 with results is the API serving; nothing else is proof
         why = "" if ok else ("quota used up this month" if self.brave_remaining == 0 else
                              f"no results (HTTP {self.brave_status}: key invalid, out of credit, or rate-limited)")
+        if not ok:
+            why = self._brave_limit_why() or why
         return {"ok": ok, "remaining": self.brave_remaining, "status": self.brave_status, "headers": self.brave_headers, "why": why}
+
+    def _brave_limit_why(self) -> str:
+        """Brave's 402 USAGE_LIMIT_EXCEEDED: the account's own monthly spending cap, not its credit balance."""
+        err = self.last_error or ""
+        if "USAGE_LIMIT_EXCEEDED" not in err:
+            return ""
+        m = re.search(r'"current_spend":\s*([\d.]+).*?"usage_limit":\s*([\d.]+)', err)
+        spent = f" (spent ${m.group(1)} of a ${m.group(2)} limit)" if m else ""
+        return (f"the Brave account's MONTHLY USAGE LIMIT is reached{spent}. Buying credit does not raise it: "
+                "raise the monthly usage limit in the Brave API dashboard, then re-run")
 
     def ddgs_alive(self) -> bool:
         """Installed AND answering (a rate-limited client returns nothing)."""
