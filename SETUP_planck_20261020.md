@@ -69,6 +69,13 @@ If December's credit runs short before the judging, the run stops before the fir
 - **On or after 29 October:** `round10 -Limit 2000` again builds the benchmark (pushed before any reader runs) and judges (~1.5 h).
   - Both runs share October's ledger, so the cap of 2,000 searches ($10) covers both.
 
+**Found 2026-10-20/22: Brave's own monthly usage limit, not credit, stopped the collection.**
+- The first full run collected 401 of the 557 Wikidata questions (426 live searches), then Brave began refusing.
+- The re-run's first search returned `HTTP 402 USAGE_LIMIT_EXCEEDED: current_spend 5.0, usage_limit 5.0, usage_limit_type monthly`.
+- So the account has a **$5 monthly spending limit**, separate from its credit balance, and October's spend reached it. Buying credit does not raise it.
+- **Fix (owner):** raise the monthly usage limit in the Brave API dashboard to at least $15 (October needs about $5 spent + $9 more), then re-run `round10 -Limit 2000`.
+- The runner now names this error plainly, instead of "Brave is not serving".
+
 ## 3. Step by step
 
 1. `git pull`
