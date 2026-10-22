@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-22 15:26)
+# Planck 3.0 results (2026-10-22 20:12)
 
 ## G0 (seed benchmark)
 
@@ -232,6 +232,7 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | x-planck_r7 | 101M | 5310 / 592 / 654 | 32 | 0.456 | 0.434 | 0.687 | 0.064 | stable 0.525 vs 0.479 (n=217); recent 0.338 vs 0.268 (n=71); news 0.407 vs 0.475 (n=59); info 0.385 vs 0.423 (n=52) |
 | x-hertz_r7 | 641M | 5310 / 592 / 654 | 32 | 0.667 | 0.434 | 0.79 | 0.047 | stable 0.710 vs 0.479 (n=217); recent 0.577 vs 0.268 (n=71); news 0.593 vs 0.475 (n=59); info 0.692 vs 0.423 (n=52) |
 | x-planck_p15rc | 101M | 137581 / 6000 / 6000 | 229 | 0.489 | 0.474 | 0.648 | 0.027 | squad 0.562 vs 0.601 (n=813); newsqa 0.461 vs 0.477 (n=859); triviaqa 0.513 vs 0.422 (n=417); searchqa 0.533 vs 0.462 (n=833); nq 0.398 vs 0.389 (n=884); squad2neg 0.000 vs 0.000 (n=0) |
+| x-hertz_r10 | 641M | 7524 / 818 / 924 | 51 | 0.600 | 0.417 | 0.77 | 0.047 | stable 0.714 vs 0.479 (n=217); recent 0.445 vs 0.277 (n=155); news 0.567 vs 0.463 (n=164); info 0.692 vs 0.423 (n=52) |
 
 ## Round 6: read -> weigh -> write on Brave, relevance-checked (SETUP_planck_20261012.md)
 

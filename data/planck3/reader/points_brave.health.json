@@ -1,0 +1,18 @@
+{
+  "searches": 857,
+  "primary_empty_rate": 0.0011668611435239206,
+  "fallback_rate": 0.0,
+  "secondary_rate": 0.0,
+  "final_empty_rate": 0.0011668611435239206,
+  "served": {
+    "brave": 856
+  },
+  "primary_share": 0.9988331388564761,
+  "primary_offtopic_rate": 0.005834305717619603,
+  "on_topic_rate": 0.9941588785046729,
+  "relevance_checked": true,
+  "brave_remaining": null,
+  "brave_quota_skips": 0,
+  "brave_live_calls": 843,
+  "valid": true
+}
