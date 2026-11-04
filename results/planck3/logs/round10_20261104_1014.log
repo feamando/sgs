@@ -1,0 +1,1460 @@
+[planck3 10:14:04] logging to C:\Users\feama\sgs\results\planck3\logs\round10_20261104_1014.log
+[planck3 10:14:04] installing Planck 3.0 deps into .venv
+[planck3 10:14:10] offline smoke tests
+[planck3 10:14:35] round 10: Brave budget for 2026-11 = 950 live searches, 0 already used (ledger C:\Users\feama\sgs\results\planck3\r10_brave_ledger.json)
+[planck3 10:14:35] round 10: Brave pools complete (data/planck3/reader/points_brave.jsonl)
+[planck3 10:14:35] round 10 teach: Gemma reads every Brave pool once (soft labels)
+> python scripts/planck3.py xreader teach --points data/planck3/reader/points_brave.jsonl --gemma-path models/gemma-4-e4b-it
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[xreader] Gemma reads 0 pools (2710 done or empty) -> data\planck3\reader\points_brave.jsonl
+[xreader] teacher: {'pools': 2710, 'taught': 2710, 'teacher_right_when_a_right_one_exists': 0.7071339173967459}
+[planck3 10:15:41] round 10: building the round 10 fresh benchmark once (Wikidata 2026 unused + portal news after 2026-10-18)
+> python scripts/planck3.py fresh9 --gemma-path models/gemma-4-e4b-it --out scripts/assets/planck3_tasks_fresh10.json --prefix f10 --after 2026-10-18 --seed 10
+  [fresh9] wikidata winner    kept  60 (pool 840; {'pool': 840, 'used before': 10, 'named in a benchmark question': 9, 'no proper-name answer': 3, 'kept': 60})
+  [fresh9] wikidata election  kept  20 (pool 65; {'pool': 65, 'used before': 19, 'no proper-name answer': 1, 'kept': 20})
+  [fresh9] wikidata season    kept  30 (pool 436; {'pool': 436, 'named in a benchmark question': 3, 'used before': 3, 'kept': 30})
+  [fresh9] wikidata headgov   kept  30 (pool 239; {'pool': 239, 'no proper-name answer': 21, 'used before': 7, 'named in a benchmark question': 3, 'not a place': 3, 'kept': 30})
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+  [fresh9] portal: 214 items, 2026-10-19 to 2026-11-03
+[readtasks] Gemma writes questions for 214 portal items (0 done) -> C:\Users\feama\sgs\data\planck3\fresh10_news_raw.json
+  50/214: 39 questions kept, 11 rejected
+  100/214: 76 questions kept, 24 rejected
+  150/214: 107 questions kept, 43 rejected
+  200/214: 146 questions kept, 54 rejected
+  214/214: 158 questions kept, 56 rejected
+[fresh9] 220 questions {'fresh': 140, 'news': 80} -> scripts\assets\planck3_tasks_fresh10.json
+[planck3 10:32:36]   this month's runner budget: 949 live searches left
+[planck3 10:32:36] Brave Search API: UP (HTTP 200); searches left this month: not reported (no monthly quota on this plan: check the spend in the Brave dashboard) (this run needs 296)
+[planck3 10:32:36]   rate-limit headers: {'X-RateLimit-Limit': '50, 0', 'X-RateLimit-Remaining': '49, 0', 'X-RateLimit-Reset': '1, 2298442', 'X-RateLimit-Policy': '50;w=1, 0;w=2592000'}
+[planck3 10:32:36] round 10: THE PRODUCT, x-hertz r10, int8, CPU 4 threads (new fresh questions; searches live)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_r10/reader.pt --writer template --reader-quant int8 --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_x-hertz-r10_cpu-int8-top16 --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] OK  f10winner000 Layne Riggs                    low       6.0/10  
+[  2/220] OK  f10winner001 Chase Briscoe                  good      7.0/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            good      8.0/10  
+[  4/220] OK  f10winner003 Xandra Velzeboer               high      9.0/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   low       5.0/10  
+[  6/220] OK  f10winner005 Austin Hill                    low       5.0/10  
+[  7/220] OK  f10winner006 Eva Marija                     low       5.0/10  
+[  8/220] XX  f10winner007 Kujawy Pomorze                 low       5.0/10  
+[  9/220] XX  f10winner008 Bishkek                        low       5.0/10  
+[ 10/220] XX  f10winner009 Bullring                       low       5.0/10  
+[ 11/220] XX  f10winner010 Jeļena Ostapenko               low       6.0/10  
+[ 12/220] OK  f10winner011 Corey Heim                     low       6.0/10  
+[ 13/220] XX  f10winner012 Germany Julia Ackermann Isabel low       5.0/10  
+[ 14/220] XX  f10winner013 Dover                          low       5.0/10  
+[ 15/220] XX  f10winner014 Julius Yego                    low       5.0/10  
+[ 16/220] OK  f10winner015 Barcelona                      low       5.0/10  
+[ 17/220] XX  f10winner016 Legendary Billy Green          low       5.0/10  
+[ 18/220] --  f10winner017 None                           none      -/10  
+[ 19/220] XX  f10winner018 Germany Julia Ackermann Isabel low       5.0/10  
+[ 20/220] OK  f10winner019 Niels Vink                     low       6.0/10  
+[ 21/220] OK  f10winner020 Third-seeded Barbora Krejčíkov good      7.0/10  
+[ 22/220] OK  f10winner021 Federica Brignone              low       6.0/10  
+[ 23/220] OK  f10winner022 Maria Timofeeva                good      7.0/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  low       5.0/10  
+[ 25/220] OK  f10winner024 Niels Vink                     sceptical 2.0/10  
+[ 26/220] OK  f10winner025 Joventut                       low       5.0/10  
+[ 27/220] XX  f10winner026 Taylor Gray                    low       6.0/10  
+[ 28/220] XX  f10winner027 Heidi Weng                     good      7.0/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            low       6.0/10  
+[ 30/220] XX  f10winner029 Canada                         low       5.0/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    sceptical 3.0/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 good      8.0/10  
+[ 33/220] XX  f10winner032 Great Britain Alfie Hewett     low       6.0/10  
+[ 34/220] XX  f10winner033 Lloyd Glasspool                low       6.0/10  
+[ 35/220] OK  f10winner034 Corey Heim                     good      8.0/10  
+[ 36/220] XX  f10winner035 Moetamen Bellah Jelassi        sceptical 0.0/10  
+[ 37/220] XX  f10winner036 Keanna MacInnes                sceptical 2.0/10  
+[ 38/220] XX  f10winner037 Bolton Wanderers               low       5.0/10  
+[ 39/220] OK  f10winner038 Roos Vanotterdijk              low       6.0/10  
+[ 40/220] XX  f10winner039 Ebba Andersson                 good      8.0/10  
+[ 41/220] OK  f10winner040 Dong Zhihao                    low       5.0/10  
+[ 42/220] OK  f10winner041 Yang Liujing                   sceptical 2.0/10  
+[ 43/220] XX  f10winner042 Pradeep Kumar                  sceptical 2.0/10  
+[ 44/220] OK  f10winner043 Olav Kooij                     low       6.0/10  
+[ 45/220] OK  f10winner044 Aryna Sabalenka                low       5.0/10  
+[ 46/220] XX  f10winner045 Jessica Pegula                 low       5.0/10  
+[ 47/220] OK  f10winner046 Jordi Meeus                    low       5.0/10  
+[ 48/220] OK  f10winner047 Lotte Kopecky                  sceptical 3.0/10  
+[ 49/220] XX  f10winner048 Aryna Sabalenka                good      7.0/10  
+[ 50/220] XX  f10winner049 Carys Lloyd                    sceptical 4.0/10  
+[ 51/220] OK  f10winner050 Corey Heim                     good      7.0/10  
+[ 52/220] OK  f10winner051 Marc-Antoine Camirand          low       5.0/10  
+[ 53/220] XX  f10winner052 USA Ryan Cochran-Siegle        good      8.0/10  
+[ 54/220] XX  f10winner053 Natalia Linares COL            sceptical 1.0/10  
+[ 55/220] OK  f10winner054 Kateřina Siniaková             low       5.0/10  
+[ 56/220] OK  f10winner055 Matthew Brennan                good      8.0/10  
+[ 57/220] OK  f10winner056 Jeļena Ostapenko               good      8.0/10  
+[ 58/220] OK  f10winner057 Benoit Cosnefroy               sceptical 3.0/10  
+[ 59/220] OK  f10winner058 Gerda Steyn                    low       6.0/10  
+[ 60/220] OK  f10winner059 Layne Riggs                    low       5.0/10  
+[ 61/220] XX  f10election000 Hungary                        good      7.0/10  
+[ 62/220] XX  f10election001 Andy Burnham                   low       5.0/10  
+[ 63/220] OK  f10election002 António José Seguro            good      7.0/10  
+[ 64/220] OK  f10election003 Party                          low       6.0/10  
+[ 65/220] OK  f10election004 Andy Burnham                   low       5.0/10  
+[ 66/220] XX  f10election005 Sitting Greens MP Kat McNamara sceptical 3.0/10  
+[ 67/220] XX  f10election006 Conservative Party             low       5.0/10  
+[ 68/220] --  f10election007 None                           none      -/10  
+[ 69/220] XX  f10election008 BJP                            low       5.0/10  
+[ 70/220] XX  f10election009 Juanma Moreno                  low       6.0/10  
+[ 71/220] XX  f10election010 Conservative                   sceptical 4.0/10  
+[ 72/220] XX  f10election011 Ismaël Omar Guelleh            low       6.0/10  
+[ 73/220] XX  f10election012 Fatima Shaban                  low       5.0/10  
+[ 74/220] XX  f10election013 Florentino Perez               good      8.0/10  
+[ 75/220] OK  f10election014 Lam                            good      7.0/10  
+[ 76/220] OK  f10election015 Zambian President Hakainde Hic good      7.0/10  
+[ 77/220] OK  f10election016 Danielle Martin                good      7.0/10  
+[ 78/220] OK  f10election017 Party                          low       6.0/10  
+[ 79/220] XX  f10election018 Labor MP Paul Papalia          low       6.0/10  
+[ 80/220] XX  f10election019 Nigel Farage                   good      7.0/10  
+[ 81/220] OK  f10season000 New Zealand                    good      7.0/10  
+[ 82/220] OK  f10season001 UConn                          low       5.0/10  
+[ 83/220] OK  f10season002 Sweden                         low       5.0/10  
+[ 84/220] XX  f10season003 Alabama State                  low       5.0/10  
+[ 85/220] --  f10season004 None                           none      -/10  
+[ 86/220] XX  f10season005 Alex de Minaur                 good      8.0/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  good      8.0/10  
+[ 88/220] OK  f10season007 Missouri State                 good      7.0/10  
+[ 89/220] OK  f10season008 Alessandro Fancellu            sceptical 3.0/10  
+[ 90/220] OK  f10season009 Marlen Reusser                 low       6.0/10  
+[ 91/220] XX  f10season010 Team USA                       low       5.0/10  
+[ 92/220] XX  f10season011 George Russell                 good      7.0/10  
+[ 93/220] OK  f10season012 Isaac del Toro                 low       6.0/10  
+[ 94/220] OK  f10season013 Olav Kooij                     good      7.0/10  
+[ 95/220] --  f10season014 None                           none      -/10  
+[ 96/220] OK  f10season015 Philippines                    low       5.0/10  
+[ 97/220] OK  f10season016 Stanford                       low       6.0/10  
+[ 98/220] XX  f10season017 Erlend Blikra                  low       6.0/10  
+[ 99/220] --  f10season018 None                           none      -/10  
+[100/220] OK  f10season019 Barcelona                      good      7.0/10  
+[101/220] XX  f10season020 Sweden Ludvig Andersson        low       6.0/10  
+[102/220] OK  f10season021 EAST Fremantle                 low       5.0/10  
+[103/220] XX  f10season022 North Carolina                 low       5.0/10  
+[104/220] OK  f10season023 Wu Yize                        good      8.0/10  
+[105/220] XX  f10season024 UAE Team Emirates-XRG          low       6.0/10  
+[106/220] OK  f10season025 New Zealand                    low       5.0/10  
+[107/220] --  f10season026 None                           none      -/10  
+[108/220] XX  f10season027 Baloise Verzekeringen          low       6.0/10  
+[109/220] XX  f10season028 Juventus                       low       5.0/10  
+[110/220] XX  f10season029 Lella Ford                     low       6.0/10  
+[111/220] XX  f10headgov000 Bashkirs                       low       5.0/10  
+[112/220] OK  f10headgov001 Democrat Abigail Spanberger    good      8.0/10  
+[113/220] XX  f10headgov002 Adhikari                       low       5.0/10  
+[114/220] XX  f10headgov003 Steinmeier                     low       5.0/10  
+[115/220] OK  f10headgov004 Sven Schulze                   low       6.0/10  
+[116/220] --  f10headgov005 None                           none      -/10  
+[117/220] --  f10headgov006 None                           none      -/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 1.0/10  
+[119/220] XX  f10headgov008 PAM                            low       5.0/10  
+[120/220] XX  f10headgov009 Rudi Achatz                    low       5.0/10  
+[121/220] OK  f10headgov010 Cem Özdemir                    low       5.0/10  
+[122/220] OK  f10headgov011 Andy Burnham                   good      7.0/10  
+[123/220] OK  f10headgov012 Paul Maréchal                  low       5.0/10  
+[124/220] --  f10headgov013 None                           none      -/10  
+[125/220] --  f10headgov014 None                           none      -/10  
+[126/220] XX  f10headgov015 Vejen Kommune                  low       5.0/10  
+[127/220] OK  f10headgov016 Andy Burnham                   high      9.0/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  low       5.0/10  
+[129/220] XX  f10headgov018 MHK Stu Peters                 low       5.0/10  
+[130/220] OK  f10headgov019 Rob Jetten                     low       5.0/10  
+[131/220] --  f10headgov020 None                           none      -/10  
+[132/220] OK  f10headgov021 Céline Vara                    low       5.0/10  
+[133/220] --  f10headgov022 None                           none      -/10  
+[134/220] XX  f10headgov023 Henning Urban Dam Nielsen      low       5.0/10  
+[135/220] XX  f10headgov024 Essam Abu Baker                low       5.0/10  
+[136/220] --  f10headgov025 None                           none      -/10  
+[137/220] OK  f10headgov026 Aurélie Maillols               sceptical 1.0/10  
+[138/220] OK  f10headgov027 Zurab Pataradze                low       5.0/10  
+[139/220] OK  f10headgov028 Fabrice Lefebvre               low       5.0/10  
+[140/220] XX  f10headgov029 Yoshiwara                      low       6.0/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                low       5.0/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 1.0/10  
+[143/220] XX  f10news_2026-10-22_conflict1 AQAP                           low       5.0/10  
+[144/220] XX  f10news_2026-10-29_election0 February 21, 2027              sceptical 4.0/10  
+[145/220] --  f10news_2026-10-27_culture0 None                           none      -/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  high      9.0/10  
+[147/220] XX  f10news_2026-11-03_election0 3                              low       6.0/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          good      8.0/10  
+[149/220] XX  f10news_2026-10-26_conflict1 Suwayda Governorate            low       5.0/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 good      7.0/10  
+[151/220] OK  f10news_2026-10-19_law0 Florida Attorney General James low       5.0/10  
+[152/220] XX  f10news_2026-10-19_law3 Staškov                        low       5.0/10  
+[153/220] --  f10news_2026-10-28_disaster1 None                           none      -/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             good      8.0/10  
+[155/220] XX  f10news_2026-10-30_law0 Supreme Court of Victoria      low       6.0/10  
+[156/220] OK  f10news_2026-10-21_conflict1 El Salvador President Nayib Bu low       5.0/10  
+[157/220] OK  f10news_2026-10-21_science0 Electronic Arts                low       6.0/10  
+[158/220] XX  f10news_2026-10-24_disaster1 500                            sceptical 3.0/10  
+[159/220] --  f10news_2026-10-23_conflict6 None                           none      -/10  
+[160/220] XX  f10news_2026-11-01_sport0 Lusail                         sceptical 3.0/10  
+[161/220] OK  f10news_2026-10-22_culture0 International Criminal Court   low       6.0/10  
+[162/220] OK  f10news_2026-10-20_law1 Pakistan                       low       5.0/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 good      7.0/10  
+[164/220] OK  f10news_2026-10-27_law1 Mada Masr                      good      8.0/10  
+[165/220] OK  f10news_2026-10-30_conflict2 Oman                           sceptical 2.0/10  
+[166/220] OK  f10news_2026-10-23_sport0 Lionel Messi                   sceptical 1.0/10  
+[167/220] --  f10news_2026-10-24_conflict3 None                           none      -/10  
+[168/220] XX  f10news_2026-10-29_election1 Magdalena Andersson            low       5.0/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 3.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 1.0/10  
+[171/220] XX  f10news_2026-10-24_election2 Tel Aviv                       sceptical 3.0/10  
+[172/220] --  f10news_2026-11-02_conflict6 None                           none      -/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        good      7.0/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Swieczkowski                   good      8.0/10  
+[175/220] XX  f10news_2026-10-25_election1 Incumbent President Iliana Yot low       5.0/10  
+[176/220] OK  f10news_2026-10-28_business1 3.2 billion                    sceptical 1.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 Hawks                          low       6.0/10  
+[178/220] XX  f10news_2026-10-21_law1 Huang Yi-hao                   sceptical 3.0/10  
+[179/220] XX  f10news_2026-10-28_law0 Stephen Yaxley-Lennon          low       6.0/10  
+[180/220] XX  f10news_2026-10-20_disaster2 14                             sceptical 1.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Switzerland Federal Supreme Co sceptical 1.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 1.0/10  
+[183/220] OK  f10news_2026-10-23_disaster2 Fernando Air Base              sceptical 2.0/10  
+[184/220] XX  f10news_2026-10-25_election3 Flávio Bolsonaro               good      7.0/10  
+[185/220] OK  f10news_2026-10-19_diplomacy1 San Marino                     low       6.0/10  
+[186/220] XX  f10news_2026-10-23_diplomacy0 Treasury Department            sceptical 2.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  good      7.0/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Coalition Joint Forces Command sceptical 2.0/10  
+[189/220] XX  f10news_2026-10-30_election2 Bogdan Święczkowski            good      8.0/10  
+[190/220] XX  f10news_2026-10-21_business1 UK                             good      7.0/10  
+[191/220] OK  f10news_2026-11-01_sport1 Mao Shimada                    good      8.0/10  
+[192/220] XX  f10news_2026-10-25_election0 Flávio Bolsonaro               good      7.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               good      7.0/10  
+[194/220] XX  f10news_2026-10-28_business0 Treasury                       sceptical 1.0/10  
+[195/220] XX  f10news_2026-10-26_law0 Federal Bureau of Investigatio sceptical 1.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Flavio Bolsonaro               good      8.0/10  
+[197/220] XX  f10news_2026-11-01_sport3 Atlanta Falcons                sceptical 4.0/10  
+[198/220] XX  f10news_2026-10-28_diplomacy0 17                             low       5.0/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              high      9.0/10  
+[200/220] OK  f10news_2026-10-22_sport2 Chicago Bears                  sceptical 4.0/10  
+[201/220] XX  f10news_2026-11-01_election1 Iliana Yotova                  good      7.0/10  
+[202/220] XX  f10news_2026-10-26_sport0 Bayern Munich                  low       6.0/10  
+[203/220] XX  f10news_2026-10-21_science1 Microsoft                      sceptical 3.0/10  
+[204/220] OK  f10news_2026-10-31_election1 34                             sceptical 1.0/10  
+[205/220] XX  f10news_2026-10-20_conflict1 Sudan People Liberation Moveme sceptical 1.0/10  
+[206/220] XX  f10news_2026-10-21_diplomacy0 Irish                          sceptical 1.0/10  
+[207/220] OK  f10news_2026-10-25_sport0 Kyle Larson                    low       6.0/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            low       5.0/10  
+[209/220] XX  f10news_2026-11-01_sport2 Lewis Hamilton                 low       5.0/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 4.0/10  
+[211/220] XX  f10news_2026-10-29_culture0 Transformative Works OTW       sceptical 1.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             good      7.0/10  
+[213/220] OK  f10news_2026-10-29_conflict0 2,000                          good      7.0/10  
+[214/220] OK  f10news_2026-10-31_sport2 Dakar                          high      9.0/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         low       6.0/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       low       5.0/10  
+[217/220] XX  f10news_2026-10-31_election0 31                             good      7.0/10  
+[218/220] XX  f10news_2026-10-20_disaster1 Toledo Mayor Wade Kapszukiewic sceptical 3.0/10  
+[219/220] XX  f10news_2026-10-20_election1 KUALA LUMPUR                   sceptical 1.0/10  
+[220/220] OK  f10news_2026-10-27_business0 40 %                           sceptical 1.0/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=none search=brave ====
+  n 220  accuracy (value shown is right) 0.477  bands monotone True
+  band high       0.023 (n=5) precision 1.000
+  band good       0.223 (n=49) precision 0.633
+  band low        0.468 (n=103) precision 0.485
+  band sceptical  0.205 (n=45) precision 0.422
+  band none       0.082 (n=18)
+  regime fresh         accuracy 0.500 (n=140)
+  regime news          accuracy 0.438 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 691, "fetch_ms": 2132, "read_ms": 3420, "write_ms": 0, "total_ms": 6510}
+[planck3 10:56:45] round 10: the shipped reader (round 9's product), same configuration
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_rc/reader.pt --writer template --reader-quant int8 --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_x-hertz-rc_cpu-int8-top16 --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] OK  f10winner000 Layne Riggs                    good      8.0/10  
+[  2/220] OK  f10winner001 Chase Briscoe                  good      8.0/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            good      8.0/10  
+[  4/220] OK  f10winner003 Xandra Velzeboer               good      8.0/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   low       6.0/10  
+[  6/220] OK  f10winner005 Austin Hill                    low       5.0/10  
+[  7/220] OK  f10winner006 Eva Marija                     low       5.0/10  
+[  8/220] XX  f10winner007 Toruń                          low       6.0/10  
+[  9/220] XX  f10winner008 Greco-Roman                    low       5.0/10  
+[ 10/220] XX  f10winner009 Bullring                       low       5.0/10  
+[ 11/220] XX  f10winner010 Elena Rybakina                 low       6.0/10  
+[ 12/220] XX  f10winner011 Chandler Smith                 low       5.0/10  
+[ 13/220] OK  f10winner012 Moluh                          sceptical 2.0/10  
+[ 14/220] OK  f10winner013 Kyle Busch                     sceptical 4.0/10  
+[ 15/220] XX  f10winner014 Tahiru Fentuo                  low       5.0/10  
+[ 16/220] OK  f10winner015 Barcelona                      low       5.0/10  
+[ 17/220] OK  f10winner016 Trevor Huddleston              low       5.0/10  
+[ 18/220] OK  f10winner017 Kaden Honeycutt                low       6.0/10  
+[ 19/220] XX  f10winner018 Germany Julia Ackermann Isabel low       5.0/10  
+[ 20/220] XX  f10winner019 Alfie Hewett                   good      7.0/10  
+[ 21/220] XX  f10winner020 Maria Sakkari                  good      7.0/10  
+[ 22/220] OK  f10winner021 Federica Brignone              low       6.0/10  
+[ 23/220] XX  f10winner022 Portugal                       good      7.0/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  good      7.0/10  
+[ 25/220] XX  f10winner024 Zverev                         low       5.0/10  
+[ 26/220] OK  f10winner025 Badalona                       low       6.0/10  
+[ 27/220] XX  f10winner026 Taylor Gray                    low       6.0/10  
+[ 28/220] XX  f10winner027 Tesero                         good      7.0/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            good      7.0/10  
+[ 30/220] XX  f10winner029 Alberta Pandas                 low       5.0/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    low       5.0/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 high      9.0/10  
+[ 33/220] XX  f10winner032 Great Britain Alfie Hewett     good      8.0/10  
+[ 34/220] XX  f10winner033 Indian Wells                   low       5.0/10  
+[ 35/220] OK  f10winner034 Corey Heim                     good      8.0/10  
+[ 36/220] XX  f10winner035 W                              low       6.0/10  
+[ 37/220] OK  f10winner036 Ellen Walshe                   sceptical 2.0/10  
+[ 38/220] XX  f10winner037 Bolton Wanderers               sceptical 4.0/10  
+[ 39/220] OK  f10winner038 Roos Vanotterdijk              low       6.0/10  
+[ 40/220] XX  f10winner039 Fabio Canal                    low       5.0/10  
+[ 41/220] XX  f10winner040 Kyrgyzstan                     good      7.0/10  
+[ 42/220] OK  f10winner041 Yang Liujing                   sceptical 0.0/10  
+[ 43/220] XX  f10winner042 Pradeep Kumar                  sceptical 3.0/10  
+[ 44/220] OK  f10winner043 Olav Kooij                     low       6.0/10  
+[ 45/220] XX  f10winner044 Elena Rybakina                 low       6.0/10  
+[ 46/220] OK  f10winner045 Linda Noskova                  good      8.0/10  
+[ 47/220] OK  f10winner046 Jordi Meeus                    low       6.0/10  
+[ 48/220] OK  f10winner047 Lotte Kopecky                  low       5.0/10  
+[ 49/220] OK  f10winner048 Elena Rybakina                 high      9.0/10  
+[ 50/220] XX  f10winner049 Dylan Groenewegen              good      8.0/10  
+[ 51/220] OK  f10winner050 Corey Heim                     low       6.0/10  
+[ 52/220] XX  f10winner051 IndyCar                        low       5.0/10  
+[ 53/220] XX  f10winner052 Stelvio Ski Centre             low       6.0/10  
+[ 54/220] XX  f10winner053 Toruń                          low       5.0/10  
+[ 55/220] OK  f10winner054 Taylor Townsend                low       5.0/10  
+[ 56/220] OK  f10winner055 Matthew Brennan                good      8.0/10  
+[ 57/220] OK  f10winner056 Jeļena Ostapenko               high      9.0/10  
+[ 58/220] OK  f10winner057 Benoit Cosnefroy               low       5.0/10  
+[ 59/220] XX  f10winner058 George Kusche                  good      7.0/10  
+[ 60/220] OK  f10winner059 Layne Riggs                    low       6.0/10  
+[ 61/220] XX  f10election000 Tisza                          good      7.0/10  
+[ 62/220] OK  f10election001 Hannah Spencer                 good      7.0/10  
+[ 63/220] OK  f10election002 António José Seguro            good      8.0/10  
+[ 64/220] XX  f10election003 Den Haag                       sceptical 2.0/10  
+[ 65/220] OK  f10election004 Andy Burnham                   good      7.0/10  
+[ 66/220] OK  f10election005 Ed Smelt                       high      9.0/10  
+[ 67/220] OK  f10election006 Peter Taylor                   good      7.0/10  
+[ 68/220] XX  f10election007 Mañueco                        low       5.0/10  
+[ 69/220] XX  f10election008 BJP                            low       6.0/10  
+[ 70/220] XX  f10election009 Juanma Moreno                  low       5.0/10  
+[ 71/220] OK  f10election010 Plaid Cymru                    sceptical 4.0/10  
+[ 72/220] OK  f10election011 Guelleh                        good      8.0/10  
+[ 73/220] OK  f10election012 Doly Begum                     good      8.0/10  
+[ 74/220] XX  f10election013 Florentino Perez               high      9.0/10  
+[ 75/220] OK  f10election014 Lam                            good      7.0/10  
+[ 76/220] OK  f10election015 Hakainde Hichilema             good      7.0/10  
+[ 77/220] OK  f10election016 Danielle Martin                good      7.0/10  
+[ 78/220] XX  f10election017 Den Haag                       low       5.0/10  
+[ 79/220] OK  f10election018 Luke Herdegen of One Nation    good      8.0/10  
+[ 80/220] XX  f10election019 Nigel Farage                   high      9.0/10  
+[ 81/220] OK  f10season000 New Zealand                    good      7.0/10  
+[ 82/220] XX  f10season001 Binghamton Bearcats            sceptical 3.0/10  
+[ 83/220] XX  f10season002 České Budějovice Attendance    low       5.0/10  
+[ 84/220] OK  f10season003 Florida A&M Lady Rattlers      low       5.0/10  
+[ 85/220] XX  f10season004 Ängelholm                      low       5.0/10  
+[ 86/220] XX  f10season005 Alex de Minaur                 low       6.0/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  high      9.0/10  
+[ 88/220] XX  f10season007 Q138537958                     low       5.0/10  
+[ 89/220] OK  f10season008 Alessandro Fancellu            sceptical 3.0/10  
+[ 90/220] XX  f10season009 Rider                          low       6.0/10  
+[ 91/220] XX  f10season010 Finále Česko                   low       5.0/10  
+[ 92/220] XX  f10season011 George Russell                 good      7.0/10  
+[ 93/220] XX  f10season012 Timelag                        sceptical 2.0/10  
+[ 94/220] OK  f10season013 Benoît Cosnefroy               low       5.0/10  
+[ 95/220] OK  f10season014 Bury St Edmunds                low       6.0/10  
+[ 96/220] XX  f10season015 Rebs                           low       5.0/10  
+[ 97/220] OK  f10season016 Stanford                       good      8.0/10  
+[ 98/220] XX  f10season017 Juan Sebastián Molano          good      7.0/10  
+[ 99/220] XX  f10season018 Geneva                         sceptical 1.0/10  
+[100/220] XX  f10season019 Rayo Vallecano                 sceptical 4.0/10  
+[101/220] XX  f10season020 Kazda                          low       5.0/10  
+[102/220] OK  f10season021 EAST Fremantle                 low       5.0/10  
+[103/220] XX  f10season022 Brooks Field                   good      7.0/10  
+[104/220] OK  f10season023 Wu Yize                        low       6.0/10  
+[105/220] XX  f10season024 O Gran Camiño                  good      7.0/10  
+[106/220] OK  f10season025 New Zealand                    low       6.0/10  
+[107/220] XX  f10season026 Paraguay                       low       5.0/10  
+[108/220] OK  f10season027 Jasper Philipsen               sceptical 4.0/10  
+[109/220] XX  f10season028 Lazio                          good      7.0/10  
+[110/220] OK  f10season029 Caprice Cayetano               low       5.0/10  
+[111/220] XX  f10headgov000 Bashkirs                       low       5.0/10  
+[112/220] OK  f10headgov001 Democrat Abigail Spanberger    good      7.0/10  
+[113/220] XX  f10headgov002 Adhikari                       low       6.0/10  
+[114/220] XX  f10headgov003 Steinmeier                     low       5.0/10  
+[115/220] XX  f10headgov004 Kabinett Schulze               low       5.0/10  
+[116/220] XX  f10headgov005 Botswana                       sceptical 3.0/10  
+[117/220] XX  f10headgov006 Landkreis Berchtesgadener Land low       5.0/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 3.0/10  
+[119/220] XX  f10headgov008 Istiqlal                       low       5.0/10  
+[120/220] XX  f10headgov009 Gregor Bayrhof                 low       5.0/10  
+[121/220] OK  f10headgov010 Özdemir                        low       6.0/10  
+[122/220] OK  f10headgov011 Andy Burnham                   good      7.0/10  
+[123/220] XX  f10headgov012 Rob Jetten                     good      7.0/10  
+[124/220] XX  f10headgov013 Zhlobin                        low       5.0/10  
+[125/220] XX  f10headgov014 Snævringen                     low       6.0/10  
+[126/220] XX  f10headgov015 Vejen Kommune                  good      7.0/10  
+[127/220] OK  f10headgov016 Andy Burnham                   high      9.0/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  low       5.0/10  
+[129/220] XX  f10headgov018 Paterna                        low       5.0/10  
+[130/220] OK  f10headgov019 Rob Jetten                     good      7.0/10  
+[131/220] XX  f10headgov020 Palau                          good      8.0/10  
+[132/220] XX  f10headgov021 Canton de Neuchâtel            low       6.0/10  
+[133/220] XX  f10headgov022 Midrand                        low       5.0/10  
+[134/220] XX  f10headgov023 Stevns Kommune                 low       5.0/10  
+[135/220] XX  f10headgov024 Tulkarm Municipality           low       5.0/10  
+[136/220] OK  f10headgov025 Rob Jetten                     good      7.0/10  
+[137/220] OK  f10headgov026 Aurélie Maillols               sceptical 1.0/10  
+[138/220] OK  f10headgov027 Zurab Pataradze                good      7.0/10  
+[139/220] OK  f10headgov028 Fabrice Lefebvre               low       6.0/10  
+[140/220] XX  f10headgov029 Keiko Fujimori                 sceptical 4.0/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                low       5.0/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 2.0/10  
+[143/220] XX  f10news_2026-10-22_conflict1 Yemen                          low       5.0/10  
+[144/220] XX  f10news_2026-10-29_election0 February 21, 2027              sceptical 4.0/10  
+[145/220] XX  f10news_2026-10-27_culture0 Dutch                          low       5.0/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  high      10.0/10  
+[147/220] XX  f10news_2026-11-03_election0 3                              sceptical 4.0/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          high      9.0/10  
+[149/220] XX  f10news_2026-10-26_conflict1 Jordan                         low       6.0/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 good      7.0/10  
+[151/220] OK  f10news_2026-10-19_law0 Florida Attorney General James sceptical 4.0/10  
+[152/220] XX  f10news_2026-10-19_law3 Staškov                        low       6.0/10  
+[153/220] XX  f10news_2026-10-28_disaster1 28                             low       6.0/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             good      8.0/10  
+[155/220] OK  f10news_2026-10-30_law0 Court of Appeal                good      7.0/10  
+[156/220] OK  f10news_2026-10-21_conflict1 El Salvador President Nayib Bu low       6.0/10  
+[157/220] XX  f10news_2026-10-21_science0 BioWare                        low       6.0/10  
+[158/220] XX  f10news_2026-10-24_disaster1 500                            sceptical 4.0/10  
+[159/220] OK  f10news_2026-10-23_conflict6 Black Sea                      sceptical 4.0/10  
+[160/220] OK  f10news_2026-11-01_sport0 Yamaha                         sceptical 2.0/10  
+[161/220] XX  f10news_2026-10-22_culture0 Freedom of Thought             sceptical 4.0/10  
+[162/220] OK  f10news_2026-10-20_law1 Pakistan                       low       6.0/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 good      7.0/10  
+[164/220] OK  f10news_2026-10-27_law1 Mada Masr                      high      9.0/10  
+[165/220] XX  f10news_2026-10-30_conflict2 Iran                           sceptical 4.0/10  
+[166/220] OK  f10news_2026-10-23_sport0 Lionel Messi                   sceptical 3.0/10  
+[167/220] XX  f10news_2026-10-24_conflict3 Ebola                          good      7.0/10  
+[168/220] XX  f10news_2026-10-29_election1 Andersson                      low       5.0/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 2.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 1.0/10  
+[171/220] XX  f10news_2026-10-24_election2 Tel Aviv                       sceptical 3.0/10  
+[172/220] XX  f10news_2026-11-02_conflict6 Russia                         sceptical 3.0/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        good      8.0/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Swieczkowski                   good      7.0/10  
+[175/220] OK  f10news_2026-10-25_election1 Iliana Iotova                  sceptical 4.0/10  
+[176/220] XX  f10news_2026-10-28_business1 3.3 billion                    sceptical 1.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 Hawks                          low       6.0/10  
+[178/220] XX  f10news_2026-10-21_law1 Taiwan                         sceptical 4.0/10  
+[179/220] OK  f10news_2026-10-28_law0 Tommy Robinson                 good      8.0/10  
+[180/220] XX  f10news_2026-10-20_disaster2 12                             sceptical 2.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Liberia                        sceptical 2.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 1.0/10  
+[183/220] OK  f10news_2026-10-23_disaster2 Fernando Air Base              sceptical 2.0/10  
+[184/220] XX  f10news_2026-10-25_election3 Flávio Bolsonaro               low       6.0/10  
+[185/220] OK  f10news_2026-10-19_diplomacy1 San Marino                     sceptical 4.0/10  
+[186/220] XX  f10news_2026-10-23_diplomacy0 Australia                      sceptical 0.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  good      8.0/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Saudi-led                      sceptical 3.0/10  
+[189/220] XX  f10news_2026-10-30_election2 Bogdan Święczkowski            good      8.0/10  
+[190/220] XX  f10news_2026-10-21_business1 Chancellor                     low       5.0/10  
+[191/220] XX  f10news_2026-11-01_sport1 Skate Canada International     low       6.0/10  
+[192/220] OK  f10news_2026-10-25_election0 Luiz Inácio Lula da Silva      good      7.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               good      7.0/10  
+[194/220] XX  f10news_2026-10-28_business0 Bank of Canada                 sceptical 2.0/10  
+[195/220] XX  f10news_2026-10-26_law0 Nigeria                        sceptical 1.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Flavio Bolsonaro               good      8.0/10  
+[197/220] OK  f10news_2026-11-01_sport3 Tampa Bay Buccaneers           sceptical 4.0/10  
+[198/220] OK  f10news_2026-10-28_diplomacy0 130                            low       5.0/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              high      9.0/10  
+[200/220] OK  f10news_2026-10-22_sport2 Chicago Bears                  low       5.0/10  
+[201/220] XX  f10news_2026-11-01_election1 Yotova                         good      7.0/10  
+[202/220] OK  f10news_2026-10-26_sport0 Harry Kane                     high      9.0/10  
+[203/220] XX  f10news_2026-10-21_science1 Microsoft                      sceptical 3.0/10  
+[204/220] XX  f10news_2026-10-31_election1 10                             sceptical 1.0/10  
+[205/220] XX  f10news_2026-10-20_conflict1 Sudan People Liberation Moveme sceptical 2.0/10  
+[206/220] OK  f10news_2026-10-21_diplomacy0 Dail                           sceptical 1.0/10  
+[207/220] XX  f10news_2026-10-25_sport0 Lincoln                        sceptical 4.0/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            low       5.0/10  
+[209/220] OK  f10news_2026-11-01_sport2 Antonelli                      low       5.0/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 4.0/10  
+[211/220] XX  f10news_2026-10-29_culture0 Transformative Works OTW       sceptical 2.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             good      7.0/10  
+[213/220] OK  f10news_2026-10-29_conflict0 2,000                          good      8.0/10  
+[214/220] OK  f10news_2026-10-31_sport2 Dakar                          high      9.0/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         low       5.0/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       sceptical 4.0/10  
+[217/220] XX  f10news_2026-10-31_election0 17                             good      7.0/10  
+[218/220] XX  f10news_2026-10-20_disaster1 MC Tank Transport              sceptical 4.0/10  
+[219/220] XX  f10news_2026-10-20_election1 RoS                            sceptical 1.0/10  
+[220/220] OK  f10news_2026-10-27_business0 40 %                           sceptical 2.0/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=none search=brave ====
+  n 220  accuracy (value shown is right) 0.486  bands monotone False
+  band high       0.064 (n=14) precision 0.857
+  band good       0.273 (n=60) precision 0.600
+  band low        0.409 (n=90) precision 0.389
+  band sceptical  0.255 (n=56) precision 0.429
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.486 (n=140)
+  regime news          accuracy 0.487 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 8, "fetch_ms": 218, "read_ms": 2971, "write_ms": 0, "total_ms": 3445}
+[planck3 11:09:40] round 10: x-hertz r10 on the GPU (rule Q)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_r10/reader.pt --writer template --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_x-hertz-r10_template --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] OK  f10winner000 Layne Riggs                    low       6.0/10  
+[  2/220] OK  f10winner001 Chase Briscoe                  good      7.0/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            good      8.0/10  
+[  4/220] OK  f10winner003 Xandra Velzeboer               high      9.0/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   low       5.0/10  
+[  6/220] OK  f10winner005 Austin Hill                    low       5.0/10  
+[  7/220] OK  f10winner006 Eva Marija                     low       5.0/10  
+[  8/220] XX  f10winner007 Kujawy Pomorze                 low       5.0/10  
+[  9/220] XX  f10winner008 Bishkek                        low       5.0/10  
+[ 10/220] XX  f10winner009 Bullring                       low       5.0/10  
+[ 11/220] XX  f10winner010 Jeļena Ostapenko               low       6.0/10  
+[ 12/220] OK  f10winner011 Corey Heim                     low       6.0/10  
+[ 13/220] XX  f10winner012 Germany Julia Ackermann Isabel low       5.0/10  
+[ 14/220] XX  f10winner013 Dover                          low       5.0/10  
+[ 15/220] XX  f10winner014 Julius Yego                    low       5.0/10  
+[ 16/220] OK  f10winner015 Barcelona                      low       5.0/10  
+[ 17/220] XX  f10winner016 Legendary Billy Green          low       5.0/10  
+[ 18/220] XX  f10winner017 Toyota                         low       5.0/10  
+[ 19/220] XX  f10winner018 Germany Julia Ackermann Isabel low       5.0/10  
+[ 20/220] OK  f10winner019 Niels Vink                     low       6.0/10  
+[ 21/220] OK  f10winner020 Third-seeded Barbora Krejčíkov low       5.0/10  
+[ 22/220] OK  f10winner021 Federica Brignone              low       6.0/10  
+[ 23/220] OK  f10winner022 Maria Timofeeva                good      7.0/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  low       6.0/10  
+[ 25/220] OK  f10winner024 Niels Vink                     sceptical 2.0/10  
+[ 26/220] XX  f10winner025 Real Madrid                    low       5.0/10  
+[ 27/220] XX  f10winner026 Taylor Gray                    low       6.0/10  
+[ 28/220] XX  f10winner027 Linn Svahn                     low       5.0/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            good      7.0/10  
+[ 30/220] XX  f10winner029 Canada                         low       5.0/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    sceptical 3.0/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 high      9.0/10  
+[ 33/220] XX  f10winner032 Great Britain Alfie Hewett     low       6.0/10  
+[ 34/220] XX  f10winner033 Lloyd Glasspool                low       6.0/10  
+[ 35/220] OK  f10winner034 Corey Heim                     good      8.0/10  
+[ 36/220] XX  f10winner035 Moetamen Bellah Jelassi        sceptical 2.0/10  
+[ 37/220] XX  f10winner036 Keanna MacInnes                sceptical 2.0/10  
+[ 38/220] XX  f10winner037 Bolton Wanderers               low       5.0/10  
+[ 39/220] OK  f10winner038 Roos Vanotterdijk              low       6.0/10  
+[ 40/220] XX  f10winner039 Ebba Andersson                 good      8.0/10  
+[ 41/220] OK  f10winner040 Dong Zhihao                    low       5.0/10  
+[ 42/220] OK  f10winner041 Yang Liujing                   sceptical 2.0/10  
+[ 43/220] XX  f10winner042 Pradeep Kumar                  sceptical 2.0/10  
+[ 44/220] OK  f10winner043 Olav Kooij                     good      7.0/10  
+[ 45/220] OK  f10winner044 Aryna Sabalenka                low       5.0/10  
+[ 46/220] XX  f10winner045 Jessica Pegula                 low       5.0/10  
+[ 47/220] OK  f10winner046 Jordi Meeus                    low       6.0/10  
+[ 48/220] OK  f10winner047 Lotte Kopecky                  sceptical 3.0/10  
+[ 49/220] XX  f10winner048 Aryna Sabalenka                good      8.0/10  
+[ 50/220] XX  f10winner049 Carys Lloyd                    sceptical 4.0/10  
+[ 51/220] OK  f10winner050 Corey Heim                     good      7.0/10  
+[ 52/220] OK  f10winner051 Marc-Antoine Camirand          low       5.0/10  
+[ 53/220] XX  f10winner052 USA Ryan Cochran-Siegle        good      8.0/10  
+[ 54/220] XX  f10winner053 Hana Moll USA                  low       5.0/10  
+[ 55/220] OK  f10winner054 Kateřina Siniaková             sceptical 4.0/10  
+[ 56/220] OK  f10winner055 Matthew Brennan                good      8.0/10  
+[ 57/220] OK  f10winner056 Jeļena Ostapenko               low       6.0/10  
+[ 58/220] XX  f10winner057 Peccioli                       sceptical 3.0/10  
+[ 59/220] OK  f10winner058 Gerda Steyn                    good      7.0/10  
+[ 60/220] OK  f10winner059 Layne Riggs                    low       5.0/10  
+[ 61/220] XX  f10election000 Trump                          sceptical 3.0/10  
+[ 62/220] XX  f10election001 Andy Burnham                   low       5.0/10  
+[ 63/220] OK  f10election002 António José Seguro            good      7.0/10  
+[ 64/220] OK  f10election003 Party                          low       6.0/10  
+[ 65/220] OK  f10election004 Andy Burnham                   low       5.0/10  
+[ 66/220] XX  f10election005 Kat McNamara                   low       5.0/10  
+[ 67/220] XX  f10election006 Conservative Party             low       5.0/10  
+[ 68/220] --  f10election007 None                           none      -/10  
+[ 69/220] XX  f10election008 BJP                            low       5.0/10  
+[ 70/220] XX  f10election009 Juanma Moreno                  low       6.0/10  
+[ 71/220] XX  f10election010 Conservative                   sceptical 4.0/10  
+[ 72/220] XX  f10election011 Ismaël Omar Guelleh            low       6.0/10  
+[ 73/220] XX  f10election012 Fatima Shaban                  low       5.0/10  
+[ 74/220] XX  f10election013 Florentino Perez               good      8.0/10  
+[ 75/220] OK  f10election014 Lam                            good      7.0/10  
+[ 76/220] OK  f10election015 Zambian President Hakainde Hic good      7.0/10  
+[ 77/220] OK  f10election016 Danielle Martin                good      7.0/10  
+[ 78/220] OK  f10election017 Party                          low       6.0/10  
+[ 79/220] OK  f10election018 Luke Herdegen of One Nation    good      7.0/10  
+[ 80/220] XX  f10election019 Nigel Farage                   good      7.0/10  
+[ 81/220] OK  f10season000 New Zealand                    good      7.0/10  
+[ 82/220] OK  f10season001 UConn                          low       5.0/10  
+[ 83/220] OK  f10season002 Sweden                         low       5.0/10  
+[ 84/220] OK  f10season003 Florida A&M Lady Rattlers      low       5.0/10  
+[ 85/220] --  f10season004 None                           none      -/10  
+[ 86/220] XX  f10season005 Alex de Minaur                 good      8.0/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  good      8.0/10  
+[ 88/220] OK  f10season007 Missouri State                 good      7.0/10  
+[ 89/220] OK  f10season008 Alessandro Fancellu            sceptical 3.0/10  
+[ 90/220] OK  f10season009 Marlen Reusser of Movistar Tea low       6.0/10  
+[ 91/220] XX  f10season010 Team USA                       low       5.0/10  
+[ 92/220] XX  f10season011 George Russell                 good      7.0/10  
+[ 93/220] OK  f10season012 Isaac del Toro                 good      7.0/10  
+[ 94/220] OK  f10season013 Olav Kooij                     good      7.0/10  
+[ 95/220] XX  f10season014 York City                      low       5.0/10  
+[ 96/220] OK  f10season015 Philippines                    low       5.0/10  
+[ 97/220] OK  f10season016 Stanford                       good      7.0/10  
+[ 98/220] XX  f10season017 Erlend Blikra                  good      7.0/10  
+[ 99/220] --  f10season018 None                           none      -/10  
+[100/220] OK  f10season019 Barcelona                      good      7.0/10  
+[101/220] XX  f10season020 Sweden Ludvig Andersson        low       6.0/10  
+[102/220] OK  f10season021 EAST Fremantle                 low       5.0/10  
+[103/220] XX  f10season022 North Carolina                 low       5.0/10  
+[104/220] OK  f10season023 Wu Yize                        low       6.0/10  
+[105/220] OK  f10season024 Adam Yates                     good      7.0/10  
+[106/220] OK  f10season025 New Zealand                    low       6.0/10  
+[107/220] --  f10season026 None                           none      -/10  
+[108/220] XX  f10season027 Baloise Verzekeringen          low       5.0/10  
+[109/220] XX  f10season028 Juventus                       low       5.0/10  
+[110/220] XX  f10season029 Lella Ford                     good      7.0/10  
+[111/220] XX  f10headgov000 Bashkirs                       low       5.0/10  
+[112/220] OK  f10headgov001 Democrat Abigail Spanberger    good      8.0/10  
+[113/220] XX  f10headgov002 Adhikari                       low       5.0/10  
+[114/220] XX  f10headgov003 Steinmeier                     low       5.0/10  
+[115/220] OK  f10headgov004 Sven Schulze                   low       6.0/10  
+[116/220] XX  f10headgov005 Botswana                       low       5.0/10  
+[117/220] --  f10headgov006 None                           none      -/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 1.0/10  
+[119/220] --  f10headgov008 None                           none      -/10  
+[120/220] XX  f10headgov009 Rudi Achatz                    low       5.0/10  
+[121/220] OK  f10headgov010 Cem Özdemir                    low       5.0/10  
+[122/220] OK  f10headgov011 Andy Burnham                   good      7.0/10  
+[123/220] OK  f10headgov012 Paul Maréchal                  low       5.0/10  
+[124/220] --  f10headgov013 None                           none      -/10  
+[125/220] --  f10headgov014 None                           none      -/10  
+[126/220] XX  f10headgov015 Vejen Kommune                  low       5.0/10  
+[127/220] OK  f10headgov016 Andy Burnham                   high      9.0/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  low       5.0/10  
+[129/220] XX  f10headgov018 MHK Stu Peters                 low       5.0/10  
+[130/220] OK  f10headgov019 Rob Jetten                     low       5.0/10  
+[131/220] --  f10headgov020 None                           none      -/10  
+[132/220] OK  f10headgov021 Céline Vara                    low       5.0/10  
+[133/220] --  f10headgov022 None                           none      -/10  
+[134/220] XX  f10headgov023 Henning Urban Dam Nielsen      low       5.0/10  
+[135/220] XX  f10headgov024 Essam Abu Baker                low       5.0/10  
+[136/220] OK  f10headgov025 Rob Jetten                     low       5.0/10  
+[137/220] OK  f10headgov026 Aurélie Maillols               sceptical 1.0/10  
+[138/220] OK  f10headgov027 Zurab Pataradze                low       5.0/10  
+[139/220] OK  f10headgov028 Fabrice Lefebvre               low       6.0/10  
+[140/220] XX  f10headgov029 Yoshiwara                      low       6.0/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                low       5.0/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 1.0/10  
+[143/220] XX  f10news_2026-10-22_conflict1 AQAP                           low       5.0/10  
+[144/220] XX  f10news_2026-10-29_election0 February 21, 2027              sceptical 4.0/10  
+[145/220] --  f10news_2026-10-27_culture0 None                           none      -/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  high      9.0/10  
+[147/220] XX  f10news_2026-11-03_election0 3                              low       6.0/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          good      8.0/10  
+[149/220] XX  f10news_2026-10-26_conflict1 Suwayda Governorate            low       5.0/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 good      7.0/10  
+[151/220] OK  f10news_2026-10-19_law0 Florida Attorney General James sceptical 4.0/10  
+[152/220] XX  f10news_2026-10-19_law3 Staškov                        low       5.0/10  
+[153/220] --  f10news_2026-10-28_disaster1 None                           none      -/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             good      8.0/10  
+[155/220] XX  f10news_2026-10-30_law0 Supreme Court of Victoria      low       6.0/10  
+[156/220] OK  f10news_2026-10-21_conflict1 El Salvador President Nayib Bu low       5.0/10  
+[157/220] OK  f10news_2026-10-21_science0 Electronic Arts                low       6.0/10  
+[158/220] XX  f10news_2026-10-24_disaster1 500                            sceptical 3.0/10  
+[159/220] --  f10news_2026-10-23_conflict6 None                           none      -/10  
+[160/220] XX  f10news_2026-11-01_sport0 MotoGP                         sceptical 3.0/10  
+[161/220] OK  f10news_2026-10-22_culture0 International Criminal Court   low       6.0/10  
+[162/220] OK  f10news_2026-10-20_law1 Pakistan                       low       5.0/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 good      7.0/10  
+[164/220] OK  f10news_2026-10-27_law1 Mada Masr                      good      8.0/10  
+[165/220] OK  f10news_2026-10-30_conflict2 Oman                           sceptical 2.0/10  
+[166/220] OK  f10news_2026-10-23_sport0 Lionel Messi                   sceptical 1.0/10  
+[167/220] --  f10news_2026-10-24_conflict3 None                           none      -/10  
+[168/220] XX  f10news_2026-10-29_election1 Magdalena Andersson            low       5.0/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 2.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 1.0/10  
+[171/220] XX  f10news_2026-10-24_election2 Tel Aviv                       sceptical 3.0/10  
+[172/220] --  f10news_2026-11-02_conflict6 None                           none      -/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        good      7.0/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Swieczkowski                   good      8.0/10  
+[175/220] XX  f10news_2026-10-25_election1 Incumbent President Iliana Yot low       5.0/10  
+[176/220] XX  f10news_2026-10-28_business1 3.3 billion                    sceptical 1.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 Hawks                          good      7.0/10  
+[178/220] XX  f10news_2026-10-21_law1 Huang Yi-hao                   sceptical 3.0/10  
+[179/220] XX  f10news_2026-10-28_law0 Stephen Yaxley-Lennon          low       6.0/10  
+[180/220] XX  f10news_2026-10-20_disaster2 14                             sceptical 1.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Switzerland Federal Supreme Co sceptical 1.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 1.0/10  
+[183/220] OK  f10news_2026-10-23_disaster2 Fernando Air Base              sceptical 2.0/10  
+[184/220] XX  f10news_2026-10-25_election3 Flávio Bolsonaro               low       6.0/10  
+[185/220] OK  f10news_2026-10-19_diplomacy1 San Marino                     low       6.0/10  
+[186/220] XX  f10news_2026-10-23_diplomacy0 Treasury Department            sceptical 2.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  good      7.0/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Coalition Joint Forces Command sceptical 2.0/10  
+[189/220] XX  f10news_2026-10-30_election2 Bogdan Święczkowski            good      8.0/10  
+[190/220] XX  f10news_2026-10-21_business1 UK                             good      7.0/10  
+[191/220] OK  f10news_2026-11-01_sport1 Mao Shimada                    good      8.0/10  
+[192/220] XX  f10news_2026-10-25_election0 Flávio Bolsonaro               good      7.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               good      7.0/10  
+[194/220] XX  f10news_2026-10-28_business0 Bank of Canada                 sceptical 1.0/10  
+[195/220] XX  f10news_2026-10-26_law0 Federal Bureau of Investigatio sceptical 1.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Flavio Bolsonaro               good      8.0/10  
+[197/220] XX  f10news_2026-11-01_sport3 Atlanta Falcons                sceptical 4.0/10  
+[198/220] OK  f10news_2026-10-28_diplomacy0 130                            low       5.0/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              high      9.0/10  
+[200/220] OK  f10news_2026-10-22_sport2 Chicago Bears                  sceptical 4.0/10  
+[201/220] XX  f10news_2026-11-01_election1 Iliana Yotova                  good      7.0/10  
+[202/220] OK  f10news_2026-10-26_sport0 Harry Kane                     good      7.0/10  
+[203/220] XX  f10news_2026-10-21_science1 Microsoft                      sceptical 3.0/10  
+[204/220] OK  f10news_2026-10-31_election1 34                             sceptical 1.0/10  
+[205/220] XX  f10news_2026-10-20_conflict1 Sudan People Liberation Moveme sceptical 1.0/10  
+[206/220] XX  f10news_2026-10-21_diplomacy0 Irish                          sceptical 1.0/10  
+[207/220] OK  f10news_2026-10-25_sport0 Kyle Larson                    low       6.0/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            low       5.0/10  
+[209/220] XX  f10news_2026-11-01_sport2 Lewis Hamilton                 low       5.0/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 4.0/10  
+[211/220] XX  f10news_2026-10-29_culture0 Transformative Works OTW       sceptical 1.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             good      7.0/10  
+[213/220] OK  f10news_2026-10-29_conflict0 2,000                          good      7.0/10  
+[214/220] OK  f10news_2026-10-31_sport2 Dakar                          high      9.0/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         low       6.0/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       low       6.0/10  
+[217/220] XX  f10news_2026-10-31_election0 31                             good      7.0/10  
+[218/220] XX  f10news_2026-10-20_disaster1 Toledo Mayor Wade Kapszukiewic sceptical 3.0/10  
+[219/220] XX  f10news_2026-10-20_election1 KUALA LUMPUR                   sceptical 1.0/10  
+[220/220] OK  f10news_2026-10-27_business0 40 %                           sceptical 1.0/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=none search=brave ====
+  n 220  accuracy (value shown is right) 0.491  bands monotone True
+  band high       0.027 (n=6) precision 1.000
+  band good       0.241 (n=53) precision 0.679
+  band low        0.455 (n=100) precision 0.470
+  band sceptical  0.209 (n=46) precision 0.413
+  band none       0.068 (n=15)
+  regime fresh         accuracy 0.514 (n=140)
+  regime news          accuracy 0.450 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 13, "read_ms": 83, "write_ms": 0, "total_ms": 341}
+[planck3 11:11:03] round 10: Gemma reader (the gap)
+> python scripts/planck3.py r5 --reader gemma --writer template --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_gemma_template --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[planck3] loading Gemma teacher models/gemma-4-e4b-it ...
+[  1/220] OK  f10winner000 Layne Riggs                    good      8.0/10  
+[  2/220] OK  f10winner001 Chase Briscoe                  high      9.0/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            good      8.0/10  
+[  4/220] OK  f10winner003 Xandra Velzeboer               high      9.0/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   good      7.0/10  
+[  6/220] OK  f10winner005 Austin Hill                    good      7.0/10  
+[  7/220] OK  f10winner006 Eva Marija                     low       5.0/10  
+[  8/220] OK  f10winner007 Gerson Balde of Portugal       good      8.0/10  
+[  9/220] --  f10winner008 None                           none      -/10  
+[ 10/220] OK  f10winner009 Taylor Mayhew                  low       5.0/10  
+[ 11/220] OK  f10winner010 Nicole Melichar-Martinez       good      7.0/10  
+[ 12/220] XX  f10winner011 Chandler Smith                 low       5.0/10  
+[ 13/220] --  f10winner012 None                           none      -/10  
+[ 14/220] OK  f10winner013 Kyle Busch                     good      7.0/10  
+[ 15/220] OK  f10winner014 Karabo More RSA                good      7.0/10  
+[ 16/220] --  f10winner015 None                           none      -/10  
+[ 17/220] XX  f10winner016 Presented                      sceptical 3.0/10  
+[ 18/220] OK  f10winner017 Kaden Honeycutt                low       6.0/10  
+[ 19/220] OK  f10winner018 Hubert Kós                     good      7.0/10  
+[ 20/220] OK  f10winner019 Niels Vink                     good      7.0/10  
+[ 21/220] XX  f10winner020 WTA                            good      8.0/10  
+[ 22/220] OK  f10winner021 Federica Brignone              good      7.0/10  
+[ 23/220] OK  f10winner022 Maria Timofeeva                low       6.0/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  good      7.0/10  
+[ 25/220] XX  f10winner024 Alfie Hewett                   low       5.0/10  
+[ 26/220] XX  f10winner025 El Joventut                    low       5.0/10  
+[ 27/220] OK  f10winner026 Austin Hill                    good      8.0/10  
+[ 28/220] OK  f10winner027 Norway                         high      9.0/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            good      7.0/10  
+[ 30/220] --  f10winner029 None                           none      -/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    low       5.0/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 high      9.0/10  
+[ 33/220] OK  f10winner032 Tokito Oda                     high      9.0/10  
+[ 34/220] OK  f10winner033 Guido Andreozzi                good      7.0/10  
+[ 35/220] OK  f10winner034 Corey Heim                     good      8.0/10  
+[ 36/220] --  f10winner035 None                           none      -/10  
+[ 37/220] OK  f10winner036 Ellen Walshe                   sceptical 3.0/10  
+[ 38/220] OK  f10winner037 Tigers                         low       5.0/10  
+[ 39/220] OK  f10winner038 Roos Vanotterdijk              low       6.0/10  
+[ 40/220] OK  f10winner039 Linn Svahn                     good      8.0/10  
+[ 41/220] --  f10winner040 None                           none      -/10  
+[ 42/220] OK  f10winner041 Yang Liujing                   sceptical 3.0/10  
+[ 43/220] XX  f10winner042 Devendra Kumar                 sceptical 3.0/10  
+[ 44/220] XX  f10winner043 Sparkassen Münsterland Giro    low       6.0/10  
+[ 45/220] OK  f10winner044 Aryna Sabalenka                good      7.0/10  
+[ 46/220] OK  f10winner045 Linda Noskova                  high      9.0/10  
+[ 47/220] OK  f10winner046 Jordi Meeus of Red Bull-BORA-h good      8.0/10  
+[ 48/220] XX  f10winner047 Milano-Sanremo Donne           good      8.0/10  
+[ 49/220] OK  f10winner048 Elena Rybakina                 high      9.0/10  
+[ 50/220] XX  f10winner049 Dylan Groenewegen              high      9.0/10  
+[ 51/220] XX  f10winner050 NASCAR Cup Series              good      7.0/10  
+[ 52/220] XX  f10winner051 Marcus Ericsson                sceptical 2.0/10  
+[ 53/220] OK  f10winner052 Switzerland Franjo von Allmen  high      9.0/10  
+[ 54/220] OK  f10winner053 Molly Caudery                  good      7.0/10  
+[ 55/220] OK  f10winner054 Kateřina Siniaková Taylor Town good      7.0/10  
+[ 56/220] OK  f10winner055 Matthew Brennan GBR            good      8.0/10  
+[ 57/220] OK  f10winner056 Marcelo Arévalo                high      9.0/10  
+[ 58/220] OK  f10winner057 Benoit Cosnefroy               sceptical 3.0/10  
+[ 59/220] XX  f10winner058 George Kusche                  good      7.0/10  
+[ 60/220] OK  f10winner059 Layne Riggs                    good      7.0/10  
+[ 61/220] XX  f10election000 Hungary                        high      9.0/10  
+[ 62/220] OK  f10election001 Hannah Spencer Green           good      8.0/10  
+[ 63/220] OK  f10election002 António José Seguro            good      8.0/10  
+[ 64/220] XX  f10election003 Richard de Mos Hart            good      7.0/10  
+[ 65/220] OK  f10election004 Andy Burnham                   low       5.0/10  
+[ 66/220] XX  f10election005 Labor Party                    good      7.0/10  
+[ 67/220] XX  f10election006 Watford Mayor                  good      8.0/10  
+[ 68/220] XX  f10election007 Popular Party                  sceptical 1.0/10  
+[ 69/220] XX  f10election008 BJP                            good      7.0/10  
+[ 70/220] OK  f10election009 Partido Popular PP             good      8.0/10  
+[ 71/220] --  f10election010 None                           none      -/10  
+[ 72/220] OK  f10election011 Guelleh                        good      8.0/10  
+[ 73/220] OK  f10election012 Doly Begum                     good      8.0/10  
+[ 74/220] XX  f10election013 Florentino Perez               high      9.0/10  
+[ 75/220] OK  f10election014 Tô Lâm                         high      9.0/10  
+[ 76/220] OK  f10election015 Hakainde Hichilema             high      9.0/10  
+[ 77/220] XX  f10election016 Liberal                        good      7.0/10  
+[ 78/220] XX  f10election017 Heart                          good      7.0/10  
+[ 79/220] OK  f10election018 Luke Herdegen of One Nation    high      9.0/10  
+[ 80/220] XX  f10election019 Nigel Farage Reform UK         high      9.0/10  
+[ 81/220] OK  f10season000 New Zealand                    good      8.0/10  
+[ 82/220] XX  f10season001 Second-seeded UConn            good      7.0/10  
+[ 83/220] --  f10season002 None                           none      -/10  
+[ 84/220] OK  f10season003 Florida A&M                    good      7.0/10  
+[ 85/220] XX  f10season004 Henriksson                     sceptical 3.0/10  
+[ 86/220] XX  f10season005 Novak Djokovic                 high      9.0/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  high      9.0/10  
+[ 88/220] --  f10season007 None                           none      -/10  
+[ 89/220] XX  f10season008 Czech Tour                     low       6.0/10  
+[ 90/220] OK  f10season009 Marlen Reusser of Movistar Tea good      8.0/10  
+[ 91/220] --  f10season010 None                           none      -/10  
+[ 92/220] OK  f10season011 Kimi Antonelli                 good      8.0/10  
+[ 93/220] OK  f10season012 Mexican Isaac del Toro         low       6.0/10  
+[ 94/220] OK  f10season013 Thibaud Gruel                  good      8.0/10  
+[ 95/220] OK  f10season014 Bury St Edmunds RUFC           good      7.0/10  
+[ 96/220] --  f10season015 None                           none      -/10  
+[ 97/220] OK  f10season016 Stanford                       good      8.0/10  
+[ 98/220] XX  f10season017 Tour of Oman                   good      8.0/10  
+[ 99/220] --  f10season018 None                           none      -/10  
+[100/220] OK  f10season019 Barcelona                      good      7.0/10  
+[101/220] XX  f10season020 Sweden Ludvig Andersson        low       5.0/10  
+[102/220] OK  f10season021 EAST Fremantle                 good      7.0/10  
+[103/220] OK  f10season022 Northeastern                   good      7.0/10  
+[104/220] OK  f10season023 Wu Yize                        good      7.0/10  
+[105/220] XX  f10season024 Monte Trega                    low       6.0/10  
+[106/220] OK  f10season025 New Zealand Black Ferns        good      7.0/10  
+[107/220] XX  f10season026 Central America Men Handball C good      7.0/10  
+[108/220] OK  f10season027 Jasper Philipsen of Alpecin-Pr good      8.0/10  
+[109/220] OK  f10season028 Roma Women                     good      7.0/10  
+[110/220] XX  f10season029 Big Winners of Pinoy Big       good      8.0/10  
+[111/220] XX  f10headgov000 New UFA President Eustace      sceptical 3.0/10  
+[112/220] OK  f10headgov001 Abigail Spanberger             high      9.0/10  
+[113/220] XX  f10headgov002 Michael Malfregeot             sceptical 3.0/10  
+[114/220] --  f10headgov003 None                           none      -/10  
+[115/220] XX  f10headgov004 Saxony-Anhalt                  good      7.0/10  
+[116/220] XX  f10headgov005 Advocate Duma Boko             good      7.0/10  
+[117/220] OK  f10headgov006 Michael Koller Freie Wähler    good      7.0/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 3.0/10  
+[119/220] XX  f10headgov008 Marchamalo                     good      7.0/10  
+[120/220] XX  f10headgov009 Rudolf Achatz                  good      7.0/10  
+[121/220] OK  f10headgov010 Minister-President Cem Özdemir good      7.0/10  
+[122/220] OK  f10headgov011 Andy Burnham                   good      7.0/10  
+[123/220] OK  f10headgov012 Paul Maréchal                  good      7.0/10  
+[124/220] --  f10headgov013 None                           none      -/10  
+[125/220] --  f10headgov014 None                           none      -/10  
+[126/220] XX  f10headgov015 Jens Ejner Christensen         low       6.0/10  
+[127/220] OK  f10headgov016 Andy Burnham                   high      9.0/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  good      7.0/10  
+[129/220] XX  f10headgov018 Fatima Ezzahra El Mansouri     sceptical 3.0/10  
+[130/220] OK  f10headgov019 Rob Jetten                     good      7.0/10  
+[131/220] OK  f10headgov020 Jérôme Marbot                  good      7.0/10  
+[132/220] OK  f10headgov021 Céline Vara                    good      7.0/10  
+[133/220] --  f10headgov022 None                           none      -/10  
+[134/220] --  f10headgov023 None                           none      -/10  
+[135/220] OK  f10headgov024 Nasr Foqha                     good      7.0/10  
+[136/220] OK  f10headgov025 Prime Minister Rob Jetten of   good      7.0/10  
+[137/220] OK  f10headgov026 Mme Aurélie MAILLOLS           sceptical 3.0/10  
+[138/220] OK  f10headgov027 Zurab Pataradze                low       5.0/10  
+[139/220] XX  f10headgov028 LEFEBVRE Fabrice               sceptical 3.0/10  
+[140/220] XX  f10headgov029 Keiko Fujimori                 good      7.0/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                low       5.0/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 3.0/10  
+[143/220] OK  f10news_2026-10-22_conflict1 Shabwah Governorate            good      7.0/10  
+[144/220] XX  f10news_2026-10-29_election0 December 13, 2026              low       5.0/10  
+[145/220] OK  f10news_2026-10-27_culture0 AVROTROS                       low       5.0/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  good      8.0/10  
+[147/220] OK  f10news_2026-11-03_election0 435                            good      8.0/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          high      9.0/10  
+[149/220] OK  f10news_2026-10-26_conflict1 Jordanian Armed Forces         good      7.0/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 good      7.0/10  
+[151/220] OK  f10news_2026-10-19_law0 Attorney General James Uthmeie low       6.0/10  
+[152/220] --  f10news_2026-10-19_law3 None                           none      -/10  
+[153/220] XX  f10news_2026-10-28_disaster1 68                             good      8.0/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             high      9.0/10  
+[155/220] XX  f10news_2026-10-30_law0 Victoria Court of Appeal       good      8.0/10  
+[156/220] OK  f10news_2026-10-21_conflict1 El Salvador President Nayib Bu good      7.0/10  
+[157/220] OK  f10news_2026-10-21_science0 Electronic Arts                good      8.0/10  
+[158/220] XX  f10news_2026-10-24_disaster1 616                            low       5.0/10  
+[159/220] OK  f10news_2026-10-23_conflict6 Black Sea                      low       6.0/10  
+[160/220] OK  f10news_2026-11-01_sport0 Yamaha                         low       5.0/10  
+[161/220] OK  f10news_2026-10-22_culture0 International Criminal Court   good      8.0/10  
+[162/220] OK  f10news_2026-10-20_law1 Pakistan                       good      7.0/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 good      7.0/10  
+[164/220] OK  f10news_2026-10-27_law1 Mada Masr                      good      8.0/10  
+[165/220] OK  f10news_2026-10-30_conflict2 Oman                           sceptical 4.0/10  
+[166/220] OK  f10news_2026-10-23_sport0 Lionel Messi                   sceptical 3.0/10  
+[167/220] XX  f10news_2026-10-24_conflict3 Bafwasande                     sceptical 3.0/10  
+[168/220] OK  f10news_2026-10-29_election1 Elisabeth Thand Ringqvist      good      7.0/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 3.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 3.0/10  
+[171/220] OK  f10news_2026-10-24_election2 Tel Aviv Hostages Square       low       5.0/10  
+[172/220] OK  f10news_2026-11-02_conflict6 Zaporizhzhia                   low       5.0/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        high      9.0/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Krzysztof Szczerski            sceptical 3.0/10  
+[175/220] XX  f10news_2026-10-25_election1 Iliana Yotova                  sceptical 3.0/10  
+[176/220] XX  f10news_2026-10-28_business1 302 billion                    sceptical 3.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 SoftBank                       low       5.0/10  
+[178/220] OK  f10news_2026-10-21_law1 New Taipei                     low       5.0/10  
+[179/220] OK  f10news_2026-10-28_law0 Tommy Robinson                 low       6.0/10  
+[180/220] XX  f10news_2026-10-20_disaster2 30                             sceptical 3.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Switzerland Federal Supreme Co sceptical 3.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 3.0/10  
+[183/220] XX  f10news_2026-10-23_disaster2 Batangas                       sceptical 3.0/10  
+[184/220] OK  f10news_2026-10-25_election3 Luiz Inácio Lula da Silva      high      9.0/10  
+[185/220] --  f10news_2026-10-19_diplomacy1 None                           none      -/10  
+[186/220] OK  f10news_2026-10-23_diplomacy0 Australian Government          low       6.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  good      8.0/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Saudi-led                      low       6.0/10  
+[189/220] OK  f10news_2026-10-30_election2 Anna Korwin-Piotrowska         good      8.0/10  
+[190/220] XX  f10news_2026-10-21_business1 UK Government                  high      9.0/10  
+[191/220] OK  f10news_2026-11-01_sport1 Mao Shimada                    good      8.0/10  
+[192/220] OK  f10news_2026-10-25_election0 Luiz Inacio Lula da Silva      high      10.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               good      7.0/10  
+[194/220] XX  f10news_2026-10-28_business0 Bank of Canada                 sceptical 3.0/10  
+[195/220] OK  f10news_2026-10-26_law0 United States Federal Bureau o sceptical 3.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Senator Flavio Bolsonaro       good      8.0/10  
+[197/220] OK  f10news_2026-11-01_sport3 Tampa Bay Buccaneers           low       5.0/10  
+[198/220] --  f10news_2026-10-28_diplomacy0 None                           none      -/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              high      9.0/10  
+[200/220] --  f10news_2026-10-22_sport2 None                           none      -/10  
+[201/220] XX  f10news_2026-11-01_election1 Incumbent President Iliana Yot good      8.0/10  
+[202/220] OK  f10news_2026-10-26_sport0 Harry Kane                     high      9.0/10  
+[203/220] --  f10news_2026-10-21_science1 None                           none      -/10  
+[204/220] OK  f10news_2026-10-31_election1 34                             sceptical 3.0/10  
+[205/220] OK  f10news_2026-10-20_conflict1 Blue Nile                      sceptical 3.0/10  
+[206/220] OK  f10news_2026-10-21_diplomacy0 Dail                           sceptical 3.0/10  
+[207/220] OK  f10news_2026-10-25_sport0 Kyle Larson                    good      7.0/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            low       5.0/10  
+[209/220] OK  f10news_2026-11-01_sport2 Antonelli                      good      7.0/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 4.0/10  
+[211/220] XX  f10news_2026-10-29_culture0 Donor                          sceptical 3.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             good      8.0/10  
+[213/220] XX  f10news_2026-10-29_conflict0 124                            good      7.0/10  
+[214/220] OK  f10news_2026-10-31_sport2 Senegal                        high      9.0/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         good      8.0/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       good      7.0/10  
+[217/220] XX  f10news_2026-10-31_election0 31                             high      9.0/10  
+[218/220] XX  f10news_2026-10-20_disaster1 MC Tank Transport              good      7.0/10  
+[219/220] OK  f10news_2026-10-20_election1 Registrar of Societies         sceptical 3.0/10  
+[220/220] OK  f10news_2026-10-27_business0 40 %                           sceptical 3.0/10  
+
+==== r5 summary: reader=gemma writer=template personal=none search=brave ====
+  n 220  accuracy (value shown is right) 0.609  bands monotone True
+  band high       0.136 (n=30) precision 0.767
+  band good       0.445 (n=98) precision 0.735
+  band low        0.155 (n=34) precision 0.647
+  band sceptical  0.164 (n=36) precision 0.472
+  band none       0.100 (n=22)
+  regime fresh         accuracy 0.586 (n=140)
+  regime news          accuracy 0.650 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.000  LLM tokens/task 2232
+  ms/task {"search_ms": 1, "fetch_ms": 27, "read_ms": 2663, "write_ms": 0, "total_ms": 2848}
+[planck3 11:22:01] round 10: no-model floor
+> python scripts/planck3.py r5 --reader heuristic --writer template --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_heuristic_template --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] XX  f10winner000 Lucas Oil Indianapolis Raceway sceptical 3.0/10  
+[  2/220] XX  f10winner001 Bank of America                low       6.0/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            low       5.0/10  
+[  4/220] XX  f10winner003 Milan                          sceptical 3.0/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   low       6.0/10  
+[  6/220] XX  f10winner005 NASCAR O'Reilly Auto Parts Ser low       5.0/10  
+[  7/220] OK  f10winner006 Eva Marija                     low       6.0/10  
+[  8/220] XX  f10winner007 TORUN                          good      7.0/10  
+[  9/220] XX  f10winner008 Greco-Roman                    low       5.0/10  
+[ 10/220] XX  f10winner009 Las Vegas                      sceptical 4.0/10  
+[ 11/220] XX  f10winner010 WTA                            sceptical 4.0/10  
+[ 12/220] XX  f10winner011 Rockingham                     low       5.0/10  
+[ 13/220] XX  f10winner012 Paris                          low       6.0/10  
+[ 14/220] XX  f10winner013 Race Results                   low       5.0/10  
+[ 15/220] XX  f10winner014 Day                            sceptical 4.0/10  
+[ 16/220] XX  f10winner015 Spanish Women Super Cup        low       6.0/10  
+[ 17/220] XX  f10winner016 Colorado National Speedway     sceptical 4.0/10  
+[ 18/220] XX  f10winner017 NASCAR Craftsman Truck Series  low       5.0/10  
+[ 19/220] XX  f10winner018 Paris                          low       6.0/10  
+[ 20/220] XX  f10winner019 Sam Schröder                   sceptical 4.0/10  
+[ 21/220] XX  f10winner020 Maria Sakkari                  sceptical 4.0/10  
+[ 22/220] XX  f10winner021 Cortina                        low       5.0/10  
+[ 23/220] XX  f10winner022 Portugal                       good      7.0/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  low       6.0/10  
+[ 25/220] OK  f10winner024 Niels Vink                     sceptical 3.0/10  
+[ 26/220] XX  f10winner025 Supercopa Endesa               sceptical 4.0/10  
+[ 27/220] XX  f10winner026 NASCAR O'Reilly Auto Parts Ser sceptical 4.0/10  
+[ 28/220] XX  f10winner027 Tesero                         low       5.0/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            sceptical 4.0/10  
+[ 30/220] XX  f10winner029 U Sports                       good      7.0/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    sceptical 4.0/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 low       6.0/10  
+[ 33/220] OK  f10winner032 Japan Tokito Oda               low       5.0/10  
+[ 34/220] XX  f10winner033 Indian Wells Open              low       6.0/10  
+[ 35/220] OK  f10winner034 Heim                           low       5.0/10  
+[ 36/220] XX  f10winner035 Q141250422                     low       5.0/10  
+[ 37/220] XX  f10winner036 Q141039728                     sceptical 3.0/10  
+[ 38/220] XX  f10winner037 Middlesbrough                  low       5.0/10  
+[ 39/220] XX  f10winner038 Swimming PDF                   low       5.0/10  
+[ 40/220] XX  f10winner039 Tesero                         low       6.0/10  
+[ 41/220] XX  f10winner040 Tokyo Aquatics Centre          low       6.0/10  
+[ 42/220] XX  f10winner041 Nagoya                         low       5.0/10  
+[ 43/220] XX  f10winner042 Asian Para Games               sceptical 2.0/10  
+[ 44/220] XX  f10winner043 Sparkassen Münsterland Giro    low       5.0/10  
+[ 45/220] XX  f10winner044 Indian Wells Open              sceptical 4.0/10  
+[ 46/220] XX  f10winner045 WTA                            good      8.0/10  
+[ 47/220] OK  f10winner046 Jordi Meeus                    low       6.0/10  
+[ 48/220] OK  f10winner047 Lotte Kopecky                  low       5.0/10  
+[ 49/220] XX  f10winner048 Aryna Sabalenka                low       6.0/10  
+[ 50/220] XX  f10winner049 Dylan Groenewegen              low       6.0/10  
+[ 51/220] XX  f10winner050 Indianapolis Motor Speedway    low       5.0/10  
+[ 52/220] XX  f10winner051 IndyCar                        sceptical 4.0/10  
+[ 53/220] XX  f10winner052 Men Super-G                    low       6.0/10  
+[ 54/220] XX  f10winner053 Q138767735                     sceptical 4.0/10  
+[ 55/220] OK  f10winner054 Taylor Townsend                low       5.0/10  
+[ 56/220] OK  f10winner055 Matthew Brennan                low       5.0/10  
+[ 57/220] OK  f10winner056 Marcelo Arévalo                low       6.0/10  
+[ 58/220] OK  f10winner057 Benoit Cosnefroy               sceptical 2.0/10  
+[ 59/220] XX  f10winner058 George Kusche                  good      7.0/10  
+[ 60/220] XX  f10winner059 NASCAR Craftsman Truck Series  sceptical 4.0/10  
+[ 61/220] XX  f10election000 Tisza                          low       5.0/10  
+[ 62/220] XX  f10election001 Green Party                    good      7.0/10  
+[ 63/220] XX  f10election002 Portugal                       low       6.0/10  
+[ 64/220] XX  f10election003 Den Haag                       sceptical 0.0/10  
+[ 65/220] OK  f10election004 Andy Burnham                   low       6.0/10  
+[ 66/220] XX  f10election005 Posted Mon                     sceptical 2.0/10  
+[ 67/220] OK  f10election006 Peter Taylor                   sceptical 4.0/10  
+[ 68/220] XX  f10election007 Castile                        sceptical 3.0/10  
+[ 69/220] XX  f10election008 BJP                            sceptical 3.0/10  
+[ 70/220] XX  f10election009 Spain                          sceptical 4.0/10  
+[ 71/220] OK  f10election010 Plaid Cymru                    good      7.0/10  
+[ 72/220] OK  f10election011 Guelleh                        low       6.0/10  
+[ 73/220] OK  f10election012 Doly Begum                     sceptical 4.0/10  
+[ 74/220] XX  f10election013 Florentino Perez               good      8.0/10  
+[ 75/220] XX  f10election014 Vietnam                        low       6.0/10  
+[ 76/220] XX  f10election015 Zambia                         good      8.0/10  
+[ 77/220] OK  f10election016 Danielle Martin                sceptical 3.0/10  
+[ 78/220] XX  f10election017 Hague                          sceptical 4.0/10  
+[ 79/220] XX  f10election018 Labor                          low       6.0/10  
+[ 80/220] XX  f10election019 Nigel Farage                   good      8.0/10  
+[ 81/220] OK  f10season000 New Zealand                    low       5.0/10  
+[ 82/220] OK  f10season001 UConn                          sceptical 4.0/10  
+[ 83/220] XX  f10season002 Czech Republic                 sceptical 3.0/10  
+[ 84/220] XX  f10season003 Gulfport Sportsplex            sceptical 4.0/10  
+[ 85/220] XX  f10season004 Sweden Hockey Games Q124705111 low       5.0/10  
+[ 86/220] XX  f10season005 Novak Djokovic                 low       6.0/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  good      7.0/10  
+[ 88/220] XX  f10season007 American                       sceptical 4.0/10  
+[ 89/220] XX  f10season008 Czech Tour Stage               sceptical 4.0/10  
+[ 90/220] OK  f10season009 Marlen Reusser of Movistar Tea good      7.0/10  
+[ 91/220] XX  f10season010 English                        sceptical 4.0/10  
+[ 92/220] XX  f10season011 F1 Canadian Grand Prix         low       6.0/10  
+[ 93/220] OK  f10season012 Isaac del Toro                 good      7.0/10  
+[ 94/220] OK  f10season013 Benoît Cosnefroy               low       6.0/10  
+[ 95/220] XX  f10season014 HomeNational League Two East   low       5.0/10  
+[ 96/220] XX  f10season015 SEABA Under-18 Championship    sceptical 4.0/10  
+[ 97/220] OK  f10season016 Stanford                       good      7.0/10  
+[ 98/220] XX  f10season017 Tour of Oman                   good      7.0/10  
+[ 99/220] XX  f10season018 Nova Scotia Scotties Tournamen low       6.0/10  
+[100/220] XX  f10season019 La Liga                        sceptical 4.0/10  
+[101/220] XX  f10season020 IIHF U18 World Championship    low       5.0/10  
+[102/220] OK  f10season021 EAST Fremantle                 sceptical 3.0/10  
+[103/220] XX  f10season022 Coastal Athletic Association A low       5.0/10  
+[104/220] OK  f10season023 Wu Yize                        low       6.0/10  
+[105/220] XX  f10season024 O Gran Camiño                  good      8.0/10  
+[106/220] OK  f10season025 New Zealand                    sceptical 4.0/10  
+[107/220] XX  f10season026 Paraguay                       sceptical 4.0/10  
+[108/220] OK  f10season027 Jasper Philipsen               low       6.0/10  
+[109/220] OK  f10season028 Roma                           sceptical 3.0/10  
+[110/220] XX  f10season029 Big Winners of Pinoy Big       low       5.0/10  
+[111/220] XX  f10headgov000 Orenburg                       low       5.0/10  
+[112/220] OK  f10headgov001 Spanberger                     good      7.0/10  
+[113/220] XX  f10headgov002 West Bengal                    low       6.0/10  
+[114/220] XX  f10headgov003 Angela Merkel                  low       5.0/10  
+[115/220] OK  f10headgov004 Sven Schulze                   sceptical 4.0/10  
+[116/220] XX  f10headgov005 Botswana                       low       6.0/10  
+[117/220] XX  f10headgov006 Data:Deutschland/Bayern/Landkr low       5.0/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 2.0/10  
+[119/220] OK  f10headgov008 Sergio Sierra                  good      7.0/10  
+[120/220] XX  f10headgov009 Gregor Bayrhof                 low       6.0/10  
+[121/220] XX  f10headgov010 Federation                     sceptical 0.0/10  
+[122/220] OK  f10headgov011 United Kingdom:Andy Burnham    good      7.0/10  
+[123/220] OK  f10headgov012 Paul Maréchal                  sceptical 4.0/10  
+[124/220] XX  f10headgov013 Gomel Oblast                   low       5.0/10  
+[125/220] XX  f10headgov014 Denmark                        low       6.0/10  
+[126/220] XX  f10headgov015 Vejen Kommune                  sceptical 4.0/10  
+[127/220] OK  f10headgov016 Andy Burnham                   good      8.0/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  low       6.0/10  
+[129/220] XX  f10headgov018 Pere Boïl                      low       5.0/10  
+[130/220] XX  f10headgov019 Dutch                          sceptical 4.0/10  
+[131/220] XX  f10headgov020 Palau                          good      7.0/10  
+[132/220] XX  f10headgov021 Canton de Neuchâtel            sceptical 3.0/10  
+[133/220] XX  f10headgov022 Washington D                   sceptical 0.0/10  
+[134/220] XX  f10headgov023 Denmark                        low       6.0/10  
+[135/220] XX  f10headgov024 Governor of Tulkarm Governorat low       5.0/10  
+[136/220] OK  f10headgov025 Rob Jetten                     low       5.0/10  
+[137/220] XX  f10headgov026 Jean-Michel SOLÉ               sceptical 1.0/10  
+[138/220] XX  f10headgov027 Government of Adjara           sceptical 4.0/10  
+[139/220] OK  f10headgov028 Fabrice Lefebvre               low       6.0/10  
+[140/220] XX  f10headgov029 Junior                         low       5.0/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                sceptical 2.0/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 2.0/10  
+[143/220] OK  f10news_2026-10-22_conflict1 Shabwah Governorate            low       6.0/10  
+[144/220] XX  f10news_2026-10-29_election0 February 21, 2027              sceptical 4.0/10  
+[145/220] XX  f10news_2026-10-27_culture0 Dutch                          sceptical 4.0/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  good      7.0/10  
+[147/220] XX  f10news_2026-11-03_election0 3                              good      8.0/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          good      8.0/10  
+[149/220] XX  f10news_2026-10-26_conflict1 Syria Daraa Governorate        sceptical 3.0/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 sceptical 4.0/10  
+[151/220] OK  f10news_2026-10-19_law0 Florida Attorney General James low       6.0/10  
+[152/220] XX  f10news_2026-10-19_law3 Božena Mariaková               low       5.0/10  
+[153/220] XX  f10news_2026-10-28_disaster1 28                             low       6.0/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             good      7.0/10  
+[155/220] XX  f10news_2026-10-30_law0 Victoria Court of Appeal       low       6.0/10  
+[156/220] XX  f10news_2026-10-21_conflict1 Haiti                          sceptical 4.0/10  
+[157/220] XX  f10news_2026-10-21_science0 EA                             sceptical 3.0/10  
+[158/220] XX  f10news_2026-10-24_disaster1 24                             good      7.0/10  
+[159/220] XX  f10news_2026-10-23_conflict6 Bulgaria                       sceptical 4.0/10  
+[160/220] XX  f10news_2026-11-01_sport0 MotoGP                         sceptical 2.0/10  
+[161/220] OK  f10news_2026-10-22_culture0 International Criminal Court I low       5.0/10  
+[162/220] XX  f10news_2026-10-20_law1 US Postal                      sceptical 2.0/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 sceptical 4.0/10  
+[164/220] XX  f10news_2026-10-27_law1 Egypt                          low       5.0/10  
+[165/220] XX  f10news_2026-10-30_conflict2 Strait of Hormuz               sceptical 3.0/10  
+[166/220] XX  f10news_2026-10-23_sport0 Princess of Asturias Award     sceptical 3.0/10  
+[167/220] XX  f10news_2026-10-24_conflict3 Ebola                          low       6.0/10  
+[168/220] XX  f10news_2026-10-29_election1 Swedish                        low       6.0/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 1.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 2.0/10  
+[171/220] XX  f10news_2026-10-24_election2 Israel                         sceptical 2.0/10  
+[172/220] XX  f10news_2026-11-02_conflict6 Ukraine                        sceptical 1.0/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        good      7.0/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Poland                         sceptical 4.0/10  
+[175/220] XX  f10news_2026-10-25_election1 Bulgaria                       low       6.0/10  
+[176/220] XX  f10news_2026-10-28_business1 28                             sceptical 1.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 Softbank Hawks                 low       5.0/10  
+[178/220] XX  f10news_2026-10-21_law1 Taiwan                         sceptical 3.0/10  
+[179/220] OK  f10news_2026-10-28_law0 Tommy Robinson                 good      7.0/10  
+[180/220] XX  f10news_2026-10-20_disaster2 14                             sceptical 2.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Liberia                        sceptical 2.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 3.0/10  
+[183/220] OK  f10news_2026-10-23_disaster2 Fernando Air Base              sceptical 3.0/10  
+[184/220] OK  f10news_2026-10-25_election3 Lula                           low       6.0/10  
+[185/220] OK  f10news_2026-10-19_diplomacy1 Andorra                        sceptical 4.0/10  
+[186/220] XX  f10news_2026-10-23_diplomacy0 Australia                      sceptical 2.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  low       6.0/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Saudi-led                      sceptical 3.0/10  
+[189/220] XX  f10news_2026-10-30_election2 Bogdan Święczkowski            good      8.0/10  
+[190/220] XX  f10news_2026-10-21_business1 UK                             good      8.0/10  
+[191/220] XX  f10news_2026-11-01_sport1 Skate Canada International     good      8.0/10  
+[192/220] OK  f10news_2026-10-25_election0 Luiz Inácio Lula da Silva      good      7.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               good      7.0/10  
+[194/220] XX  f10news_2026-10-28_business0 Bank of Canada                 sceptical 3.0/10  
+[195/220] XX  f10news_2026-10-26_law0 Nigeria                        sceptical 2.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Flavio Bolsonaro               good      7.0/10  
+[197/220] OK  f10news_2026-11-01_sport3 Tampa Bay Buccaneers           sceptical 2.0/10  
+[198/220] OK  f10news_2026-10-28_diplomacy0 130                            sceptical 4.0/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              high      9.0/10  
+[200/220] OK  f10news_2026-10-22_sport2 Chicago Bears                  sceptical 4.0/10  
+[201/220] XX  f10news_2026-11-01_election1 Yotova                         good      7.0/10  
+[202/220] OK  f10news_2026-10-26_sport0 Harry Kane                     good      8.0/10  
+[203/220] XX  f10news_2026-10-21_science1 Microsoft                      sceptical 3.0/10  
+[204/220] OK  f10news_2026-10-31_election1 34                             sceptical 3.0/10  
+[205/220] XX  f10news_2026-10-20_conflict1 Rapid Support Forces RSF       sceptical 2.0/10  
+[206/220] XX  f10news_2026-10-21_diplomacy0 Irish                          sceptical 2.0/10  
+[207/220] OK  f10news_2026-10-25_sport0 Kyle Larson                    low       5.0/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            good      7.0/10  
+[209/220] OK  f10news_2026-11-01_sport2 Kimi Antonelli                 low       5.0/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 3.0/10  
+[211/220] XX  f10news_2026-10-29_culture0 Transformative Works OTW       sceptical 2.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             low       6.0/10  
+[213/220] OK  f10news_2026-10-29_conflict0 2,000                          low       5.0/10  
+[214/220] OK  f10news_2026-10-31_sport2 Dakar                          high      9.0/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         low       6.0/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       low       6.0/10  
+[217/220] XX  f10news_2026-10-31_election0 31                             good      7.0/10  
+[218/220] XX  f10news_2026-10-20_disaster1 MC Tank Transport              good      7.0/10  
+[219/220] OK  f10news_2026-10-20_election1 Registrar of Societies         sceptical 2.0/10  
+[220/220] XX  f10news_2026-10-27_business0 50                             sceptical 2.0/10  
+
+==== r5 summary: reader=heuristic writer=template personal=none search=brave ====
+  n 220  accuracy (value shown is right) 0.359  bands monotone True
+  band high       0.009 (n=2) precision 1.000
+  band good       0.177 (n=39) precision 0.462
+  band low        0.395 (n=87) precision 0.368
+  band sceptical  0.418 (n=92) precision 0.293
+  band none       0.000 (n=0)
+  regime fresh         accuracy 0.314 (n=140)
+  regime news          accuracy 0.438 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.000  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 373, "read_ms": 0, "write_ms": 0, "total_ms": 612}
+[planck3 11:24:16] round 10: worst-case personal profile (rule E)
+> python scripts/planck3.py r5 --reader x-hertz --reader-checkpoint checkpoints/xreader_hertz_r10/reader.pt --writer template --reader-quant int8 --personal contrarian --tasks scripts/assets/planck3_tasks_fresh10.json --search brave --out results/planck3/r10_x-hertz-r10_cpu-int8-top16_contrarian --gemma-path models/gemma-4-e4b-it --g2-head results/planck3/g2v2_head_planck_s0_ddgs/head.pt --planck-checkpoint checkpoints/planck13/best.pt --planck-tokenizer data/wikipedia/tokenizer.model
+[planck3] search=brave -> wikipedia net=live relevance check=on cache=C:\Users\feama\sgs\data\planck3_cache
+[  1/220] OK  f10winner000 Layne Riggs                    sceptical 2.6/10  
+[  2/220] OK  f10winner001 Chase Briscoe                  sceptical 2.6/10  
+[  3/220] OK  f10winner002 Shane van Gisbergen            sceptical 4.6/10  
+[  4/220] OK  f10winner003 Xandra Velzeboer               sceptical 4.6/10  
+[  5/220] OK  f10winner004 Bernice Yuen                   sceptical 2.6/10  
+[  6/220] OK  f10winner005 Austin Hill                    sceptical 2.6/10  
+[  7/220] OK  f10winner006 Eva Marija                     sceptical 2.6/10  
+[  8/220] XX  f10winner007 Kujawy Pomorze                 sceptical 2.6/10  
+[  9/220] XX  f10winner008 Bishkek                        sceptical 2.6/10  
+[ 10/220] XX  f10winner009 Bullring                       sceptical 2.6/10  
+[ 11/220] XX  f10winner010 Jeļena Ostapenko               sceptical 3.6/10  
+[ 12/220] OK  f10winner011 Corey Heim                     sceptical 2.6/10  
+[ 13/220] XX  f10winner012 Germany Julia Ackermann Isabel sceptical 2.6/10  
+[ 14/220] XX  f10winner013 Dover                          sceptical 2.6/10  
+[ 15/220] XX  f10winner014 Julius Yego                    sceptical 2.6/10  
+[ 16/220] OK  f10winner015 Barcelona                      sceptical 2.6/10  
+[ 17/220] XX  f10winner016 Legendary Billy Green          sceptical 2.6/10  
+[ 18/220] --  f10winner017 None                           none      -/10  
+[ 19/220] XX  f10winner018 Germany Julia Ackermann Isabel sceptical 2.6/10  
+[ 20/220] OK  f10winner019 Niels Vink                     sceptical 3.6/10  
+[ 21/220] OK  f10winner020 Third-seeded Barbora Krejčíkov sceptical 4.6/10  
+[ 22/220] OK  f10winner021 Federica Brignone              sceptical 2.6/10  
+[ 23/220] OK  f10winner022 Maria Timofeeva                sceptical 3.6/10  
+[ 24/220] OK  f10winner023 Sujeet Kalkal                  sceptical 2.6/10  
+[ 25/220] OK  f10winner024 Niels Vink                     sceptical 2.8/10  
+[ 26/220] OK  f10winner025 Joventut                       sceptical 2.6/10  
+[ 27/220] XX  f10winner026 Taylor Gray                    sceptical 2.6/10  
+[ 28/220] XX  f10winner027 Heidi Weng                     sceptical 2.6/10  
+[ 29/220] OK  f10winner028 Christian Lundgaard            sceptical 3.6/10  
+[ 30/220] XX  f10winner029 Canada                         sceptical 2.6/10  
+[ 31/220] OK  f10winner030 Noa Isidore                    sceptical 1.8/10  
+[ 32/220] OK  f10winner031 Mirra Andreeva                 sceptical 3.6/10  
+[ 33/220] XX  f10winner032 Great Britain Alfie Hewett     sceptical 3.6/10  
+[ 34/220] XX  f10winner033 Lloyd Glasspool                sceptical 3.6/10  
+[ 35/220] OK  f10winner034 Corey Heim                     sceptical 4.6/10  
+[ 36/220] XX  f10winner035 Moetamen Bellah Jelassi        sceptical 2.0/10  
+[ 37/220] XX  f10winner036 Keanna MacInnes                sceptical 2.0/10  
+[ 38/220] XX  f10winner037 Bolton Wanderers               sceptical 2.6/10  
+[ 39/220] OK  f10winner038 Roos Vanotterdijk              sceptical 3.6/10  
+[ 40/220] XX  f10winner039 Ebba Andersson                 sceptical 4.6/10  
+[ 41/220] OK  f10winner040 Dong Zhihao                    sceptical 2.6/10  
+[ 42/220] OK  f10winner041 Yang Liujing                   sceptical 2.0/10  
+[ 43/220] XX  f10winner042 Pradeep Kumar                  sceptical 2.0/10  
+[ 44/220] OK  f10winner043 Olav Kooij                     sceptical 2.6/10  
+[ 45/220] OK  f10winner044 Aryna Sabalenka                sceptical 2.6/10  
+[ 46/220] XX  f10winner045 Jessica Pegula                 sceptical 3.6/10  
+[ 47/220] OK  f10winner046 Jordi Meeus                    sceptical 3.6/10  
+[ 48/220] OK  f10winner047 Lotte Kopecky                  sceptical 1.8/10  
+[ 49/220] XX  f10winner048 Aryna Sabalenka                sceptical 2.6/10  
+[ 50/220] XX  f10winner049 Carys Lloyd                    sceptical 2.8/10  
+[ 51/220] OK  f10winner050 Corey Heim                     sceptical 3.6/10  
+[ 52/220] OK  f10winner051 Marc-Antoine Camirand          sceptical 2.6/10  
+[ 53/220] XX  f10winner052 USA Ryan Cochran-Siegle        sceptical 4.6/10  
+[ 54/220] XX  f10winner053 Natalia Linares COL            sceptical 1.0/10  
+[ 55/220] OK  f10winner054 Kateřina Siniaková             sceptical 2.6/10  
+[ 56/220] OK  f10winner055 Matthew Brennan                sceptical 4.6/10  
+[ 57/220] OK  f10winner056 Jeļena Ostapenko               sceptical 3.6/10  
+[ 58/220] OK  f10winner057 Benoit Cosnefroy               sceptical 1.8/10  
+[ 59/220] OK  f10winner058 Gerda Steyn                    sceptical 3.6/10  
+[ 60/220] OK  f10winner059 Layne Riggs                    sceptical 2.6/10  
+[ 61/220] XX  f10election000 Trump                          sceptical 2.8/10  
+[ 62/220] XX  f10election001 Andy Burnham                   sceptical 2.6/10  
+[ 63/220] OK  f10election002 António José Seguro            sceptical 3.6/10  
+[ 64/220] OK  f10election003 Party                          sceptical 3.6/10  
+[ 65/220] OK  f10election004 Andy Burnham                   sceptical 4.6/10  
+[ 66/220] XX  f10election005 Sitting Greens MP Kat McNamara sceptical 2.6/10  
+[ 67/220] XX  f10election006 Conservative Party             sceptical 4.6/10  
+[ 68/220] --  f10election007 None                           none      -/10  
+[ 69/220] XX  f10election008 BJP                            sceptical 2.6/10  
+[ 70/220] XX  f10election009 Juanma Moreno                  sceptical 2.6/10  
+[ 71/220] XX  f10election010 Conservative                   sceptical 3.6/10  
+[ 72/220] XX  f10election011 Ismaël Omar Guelleh            sceptical 2.6/10  
+[ 73/220] XX  f10election012 Fatima Shaban                  sceptical 2.6/10  
+[ 74/220] XX  f10election013 Florentino Perez               sceptical 3.6/10  
+[ 75/220] OK  f10election014 Lam                            sceptical 2.6/10  
+[ 76/220] XX  f10election015 Zambian President Hakainde Hic sceptical 3.0/10  
+[ 77/220] OK  f10election016 Danielle Martin                sceptical 4.6/10  
+[ 78/220] OK  f10election017 Party                          sceptical 3.6/10  
+[ 79/220] XX  f10election018 Labor MP Paul Papalia          sceptical 2.6/10  
+[ 80/220] XX  f10election019 Nigel Farage                   sceptical 2.6/10  
+[ 81/220] OK  f10season000 New Zealand                    sceptical 3.6/10  
+[ 82/220] OK  f10season001 UConn                          sceptical 2.6/10  
+[ 83/220] OK  f10season002 Sweden                         sceptical 2.6/10  
+[ 84/220] XX  f10season003 Alabama State                  sceptical 2.6/10  
+[ 85/220] --  f10season004 None                           none      -/10  
+[ 86/220] XX  f10season005 Alex de Minaur                 sceptical 3.6/10  
+[ 87/220] OK  f10season006 Tadej Pogacar                  sceptical 3.6/10  
+[ 88/220] OK  f10season007 Missouri State                 sceptical 4.6/10  
+[ 89/220] OK  f10season008 Alessandro Fancellu            sceptical 1.8/10  
+[ 90/220] OK  f10season009 Marlen Reusser                 sceptical 2.6/10  
+[ 91/220] XX  f10season010 Team USA                       sceptical 2.6/10  
+[ 92/220] XX  f10season011 George Russell                 sceptical 3.6/10  
+[ 93/220] OK  f10season012 Isaac del Toro                 sceptical 2.6/10  
+[ 94/220] OK  f10season013 Olav Kooij                     sceptical 3.6/10  
+[ 95/220] --  f10season014 None                           none      -/10  
+[ 96/220] OK  f10season015 Philippines                    sceptical 2.6/10  
+[ 97/220] OK  f10season016 Stanford                       sceptical 2.6/10  
+[ 98/220] XX  f10season017 Erlend Blikra                  sceptical 2.6/10  
+[ 99/220] --  f10season018 None                           none      -/10  
+[100/220] OK  f10season019 Barcelona                      sceptical 4.6/10  
+[101/220] XX  f10season020 Sweden Ludvig Andersson        sceptical 3.6/10  
+[102/220] OK  f10season021 EAST Fremantle                 sceptical 2.6/10  
+[103/220] XX  f10season022 North Carolina                 sceptical 2.6/10  
+[104/220] OK  f10season023 Wu Yize                        sceptical 3.6/10  
+[105/220] XX  f10season024 UAE Team Emirates-XRG          sceptical 2.6/10  
+[106/220] OK  f10season025 New Zealand                    sceptical 2.6/10  
+[107/220] --  f10season026 None                           none      -/10  
+[108/220] XX  f10season027 Baloise Verzekeringen          sceptical 2.6/10  
+[109/220] XX  f10season028 Juventus                       sceptical 2.6/10  
+[110/220] XX  f10season029 Lella Ford                     sceptical 3.6/10  
+[111/220] XX  f10headgov000 Bashkirs                       sceptical 2.6/10  
+[112/220] OK  f10headgov001 Democrat Abigail Spanberger    sceptical 3.6/10  
+[113/220] XX  f10headgov002 Adhikari                       sceptical 2.6/10  
+[114/220] XX  f10headgov003 Steinmeier                     sceptical 2.6/10  
+[115/220] OK  f10headgov004 Sven Schulze                   sceptical 3.6/10  
+[116/220] --  f10headgov005 None                           none      -/10  
+[117/220] --  f10headgov006 None                           none      -/10  
+[118/220] OK  f10headgov007 Sophie Douvry                  sceptical 1.0/10  
+[119/220] XX  f10headgov008 PAM                            sceptical 2.6/10  
+[120/220] XX  f10headgov009 Rudi Achatz                    sceptical 2.6/10  
+[121/220] OK  f10headgov010 Cem Özdemir                    sceptical 2.6/10  
+[122/220] OK  f10headgov011 Andy Burnham                   sceptical 4.2/10  
+[123/220] OK  f10headgov012 Paul Maréchal                  sceptical 2.6/10  
+[124/220] --  f10headgov013 None                           none      -/10  
+[125/220] --  f10headgov014 None                           none      -/10  
+[126/220] XX  f10headgov015 Vejen Kommune                  sceptical 2.6/10  
+[127/220] OK  f10headgov016 Andy Burnham                   sceptical 4.6/10  
+[128/220] OK  f10headgov017 Brice BOUVIER                  sceptical 2.6/10  
+[129/220] XX  f10headgov018 MHK Stu Peters                 sceptical 2.6/10  
+[130/220] OK  f10headgov019 Rob Jetten                     sceptical 2.6/10  
+[131/220] --  f10headgov020 None                           none      -/10  
+[132/220] OK  f10headgov021 Céline Vara                    sceptical 2.6/10  
+[133/220] --  f10headgov022 None                           none      -/10  
+[134/220] XX  f10headgov023 Henning Urban Dam Nielsen      sceptical 2.6/10  
+[135/220] XX  f10headgov024 Essam Abu Baker                sceptical 2.6/10  
+[136/220] --  f10headgov025 None                           none      -/10  
+[137/220] OK  f10headgov026 Aurélie Maillols               sceptical 1.0/10  
+[138/220] OK  f10headgov027 Zurab Pataradze                sceptical 2.6/10  
+[139/220] OK  f10headgov028 Fabrice Lefebvre               sceptical 2.6/10  
+[140/220] XX  f10headgov029 Yoshiwara                      sceptical 3.6/10  
+[141/220] OK  f10news_2026-10-22_sport1 Daiki Hashimoto                sceptical 3.8/10  
+[142/220] OK  f10news_2026-10-27_law0 34                             sceptical 1.0/10  
+[143/220] XX  f10news_2026-10-22_conflict1 AQAP                           sceptical 2.6/10  
+[144/220] XX  f10news_2026-10-29_election0 February 21, 2027              sceptical 2.2/10  
+[145/220] --  f10news_2026-10-27_culture0 None                           none      -/10  
+[146/220] OK  f10news_2026-10-23_conflict3 Melania Trump                  sceptical 4.0/10  
+[147/220] XX  f10news_2026-11-03_election0 3                              sceptical 2.6/10  
+[148/220] OK  f10news_2026-10-22_disaster1 Nagqu                          sceptical 3.6/10  
+[149/220] XX  f10news_2026-10-26_conflict1 Suwayda Governorate            sceptical 2.6/10  
+[150/220] XX  f10news_2026-10-19_law2 Paul Mackenzie                 sceptical 3.8/10  
+[151/220] OK  f10news_2026-10-19_law0 Florida Attorney General James sceptical 2.8/10  
+[152/220] XX  f10news_2026-10-19_law3 Staškov                        sceptical 2.6/10  
+[153/220] --  f10news_2026-10-28_disaster1 None                           none      -/10  
+[154/220] OK  f10news_2026-11-01_law1 13                             sceptical 4.0/10  
+[155/220] XX  f10news_2026-10-30_law0 Supreme Court of Victoria      sceptical 2.6/10  
+[156/220] OK  f10news_2026-10-21_conflict1 El Salvador President Nayib Bu sceptical 2.2/10  
+[157/220] OK  f10news_2026-10-21_science0 Electronic Arts                sceptical 2.6/10  
+[158/220] XX  f10news_2026-10-24_disaster1 500                            sceptical 1.8/10  
+[159/220] --  f10news_2026-10-23_conflict6 None                           none      -/10  
+[160/220] XX  f10news_2026-11-01_sport0 Lusail                         sceptical 1.8/10  
+[161/220] OK  f10news_2026-10-22_culture0 International Criminal Court   sceptical 2.6/10  
+[162/220] OK  f10news_2026-10-20_law1 Pakistan                       sceptical 1.8/10  
+[163/220] OK  f10news_2026-10-31_sport1 Gabby Williams                 sceptical 3.8/10  
+[164/220] OK  f10news_2026-10-27_law1 Mada Masr                      sceptical 4.8/10  
+[165/220] OK  f10news_2026-10-30_conflict2 Oman                           sceptical 1.4/10  
+[166/220] OK  f10news_2026-10-23_sport0 Lionel Messi                   sceptical 1.0/10  
+[167/220] --  f10news_2026-10-24_conflict3 None                           none      -/10  
+[168/220] XX  f10news_2026-10-29_election1 Magdalena Andersson            sceptical 2.6/10  
+[169/220] OK  f10news_2026-10-25_sport2 Yuri Yoshida                   sceptical 3.0/10  
+[170/220] XX  f10news_2026-10-22_disaster0 40                             sceptical 1.0/10  
+[171/220] XX  f10news_2026-10-24_election2 Tel Aviv                       sceptical 1.8/10  
+[172/220] --  f10news_2026-11-02_conflict6 None                           none      -/10  
+[173/220] OK  f10news_2026-10-30_law1 Binance                        sceptical 2.6/10  
+[174/220] XX  f10news_2026-10-31_diplomacy0 Swieczkowski                   sceptical 3.6/10  
+[175/220] XX  f10news_2026-10-25_election1 Incumbent President Iliana Yot sceptical 2.6/10  
+[176/220] OK  f10news_2026-10-28_business1 3.2 billion                    sceptical 1.0/10  
+[177/220] OK  f10news_2026-10-28_sport1 Hawks                          sceptical 3.6/10  
+[178/220] XX  f10news_2026-10-21_law1 Huang Yi-hao                   sceptical 1.8/10  
+[179/220] XX  f10news_2026-10-28_law0 Stephen Yaxley-Lennon          sceptical 2.2/10  
+[180/220] XX  f10news_2026-10-20_disaster2 14                             sceptical 1.0/10  
+[181/220] XX  f10news_2026-10-30_law2 Switzerland Federal Supreme Co sceptical 1.0/10  
+[182/220] OK  f10news_2026-10-31_law0 13                             sceptical 1.0/10  
+[183/220] OK  f10news_2026-10-23_disaster2 Fernando Air Base              sceptical 2.0/10  
+[184/220] XX  f10news_2026-10-25_election3 Flávio Bolsonaro               sceptical 4.6/10  
+[185/220] OK  f10news_2026-10-19_diplomacy1 San Marino                     sceptical 3.6/10  
+[186/220] XX  f10news_2026-10-23_diplomacy0 Treasury Department            sceptical 2.0/10  
+[187/220] OK  f10news_2026-10-27_disaster1 Cyclone Arnab                  sceptical 2.6/10  
+[188/220] XX  f10news_2026-10-30_conflict1 Coalition Joint Forces Command sceptical 1.4/10  
+[189/220] XX  f10news_2026-10-30_election2 President Karol Nawrocki       sceptical 4.6/10  
+[190/220] XX  f10news_2026-10-21_business1 Energy Wealth Fund             sceptical 2.6/10  
+[191/220] OK  f10news_2026-11-01_sport1 Mao Shimada                    sceptical 3.6/10  
+[192/220] XX  f10news_2026-10-25_election0 Flavio Bolsonaro               sceptical 3.0/10  
+[193/220] OK  f10news_2026-10-26_law1 Flavio Bolsonaro               sceptical 3.8/10  
+[194/220] XX  f10news_2026-10-28_business0 Treasury                       sceptical 1.0/10  
+[195/220] XX  f10news_2026-10-26_law0 Federal Bureau of Investigatio sceptical 1.0/10  
+[196/220] OK  f10news_2026-10-28_election1 Flavio Bolsonaro               sceptical 4.2/10  
+[197/220] XX  f10news_2026-11-01_sport3 Atlanta Falcons                sceptical 2.8/10  
+[198/220] XX  f10news_2026-10-28_diplomacy0 17                             sceptical 2.6/10  
+[199/220] OK  f10news_2026-10-28_sport0 Milwaukee Brewers              sceptical 4.6/10  
+[200/220] OK  f10news_2026-10-22_sport2 Chicago Bears                  sceptical 2.8/10  
+[201/220] XX  f10news_2026-11-01_election1 Iliana Yotova                  sceptical 3.0/10  
+[202/220] XX  f10news_2026-10-26_sport0 Bayern Munich                  sceptical 3.6/10  
+[203/220] XX  f10news_2026-10-21_science1 Microsoft                      sceptical 3.0/10  
+[204/220] OK  f10news_2026-10-31_election1 34                             sceptical 1.0/10  
+[205/220] XX  f10news_2026-10-20_conflict1 Sudan People Liberation Moveme sceptical 1.0/10  
+[206/220] XX  f10news_2026-10-21_diplomacy0 Irish                          sceptical 1.0/10  
+[207/220] OK  f10news_2026-10-25_sport0 Kyle Larson                    sceptical 2.6/10  
+[208/220] XX  f10news_2026-10-20_conflict2 153                            sceptical 1.8/10  
+[209/220] XX  f10news_2026-11-01_sport2 Lewis Hamilton                 sceptical 4.6/10  
+[210/220] OK  f10news_2026-10-21_law2 Olfa Hamdi                     sceptical 3.4/10  
+[211/220] XX  f10news_2026-10-29_culture0 Transformative Works OTW       sceptical 1.0/10  
+[212/220] XX  f10news_2026-10-23_conflict5 40                             sceptical 2.6/10  
+[213/220] OK  f10news_2026-10-29_conflict0 2,000                          sceptical 2.6/10  
+[214/220] OK  f10news_2026-10-31_sport2 Dakar                          low       5.6/10  
+[215/220] OK  f10news_2026-10-30_election0 Meloni                         sceptical 2.6/10  
+[216/220] OK  f10news_2026-10-21_election0 Paul St-Pierre Plamondon       sceptical 2.6/10  
+[217/220] XX  f10news_2026-10-31_election0 31                             sceptical 4.6/10  
+[218/220] XX  f10news_2026-10-20_disaster1 Toledo Mayor Wade Kapszukiewic sceptical 1.8/10  
+[219/220] XX  f10news_2026-10-20_election1 KUALA LUMPUR                   sceptical 1.0/10  
+[220/220] OK  f10news_2026-10-27_business0 40 %                           sceptical 1.0/10  
+
+==== r5 summary: reader=x-hertz writer=template personal=contrarian search=brave ====
+  n 220  accuracy (value shown is right) 0.473  bands monotone True
+  band high       0.000 (n=0)
+  band good       0.000 (n=0)
+  band low        0.005 (n=1) precision 1.000
+  band sceptical  0.914 (n=201) precision 0.512
+  band none       0.082 (n=18)
+  regime fresh         accuracy 0.493 (n=140)
+  regime news          accuracy 0.438 (n=80)
+  writer faithful 1.0  fallback 0.0  qtype accuracy 0.9818181818181818
+  changed by personal profile 0.709  LLM tokens/task 0
+  ms/task {"search_ms": 1, "fetch_ms": 230, "read_ms": 3700, "write_ms": 0, "total_ms": 4264}
+> python scripts/planck3.py r10 decide
+[r10] rule G FAIL; gap closed -0.07 -> keep round 9's reader: Brave pools + Gemma soft labels did not beat it by 5 points
+> python scripts/planck3.py report
+Traceback (most recent call last):
+  File "C:\Users\feama\sgs\scripts\planck3.py", line 1022, in <module>
+    main()
+  File "C:\Users\feama\sgs\scripts\planck3.py", line 1018, in main
+    args.fn(args)
+  File "C:\Users\feama\sgs\scripts\planck3.py", line 730, in cmd_report
+    lines += r6_lines(RESULTS)
+             ^^^^^^^^^^^^^^^^^
+  File "C:\Users\feama\sgs\src\planck3\round6.py", line 175, in report_lines
+    detail = (f"{r['acc']:.3f} vs midpoint {r['midpoint']:.3f}, round 5's reader {r['vs_round5_reader']:.3f}, p {r['p']:.3g}"
+                                            ~^^^^^^^^^^^^
+KeyError: 'midpoint'

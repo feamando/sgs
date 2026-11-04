@@ -1,0 +1,94 @@
+{
+  "n": 220,
+  "accuracy": 0.4863636363636364,
+  "bands": {
+    "high": {
+      "n": 14,
+      "share": 0.06363636363636363,
+      "precision": 0.8571428571428571
+    },
+    "good": {
+      "n": 60,
+      "share": 0.2727272727272727,
+      "precision": 0.6
+    },
+    "low": {
+      "n": 90,
+      "share": 0.4090909090909091,
+      "precision": 0.3888888888888889
+    },
+    "sceptical": {
+      "n": 56,
+      "share": 0.2545454545454545,
+      "precision": 0.42857142857142855
+    },
+    "none": {
+      "n": 0,
+      "share": 0.0,
+      "precision": null
+    }
+  },
+  "bands_monotone": false,
+  "by_regime": {
+    "fresh": {
+      "n": 140,
+      "accuracy": 0.4857142857142857
+    },
+    "news": {
+      "n": 80,
+      "accuracy": 0.4875
+    }
+  },
+  "qtype_accuracy": 0.9818181818181818,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 0.9863636363636363,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.8772727272727273,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 7.676818181818183,
+    "fetch_ms": 217.84363636363636,
+    "read_ms": 2971.293181818182,
+    "write_ms": 0.0,
+    "total_ms": 3444.9150000000004
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.5,
+  "reader": "x-hertz",
+  "reader_config": {
+    "quant": "int8",
+    "max_cands": 16,
+    "device": "cpu",
+    "qengine": "fbgemm",
+    "threads": 4,
+    "params": 134984073,
+    "size_mb": 888.2
+  },
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh10.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 220,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 220
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.013636363636363636,
+    "on_topic_rate": 0.9863636363636363,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "brave_live_calls": 0,
+    "valid": true
+  },
+  "wall_s": 758.1,
+  "llm_usd_per_task_as_haiku": 0.0
+}
