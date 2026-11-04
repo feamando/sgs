@@ -172,8 +172,13 @@ def report_lines(results: Path) -> list[str]:
     for f, prod in prods.items():
         r = prod.get("rule_r") or rule_r(results, prod.get("run", ""))
         verdict = "PASS" if r.get("pass") else "FAIL"
-        detail = (f"{r['acc']:.3f} vs midpoint {r['midpoint']:.3f}, round 5's reader {r['vs_round5_reader']:.3f}, p {r['p']:.3g}"
-                  if "acc" in r else r.get("why", ""))
+        # round 9 on reuse the rule_r contract without round 6's midpoint (round 10's is rule G): show what is there
+        if "midpoint" in r:
+            detail = f"{r['acc']:.3f} vs midpoint {r['midpoint']:.3f}, round 5's reader {r['vs_round5_reader']:.3f}, p {r['p']:.3g}"
+        elif r.get("acc") is not None:
+            detail = f"{r['acc']:.3f}; {r.get('why', '')}"
+        else:
+            detail = r.get("why", "")
         lines.append(f"- {f[:-5]} (pre-registered choice): reader {prod.get('reader')} ({prod.get('reader_why')}); "
                      f"writer {prod.get('writer')} ({prod.get('writer_why')}); rule R {verdict} ({detail})")
     for name in runs:

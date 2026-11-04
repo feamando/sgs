@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-10-22 20:12)
+# Planck 3.0 results (2026-11-04 14:56)
 
 ## G0 (seed benchmark)
 
@@ -300,11 +300,17 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r9_x-hertz-rc_template_quick | 12 | 0.417 | 0.417 (n=12) |  | 0 /  | 2 / 1.000 | 6 / 0.333 | 4 / 0.250 | 0 | True | 1.000 | 1.000 |  |  | 94 | 0 | 0.000 |
 | r9_x-planck15-rc_template | 220 | 0.386 | 0.336 (n=140) | 0.475 (n=80) | 1 / 1.000 | 38 / 0.553 | 118 / 0.331 | 58 / 0.414 | 5 | False | 0.977 | 1.000 |  |  | 89 | 0 | 0.000 |
 | r9_x-planck15-rc_template_quick | 12 | 0.583 | 0.583 (n=12) |  | 0 /  | 1 / 1.000 | 10 / 0.600 | 1 / 0.000 | 0 | True | 1.000 | 1.000 |  |  | 39 | 0 | 0.000 |
+| r10_gemma_template | 220 | 0.609 | 0.586 (n=140) | 0.650 (n=80) | 30 / 0.767 | 98 / 0.735 | 34 / 0.647 | 36 / 0.472 | 22 | True | 0.986 | 1.000 |  |  | 2663 | 0 | 0.000 |
 | r10_gemma_template_quick | 12 | 0.583 | 0.583 (n=12) |  | 3 / 0.667 | 6 / 0.833 | 0 /  | 2 / 0.000 | 1 | True | 1.000 | 1.000 |  |  | 2552 | 0 | 0.000 |
+| r10_heuristic_template | 220 | 0.359 | 0.314 (n=140) | 0.438 (n=80) | 2 / 1.000 | 39 / 0.462 | 87 / 0.368 | 92 / 0.293 | 0 | True | 0.986 | 1.000 |  |  | 0 | 0 | 0.000 |
 | r10_heuristic_template_quick | 12 | 0.333 | 0.333 (n=12) |  | 0 /  | 2 / 0.500 | 7 / 0.286 | 3 / 0.333 | 0 | True | 1.000 | 1.000 |  |  | 0 | 0 | 0.000 |
+| r10_x-hertz-r10_cpu-int8-top16 | 220 | 0.477 | 0.500 (n=140) | 0.438 (n=80) | 5 / 1.000 | 49 / 0.633 | 103 / 0.485 | 45 / 0.422 | 18 | True | 0.986 | 1.000 |  |  | 3420 | 0 | 0.000 |
+| r10_x-hertz-r10_cpu-int8-top16_contrarian | 220 | 0.473 | 0.493 (n=140) | 0.438 (n=80) | 0 /  | 0 /  | 1 / 1.000 | 201 / 0.512 | 18 | True | 0.986 | 1.000 |  |  | 3700 | 0 | 0.709 |
 | r10_x-hertz-r10_cpu-int8-top16_contrarian_quick | 12 | 0.667 | 0.667 (n=12) |  | 0 /  | 0 /  | 0 /  | 12 / 0.667 | 0 | True | 1.000 | 1.000 |  |  | 4280 | 0 | 0.833 |
 | r10_x-hertz-r10_cpu-int8-top16_quick | 12 | 0.667 | 0.667 (n=12) |  | 1 / 1.000 | 6 / 0.833 | 3 / 0.333 | 2 / 0.500 | 0 | True | 1.000 | 1.000 |  |  | 2801 | 0 | 0.000 |
+| r10_x-hertz-r10_template | 220 | 0.491 | 0.514 (n=140) | 0.450 (n=80) | 6 / 1.000 | 53 / 0.679 | 100 / 0.470 | 46 / 0.413 | 15 | True | 0.986 | 1.000 |  |  | 83 | 0 | 0.000 |
 | r10_x-hertz-r10_template_quick | 12 | 0.667 | 0.667 (n=12) |  | 1 / 1.000 | 7 / 0.857 | 3 / 0.000 | 1 / 1.000 | 0 | True | 1.000 | 1.000 |  |  | 61 | 0 | 0.000 |
+| r10_x-hertz-rc_cpu-int8-top16 | 220 | 0.486 | 0.486 (n=140) | 0.487 (n=80) | 14 / 0.857 | 60 / 0.600 | 90 / 0.389 | 56 / 0.429 | 0 | False | 0.986 | 1.000 |  |  | 2971 | 0 | 0.000 |
 | r10_x-hertz-rc_cpu-int8-top16_quick | 12 | 0.583 | 0.583 (n=12) |  | 0 /  | 8 / 0.875 | 3 / 0.000 | 1 / 0.000 | 0 | True | 1.000 | 1.000 |  |  | 2730 | 0 | 0.000 |
 
 | paired (same questions) | n | run | vs | only run right | only vs right | McNemar p |
@@ -346,6 +352,9 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 | r9_x-hertz-rc_cpu-int8-top16_contrarian vs r9_x-hertz-rc_cpu-int8-top16 | 220 | 0.491 | 0.491 | 1 | 1 | 1 |
 | r9_x-hertz-rc_cpu-int8-top16_contrarian_quick vs r9_x-hertz-rc_cpu-int8-top16 | 12 | 0.417 | 0.417 | 0 | 0 | 1 |
 | r9_x-hertz-rc_cpu-int8-top16_quick vs r9_x-hertz-rc_cpu-int8-top16 | 12 | 0.417 | 0.417 | 0 | 0 | 1 |
+| r10_x-hertz-r10_cpu-int8-top16_contrarian vs r10_x-hertz-r10_cpu-int8-top16 | 220 | 0.473 | 0.477 | 0 | 1 | 1 |
+| r10_x-hertz-r10_cpu-int8-top16_contrarian_quick vs r10_x-hertz-r10_cpu-int8-top16 | 12 | 0.667 | 0.667 | 1 | 1 | 1 |
+| r10_x-hertz-r10_cpu-int8-top16_quick vs r10_x-hertz-r10_cpu-int8-top16 | 12 | 0.667 | 0.667 | 1 | 1 | 1 |
 | r6_x-planck_template vs r6_planck_template | 243 | 0.424 | 0.514 | 27 | 49 | 0.0154 |
 | r6_x-hertz_template vs r6_x-planck_template | 243 | 0.391 | 0.424 | 22 | 30 | 0.332 |
 | r6_x-planck_template vs r6_gemma_template | 243 | 0.424 | 0.634 | 21 | 72 | 1.04e-07 |
@@ -366,6 +375,7 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 - r7_product (pre-registered choice): reader x-planck (fixed before the run: the phone-size model (no selection)); writer template (round 6: no small writer passes rule W); rule R FAIL (0.543 vs midpoint 0.574, round 5's reader 0.514, p 0.47)
 - r8_product (pre-registered choice): reader x-planck (fixed before the run: Planck 1.5, the phone-size model); writer template (round 6: no small writer passes rule W); rule R FAIL (0.523 vs midpoint 0.574, round 5's reader 0.514, p 0.902)
 - r9_product (pre-registered choice): reader x-hertz (fixed before the run: round 7's Hertz reading reader, int8 on CPU (passed round 8's M)); writer template (round 6: no small writer passes rule W); rule R PASS (0.491 vs midpoint 0.461, round 5's reader 0.314, p 1.77e-06)
+- r10_product (pre-registered choice): reader x-hertz (fixed before the run: Hertz's reader trained on Brave pools with Gemma soft labels); writer template (round 6: no small writer passes rule W); rule R FAIL (0.477; round 10: rule G and the product checks)
 - writer judge (r6_x-hertz_hertz_quick, Gemma, blind): small writer preferred 3, template 6, tie 1 of 10
 - KV cache (writer_hertz6_cpu): 100% of 10 greedy answers identical; 4195 ms cached vs 41492 ms uncached (cpu)
 - KV cache (writer_hertz6_cuda): 100% of 20 greedy answers identical; 175 ms cached vs 370 ms uncached (cuda)
@@ -426,16 +436,28 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 - r9_x-planck15-rc_template: fresh 0.336 (n=140); news 0.475 (n=80)
 - **Outcome (pre-registered):** ship: Hertz's reader (int8, CPU) passed R9 on fresh questions
 
+## Round 10: Hertz's reader on Brave pools with Gemma soft labels (SETUP_planck_20261020.md)
+
+- **G (vs the shipped reader, new fresh questions)** FAIL: 0.477 vs 0.486 (28 vs 30, p 0.896, n 220)
+- **Q (int8 CPU vs GPU)** PASS: 0.477 vs 0.491 (3 vs 6, p 0.508, n 220)
+- **vs Gemma**: 0.477 vs 0.609 (26 vs 55, p 0.00169, n 220)
+- **vs the heuristic**: 0.477 vs 0.359 (44 vs 18, p 0.0013, n 220)
+- **Gap to Gemma closed:** -7%
+- **C1** FAIL: monotone True, high {'n': 5, 'precision': 1.0, 'bar': 0.9, 'judged': False}, good {'n': 49, 'precision': 0.6326530612244898, 'bar': 0.7, 'judged': True}
+- **L** PASS: ms 3419.6081818181815, measured_on every fresh question, CPU, 4 threads
+- **E** PASS: drop 0.004545454545454575, changed 156, flagged 156
+- **Outcome (pre-registered):** keep round 9's reader: Brave pools + Gemma soft labels did not beat it by 5 points
+
 ## G2 v2 heads (choice head + calibrated answerability gate)
 
 | head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
 |---|---|---|---|---|---|---|---|---|---|
-| g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
-| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
-| g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.438 | 0.312 | 0.753 | 0.204 | 0.528 | 0.325 | 0.462 (0.9) |
-| g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
-| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
-| g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.531 | 0.312 | 0.875 | 0.184 | 0.911 | 0.150 | 1.000 (0.9) |
+| g2v2_head_hash_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
+| g2v2_head_hash_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
+| g2v2_head_hash_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 32 | 0.438 | 0.312 | 0.753 | 0.204 | 0.528 | 0.325 | 0.462 (0.9) |
+| g2v2_head_planck_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
+| g2v2_head_planck_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
+| g2v2_head_planck_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 32 | 0.531 | 0.312 | 0.875 | 0.184 | 0.911 | 0.150 | 1.000 (0.9) |
 
 ## G2 heads (learned from known answers)
 
