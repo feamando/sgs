@@ -1630,3 +1630,66 @@ def test_round10_search_errors_are_reported_and_retried(tmp_path, monkeypatch):
             w.search(f"q{i}")
     except W.SearchUnavailable as e:
         assert "HTTP 402" in str(e)                                           # the breaker names the cause
+
+
+def test_round11_view_pages_dumps_and_diagnosis(tmp_path):
+    import gzip
+    import json as _json
+    from src.planck3 import round11 as R11
+    from src.planck3.answer import Answerer
+    from src.planck3.readers import HeuristicReader, LLMReader
+    from src.planck3.util import write_json
+    from src.planck3.writer import TemplateWriter
+    # the Gemma reader's view is a parameter (round 11: top 16 = the shipped reader's view)
+    pol = ScriptedLLM(['{"k": 0, "p": 0.9}'])
+    rd = LLMReader(pol, max_cands=2)
+    r = rd.read("q?", "entity", {"cands": [{"value": f"v{i}", "context": ""} for i in range(5)]})
+    assert len(r) == 5 and r[0] == 0.9 and "[2]" not in pol.prompts[0] and "[1]" in pol.prompts[0]
+    # always reading the pages (open_below > 10) and the pool dump
+    st = Store(tmp_path / "s.sqlite")
+    a = Answerer(SnippetWeb(), st, HeuristicReader(), TemplateWriter(), store_answer=False)
+    assert a.run("What year was IKEA founded?")["pools"] is None                       # no dump by default
+    w = SnippetWeb()
+    b = Answerer(w, st, HeuristicReader(), TemplateWriter(), store_answer=False, open_below=11, keep_pools=True)
+    res = b.run("What year was IKEA founded?")
+    assert w.calls["fetch"] == 2 and res["pools"][0]["name"] == "snippets" and res["explain"]["read_pools"] >= 1
+    st.close()
+    # reach: a right candidate in the top k of any pool read
+    d = tmp_path / "res" / R11.D["ship32P"]
+    d.mkdir(parents=True)
+    with gzip.open(d / "pools.jsonl.gz", "wt", encoding="utf-8") as f:
+        for i in range(10):
+            cands = [{"value": f"x{j}"} for j in range(32)]
+            cands[3 if i < 5 else 20]["value"] = "Team Alpha"
+            f.write(_json.dumps({"task_id": f"t{i}", "answer_type": "entity", "gold": ["Team Alpha"],
+                                 "pools": [{"cands": cands}]}) + "\n")
+    rch = R11.reach(d / "pools.jsonl.gz")
+    assert rch["top16"] == 0.5 and rch["top32"] == 1.0
+    # the pre-registered diagnosis
+    R = tmp_path / "res"
+
+    def run(name, right, n=200, value=None):
+        dd = R / name
+        dd.mkdir(parents=True, exist_ok=True)
+        (dd / "results.jsonl").write_text("\n".join(_json.dumps(
+            {"task_id": f"t{i}", "regime": "fresh", "shown_correct": i < right, "value": value or f"v{i}", "confidence": 7,
+             "changed_by_personal": False, "timing": {"read_ms": 3000}, "parts": [{"read_cands": 20}]}) for i in range(n)),
+            encoding="utf-8")
+        write_json(dd / "summary.json", {"accuracy": right / n, "timing_ms_per_task": {"read_ms": 3000}, "bands": {}, "bands_monotone": True})
+    run(R11.R10_SHIPPED, 98)
+    for k, right in (("ship", 98), ("ship32", 99), ("shipP", 112), ("ship32P", 110), ("gem", 122), ("gem16", 121),
+                     ("gem16P", 124), ("old", 150)):
+        run(R11.D[k], right)
+    out = R11.diagnose(R)
+    assert out["replay"]["pass"] and out["outcome"] == "config" and out["best_config"] == "shipP"
+    assert out["config"] == {"reader_cands": 16, "open_below": 11.0} and out["latency"]["fresh10"]["ms_per_cand"] == 150
+    run(R11.D["shipP"], 100)
+    run(R11.D["ship32P"], 100)
+    run(R11.D["ship32"], 100)
+    assert R11.diagnose(R)["outcome"] == "size"                                      # Gemma +24 at identical evidence
+    run(R11.D["gem16P"], 105)
+    assert R11.diagnose(R)["outcome"] == "split"
+    run(R11.D["ship"], 98, value="other")
+    assert R11.diagnose(R)["outcome"] == "invalid"                                   # not a replay of round 10
+    with pytest.raises(SystemExit):
+        R11.decide(R)

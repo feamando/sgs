@@ -25,8 +25,11 @@ OPEN_BELOW = 7.0     # read pages when the snippets alone weigh in under "good"
 
 class Answerer:
     def __init__(self, web, store, reader, writer, max_pages: int = MAX_PAGES, use_personal: bool = True,
-                 store_answer: bool = True, personal_override=None):
+                 store_answer: bool = True, personal_override=None, open_below: float = OPEN_BELOW,
+                 keep_pools: bool = False):
         self.web, self.store, self.reader, self.writer = web, store, reader, writer
+        self.open_below = open_below    # round 11: > 10 = always read the pages (the evidence check)
+        self.keep_pools = keep_pools    # round 11: return what the reader saw (diagnosis dumps)
         self.personal_override = personal_override  # (domain, system) -> personal score; evaluation profiles
         self.max_pages = max_pages
         self.use_personal = use_personal
@@ -82,7 +85,7 @@ class Answerer:
         self._read(question, at, pools, timing)
         cons = consolidate(pools, at, qt, tp)
         opened = []
-        if results and (cons["value"] is None or cons["confidence"] < OPEN_BELOW):
+        if results and (cons["value"] is None or cons["confidence"] < self.open_below):
             order = sorted(results, key=lambda r: (-(title_aboutness(question, r.get("title", "")) >= 0.5),
                                                    -r["trust_record"]["effective"]))
             for r in order[: self.max_pages]:
@@ -141,6 +144,8 @@ class Answerer:
                    "writer_fallback": wr.get("fallback", False), "writer_generated": wr.get("generated"),
                    "writer_tries": wr.get("tries", 0), "writer_first_try_faithful": wr.get("first_try_faithful"),
                    "writer_template": wr.get("template"), "search_on_topic": on_topic,
+                   "read_pools": len(pools), "read_cands": sum(min(len(p["cands"]), getattr(self.reader, "max_cands", None)
+                                                                   or len(p["cands"])) for p in pools),
                    "divergence": div,
                    "sources": [{"role": "states it" if i == 0 else "agrees", "domain": f["domain"], "url": f["url"],
                                 "trust": f["trust"]} for i, f in enumerate(cons["families"])]
@@ -154,7 +159,11 @@ class Answerer:
                 "search_calls": self.web.calls.get("search", 0) - calls0["search"],
                 "fetch_calls": self.web.calls.get("fetch", 0) - calls0["fetch"],
                 "web_calls": sum(self.web.calls.get(k, 0) - calls0[k] for k in calls0),
-                "steps": len(steps), "trajectory": [], "usage": dict(getattr(self.reader, "usage", {}))}
+                "steps": len(steps), "trajectory": [], "usage": dict(getattr(self.reader, "usage", {})),
+                "pools": [{"name": p["name"], "snippet": p.get("snippet", False), "r": [round(float(x), 4) for x in p["r"][:32]],
+                           "cands": [{"value": c["value"], "context": (c.get("context") or "")[:240], "score": c.get("score"),
+                                      "domains": (c.get("domains") or [])[:3]} for c in p["cands"][:32]]}
+                          for p in pools] if self.keep_pools else None}
 
     def _read(self, question, at, pools, timing, only_new=False):
         for pool in pools:

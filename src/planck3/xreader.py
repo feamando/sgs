@@ -37,6 +37,7 @@ from .util import REPO_ROOT, read_json, read_jsonl, write_json
 
 READER_DIR = REPO_ROOT / "data" / "planck3" / "reader"
 MAX_CANDS = 16
+MAX_READ = 32         # round 11: a trained reader may READ up to this many (trained on MAX_CANDS)
 PREFIX_TOKENS = 64
 CAND_TOKENS = 112
 EVIDENCE_CHARS = 320
@@ -71,14 +72,14 @@ def split_of(task_id: str) -> str:
     return "test" if h == 0 else "val" if h == 1 else "train"
 
 
-def pool_cands(p: dict) -> tuple[list[dict], list[bool]]:
+def pool_cands(p: dict, k_max: int = MAX_CANDS) -> tuple[list[dict], list[bool]]:
     """Top MAX_CANDS candidates in ranker order, exactly what the reader sees when it answers.
 
     Round 6 swapped a right candidate from beyond the cut into the LAST slot at training time. With
     "position in the ranking" among the features, that taught the reader that the 16th candidate is
     often right, which is never true at answer time (no labels, no swap). Round 6b: no swap; a pool
     whose only right candidate is beyond the cut is a pool with no right candidate, as served."""
-    k = min(len(p["cands"]), MAX_CANDS)
+    k = min(len(p["cands"]), k_max)
     return list(p["cands"][:k]), [bool(x) for x in p["labels"][:k]]
 
 
@@ -109,9 +110,9 @@ def make_head(d_f: int):
 class Encoded:
     """One pool as token ids: a shared prefix + one continuation per candidate."""
 
-    def __init__(self, sp, p: dict, shift: int = 0):
+    def __init__(self, sp, p: dict, shift: int = 0, k_max: int = MAX_CANDS):
         q = shift_years(p["question"], shift) if shift else p["question"]
-        cands, self.labels = pool_cands(p)
+        cands, self.labels = pool_cands(p, k_max)
         t = p.get("teacher")                     # round 10: Gemma's reading of the same pool, if labelled
         self.teacher = None if not t else (int(t["k"]) if t.get("k") is not None and int(t["k"]) < len(cands) else -1,
                                            float(t.get("p", 0.5)))
@@ -415,7 +416,8 @@ class CrossReader:
     def __init__(self, checkpoint: str, device: str | None = None, prefix_cache: bool | None = None,
                  quant: str | None = None, max_cands: int = 0):
         """quant='int8': dynamic int8 weights for every Linear layer (CPU only; the phone proxy).
-        max_cands: read only the top k candidates (default MAX_CANDS), the rest score 0."""
+        max_cands: read only the top k candidates (default MAX_CANDS), the rest score 0. Round 11: up to
+        MAX_READ, beyond what the reader was trained on (the view check; reported as untrained at that k)."""
         import sentencepiece as spm
         import torch
         from src.sgs_lm import SGSLanguageModel
@@ -428,7 +430,7 @@ class CrossReader:
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.lm.to(self.device).eval()
         self.head.to(self.device).eval()
-        self.max_cands = min(max_cands or MAX_CANDS, MAX_CANDS)
+        self.max_cands = min(max_cands or MAX_CANDS, MAX_READ)
         if quant == "int8":
             if self.device != "cpu":
                 raise SystemExit("--reader-quant int8 runs on CPU only (set CUDA_VISIBLE_DEVICES=-1)")
@@ -453,7 +455,8 @@ class CrossReader:
     def logits(self, question: str, answer_type: str, pool: dict) -> np.ndarray:
         torch = self.torch
         e = Encoded(self.sp, {"question": question, "answer_type": answer_type, "cands": pool["cands"][:self.max_cands],
-                              "labels": [False] * len(pool["cands"]), "snippet": pool.get("snippet", False)})
+                              "labels": [False] * len(pool["cands"]), "snippet": pool.get("snippet", False)},
+                    k_max=self.max_cands)
         if not self.prefix_cache:
             with torch.no_grad():
                 return _forward(self.lm, self.head, [e], self.device, self.pad).float().cpu().numpy()
@@ -476,7 +479,7 @@ class CrossReader:
         k = int(np.argmax(choice))
         g = 1 / (1 + math.exp(-(self.a * float(lg[k, 1]) + self.b)))
         r = [float(c * g) for c in choice]
-        return r + [0.0] * (len(pool["cands"]) - len(r))       # beyond the top 16: not read
+        return r + [0.0] * (len(pool["cands"]) - len(r))       # beyond the top max_cands: not read
 
 
 def reader_size_mb(lm, head) -> float:

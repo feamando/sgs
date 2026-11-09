@@ -160,7 +160,7 @@ def build(gemma_path: str, out: Path = FRESH9, seed: int = 9, until: str | None 
     d = {"version": 1, "created": date.today().isoformat(), "split": f"bench-fresh{prefix[1:]}", "seed": seed,
          "source": ("Wikidata SPARQL 2026 items unused by any earlier benchmark or training set (gold = Wikidata); "
                     f"Wikipedia Current Events portal after {after_d}, questions by Gemma, round 6 checks (gold = the item's words)"),
-         "note": "built before any round 9 reader ran on it; never used to train or choose a reader",
+         "note": f"built before any reader ran on it (fresh{prefix[1:]}); never used to train or choose a reader",
          "counts": dict(Counter(t["regime"] for t in tasks)), "build": {"wikidata": wst, "news": nst}, "tasks": tasks}
     write_json(out, d)
     print(f"[fresh9] {len(tasks)} questions {d['counts']} -> {out}")

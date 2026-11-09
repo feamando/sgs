@@ -51,6 +51,10 @@
      round10   round 10 (SETUP_planck_20261020.md): close the Gemma gap on FREE Brave credit, once a month:
                collect round 6's training questions on Brave (<= 950 live searches a month, -Limit overrides),
                Gemma soft labels, retrain Hertz's reader, then a NEW fresh benchmark and the judging
+     round11   round 11 (SETUP_planck_20261109.md): where is the Gemma gap? Phase 1 re-reads round 10's
+               fresh questions from the CACHE (0 searches, enforced): evidence view (top 16/20/32), always
+               reading the pages, Gemma at the shipped view; diagnosis -> r11_plan.json (~2-3 h). Phase 2 only
+               if a configuration wins: a NEW fresh benchmark (news after 2026-11-03, from 2026-11-14), ~300 searches
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -1024,6 +1028,73 @@ function Do-Round10 {
     P3 (@("r10", "decide") + $ttag)
 }
 
+# Round 11 (SETUP_planck_20261109.md): where is the Gemma gap? Phase 1 needs no searches: every arm
+# replays round 10's cached Brave answers and pages on fresh10 (a 0-search ledger makes any live Brave
+# call impossible; a page not in the cache is fetched, and counted). Phase 2 runs only if the
+# pre-registered diagnosis picks a configuration: a NEW fresh benchmark, committed before any reader runs.
+function Do-Round11 {
+    foreach ($f in @($V2HEAD, $PLANCK_CKPT, $GEMMA, "checkpoints/xreader_hertz_rc/reader.pt", "$RES/r10_product.json",
+                     "$RES/$("r10_x-hertz-rc_cpu-int8-top16")/results.jsonl", "scripts/assets/planck3_tasks_fresh10.json")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 11 reuses round 10)" }
+    }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $f10 = "scripts/assets/planck3_tasks_fresh10.json"
+    $old = "$FRESH,$NEWS,$INFO"
+    $ck = "checkpoints/xreader_hertz_rc/reader.pt"
+    $hz = @("--reader", "x-hertz", "--reader-checkpoint", $ck, "--writer", "template", "--reader-quant", "int8", "--dump-pools")
+    $pg = @("--open-below", "11")
+    $gm = @("--reader", "gemma", "--writer", "template", "--dump-pools")
+    # phase 1: no live searches at all (the ledger's budget is 0; cached answers are free)
+    $ledger = Join-Path $Root "$RES/r11_brave_ledger$Tag.json"
+    Set-Content -Path $ledger -Value (@{ budget = 0; used = 0; month = (Get-Date -Format "yyyy-MM") } | ConvertTo-Json) -Encoding UTF8
+    $env:PLANCK3_BRAVE_LEDGER = $ledger
+    try {
+        Log "round 11 phase 1: re-reading round 10's fresh questions from the cache (0 Brave searches)"
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top16" $hz "round 11: the shipped reader, as round 10 (replication + what it saw)" 0 $f10 }
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top32" ($hz + @("--reader-cands", "32")) "round 11: the shipped reader reading the top 32" 0 $f10 }
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top16_pages" ($hz + $pg) "round 11: the shipped reader, always reading the 2 pages" 0 $f10 }
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top32_pages" ($hz + $pg + @("--reader-cands", "32")) "round 11: top 32 and always the pages" 0 $f10 }
+        Invoke-R6 "r11d_gemma_template" $gm "round 11: Gemma, top 20 (replication + what it saw)" 0 $f10
+        Invoke-R6 "r11d_gemma-top16_template" ($gm + @("--reader-cands", "16")) "round 11: Gemma at the shipped view (top 16)" 0 $f10
+        Invoke-R6 "r11d_gemma-top16_template_pages" ($gm + @("--reader-cands", "16") + $pg) "round 11: Gemma, top 16, always the pages (= the small reader's evidence)" 0 $f10
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top16_old" $hz "round 11: the shipped reader on round 8's 243 questions (latency per candidate)" 0 $old }
+    } finally { Remove-Item Env:PLANCK3_BRAVE_LEDGER -ErrorAction SilentlyContinue }
+    P3 (@("r11", "diagnose") + $ttag)
+    $plan = @((Invoke-Quiet $PY (@("scripts/planck3.py", "r11", "plan") + $ttag)).Out | Where-Object { $_ })[-1] -split " "
+    if ($plan[0] -ne "config") { Log "round 11: the diagnosis is '$($plan[0])': no configuration to judge (see r11_plan.json). Done."; return }
+    if ($Quick) { Log "round 11 -Quick: phase 2 skipped (the shakedown never builds a benchmark)"; return }
+    # phase 2: a NEW fresh benchmark (news after round 10's window, 10 days of portal news from 2026-11-14)
+    $f11 = "scripts/assets/planck3_tasks_fresh11.json"
+    if (-not (Test-Path $f11) -and (Get-Date) -lt [datetime]"2026-11-14") {
+        Log "round 11: the diagnosis picked a configuration. fresh11 needs 10 days of portal news after 3 November: re-run on or after 14 November (phase 1 is kept)"
+        return
+    }
+    if (-not (Test-Path $f11)) {
+        Log "round 11: building fresh11 once (Wikidata 2026 unused by rounds 1-10 + portal news after 2026-11-03)"
+        P3 @("fresh9", "--gemma-path", $GEMMA, "--out", $f11, "--prefix", "f11", "--after", "2026-11-03", "--seed", "11")
+        if (-not $NoPush) {
+            Invoke-Checked git @("add", "-f", "--", $f11)
+            Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null
+            Invoke-Checked git @("commit", "-m", "data(planck3): round 11 fresh benchmark, built before any reader ran on it")
+            Invoke-Checked git @("pull", "--rebase", "--autostash", "origin", "main")
+            Invoke-Checked git @("push", "origin", "main")
+        }
+    }
+    $n = (Get-Content $f11 -Raw | ConvertFrom-Json).tasks.Count
+    $need = [int]($n * 1.3) + 10
+    $chk = Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave", "--need", "$need")
+    $chk.Out | ForEach-Object { Log "$_" }
+    if ($chk.Code -ne 0) { throw "Brave cannot serve round 11's judging ($need searches): check the key and the monthly usage limit" }
+    $cfg = @("--reader-cands", $plan[1], "--open-below", $plan[2])
+    $sh = @("--reader", "x-hertz", "--reader-checkpoint", $ck, "--writer", "template", "--reader-quant", "int8")
+    Invoke-OnCpu { Invoke-R6 "r11_product_cpu-int8" ($sh + $cfg) "round 11: THE PRODUCT, round 9's reader with the diagnosed configuration (fresh11; searches live)" 0 $f11 }
+    Invoke-OnCpu { Invoke-R6 "r11_x-hertz-rc_cpu-int8-top16" $sh "round 11: the shipped configuration" 0 $f11 }
+    Invoke-R6 "r11_gemma_template" @("--reader", "gemma", "--writer", "template") "round 11: Gemma (reference)" 0 $f11
+    Invoke-R6 "r11_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 11: no-model floor" 0 $f11
+    Invoke-OnCpu { Invoke-R6 "r11_product_cpu-int8_contrarian" ($sh + $cfg + @("--personal", "contrarian")) "round 11: worst-case personal profile (rule E)" 0 $f11 }
+    P3 (@("r11", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -1048,7 +1119,7 @@ function Do-Push {
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
                        "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log", "judge.json", "judge_pairs.jsonl",
-                       "r*_product*.json")) {
+                       "r*_product*.json", "r11_plan*.json", "pools.jsonl.gz", "r1*_brave_ledger*.json")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
@@ -1192,6 +1263,16 @@ switch ($Command.ToLower()) {
         try { Do-Round10 } finally { Remove-Item Env:PLANCK3_BRAVE_LEDGER -ErrorAction SilentlyContinue }
         P3 @("report")
         Log ("round10$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round11"    {
+        Start-RunLog "round11"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        Do-Round11
+        P3 @("report")
+        Log ("round11$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {

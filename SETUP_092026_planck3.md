@@ -435,6 +435,27 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **G:** ≥ 5 points over the shipped reader on the new questions, p < 0.05.
     - **GAP:** the share of the Gemma gap closed (reported).
     - **Q, L, E** as round 9.
+- **ROUND 10 RESULTS OF RECORD (2026-11-04, results 7fd072b; SETUP_planck_20261020.md section 9): rule G FAILS → round 9's reader keeps shipping.**
+  - **On fresh10 (220):** x-hertz r10 47.7% vs the shipped reader 48.6% (p 0.90), Gemma 60.9%, heuristic 35.9%. Gap closed: none (-0.07). News worse: 43.8% vs 48.8%.
+  - **Q, L (3.42 s), E pass; C1 fails** (good band 0.63 vs 0.70).
+  - **Brave pools + Gemma soft labels did not help.**
+- **Round 11 built + pre-registered (2026-11-09, `SETUP_planck_20261109.md`, `planck3.ps1 round11`): where is the Gemma gap?**
+  - **Found before any run:**
+    - Gemma reads the top 20 candidates, the shipped reader 16.
+    - The arms read different pages: pages open below 7/10, and that weighing uses each reader's own scores.
+    - "Longer contexts" is ruled out: Gemma sees 200 characters per candidate, the small reader 240.
+  - **Phase 1 (0 searches, cached fresh10):**
+    - 8 arms vary the view (16/20/32) and the pages (as today vs always 2);
+    - Gemma at the shipped view and the same evidence;
+    - reach from the pool dumps;
+    - ms per candidate (latency).
+  - **Diagnosis, in order:**
+    - **valid:** replay ≥ 90% same values;
+    - **config:** a configuration ≥ +3 pts → phase 2;
+    - **view:** Gemma's view ≥ 3 pts and reach top 32 ≥ +3 pts → round 12 trains wider;
+    - **size:** Gemma ≥ 8 pts at identical evidence → round 12 = larger base, owner's call;
+    - **split:** none of the above.
+  - **Phase 2 (config only):** fresh11 (news after 2026-11-03, from 2026-11-14), G11 ≥ +3 pts, p < 0.05, L, E.
 - *Round 8 options as planned on 2026-10-14 (superseded by the round 8 build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.

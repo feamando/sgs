@@ -1,6 +1,6 @@
 # Planck 3.0 round 10: closing the Gemma gap (Hertz's reader on Brave pools, Gemma soft labels)
 
-Nikita Gorshkov · 2026-10-20 · Status: built; owner bought credit (2026-10-20, $11.81): run now with `-Limit 2000`, judge from 29 October · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261019.md` (round 9: Hertz's int8 reader ships, 49.1% vs Gemma 60.9%) · Plan and results of record: `SETUP_092026_planck3.md`
+Nikita Gorshkov · 2026-10-20 · Status: done 2026-11-04, rule G FAILED (results of record in section 9); round 11 = `SETUP_planck_20261109.md` · Swimlane 1 (Planck) · Box: `C:\Users\feama\sgs` · Previous round: `SETUP_planck_20261019.md` (round 9: Hertz's int8 reader ships, 49.1% vs Gemma 60.9%) · Plan and results of record: `SETUP_092026_planck3.md`
 
 **TL;DR.** One command, `.\scripts\planck3.ps1 round10 -Limit 2000`, run twice: now (collect, teach, train, ~3 h) and on or after 29 October (new benchmark + judging, ~1.5 h). The owner bought credit on 2026-10-20 ($11.81); the original plan below ran on free credit only, 950 searches a month, in November and December. It resumes where it stopped.
 
@@ -144,3 +144,29 @@ If December's credit runs short before the judging, the run stops before the fir
 | Gemma's labels are wrong on many pools | the known-answer loss stays at full weight; Gemma's agreement with the gold is logged |
 | Training on Brave pools overfits | early stopping on held-out questions; it starts from the shipped reader, not from scratch |
 | The new benchmark leaks into training | it is in the benchmark list every training-set builder filters against; built after the collection |
+
+## 9. Results of record (run round10_20261104_1014, results 7fd072b; report fix f632710)
+
+**Rule G FAILS → round 9's reader keeps shipping** (pre-registered outcome: keep round 9's reader; round 11 asks size vs evidence view).
+
+| Arm (220 fresh10 questions: 140 Wikidata + 80 news) | Right | Wikidata | News |
+|---|---|---|---|
+| Gemma (reference) | 60.9% | 58.6% | 65.0% |
+| **shipped r9 reader** (x-hertz rc, int8 CPU, top 16) | **48.6%** | 48.6% | 48.8% |
+| product x-hertz r10, int8 CPU | 47.7% (28 vs 30 only-right, p 0.90) | 50.0% | 43.8% |
+| x-hertz r10 on the GPU | 49.1% | 51.4% | 45.0% |
+| heuristic (no model) | 35.9% | 31.4% | 43.8% |
+
+- **G FAIL:** -0.9 points vs the shipped reader (bar +5, p < 0.05).
+- **GAP closed:** -0.07, so none.
+- **News got worse:** 43.8% vs 48.8%.
+- **Q PASS** (GPU 49.1%), **L PASS** (3.42 s per question), **E PASS**.
+- **C1 FAIL:** good-band precision 0.63 vs the 0.70 bar.
+- **Training (phase 1, 2026-10-22):**
+  - 557 + 857 questions collected on Brave (99.4% on topic, 0% fallback).
+  - Gemma right on 70.7% of the pools where a right candidate exists.
+  - The reader trained from round 7's: epoch 0 val 0.613 best, then early stop.
+  - Test choice 0.600 vs the ranker's 0.417 on held-out pools: a gain that did not carry to the benchmark.
+- **The "fail" the owner first saw** was `planck3.py report` crashing (KeyError `midpoint` on the round 9 and 10 product files), fixed in f632710. `decide` had already run, and the chat factory correctly skips r10.
+- **Runner gap, fixed in round 11:** `Do-Push` now adds the Brave ledgers, so git no longer shows a stale count.
+

@@ -147,7 +147,7 @@ def _chat_harness_factory(args):
     from src.planck3.writer import make_writer
     # auto = what round 10 / 9 / 8 / 7 / 6b / 6 chose, but a new reader ships only if it passed rule R (it beat round 5's
     # reader); otherwise round 5's Planck reader, the best small reader measured so far
-    prods = [read_json(RESULTS / f) for f in ("r10_product.json", "r9_product.json", "r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
+    prods = [read_json(RESULTS / f) for f in ("r11_product.json", "r10_product.json", "r9_product.json", "r8_product.json", "r7_product.json", "r6b_product.json", "r6_product.json") if (RESULTS / f).exists()]
     prod = next((p for p in prods if (p.get("rule_r") or {}).get("pass")), prods[0] if prods else {})
     rd, wr, wck, rck = args.reader, args.writer, None, None
     if rd == "auto":
@@ -171,7 +171,8 @@ def _chat_harness_factory(args):
                          reader_cands=prod.get("reader_cands", 0) if rck else 0)
     writer = make_writer(wr, gemma_path=args.gemma_path, checkpoint=wck)
     print(f"[planck3] answer pipeline: reader={reader.name} writer={writer.name} (trust: config/planck3/source_registry.json)")
-    return lambda: Answerer(web, store, reader, writer)
+    ob = float(prod.get("open_below", 7.0)) if rck else 7.0      # round 11: a configuration may always read the pages
+    return lambda: Answerer(web, store, reader, writer, open_below=ob)
 
 
 def cmd_chat(args):
@@ -736,6 +737,8 @@ def cmd_report(args):
     lines += r9_lines(RESULTS)
     from src.planck3.round10 import report_lines as r10_lines
     lines += r10_lines(RESULTS)
+    from src.planck3.round11 import report_lines as r11_lines
+    lines += r11_lines(RESULTS)
     v2 = sorted(RESULTS.glob("g2v2_head_*/train_log.json"))
     if v2:
         lines += ["## G2 v2 heads (choice head + calibrated answerability gate)", "",
@@ -1001,7 +1004,7 @@ def main():
     p.add_argument("--out", default=None, help="default: config/planck3/source_trust.json")
     p.set_defaults(fn=cmd_trust)
 
-    from src.planck3 import freshbench, g2, readtasks, round5, round6, round7, round8, round9, round10, wikirace, xreader
+    from src.planck3 import freshbench, g2, readtasks, round5, round6, round7, round8, round9, round10, round11, wikirace, xreader
     wikirace.add_cli(sub)
     g2.add_cli(sub, add_web_args, build_web)
     round5.add_cli(sub, add_web_args, build_web)
@@ -1012,6 +1015,7 @@ def main():
     round8.add_cli(sub)
     round9.add_cli(sub)
     round10.add_cli(sub)
+    round11.add_cli(sub)
     freshbench.add_cli(sub)
 
     args = ap.parse_args()

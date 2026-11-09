@@ -43,7 +43,8 @@ def build_answerer(args, build_web, store_path=None, personal_override=None, sto
     else:
         writer = make_writer(args.writer, checkpoint=args.writer_checkpoint, gemma_path=args.gemma_path,
                              tries=getattr(args, "tries", None))
-    return Answerer(web, store, reader, writer, personal_override=personal_override, store_answer=store_answer), web
+    return Answerer(web, store, reader, writer, personal_override=personal_override, store_answer=store_answer,
+                    open_below=getattr(args, "open_below", 7.0), keep_pools=getattr(args, "dump_pools", False)), web
 
 
 def _turns(task):
@@ -75,7 +76,7 @@ def run_eval(args, build_web):
     if res_path.exists():
         res_path.unlink()
     prices = load_prices(args.prices)
-    records = []
+    records, dump = [], []
     t_start = time.time()
     for i, task in enumerate(tasks, 1):
         prev, parts = None, []
@@ -104,6 +105,7 @@ def run_eval(args, build_web):
                           "on_topic": ex.get("search_on_topic"), "reader_p": ex.get("reader_p"),
                           "tokens": toks, "divergence": ex["divergence"], "conflicts": len(ex["conflicts"]),
                           "search_calls": r["search_calls"], "fetch_calls": r["fetch_calls"],
+                          "read_pools": ex.get("read_pools"), "read_cands": ex.get("read_cands"),
                           "items": ex["items"], "sources": [s["domain"] for s in ex["sources"]],
                           "top_source_scored": ex["sources"][0]["trust"]["scored"] if ex["sources"] else None})
             prev = Turn(user=q_user, question=q, answer_type=at, entity=None, rewrite="NEW", result=r)
@@ -123,6 +125,8 @@ def run_eval(args, build_web):
                "parts": parts}
         append_jsonl(res_path, rec)
         records.append(rec)
+        if getattr(args, "dump_pools", False) and task["family"] == "fact":
+            dump.append({"task_id": task["id"], "answer_type": at, "gold": task.get("gold"), "pools": r.get("pools") or []})
         mark = "OK " if rec["shown_correct"] else ("-- " if rec["band"] == "none" else "XX ")
         print(f"[{i:>3}/{len(tasks)}] {mark} {task['id']:<12} {str(rec['value'])[:30]:<30} {rec['band']:<9} "
               f"{rec['confidence'] if rec['confidence'] is not None else '-'}/10  {'' if rec['faithful'] else 'UNFAITHFUL->template'}",
@@ -135,6 +139,11 @@ def run_eval(args, build_web):
                  "llm_usd_per_task_as_haiku": sum(r["tokens"]["in"] * rate["input"] + r["tokens"]["out"] * rate["output"]
                                                   for r in records) / 1e6 / max(len(records), 1)})
     write_json(out / "summary.json", summ)
+    if dump:                                     # round 11: what the reader saw, per question (gzip, pushed)
+        import gzip
+        with gzip.open(out / "pools.jsonl.gz", "wt", encoding="utf-8") as f:
+            for d in dump:
+                f.write(json.dumps(d, ensure_ascii=False) + "\n")
     _print(summ)
 
 
@@ -317,6 +326,9 @@ def add_cli(sub, add_web_args, build_web):
     p.add_argument("--writer-checkpoint", default=None)
     p.add_argument("--tries", type=int, default=None, help="small writers: answers tried before the template (round 6: 3)")
     p.add_argument("--personal", default="none", choices=["none", "contrarian"])
+    p.add_argument("--open-below", type=float, default=7.0,
+                   help="read pages when the snippets weigh in under this (round 11: 11 = always read them)")
+    p.add_argument("--dump-pools", action="store_true", help="round 11: write what the reader saw to pools.jsonl.gz")
     p.add_argument("--out", required=True)
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--sample", type=int, default=0)

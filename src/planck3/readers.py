@@ -69,15 +69,16 @@ class LLMReader:
     """Any LLMPolicy (Gemma local, Bedrock Haiku) as a reader over one pool."""
     kind = "llm"
 
-    def __init__(self, policy):
+    def __init__(self, policy, max_cands: int = 20):
         self.policy = policy
         self.name = policy.name
         self.usage = policy.usage
+        self.max_cands = max_cands or 20          # round 11: Gemma at the product's top 16 (the view check)
 
     def read(self, question: str, answer_type: str, pool: dict) -> list[float]:
         import json
         import re
-        cands = pool["cands"][:20]
+        cands = pool["cands"][:self.max_cands]
         if not cands:
             return []
         lines = [f"QUESTION: {question}", f"EXPECTED ANSWER TYPE: {answer_type}",
@@ -115,7 +116,8 @@ def make_reader(name: str, **kw):
         return PlanckReader(kw["head"], kw.get("checkpoint"), kw.get("tokenizer"))
     if name in ("gemma", "bedrock"):
         from .policies import make_policy
-        return LLMReader(make_policy(name, **{k: v for k, v in kw.items() if k in ("gemma_path", "model_id", "region", "profile")}))
+        return LLMReader(make_policy(name, **{k: v for k, v in kw.items() if k in ("gemma_path", "model_id", "region", "profile")}),
+                         max_cands=kw.get("reader_cands") or 20)
     raise ValueError(f"unknown reader {name}")
 
 
