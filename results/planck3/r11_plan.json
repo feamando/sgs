@@ -1,0 +1,113 @@
+{
+  "tag": "",
+  "benchmark": "scripts/assets/planck3_tasks_fresh10.json (cached Brave answers, no searches)",
+  "accuracy": {
+    "ship": 0.4863636363636364,
+    "ship32": 0.4818181818181818,
+    "shipP": 0.4818181818181818,
+    "ship32P": 0.4772727272727273,
+    "gem": 0.6090909090909091,
+    "gem16": 0.6,
+    "gem16P": 0.6090909090909091,
+    "old": 0.6049382716049383
+  },
+  "replay": {
+    "pass": true,
+    "bar": 0.9,
+    "vs": "r10_x-hertz-rc_cpu-int8-top16",
+    "n": 220,
+    "same_value": 1.0
+  },
+  "gap": {
+    "a": "r11d_gemma_template",
+    "b": "r11d_x-hertz-rc_cpu-int8-top16",
+    "n": 220,
+    "acc_a": 0.6090909090909091,
+    "acc_b": 0.4863636363636364,
+    "a_only": 48,
+    "b_only": 21,
+    "p": 0.0015503169494868645
+  },
+  "config_vs_shipped": {
+    "ship32": {
+      "a": "r11d_x-hertz-rc_cpu-int8-top32",
+      "b": "r11d_x-hertz-rc_cpu-int8-top16",
+      "n": 220,
+      "acc_a": 0.4818181818181818,
+      "acc_b": 0.4863636363636364,
+      "a_only": 3,
+      "b_only": 4,
+      "p": 1.0
+    },
+    "shipP": {
+      "a": "r11d_x-hertz-rc_cpu-int8-top16_pages",
+      "b": "r11d_x-hertz-rc_cpu-int8-top16",
+      "n": 220,
+      "acc_a": 0.4818181818181818,
+      "acc_b": 0.4863636363636364,
+      "a_only": 1,
+      "b_only": 2,
+      "p": 1.0
+    },
+    "ship32P": {
+      "a": "r11d_x-hertz-rc_cpu-int8-top32_pages",
+      "b": "r11d_x-hertz-rc_cpu-int8-top16",
+      "n": 220,
+      "acc_a": 0.4772727272727273,
+      "acc_b": 0.4863636363636364,
+      "a_only": 4,
+      "b_only": 6,
+      "p": 0.75390625
+    }
+  },
+  "best_config": "shipP",
+  "config": null,
+  "gemma_view": {
+    "a": "r11d_gemma_template",
+    "b": "r11d_gemma-top16_template",
+    "n": 220,
+    "acc_a": 0.6090909090909091,
+    "acc_b": 0.6,
+    "a_only": 5,
+    "b_only": 3,
+    "p": 0.7265625
+  },
+  "equal_evidence": {
+    "a": "r11d_gemma-top16_template_pages",
+    "b": "r11d_x-hertz-rc_cpu-int8-top16_pages",
+    "n": 220,
+    "acc_a": 0.6090909090909091,
+    "acc_b": 0.4818181818181818,
+    "a_only": 45,
+    "b_only": 17,
+    "p": 0.0004970915863810334
+  },
+  "reach": {
+    "n": 220,
+    "top16": 0.8818181818181818,
+    "top20": 0.8863636363636364,
+    "top32": 0.8954545454545455
+  },
+  "gap_shares": {
+    "view (Gemma top 20 vs 16)": 0.07407407407407454,
+    "pages for the small reader": -0.03703703703703727,
+    "reading at identical evidence": 1.0370370370370372
+  },
+  "latency": {
+    "fresh10": {
+      "n": 220,
+      "cands_per_q": 35.45909090909091,
+      "read_ms_per_q": 3201.818181818182,
+      "ms_per_cand": 90.29611588257916
+    },
+    "old243": {
+      "n": 242,
+      "cands_per_q": 27.06198347107438,
+      "read_ms_per_q": 2315.754958677686,
+      "ms_per_cand": 85.57225530615361
+    },
+    "r8_read_ms_per_q": 1330.5065843621398
+  },
+  "outcome": "size",
+  "next": "round 12 (not built): the gap is the reader; the owner's call on a larger SGS base"
+}

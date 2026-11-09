@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-11-04 14:56)
+# Planck 3.0 results (2026-11-09 19:25)
 
 ## G0 (seed benchmark)
 
@@ -448,16 +448,31 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 - **E** PASS: drop 0.004545454545454575, changed 156, flagged 156
 - **Outcome (pre-registered):** keep round 9's reader: Brave pools + Gemma soft labels did not beat it by 5 points
 
+## Round 11: where is the Gemma gap? (SETUP_planck_20261109.md)
+
+- **Replay** PASS: same value as round 10 on 1.000
+- **Accuracy on fresh10 (cached):** ship 0.486; ship32 0.482; shipP 0.482; ship32P 0.477; gem 0.609; gem16 0.600; gem16P 0.609
+- **gap (Gemma vs shipped):** 0.609 vs 0.486 (48 vs 21, p 0.00155, n 220)
+- **Gemma top 20 vs top 16:** 0.609 vs 0.600 (5 vs 3, p 0.727, n 220)
+- **Gemma vs shipped at identical evidence:** 0.609 vs 0.482 (45 vs 17, p 0.000497, n 220)
+- **ship32 vs shipped:** 0.482 vs 0.486 (3 vs 4, p 1, n 220)
+- **shipP vs shipped:** 0.482 vs 0.486 (1 vs 2, p 1, n 220)
+- **ship32P vs shipped:** 0.477 vs 0.486 (4 vs 6, p 0.754, n 220)
+- **Reach (a right candidate in view):** top 16 0.882, top 20 0.886, top 32 0.895
+- **Latency fresh10:** 35 candidates/question, 90 ms each, 3202 ms/question
+- **Latency old243:** 27 candidates/question, 86 ms each, 2316 ms/question
+- **Diagnosis (pre-registered):** size: round 12 (not built): the gap is the reader; the owner's call on a larger SGS base
+
 ## G2 v2 heads (choice head + calibrated answerability gate)
 
 | head | points | test points with a right candidate | choice accuracy | deterministic ranker | gate AUC | gate ECE | tau | test coverage at tau | test precision at tau (target) |
 |---|---|---|---|---|---|---|---|---|---|
-| g2v2_head_hash_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
-| g2v2_head_hash_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
-| g2v2_head_hash_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 32 | 0.438 | 0.312 | 0.753 | 0.204 | 0.528 | 0.325 | 0.462 (0.9) |
-| g2v2_head_planck_s0 | data\planck3\g2\points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
-| g2v2_head_planck_s0_ddgs | data\planck3\g2\points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
-| g2v2_head_planck_s0_ddgs_quick | data\planck3\g2\points_ddgs_quick.jsonl | 32 | 0.531 | 0.312 | 0.875 | 0.184 | 0.911 | 0.150 | 1.000 (0.9) |
+| g2v2_head_hash_s0 | points_searxng.jsonl | 143 | 0.336 | 0.364 | 0.739 | 0.061 | 0.879 | 0.014 | 1.000 (0.9) |
+| g2v2_head_hash_s0_ddgs | points_ddgs.jsonl | 243 | 0.494 | 0.481 | 0.809 | 0.046 | 0.843 | 0.126 | 0.917 (0.9) |
+| g2v2_head_hash_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.438 | 0.312 | 0.753 | 0.204 | 0.528 | 0.325 | 0.462 (0.9) |
+| g2v2_head_planck_s0 | points_searxng.jsonl | 143 | 0.490 | 0.364 | 0.782 | 0.051 | 0.669 | 0.051 | 1.000 (0.9) |
+| g2v2_head_planck_s0_ddgs | points_ddgs.jsonl | 243 | 0.667 | 0.481 | 0.831 | 0.090 | 0.811 | 0.203 | 0.931 (0.9) |
+| g2v2_head_planck_s0_ddgs_quick | points_ddgs_quick.jsonl | 32 | 0.531 | 0.312 | 0.875 | 0.184 | 0.911 | 0.150 | 1.000 (0.9) |
 
 ## G2 heads (learned from known answers)
 
