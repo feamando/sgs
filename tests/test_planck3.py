@@ -1693,3 +1693,66 @@ def test_round11_view_pages_dumps_and_diagnosis(tmp_path):
     assert R11.diagnose(R)["outcome"] == "invalid"                                   # not a replay of round 10
     with pytest.raises(SystemExit):
         R11.decide(R)
+
+
+def test_round12_sample_agreement_pilot_and_decide(tmp_path):
+    import json as _json
+    from src.planck3 import round12 as R12
+    from src.planck3 import xreader as X
+    from src.planck3.util import write_json
+    # the seeded sample never touches its source and keeps whole lines
+    src = tmp_path / "rc.jsonl"
+    src.write_text("\n".join(_json.dumps({"task_id": f"{'squad' if i % 2 else 'newsqa'}_{i}", "cands": [{"value": "a"}],
+                                          "labels": [True]}) for i in range(50)) + "\n", encoding="utf-8")
+    before = src.read_text(encoding="utf-8")
+    meta = X.sample_points(src, tmp_path / "out" / "s.jsonl", 20, seed=12)
+    rows = (tmp_path / "out" / "s.jsonl").read_text(encoding="utf-8").splitlines()
+    assert meta["kept"] == 20 and len(rows) == 20 and src.read_text(encoding="utf-8") == before
+    assert sum(meta["by_group"].values()) == 20 and set(meta["by_group"]) <= {"squad", "newsqa"}
+    again = X.sample_points(src, tmp_path / "out" / "t.jsonl", 20, seed=12)
+    assert (tmp_path / "out" / "t.jsonl").read_text(encoding="utf-8").splitlines() == rows and again["by_group"] == meta["by_group"]
+    assert X.sample_points(src, tmp_path / "out" / "all.jsonl", 0)["kept"] == 50
+
+    # teacher agreement on held-out pools
+    class E:
+        def __init__(self, labels, teacher):
+            self.labels, self.teacher = labels, teacher
+    sc = [np.array([[2.0, 0], [0.0, 0]]), np.array([[0.0, 0], [3.0, 0]]), np.array([[1.0, 0], [0.0, 0]])]
+    en = [E([True, False], (0, 0.9)), E([True, False], (0, 0.8)), E([False, False], (-1, 0.0))]
+    ta = X.teacher_agreement(sc, en)
+    assert ta["pools"] == 2 and ta["reader_picks_teacher"] == 0.5 and ta["teacher_right"] == 1.0 and ta["reader_right"] == 0.5
+    assert X.teacher_agreement(sc, [E([True, False], None)] * 3) == {"pools": 0}
+
+    # the pre-registered pilot (rule P) and the ship rule (G12)
+    R = tmp_path / "res"
+
+    def run(name, right, n=200):
+        dd = R / name
+        dd.mkdir(parents=True, exist_ok=True)
+        (dd / "results.jsonl").write_text("\n".join(_json.dumps(
+            {"task_id": f"t{i}", "regime": "fresh", "shown_correct": i < right, "value": f"v{i}", "confidence": 7,
+             "changed_by_personal": False, "parts": [], "timing": {"read_ms": 3000}}) for i in range(n)), encoding="utf-8")
+        write_json(dd / "summary.json", {"accuracy": right / n, "timing_ms_per_task": {"read_ms": 3000, "write_ms": 10},
+                                         "bands": {}, "bands_monotone": True})
+    run(R12.R11_SHIP, 97)
+    run(R12.R11_GEM, 122)
+    run(R12.PILOT, 102)                                                               # +2.5 points: below the bar
+    out = R12.pilot(R)
+    assert not out["rule_p"]["pass"] and out["outcome"] == "stop"
+    with pytest.raises(SystemExit):
+        R12.decide(R)
+    run(R12.PILOT, 104)                                                               # +3.5 points
+    out = R12.pilot(R)
+    assert out["rule_p"]["pass"] and out["outcome"] == "judge" and abs(out["gap_closed"]["share"] - 7 / 25) < 1e-9
+    for name, right in ((R12.SHIPPED, 98), (R12.PRODUCT, 112), (R12.GPU, 113), (R12.REF, 122), (R12.FLOOR, 72),
+                        (R12.PRODUCT + "_contrarian", 110)):
+        run(name, right)
+    pr = R12.decide(R)
+    assert pr["rule_g12"]["pass"] and pr["rule_q"]["pass"] and pr["rule_l"]["pass"] and pr["rule_e"]["pass"]
+    assert pr["rule_r"]["pass"] and pr["outcome"].startswith("ship") and pr["reader_checkpoint"] == R12.CKPT
+    run(R12.GPU, 120)                                                                 # int8 loses 4 points: Q fails
+    pr = R12.decide(R)
+    assert pr["rule_g12"]["pass"] and not pr["rule_q"]["pass"] and not pr["rule_r"]["pass"] and "blocked" in pr["outcome"]
+    run(R12.PRODUCT, 100)
+    assert not R12.decide(R)["rule_g12"]["pass"]
+    assert any("Round 12" in x for x in R12.report_lines(R))

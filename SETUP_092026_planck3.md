@@ -456,6 +456,11 @@ powershell -ExecutionPolicy Bypass -File scripts\planck3.ps1 all
     - **size:** Gemma ≥ 8 pts at identical evidence → round 12 = larger base, owner's call;
     - **split:** none of the above.
   - **Phase 2 (config only):** fresh11 (news after 2026-11-03, from 2026-11-14), G11 ≥ +3 pts, p < 0.05, L, E.
+- **Round 11 results (2026-11-09, 6218a65): diagnosis size.** No configuration moves the shipped reader. The view is worth +0.9 points. With identical evidence Gemma reads +12.7 points better (p 0.0005), which is the whole gap. 0 searches. Details: `SETUP_planck_20261109.md` section 10.
+- **Round 12 built + pre-registered (2026-11-13, `SETUP_planck_20261113.md`, `planck3.ps1 round12`): distillation at scale.**
+  - **Owner's call:** test the recipe before a larger base, because the measured size slope makes a bigger base expensive.
+  - **Teach and train:** Gemma teaches about 37k pools (14x round 10). The shipped reader retrains with weight 1.0.
+  - **Gate:** rule P, a 0-search pilot on cached fresh10 that must show +3 points, before fresh12 and the ship rule.
 - *Round 8 options as planned on 2026-10-14 (superseded by the round 8 build above):*
   - **R passes:** ship x-planck r7; round 8 polishes the writer and calibration (C1, L) on it.
   - **R fails, N fails:** rebuild the Planck base, SGS kept: a reading-first goal on a pre-2026 corpus with news and a date cutoff, 3-7 days on the 4090 per attempt. The corpus, goal and budget are written down before any training.

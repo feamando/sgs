@@ -281,6 +281,46 @@ def evaluate(scores, encs, T, a, b) -> dict:
             "base_rate": float(y.mean()) if len(y) else None}
 
 
+def teacher_agreement(scores, encs) -> dict:
+    """Round 12: on held-out pools Gemma read, how often the reader picks Gemma's candidate (where Gemma
+    picked one), and how often Gemma's pick is right where a right one exists (the teacher's own ceiling)."""
+    rows = [(s, e) for s, e in zip(scores, encs) if e.teacher is not None and e.teacher[0] >= 0]
+    if not rows:
+        return {"pools": 0}
+    same = sum(int(np.argmax(s[:, 0])) == e.teacher[0] for s, e in rows)
+    lab = [(s, e) for s, e in rows if any(e.labels)]
+    return {"pools": len(rows), "reader_picks_teacher": same / len(rows),
+            "teacher_right": sum(bool(e.labels[e.teacher[0]]) for _, e in lab) / max(len(lab), 1),
+            "reader_right": sum(bool(e.labels[int(np.argmax(s[:, 0]))]) for s, e in lab) / max(len(lab), 1),
+            "pools_with_a_right_candidate": len(lab)}
+
+
+def sample_points(src: Path, out: Path, n: int, seed: int = 12) -> dict:
+    """Round 12: a seeded sample of n pools from a points file, streamed (round 7's 150k reading pools do
+    not fit in memory parsed). n = 0 copies every pool. The source is never modified: `teach` rewrites its
+    file in place, so round 12 teaches copies and rounds 6-10's files stay as they were."""
+    with open(src, encoding="utf-8") as f:
+        total = sum(1 for line in f if line.strip())
+    keep = set(range(total)) if not n or n >= total else set(random.Random(seed).sample(range(total), n))
+    by: dict[str, int] = {}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_suffix(".tmp")
+    with open(src, encoding="utf-8") as f, open(tmp, "w", encoding="utf-8") as g:
+        i = 0
+        for line in f:
+            if not line.strip():
+                continue
+            if i in keep:
+                g.write(line if line.endswith("\n") else line + "\n")
+                tid = json.loads(line).get("task_id", "")
+                by[group_of(tid)] = by.get(group_of(tid), 0) + 1
+            i += 1
+    tmp.replace(out)
+    meta = {"src": str(src), "out": str(out), "total": total, "kept": len(keep), "seed": seed, "by_group": by}
+    print(f"[xreader] sampled {len(keep)} of {total} pools -> {out} {by}", flush=True)
+    return meta
+
+
 # ── train once ───────────────────────────────────────────────────────────
 def load_points(paths: list[Path]) -> list[dict]:
     """Pools trimmed to the top MAX_CANDS as they are read (round 7's 150k reading pools would not
@@ -394,6 +434,7 @@ def train(points: list[Path], base_ckpt: str, tokenizer: str, out_dir: Path, nam
                "schedule": {"unit": "batches", "steps": steps},
                "right_beyond_cut": {k: sum(bool(p.get("beyond")) for p in v) for k, v in by.items()},
                "test": evaluate(st, test, T, a, b),
+               "test_teacher_agreement": teacher_agreement(st, test),
                "test_by_group": {g: evaluate([s for s, p in zip(st, by["test"]) if group_of(p["task_id"]) == g],
                                              [e for e, p in zip(test, by["test"]) if group_of(p["task_id"]) == g], T, a, b)
                                  for g in GROUPS if any(group_of(p["task_id"]) == g for p in by["test"])}}
@@ -502,12 +543,13 @@ def teach(points: Path, policy, limit: int = 0) -> dict:
     todo = [i for i, p in enumerate(pts) if p.get("teacher") is None and p.get("cands")][: limit or None]
     print(f"[xreader] Gemma reads {len(todo)} pools ({len(pts) - len(todo)} done or empty) -> {points}", flush=True)
     t0 = time.time()
+    every = max(200, len(todo) // 60)      # round 12: a 30k-pool file is rewritten ~60 times, not 150
     for n, i in enumerate(todo, 1):
         p = pts[i]
         r = rd.read(p["question"], p["answer_type"], {"cands": p["cands"][:MAX_CANDS], "snippet": p.get("source") == "snippet"})
         k = int(np.argmax(r)) if r and max(r) > 0 else None
         p["teacher"] = {"k": k, "p": float(r[k]) if k is not None else 0.0, "by": policy.name}
-        if n % 200 == 0 or n == len(todo):
+        if n % every == 0 or n == len(todo):
             _write_jsonl(points, pts)
             print(f"  {n}/{len(todo)} pools ({(time.time() - t0) / n:.2f}s/pool)", flush=True)
     _write_jsonl(points, pts)
@@ -529,7 +571,10 @@ def _write_jsonl(path: Path, rows: list[dict]):
 # ── CLI ──────────────────────────────────────────────────────────────────
 def add_cli(sub, add_web_args, build_web):
     p = sub.add_parser("xreader", help="round 6/7 reader: collect (search + label) | rcdata (round 7 reading sets) | train (planck|hertz)")
-    p.add_argument("stage", choices=["collect", "rcdata", "train", "teach"])
+    p.add_argument("stage", choices=["collect", "rcdata", "train", "teach", "sample"])
+    p.add_argument("--out", default=None, help="sample: where the sampled pools go")
+    p.add_argument("--n", type=int, default=0, help="sample: how many pools (0 = copy all)")
+    p.add_argument("--seed", type=int, default=12, help="sample: the seed")
     p.add_argument("--tasks", default=None, help="comma list (default: the Wikidata tasks + Gemma's news tasks)")
     p.add_argument("--points", default=str(READER_DIR / "points.jsonl"))
     p.add_argument("--stable-points", default=str(REPO_ROOT / "data" / "planck3" / "g2" / "points_ddgs.jsonl"),
@@ -554,6 +599,14 @@ def add_cli(sub, add_web_args, build_web):
     add_web_args(p)                              # brings --gemma-path (round 10 teach)
 
     def run(a):
+        if a.stage == "sample":
+            if not a.out:
+                raise SystemExit("xreader sample needs --out")
+            if Path(a.out).exists():
+                print(f"[xreader] {a.out} exists (kept: teach resumes on it)")
+                return
+            sample_points(Path(a.points), Path(a.out), a.n, a.seed)
+            return
         if a.stage == "teach":
             from .policies import make_policy
             teach(Path(a.points), make_policy("gemma", gemma_path=a.gemma_path), a.limit)

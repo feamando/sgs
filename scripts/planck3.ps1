@@ -4,7 +4,7 @@
    Step-by-step guides: SETUP_planck_20260901.md (rounds 1-2), SETUP_planck_20260903.md (round 3),
    SETUP_planck_20261008.md (round 4), SETUP_planck_20261009.md (round 5), SETUP_planck_20261012.md (round 6),
    SETUP_planck_20261014.md (round 7), SETUP_planck_20261015.md (round 8), SETUP_planck_20261019.md (round 9),
-   SETUP_planck_20261020.md (round 10)
+   SETUP_planck_20261020.md (round 10), SETUP_planck_20261109.md (round 11), SETUP_planck_20261113.md (round 12)
    Plan: SETUP_092026_planck3.md
 
  .DESCRIPTION
@@ -55,6 +55,9 @@
                fresh questions from the CACHE (0 searches, enforced): evidence view (top 16/20/32), always
                reading the pages, Gemma at the shipped view; diagnosis -> r11_plan.json (~2-3 h). Phase 2 only
                if a configuration wins: a NEW fresh benchmark (news after 2026-11-03, from 2026-11-14), ~300 searches
+     round12   round 12 (SETUP_planck_20261113.md): distillation at scale. Gemma reads ~37k pools once
+               (~13 h, resumable), the shipped reader retrains on them (soft labels at 1.0), then a 0-search
+               pilot on round 11's cached fresh10 (rule P). Only a passing pilot builds fresh12 (~300 searches)
      setkey    store an API key in .env (gitignored, never pushed), input hidden: .\scripts\planck3.ps1 setkey
                (default BRAVE_API_KEY; another name: setkey OTHER_KEY). Then checks the Brave API answers
      report    every result in one table -> results/planck3/REPORT.md
@@ -1095,6 +1098,87 @@ function Do-Round11 {
     P3 (@("r11", "decide") + $ttag)
 }
 
+# Round 12 (SETUP_planck_20261113.md): distillation at scale (owner's call, 2026-11-13). Gemma reads ~37k
+# pools once (30k of round 7's public reading pools + our pools; round 10's Brave pools are already taught),
+# the shipped reader retrains on all of it with Gemma's soft labels at weight 1.0. A 0-search pilot on
+# round 11's cached fresh10 gates everything; only a passing pilot spends ~300 Brave searches on fresh12.
+function Do-Round12 {
+    $rc = "data/planck3/reader/rc_points.jsonl"
+    $ck0 = "checkpoints/xreader_hertz_rc/reader.pt"
+    $f10 = "scripts/assets/planck3_tasks_fresh10.json"
+    foreach ($f in @($V2HEAD, $PLANCK_CKPT, $GEMMA, $ck0, $rc, "data/planck3/reader/points$Tag.jsonl", "data/planck3/g2/points_ddgs.jsonl",
+                     "data/planck3/reader/points_brave$Tag.jsonl", $f10, "$RES/r11_plan.json", "$RES/r11d_x-hertz-rc_cpu-int8-top16/results.jsonl")) {
+        if (-not (Test-Path $f)) { throw "missing $f (round 12 reuses rounds 7, 10 and 11)" }
+    }
+    if (-not (Test-Path $HERTZ_CKPT) -or -not (Test-Path $HERTZ_TOK)) { throw "Hertz 1.2 ($HERTZ_CKPT, $HERTZ_TOK) is needed to load the reader's backbone" }
+    $ttag = if ($Tag) { @("--tag", $Tag) } else { @() }
+    $dd = "data/planck3/reader/r12$Tag"
+    # 1. what Gemma reads: copies (teach rewrites its file in place; rounds 6-10's files stay untouched)
+    $rcN = if ($Quick) { "300" } else { "30000" }
+    P3 @("xreader", "sample", "--points", $rc, "--out", "$dd/rc.jsonl", "--n", $rcN, "--seed", "12")
+    P3 @("xreader", "sample", "--points", "data/planck3/reader/points$Tag.jsonl", "--out", "$dd/ours.jsonl", "--n", "0")
+    P3 @("xreader", "sample", "--points", "data/planck3/g2/points_ddgs.jsonl", "--out", "$dd/stable.jsonl", "--n", "0")
+    # 2. Gemma labels every pool once (~13 h at round 10's 1.28 s/pool; resumable: re-run carries on)
+    $lim = if ($Quick) { @("--limit", "40") } else { @() }
+    foreach ($f in @("stable", "ours", "rc")) {
+        Log "round 12 teach: Gemma reads every pool of $dd/$f.jsonl once (soft labels; resumable)"
+        P3 (@("xreader", "teach", "--points", "$dd/$f.jsonl", "--gemma-path", $GEMMA) + $lim)
+    }
+    if (-not $NoPush -and -not $Quick) { Do-Push }   # the teach log lands before training (the labels stay local: data/ is not pushed)
+    # 3. the reader: from the shipped reader, everything, Gemma at weight 1.0
+    $ck = "checkpoints/xreader_hertz_r12$Tag/reader.pt"
+    if (-not (Test-Path $ck)) {
+        Log "round 12 train: from the shipped reader (x-hertz rc), ~45k pools, Gemma soft labels at weight 1.0, 2 epochs, early stop 1"
+        $q = if ($Quick) { @("--max-points", "400", "--epochs", "1") } else { @("--epochs", "2", "--early-stop", "1", "--max-eval", "6000") }
+        P3 (@("xreader", "train", "--base", "hertz", "--stable-points", "$dd/stable.jsonl", "--points", "$dd/ours.jsonl",
+              "--extra-points", "$dd/rc.jsonl,data/planck3/reader/points_brave$Tag.jsonl", "--init", $ck0, "--teacher-w", "1.0",
+              "--tag", "_r12$Tag", "--base-checkpoint", $HERTZ_CKPT, "--base-tokenizer", $HERTZ_TOK) + $q)
+    }
+    # 4. the pilot: round 11's cached fresh10, the shipped configuration, 0 searches (enforced)
+    $hz = @("--reader", "x-hertz", "--writer", "template", "--reader-quant", "int8", "--dump-pools")
+    $ledger = Join-Path $Root "$RES/r12_brave_ledger$Tag.json"
+    Set-Content -Path $ledger -Value (@{ budget = 0; used = 0; month = (Get-Date -Format "yyyy-MM") } | ConvertTo-Json) -Encoding UTF8
+    $env:PLANCK3_BRAVE_LEDGER = $ledger
+    try {
+        Log "round 12 pilot: re-reading fresh10 from round 11's cache (0 Brave searches)"
+        # the comparison arms exist from round 11 (skipped); a -Quick run makes 12-question versions
+        Invoke-OnCpu { Invoke-R6 "r11d_x-hertz-rc_cpu-int8-top16" ($hz + @("--reader-checkpoint", $ck0)) "round 12 pilot: the shipped reader (round 11's D_ship)" 0 $f10 }
+        Invoke-R6 "r11d_gemma_template" @("--reader", "gemma", "--writer", "template", "--dump-pools") "round 12 pilot: Gemma (round 11's D_gem)" 0 $f10
+        Invoke-OnCpu { Invoke-R6 "r12p_x-hertz-r12_cpu-int8-top16" ($hz + @("--reader-checkpoint", $ck)) "round 12 pilot: THE PRODUCT, the distilled reader, int8 CPU, top 16 (cached fresh10)" 0 $f10 }
+    } finally { Remove-Item Env:PLANCK3_BRAVE_LEDGER -ErrorAction SilentlyContinue }
+    P3 (@("r12", "pilot") + $ttag)
+    $plan = @((Invoke-Quiet $PY (@("scripts/planck3.py", "r12", "plan") + $ttag)).Out | Where-Object { $_ })[-1]
+    if ($plan -ne "judge") { Log "round 12: rule P failed: distillation did not move the reader on cached evidence (see r12_pilot.json). Done."; return }
+    if ($Quick) { Log "round 12 -Quick: phase 2 skipped (the shakedown never builds a benchmark)"; return }
+    # 5. a NEW fresh benchmark (Wikidata 2026 unused by rounds 1-11 + portal news after 2026-11-03), committed first
+    $f12 = "scripts/assets/planck3_tasks_fresh12.json"
+    if (-not (Test-Path $f12)) {
+        Log "round 12: building fresh12 once (Wikidata 2026 unused by rounds 1-11 + portal news after 2026-11-03)"
+        P3 @("fresh9", "--gemma-path", $GEMMA, "--out", $f12, "--prefix", "f12", "--after", "2026-11-03", "--seed", "12")
+        if (-not $NoPush) {
+            Invoke-Checked git @("add", "-f", "--", $f12)
+            Invoke-Quiet git @("reset", "-q", "--", ".env") | Out-Null
+            Invoke-Checked git @("commit", "-m", "data(planck3): round 12 fresh benchmark, built before any reader ran on it")
+            Invoke-Checked git @("pull", "--rebase", "--autostash", "origin", "main")
+            Invoke-Checked git @("push", "origin", "main")
+        }
+    }
+    $n = (Get-Content $f12 -Raw | ConvertFrom-Json).tasks.Count
+    $need = [int]($n * 1.3) + 10
+    $chk = Invoke-Quiet $PY @("scripts/planck3.py", "search-check", "--backend", "brave", "--need", "$need")
+    $chk.Out | ForEach-Object { Log "$_" }
+    if ($chk.Code -ne 0) { Log "round 12: the judging needs $need live Brave searches; re-run after the monthly credit resets (the pilot is kept)"; return }
+    $pr = @("--reader", "x-hertz", "--reader-checkpoint", $ck, "--writer", "template")
+    $sh = @("--reader", "x-hertz", "--reader-checkpoint", $ck0, "--writer", "template", "--reader-quant", "int8")
+    Invoke-OnCpu { Invoke-R6 "r12_x-hertz-r12_cpu-int8-top16" ($pr + @("--reader-quant", "int8")) "round 12: THE PRODUCT, the distilled reader, int8, CPU 4 threads (fresh12; searches live)" 0 $f12 }
+    Invoke-OnCpu { Invoke-R6 "r12_x-hertz-rc_cpu-int8-top16" $sh "round 12: the shipped reader, same configuration" 0 $f12 }
+    Invoke-R6 "r12_x-hertz-r12_template" $pr "round 12: the distilled reader on the GPU (rule Q)" 0 $f12
+    Invoke-R6 "r12_gemma_template" @("--reader", "gemma", "--writer", "template") "round 12: Gemma (the gap)" 0 $f12
+    Invoke-R6 "r12_heuristic_template" @("--reader", "heuristic", "--writer", "template") "round 12: no-model floor" 0 $f12
+    Invoke-OnCpu { Invoke-R6 "r12_x-hertz-r12_cpu-int8-top16_contrarian" ($pr + @("--reader-quant", "int8", "--personal", "contrarian")) "round 12: worst-case personal profile (rule E)" 0 $f12 }
+    P3 (@("r12", "decide") + $ttag)
+}
+
 # ── secrets ──────────────────────────────────────────────────────────────
 function Do-SetKey {
     $name = if ($Question) { $Question } else { "BRAVE_API_KEY" }
@@ -1119,7 +1203,7 @@ function Do-Push {
     Log "committing results/planck3 (summaries, REPORT.md, logs, compressed trajectories)"
     foreach ($pat in @("summary.json", "cards.md", "results.jsonl", "train_log.json", "trajectories.jsonl.gz",
                        "pairs_*.jsonl", "REPORT.md", "doctor.json", "digest.md", "*.log", "judge.json", "judge_pairs.jsonl",
-                       "r*_product*.json", "r11_plan*.json", "pools.jsonl.gz", "r1*_brave_ledger*.json")) {
+                       "r*_product*.json", "r11_plan*.json", "r12_pilot*.json", "pools.jsonl.gz", "r1*_brave_ledger*.json")) {
         Get-ChildItem -Path $RES -Recurse -Filter $pat -ErrorAction SilentlyContinue |
             ForEach-Object { Invoke-Quiet git @("add", "-f", "--", $_.FullName) | Out-Null }
     }
@@ -1273,6 +1357,16 @@ switch ($Command.ToLower()) {
         Do-Round11
         P3 @("report")
         Log ("round11$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
+        Do-Push
+    }
+    "round12"    {
+        Start-RunLog "round12"
+        $t0 = Get-Date
+        Do-Setup
+        Log "offline smoke tests"; Invoke-Checked $PY @("-m", "pytest", "tests/test_planck3.py", "-q")
+        try { Do-Round12 } finally { Remove-Item Env:PLANCK3_BRAVE_LEDGER -ErrorAction SilentlyContinue }
+        P3 @("report")
+        Log ("round12$Tag finished in {0:N0} min" -f ((Get-Date) - $t0).TotalMinutes)
         Do-Push
     }
     "round6b"    {
