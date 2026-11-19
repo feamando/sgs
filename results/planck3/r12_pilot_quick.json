@@ -1,0 +1,70 @@
+{
+  "tag": "_quick",
+  "benchmark": "scripts/assets/planck3_tasks_fresh10.json (round 11's cached evidence, 0 searches)",
+  "rule_p": {
+    "pass": false,
+    "margin": 0.03,
+    "a": "r12p_x-hertz-r12_cpu-int8-top16_quick",
+    "b": "r11d_x-hertz-rc_cpu-int8-top16_quick",
+    "n": 12,
+    "acc_a": 0.5833333333333334,
+    "acc_b": 0.5833333333333334,
+    "a_only": 0,
+    "b_only": 0,
+    "p": 1.0
+  },
+  "gap_closed": {
+    "share": 0.0,
+    "gemma_vs_shipped": {
+      "a": "r11d_gemma_template_quick",
+      "b": "r11d_x-hertz-rc_cpu-int8-top16_quick",
+      "n": 12,
+      "acc_a": 0.8333333333333334,
+      "acc_b": 0.5833333333333334,
+      "a_only": 3,
+      "b_only": 0,
+      "p": 0.25
+    }
+  },
+  "mechanism": {
+    "teacher_agreement": {
+      "pools": 1,
+      "reader_picks_teacher": 1.0,
+      "teacher_right": 0.0,
+      "reader_right": 0.0,
+      "pools_with_a_right_candidate": 1
+    },
+    "test": {
+      "pools": 42,
+      "pools_with_a_right_candidate": 30,
+      "choice_acc": 0.6333333333333333,
+      "ranker_acc": 0.5,
+      "only_choice_right": 5,
+      "only_ranker_right": 1,
+      "vs_ranker_p": 0.21875,
+      "gate_auc": 0.7185354691075515,
+      "gate_ece": 0.18376444925878055,
+      "base_rate": 0.4523809523809524
+    },
+    "teacher_labelled": {
+      "train": 12,
+      "val": 2,
+      "test": 4
+    },
+    "n_points": {
+      "train": 325,
+      "val": 33,
+      "test": 42
+    },
+    "epochs": [
+      {
+        "epoch": 0,
+        "train_loss": 1.5691217534594089,
+        "val_choice_acc": 0.5,
+        "s": 29.8
+      }
+    ]
+  },
+  "outcome": "stop",
+  "next": "stop: distillation at scale does not move the reader at identical evidence; the recipe is spent at 640M and a larger base is the only lever left (owner's call; round 13 not built)"
+}
