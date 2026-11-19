@@ -1,0 +1,76 @@
+{
+  "tag": "",
+  "benchmark": "scripts/assets/planck3_tasks_fresh10.json (round 11's cached evidence, 0 searches)",
+  "rule_p": {
+    "pass": false,
+    "margin": 0.03,
+    "a": "r12p_x-hertz-r12_cpu-int8-top16",
+    "b": "r11d_x-hertz-rc_cpu-int8-top16",
+    "n": 220,
+    "acc_a": 0.4636363636363636,
+    "acc_b": 0.4863636363636364,
+    "a_only": 18,
+    "b_only": 23,
+    "p": 0.5327092552361137
+  },
+  "gap_closed": {
+    "share": -0.18518518518518545,
+    "gemma_vs_shipped": {
+      "a": "r11d_gemma_template",
+      "b": "r11d_x-hertz-rc_cpu-int8-top16",
+      "n": 220,
+      "acc_a": 0.6090909090909091,
+      "acc_b": 0.4863636363636364,
+      "a_only": 48,
+      "b_only": 21,
+      "p": 0.0015503169494868645
+    }
+  },
+  "mechanism": {
+    "teacher_agreement": {
+      "pools": 2680,
+      "reader_picks_teacher": 0.5041044776119403,
+      "teacher_right": 0.7917505030181087,
+      "reader_right": 0.641851106639839,
+      "pools_with_a_right_candidate": 1988
+    },
+    "test": {
+      "pools": 3826,
+      "pools_with_a_right_candidate": 2425,
+      "choice_acc": 0.6131958762886598,
+      "ranker_acc": 0.43876288659793816,
+      "only_choice_right": 525,
+      "only_ranker_right": 102,
+      "vs_ranker_p": 1.6189957597348978e-69,
+      "gate_auc": 0.761255665101537,
+      "gate_ece": 0.015516448094399527,
+      "base_rate": 0.3886565603763722
+    },
+    "teacher_labelled": {
+      "train": 31736,
+      "val": 3704,
+      "test": 3826
+    },
+    "n_points": {
+      "train": 31736,
+      "val": 3704,
+      "test": 3826
+    },
+    "epochs": [
+      {
+        "epoch": 0,
+        "train_loss": 2.547081281930385,
+        "val_choice_acc": 0.6127787307032591,
+        "s": 2265.3
+      },
+      {
+        "epoch": 1,
+        "train_loss": 1.7909831469202684,
+        "val_choice_acc": 0.5926243567753001,
+        "s": 2258.9
+      }
+    ]
+  },
+  "outcome": "stop",
+  "next": "stop: distillation at scale does not move the reader at identical evidence; the recipe is spent at 640M and a larger base is the only lever left (owner's call; round 13 not built)"
+}

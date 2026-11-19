@@ -1,4 +1,4 @@
-# Planck 3.0 results (2026-11-18 22:22)
+# Planck 3.0 results (2026-11-19 14:14)
 
 ## G0 (seed benchmark)
 
@@ -462,6 +462,12 @@ _v2 = round 6b, trained on the top 16 candidates as served (round 6 swapped a de
 - **Latency fresh10:** 35 candidates/question, 90 ms each, 3202 ms/question
 - **Latency old243:** 27 candidates/question, 86 ms each, 2316 ms/question
 - **Diagnosis (pre-registered):** size: round 12 (not built): the gap is the reader; the owner's call on a larger SGS base
+
+## Round 12: distillation at scale (SETUP_planck_20261113.md)
+
+- **D (held-out pools Gemma read, 2680):** reader picks Gemma's candidate 0.504; right where a right one exists: reader 0.642 vs Gemma 0.792
+- **P (pilot, cached fresh10)** FAIL: 0.464 vs shipped 0.486 (18 vs 23, p 0.533, n 220); gap closed -0.185
+- **Pilot outcome (pre-registered):** stop: stop: distillation at scale does not move the reader at identical evidence; the recipe is spent at 640M and a larger base is the only lever left (owner's call; round 13 not built)
 
 ## G2 v2 heads (choice head + calibrated answerability gate)
 

@@ -1,0 +1,94 @@
+{
+  "n": 220,
+  "accuracy": 0.4636363636363636,
+  "bands": {
+    "high": {
+      "n": 4,
+      "share": 0.01818181818181818,
+      "precision": 0.75
+    },
+    "good": {
+      "n": 56,
+      "share": 0.2545454545454545,
+      "precision": 0.6607142857142857
+    },
+    "low": {
+      "n": 89,
+      "share": 0.40454545454545454,
+      "precision": 0.42696629213483145
+    },
+    "sceptical": {
+      "n": 59,
+      "share": 0.2681818181818182,
+      "precision": 0.4067796610169492
+    },
+    "none": {
+      "n": 12,
+      "share": 0.05454545454545454,
+      "precision": null
+    }
+  },
+  "bands_monotone": true,
+  "by_regime": {
+    "fresh": {
+      "n": 140,
+      "accuracy": 0.44285714285714284
+    },
+    "news": {
+      "n": 80,
+      "accuracy": 0.5
+    }
+  },
+  "qtype_accuracy": 0.9818181818181818,
+  "writer_faithful": 1.0,
+  "writer_fallback": 0.0,
+  "writer_first_try_faithful": null,
+  "writer_mean_tries": null,
+  "search_on_topic": 0.9863636363636363,
+  "changed_by_personal": 0.0,
+  "registry_coverage": 0.875,
+  "tokens_per_task": 0.0,
+  "timing_ms_per_task": {
+    "search_ms": 8.039545454545454,
+    "fetch_ms": 122.74181818181819,
+    "read_ms": 3069.061818181818,
+    "write_ms": 0.0,
+    "total_ms": 3503.342727272727
+  },
+  "mean_search_calls": 1.0,
+  "mean_fetch_calls": 1.6272727272727272,
+  "reader": "x-hertz",
+  "reader_config": {
+    "quant": "int8",
+    "max_cands": 16,
+    "device": "cpu",
+    "qengine": "fbgemm",
+    "threads": 4,
+    "params": 134984073,
+    "size_mb": 888.2
+  },
+  "writer": "template",
+  "personal": "none",
+  "tasks": "scripts/assets/planck3_tasks_fresh10.json",
+  "search": "brave",
+  "search_health": {
+    "searches": 220,
+    "primary_empty_rate": 0.0,
+    "fallback_rate": 0.0,
+    "secondary_rate": 0.0,
+    "final_empty_rate": 0.0,
+    "served": {
+      "brave": 220
+    },
+    "primary_share": 1.0,
+    "primary_offtopic_rate": 0.013636363636363636,
+    "on_topic_rate": 0.9863636363636363,
+    "relevance_checked": true,
+    "brave_remaining": null,
+    "brave_quota_skips": 0,
+    "brave_live_calls": 0,
+    "valid": true
+  },
+  "wall_s": 771.0,
+  "llm_usd_per_task_as_haiku": 0.0
+}
